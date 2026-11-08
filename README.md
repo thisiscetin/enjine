@@ -144,6 +144,7 @@ SUPPORTED.md                generated list of everything the engine supports
 | [docs/guides/decision-api.md](docs/guides/decision-api.md) | playing a game through the API |
 | [docs/guides/adding-a-mechanic.md](docs/guides/adding-a-mechanic.md) | how to extend the engine |
 | [docs/MECHANICS_COVERAGE.md](docs/MECHANICS_COVERAGE.md) | the full CR checklist with milestones and priorities |
+| [docs/reviews/VERDICT.md](docs/reviews/VERDICT.md) | design review verdict and the prioritized work queue (elegance, performance, future-proofness) |
 | [docs/DESIGN.md](docs/DESIGN.md), [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | design decisions and code layout |
 
 ## Development
