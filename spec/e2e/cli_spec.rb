@@ -54,6 +54,51 @@ RSpec.describe Enjine::CLI do
     expect(out).to include("wins (concede)")
   end
 
+  describe "random decks" do
+    let(:sets) { ["--sets-dir", DeckBuilderHelpers::SET_FIXTURES] }
+
+    it "prints a reproducible random deck document as JSON" do
+      code, out = run(sets + %w[--random-deck sets=fxa,fxb colors=WU seed=7])
+      expect(code).to eq(0)
+      doc = JSON.parse(out)
+      expect(doc["description"]).to include("sets=fxa,fxb colors=WU seed=7")
+      expect(Enjine::Player.new(name: "p", deck: doc)).to be_ready
+      expect(run(sets + ["--random-deck", "sets=fxb,fxa colors=UW seed=7"])[1]).to eq(out)
+      expect(run(sets + %w[--random-deck sets=fxa,fxb,colors=W,U,seed=7])[1]).to eq(out)
+    end
+
+    it "picks random colors, all sets or Standard sets, and the --seed by default" do
+      two = JSON.parse(run(sets + %w[--seed 5 --random-deck colors=2])[1])
+      expect(two["description"]).to match(/sets=fxa,fxb colors=[WUBRG]{2} seed=5/)
+      allow(Date).to receive(:today).and_return(Date.new(2026, 1, 1)) # only fxa is out by then
+      expect(run(sets + %w[--random-deck sets=standard seed=1])[1]).to include("sets=fxa colors")
+      expect(JSON.parse(run(sets + %w[--random-deck sets=standard size=61 seed=1])[1])["main"].sum { it["count"] }).to eq(61)
+      expect(JSON.parse(run(sets + %w[--random-deck sets=all colors=any seed=1])[1])).to include("cards", "main")
+      expect(run(sets + %w[--seed 1 --random-deck])[0]).to eq(0)
+    end
+
+    it "reports bad specs and impossible decks with exit code 1" do
+      expect(run(sets + %w[--random-deck colors=X])).to eq([1, "error: unknown color X (use W U B R G)\n"])
+      expect(run(sets + %w[--random-deck sets=nope])[1]).to start_with("error: unknown set \"nope\"")
+      expect(run(sets + ["--random-deck", "fxa"])[1]).to include("expected key=value")
+      expect(run(sets + %w[--random-deck mood=happy])[1]).to include("unknown random deck option(s): mood")
+      expect(run(sets + %w[--random-deck sets=fxa colors=W size=200])[1]).to start_with("error: cannot build a 200-card W deck")
+    end
+
+    it "lists the sets in the sets directory" do
+      _, out = run(sets + %w[--list-sets])
+      expect(out).to include("fxa    Ashfall Reaches (2025-06-13) · 48 playable, 2 unsupported",
+                             "fxb    Tidewild Expanse")
+    end
+
+    it "plays games with random:SPEC decks" do
+      code, out = run(sets + %w[--deck1 random:sets=fxa,colors=2 --deck2 random --p1 random --p2 random --seed 3])
+      expect(code).to eq(0)
+      expect(out).to include("alice: random deck: sets=fxa colors=", "bob: random deck: sets=fxa,fxb", "seed=4", "GAME OVER")
+      expect(run(sets + %w[--deck1 random:colors=X --p1 random --p2 random])).to eq([1, "error: unknown color X (use W U B R G)\n"])
+    end
+  end
+
   it "says when there is nothing to undo" do
     _, out = run(%w[--seed 4], "u\nq\n")
     expect(out).to include("Nothing to undo")

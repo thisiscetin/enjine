@@ -13,6 +13,7 @@ require "enjine"
 require "enjine/card_pool/core"
 require "enjine/docs"
 require "enjine/cli"
+require "enjine/deck_builder"
 
 Dir[File.join(__dir__, "support/**/*.rb")].each { |f| require f }
 

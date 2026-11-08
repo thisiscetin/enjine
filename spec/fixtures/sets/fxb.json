@@ -1,0 +1,1077 @@
+{
+  "format": 1,
+  "code": "fxb",
+  "name": "Tidewild Expanse",
+  "released_at": "2026-10-02",
+  "standard_legal_until": "2029-01-19",
+  "standard_legal_until_estimated": true,
+  "cards": [
+    {
+      "card": {
+        "name": "Gatehold Recruit",
+        "mana_cost": "{W}",
+        "types": [
+          "creature"
+        ],
+        "subtypes": [
+          "human",
+          "soldier"
+        ],
+        "power": 2,
+        "toughness": 1
+      },
+      "rarity": "common",
+      "scryfall_id": "00000000-0000-4000-8000-000000320000",
+      "collector_number": "1"
+    },
+    {
+      "card": {
+        "name": "Plumed Outrider",
+        "mana_cost": "{1}{W}",
+        "types": [
+          "creature"
+        ],
+        "subtypes": [
+          "bird",
+          "soldier"
+        ],
+        "keywords": [
+          "flash"
+        ],
+        "power": 2,
+        "toughness": 2
+      },
+      "rarity": "common",
+      "scryfall_id": "00000000-0000-4000-8000-000000320001",
+      "collector_number": "2"
+    },
+    {
+      "card": {
+        "name": "Halo Bearer",
+        "mana_cost": "{2}{W}",
+        "types": [
+          "creature"
+        ],
+        "subtypes": [
+          "human",
+          "cleric"
+        ],
+        "power": 3,
+        "toughness": 2
+      },
+      "rarity": "uncommon",
+      "scryfall_id": "00000000-0000-4000-8000-000000320002",
+      "collector_number": "3"
+    },
+    {
+      "card": {
+        "name": "Ivory Bulwark",
+        "mana_cost": "{3}{W}",
+        "types": [
+          "creature"
+        ],
+        "subtypes": [
+          "wall"
+        ],
+        "power": 2,
+        "toughness": 5
+      },
+      "rarity": "rare",
+      "scryfall_id": "00000000-0000-4000-8000-000000320003",
+      "collector_number": "4"
+    },
+    {
+      "card": {
+        "name": "Radiant Exarch",
+        "mana_cost": "{3}{W}{W}",
+        "types": [
+          "creature"
+        ],
+        "subtypes": [
+          "angel"
+        ],
+        "power": 4,
+        "toughness": 4,
+        "abilities": [
+          {
+            "activated": {
+              "cost": [
+                {
+                  "mana": "{W}"
+                }
+              ],
+              "effects": [
+                {
+                  "gain_life": {
+                    "amount": 1
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "rarity": "common",
+      "scryfall_id": "00000000-0000-4000-8000-000000320004",
+      "collector_number": "5"
+    },
+    {
+      "card": {
+        "name": "Righteous Edict",
+        "mana_cost": "{3}{W}",
+        "types": [
+          "sorcery"
+        ],
+        "abilities": [
+          {
+            "spell": {
+              "effects": [
+                {
+                  "destroy": {
+                    "to": {
+                      "target": 0
+                    }
+                  }
+                }
+              ],
+              "targets": [
+                "creature_or_planeswalker"
+              ]
+            }
+          }
+        ]
+      },
+      "rarity": "common",
+      "scryfall_id": "00000000-0000-4000-8000-000000320005",
+      "collector_number": "6"
+    },
+    {
+      "card": {
+        "name": "Shield of Dawn",
+        "mana_cost": "{W}",
+        "types": [
+          "instant"
+        ],
+        "abilities": [
+          {
+            "spell": {
+              "effects": [
+                {
+                  "pump": {
+                    "power": 1,
+                    "toughness": 3,
+                    "to": {
+                      "target": 0
+                    }
+                  }
+                }
+              ],
+              "targets": [
+                "creature"
+              ]
+            }
+          }
+        ]
+      },
+      "rarity": "uncommon",
+      "scryfall_id": "00000000-0000-4000-8000-000000320006",
+      "collector_number": "7"
+    },
+    {
+      "card": {
+        "name": "Brinespout Sprite",
+        "mana_cost": "{U}",
+        "types": [
+          "creature"
+        ],
+        "subtypes": [
+          "faerie"
+        ],
+        "power": 1,
+        "toughness": 2
+      },
+      "rarity": "rare",
+      "scryfall_id": "00000000-0000-4000-8000-000000320007",
+      "collector_number": "8"
+    },
+    {
+      "card": {
+        "name": "Kelpweave Mystic",
+        "mana_cost": "{1}{U}",
+        "types": [
+          "creature"
+        ],
+        "subtypes": [
+          "merfolk",
+          "wizard"
+        ],
+        "keywords": [
+          "flash"
+        ],
+        "power": 1,
+        "toughness": 2
+      },
+      "rarity": "common",
+      "scryfall_id": "00000000-0000-4000-8000-000000320008",
+      "collector_number": "9"
+    },
+    {
+      "card": {
+        "name": "Coralhide Turtle",
+        "mana_cost": "{2}{U}",
+        "types": [
+          "creature"
+        ],
+        "subtypes": [
+          "turtle"
+        ],
+        "power": 1,
+        "toughness": 5
+      },
+      "rarity": "common",
+      "scryfall_id": "00000000-0000-4000-8000-000000320009",
+      "collector_number": "10"
+    },
+    {
+      "card": {
+        "name": "Fathom Hunter",
+        "mana_cost": "{3}{U}",
+        "types": [
+          "creature"
+        ],
+        "subtypes": [
+          "serpent"
+        ],
+        "power": 3,
+        "toughness": 4
+      },
+      "rarity": "uncommon",
+      "scryfall_id": "00000000-0000-4000-8000-000000320010",
+      "collector_number": "11"
+    },
+    {
+      "card": {
+        "name": "Maelstrom Wyrm",
+        "mana_cost": "{4}{U}{U}",
+        "types": [
+          "creature"
+        ],
+        "subtypes": [
+          "serpent"
+        ],
+        "power": 5,
+        "toughness": 6
+      },
+      "rarity": "rare",
+      "scryfall_id": "00000000-0000-4000-8000-000000320011",
+      "collector_number": "12"
+    },
+    {
+      "card": {
+        "name": "Thought Eddy",
+        "mana_cost": "{U}",
+        "types": [
+          "instant"
+        ],
+        "abilities": [
+          {
+            "spell": {
+              "effects": [
+                {
+                  "draw": {
+                    "amount": 1
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "rarity": "common",
+      "scryfall_id": "00000000-0000-4000-8000-000000320012",
+      "collector_number": "13"
+    },
+    {
+      "card": {
+        "name": "Riptide Denial",
+        "mana_cost": "{2}{U}",
+        "types": [
+          "instant"
+        ],
+        "abilities": [
+          {
+            "spell": {
+              "effects": [
+                {
+                  "counter": {
+                    "to": {
+                      "target": 0
+                    }
+                  }
+                }
+              ],
+              "targets": [
+                "spell"
+              ]
+            }
+          }
+        ]
+      },
+      "rarity": "common",
+      "scryfall_id": "00000000-0000-4000-8000-000000320013",
+      "collector_number": "14"
+    },
+    {
+      "card": {
+        "name": "Bogscour Leech",
+        "mana_cost": "{B}",
+        "types": [
+          "creature"
+        ],
+        "subtypes": [
+          "leech"
+        ],
+        "power": 1,
+        "toughness": 2
+      },
+      "rarity": "uncommon",
+      "scryfall_id": "00000000-0000-4000-8000-000000320014",
+      "collector_number": "15"
+    },
+    {
+      "card": {
+        "name": "Nightglade Prowler",
+        "mana_cost": "{1}{B}",
+        "types": [
+          "creature"
+        ],
+        "subtypes": [
+          "vampire"
+        ],
+        "keywords": [
+          "haste"
+        ],
+        "power": 2,
+        "toughness": 2
+      },
+      "rarity": "rare",
+      "scryfall_id": "00000000-0000-4000-8000-000000320015",
+      "collector_number": "16"
+    },
+    {
+      "card": {
+        "name": "Sepulcher Knight",
+        "mana_cost": "{2}{B}",
+        "types": [
+          "creature"
+        ],
+        "subtypes": [
+          "zombie",
+          "knight"
+        ],
+        "power": 3,
+        "toughness": 3
+      },
+      "rarity": "common",
+      "scryfall_id": "00000000-0000-4000-8000-000000320016",
+      "collector_number": "17"
+    },
+    {
+      "card": {
+        "name": "Ghoulkin Horde",
+        "mana_cost": "{4}{B}",
+        "types": [
+          "creature"
+        ],
+        "subtypes": [
+          "zombie"
+        ],
+        "power": 5,
+        "toughness": 4
+      },
+      "rarity": "common",
+      "scryfall_id": "00000000-0000-4000-8000-000000320017",
+      "collector_number": "18"
+    },
+    {
+      "card": {
+        "name": "Tombspire Wraith",
+        "mana_cost": "{5}{B}",
+        "types": [
+          "creature"
+        ],
+        "subtypes": [
+          "spirit"
+        ],
+        "power": 5,
+        "toughness": 5,
+        "abilities": [
+          {
+            "activated": {
+              "cost": [
+                "tap"
+              ],
+              "effects": [
+                {
+                  "lose_life": {
+                    "amount": 1,
+                    "to": "each_opponent"
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "rarity": "uncommon",
+      "scryfall_id": "00000000-0000-4000-8000-000000320018",
+      "collector_number": "19"
+    },
+    {
+      "card": {
+        "name": "Withering Gaze",
+        "mana_cost": "{1}{B}",
+        "types": [
+          "instant"
+        ],
+        "abilities": [
+          {
+            "spell": {
+              "effects": [
+                {
+                  "pump": {
+                    "power": -2,
+                    "toughness": -2,
+                    "to": {
+                      "target": 0
+                    }
+                  }
+                }
+              ],
+              "targets": [
+                "creature"
+              ]
+            }
+          }
+        ]
+      },
+      "rarity": "rare",
+      "scryfall_id": "00000000-0000-4000-8000-000000320019",
+      "collector_number": "20"
+    },
+    {
+      "card": {
+        "name": "Dread Tithe",
+        "mana_cost": "{3}{B}",
+        "types": [
+          "sorcery"
+        ],
+        "abilities": [
+          {
+            "spell": {
+              "effects": [
+                {
+                  "lose_life": {
+                    "amount": 3,
+                    "to": "each_opponent"
+                  }
+                },
+                {
+                  "draw": {
+                    "amount": 1
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "rarity": "common",
+      "scryfall_id": "00000000-0000-4000-8000-000000320020",
+      "collector_number": "21"
+    },
+    {
+      "card": {
+        "name": "Sparkmane Hound",
+        "mana_cost": "{R}",
+        "types": [
+          "creature"
+        ],
+        "subtypes": [
+          "dog"
+        ],
+        "power": 2,
+        "toughness": 1
+      },
+      "rarity": "common",
+      "scryfall_id": "00000000-0000-4000-8000-000000320021",
+      "collector_number": "22"
+    },
+    {
+      "card": {
+        "name": "Kilnborn Scrapper",
+        "mana_cost": "{1}{R}",
+        "types": [
+          "creature"
+        ],
+        "subtypes": [
+          "goblin",
+          "warrior"
+        ],
+        "keywords": [
+          "haste"
+        ],
+        "power": 2,
+        "toughness": 1
+      },
+      "rarity": "uncommon",
+      "scryfall_id": "00000000-0000-4000-8000-000000320022",
+      "collector_number": "23"
+    },
+    {
+      "card": {
+        "name": "Furnace Raider",
+        "mana_cost": "{2}{R}",
+        "types": [
+          "creature"
+        ],
+        "subtypes": [
+          "human",
+          "warrior"
+        ],
+        "power": 3,
+        "toughness": 2,
+        "abilities": [
+          {
+            "activated": {
+              "cost": [
+                "tap",
+                {
+                  "mana": "{1}{R}"
+                }
+              ],
+              "effects": [
+                {
+                  "deal_damage": {
+                    "amount": 1,
+                    "to": {
+                      "target": 0
+                    }
+                  }
+                }
+              ],
+              "targets": [
+                "any_target"
+              ]
+            }
+          }
+        ]
+      },
+      "rarity": "rare",
+      "scryfall_id": "00000000-0000-4000-8000-000000320023",
+      "collector_number": "24"
+    },
+    {
+      "card": {
+        "name": "Lavaback Rhino",
+        "mana_cost": "{4}{R}",
+        "types": [
+          "creature"
+        ],
+        "subtypes": [
+          "rhino"
+        ],
+        "keywords": [
+          "haste"
+        ],
+        "power": 5,
+        "toughness": 3
+      },
+      "rarity": "common",
+      "scryfall_id": "00000000-0000-4000-8000-000000320024",
+      "collector_number": "25"
+    },
+    {
+      "card": {
+        "name": "Vorran, Flame Herald",
+        "mana_cost": "{2}{R}{R}",
+        "types": [
+          "planeswalker"
+        ],
+        "subtypes": [
+          "vorran"
+        ],
+        "loyalty": 3,
+        "abilities": [
+          {
+            "loyalty": {
+              "cost": 1,
+              "targets": [
+                "any_target"
+              ],
+              "effects": [
+                {
+                  "deal_damage": {
+                    "amount": 1,
+                    "to": {
+                      "target": 0
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "loyalty": {
+              "cost": -3,
+              "targets": [
+                "creature"
+              ],
+              "effects": [
+                {
+                  "deal_damage": {
+                    "amount": 4,
+                    "to": {
+                      "target": 0
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "rarity": "mythic",
+      "scryfall_id": "00000000-0000-4000-8000-000000320025",
+      "collector_number": "26"
+    },
+    {
+      "card": {
+        "name": "Blazing Volley",
+        "mana_cost": "{1}{R}",
+        "types": [
+          "instant"
+        ],
+        "abilities": [
+          {
+            "spell": {
+              "effects": [
+                {
+                  "deal_damage": {
+                    "amount": 3,
+                    "to": {
+                      "target": 0
+                    }
+                  }
+                }
+              ],
+              "targets": [
+                "creature_or_planeswalker"
+              ]
+            }
+          }
+        ]
+      },
+      "rarity": "uncommon",
+      "scryfall_id": "00000000-0000-4000-8000-000000320026",
+      "collector_number": "27"
+    },
+    {
+      "card": {
+        "name": "Pyre Burst",
+        "mana_cost": "{4}{R}{R}",
+        "types": [
+          "sorcery"
+        ],
+        "abilities": [
+          {
+            "spell": {
+              "effects": [
+                {
+                  "deal_damage": {
+                    "amount": 5,
+                    "to": {
+                      "target": 0
+                    }
+                  }
+                }
+              ],
+              "targets": [
+                "any_target"
+              ]
+            }
+          }
+        ]
+      },
+      "rarity": "rare",
+      "scryfall_id": "00000000-0000-4000-8000-000000320027",
+      "collector_number": "28"
+    },
+    {
+      "card": {
+        "name": "Saplight Druid",
+        "mana_cost": "{G}",
+        "types": [
+          "creature"
+        ],
+        "subtypes": [
+          "elf",
+          "druid"
+        ],
+        "power": 1,
+        "toughness": 1,
+        "abilities": [
+          {
+            "mana": {
+              "cost": [
+                "tap"
+              ],
+              "produce": "{G}"
+            }
+          }
+        ]
+      },
+      "rarity": "common",
+      "scryfall_id": "00000000-0000-4000-8000-000000320028",
+      "collector_number": "29"
+    },
+    {
+      "card": {
+        "name": "Fernback Boar",
+        "mana_cost": "{1}{G}",
+        "types": [
+          "creature"
+        ],
+        "subtypes": [
+          "boar"
+        ],
+        "power": 3,
+        "toughness": 2
+      },
+      "rarity": "common",
+      "scryfall_id": "00000000-0000-4000-8000-000000320029",
+      "collector_number": "30"
+    },
+    {
+      "card": {
+        "name": "Canopy Stalker",
+        "mana_cost": "{2}{G}",
+        "types": [
+          "creature"
+        ],
+        "subtypes": [
+          "spider"
+        ],
+        "power": 3,
+        "toughness": 4
+      },
+      "rarity": "uncommon",
+      "scryfall_id": "00000000-0000-4000-8000-000000320030",
+      "collector_number": "31"
+    },
+    {
+      "card": {
+        "name": "Grovekeeper Wurm",
+        "mana_cost": "{4}{G}{G}",
+        "types": [
+          "creature"
+        ],
+        "subtypes": [
+          "wurm"
+        ],
+        "power": 6,
+        "toughness": 6
+      },
+      "rarity": "rare",
+      "scryfall_id": "00000000-0000-4000-8000-000000320031",
+      "collector_number": "32"
+    },
+    {
+      "card": {
+        "name": "Highland Mammoth",
+        "mana_cost": "{3}{G}",
+        "types": [
+          "creature"
+        ],
+        "subtypes": [
+          "elephant"
+        ],
+        "power": 4,
+        "toughness": 4
+      },
+      "rarity": "common",
+      "scryfall_id": "00000000-0000-4000-8000-000000320032",
+      "collector_number": "33"
+    },
+    {
+      "card": {
+        "name": "Bramble Growth",
+        "mana_cost": "{1}{G}",
+        "types": [
+          "sorcery"
+        ],
+        "abilities": [
+          {
+            "spell": {
+              "effects": [
+                {
+                  "add_counters": {
+                    "counter": "+1/+1",
+                    "amount": 2,
+                    "to": {
+                      "target": 0
+                    }
+                  }
+                }
+              ],
+              "targets": [
+                "creature"
+              ]
+            }
+          }
+        ]
+      },
+      "rarity": "common",
+      "scryfall_id": "00000000-0000-4000-8000-000000320033",
+      "collector_number": "34"
+    },
+    {
+      "card": {
+        "name": "Feral Roar",
+        "mana_cost": "{2}{G}",
+        "types": [
+          "instant"
+        ],
+        "abilities": [
+          {
+            "spell": {
+              "effects": [
+                {
+                  "pump": {
+                    "power": 2,
+                    "toughness": 2,
+                    "to": {
+                      "each": "creature",
+                      "controller": "you"
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "rarity": "uncommon",
+      "scryfall_id": "00000000-0000-4000-8000-000000320034",
+      "collector_number": "35"
+    },
+    {
+      "card": {
+        "name": "Brass Golem",
+        "mana_cost": "{4}",
+        "types": [
+          "artifact",
+          "creature"
+        ],
+        "subtypes": [
+          "golem"
+        ],
+        "power": 3,
+        "toughness": 3
+      },
+      "rarity": "rare",
+      "scryfall_id": "00000000-0000-4000-8000-000000320035",
+      "collector_number": "36"
+    },
+    {
+      "card": {
+        "name": "Tidewild Compass",
+        "mana_cost": "{3}",
+        "types": [
+          "artifact"
+        ],
+        "abilities": [
+          {
+            "activated": {
+              "cost": [
+                "tap",
+                {
+                  "mana": "{2}"
+                }
+              ],
+              "effects": [
+                {
+                  "gain_life": {
+                    "amount": 2
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "rarity": "common",
+      "scryfall_id": "00000000-0000-4000-8000-000000320036",
+      "collector_number": "37"
+    },
+    {
+      "card": {
+        "name": "Hollow Idol",
+        "mana_cost": "{1}",
+        "types": [
+          "artifact"
+        ],
+        "abilities": [
+          {
+            "mana": {
+              "cost": [
+                "tap"
+              ],
+              "produce": "{C}"
+            }
+          }
+        ]
+      },
+      "rarity": "common",
+      "scryfall_id": "00000000-0000-4000-8000-000000320037",
+      "collector_number": "38"
+    },
+    {
+      "card": {
+        "name": "Mirefang Reaver",
+        "mana_cost": "{1}{B}{R}",
+        "types": [
+          "creature"
+        ],
+        "subtypes": [
+          "vampire",
+          "warrior"
+        ],
+        "keywords": [
+          "haste"
+        ],
+        "power": 3,
+        "toughness": 3
+      },
+      "rarity": "uncommon",
+      "scryfall_id": "00000000-0000-4000-8000-000000320038",
+      "collector_number": "39"
+    },
+    {
+      "card": {
+        "name": "Glade Benediction",
+        "mana_cost": "{G}{W}",
+        "types": [
+          "instant"
+        ],
+        "abilities": [
+          {
+            "spell": {
+              "effects": [
+                {
+                  "gain_life": {
+                    "amount": 3
+                  }
+                },
+                {
+                  "pump": {
+                    "power": 1,
+                    "toughness": 1,
+                    "to": {
+                      "each": "creature",
+                      "controller": "you"
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "rarity": "rare",
+      "scryfall_id": "00000000-0000-4000-8000-000000320039",
+      "collector_number": "40"
+    },
+    {
+      "card": {
+        "name": "Cindermarsh",
+        "types": [
+          "land"
+        ],
+        "abilities": [
+          {
+            "mana": {
+              "cost": [
+                "tap"
+              ],
+              "produce": "{B}"
+            }
+          },
+          {
+            "mana": {
+              "cost": [
+                "tap"
+              ],
+              "produce": "{R}"
+            }
+          }
+        ]
+      },
+      "rarity": "common",
+      "scryfall_id": "00000000-0000-4000-8000-000000320040",
+      "collector_number": "41"
+    },
+    {
+      "card": {
+        "name": "Sunlit Glade",
+        "types": [
+          "land"
+        ],
+        "subtypes": [
+          "forest",
+          "plains"
+        ]
+      },
+      "rarity": "common",
+      "scryfall_id": "00000000-0000-4000-8000-000000320041",
+      "collector_number": "42"
+    },
+    {
+      "card": {
+        "name": "Murkwater Cove",
+        "types": [
+          "land"
+        ],
+        "abilities": [
+          {
+            "mana": {
+              "cost": [
+                "tap"
+              ],
+              "produce": "{U}"
+            }
+          },
+          {
+            "mana": {
+              "cost": [
+                "tap"
+              ],
+              "produce": "{B}"
+            }
+          }
+        ]
+      },
+      "rarity": "uncommon",
+      "scryfall_id": "00000000-0000-4000-8000-000000320042",
+      "collector_number": "43"
+    }
+  ],
+  "unsupported": [
+    {
+      "name": "Prismatic Tidecaller",
+      "missing": [
+        "any-color mana"
+      ]
+    }
+  ]
+}
