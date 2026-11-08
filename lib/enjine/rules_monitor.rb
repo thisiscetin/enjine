@@ -121,9 +121,10 @@ module Enjine
       end
       return true if stationed || attached_grants(obj.id).any? { it["keywords"].include?(keyword.to_s) }
 
-      state.effects.any? do |e|
+      granted = state.effects.any? do |e|
         e["kind"] == "grant" && e["affected"].include?(obj.id) && e["keywords"].include?(keyword.to_s)
       end
+      granted || static_keyword?(obj, keyword)
     end
 
     def ability_activated!(event)
@@ -152,8 +153,7 @@ module Enjine
       active_turn = state.turn
       sick = obj.controlled_since.nil? || obj.controlled_since >= active_turn
       finding("302.6", "summoning-sick #{event.object} attacked") if sick && !keyword?(obj, :haste)
-      return unless keyword?(obj,
-                             :defender) && !keyword?(obj, :attacks_despite_defender) && !static_keyword?(obj, :attacks_despite_defender)
+      return unless keyword?(obj, :defender) && !keyword?(obj, :attacks_despite_defender)
 
       finding("702.3b", "#{event.object} has defender but attacked")
     end
@@ -281,7 +281,7 @@ module Enjine
       end
     end
 
-    def indestructible?(obj) = keyword?(obj, :indestructible) || static_keyword?(obj, :indestructible)
+    def indestructible?(obj) = keyword?(obj, :indestructible)
 
     # CR 514.1: after cleanup the active player has at most seven cards (checked at the next turn's priority).
     # The player whose turn ended is the one active before (an extra turn may follow its own, CR 500.7).

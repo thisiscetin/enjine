@@ -66,7 +66,7 @@ RSpec.describe Enjine::RulesMonitor do
       [{ "name" => "Banner of Ranks", "mana_cost" => "{2}", "types" => ["artifact"],
          "abilities" => [{ "static" => { "affects" => { "each" => "creature", "controller" => "you" },
                                          "pump" => { "power" => 1, "toughness" => 1 },
-                                         "keywords" => %w[indestructible attacks_despite_defender] } }] },
+                                         "keywords" => %w[indestructible attacks_despite_defender haste] } }] },
        { "name" => "Wall of Ranks", "mana_cost" => "{1}", "types" => ["creature"], "keywords" => ["defender"], "power" => 1,
          "toughness" => 1 }]
     end
@@ -90,6 +90,18 @@ RSpec.describe Enjine::RulesMonitor do
       event = Enjine::Events::AttackerDeclared.new(object: obj_id(game, "Wall of Ranks"), target: "player:bob")
       expect(monitor.check!(Enjine::HistoryEntry.new(seq: 1, turn: 3, step: "x", player: nil, kind: nil, option: nil,
                                                      events: [event]))).to eq([])
+    end
+
+    it "counts haste granted by a static ability for summoning-sick attackers (CR 302.6)" do
+      wall = game.state.object(obj_id(game, "Wall of Ranks"))
+      wall.controlled_since = 3
+      event = Enjine::Events::AttackerDeclared.new(object: wall.id, target: "player:bob")
+      expect(checked_events(game, [event])).to eq([])
+    end
+
+    def checked_events(game, events)
+      described_class.new(game).check!(Enjine::HistoryEntry.new(seq: 1, turn: 3, step: "x", player: nil, kind: nil, option: nil,
+                                                                events: events))
     end
 
     it "reports a static pump the engine forgot" do

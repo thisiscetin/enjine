@@ -5,6 +5,10 @@ Goal: every card of the Star Trek expansion (Scryfall set `trk`, released
 validation, and is verified in play. Then the README lists `trk` as a
 **verified set**.
 
+Status (2026-11-09): 227 of 311 cards convert (`lib/enjine/sets/trk.json`); 84 are listed as
+unsupported with the capabilities they still need. Cards waiting on a capability are named
+in each group's section below.
+
 Data goes in `lib/enjine/sets/trk.json`. It ships with the gem and isn't loaded
 by default. It contains structured card data plus each card's **printing
 identifier**: the set code and collector number printed on the card
@@ -293,10 +297,8 @@ play static); Hoshi Sato (creature types among creatures), First Contact (first 
 game), Deep Space 9 (the rules monitor's static pumps); V'Ger ("until your next turn");
 There's Coffee in that Nebula, Pattern Buffer Preservation (beam me up).
 
-Still to do: `RulesMonitor#keyword?` ignores keywords granted by static abilities, so a trk
-fuzz game with Hit It! (creatures you control have haste) reports a false CR 302.6 finding
-("summoning-sick … attacked"); flying/reach grants would do the same for 702.9b. The engine
-applies the grant correctly; the monitor needs the static-ability layer pass.
+`RulesMonitor#keyword?` now counts keywords granted by static abilities (haste from Hit It!,
+flying or reach), so trk games with those grants no longer report false 302.6 / 702.9b findings.
 
 ## Pipeline
 
