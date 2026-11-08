@@ -219,7 +219,11 @@ module Enjine
         index = ctx["player"]
         obj = object(ctx["object"])
         obj.targets = ctx["targets"].dup
-        if ctx["kind"] == "ability"
+        if ctx["kind"] == "trigger"
+          emit Events::TriggerPutOnStack.new(player: name(index), object: obj.id, source: ctx["source"], card: obj.card,
+                                             ability: ctx["ability"], targets: obj.targets)
+          return # placing continues in the put_triggers frame; no priority yet
+        elsif ctx["kind"] == "ability"
           pay_ability_costs!(ctx)
           emit Events::AbilityActivated.new(player: name(index), object: obj.id, card: obj.card, source: ctx["source"],
                                             ability: ctx["ability"], targets: obj.targets)

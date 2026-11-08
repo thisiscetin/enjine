@@ -32,6 +32,10 @@ Cleanup step: discard one card, `{type: "discard", object: id}`, until the hand 
 
 Keep the hand (`{type: "keep"}`) or take a London mulligan (`{type: "mulligan"}`). Players declare in turn order; mulligans then happen simultaneously (CR 103.5).
 
+## order_triggers
+
+Put one of your pending triggered abilities on the stack next: `{type: "trigger", trigger: id}` (CR 603.3b). The last one put on the stack resolves first.
+
 ## pay_cost
 
 While casting/activating: `{type: "pay_mana", mana: "R"}` spends one mana from the pool, `{type: "activate_mana", object: id, ability: ref}` taps a source, `{type: "cancel"}` rewinds. `remaining` shows what is left to pay.

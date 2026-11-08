@@ -12,6 +12,16 @@ Rules: CR 115.4
 "any_target"
 ```
 
+## artifact
+
+An artifact on the battlefield.
+
+Rules: CR 115.1
+
+```json
+"artifact"
+```
+
 ## creature
 
 A creature on the battlefield.
@@ -30,6 +40,16 @@ Rules: CR 115.1
 
 ```json
 "creature_or_planeswalker"
+```
+
+## land
+
+A land on the battlefield.
+
+Rules: CR 115.1
+
+```json
+"land"
 ```
 
 ## opponent

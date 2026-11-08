@@ -123,3 +123,32 @@ Rules: CR 113.3a, CR 601.2c, CR 608.2b, CR 608.2c
   }
 }
 ```
+
+## triggered
+
+A triggered ability: when its trigger condition happens, it is put on the stack the next time a player would receive priority (in APNAP order), with targets chosen then.
+
+Rules: CR 603.2, CR 603.3, CR 603.3b, CR 603.3d
+
+| Parameter | Description |
+| --- | --- |
+| `when` | a trigger condition, e.g. {"enters": {}} |
+| `targets` | list of target filters |
+| `effects` | list of effects |
+
+```json
+{
+  "triggered": {
+    "when": {
+      "enters": {}
+    },
+    "effects": [
+      {
+        "draw": {
+          "amount": 1
+        }
+      }
+    ]
+  }
+}
+```

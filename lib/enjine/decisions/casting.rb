@@ -12,7 +12,8 @@ module Enjine
       end
 
       def self.options(engine, _pending)
-        engine.target_candidates.map { { type: "target", target: it } } + [CANCEL]
+        options = engine.target_candidates.map { { type: "target", target: it } }
+        engine.casting["kind"] == "trigger" ? options : options + [CANCEL] # triggers can't be "cancelled"
       end
 
       def self.submit(engine, _pending, option)

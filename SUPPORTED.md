@@ -47,6 +47,17 @@ Rules version: Comprehensive Rules effective 2026-09-25.
 | [`loyalty`](docs/reference/abilities.md#loyalty) | 606.3, 606.4, 606.5, 602.2b | A loyalty ability. Its cost adds (positive) or removes (negative) loyalty counters and is paid on activation. Sorcery speed, and only one loyalty ability per planeswalker per turn. |
 | [`mana`](docs/reference/abilities.md#mana) | 605.1a, 605.3a, 605.3b, 106.4 | An activated mana ability: pay the cost, add the mana to your mana pool immediately. It does not use the stack and can be activated whenever you have priority. |
 | [`spell`](docs/reference/abilities.md#spell) | 113.3a, 601.2c, 608.2b, 608.2c | The spell ability of an instant or sorcery: its targets are chosen while casting and its effects happen in order when it resolves. If every target is illegal on resolution, it doesn't resolve. |
+| [`triggered`](docs/reference/abilities.md#triggered) | 603.2, 603.3, 603.3b, 603.3d | A triggered ability: when its trigger condition happens, it is put on the stack the next time a player would receive priority (in APNAP order), with targets chosen then. |
+
+## Trigger conditions
+
+| Name | Rules | Description |
+| --- | --- | --- |
+| [`attacks`](docs/reference/triggers.md#attacks) | 508.3a | The subject is declared as an attacker. |
+| [`cast`](docs/reference/triggers.md#cast) | 603.2, 601.2i | A player casts a spell. `controller`: you (default) | opponent | any; `spell`: optional filter on the spell's card types (e.g. "creature", "noncreature"). |
+| [`dies`](docs/reference/triggers.md#dies) | 603.6c, 603.10a, 700.4 | The subject is put into a graveyard from the battlefield. Looks back in time (CR 603.10a). |
+| [`enters`](docs/reference/triggers.md#enters) | 603.6a, 603.2 | The subject enters the battlefield. |
+| [`step_begins`](docs/reference/triggers.md#step_begins) | 603.6b, 503.1a, 513.1a | A step begins. `whose`: "your" (default), "each" or "opponent". |
 
 ## Costs
 
@@ -73,8 +84,10 @@ Rules version: Comprehensive Rules effective 2026-09-25.
 | Name | Rules | Description |
 | --- | --- | --- |
 | [`any_target`](docs/reference/filters.md#any_target) | 115.4 | A creature, player or planeswalker (battles: later). |
+| [`artifact`](docs/reference/filters.md#artifact) | 115.1 | An artifact on the battlefield. |
 | [`creature`](docs/reference/filters.md#creature) | 115.1 | A creature on the battlefield. |
 | [`creature_or_planeswalker`](docs/reference/filters.md#creature_or_planeswalker) | 115.1 | A creature or planeswalker on the battlefield. |
+| [`land`](docs/reference/filters.md#land) | 115.1 | A land on the battlefield. |
 | [`opponent`](docs/reference/filters.md#opponent) | 102.2 | An opponent of the ability's controller. |
 | [`permanent`](docs/reference/filters.md#permanent) | 110.1 | Any permanent on the battlefield. |
 | [`planeswalker`](docs/reference/filters.md#planeswalker) | 115.1 | A planeswalker on the battlefield. |

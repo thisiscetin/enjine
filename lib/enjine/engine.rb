@@ -22,6 +22,7 @@ module Enjine
     def emit(event)
       touch! if Characteristics::LAYER_EVENTS.include?(event.class)
       @emit.call(event)
+      watch_triggers!(event) unless event.is_a?(Events::AbilityTriggered)
     end
 
     def name(index) = state.players[index].name
@@ -166,7 +167,11 @@ module Enjine
     # Called once a step's turn-based actions (and any decisions they needed) are complete.
     def turn_based_actions_done!
       step.finish(self)
-      if step.priority?
+      if !step.priority? && state.step == :cleanup && !state.pending_triggers.empty?
+        state.repeat_cleanup = true # CR 514.3a: priority now, then another cleanup step
+        state.step_state = "active"
+        give_priority!(state.active)
+      elsif step.priority?
         give_priority!(state.active)
       else
         ask!(nil)
@@ -178,6 +183,10 @@ module Enjine
     def next_step!
       empty_mana_pools!
       end_combat! if state.step == :end_of_combat # CR 511.3
+      if state.step == :cleanup && state.repeat_cleanup
+        state.repeat_cleanup = false
+        return enter_step!(:cleanup)
+      end
       index = Steps.index(state.step) + 1
       index += 1 while index < Steps::ORDER.size && Steps::ORDER[index].skip?(self)
       if index >= Steps::ORDER.size
@@ -193,6 +202,7 @@ module Enjine
     def give_priority!(index)
       check_state_based_actions!
       return if state.over?
+      return if put_triggers_first!(index)
 
       state.priority = index
       ask!("kind" => "priority", "player" => index)
@@ -252,20 +262,28 @@ module Enjine
       state.zone_list(old.zone, old.owner).delete(id)
       state.objects.delete(id)
       fresh = create_object(old.card, old.owner, to)
+      lki = old.zone == :battlefield ? { "controller" => old.controller, "card" => old.card } : nil
       leave_combat!(id) if old.zone == :battlefield
-      if to == :battlefield
+      arrive!(fresh, old, data)
+      list = state.zone_list(to, old.owner)
+      data["position"] == :bottom ? list.push(fresh.id) : list.unshift(fresh.id)
+      event = Events::ZoneChanged.new(card: old.card, old_id: id, new_id: fresh.id, owner: name(old.owner),
+                                      from: old.zone.to_s, to: to.to_s, reason: data["reason"])
+      lki ? with_last_known(id, lki) { emit event } : emit(event)
+      fresh
+    end
+
+    # Status of the new object in its new zone (CR 110.2, 614.12 entering status).
+    def arrive!(fresh, old, data)
+      case data["to"]
+      when :battlefield
         fresh.controller = data["controller"] || old.owner
         fresh.controlled_since = state.turn
         fresh.tapped = data["enters"]["tapped"]
         fresh.counters.merge!(data["enters"]["counters"])
-      elsif to == :stack
+      when :stack
         fresh.controller = data["controller"] || old.owner
       end
-      list = state.zone_list(to, old.owner)
-      data["position"] == :bottom ? list.push(fresh.id) : list.unshift(fresh.id)
-      emit Events::ZoneChanged.new(card: old.card, old_id: id, new_id: fresh.id, owner: name(old.owner),
-                                   from: old.zone.to_s, to: to.to_s, reason: data["reason"])
-      fresh
     end
 
     def draw!(index)

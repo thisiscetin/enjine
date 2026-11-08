@@ -8,7 +8,7 @@ module Enjine
   # declares its metadata with `primitive`; the declaration both registers it
   # in Enjine.registry and feeds the generated reference docs.
   class Primitive
-    CATEGORIES = %i[type supertype subtype keyword ability cost effect filter].freeze
+    CATEGORIES = %i[type supertype subtype keyword ability trigger cost effect filter].freeze
 
     class << self
       attr_reader :category, :primitive_name, :description, :rules, :params, :example

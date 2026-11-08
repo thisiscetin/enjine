@@ -55,5 +55,12 @@ module Enjine
       def self.decisions = %w[assign_damage]
     end
     register("combat_damage", CombatDamage)
+
+    # Putting pending triggered abilities on the stack (CR 603.3), then giving priority.
+    class PutTriggers < Base
+      def self.step(engine, frame) = engine.step_put_triggers!(frame)
+      def self.decisions = %w[order_triggers]
+    end
+    register("put_triggers", PutTriggers)
   end
 end

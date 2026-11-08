@@ -27,5 +27,6 @@ module Enjine
     def ability(ref) = abilities.find { it.ref == ref }&.ability
     def mana_abilities = abilities.select { it.ability.mana_ability? }
     def activated_abilities = abilities.select { %i[activated loyalty].include?(it.ability.kind) }
+    def triggered_abilities = abilities.select { it.ability.kind == :triggered }
   end
 end

@@ -68,6 +68,7 @@ module Enjine
     def ability(ref) = @ability_instances.find { it.ref == ref }&.ability
 
     def permanent? = @permanent
+    def triggered? = @triggered
     def land? = @land
     def creature? = @creature
     def planeswalker? = @planeswalker
@@ -106,6 +107,7 @@ module Enjine
       @castable = !@land && !@mana_cost.nil?
       @deck_limit_exempt = @supertypes.any? { Enjine.registry.fetch(:supertype, it).deck_limit_exempt? }
       @spell_ability = @abilities.find { it.kind == :spell }
+      @triggered = @abilities.any? { it.kind == :triggered }
     end
 
     def validate_type_specific(errors)

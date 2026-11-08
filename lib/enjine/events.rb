@@ -68,6 +68,9 @@ module Enjine
     AttackerDeclared = define(:attacker_declared, :object, :target)
     BlockerDeclared = define(:blocker_declared, :object, :attacker)
     DamageAssigned = define(:damage_assigned, :attacker, :blocker)
+    AbilityTriggered = define(:ability_triggered, :player, :source, :card, :ability)
+    TriggerPutOnStack = define(:trigger_put_on_stack, :player, :object, :source, :card, :ability, :targets)
+    TriggerRemoved = define(:trigger_removed, :player, :source, :card, :reason)
 
     # A card moved between zones; old_id stops existing and new_id is born (CR 400.7).
     ZoneChanged = define(:zone_changed, :card, :old_id, :new_id, :owner, :from, :to, :reason) do

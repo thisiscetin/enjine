@@ -21,6 +21,11 @@ module SetConverter
   UNSUPPORTED_SUPERTYPES = %w[Legendary Snow World].freeze
   NUMBER = { "a" => 1, "an" => 1, "one" => 1, "two" => 2, "three" => 3, "four" => 4, "five" => 5 }.freeze
 
+  # Keyword abilities recognised on a keyword-only line (supported or not; unsupported
+  # ones are reported as missing).
+  KNOWN_KEYWORDS = ["flying", "reach", "vigilance", "trample", "menace", "lifelink", "deathtouch", "first strike",
+                    "double strike", "defender", "indestructible", "hexproof", "haste", "flash"].freeze
+
   module_function
 
   # ---- source adapter (Scryfall today; swap for MTGJSON or a database) -----------
@@ -106,7 +111,7 @@ module SetConverter
   def keyword_line(line)
     parts = line.split(/,\s*/).map(&:downcase)
     if parts.all? do
-      SUPPORTED_KEYWORDS.include?(it) || it.match?(/\A(flying|reach|vigilance|trample|menace|lifelink|deathtouch|first strike|double strike|defender|indestructible|hexproof|haste|flash)\z/)
+      SUPPORTED_KEYWORDS.include?(it) || KNOWN_KEYWORDS.include?(it)
     end
       parts
     end

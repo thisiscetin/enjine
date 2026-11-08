@@ -476,5 +476,201 @@
     ],
     "power": 6,
     "toughness": 4
+  },
+  {
+    "name": "Tower Scholar",
+    "mana_cost": "{1}{U}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "human",
+      "wizard"
+    ],
+    "power": 1,
+    "toughness": 1,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "enters": {}
+          },
+          "effects": [
+            {
+              "draw": {
+                "amount": 1
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "When this creature enters, draw a card."
+  },
+  {
+    "name": "Ember Martyr",
+    "mana_cost": "{R}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "human",
+      "warrior"
+    ],
+    "power": 1,
+    "toughness": 1,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "dies": {}
+          },
+          "effects": [
+            {
+              "deal_damage": {
+                "amount": 2,
+                "to": "each_opponent"
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "When this creature dies, it deals 2 damage to each opponent."
+  },
+  {
+    "name": "Dawn Keeper",
+    "mana_cost": "{1}{W}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "human",
+      "cleric"
+    ],
+    "power": 1,
+    "toughness": 3,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "step_begins": {
+              "step": "upkeep"
+            }
+          },
+          "effects": [
+            {
+              "gain_life": {
+                "amount": 1
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "At the beginning of your upkeep, you gain 1 life."
+  },
+  {
+    "name": "Ridge Sniper",
+    "mana_cost": "{2}{R}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "goblin",
+      "archer"
+    ],
+    "power": 2,
+    "toughness": 1,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "enters": {}
+          },
+          "targets": [
+            "creature"
+          ],
+          "effects": [
+            {
+              "deal_damage": {
+                "amount": 1,
+                "to": {
+                  "target": 0
+                }
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "When this creature enters, it deals 1 damage to target creature."
+  },
+  {
+    "name": "Moss Grower",
+    "mana_cost": "{1}{G}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "elf",
+      "druid"
+    ],
+    "power": 1,
+    "toughness": 2,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "enters": {
+              "subject": {
+                "each": "land",
+                "controller": "you"
+              }
+            }
+          },
+          "effects": [
+            {
+              "add_counters": {
+                "counter": "+1/+1",
+                "amount": 1,
+                "to": "self"
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "Whenever a land you control enters, put a +1/+1 counter on this creature."
+  },
+  {
+    "name": "Banner Raider",
+    "mana_cost": "{1}{W}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "human",
+      "soldier"
+    ],
+    "power": 2,
+    "toughness": 2,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "attacks": {}
+          },
+          "effects": [
+            {
+              "gain_life": {
+                "amount": 1
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "Whenever this creature attacks, you gain 1 life."
   }
 ]

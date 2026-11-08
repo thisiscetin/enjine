@@ -105,6 +105,35 @@ module Enjine
         def sorcery_speed? = @sorcery
       end
 
+      # A triggered ability "When/Whenever/At [trigger], [effect]" (CR 603).
+      class TriggeredAbility < StackAbility
+        primitive :ability, :triggered,
+                  description: "A triggered ability: when its trigger condition happens, it is put on the stack the " \
+                               "next time a player would receive priority (in APNAP order), with targets chosen then.",
+                  rules: %w[603.2 603.3 603.3b 603.3d],
+                  params: { "when" => "a trigger condition, e.g. {\"enters\": {}}", "targets" => "list of target filters",
+                            "effects" => "list of effects" },
+                  example: { "triggered" => { "when" => { "enters" => {} }, "effects" => [{ "draw" => { "amount" => 1 } }] } }
+
+        attr_reader :trigger
+
+        def self.build(params, errors, path, **)
+          Mechanics.check_keys(params, %w[when targets effects], errors, path)
+          raw = Mechanics.fetch_param(params, :when)
+          trigger = raw.nil? ? ((errors << "#{path}.when: required") && nil) : Mechanics.build_entry(:trigger, raw, errors, "#{path}.when")
+          targets = parse_targets(params, errors, path)
+          new(targets: targets, effects: parse_effects(params, errors, path, targets.size), trigger: trigger)
+        end
+
+        def initialize(trigger:, **)
+          @trigger = trigger
+          super(**)
+        end
+
+        def kind = :triggered
+        def to_s = "#{trigger}, #{effects_text}"
+      end
+
       # A planeswalker loyalty ability "+N: ..." / "-N: ..." (CR 606).
       class LoyaltyAbility < StackAbility
         primitive :ability, :loyalty,

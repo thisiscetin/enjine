@@ -47,6 +47,8 @@ module Enjine
       state.blockers = deep_copy(data.fetch("blockers", {}))
       state.effects = deep_copy(data.fetch("effects", []))
       state.frames = deep_copy(data.fetch("frames", []))
+      state.pending_triggers = deep_copy(data.fetch("pending_triggers", []))
+      state.repeat_cleanup = data.fetch("repeat_cleanup", false)
       state.attacks_declared = data.fetch("attacks_declared", 0)
       %w[turn active step_state priority passes next_id starting_player].each do |k|
         state.public_send("#{k}=", data[k])
