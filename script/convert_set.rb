@@ -203,9 +203,14 @@ module SetConverter
 
   SUBJECTS = { "creatures" => "creature", "artifact creatures" => "creature", "lands" => "land", "artifacts" => "artifact" }.freeze
 
+  STATIC_LINE = %r{
+    \A(Other\ )?(creatures|artifact\ creatures|artifacts)\ you\ control\
+    (?:get\ ([+-]\d+)/([+-]\d+)(?:\ and\ have\ ([a-z,\ ]+))?|have\ ([a-z,\ ]+))\.\z
+  }x
+
   # "Other creatures you control get +1/+1." / "Creatures you control have vigilance."
   def static_line(line)
-    m = %r{\A(Other )?(creatures|artifact creatures|artifacts) you control (?:get ([+-]\d+)/([+-]\d+)(?: and have ([a-z, ]+))?|have ([a-z, ]+))\.\z}.match(line)
+    m = STATIC_LINE.match(line)
     return nil unless m
 
     keywords = (m[5] || m[6]).to_s.split(/, (?:and )?| and /).map(&:strip).reject(&:empty?)

@@ -40,6 +40,7 @@ Metrics/ParameterLists:
   CountKeywordArgs: false
 Metrics/BlockLength:
   Exclude:
+    - "script/convert_set.rb"
     - "spec/**/*"
     - "*.gemspec"
     - "Rakefile"

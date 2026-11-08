@@ -1554,6 +1554,7 @@
         "number": "7"
       },
       "missing": [
+        "static ability",
         "triggered ability",
         "tokens",
         "library manipulation",
@@ -3499,6 +3500,7 @@
         "number": "170"
       },
       "missing": [
+        "static ability",
         "triggered ability",
         "condition (if/unless/as long as)",
         "counters",
