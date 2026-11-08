@@ -198,6 +198,30 @@ Rules: CR 119.3
 }
 ```
 
+## grant
+
+Each referenced permanent gains the `keywords` until end of turn.
+
+Rules: CR 611.2a, CR 611.2c, CR 613.1f, CR 514.2
+
+| Parameter | Description |
+| --- | --- |
+| `keywords` | list of keywords |
+| `to` | selector |
+
+```json
+{
+  "grant": {
+    "keywords": [
+      "flying"
+    ],
+    "to": {
+      "target": 0
+    }
+  }
+}
+```
+
 ## lose_life
 
 Each referenced player loses `amount` life.

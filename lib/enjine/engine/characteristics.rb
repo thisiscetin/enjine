@@ -45,24 +45,48 @@ module Enjine
       # Only modified objects get an entry; the rest use their printed characteristics.
       def apply_layers
         modified = {}
+        statics = static_sources
         effects = state.effects
+        return modified if statics.empty? && effects.empty? && state.battlefield.none? { !object(it).counters.empty? }
+
         state.battlefield.each do |id|
           obj = object(id)
-          next if effects.empty? && obj.counters.empty?
-
-          delta_p = delta_t = obj.counters.fetch("+1/+1", 0) - obj.counters.fetch("-1/-1", 0)
-          effects.each do |effect|
-            next unless effect["kind"] == "pump" && effect["affected"].include?(id)
-
-            delta_p += effect["power"]
-            delta_t += effect["toughness"]
-          end
-          next if delta_p.zero? && delta_t.zero?
-
           base = definition(obj).printed_characteristics
-          modified[id] = base.with(power: base.power.to_i + delta_p, toughness: base.toughness.to_i + delta_t)
+          keywords = base.keywords.dup
+          delta_p = delta_t = obj.counters.fetch("+1/+1", 0) - obj.counters.fetch("-1/-1", 0)
+          # Layer 6 then 7c, each in timestamp order (CR 613.7); statics come before resolved effects.
+          statics.each do |source, ability|
+            next unless ability.affects?(obj, source, base.types)
+
+            keywords |= ability.keywords
+            delta_p += ability.power
+            delta_t += ability.toughness
+          end
+          effects.each do |effect|
+            next unless effect["affected"].include?(id)
+
+            case effect["kind"]
+            when "pump"
+              delta_p += effect["power"]
+              delta_t += effect["toughness"]
+            when "grant" then keywords |= effect["keywords"].map(&:to_sym)
+            end
+          end
+          next if delta_p.zero? && delta_t.zero? && keywords == base.keywords
+
+          modified[id] = base.with(power: base.power && (base.power + delta_p), toughness: base.toughness && (base.toughness + delta_t),
+                                   keywords: keywords.freeze)
         end
         modified
+      end
+
+      # [[source object, StaticAbility], ...] for permanents on the battlefield (printed abilities:
+      # an ability granting static abilities would need layer dependencies, CR 613.8).
+      def static_sources
+        state.battlefield.flat_map do |id|
+          obj = object(id)
+          definition(obj).ability_instances.filter_map { [obj, it.ability] if it.ability.kind == :static }
+        end
       end
 
       # Starts a continuous effect from a resolving spell or ability (CR 611.2).

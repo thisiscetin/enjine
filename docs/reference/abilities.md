@@ -152,6 +152,33 @@ Rules: CR 113.3a, CR 601.2c, CR 608.2b, CR 608.2c
 }
 ```
 
+## static
+
+While its source is on the battlefield, every matching permanent gets `pump` and/or the `keywords`. `affects` is {"each": filter, "controller": you|opponent|any, "other": true} (relative to the source's controller).
+
+Rules: CR 604.1, CR 611.3a, CR 613.1f, CR 613.4c
+
+| Parameter | Description |
+| --- | --- |
+| `affects` | {"each": filter, "controller": ..., "other": bool} |
+| `pump` | {"power": n, "toughness": n} |
+| `keywords` | list of keywords |
+
+```json
+{
+  "static": {
+    "affects": {
+      "each": "creature",
+      "controller": "you"
+    },
+    "pump": {
+      "power": 1,
+      "toughness": 1
+    }
+  }
+}
+```
+
 ## triggered
 
 A triggered ability: when its trigger condition happens, it is put on the stack the next time a player would receive priority (in APNAP order), with targets chosen then.

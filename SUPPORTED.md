@@ -62,6 +62,7 @@ Rules version: Comprehensive Rules effective 2026-09-25.
 | [`loyalty`](docs/reference/abilities.md#loyalty) | 606.3, 606.4, 606.5, 602.2b | A loyalty ability. Its cost adds (positive) or removes (negative) loyalty counters and is paid on activation. Sorcery speed, and only one loyalty ability per planeswalker per turn. |
 | [`mana`](docs/reference/abilities.md#mana) | 605.1a, 605.3a, 605.3b, 106.4 | An activated mana ability: pay the cost, add the mana to your mana pool immediately. It does not use the stack and can be activated whenever you have priority. |
 | [`spell`](docs/reference/abilities.md#spell) | 113.3a, 601.2c, 608.2b, 608.2c | The spell ability of an instant or sorcery: its targets are chosen while casting and its effects happen in order when it resolves. If every target is illegal on resolution, it doesn't resolve. |
+| [`static`](docs/reference/abilities.md#static) | 604.1, 611.3a, 613.1f, 613.4c | While its source is on the battlefield, every matching permanent gets `pump` and/or the `keywords`. `affects` is {"each": filter, "controller": you|opponent|any, "other": true} (relative to the source's controller). |
 | [`triggered`](docs/reference/abilities.md#triggered) | 603.2, 603.3, 603.3b, 603.3d | A triggered ability: when its trigger condition happens, it is put on the stack the next time a player would receive priority (in APNAP order), with targets chosen then. |
 
 ## Trigger conditions
@@ -95,6 +96,7 @@ Rules version: Comprehensive Rules effective 2026-09-25.
 | [`draw`](docs/reference/effects.md#draw) | 121.1, 121.2 | Each referenced player draws `amount` cards (default: you). |
 | [`exile`](docs/reference/effects.md#exile) | 406.1, 701.13a | Exile each referenced permanent. |
 | [`gain_life`](docs/reference/effects.md#gain_life) | 119.3 | Each referenced player gains `amount` life (default: you). |
+| [`grant`](docs/reference/effects.md#grant) | 611.2a, 611.2c, 613.1f, 514.2 | Each referenced permanent gains the `keywords` until end of turn. |
 | [`lose_life`](docs/reference/effects.md#lose_life) | 119.3 | Each referenced player loses `amount` life. |
 | [`mill`](docs/reference/effects.md#mill) | 701.17a | Each referenced player puts the top `amount` cards of their library into their graveyard (default: you). |
 | [`pump`](docs/reference/effects.md#pump) | 611.2a, 611.2c, 613.4c, 514.2 | Each referenced creature gets +power/+toughness until end of turn. The set of affected creatures is locked in when the effect starts. |
