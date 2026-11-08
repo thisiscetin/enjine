@@ -9,10 +9,10 @@ module Enjine
   # Enjine.registry. Anything unknown is reported (with its path) in a single
   # InvalidCardDefinition error.
   class CardDefinition
-    KEYS = %w[name mana_cost types supertypes subtypes power toughness abilities rules_text].freeze
+    KEYS = %w[name mana_cost types supertypes subtypes keywords power toughness loyalty abilities rules_text].freeze
     SUBTYPE_FORMAT = /\A[a-z][a-z0-9_]*\z/
 
-    attr_reader :id, :name, :mana_cost, :types, :supertypes, :subtypes, :power, :toughness,
+    attr_reader :id, :name, :mana_cost, :types, :supertypes, :subtypes, :keywords, :power, :toughness, :loyalty,
                 :abilities, :rules_text, :type_modules, :source
 
     # Canonical id derived from a card name: "Jace, the Mind Sculptor" -> "jace_the_mind_sculptor".
@@ -40,12 +40,15 @@ module Enjine
       @supertypes, = read_names(card, "supertypes", :supertype, errors)
       @subtypes = read_subtypes(card, errors)
       @mana_cost = card.key?("mana_cost") ? Mana.parse_cost(card["mana_cost"], errors) : nil
+      @keywords, = read_names(card, "keywords", :keyword, errors)
       @power = read_stat(card, "power", errors)
       @toughness = read_stat(card, "toughness", errors)
+      @loyalty = read_stat(card, "loyalty", errors)
       @rules_text = card["rules_text"]
       errors << "rules_text: must be a string" unless @rules_text.nil? || @rules_text.is_a?(String)
       @abilities = read_abilities(card, errors)
       @type_modules.each { |mod| mod.validate(card, errors) }
+      validate_type_specific(errors)
       @source = normalize(card)
       freeze
     end
@@ -57,6 +60,16 @@ module Enjine
     def deck_limit_exempt? = @supertypes.any? { |s| Enjine.registry.fetch(:supertype, s).deck_limit_exempt? }
 
     def mana_abilities = @abilities.select(&:mana_ability?)
+    def keyword?(keyword) = @keywords.include?(keyword.to_sym)
+    def creature? = type?(:creature)
+    def planeswalker? = type?(:planeswalker)
+    def spell_ability = @abilities.find { _1.kind == :spell }
+
+    # Whether this card can be cast at instant speed (CR 304.1, 702.8a).
+    def instant_speed? = @type_modules.any?(&:instant_speed?) || keyword?(:flash)
+
+    # Lands are played, not cast; a card without a mana cost can't be cast normally (CR 202.1b).
+    def castable? = !land? && !@mana_cost.nil?
 
     def type_line
       left = (@supertypes + @types).map { |t| t.to_s.capitalize }.join(" ")
@@ -73,6 +86,17 @@ module Enjine
     def hash = @source.hash
 
     private
+
+    def validate_type_specific(errors)
+      errors << "power/toughness: only creatures have power and toughness" if !creature? && (@power || @toughness)
+      errors << "loyalty: only planeswalkers have loyalty" if !planeswalker? && @loyalty
+      @abilities.each_with_index do |ability, i|
+        allowed = ability.allowed_types
+        next if allowed.nil? || allowed.any? { type?(_1) }
+
+        errors << "abilities[#{i}]: #{ability.class.primitive_name} abilities need a #{allowed.join("/")} card"
+      end
+    end
 
     def read_name(card, errors)
       name = card["name"]
@@ -153,8 +177,10 @@ module Enjine
       out["types"] = @types.map(&:to_s)
       out["supertypes"] = @supertypes.map(&:to_s) unless @supertypes.empty?
       out["subtypes"] = @subtypes.map(&:to_s) unless @subtypes.empty?
+      out["keywords"] = @keywords.map(&:to_s) unless @keywords.empty?
       out["power"] = @power unless @power.nil?
       out["toughness"] = @toughness unless @toughness.nil?
+      out["loyalty"] = @loyalty unless @loyalty.nil?
       out["abilities"] = deep_stringify(card["abilities"]) if card["abilities"].is_a?(Array) && !card["abilities"].empty?
       out["rules_text"] = @rules_text if @rules_text
       deep_freeze(out)

@@ -16,6 +16,7 @@ module Enjine
 
       def priority? = true
       def skip?(_engine) = false
+      def finish(_engine) = nil
 
       # Performs the step's turn-based actions. May set a pending decision; in that
       # case the decision calls engine.turn_based_actions_done! when finished.
@@ -48,11 +49,29 @@ module Enjine
       def skip?(engine) = engine.attackers.empty?
     end
 
+    # CR 508.1: the active player declares attackers (a turn-based action).
+    class DeclareAttackers < Step
+      def begin(engine) = engine.begin_declare_attackers!
+    end
+
+    # CR 509.1: the defending player declares blockers.
+    class DeclareBlockers < CombatStepAfterAttackers
+      def begin(engine) = engine.begin_declare_blockers!
+    end
+
+    # CR 510: combat damage is assigned and dealt simultaneously.
+    class CombatDamage < CombatStepAfterAttackers
+      def begin(engine) = engine.begin_combat_damage!
+    end
+
     # CR 514: discard to maximum hand size, then end "until end of turn" effects; no priority.
     class Cleanup < Step
       MAX_HAND_SIZE = 7
 
       def priority? = false
+
+      # CR 514.2: remove marked damage and end "until end of turn" effects.
+      def finish(engine) = engine.cleanup_turn!
 
       def begin(engine)
         excess = engine.active_player.hand.size - MAX_HAND_SIZE
@@ -70,9 +89,9 @@ module Enjine
       Draw.new(:draw, :beginning),
       Step.new(:precombat_main, :precombat_main),
       Step.new(:beginning_of_combat, :combat),
-      Step.new(:declare_attackers, :combat),
-      CombatStepAfterAttackers.new(:declare_blockers, :combat),
-      CombatStepAfterAttackers.new(:combat_damage, :combat),
+      DeclareAttackers.new(:declare_attackers, :combat),
+      DeclareBlockers.new(:declare_blockers, :combat),
+      CombatDamage.new(:combat_damage, :combat),
       Step.new(:end_of_combat, :combat),
       Step.new(:postcombat_main, :postcombat_main),
       Step.new(:end, :ending),

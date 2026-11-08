@@ -53,6 +53,21 @@ module Enjine
     ManaEmptied = define(:mana_emptied, :player, :mana)
     PlayerLost = define(:player_lost, :player, :reason)
     GameEnded = define(:game_ended, :winner, :reason)
+    TargetChosen = define(:target_chosen, :player, :object, :target)
+    ManaPaid = define(:mana_paid, :player, :mana, :object)
+    SpellCast = define(:spell_cast, :player, :object, :card, :targets)
+    AbilityActivated = define(:ability_activated, :player, :object, :card, :source, :ability, :targets)
+    CastCancelled = define(:cast_cancelled, :player, :object, :card)
+    Resolved = define(:resolved, :object, :card, :kind)
+    Fizzled = define(:fizzled, :object, :card)
+    DamageDealt = define(:damage_dealt, :source, :target, :amount)
+    LifeChanged = define(:life_changed, :player, :from, :to)
+    CountersChanged = define(:counters_changed, :object, :counter, :from, :to)
+    EffectStarted = define(:effect_started, :kind, :affected, :details)
+    EffectsEnded = define(:effects_ended, :count)
+    AttackerDeclared = define(:attacker_declared, :object, :target)
+    BlockerDeclared = define(:blocker_declared, :object, :attacker)
+    DamageAssigned = define(:damage_assigned, :attacker, :blocker)
 
     # A card moved between zones; old_id stops existing and new_id is born (CR 400.7).
     ZoneChanged = define(:zone_changed, :card, :old_id, :new_id, :owner, :from, :to, :reason) do

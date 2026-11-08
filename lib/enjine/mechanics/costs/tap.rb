@@ -12,7 +12,7 @@ module Enjine
 
         INSTANCE = new.freeze
 
-        def self.build(params, errors, path)
+        def self.build(params, errors, path, **)
           Mechanics.check_keys(params, [], errors, path)
           INSTANCE
         end
@@ -23,6 +23,7 @@ module Enjine
           engine.tap!(object)
         end
 
+        def mana? = false
         def to_s = "{T}"
       end
     end

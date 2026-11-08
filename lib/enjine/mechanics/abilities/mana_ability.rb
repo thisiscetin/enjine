@@ -16,7 +16,7 @@ module Enjine
 
         attr_reader :costs, :produce
 
-        def self.build(params, errors, path)
+        def self.build(params, errors, path, **)
           Mechanics.check_keys(params, %w[cost produce], errors, path)
           raw_costs = Mechanics.fetch_param(params, :cost)
           costs = if raw_costs.is_a?(Array) && !raw_costs.empty?
@@ -37,6 +37,8 @@ module Enjine
         end
 
         def mana_ability? = true
+        def kind = :mana
+        def allowed_types = nil
 
         def activatable?(engine, object) = costs.all? { |c| c.payable?(engine, object) }
 

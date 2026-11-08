@@ -14,6 +14,7 @@ module Enjine
 
         def self.permanent? = true
         def self.playable_as_land? = true
+        def self.instant_speed? = false
 
         def self.validate(card, errors)
           errors << "mana_cost: lands have no mana cost (CR 202.1a)" if card.key?("mana_cost")

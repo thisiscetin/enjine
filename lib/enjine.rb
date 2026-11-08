@@ -6,6 +6,7 @@ require_relative "enjine/rng"
 require_relative "enjine/mana"
 require_relative "enjine/primitive"
 require_relative "enjine/mechanics"
+require_relative "enjine/mechanics/selector"
 Dir[File.join(__dir__, "enjine/mechanics/**/*.rb")].each { |f| require f }
 require_relative "enjine/card_definition"
 require_relative "enjine/catalog"
@@ -17,8 +18,9 @@ require_relative "enjine/steps"
 require_relative "enjine/decisions"
 Dir[File.join(__dir__, "enjine/decisions/*.rb")].each { |f| require f }
 require_relative "enjine/actions"
-%w[pass play_land activate_mana_ability].each { |f| require_relative "enjine/actions/#{f}" }
+%w[pass play_land activate_mana_ability cast].each { |f| require_relative "enjine/actions/#{f}" }
 require_relative "enjine/engine"
+Dir[File.join(__dir__, "enjine/engine/*.rb")].each { |f| require f }
 require_relative "enjine/snapshot"
 require_relative "enjine/history"
 require_relative "enjine/view"

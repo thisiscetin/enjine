@@ -28,7 +28,7 @@ module Enjine
     def object(id) = state.objects.fetch(id)
     def ask!(pending) = state.pending = pending
     def step = Steps.fetch(state.step)
-    def attackers = []
+    def attackers = state.attackers
 
     # ---- pregame (CR 103) -------------------------------------------------
 
@@ -147,6 +147,7 @@ module Enjine
 
     # Called once a step's turn-based actions (and any decisions they needed) are complete.
     def turn_based_actions_done!
+      step.finish(self)
       if step.priority?
         give_priority!(state.active)
       else
@@ -158,6 +159,7 @@ module Enjine
     # CR 500.4: mana empties between steps. CR 500.1: proceed to the next step / turn.
     def next_step!
       empty_mana_pools!
+      end_combat! if state.step == :end_of_combat # CR 511.3
       index = Steps.index(state.step) + 1
       index += 1 while index < Steps::ORDER.size && Steps::ORDER[index].skip?(self)
       if index >= Steps::ORDER.size
@@ -187,7 +189,9 @@ module Enjine
     def pass_priority!(index)
       emit Events::PriorityPassed.new(player: name(index))
       state.passes += 1
-      if state.passes >= state.players.size
+      if state.passes >= state.players.size && !state.stack.empty?
+        resolve_top! # CR 117.4, 608
+      elsif state.passes >= state.players.size
         # CR 117.4 / 500.2: all players passed with an empty stack -> the step ends.
         ask!(nil)
         state.step_state = "done"
@@ -207,7 +211,8 @@ module Enjine
       id = "#{card}##{state.next_id}"
       state.next_id += 1
       state.objects[id] = GameObject.new(id: id, card: card, owner: owner, controller: owner, zone: zone,
-                                         tapped: false, controlled_since: nil)
+                                         tapped: false, controlled_since: nil, kind: "card", counters: {},
+                                         damage: 0, source: nil, ability: nil, targets: nil, loyalty_turn: nil)
     end
 
     # Moves an object to a zone as a new object (CR 400.7). Returns the new object.
@@ -216,9 +221,14 @@ module Enjine
       state.zone_list(old.zone, old.owner).delete(id)
       state.objects.delete(id)
       fresh = create_object(old.card, old.owner, to)
+      leave_combat!(id) if old.zone == :battlefield
       if to == :battlefield
         fresh.controller = controller || old.owner
         fresh.controlled_since = state.turn
+        loyalty = definition(fresh).loyalty
+        fresh.counters["loyalty"] = loyalty if loyalty # CR 306.5b
+      elsif to == :stack
+        fresh.controller = controller || old.owner
       end
       list = state.zone_list(to, old.owner)
       position == :bottom ? list.push(fresh.id) : list.unshift(fresh.id)
@@ -259,7 +269,8 @@ module Enjine
     # CR 302.6: a creature's {T} abilities need it under continuous control since
     # the start of its controller's most recent turn.
     def summoning_sick_for_tap?(object)
-      return false unless definition(object).type?(:creature)
+      defn = definition(object)
+      return false if !defn.type?(:creature) || defn.keyword?(:haste)
 
       most_recent_turn = state.active == object.controller ? state.turn : state.turn - 1
       object.controlled_since.nil? || object.controlled_since >= most_recent_turn
@@ -285,6 +296,13 @@ module Enjine
     # ---- state-based actions & game end (CR 704, 104) ------------------------
 
     def check_state_based_actions!
+      loop do
+        check_player_state_based_actions!
+        break if state.over? || !check_permanent_state_based_actions!
+      end
+    end
+
+    def check_player_state_based_actions!
       state.players.each_with_index do |pl, i|
         next if pl.lost
 

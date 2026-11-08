@@ -20,6 +20,7 @@ module Enjine
       validate_header(data, errors)
       validate_players(data, errors)
       validate_objects(data, catalog, errors)
+      validate_combat(data, errors) if errors.empty?
       validate_turn(data, errors) if errors.empty?
       errors
     end
@@ -39,10 +40,14 @@ module Enjine
       state.decklists = data["decklists"].map { |l| l.dup.freeze }.freeze
       state.players = data["players"].map { |p| build_player(p) }
       state.objects = data["objects"].to_h do |o|
-        [o["id"], GameObject.new(id: o["id"], card: o["card"], owner: o["owner"], controller: o["controller"],
-                                 zone: o["zone"].to_sym, tapped: o["tapped"], controlled_since: o["controlled_since"])]
+        [o["id"], build_object(o)]
       end
       %w[battlefield stack exile].each { |z| state.public_send("#{z}=", data[z].dup) }
+      state.attackers = deep_copy(data.fetch("attackers", {}))
+      state.blockers = deep_copy(data.fetch("blockers", {}))
+      state.effects = deep_copy(data.fetch("effects", []))
+      state.casting = deep_copy(data["casting"])
+      state.combat_damage = deep_copy(data["combat_damage"])
       %w[turn active step_state priority passes next_id starting_player].each do |k|
         state.public_send("#{k}=", data[k])
       end
@@ -51,6 +56,16 @@ module Enjine
       state.result = data["result"]&.dup
       state
     end
+
+    def build_object(hash)
+      GameObject.new(id: hash["id"], card: hash["card"], owner: hash["owner"], controller: hash["controller"],
+                     zone: hash["zone"].to_sym, tapped: hash["tapped"], controlled_since: hash["controlled_since"],
+                     kind: hash.fetch("kind", "card"), counters: deep_copy(hash.fetch("counters", {})),
+                     damage: hash.fetch("damage", 0), source: hash["source"], ability: hash["ability"],
+                     targets: deep_copy(hash["targets"]), loyalty_turn: hash["loyalty_turn"])
+    end
+
+    def deep_copy(value) = Marshal.load(Marshal.dump(value)) # rubocop:disable Security/MarshalLoad
 
     def build_player(hash)
       PlayerState.new(**PLAYER_KEYS.to_h { |k| [k.to_sym, hash[k]] }).tap do |pl|
@@ -120,10 +135,49 @@ module Enjine
       zone = obj["zone"].to_s
       errors << "#{path}.zone: unknown zone #{zone.inspect}" unless State::ZONES.map(&:to_s).include?(zone)
       errors << "#{path}.tapped: must be true or false" unless [true, false].include?(obj["tapped"])
-      return if zone == "battlefield"
+      validate_object_state(obj, path, zone, errors)
+      return if %w[battlefield stack].include?(zone)
 
       errors << "#{path}: only permanents on the battlefield can be tapped" if obj["tapped"]
-      errors << "#{path}: controller must equal owner outside the battlefield" if obj["controller"] != obj["owner"]
+      errors << "#{path}: controller must equal owner outside the battlefield and stack" if obj["controller"] != obj["owner"]
+    end
+
+    def validate_object_state(obj, path, zone, errors)
+      kind = obj.fetch("kind", "card")
+      errors << "#{path}.kind: must be \"card\" or \"ability\"" unless %w[card ability].include?(kind)
+      if kind == "ability"
+        errors << "#{path}: abilities can only exist on the stack" unless zone == "stack"
+        errors << "#{path}.ability: must be an ability index" unless obj["ability"].is_a?(Integer)
+      end
+      counters = obj.fetch("counters", {})
+      unless counters.is_a?(Hash) && counters.all? { |k, v| Mechanics::Effects::COUNTER_KINDS.include?(k) && non_negative?(v) }
+        errors << "#{path}.counters: must map counter kinds to non-negative integers"
+      end
+      errors << "#{path}.damage: must be a non-negative integer" unless non_negative?(obj.fetch("damage", 0))
+      return if zone == "battlefield"
+
+      errors << "#{path}: only permanents have counters or damage" if counters.values.any?(&:positive?) || obj["damage"].to_i.positive?
+    end
+
+    def validate_combat(data, errors)
+      battlefield = data["battlefield"]
+      attackers = data.fetch("attackers", {})
+      blockers = data.fetch("blockers", {})
+      return errors << "attackers/blockers: must be objects" unless attackers.is_a?(Hash) && blockers.is_a?(Hash)
+
+      attackers.each_key { |id| errors << "attackers: #{id} is not on the battlefield" unless battlefield.include?(id) }
+      blockers.each do |id, attacker|
+        errors << "blockers: #{id} is not on the battlefield" unless battlefield.include?(id)
+        errors << "blockers: #{id} blocks #{attacker}, which is not attacking" unless attackers.key?(attacker)
+      end
+      errors << "effects: must be a list" unless data.fetch("effects", []).is_a?(Array)
+      casting = data["casting"]
+      return if casting.nil?
+
+      errors << "casting: object #{casting["object"]} is not on the stack" unless data["stack"].include?(casting["object"])
+      return if %w[choose_target pay_cost].include?(data.dig("pending", "kind"))
+
+      errors << "casting: a cast in progress needs a choose_target or pay_cost decision"
     end
 
     def validate_zone_membership(data, objects, errors)

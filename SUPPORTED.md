@@ -8,7 +8,13 @@ Rules version: Comprehensive Rules effective 2026-09-25.
 
 | Name | Rules | Description |
 | --- | --- | --- |
+| [`artifact`](docs/reference/types.md#artifact) | 301.1 | A permanent cast at sorcery speed. |
+| [`creature`](docs/reference/types.md#creature) | 302.1, 302.4, 302.6, 307.1 | A permanent with power and toughness that can attack and block. Cast at sorcery speed. It can't attack or use {T} abilities unless controlled continuously since its controller's most recent turn began (summoning sickness). |
+| [`enchantment`](docs/reference/types.md#enchantment) | 303.1 | A permanent cast at sorcery speed. |
+| [`instant`](docs/reference/types.md#instant) | 304.1, 304.2, 608.2n | A spell cast any time its controller has priority. Its spell ability resolves, then it goes to the graveyard. |
 | [`land`](docs/reference/types.md#land) | 305.1, 305.2, 305.3, 202.1a | A permanent played with the special action "play a land" (one per turn, main phase, empty stack). It has no mana cost. |
+| [`planeswalker`](docs/reference/types.md#planeswalker) | 306.5b, 306.8, 120.3c, 606.3, 704.5i | A permanent that enters with loyalty counters equal to its printed loyalty. Its loyalty abilities can be activated at sorcery speed, one per turn. Damage dealt to it removes loyalty counters; at 0 loyalty it is put into its owner's graveyard. |
+| [`sorcery`](docs/reference/types.md#sorcery) | 307.1, 307.2, 608.2n | A spell cast only in its controller's main phase while the stack is empty. |
 
 ## Supertypes
 
@@ -26,21 +32,54 @@ Rules version: Comprehensive Rules effective 2026-09-25.
 | [`plains`](docs/reference/subtypes.md#plains) | 305.6, 205.3i | Basic land type. A land with this subtype has "{T}: Add {W}." |
 | [`swamp`](docs/reference/subtypes.md#swamp) | 305.6, 205.3i | Basic land type. A land with this subtype has "{T}: Add {B}." |
 
+## Keyword abilities
+
+| Name | Rules | Description |
+| --- | --- | --- |
+| [`flash`](docs/reference/keywords.md#flash) | 702.8a | You may cast this spell any time you could cast an instant. |
+| [`haste`](docs/reference/keywords.md#haste) | 702.10a, 302.6 | This creature can attack and use {T} abilities even if it hasn't been under your control continuously since your most recent turn began. |
+
 ## Abilities
 
 | Name | Rules | Description |
 | --- | --- | --- |
+| [`activated`](docs/reference/abilities.md#activated) | 602.1, 602.2, 602.5d | An activated ability: announce it, choose targets, pay its costs, then it goes on the stack. `timing: "sorcery"` restricts it to sorcery speed. |
+| [`loyalty`](docs/reference/abilities.md#loyalty) | 606.3, 606.4, 606.5, 602.2b | A loyalty ability. Its cost adds (positive) or removes (negative) loyalty counters and is paid on activation. Sorcery speed, and only one loyalty ability per planeswalker per turn. |
 | [`mana`](docs/reference/abilities.md#mana) | 605.1a, 605.3a, 605.3b, 106.4 | An activated mana ability: pay the cost, add the mana to your mana pool immediately. It does not use the stack and can be activated whenever you have priority. |
+| [`spell`](docs/reference/abilities.md#spell) | 113.3a, 601.2c, 608.2b, 608.2c | The spell ability of an instant or sorcery: its targets are chosen while casting and its effects happen in order when it resolves. If every target is illegal on resolution, it doesn't resolve. |
 
 ## Costs
 
 | Name | Rules | Description |
 | --- | --- | --- |
+| [`mana`](docs/reference/costs.md#mana) | 601.2g, 601.2h, 602.2b | Pay mana as part of an activation. Paid during the activation by spending mana from your pool, tapping sources one at a time. |
 | [`tap`](docs/reference/costs.md#tap) | 107.5, 602.5a | {T} — tap the permanent the ability belongs to. Requires it to be untapped. |
 
 ## Effects
 
-_None yet._
+| Name | Rules | Description |
+| --- | --- | --- |
+| [`add_counters`](docs/reference/effects.md#add_counters) | 122.1, 122.6, 613.4c | Put `amount` counters of kind `counter` (+1/+1, -1/-1, loyalty) on each referenced permanent. |
+| [`counter`](docs/reference/effects.md#counter) | 701.6a | Counter each referenced spell: it leaves the stack for its owner's graveyard without resolving. |
+| [`deal_damage`](docs/reference/effects.md#deal_damage) | 120.3a, 120.3c, 120.3e, 120.6 | Deal `amount` damage to each referenced creature, planeswalker or player. Damage to a player causes life loss; to a planeswalker removes loyalty counters; to a creature is marked until cleanup. |
+| [`destroy`](docs/reference/effects.md#destroy) | 701.8a | Destroy each referenced permanent (it goes to its owner's graveyard). |
+| [`draw`](docs/reference/effects.md#draw) | 121.1, 121.2 | Each referenced player draws `amount` cards (default: you). |
+| [`gain_life`](docs/reference/effects.md#gain_life) | 119.3 | Each referenced player gains `amount` life (default: you). |
+| [`lose_life`](docs/reference/effects.md#lose_life) | 119.3 | Each referenced player loses `amount` life. |
+| [`pump`](docs/reference/effects.md#pump) | 611.2a, 611.2c, 613.4c, 514.2 | Each referenced creature gets +power/+toughness until end of turn. The set of affected creatures is locked in when the effect starts. |
+
+## Target filters and selectors
+
+| Name | Rules | Description |
+| --- | --- | --- |
+| [`any_target`](docs/reference/filters.md#any_target) | 115.4 | A creature, player or planeswalker (battles: later). |
+| [`creature`](docs/reference/filters.md#creature) | 115.1 | A creature on the battlefield. |
+| [`creature_or_planeswalker`](docs/reference/filters.md#creature_or_planeswalker) | 115.1 | A creature or planeswalker on the battlefield. |
+| [`opponent`](docs/reference/filters.md#opponent) | 102.2 | An opponent of the ability's controller. |
+| [`permanent`](docs/reference/filters.md#permanent) | 110.1 | Any permanent on the battlefield. |
+| [`planeswalker`](docs/reference/filters.md#planeswalker) | 115.1 | A planeswalker on the battlefield. |
+| [`player`](docs/reference/filters.md#player) | 115.1 | A player. |
+| [`spell`](docs/reference/filters.md#spell) | 112.1, 115.1 | A spell on the stack. |
 
 ## Decisions
 

@@ -4,9 +4,25 @@
 
 `game.pending_decision` returns the decision below; submit one of its `options`.
 
+## assign_damage
+
+Assign one point of combat damage of `attacker`: `{type: "assign", object: blocker_id}`. `remaining` points are left.
+
 ## bottom
 
 After keeping, put one card on the bottom of the library: `{type: "bottom", object: id}`. Asked once per mulligan taken. Hidden from the opponent (CR 103.5).
+
+## choose_target
+
+While casting/activating: `{type: "target", target: ref}` for the next target (ref is an object id or "player:<name>"), or `{type: "cancel"}` to rewind the whole cast.
+
+## declare_attackers
+
+Declare one attacker: `{type: "attack", object: id, target: ref}` (the defending player or one of their planeswalkers), or `{type: "done"}`.
+
+## declare_blockers
+
+Declare one blocker: `{type: "block", object: id, attacker: id}`, or `{type: "done"}`.
 
 ## discard
 
@@ -15,6 +31,10 @@ Cleanup step: discard one card, `{type: "discard", object: id}`, until the hand 
 ## mulligan
 
 Keep the hand (`{type: "keep"}`) or take a London mulligan (`{type: "mulligan"}`). Players declare in turn order; mulligans then happen simultaneously (CR 103.5).
+
+## pay_cost
+
+While casting/activating: `{type: "pay_mana", mana: "R"}` spends one mana from the pool, `{type: "activate_mana", object: id, ability: i}` taps a source, `{type: "cancel"}` rewinds. `remaining` shows what is left to pay.
 
 ## play_or_draw
 
@@ -26,6 +46,8 @@ The player holding priority takes an action or passes. Options come from the pri
 
 ## Priority actions
 
+- `activate` — `{type: "activate", object: id, ability: index}` — start activating an ability (CR 602.2), including planeswalker loyalty abilities (CR 606).
 - `activate_mana` — `{type: "activate_mana", object: id, ability: index}` — activate a mana ability; it resolves immediately (CR 605.3).
+- `cast` — `{type: "cast", object: id}` — start casting a card from your hand (CR 601.2). Offered only when timing allows, targets exist and enough mana is available.
 - `pass` — `{type: "pass"}` — pass priority. When all players pass in succession with an empty stack, the step ends (CR 117.4).
 - `play_land` — `{type: "play_land", object: id}` — special action: your main phase, empty stack, one land per turn (CR 305.1, 305.2).

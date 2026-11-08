@@ -23,7 +23,8 @@ module Enjine
         "stack" => state.stack.map { object_view(engine, it) },
         "exile" => state.exile.map { object_view(engine, it) },
         "pending" => pending_view(engine, viewer),
-        "result" => state.result&.dup
+        "result" => state.result&.dup,
+        "effects" => state.effects.map { _1.except("controller").merge("controller" => engine.name(_1["controller"])) }
       }
     end
 
@@ -43,14 +44,41 @@ module Enjine
     def object_view(engine, id)
       obj = engine.object(id)
       defn = engine.definition(obj)
+      return ability_view(engine, obj, defn) if obj.ability?
+
       view = { "id" => id, "card" => obj.card, "name" => defn.name, "type_line" => defn.type_line,
                "owner" => engine.name(obj.owner) }
       view["mana_cost"] = defn.mana_cost.to_s if defn.mana_cost
-      if obj.zone == :battlefield
-        view["controller"] = engine.name(obj.controller)
-        view["tapped"] = obj.tapped
+      view["keywords"] = defn.keywords.map(&:to_s) unless defn.keywords.empty?
+      view["rules_text"] = defn.rules_text if defn.rules_text
+      case obj.zone
+      when :battlefield then permanent_view(engine, obj, defn, view)
+      when :stack then view.merge!("controller" => engine.name(obj.controller), "targets" => obj.targets || [])
       end
       view
+    end
+
+    def permanent_view(engine, obj, defn, view)
+      view["controller"] = engine.name(obj.controller)
+      view["tapped"] = obj.tapped
+      if defn.creature?
+        power, toughness = engine.power_toughness(obj)
+        view.merge!("power" => power, "toughness" => toughness, "damage" => obj.damage,
+                    "summoning_sick" => engine.summoning_sick_for_tap?(obj))
+      end
+      view["loyalty"] = engine.loyalty(obj) if defn.planeswalker?
+      view["counters"] = obj.counters.reject { |_, n| n.zero? } unless obj.counters.values.all?(&:zero?)
+      if (attack = engine.attackers[obj.id])
+        view["attacking"] = attack["target"]
+      end
+      view["blocking"] = engine.state.blockers[obj.id] if engine.state.blockers.key?(obj.id)
+    end
+
+    def ability_view(engine, obj, defn)
+      ability = defn.abilities[obj.ability]
+      { "id" => obj.id, "card" => obj.card, "name" => "#{defn.name} ability", "kind" => "ability",
+        "ability" => obj.ability, "loyalty_cost" => ability.loyalty_cost, "source" => obj.source,
+        "controller" => engine.name(obj.controller), "targets" => obj.targets || [] }.compact
     end
 
     def pending_view(engine, viewer)

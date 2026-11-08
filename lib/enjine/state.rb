@@ -3,10 +3,15 @@
 module Enjine
   # A card or token in a zone (CR 109). Refers to its definition by id only.
   # A new GameObject (with a new id) is created on every zone change (CR 400.7).
-  GameObject = Struct.new(:id, :card, :owner, :controller, :zone, :tapped, :controlled_since) do
+  GameObject = Struct.new(:id, :card, :owner, :controller, :zone, :tapped, :controlled_since, :kind, :counters,
+                          :damage, :source, :ability, :targets, :loyalty_turn) do
+    def ability? = kind == "ability"
+
     def to_h
       { "id" => id, "card" => card, "owner" => owner, "controller" => controller, "zone" => zone.to_s,
-        "tapped" => tapped, "controlled_since" => controlled_since }
+        "tapped" => tapped, "controlled_since" => controlled_since, "kind" => kind, "counters" => counters.dup,
+        "damage" => damage, "source" => source, "ability" => ability, "targets" => targets&.dup,
+        "loyalty_turn" => loyalty_turn }
     end
   end
 
@@ -39,7 +44,8 @@ module Enjine
     STEP_STATES = %w[begin active done].freeze
 
     attr_accessor :seed, :rng, :decklists, :players, :objects, :battlefield, :stack, :exile, :turn, :active,
-                  :step, :step_state, :priority, :passes, :next_id, :starting_player, :pending, :result
+                  :step, :step_state, :priority, :passes, :next_id, :starting_player, :pending, :result,
+                  :attackers, :blockers, :effects, :casting, :combat_damage
 
     def self.initial(names:, decklists:, seed:)
       state = new
@@ -51,6 +57,11 @@ module Enjine
       state.battlefield = []
       state.stack = []
       state.exile = []
+      state.attackers = {}
+      state.blockers = {}
+      state.effects = []
+      state.casting = nil
+      state.combat_damage = nil
       state.turn = 0
       state.passes = 0
       state.next_id = 1
@@ -78,7 +89,17 @@ module Enjine
         "step_state" => step_state, "priority" => priority, "passes" => passes, "next_id" => next_id,
         "starting_player" => starting_player, "pending" => pending&.dup, "result" => result&.dup,
         "players" => players.map(&:to_h), "objects" => objects.values.map(&:to_h),
-        "battlefield" => battlefield.dup, "stack" => stack.dup, "exile" => exile.dup }
+        "battlefield" => battlefield.dup, "stack" => stack.dup, "exile" => exile.dup,
+        "attackers" => attackers.dup, "blockers" => blockers.dup, "effects" => effects.map { deep_dup(_1) },
+        "casting" => casting && deep_dup(casting), "combat_damage" => combat_damage && deep_dup(combat_damage) }
+    end
+
+    def deep_dup(value)
+      case value
+      when Hash then value.to_h { |k, v| [k, deep_dup(v)] }
+      when Array then value.map { deep_dup(_1) }
+      else value
+      end
     end
   end
 end

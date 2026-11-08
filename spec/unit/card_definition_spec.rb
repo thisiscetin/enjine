@@ -58,7 +58,7 @@ RSpec.describe Enjine::CardDefinition do
     expect(errors).to include(
       a_string_matching(/\Aflavor: unknown field/),
       a_string_matching(/\Aname: required/),
-      a_string_matching(/\Atypes\[1\]: unknown type "wizardry" \(supported: land\)/),
+      a_string_matching(/\Atypes\[1\]: unknown type "wizardry" \(supported: .*land/),
       a_string_matching(/\Asupertypes\[0\]: unknown supertype "snowy"/),
       a_string_matching(/\Asubtypes\[0\]: invalid subtype/),
       a_string_matching(/\Apower: must be an integer/),
