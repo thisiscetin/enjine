@@ -11,5 +11,13 @@
       { "static": { "affects": { "each": { "creature": { "any_of": ["artifact"] } }, "controller": "you" },
                     "keywords": ["vigilance"] } }
     ]
+  },
+  "Culber and Stamets, Star-Crossed": {
+    "abilities": [
+      { "triggered": { "when": { "enters": {} }, "choose": 1, "modes": [
+        { "targets": ["creature"],
+          "effects": [{ "add_counters": { "counter": "+1/+1", "amount": 1, "to": { "target": 0 } } }] },
+        { "effects": [{ "add_mana": { "amount": 2, "color": "any_one" } }] } ] } }
+    ]
   }
 }

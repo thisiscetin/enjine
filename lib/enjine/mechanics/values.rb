@@ -9,14 +9,16 @@ module Enjine
     #   {"toughness": ...}                             a creature's toughness
     #   {"hand_size": "you"}                           cards in a player's hand
     #   {"life": "you"}                                a player's life total
+    #   "x"                                            the X announced for this spell or ability (CR 107.3)
     class Amount
       KINDS = %w[count power toughness hand_size life].freeze
 
       def self.build(data, errors, path, targets_count:, min: 0)
         return Fixed.new(data) if data.is_a?(Integer) && data >= min
+        return X::INSTANCE if data == "x"
 
         unless data.is_a?(Hash) && data.size == 1 && KINDS.include?(data.keys.first.to_s)
-          errors << "#{path}: must be an integer >= #{min} or one of {#{KINDS.join("|")}: selector}"
+          errors << "#{path}: must be an integer >= #{min}, \"x\" or one of {#{KINDS.join("|")}: selector}"
           return Fixed.new(0)
         end
         kind, ref = data.first
@@ -54,6 +56,15 @@ module Enjine
         index && engine.player(index)
       end
 
+      # X (CR 107.3a): the value announced for the resolving spell or ability. An enters-the-battlefield
+      # trigger carries the X its permanent was cast with (CR 107.3m). 0 when none was announced.
+      class X
+        INSTANCE = new.freeze
+
+        def value(engine, ctx) = engine.state.objects[ctx.object]&.x.to_i
+        def to_s = "X"
+      end
+
       # A fixed number.
       class Fixed
         attr_reader :n
@@ -74,6 +85,8 @@ module Enjine
     #   {"life": "you", "at_least": 10} / {"life": "you", "at_most": 5}
     #   {"hand_size": "you", "at_most": 0}
     #   {"your_turn": true}
+    #   {"targets": filter}        one of the chosen targets matches (e.g. "if it targets a tapped creature")
+    #   {"attacked": true}         a creature is attacking you (CR 508.1b)
     #   {"not": condition}, {"all": [conditions]}, {"any": [conditions]}
     class Condition
       def self.build(data, errors, path, targets_count: 0)
@@ -88,6 +101,8 @@ module Enjine
           parts = Array(data[key]).each_with_index.map { |c, i| build(c, errors, "#{path}.#{key}[#{i}]", targets_count: targets_count) }
           Many.new(key, parts.compact)
         elsif data.key?("your_turn") then YourTurn.new(data["your_turn"] != false)
+        elsif data.key?("targets") then Targets.build(data, errors, path)
+        elsif data.key?("attacked") then Attacked.new(data["attacked"] != false)
         else Compare.build(data, errors, path, targets_count)
         end
       end
@@ -99,7 +114,7 @@ module Enjine
         def self.build(data, errors, path, targets_count)
           subject = (data.keys & SUBJECTS.keys).first
           unless subject
-            errors << "#{path}: unknown condition (use controls, life, hand_size, your_turn, not, all, any)"
+            errors << "#{path}: unknown condition (use controls, life, hand_size, your_turn, targets, attacked, not, all, any)"
             return nil
           end
           Mechanics.check_keys(data, [subject, "at_least", "at_most"], errors, path)
@@ -137,6 +152,43 @@ module Enjine
 
         def true?(engine, ctx) = (engine.state.active == ctx.controller) == @wanted
         def to_s = @wanted ? "it's your turn" : "it's not your turn"
+      end
+
+      # One of the chosen targets matches a filter. Before targets are chosen (`ctx.targets` nil, as when
+      # checking whether a cost reduction could apply) it counts as met.
+      class Targets
+        def self.build(data, errors, path)
+          Mechanics.check_keys(data, %w[targets], errors, path)
+          new(Mechanics.build_entry(:filter, data["targets"], errors, "#{path}.targets"))
+        end
+
+        def initialize(filter)
+          @filter = filter
+          freeze
+        end
+
+        def true?(engine, ctx)
+          return true if ctx.targets.nil?
+
+          ctx.targets.compact.any? { @filter&.match?(engine, it, ctx.controller) }
+        end
+
+        def to_s = "it targets a #{@filter.respond_to?(:primitive_name) ? @filter.primitive_name : @filter}"
+      end
+
+      # A creature is attacking the controller, as opposed to a planeswalker they control (CR 508.1b).
+      class Attacked
+        def initialize(wanted)
+          @wanted = wanted
+          freeze
+        end
+
+        def true?(engine, ctx)
+          you = Filters.player_ref(engine, ctx.controller)
+          engine.attackers.values.any? { it["target"] == you } == @wanted
+        end
+
+        def to_s = @wanted ? "a creature is attacking you" : "no creature is attacking you"
       end
 
       # Negation.

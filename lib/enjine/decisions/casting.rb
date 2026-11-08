@@ -22,6 +22,21 @@ module Enjine
     end
     register("choose_mode", ChooseMode)
 
+    # CR 601.2b / 107.3a: announce the value of X for a cost with {X}.
+    class ChooseX < Base
+      def self.doc
+        'While casting/activating a spell or ability with {X} in its cost: `{type: "x", value: n}` ' \
+          'announces X (0 up to `max`, the most the available mana could pay for); `{type: "cancel"}` rewinds.'
+      end
+
+      def self.options(_engine, pending) = (0..pending["max"]).map { { type: "x", value: it } } + [CANCEL]
+
+      def self.submit(engine, _pending, option)
+        option[:type] == "cancel" ? engine.cancel_casting! : engine.announce_x!(option[:value])
+      end
+    end
+    register("choose_x", ChooseX)
+
     # CR 601.2c: choose the next target of the spell or ability being cast.
     class ChooseTarget < Base
       def self.doc

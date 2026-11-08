@@ -27,6 +27,27 @@ Rules: CR 122.1, CR 122.6, CR 613.4c
 }
 ```
 
+## add_mana
+
+You add mana to your mana pool: the fixed mana in `produce`, or `amount` mana of a color you choose as it resolves (`color: "any_one"`: all of one color; `color: "any"`: each mana's color chosen separately, "in any combination of colors").
+
+Rules: CR 106.1a, CR 106.4, CR 608.2d, CR 605.1a
+
+| Parameter | Description |
+| --- | --- |
+| `produce` | mana symbols, e.g. "{R}{R}" |
+| `amount` | amount (with color; default 1) |
+| `color` | any_one | any |
+
+```json
+{
+  "add_mana": {
+    "amount": 2,
+    "color": "any_one"
+  }
+}
+```
+
 ## counter
 
 Counter each referenced spell: it leaves the stack for its owner's graveyard without resolving.

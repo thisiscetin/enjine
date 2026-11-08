@@ -49,6 +49,7 @@ Rules version: Comprehensive Rules effective 2026-09-25.
 | [`lifelink`](docs/reference/keywords.md#lifelink) | 702.15b | Damage dealt by this source also causes its controller to gain that much life. |
 | [`menace`](docs/reference/keywords.md#menace) | 702.111b | Can't be blocked except by two or more creatures. |
 | [`reach`](docs/reference/keywords.md#reach) | 702.17b | Can block creatures with flying. |
+| [`sunburst`](docs/reference/keywords.md#sunburst) | 702.44a, 702.44b | As this permanent enters from the stack as a resolving spell, it gets a +1/+1 counter (a creature) or a charge counter (otherwise) for each color of mana spent to cast it. |
 | [`trample`](docs/reference/keywords.md#trample) | 702.19b, 702.19e | Excess combat damage beyond lethal damage to its blockers can be assigned to the player or planeswalker it's attacking. |
 | [`vigilance`](docs/reference/keywords.md#vigilance) | 702.20b | Attacking doesn't cause this creature to tap. |
 
@@ -57,6 +58,8 @@ Rules version: Comprehensive Rules effective 2026-09-25.
 | Name | Rules | Description |
 | --- | --- | --- |
 | [`activated`](docs/reference/abilities.md#activated) | 602.1, 602.2, 602.5d | An activated ability: announce it, choose targets, pay its costs, then it goes on the stack. `timing: "sorcery"` restricts it to sorcery speed. |
+| [`cost_modifier`](docs/reference/abilities.md#cost_modifier) | 601.2f, 118.7a, 604.1 | While on the battlefield: spells cast by `caster` (you, opponent or any; default you) whose card types match `spells` ({"any_of": [types], "not": [types]}, default all spells) cost `reduce` less or `increase` more generic mana. |
+| [`cost_reduction`](docs/reference/abilities.md#cost_reduction) | 601.2f, 118.7a, 702.41a | This spell costs `amount` generic mana less to cast, if the optional `if` condition holds when its total cost is determined (after targets are chosen). `amount` may be computed, e.g. {"count": {"each": "artifact", "controller": "you"}} for affinity for artifacts (CR 702.41a). It can't reduce colored mana or go below {0}. |
 | [`enters_tapped`](docs/reference/abilities.md#enters_tapped) | 614.1c, 614.12 | This permanent enters the battlefield tapped (a self-replacement effect). |
 | [`enters_tapped_unless_pay_life`](docs/reference/abilities.md#enters_tapped_unless_pay_life) | 614.12, 119.4 | As this permanent enters, its controller may pay `life` life; if they don't, it enters tapped. You can't pay more life than you have. |
 | [`loyalty`](docs/reference/abilities.md#loyalty) | 606.3, 606.4, 606.5, 602.2b | A loyalty ability. Its cost adds (positive) or removes (negative) loyalty counters and is paid on activation. Sorcery speed, and only one loyalty ability per planeswalker per turn. |
@@ -88,6 +91,7 @@ Rules version: Comprehensive Rules effective 2026-09-25.
 | Name | Rules | Description |
 | --- | --- | --- |
 | [`add_counters`](docs/reference/effects.md#add_counters) | 122.1, 122.6, 613.4c | Put `amount` counters of kind `counter` (+1/+1, -1/-1, loyalty) on each referenced permanent. |
+| [`add_mana`](docs/reference/effects.md#add_mana) | 106.1a, 106.4, 608.2d, 605.1a | You add mana to your mana pool: the fixed mana in `produce`, or `amount` mana of a color you choose as it resolves (`color: "any_one"`: all of one color; `color: "any"`: each mana's color chosen separately, "in any combination of colors"). |
 | [`counter`](docs/reference/effects.md#counter) | 701.6a | Counter each referenced spell: it leaves the stack for its owner's graveyard without resolving. |
 | [`create_token`](docs/reference/effects.md#create_token) | 111.1, 111.10, 701.7a, 704.5d | Create `amount` tokens under the referenced player's control (default: you). `token` is a predefined token name (Treasure, Clue, Food) or an inline card definition. `tapped: true` creates them tapped. |
 | [`deal_damage`](docs/reference/effects.md#deal_damage) | 120.3a, 120.3c, 120.3e, 120.6 | Deal `amount` damage to each referenced creature, planeswalker or player. Damage to a player causes life loss; to a planeswalker removes loyalty counters; to a creature is marked until cleanup. |

@@ -12,8 +12,11 @@ module Enjine
       TYPES.to_h { |t| [t, 0] }
     end
 
-    # A parsed mana cost such as "{2}{R}{R}".
-    Cost = Data.define(:generic, :colored) do
+    # A parsed mana cost such as "{2}{R}{R}" or "{X}{R}". `x_symbols` counts the {X} (CR 107.3);
+    # their value is announced while casting (CR 601.2b) and is 0 everywhere else (CR 107.3g).
+    Cost = Data.define(:generic, :colored, :x_symbols) do
+      def initialize(generic:, colored:, x_symbols: 0) = super
+
       def self.parse(text)
         errors = []
         cost = Mana.parse_cost(text, errors)
@@ -22,12 +25,15 @@ module Enjine
         cost
       end
 
-      # Mana value (CR 202.3).
+      # Mana value (CR 202.3); {X} counts as 0 off the stack (CR 202.3e).
       def mana_value = generic + colored.values.sum
 
+      # The cost with X replaced by `value` (CR 107.3a): each {X} adds that much generic mana.
+      def with_x(value) = with(generic: generic + (x_symbols * value), x_symbols: 0)
+
       def to_s
-        parts = []
-        parts << "{#{generic}}" if generic.positive? || colored.empty?
+        parts = ["{X}"] * x_symbols
+        parts << "{#{generic}}" if generic.positive? || (colored.empty? && x_symbols.zero?)
         colored.each { |c, n| parts.concat(["{#{c}}"] * n) }
         parts.join
       end
@@ -47,15 +53,17 @@ module Enjine
       end
 
       generic = 0
+      x = 0
       colored = {}
       text.scan(SYMBOL).flatten.each do |sym|
         case sym
         when /\A\d+\z/ then generic += sym.to_i
+        when "X" then x += 1
         when "W", "U", "B", "R", "G", "C" then colored[sym.to_sym] = colored.fetch(sym.to_sym, 0) + 1
         else errors << "#{path}: unsupported mana symbol {#{sym}}"
         end
       end
-      Cost.new(generic: generic, colored: colored.freeze)
+      Cost.new(generic: generic, colored: colored.freeze, x_symbols: x)
     end
 
     # Parses produced mana such as "{G}" or "{C}{C}" into an Array of pool types.

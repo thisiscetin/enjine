@@ -61,7 +61,7 @@ Rules for the agent:
 | --- | --- | --- | --- |
 | `name` | yes | string | Unique. Its slug becomes the card id: `"Jace, the Mind Sculptor"` → `jace_the_mind_sculptor`. Two different definitions with the same name in one game raise `CatalogConflict`. |
 | `types` | yes | list | Card types, lowercase: `land`, `creature`, `artifact`, `enchantment`, `planeswalker`, `instant`, `sorcery`. A card can have several (`["artifact", "creature"]`). |
-| `mana_cost` | castable cards | string | `"{2}{W}{W}"`. Symbols: `{N}` generic, `{W}{U}{B}{R}{G}`, `{C}`. Lands must **not** have one. A card without one can't be cast. Hybrid, Phyrexian, `{X}` and `{S}` are not supported yet. |
+| `mana_cost` | castable cards | string | `"{2}{W}{W}"`. Symbols: `{N}` generic, `{W}{U}{B}{R}{G}`, `{C}`, `{X}` (announced while casting; use the amount `"x"` in effects, see 4.7). Lands must **not** have one. A card without one can't be cast. Hybrid, Phyrexian and `{S}` are not supported yet. |
 | `supertypes` | no | list | `basic` (exempt from the 4-copy rule). `legendary` and `snow`: not yet. |
 | `subtypes` | no | list | Lowercase, spaces become `_`: `["human", "wizard"]`. Free-form labels, except the basic land types `plains island swamp mountain forest`, which grant their mana ability automatically (CR 305.6) and are valid only on lands. |
 | `keywords` | no | list | Keyword abilities, lowercase: see `SUPPORTED.md` → *Keyword abilities*. |
@@ -108,7 +108,10 @@ Any other mana ability is written explicitly:
 ```
 
 `produce` is a string of mana symbols: `"{G}"`, `"{C}{C}"`. "Add one mana of any
-color" and other choices are not supported yet.
+color" is written as one mana ability per color (`{W}`, `{U}`, ...), and "add two
+mana of any one color" as one per color producing `{W}{W}`, `{U}{U}`, ... (the same
+decisions, no new rules). A mana ability whose amount varies ("add X mana") is not
+supported yet.
 
 ---
 
@@ -196,6 +199,25 @@ See `docs/reference/effects.md` for the generated list. Currently:
 | `draw` | "draw N cards" | `{ "draw": { "amount": N } }` (`to` defaults to `"you"`) |
 | `destroy` | "destroy target …" | `{ "destroy": { "to": … } }` |
 | `counter` | "counter target spell" | `{ "counter": { "to": { "target": 0 } } }` |
+
+### 4.7 Mana effects, X and cost changes
+
+| Oracle text | Data |
+| --- | --- |
+| "Add {R}{R}{R}." (a spell or trigger, not a mana ability) | `{ "add_mana": { "produce": "{R}{R}{R}" } }` |
+| "Add two mana of any one color." | `{ "add_mana": { "amount": 2, "color": "any_one" } }` |
+| "Add two mana in any combination of colors." | `{ "add_mana": { "amount": 2, "color": "any" } }` |
+| `{X}` in the cost, "deals X damage" | `"mana_cost": "{X}{R}"`, `{ "deal_damage": { "amount": "x", ... } }` |
+| "... costs {2} less to cast if it targets a tapped creature." | `{ "cost_reduction": { "amount": 2, "if": { "targets": { "creature": { "tapped": true } } } } }` |
+| "... costs {1} less to cast if a creature is attacking you." | `{ "cost_reduction": { "amount": 1, "if": { "attacked": true } } }` |
+| "Affinity for artifacts" | `{ "cost_reduction": { "amount": { "count": { "each": "artifact", "controller": "you" } } } }` |
+| "Noncreature spells you cast cost {1} less to cast." | `{ "cost_modifier": { "spells": { "not": ["creature"] }, "reduce": 1 } }` |
+| "Spells your opponents cast cost {1} more to cast." | `{ "cost_modifier": { "caster": "opponent", "increase": 1 } }` |
+| "This ability costs {1} less to activate for each land you control." | `"cost_reduction": { "amount": {...} }` inside the `activated` ability |
+
+An activated ability without targets that adds mana is a *mana ability* (CR 605.1a):
+use `mana`, not `activated` with `add_mana` (validation rejects it). In an
+enters-the-battlefield trigger, `"x"` is the X the permanent was cast with (CR 107.3m).
 
 Anything with *conditions* ("if …", "unless …"), *choices* ("choose one —"),
 *variable amounts* ("X", "equal to the number of …"), *durations other than until

@@ -52,7 +52,7 @@ module Enjine
       @supertypes, = read_names(card, "supertypes", :supertype, errors)
       @subtypes = read_subtypes(card, errors)
       @mana_cost = card.key?("mana_cost") ? Mana.parse_cost(card["mana_cost"], errors) : nil
-      @keywords, = read_names(card, "keywords", :keyword, errors)
+      @keywords, keyword_modules = read_names(card, "keywords", :keyword, errors)
       @power = read_stat(card, "power", errors)
       @toughness = read_stat(card, "toughness", errors)
       @loyalty = read_stat(card, "loyalty", errors)
@@ -60,6 +60,7 @@ module Enjine
       errors << "rules_text: must be a string" unless @rules_text.nil? || @rules_text.is_a?(String)
       @abilities = read_abilities(card, errors)
       @type_modules.each { |mod| mod.validate(card, errors) }
+      keyword_modules.each { |mod| mod.validate(card, errors) if mod.respond_to?(:validate) }
       precompute_predicates
       validate_type_specific(errors)
       @source = normalize(card)

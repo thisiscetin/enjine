@@ -371,6 +371,46 @@
     },
     {
       "card": {
+        "name": "Red Alert!",
+        "mana_cost": "{2}{R}",
+        "types": [
+          "instant"
+        ],
+        "abilities": [
+          {
+            "spell": {
+              "effects": [
+                {
+                  "pump": {
+                    "power": 2,
+                    "toughness": 0,
+                    "to": {
+                      "each": "creature",
+                      "controller": "you"
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "cost_reduction": {
+              "amount": 2,
+              "if": {
+                "attacked": true
+              }
+            }
+          }
+        ]
+      },
+      "rarity": "uncommon",
+      "printing": {
+        "set": "trk",
+        "number": "169"
+      }
+    },
+    {
+      "card": {
         "name": "Savvy Profiteer",
         "mana_cost": "{1}{R}",
         "types": [
@@ -468,6 +508,68 @@
       "printing": {
         "set": "trk",
         "number": "174"
+      }
+    },
+    {
+      "card": {
+        "name": "Culber and Stamets, Star-Crossed",
+        "mana_cost": "{3}{G}",
+        "types": [
+          "creature"
+        ],
+        "supertypes": [
+          "legendary"
+        ],
+        "subtypes": [
+          "human",
+          "doctor",
+          "artificer"
+        ],
+        "power": 3,
+        "toughness": 4,
+        "abilities": [
+          {
+            "triggered": {
+              "when": {
+                "enters": {}
+              },
+              "choose": 1,
+              "modes": [
+                {
+                  "targets": [
+                    "creature"
+                  ],
+                  "effects": [
+                    {
+                      "add_counters": {
+                        "counter": "+1/+1",
+                        "amount": 1,
+                        "to": {
+                          "target": 0
+                        }
+                      }
+                    }
+                  ]
+                },
+                {
+                  "effects": [
+                    {
+                      "add_mana": {
+                        "amount": 2,
+                        "color": "any_one"
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "rarity": "uncommon",
+      "printing": {
+        "set": "trk",
+        "number": "191"
       }
     },
     {
@@ -2164,8 +2266,6 @@
         "number": "60"
       },
       "missing": [
-        "condition (if/unless/as long as)",
-        "static ability",
         "other rules text"
       ]
     },
@@ -3481,18 +3581,6 @@
       ]
     },
     {
-      "name": "Red Alert!",
-      "rarity": "uncommon",
-      "printing": {
-        "set": "trk",
-        "number": "169"
-      },
-      "missing": [
-        "condition (if/unless/as long as)",
-        "static ability"
-      ]
-    },
-    {
       "name": "Sarcophagus, Ship of the Dead",
       "rarity": "uncommon",
       "printing": {
@@ -3730,17 +3818,6 @@
       },
       "missing": [
         "variable amount"
-      ]
-    },
-    {
-      "name": "Culber and Stamets, Star-Crossed",
-      "rarity": "uncommon",
-      "printing": {
-        "set": "trk",
-        "number": "191"
-      },
-      "missing": [
-        "modal choice"
       ]
     },
     {
@@ -4614,7 +4691,6 @@
         "number": "264"
       },
       "missing": [
-        "other rules text",
         "variable amount",
         "sacrifice",
         "counters"

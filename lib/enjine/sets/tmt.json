@@ -12,6 +12,50 @@
   "cards": [
     {
       "card": {
+        "name": "Grounded for Life",
+        "mana_cost": "{4}{W}",
+        "types": [
+          "instant"
+        ],
+        "abilities": [
+          {
+            "spell": {
+              "targets": [
+                "creature"
+              ],
+              "effects": [
+                {
+                  "destroy": {
+                    "to": {
+                      "target": 0
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "cost_reduction": {
+              "amount": 3,
+              "if": {
+                "targets": {
+                  "creature": {
+                    "tapped": true
+                  }
+                }
+              }
+            }
+          }
+        ]
+      },
+      "rarity": "common",
+      "printing": {
+        "set": "tmt",
+        "number": "7"
+      }
+    },
+    {
+      "card": {
         "name": "Buzz Bots",
         "mana_cost": "{1}{U}",
         "types": [
@@ -172,49 +216,67 @@
     },
     {
       "card": {
-        "name": "Krang, Utrom Warlord",
-        "mana_cost": "{9}",
+        "name": "Transdimensional Bovine",
+        "mana_cost": "{2}{G}",
         "types": [
-          "artifact",
           "creature"
         ],
-        "supertypes": [
-          "legendary"
-        ],
         "subtypes": [
-          "utrom",
-          "robot"
+          "ox",
+          "avatar"
         ],
         "keywords": [
-          "flying",
-          "trample",
-          "indestructible",
-          "haste"
+          "flying"
         ],
-        "power": 9,
-        "toughness": 9,
+        "power": 0,
+        "toughness": 4,
         "abilities": [
           {
-            "static": {
-              "affects": {
-                "each": "creature",
-                "controller": "you",
-                "other": true
-              },
-              "keywords": [
-                "flying",
-                "trample",
-                "indestructible",
-                "haste"
-              ]
+            "mana": {
+              "cost": [
+                "tap"
+              ],
+              "produce": "{W}{W}"
+            }
+          },
+          {
+            "mana": {
+              "cost": [
+                "tap"
+              ],
+              "produce": "{U}{U}"
+            }
+          },
+          {
+            "mana": {
+              "cost": [
+                "tap"
+              ],
+              "produce": "{B}{B}"
+            }
+          },
+          {
+            "mana": {
+              "cost": [
+                "tap"
+              ],
+              "produce": "{R}{R}"
+            }
+          },
+          {
+            "mana": {
+              "cost": [
+                "tap"
+              ],
+              "produce": "{G}{G}"
             }
           }
         ]
       },
-      "rarity": "mythic",
+      "rarity": "rare",
       "printing": {
         "set": "tmt",
-        "number": "175"
+        "number": "134"
       }
     },
     {
@@ -615,18 +677,6 @@
       "missing": [
         "triggered ability",
         "tokens"
-      ]
-    },
-    {
-      "name": "Grounded for Life",
-      "rarity": "common",
-      "printing": {
-        "set": "tmt",
-        "number": "7"
-      },
-      "missing": [
-        "condition (if/unless/as long as)",
-        "static ability"
       ]
     },
     {
@@ -1073,7 +1123,6 @@
         "number": "43"
       },
       "missing": [
-        "other rules text",
         "triggered ability",
         "condition (if/unless/as long as)",
         "variable amount"
@@ -2148,17 +2197,6 @@
       ]
     },
     {
-      "name": "Transdimensional Bovine",
-      "rarity": "rare",
-      "printing": {
-        "set": "tmt",
-        "number": "134"
-      },
-      "missing": [
-        "other rules text"
-      ]
-    },
-    {
       "name": "Turtle Power!",
       "rarity": "rare",
       "printing": {
@@ -2625,6 +2663,7 @@
         "number": "172"
       },
       "missing": [
+        "static ability",
         "triggered ability",
         "tokens",
         "sacrifice",
@@ -2656,6 +2695,17 @@
       "missing": [
         "triggered ability",
         "exile"
+      ]
+    },
+    {
+      "name": "Krang, Utrom Warlord",
+      "rarity": "mythic",
+      "printing": {
+        "set": "tmt",
+        "number": "175"
+      },
+      "missing": [
+        "static ability"
       ]
     },
     {

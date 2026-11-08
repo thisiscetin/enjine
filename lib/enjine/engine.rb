@@ -257,7 +257,11 @@ module Enjine
       data = { "object" => id, "to" => to, "position" => position, "reason" => reason, "controller" => controller }
       data["enters"] = { "tapped" => false, "counters" => {} } if to == :battlefield
       data = propose("zone_change", data).data
-      data["enters"].merge!(enters) if enters && data["enters"]
+      if enters && data["enters"]
+        counters = data["enters"]["counters"].dup
+        enters.fetch("counters", {}).each { |kind, n| counters[kind] = counters.fetch(kind, 0) + n }
+        data["enters"].merge!(enters, "counters" => counters)
+      end
       execute_zone_change!(data)
     end
 
@@ -312,6 +316,7 @@ module Enjine
         fresh.controlled_since = state.turn
         fresh.tapped = data["enters"]["tapped"]
         fresh.counters.merge!(data["enters"]["counters"])
+        fresh.x = old.x if old.zone == :stack # CR 107.3m: its ETB abilities use the spell's X
       when :stack
         fresh.controller = data["controller"] || old.owner
       end

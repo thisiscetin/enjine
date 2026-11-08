@@ -110,6 +110,15 @@ module Enjine
         ask!(nil)
       end
 
+      # CR 107.3m: an enters-the-battlefield trigger uses the X its permanent was cast with.
+      def entered_x(trigger)
+        event = trigger["event"]
+        return nil unless event["type"] == "zone_changed" && event["to"] == "battlefield" &&
+                          event["new_id"] == trigger["source"]
+
+        state.objects[trigger["source"]]&.x
+      end
+
       # Creates the triggered ability on the stack and starts choosing its targets.
       # CR 603.3d: a trigger without legal targets is removed.
       def place_trigger!(trigger)
@@ -125,6 +134,7 @@ module Enjine
         obj.kind = "ability"
         obj.source = trigger["source"]
         obj.ability = trigger["ability"]
+        obj.x = entered_x(trigger)
         state.stack.unshift(obj.id)
         start_casting!(trigger["controller"], obj.id, "trigger", source: trigger["source"], ability: trigger["ability"],
                                                                  cost: nil)

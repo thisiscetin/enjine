@@ -112,7 +112,7 @@ module SetConverter
         abilities << { "enters_tapped_unless_pay_life" => { "life" => Integer(m[1]) } }
       elsif line.match?(/\ACARDNAME enters tapped\.\z/)
         abilities << "enters_tapped"
-      elsif (static = static_line(line))
+      elsif (static = static_line(line) || cost_line(line))
         abilities << static
       elsif line == "Activate only as a sorcery." && abilities.last.is_a?(Hash) && abilities.last["activated"]
         abilities.last["activated"]["timing"] = "sorcery"
@@ -135,6 +135,9 @@ module SetConverter
       end })
     end
     data["abilities"] = abilities unless abilities.empty?
+    # "X" is only the announced X when a cost has {X} (CR 107.3a); otherwise the text defines it.
+    text_x = JSON.generate(abilities).include?('"amount":"x"')
+    missing << "variable amount" if text_x && !"#{data["mana_cost"]}#{JSON.generate(abilities)}".include?("{X}")
   end
 
   def keyword_line(line)
@@ -230,6 +233,7 @@ module SetConverter
                when /\A(?:\{[WUBRGC]\})+\z/ then [m[1]]
                when /\A(\{[WUBRGC]\})(?:, (\{[WUBRGC]\}))*,? or (\{[WUBRGC]\})\z/ then m[1].scan(/\{[WUBRGC]\}/)
                when "one mana of any color" then %w[{W} {U} {B} {R} {G}]
+               when /\A(two|three) mana of any one color\z/ then %w[{W} {U} {B} {R} {G}].map { it * number(::Regexp.last_match(1)) }
                else return nil
                end
     produced.map { { "mana" => { "cost" => ["tap"], "produce" => it } } }
@@ -242,11 +246,13 @@ module SetConverter
       case cost
       when "{T}" then "tap"
       when "Sacrifice CARDNAME" then "sacrifice"
-      when /\A(\{[0-9WUBRGC]\})+\z/ then { "mana" => cost }
+      when /\A(\{[0-9WUBRGCX]\})+\z/ then { "mana" => cost }
       else return nil
       end
     end
     effects, targets = sentence_effects(m[2], 0)
+    return nil if effects&.any? { it.key?("add_mana") } # CR 605.1a: that's a mana ability
+
     effects && { "activated" => { "cost" => costs, "targets" => targets, "effects" => effects }.reject { |_, v| v.empty? } }
   end
 
@@ -287,6 +293,52 @@ module SetConverter
 
   def number(word) = NUMBER[word] || Integer(word, exception: false)
 
+  # A number word, or X (an amount announced while casting, CR 107.3a).
+  def amount(word) = word == "X" ? "x" : number(word)
+
+  # "This spell costs {2} less to cast if ..." / "for each ..." (CR 601.2f) and "Affinity for artifacts"
+  # (CR 702.41a); "[Noncreature] spells you cast cost {1} less to cast." (a static cost modifier).
+  COST_CONDITIONS = { "a creature is attacking you" => { "attacked" => true } }.freeze
+  SPELL_KINDS = { "" => {}, "Creature " => { "any_of" => ["creature"] }, "Noncreature " => { "not" => ["creature"] },
+                  "Artifact " => { "any_of" => ["artifact"] },
+                  "Instant and sorcery " => { "any_of" => %w[instant sorcery] } }.freeze
+
+  SPELL_COST_LINE = /\A(Creature\ |Noncreature\ |Artifact\ |Instant\ and\ sorcery\ )?[Ss]pells\ (you|your\ opponents)
+                     \ cast\ cost\ \{(\d+)\}\ (less|more)\ to\ cast\.\z/x
+
+  def cost_line(line)
+    if line == "Affinity for artifacts"
+      return { "cost_reduction" => { "amount" => { "count" => { "each" => "artifact", "controller" => "you" } } } }
+    end
+
+    if (m = SPELL_COST_LINE.match(line))
+      modifier = { "caster" => m[2] == "you" ? "you" : "opponent", m[4] == "less" ? "reduce" : "increase" => Integer(m[3]) }
+      kinds = SPELL_KINDS.fetch(m[1].to_s)
+      return { "cost_modifier" => (kinds.empty? ? modifier : modifier.merge("spells" => kinds)) }
+    end
+    m = /\AThis spell costs \{(\d+)\} less to cast (?:if (.+)|for each (artifact|creature|land) you control)\.\z/.match(line)
+    return nil unless m
+
+    reduction = { "amount" => Integer(m[1]) }
+    if m[3]
+      reduction["amount"] = { "count" => { "each" => m[3], "controller" => "you" } }
+      return nil unless m[1] == "1"
+    elsif (condition = cost_condition(m[2]))
+      reduction["if"] = condition
+    else
+      return nil
+    end
+    { "cost_reduction" => reduction }
+  end
+
+  def cost_condition(text)
+    return COST_CONDITIONS[text] if COST_CONDITIONS.key?(text)
+
+    phrase = text[/\Ait targets (?:a|an) (.+)\z/, 1] or return nil
+    filter = TARGETS["target #{phrase}"]
+    filter && { "targets" => filter }
+  end
+
   CREATURE_TOKEN = %r{
     \ACreate\ (a|an|one|two|three|\d+)\ (tapped\ )?(\d+)/(\d+)\
     (?:(?:white|blue|black|red|green|colorless)(?:\ and\ \w+)?\ )?
@@ -308,11 +360,16 @@ module SetConverter
 
   def sentence_effect(sentence, targets, offset)
     case sentence
-    when /\A(?:CARDNAME|This spell) deals (\d+) damage to (.+)\z/
+    when /\A(?:CARDNAME|This spell) deals (\d+|X) damage to (.+)\z/
       to = target_ref(::Regexp.last_match(2), targets, offset) || (::Regexp.last_match(2) == "each opponent" && "each_opponent")
-      to && { "deal_damage" => { "amount" => Integer(::Regexp.last_match(1)), "to" => to } }
-    when /\A(?:You draw|Draw) (a|two|three|\d+) cards?\z/ then { "draw" => { "amount" => number(::Regexp.last_match(1)) } }
-    when /\AYou gain (\d+) life\z/ then { "gain_life" => { "amount" => Integer(::Regexp.last_match(1)) } }
+      to && { "deal_damage" => { "amount" => amount(::Regexp.last_match(1)), "to" => to } }
+    when /\AAdd ((?:\{[WUBRGC]\})+)\z/ then { "add_mana" => { "produce" => ::Regexp.last_match(1) } }
+    when /\AAdd (one|two|three) mana of any (?:one )?color\z/
+      { "add_mana" => { "amount" => number(::Regexp.last_match(1)), "color" => "any_one" } }
+    when /\AAdd (two|three) mana in any combination of colors\z/
+      { "add_mana" => { "amount" => number(::Regexp.last_match(1)), "color" => "any" } }
+    when /\A(?:You draw|Draw) (a|two|three|\d+|X) cards?\z/ then { "draw" => { "amount" => amount(::Regexp.last_match(1)) } }
+    when /\AYou gain (\d+|X) life\z/ then { "gain_life" => { "amount" => amount(::Regexp.last_match(1)) } }
     when /\AEach opponent loses (\d+) life\z/ then { "lose_life" => { "amount" => Integer(::Regexp.last_match(1)),
                                                                       "to" => "each_opponent" } }
     when %r{\A(#{TARGET_PHRASES}) gets \+(\d+)/\+(\d+) until end of turn\z}io

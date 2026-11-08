@@ -54,6 +54,7 @@ module Enjine
     PlayerLost = define(:player_lost, :player, :reason)
     GameEnded = define(:game_ended, :winner, :reason)
     TargetChosen = define(:target_chosen, :player, :object, :target)
+    XAnnounced = define(:x_announced, :player, :object, :value)
     ManaPaid = define(:mana_paid, :player, :mana, :object)
     SpellCast = define(:spell_cast, :player, :object, :card, :targets)
     AbilityActivated = define(:ability_activated, :player, :object, :card, :source, :ability, :targets)
