@@ -183,6 +183,41 @@ Rules: CR 608.2g, CR 118.9, CR 601.2a, CR 107.3b, CR 118.6a
 }
 ```
 
+## choose_cards
+
+You choose `count` (default 1; "any": any number) cards matching `for` from `from`: a selector (e.g. {"result": 0}, the cards an earlier effect milled) or a player's zone, {"hand": selector} / {"graveyard": selector}. `optional`: you may choose fewer. Then they are put into `put` (`tapped` onto the battlefield, under your control; exiled cards `link`ed to the source). `look`: you look at the whole zone first; `reveal`: "chosen" reveals what you chose, "all" the whole set. `then` runs if a card was chosen, `otherwise` if none was ("if you can't").
+
+Rules: CR 701.20a, CR 701.20e, CR 400.7j, CR 608.2c, CR 607.2a, CR 118.12
+
+| Parameter | Description |
+| --- | --- |
+| `from` | selector or {"hand"|"graveyard": player selector} |
+| `for` | card spec |
+| `count` | integer or "any" |
+| `optional` | boolean |
+| `put` | hand | graveyard | exile | battlefield | library_top | library_bottom |
+| `tapped` | boolean |
+| `link` | boolean |
+| `look` | boolean |
+| `reveal` | chosen | all |
+| `then` | list of effects |
+| `otherwise` | list of effects |
+
+```json
+{
+  "choose_cards": {
+    "from": {
+      "result": 0
+    },
+    "for": {
+      "permanent": true
+    },
+    "optional": true,
+    "put": "hand"
+  }
+}
+```
+
 ## counter
 
 Counter each referenced spell or ability: a spell leaves the stack for its owner's graveyard without resolving, an ability ceases to exist. A spell that can't be countered stays.
@@ -351,6 +386,39 @@ Rules: CR 701.8a
 }
 ```
 
+## dig
+
+Look at the top `amount` cards of your library (`reveal: "all"`: reveal them). Take `count` (default 1; "all": every matching card, no choice) cards matching `for` and put them into `put` (`tapped` onto the battlefield); `optional`: you may take fewer. `reveal: "chosen"` reveals the cards taken. The rest go to `rest`: "bottom_random" (default), "bottom_any" (in an order you choose) or "graveyard".
+
+Rules: CR 701.20a, CR 701.20e, CR 401.4, CR 400.7j
+
+| Parameter | Description |
+| --- | --- |
+| `amount` | amount (how many cards) |
+| `for` | card spec (default any card) |
+| `count` | integer or "all" |
+| `optional` | boolean |
+| `put` | hand | battlefield | graveyard |
+| `tapped` | boolean |
+| `reveal` | none | chosen | all |
+| `rest` | bottom_random | bottom_any | graveyard |
+
+```json
+{
+  "dig": {
+    "amount": 6,
+    "for": {
+      "types": [
+        "artifact"
+      ]
+    },
+    "optional": true,
+    "reveal": "chosen",
+    "put": "hand"
+  }
+}
+```
+
 ## discard
 
 Each referenced player discards `amount` cards of their choice (default: you).
@@ -428,13 +496,15 @@ Rules: CR 121.1, CR 121.2
 
 ## exile
 
-Exile each referenced permanent.
+Exile each referenced permanent, or card in a graveyard or hand. `link: true`: the cards are exiled with the source, for its "exiled with" abilities (the `exiled_with` selector). `until_source_leaves: true`: they return to the battlefield under their owners' control when the source leaves the battlefield; if it already has, nothing is exiled.
 
-Rules: CR 406.1, CR 701.13a
+Rules: CR 406.1, CR 701.13a, CR 607.2a, CR 406.6, CR 610.3, CR 610.3a, CR 610.3b, CR 610.3c
 
 | Parameter | Description |
 | --- | --- |
 | `to` | selector |
+| `link` | boolean |
+| `until_source_leaves` | boolean |
 
 ```json
 {
@@ -478,19 +548,20 @@ Rules: CR 608.2n, CR 406.1
 
 ## exile_top
 
-Each referenced player exiles the top `amount` cards of their library (default: you). The exiled cards are this effect's result.
+Each referenced player (default: you) exiles the top `amount` cards of their library (face up). Later effects name them with {"result": n}; `link: true` exiles them with the source.
 
-Rules: CR 406.1, CR 701.13a, CR 400.7j
+Rules: CR 406.1, CR 400.7j, CR 607.2a
 
 | Parameter | Description |
 | --- | --- |
 | `amount` | amount |
-| `to` | selector |
+| `to` | selector of players |
+| `link` | boolean |
 
 ```json
 {
   "exile_top": {
-    "amount": 2
+    "amount": 4
   }
 }
 ```
@@ -513,6 +584,24 @@ Rules: CR 406.1, CR 701.13a, CR 400.7j
     "to": {
       "target": 0
     }
+  }
+}
+```
+
+## explore
+
+Each referenced permanent explores: its controller reveals the top card of their library. A land card goes to their hand; otherwise the permanent gets a +1/+1 counter (if it's still on the battlefield) and they may put the card into their graveyard.
+
+Rules: CR 701.44a, CR 701.44b, CR 701.44c
+
+| Parameter | Description |
+| --- | --- |
+| `to` | selector of permanents |
+
+```json
+{
+  "explore": {
+    "to": "self"
   }
 }
 ```
@@ -620,6 +709,26 @@ Rules: CR 611.2a, CR 611.2c, CR 613.1f, CR 514.2
     "keywords": [
       "flying"
     ],
+    "to": {
+      "target": 0
+    }
+  }
+}
+```
+
+## look_at_hand
+
+You look at each referenced player's hand (other players don't see the cards).
+
+Rules: CR 701.20e
+
+| Parameter | Description |
+| --- | --- |
+| `to` | selector of players |
+
+```json
+{
+  "look_at_hand": {
     "to": {
       "target": 0
     }
@@ -814,6 +923,28 @@ Rules: CR 611.2a, CR 611.2c, CR 613.4c, CR 514.2
 }
 ```
 
+## put_in_library
+
+Put each referenced permanent, or card in a graveyard or exile, into its owner's library: on the `top` or `bottom`, or (`owner_choice`) where its owner chooses.
+
+Rules: CR 401.4, CR 400.7, CR 608.2b
+
+| Parameter | Description |
+| --- | --- |
+| `to` | selector |
+| `position` | top | bottom | owner_choice |
+
+```json
+{
+  "put_in_library": {
+    "to": {
+      "target": 0
+    },
+    "position": "bottom"
+  }
+}
+```
+
 ## reflexive_trigger
 
 Creates a reflexive triggered ability ("when you do, ...") that triggers immediately, with the controller and source of the resolving spell or ability. Its `targets` are chosen as it's put on the stack; its `effects` may name the results of earlier effects of the creating list.
@@ -936,9 +1067,9 @@ Rules: CR 400.7, CR 400.4a, CR 110.2, CR 111.8, CR 603.7c, CR 614.1c, CR 122.6
 
 ## return_to_hand
 
-Return each referenced permanent to its owner's hand.
+Return each referenced permanent, or card in a graveyard or exile ("target creature card from your graveyard"), to its owner's hand.
 
-Rules: CR 400.6
+Rules: CR 400.6, CR 404.1, CR 608.2b
 
 | Parameter | Description |
 | --- | --- |
@@ -950,6 +1081,35 @@ Rules: CR 400.6
     "to": {
       "target": 0
     }
+  }
+}
+```
+
+## reveal_until
+
+Reveal cards from the top of your library until `count` (an amount, default 1) cards matching `for` are revealed (or the library runs out). Put those into `put` (`tapped` onto the battlefield, under your control) and the rest to `rest` (default the bottom in a random order).
+
+Rules: CR 701.20a, CR 401.4, CR 400.7j
+
+| Parameter | Description |
+| --- | --- |
+| `for` | card spec |
+| `count` | amount |
+| `put` | hand | battlefield |
+| `tapped` | boolean |
+| `rest` | bottom_random | bottom_any | graveyard |
+
+```json
+{
+  "reveal_until": {
+    "for": {
+      "types": [
+        "land"
+      ]
+    },
+    "count": 2,
+    "put": "battlefield",
+    "tapped": true
   }
 }
 ```
@@ -974,6 +1134,27 @@ Rules: CR 701.21a
 }
 ```
 
+## sacrifice_choice
+
+Each referenced player (default: you) sacrifices `count` (default 1; "any": any number) permanents they control matching `filter`, chosen by them in turn order starting with the active player; all are sacrificed at once. The `filter`'s `controller` and `other` restrictions are relative to the effect's controller and source.
+
+Rules: CR 701.21a, CR 101.4, CR 118.3
+
+| Parameter | Description |
+| --- | --- |
+| `filter` | a filter, e.g. {"creature": {"token": false}} |
+| `count` | integer or "any" |
+| `to` | selector of players |
+
+```json
+{
+  "sacrifice_choice": {
+    "filter": "creature",
+    "to": "each_opponent"
+  }
+}
+```
+
 ## scry
 
 Look at the top `amount` cards of your library; put any number on the bottom and the rest on top in any order.
@@ -994,17 +1175,20 @@ Rules: CR 701.22a
 
 ## search_library
 
-Search your library for up to `count` cards matching `for`, then put them into your hand (or onto the battlefield, tapped if `tapped`) and shuffle. With a stated quality you may find fewer (or none); a search for just "a card" must find one if it can. `reveal` shows the found cards to every player.
+Search your library for up to `count` cards matching `for`, then put them into your hand (or onto the battlefield, tapped if `tapped`, with `counters`) and shuffle. With a stated quality you may find fewer (or none); a search for just "a card" must find one if it can. `reveal` shows the found cards to every player. `searcher` names another player who searches their own library (e.g. {"controller_of": {"target": 0}}); `may: true` lets the searcher decline (then nothing is shuffled).
 
-Rules: CR 701.23a, CR 701.23b, CR 701.23d, CR 701.23e, CR 701.20a, CR 701.24a, CR 701.24b
+Rules: CR 701.23a, CR 701.23b, CR 701.23d, CR 701.23e, CR 701.20a, CR 701.24a, CR 701.24b, CR 118.12, CR 110.2a
 
 | Parameter | Description |
 | --- | --- |
 | `for` | card spec: "card" (default), {"types"|"subtypes"|"supertypes": [...], "name": "..."} or {"any_of": [spec, ...]} |
-| `count` | integer (default 1) or "any" (any number) |
+| `count` | integer (default 1), "any" (any number) or an amount ("up to that many") |
 | `put` | "hand" (default) or "battlefield" |
 | `tapped` | true: the cards enter tapped (with put: battlefield) |
+| `counters` | {counter name: n}: the cards enter with these counters (with put: battlefield) |
 | `reveal` | true: reveal the found cards |
+| `searcher` | selector of the searching player (default "you") |
+| `may` | true: the searcher may choose not to search |
 
 ```json
 {
@@ -1067,6 +1251,42 @@ Rules: CR 205.1a, CR 613.1d, CR 611.2c, CR 514.2
       "target": 0
     }
   }
+}
+```
+
+## shuffle_into_library
+
+Put each referenced card (in a graveyard or exile) or permanent into its owner's library; each of those owners shuffles their library.
+
+Rules: CR 701.24a, CR 701.24c
+
+| Parameter | Description |
+| --- | --- |
+| `to` | selector |
+
+```json
+{
+  "shuffle_into_library": {
+    "to": {
+      "target": 0
+    }
+  }
+}
+```
+
+## shuffle_library
+
+Each referenced player shuffles their library (default: you).
+
+Rules: CR 701.24a
+
+| Parameter | Description |
+| --- | --- |
+| `to` | selector |
+
+```json
+{
+  "shuffle_library": {}
 }
 ```
 

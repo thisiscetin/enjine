@@ -3,31 +3,84 @@
 module Enjine
   module Mechanics
     module Effects
-      # Moves each referenced permanent to a zone.
+      # Moves each referenced permanent, or card in one of the class's other zones (a target card in a
+      # graveyard, a card chosen from a hand), to a zone. A card that has left the zone it was in
+      # (CR 400.7, 608.2b) isn't found any more, so it isn't moved.
       class ZoneEffect < Effect
         def self.keys = %w[to if]
         def self.zone = raise(NotImplementedError)
         def self.reason = name.split("::").last.downcase
+        def self.from_zones = %i[battlefield graveyard]
 
         def apply(engine, ctx)
-          objects(engine, ctx).each { engine.move!(it, self.class.zone, reason: self.class.reason) }
+          movable(engine, ctx).each { move(engine, ctx, it) }
+        end
+
+        # The referenced objects that are permanents or cards in the zones this effect moves cards from.
+        def movable(engine, ctx)
+          refs(engine, ctx).select do |id|
+            obj = engine.state.objects[id]
+            obj && !obj.ability? && self.class.from_zones.include?(obj.zone)
+          end
+        end
+
+        def move(engine, ctx, id)
+          Linked.remember!(engine, ctx, id)
+          engine.move!(id, self.class.zone, reason: self.class.reason)
         end
       end
 
-      # Exile (CR 406, 701.13).
+      # Exile (CR 406, 701.13). `link`: the card is "exiled with" the source, for its linked abilities
+      # (CR 607.2a). `until_source_leaves`: it returns once the source leaves the battlefield (CR 610.3).
       class Exile < ZoneEffect
-        primitive :effect, :exile, description: "Exile each referenced permanent.", rules: %w[406.1 701.13a],
-                                   params: { "to" => "selector" }, example: { "exile" => { "to" => { "target" => 0 } } }
+        primitive :effect, :exile,
+                  description: "Exile each referenced permanent, or card in a graveyard or hand. `link: true`: the cards " \
+                               "are exiled with the source, for its \"exiled with\" abilities (the `exiled_with` selector). " \
+                               "`until_source_leaves: true`: they return to the battlefield under their owners' control " \
+                               "when the source leaves the battlefield; if it already has, nothing is exiled.",
+                  rules: %w[406.1 701.13a 607.2a 406.6 610.3 610.3a 610.3b 610.3c],
+                  params: { "to" => "selector", "link" => "boolean", "until_source_leaves" => "boolean" },
+                  example: { "exile" => { "to" => { "target" => 0 } } }
+
+        attr_reader :link, :until_leaves
+
+        def self.keys = %w[to link until_source_leaves if]
         def self.zone = :exile
+        def self.from_zones = %i[battlefield graveyard hand]
+
+        def setup(params, errors, path)
+          @link = Linked.flag(params, "link", errors, path)
+          @until_leaves = Linked.flag(params, "until_source_leaves", errors, path)
+        end
+
+        def to_s = "exile#{" until the source leaves" if until_leaves}#{" (linked)" if link} → #{to}"
+
+        # CR 610.3a-b: if the source has already left the battlefield, the object doesn't move.
+        def apply(engine, ctx)
+          return if until_leaves && !engine.state.battlefield.include?(ctx.source)
+
+          super
+        end
+
+        def move(engine, ctx, id)
+          fresh = super or return
+          engine.link_exiled!(ctx.source, fresh.id) if link || until_leaves
+          return unless until_leaves
+
+          (engine.object(ctx.source).memory[Linked::UNTIL_LEAVES] ||= []) << fresh.id
+        end
       end
 
       # Return to its owner's hand (CR 400.6).
       class ReturnToHand < ZoneEffect
-        primitive :effect, :return_to_hand, description: "Return each referenced permanent to its owner's hand.",
-                                            rules: %w[400.6], params: { "to" => "selector" },
-                                            example: { "return_to_hand" => { "to" => { "target" => 0 } } }
+        primitive :effect, :return_to_hand,
+                  description: "Return each referenced permanent, or card in a graveyard or exile (\"target creature " \
+                               "card from your graveyard\"), to its owner's hand.",
+                  rules: %w[400.6 404.1 608.2b], params: { "to" => "selector" },
+                  example: { "return_to_hand" => { "to" => { "target" => 0 } } }
         def self.zone = :hand
         def self.reason = "bounce"
+        def self.from_zones = %i[battlefield graveyard exile]
       end
 
       # Tap permanents (CR 701.26).

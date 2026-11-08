@@ -16,11 +16,12 @@ module Enjine
     #   "attached"                                  what the source is attached to ("enchanted creature", CR 303.4m)
     #   {"each": "creature", "controller": "you"}  every matching object (you | opponent | any)
     #   {"result": 0}                               what effect 0 of this list moved or created (CR 400.7j)
-    #   {"controller_of": {"target": 0}}            the player who controls the first target ("its controller");
+    #   {"controller_of": selector}                 the controller of each referenced object ("its controller");
     #                                               one that has left the battlefield as it last existed (CR 608.2h)
     #   {"triggering": "object" | "player"}        what the trigger event was about ("that creature",
     #                                               "that player", CR 603.2); see Triggers.event_facts
     #   "watched"                                   what a delayed triggered ability watches (CR 603.7c)
+    #   "exiled_with"                               cards in exile exiled with the source (linked abilities, CR 607.2a)
     class Selector
       CONTROLLERS = %w[you opponent any].freeze
       TRIGGERING = %w[object player].freeze
@@ -29,7 +30,7 @@ module Enjine
 
       def self.build(data, errors, path, targets_count:, results_count: 0)
         case data
-        when "self", "you", "each_opponent", "attached", "watched" then new(data.to_sym)
+        when "self", "you", "each_opponent", "attached", "watched", "exiled_with" then new(data.to_sym)
         when Hash
           data = data.transform_keys(&:to_s)
           return build_result(data, errors, path, results_count) if data.key?("result")
@@ -104,6 +105,7 @@ module Enjine
         when :watched then "the watched object(s)"
         when :you then "you"
         when :each_opponent then "each opponent"
+        when :exiled_with then "the cards exiled with it"
         when :each then "each #{value.primitive_name.tr("_",
                                                         " ")}#{{ "you" => " you control",
                                                                  "opponent" => " an opponent controls" }[controller]}"
@@ -124,6 +126,7 @@ module Enjine
           engine.state.players.each_index.reject { it == ctx.controller }.map { Filters.player_ref(engine, it) }
         when :each then each(engine, ctx)
         when :controller_of then controllers(engine, ctx)
+        when :exiled_with then Linked.exiled_with(engine, ctx.source)
         end
       end
 
@@ -139,7 +142,8 @@ module Enjine
                                     stack].include?(obj.zone)
                          obj.controller
                        else
-                         engine.resolving_last_known(ref)&.fetch("controller")
+                         engine.resolving_last_known(ref)&.fetch("controller") ||
+                           engine.state.objects[ctx.object]&.memory&.dig(Linked::LKI, ref) || obj&.controller
                        end
           controller && Filters.player_ref(engine, controller)
         end.uniq
@@ -159,7 +163,7 @@ module Enjine
       end
 
       def each(engine, ctx)
-        value.candidates(engine, ctx.controller).select do |ref|
+        value.candidates_for(engine, ctx.controller, ctx.source).select do |ref|
           index = Filters.player_index(engine, ref)
           owner = index || engine.object(ref).controller
           controller == "any" || (controller == "you") == (owner == ctx.controller)

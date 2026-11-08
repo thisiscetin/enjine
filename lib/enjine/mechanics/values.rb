@@ -304,6 +304,7 @@ module Enjine
     #                              {"not": {"source": "creature"}})
     #   {"attacked_this_turn": true}  the source attacked this turn
     #   {"nth_resolution": n}      this is the nth time this turn this ability resolves (CR 608.2)
+    #   {"share_card_type": selector}  the referenced objects share a card type ("exiled_with": linked cards)
     #   {"not": condition}, {"all": [conditions]}, {"any": [conditions]}
     class Condition
       FLAGS = %w[your_turn was_cast attacked attacked_this_turn].freeze
@@ -326,6 +327,7 @@ module Enjine
         elsif data.key?("targets") then Targets.build(data, errors, path)
         elsif data.key?("triggering") then TriggeringIs.build(data, errors, path)
         elsif data.key?("began_extra_turn") then BeganExtraTurn.new(data["began_extra_turn"] != false) # CR 500.7
+        elsif data.key?("share_card_type") then ShareCardType.build(data, errors, path, targets_count) # effects/zones.rb
         elsif data.key?("source") then Source.build(data, errors, path)
         elsif data.key?("nth_resolution") then NthResolution.build(data, errors, path)
         else Compare.build(data, errors, path, **context)

@@ -1,4 +1,37 @@
 {
+  "70,000 Light-Years from Home": {
+    "abilities": [
+      { "spell": { "targets": [{ "one_of": ["creature", { "permanent": { "subtypes": ["spacecraft"] } }] }], "effects": [
+        { "exile": { "to": { "target": 0 } } },
+        { "search_library": { "searcher": { "controller_of": { "target": 0 } }, "may": true,
+                              "for": { "supertypes": ["basic"], "types": ["land"] }, "reveal": true } } ] } }
+    ]
+  },
+  "All Good Things...": {
+    "note": "linked abilities: chapters I-III exile with the Saga, chapter IV checks the cards exiled with it",
+    "abilities": [
+      { "chapter": { "chapter": 1, "effects": [
+        { "draw": { "amount": 2 } },
+        { "choose_cards": { "from": { "hand": "you" }, "put": "exile", "link": true } } ] } },
+      { "chapter": { "chapter": 2, "effects": [
+        { "draw": { "amount": 2 } },
+        { "choose_cards": { "from": { "hand": "you" }, "put": "exile", "link": true } } ] } },
+      { "chapter": { "chapter": 3, "effects": [
+        { "draw": { "amount": 2 } },
+        { "choose_cards": { "from": { "hand": "you" }, "put": "exile", "link": true } } ] } },
+      { "chapter": { "chapter": 4, "effects": [
+        { "gain_life": { "amount": 10, "if": { "share_card_type": "exiled_with" } } } ] } }
+    ]
+  },
+  "Artificial Anomaly": {
+    "abilities": [
+      { "mana": { "cost": ["tap"], "produce": "{C}" } },
+      { "activated": { "cost": [{ "mana": "{3}{B}" }, "tap", "sacrifice"], "effects": [
+        { "lose_life": { "amount": 2, "to": "each_opponent" } },
+        { "gain_life": { "amount": 2 } },
+        { "create_token": { "token": { "name": "New Planet", "types": ["land"], "subtypes": ["planet"], "abilities": [{ "mana": { "cost": ["tap"], "produce": "{W}" } }, { "mana": { "cost": ["tap"], "produce": "{U}" } }, { "mana": { "cost": ["tap"], "produce": "{B}" } }, { "mana": { "cost": ["tap"], "produce": "{R}" } }, { "mana": { "cost": ["tap"], "produce": "{G}" } }] }, "tapped": true } } ] } }
+    ]
+  },
   "A Good Day to Die": {
     "abilities": [
       { "spell": { "targets": ["creature"], "effects": [
@@ -47,6 +80,15 @@
                                        "power": 1, "toughness": 1 } } } ] } }
     ]
   },
+  "Automated Warfare System": {
+    "keywords": ["flying"],
+    "abilities": [
+      { "triggered": { "when": { "attacks": {} }, "effects": [
+        { "may": { "effects": [
+          { "sacrifice_choice": { "filter": { "one_of": [{ "creature": { "other": true } }, { "artifact": { "other": true } }] } } } ],
+                   "then": [{ "draw": { "amount": 1 } }] } } ] } }
+    ]
+  },
   "Astute Terraformer": {
     "abilities": [
       {"activated":{"cost":[{"mana":"{6}"}],"limit":"once_each_turn","cost_reduction":{"amount":{"distinct_names":{"each":"land","controller":"you"}}},"effects":[{"pump":{"power":2,"toughness":2,"to":"self"}}]}}
@@ -58,6 +100,14 @@
                        "effects": [{ "pump": { "power": -2, "toughness": -2, "to": { "target": 0 } } }] } },
       { "static": { "affects": "attached", "pump": { "power": 2, "toughness": 0 } } },
       { "equip": { "cost": [{ "mana": "{2}" }] } }
+    ]
+  },
+  "Branching Timeline": {
+    "note": "strange new worlds: X is distinct_names over lands you control",
+    "abilities": [
+      { "spell": { "effects": [
+        { "dig": { "amount": { "distinct_names": { "each": "land", "controller": "you" } }, "reveal": "all",
+                   "for": { "permanent": true }, "count": "all", "put": "battlefield", "tapped": true } } ] } }
     ]
   },
   "Battle-Scarred Survivalist": {
@@ -155,6 +205,39 @@
         { "targets": ["creature"],
           "effects": [{ "add_counters": { "counter": "+1/+1", "amount": 1, "to": { "target": 0 } } }] },
         { "effects": [{ "add_mana": { "amount": 2, "color": "any_one" } }] } ] } }
+    ]
+  },
+  "Cybernetic Specialist": {
+    "abilities": [
+      { "triggered": { "when": { "enters": {} }, "effects": [{ "surveil": { "amount": 1 } }] } },
+      { "activated": { "cost": [{ "mana": "{1}" }, "tap"], "targets": [{ "graveyard_card": { "controller": "you" } }],
+                       "effects": [{ "put_in_library": { "to": { "target": 0 }, "position": "bottom" } }] } }
+    ]
+  },
+  "D'Ghor Bloodletter": {
+    "abilities": [
+      { "triggered": { "when": { "enters": {} }, "choose": 1, "modes": [
+        { "effects": [{ "pump": { "power": -1, "toughness": -1, "to": { "each": { "creature": { "other": true } } } } }] },
+        { "effects": [{ "sacrifice_choice": { "filter": "creature", "to": { "each": "player" } } }] } ] } }
+    ]
+  },
+  "Dathon and Picard at El-Adrel": {
+    "abilities": [
+      { "spell": { "choose": 1, "modes": [
+        { "targets": ["creature"], "effects": [
+          { "pump": { "power": 3, "toughness": 3, "to": { "target": 0 } } },
+          { "grant": { "keywords": ["trample"], "to": { "target": 0 } } } ] },
+        { "effects": [
+          { "sacrifice_choice": { "filter": { "permanent": { "any_of": ["artifact", "enchantment"], "token": false } },
+                                  "to": "each_opponent" } } ] } ] } }
+    ]
+  },
+  "Dominion Assault Force": {
+    "keywords": ["vigilance"],
+    "abilities": [
+      { "triggered": { "when": { "enters": {} }, "choose": 1, "modes": [
+        { "targets": ["graveyard_card"], "effects": [{ "exile": { "to": { "target": 0 } } }] },
+        { "effects": [{ "surveil": { "amount": 1 } }] } ] } }
     ]
   },
   "Deep Space Scan": {
@@ -276,6 +359,59 @@
           { "draw": { "amount": 1,
                       "if": { "controls": { "each": { "permanent": { "counters": true } }, "controller": "you" },
                               "at_least": 1 } } } ] } ] } }
+    ]
+  },
+  "Gaseous Anomaly": {
+    "abilities": [
+      { "mana": { "cost": ["tap"], "produce": "{C}" } },
+      { "activated": { "cost": [{ "mana": "{5}{U}" }, "tap", "sacrifice"], "effects": [
+        { "draw": { "amount": 2 } },
+        { "create_token": { "token": { "name": "New Planet", "types": ["land"], "subtypes": ["planet"], "abilities": [{ "mana": { "cost": ["tap"], "produce": "{W}" } }, { "mana": { "cost": ["tap"], "produce": "{U}" } }, { "mana": { "cost": ["tap"], "produce": "{B}" } }, { "mana": { "cost": ["tap"], "produce": "{R}" } }, { "mana": { "cost": ["tap"], "produce": "{G}" } }] }, "tapped": true } } ] } }
+    ]
+  },
+  "Genesis Device": {
+    "abilities": [
+      { "triggered": { "when": { "enters": {} }, "effects": [
+        { "search_library": { "for": { "any_of": [{ "supertypes": ["basic"], "types": ["land"] }, { "subtypes": ["planet"] }] },
+                              "put": "battlefield", "tapped": true } } ] } },
+      { "activated": { "cost": [{ "mana": "{3}{G}{G}" }, "tap", "sacrifice"], "timing": "sorcery", "effects": [
+        { "sacrifice_choice": { "filter": "land", "count": "any" } },
+        { "search_library": { "for": { "types": ["land"] }, "count": { "count": { "result": 0 } },
+                              "put": "battlefield", "tapped": true } } ] } }
+    ]
+  },
+  "Guidance Failure": {
+    "abilities": [
+      { "cost_reduction": { "amount": 1, "if": { "targets": { "creature": { "attacking": true } } } } },
+      { "spell": { "targets": [{ "one_of": ["creature", { "permanent": { "subtypes": ["spacecraft"] } }] }],
+                   "effects": [{ "put_in_library": { "to": { "target": 0 }, "position": "owner_choice" } }] } }
+    ]
+  },
+  "Hit It!": {
+    "abilities": [
+      { "static": { "affects": { "each": "creature", "controller": "you" }, "keywords": ["haste"] } },
+      { "triggered": { "when": { "enters": {} }, "effects": [
+        { "dig": { "amount": 5, "reveal": "all", "for": { "types": ["land"] }, "put": "battlefield", "tapped": true,
+                   "rest": "graveyard" } } ] } }
+    ]
+  },
+  "In the Pale Moonlight": {
+    "abilities": [
+      { "chapter": { "chapter": 1, "effects": [
+        { "sacrifice_choice": { "filter": { "creature": { "token": false } }, "to": "each_opponent" } } ] } },
+      { "chapter": { "chapter": 2, "effects": [{ "create_token": { "token": "Clue" } }] } },
+      { "chapter": { "chapter": 3, "effects": [
+        { "may": { "effects": [{ "sacrifice_choice": { "filter": { "permanent": { "any_of": ["artifact", "creature"] } } } }],
+                   "then": [{ "create_token": { "token": { "name": "Romulan", "types": ["creature"], "subtypes": ["romulan"],
+                                                           "power": 2, "toughness": 2 }, "amount": 2 } }] } } ] } }
+    ]
+  },
+  "Salt Vampire": {
+    "keywords": ["lifelink"],
+    "abilities": [
+      { "triggered": { "when": { "enters": {} }, "targets": ["opponent"], "effects": [
+        { "choose_cards": { "from": { "hand": { "target": 0 } }, "look": true, "for": { "not_types": ["land"] },
+                            "optional": true, "put": "exile", "then": [{ "draw": { "amount": 1, "to": { "target": 0 } } }] } } ] } }
     ]
   },
   "Georgiou, Terran Emperor": {
@@ -662,6 +798,47 @@
           { "deal_damage": { "amount": 3, "to": { "target": 0 } } } ] } ] } }
     ]
   },
+  "Spatial Anomaly": {
+    "abilities": [
+      { "mana": { "cost": ["tap"], "produce": "{C}" } },
+      { "activated": { "cost": [{ "mana": "{4}{R}" }, "tap", "sacrifice"], "targets": ["creature"], "effects": [
+        { "deal_damage": { "amount": 2, "to": { "target": 0 } } },
+        { "create_token": { "token": { "name": "New Planet", "types": ["land"], "subtypes": ["planet"], "abilities": [{ "mana": { "cost": ["tap"], "produce": "{W}" } }, { "mana": { "cost": ["tap"], "produce": "{U}" } }, { "mana": { "cost": ["tap"], "produce": "{B}" } }, { "mana": { "cost": ["tap"], "produce": "{R}" } }, { "mana": { "cost": ["tap"], "produce": "{G}" } }] }, "tapped": true } } ] } }
+    ]
+  },
+  "Spock, Always Your Friend": {
+    "abilities": [
+      { "triggered": { "when": { "enters": {} }, "effects": [
+        { "dig": { "amount": 4, "for": { "not_types": ["creature", "land"] }, "optional": true, "reveal": "chosen",
+                   "put": "hand", "rest": "bottom_any" } } ] } }
+    ]
+  },
+  "Subspace Anomaly": {
+    "abilities": [
+      { "mana": { "cost": ["tap"], "produce": "{C}" } },
+      { "activated": { "cost": [{ "mana": "{4}{W}" }, "tap", "sacrifice"], "effects": [
+        { "create_token": { "token": { "name": "Officer", "types": ["creature"], "subtypes": ["officer"],
+                                       "power": 1, "toughness": 1 }, "amount": 2 } },
+        { "create_token": { "token": { "name": "New Planet", "types": ["land"], "subtypes": ["planet"], "abilities": [{ "mana": { "cost": ["tap"], "produce": "{W}" } }, { "mana": { "cost": ["tap"], "produce": "{U}" } }, { "mana": { "cost": ["tap"], "produce": "{B}" } }, { "mana": { "cost": ["tap"], "produce": "{R}" } }, { "mana": { "cost": ["tap"], "produce": "{G}" } }] }, "tapped": true } } ] } }
+    ]
+  },
+  "Temporal Anomaly": {
+    "abilities": [
+      { "mana": { "cost": ["tap"], "produce": "{C}" } },
+      { "activated": { "cost": [{ "mana": "{3}{G}" }, "tap", "sacrifice"], "effects": [
+        { "mill": { "amount": 4 } },
+        { "choose_cards": { "from": { "result": 0 }, "for": { "permanent": true }, "optional": true, "put": "hand" } },
+        { "create_token": { "token": { "name": "New Planet", "types": ["land"], "subtypes": ["planet"], "abilities": [{ "mana": { "cost": ["tap"], "produce": "{W}" } }, { "mana": { "cost": ["tap"], "produce": "{U}" } }, { "mana": { "cost": ["tap"], "produce": "{B}" } }, { "mana": { "cost": ["tap"], "produce": "{R}" } }, { "mana": { "cost": ["tap"], "produce": "{G}" } }] }, "tapped": true } } ] } }
+    ]
+  },
+  "Temporal Conqueror": {
+    "abilities": [
+      { "triggered": { "when": { "enters": {} }, "effects": [
+        { "mill": { "amount": 3 } },
+        { "choose_cards": { "from": { "graveyard": "you" }, "for": { "types": ["land"] }, "put": "hand",
+                            "otherwise": [{ "create_token": { "token": "Treasure" } }] } } ] } }
+    ]
+  },
   "Species 8472": {
     "abilities": [
       { "triggered": { "when": { "enters": {} }, "effects": [{ "gain_life": { "amount": { "distinct_names": { "each": "land", "controller": "you" } } } }] } },
@@ -760,6 +937,50 @@
         { "targets": ["opponent"], "effects": [
           { "draw": { "amount": 1, "to": { "target": 0 } } },
           { "draw": { "amount": 2 } } ] } ] } }
+    ]
+  },
+  "Test of Courage": {
+    "abilities": [
+      { "spell": { "choose": 1, "modes": [
+        { "targets": ["graveyard_card"], "effects": [
+          { "exile": { "to": { "target": 0 } } },
+          { "gain_life": { "amount": 2 } } ] },
+        { "targets": [{ "permanent": { "any_of": ["artifact", "enchantment"], "mana_value": { "at_most": 3 } } }],
+          "effects": [{ "destroy": { "to": { "target": 0 } } }] } ] } }
+    ]
+  },
+  "Test of Loyalty": {
+    "abilities": [
+      { "spell": { "choose": 1, "modes": [
+        { "targets": ["graveyard_card"], "effects": [
+          { "exile": { "to": { "target": 0 } } },
+          { "draw": { "amount": 1 } } ] },
+        { "targets": [{ "graveyard_card": { "controller": "you", "any_of": ["creature"] } }],
+          "effects": [{ "return_to_hand": { "to": { "target": 0 } } }] } ] } }
+    ]
+  },
+  "U.S.S. Voyager, Lone Wanderer": {
+    "keywords": ["station"],
+    "abilities": [
+      { "triggered": { "when": { "enters": {} }, "effects": [
+        { "reveal_until": { "for": { "types": ["land"] }, "count": 2, "put": "battlefield", "tapped": true } } ] } },
+      { "station_symbol": { "at": 8, "keywords": ["flying", "vigilance"], "power": 3, "toughness": 3 } }
+    ]
+  },
+  "Unexplored Territory": {
+    "abilities": [
+      { "mana": { "cost": ["tap"], "produce": "{C}" } },
+      { "activated": { "cost": [{ "mana": "{1}" }, "tap", "sacrifice"], "effects": [
+        { "search_library": { "for": { "supertypes": ["basic"], "types": ["land"] }, "put": "battlefield",
+                              "tapped": true } } ] } }
+    ]
+  },
+  "Will Riker, First in the Field": {
+    "abilities": [
+      { "triggered": { "when": { "step_begins": { "step": "beginning_of_combat" } }, "effects": [
+        { "reveal_until": { "for": { "types": ["land"] }, "count": 2, "put": "battlefield" } },
+        { "delayed_trigger": { "when": { "step_begins": { "step": "end" } },
+                               "effects": [{ "sacrifice": { "to": { "result": 0 } } }] } } ] } }
     ]
   },
   "Warp Core": {

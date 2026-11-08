@@ -9,12 +9,18 @@ module Enjine
     #   "card"                                          any card
     #   {"types": ["land"], "supertypes": ["basic"]}    every listed quality must match
     #   {"subtypes": ["swamp"]} / {"name": "Card Name"}
+    #   {"not_types": ["creature", "land"]}             "noncreature, nonland card"
+    #   {"permanent": true}                             "permanent card": any permanent card type (CR 110.4a)
+    #   {"mana_value": {"at_most": 3}}                  also at_least / equal; each bound an amount (CR 202.3)
     #   {"any_of": [spec, spec, ...]}                   at least one spec must match
     class CardSpec
-      KEYS = %w[types subtypes supertypes name any_of].freeze
+      KEYS = %w[types not_types subtypes supertypes name any_of permanent mana_value].freeze
       SUBTYPE = /\A[a-z][a-z0-9_]*\z/
+      # CR 110.4a: the permanent card types (battles have no primitive yet, so none matches that way).
+      PERMANENT_TYPES = %i[artifact battle creature enchantment land planeswalker].freeze
+      BOUNDS = %w[at_least at_most equal].freeze
 
-      attr_reader :types, :subtypes, :supertypes, :name, :any_of
+      attr_reader :types, :not_types, :subtypes, :supertypes, :name, :any_of, :permanent, :mana_value
 
       def self.build(data, errors, path)
         return ANY if data.nil? || data == "card"
@@ -25,7 +31,8 @@ module Enjine
         errors << "#{path}: needs at least one of #{KEYS.join(", ")}" if data.empty?
         new(types: names(data, "types", :type, errors, path), supertypes: names(data, "supertypes", :supertype, errors, path),
             subtypes: subtype_list(data, errors, path), name: name_param(data, errors, path),
-            any_of: alternatives(data, errors, path))
+            any_of: alternatives(data, errors, path), not_types: names(data, "not_types", :type, errors, path),
+            permanent: permanent_param(data, errors, path), mana_value: mana_value_param(data, errors, path))
       end
 
       def self.names(data, key, category, errors, path)
@@ -70,37 +77,86 @@ module Enjine
         specs.each_with_index.map { |spec, i| build(spec, errors, "#{path}.any_of[#{i}]") }
       end
 
-      def initialize(types: [], subtypes: [], supertypes: [], name: nil, any_of: [])
+      def self.permanent_param(data, errors, path)
+        value = data["permanent"]
+        errors << "#{path}.permanent: must be true" unless value.nil? || value == true
+        value == true
+      end
+
+      # {"at_least"|"at_most"|"equal": amount}: each bound is an Amount, computed as the card is looked at.
+      def self.mana_value_param(data, errors, path)
+        raw = data["mana_value"]
+        return {} if raw.nil?
+
+        unless raw.is_a?(Hash) && !raw.empty? && (raw.keys.map(&:to_s) - BOUNDS).empty?
+          errors << "#{path}.mana_value: must be {\"at_least\"|\"at_most\"|\"equal\": amount}"
+          return {}
+        end
+        raw.to_h { |key, n| [key.to_s, Amount.build(n, errors, "#{path}.mana_value.#{key}", targets_count: 0)] }
+      end
+
+      def initialize(types: [], subtypes: [], supertypes: [], name: nil, any_of: [], not_types: [], permanent: false,
+                     mana_value: {})
         @types = types.freeze
+        @not_types = not_types.freeze
         @subtypes = subtypes.freeze
         @supertypes = supertypes.freeze
         @name = name
         @any_of = any_of.freeze
+        @permanent = permanent
+        @mana_value = mana_value.freeze
         freeze
       end
 
       # True when the spec states no quality: "a card" (CR 701.23d).
-      def any? = types.empty? && subtypes.empty? && supertypes.empty? && name.nil? && any_of.empty?
+      def any?
+        types.empty? && not_types.empty? && subtypes.empty? && supertypes.empty? && name.nil? && any_of.empty? &&
+          !permanent && mana_value.empty?
+      end
 
-      # Whether a card object matches, by its current characteristics (CR 109.3).
-      def match?(engine, object)
+      # Whether a card object matches, by its current characteristics (CR 109.3). `ctx` (an EffectContext)
+      # computes mana value bounds given as amounts; without one, only fixed bounds can be met.
+      def match?(engine, object, ctx = nil)
         return false unless object.kind == "card"
 
         chars = engine.chars(object)
-        types.all? { chars.type?(it) } && subtypes.all? { chars.subtypes.include?(it) } &&
-          supertypes.all? { chars.supertypes.include?(it) } && (name.nil? || chars.name == name) &&
-          (any_of.empty? || any_of.any? { it.match?(engine, object) })
+        types.all? { chars.type?(it) } && not_types.none? { chars.type?(it) } &&
+          subtypes.all? { chars.subtypes.include?(it) } && supertypes.all? { chars.supertypes.include?(it) } &&
+          (name.nil? || chars.name == name) && (!permanent || chars.types.intersect?(PERMANENT_TYPES)) &&
+          mana_value_ok?(engine, chars, ctx) && (any_of.empty? || any_of.any? { it.match?(engine, object, ctx) })
       end
 
       def to_s
         return "#{any_of.map { it.to_s.delete_suffix(" card") }.join(" or ")} card" unless any_of.empty?
         return "card named #{name}" if name
 
-        words = supertypes + subtypes.map { it.to_s.capitalize } + types
-        (words.map { it.to_s.tr("_", " ") } + ["card"]).join(" ")
+        words = not_types.map { "non#{it}" } + supertypes + subtypes.map { it.to_s.capitalize } + types
+        words << "permanent" if permanent
+        text = (words.map { it.to_s.tr("_", " ") } + ["card"]).join(" ")
+        return text if mana_value.empty?
+
+        "#{text} with mana value #{mana_value.map { |bound, n| "#{bound.tr("_", " ")} #{n}" }.join(" and ")}"
       end
 
-      ANY = new
+      private
+
+      # CR 202.3: a card's mana value; 0 without a mana cost (CR 202.3a).
+      def mana_value_ok?(engine, chars, ctx)
+        return true if mana_value.empty?
+
+        value = chars.mana_cost&.mana_value.to_i
+        mana_value.all? do |bound, amount|
+          n = ctx ? amount.value(engine, ctx) : fixed(amount)
+          next false if n.nil?
+
+          { "at_least" => value >= n, "at_most" => value <= n, "equal" => value == n }.fetch(bound)
+        end
+      end
+
+      def fixed(amount) = amount.is_a?(Amount::Fixed) ? amount.n : nil
     end
+
+    # "card": any card.
+    CardSpec::ANY = CardSpec.new
   end
 end

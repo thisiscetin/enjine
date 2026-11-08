@@ -315,6 +315,7 @@ module Enjine
       event = Events::ZoneChanged.new(card: old.card, old_id: id, new_id: fresh.id, owner: name(old.owner),
                                       from: old.zone.to_s, to: to.to_s, reason: data["reason"])
       lki ? with_last_known(id, lki) { emit event } : emit(event)
+      return_exiled_until_leaves!(old) if lki # CR 610.3
       fresh
     end
 

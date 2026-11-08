@@ -18,8 +18,9 @@ RSpec.describe "Cycling, card specs and library search: validation (unit)" do
   end
 
   it "card specs report unknown keys, names and malformed lists by path (CR 701.23a)" do
-    expect(spec_errors(42)).to eq(['s: must be "card" or an object (types, subtypes, supertypes, name, any_of)'])
-    expect(spec_errors({})).to eq(["s: needs at least one of types, subtypes, supertypes, name, any_of"])
+    expect(spec_errors(42))
+      .to eq(['s: must be "card" or an object (types, not_types, subtypes, supertypes, name, any_of, permanent, mana_value)'])
+    expect(spec_errors({})).to eq(["s: needs at least one of types, not_types, subtypes, supertypes, name, any_of, permanent, mana_value"])
     expect(spec_errors({ "types" => "land" })).to eq(["s.types: must be a list"])
     expect(spec_errors({ "supertypes" => ["ancient"] })).to eq(['s.supertypes: unknown supertype "ancient"'])
     expect(spec_errors({ "subtypes" => ["Bad Type!"] })).to eq(['s.subtypes: invalid subtype "Bad Type!"'])
@@ -40,7 +41,8 @@ RSpec.describe "Cycling, card specs and library search: validation (unit)" do
   end
 
   it "search_library validates count, put, tapped and reveal" do
-    expect(errors_for(search({ "count" => 0 }))).to eq(['a.spell.effects[0].search_library.count: must be a positive integer or "any"'])
+    expect(errors_for(search({ "count" => 0 })))
+      .to eq(['a.spell.effects[0].search_library.count: must be a positive integer, "any" or an amount'])
     expect(errors_for(search({ "put" => "exile" }))).to eq(["a.spell.effects[0].search_library.put: must be one of hand, battlefield"])
     expect(errors_for(search({ "reveal" => "yes" }))).to eq(["a.spell.effects[0].search_library.reveal: must be true or false"])
     expect(errors_for(search({ "tapped" => true })))

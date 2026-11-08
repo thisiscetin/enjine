@@ -120,22 +120,7 @@ module Enjine
     end
 
     module Effects
-      # Exile the top N cards of a library (CR 406, 701.13). Its result is the exiled cards (CR 400.7j).
-      class ExileTop < Effect
-        primitive :effect, :exile_top,
-                  description: "Each referenced player exiles the top `amount` cards of their library (default: you). " \
-                               "The exiled cards are this effect's result.",
-                  rules: %w[406.1 701.13a 400.7j], params: { "amount" => "amount", "to" => "selector" },
-                  example: { "exile_top" => { "amount" => 2 } }
-
-        def self.default_to = "you"
-
-        def apply(engine, ctx)
-          players(engine, ctx).each do |index|
-            engine.player(index).library.first(amount_for(engine, ctx)).each { engine.move!(it, :exile, reason: "exile") }
-          end
-        end
-      end
+      # (exile_top, exiling the top N cards: see effects/library.rb.)
 
       # Exiling cards from the top of a library one at a time until a nonland card is exiled (CR 701.13).
       class ExileUntil < Effect

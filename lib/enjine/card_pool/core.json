@@ -2632,6 +2632,759 @@
     ]
   },
   {
+    "name": "Archive Diver",
+    "mana_cost": "{1}{U}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "merfolk",
+      "scholar"
+    ],
+    "power": 1,
+    "toughness": 2,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "enters": {}
+          },
+          "effects": [
+            {
+              "dig": {
+                "amount": 4,
+                "for": {
+                  "not_types": [
+                    "land"
+                  ]
+                },
+                "optional": true,
+                "reveal": "chosen",
+                "put": "hand",
+                "rest": "bottom_any"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Vault Expedition",
+    "mana_cost": "{3}{G}",
+    "types": [
+      "sorcery"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "effects": [
+            {
+              "dig": {
+                "amount": 5,
+                "reveal": "all",
+                "for": {
+                  "permanent": true,
+                  "mana_value": {
+                    "at_most": 3
+                  }
+                },
+                "count": "all",
+                "put": "battlefield",
+                "tapped": true
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Twin Pages",
+    "mana_cost": "{1}{B}",
+    "types": [
+      "sorcery"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "effects": [
+            {
+              "dig": {
+                "amount": 2,
+                "rest": "graveyard"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Seismic Survey",
+    "mana_cost": "{2}{R}",
+    "types": [
+      "sorcery"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "effects": [
+            {
+              "reveal_until": {
+                "for": {
+                  "types": [
+                    "land"
+                  ]
+                },
+                "count": 2,
+                "put": "battlefield"
+              }
+            },
+            {
+              "delayed_trigger": {
+                "when": {
+                  "step_begins": {
+                    "step": "end"
+                  }
+                },
+                "effects": [
+                  {
+                    "sacrifice": {
+                      "to": {
+                        "result": 0
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Cinder Archivist",
+    "mana_cost": "{2}{R}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "human",
+      "wizard"
+    ],
+    "power": 2,
+    "toughness": 2,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "enters": {}
+          },
+          "effects": [
+            {
+              "exile_top": {
+                "amount": 2,
+                "link": true
+              }
+            },
+            {
+              "return_to_battlefield": {
+                "to": {
+                  "result": 0
+                },
+                "under": "you"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Trail Scout",
+    "mana_cost": "{1}{G}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "elf",
+      "scout"
+    ],
+    "power": 2,
+    "toughness": 1,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "enters": {}
+          },
+          "effects": [
+            {
+              "explore": {
+                "to": "self"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Grave Sifter",
+    "mana_cost": "{1}{G}",
+    "types": [
+      "instant"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "effects": [
+            {
+              "mill": {
+                "amount": 3
+              }
+            },
+            {
+              "choose_cards": {
+                "from": {
+                  "result": 0
+                },
+                "for": {
+                  "permanent": true
+                },
+                "optional": true,
+                "put": "hand",
+                "otherwise": [
+                  {
+                    "gain_life": {
+                      "amount": 2
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Tithe Collector",
+    "mana_cost": "{2}{B}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "human",
+      "cleric"
+    ],
+    "power": 2,
+    "toughness": 2,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "enters": {}
+          },
+          "effects": [
+            {
+              "sacrifice_choice": {
+                "filter": {
+                  "creature": {
+                    "token": false
+                  }
+                },
+                "to": "each_opponent"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Desperate Barter",
+    "mana_cost": "{B}",
+    "types": [
+      "instant"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "effects": [
+            {
+              "may": {
+                "effects": [
+                  {
+                    "sacrifice_choice": {
+                      "filter": {
+                        "one_of": [
+                          "artifact",
+                          "creature"
+                        ]
+                      }
+                    }
+                  }
+                ],
+                "then": [
+                  {
+                    "draw": {
+                      "amount": 2
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Terraforming Rig",
+    "mana_cost": "{2}{G}",
+    "types": [
+      "artifact"
+    ],
+    "abilities": [
+      {
+        "activated": {
+          "cost": [
+            {
+              "mana": "{1}{G}"
+            },
+            "tap",
+            "sacrifice"
+          ],
+          "timing": "sorcery",
+          "effects": [
+            {
+              "sacrifice_choice": {
+                "filter": "land",
+                "count": "any"
+              }
+            },
+            {
+              "search_library": {
+                "for": {
+                  "types": [
+                    "land"
+                  ]
+                },
+                "count": {
+                  "count": {
+                    "result": 0
+                  }
+                },
+                "put": "battlefield",
+                "tapped": true
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Lost Bearings",
+    "mana_cost": "{2}{U}",
+    "types": [
+      "instant"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "targets": [
+            "creature"
+          ],
+          "effects": [
+            {
+              "put_in_library": {
+                "to": {
+                  "target": 0
+                },
+                "position": "owner_choice"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Memory Recycler",
+    "mana_cost": "{1}{U}",
+    "types": [
+      "sorcery"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "targets": [
+            "graveyard_card"
+          ],
+          "effects": [
+            {
+              "shuffle_into_library": {
+                "to": {
+                  "target": 0
+                }
+              }
+            },
+            {
+              "draw": {
+                "amount": 1
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Tomb Archivist",
+    "mana_cost": "{1}{W}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "human",
+      "cleric"
+    ],
+    "power": 1,
+    "toughness": 3,
+    "abilities": [
+      {
+        "activated": {
+          "cost": [
+            {
+              "mana": "{1}"
+            },
+            "tap"
+          ],
+          "targets": [
+            {
+              "graveyard_card": {
+                "controller": "you"
+              }
+            }
+          ],
+          "effects": [
+            {
+              "put_in_library": {
+                "to": {
+                  "target": 0
+                },
+                "position": "bottom"
+              }
+            },
+            {
+              "shuffle_library": {}
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Mind Probe",
+    "mana_cost": "{1}{B}",
+    "types": [
+      "sorcery"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "targets": [
+            "opponent"
+          ],
+          "effects": [
+            {
+              "look_at_hand": {
+                "to": {
+                  "target": 0
+                }
+              }
+            },
+            {
+              "choose_cards": {
+                "from": {
+                  "hand": {
+                    "target": 0
+                  }
+                },
+                "reveal": "all",
+                "for": {
+                  "not_types": [
+                    "land"
+                  ]
+                },
+                "optional": true,
+                "put": "exile",
+                "then": [
+                  {
+                    "draw": {
+                      "amount": 1,
+                      "to": {
+                        "target": 0
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Ash Warden",
+    "mana_cost": "{G}",
+    "types": [
+      "instant"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "choose": 1,
+          "modes": [
+            {
+              "targets": [
+                "graveyard_card"
+              ],
+              "effects": [
+                {
+                  "exile": {
+                    "to": {
+                      "target": 0
+                    }
+                  }
+                },
+                {
+                  "gain_life": {
+                    "amount": 2
+                  }
+                }
+              ]
+            },
+            {
+              "targets": [
+                {
+                  "graveyard_card": {
+                    "controller": "you",
+                    "any_of": [
+                      "creature"
+                    ]
+                  }
+                }
+              ],
+              "effects": [
+                {
+                  "return_to_hand": {
+                    "to": {
+                      "target": 0
+                    }
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Stasis Cell",
+    "mana_cost": "{2}{W}",
+    "types": [
+      "artifact"
+    ],
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "enters": {}
+          },
+          "targets": [
+            {
+              "permanent": {
+                "controller": "opponent",
+                "not": [
+                  "land"
+                ]
+              }
+            }
+          ],
+          "effects": [
+            {
+              "exile": {
+                "to": {
+                  "target": 0
+                },
+                "until_source_leaves": true
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Keepsake Chronicle",
+    "mana_cost": "{2}{U}",
+    "types": [
+      "enchantment"
+    ],
+    "subtypes": [
+      "saga"
+    ],
+    "abilities": [
+      {
+        "chapter": {
+          "chapter": 1,
+          "effects": [
+            {
+              "draw": {
+                "amount": 2
+              }
+            },
+            {
+              "choose_cards": {
+                "from": {
+                  "hand": "you"
+                },
+                "put": "exile",
+                "link": true
+              }
+            }
+          ]
+        }
+      },
+      {
+        "chapter": {
+          "chapter": 2,
+          "effects": [
+            {
+              "draw": {
+                "amount": 2
+              }
+            },
+            {
+              "choose_cards": {
+                "from": {
+                  "hand": "you"
+                },
+                "put": "exile",
+                "link": true
+              }
+            }
+          ]
+        }
+      },
+      {
+        "chapter": {
+          "chapter": 3,
+          "effects": [
+            {
+              "gain_life": {
+                "amount": 6,
+                "if": {
+                  "share_card_type": "exiled_with"
+                }
+              }
+            },
+            {
+              "choose_cards": {
+                "from": "exiled_with",
+                "optional": true,
+                "put": "hand"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Exile and Atone",
+    "mana_cost": "{1}{W}",
+    "types": [
+      "sorcery"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "targets": [
+            "creature"
+          ],
+          "effects": [
+            {
+              "exile": {
+                "to": {
+                  "target": 0
+                }
+              }
+            },
+            {
+              "search_library": {
+                "searcher": {
+                  "controller_of": {
+                    "target": 0
+                  }
+                },
+                "may": true,
+                "for": {
+                  "supertypes": [
+                    "basic"
+                  ],
+                  "types": [
+                    "land"
+                  ]
+                },
+                "put": "battlefield",
+                "tapped": true
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Muster the Veterans",
+    "mana_cost": "{3}{G}",
+    "types": [
+      "sorcery"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "effects": [
+            {
+              "search_library": {
+                "for": {
+                  "types": [
+                    "creature"
+                  ],
+                  "mana_value": {
+                    "at_most": 3
+                  }
+                },
+                "put": "battlefield",
+                "counters": {
+                  "+1/+1": 1
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
     "name": "Ledger Savant",
     "mana_cost": "{2}{U}{U}",
     "types": [

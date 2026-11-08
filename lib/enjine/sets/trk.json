@@ -12,6 +12,68 @@
   "cards": [
     {
       "card": {
+        "name": "70,000 Light-Years from Home",
+        "mana_cost": "{1}{W}",
+        "types": [
+          "sorcery"
+        ],
+        "abilities": [
+          {
+            "spell": {
+              "targets": [
+                {
+                  "one_of": [
+                    "creature",
+                    {
+                      "permanent": {
+                        "subtypes": [
+                          "spacecraft"
+                        ]
+                      }
+                    }
+                  ]
+                }
+              ],
+              "effects": [
+                {
+                  "exile": {
+                    "to": {
+                      "target": 0
+                    }
+                  }
+                },
+                {
+                  "search_library": {
+                    "searcher": {
+                      "controller_of": {
+                        "target": 0
+                      }
+                    },
+                    "may": true,
+                    "for": {
+                      "supertypes": [
+                        "basic"
+                      ],
+                      "types": [
+                        "land"
+                      ]
+                    },
+                    "reveal": true
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "rarity": "uncommon",
+      "printing": {
+        "set": "trk",
+        "number": "1"
+      }
+    },
+    {
+      "card": {
         "name": "Andromedan Automatons",
         "mana_cost": "{2}{W}",
         "types": [
@@ -2231,6 +2293,62 @@
     },
     {
       "card": {
+        "name": "Guidance Failure",
+        "mana_cost": "{3}{U}",
+        "types": [
+          "instant"
+        ],
+        "abilities": [
+          {
+            "cost_reduction": {
+              "amount": 1,
+              "if": {
+                "targets": {
+                  "creature": {
+                    "attacking": true
+                  }
+                }
+              }
+            }
+          },
+          {
+            "spell": {
+              "targets": [
+                {
+                  "one_of": [
+                    "creature",
+                    {
+                      "permanent": {
+                        "subtypes": [
+                          "spacecraft"
+                        ]
+                      }
+                    }
+                  ]
+                }
+              ],
+              "effects": [
+                {
+                  "put_in_library": {
+                    "to": {
+                      "target": 0
+                    },
+                    "position": "owner_choice"
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "rarity": "common",
+      "printing": {
+        "set": "trk",
+        "number": "60"
+      }
+    },
+    {
+      "card": {
         "name": "Highly Illogical",
         "mana_cost": "{1}{U}",
         "types": [
@@ -3483,6 +3601,71 @@
     },
     {
       "card": {
+        "name": "Automated Warfare System",
+        "mana_cost": "{2}{B}",
+        "types": [
+          "artifact",
+          "creature"
+        ],
+        "subtypes": [
+          "construct"
+        ],
+        "keywords": [
+          "flying"
+        ],
+        "power": 2,
+        "toughness": 2,
+        "abilities": [
+          {
+            "triggered": {
+              "when": {
+                "attacks": {}
+              },
+              "effects": [
+                {
+                  "may": {
+                    "effects": [
+                      {
+                        "sacrifice_choice": {
+                          "filter": {
+                            "one_of": [
+                              {
+                                "creature": {
+                                  "other": true
+                                }
+                              },
+                              {
+                                "artifact": {
+                                  "other": true
+                                }
+                              }
+                            ]
+                          }
+                        }
+                      }
+                    ],
+                    "then": [
+                      {
+                        "draw": {
+                          "amount": 1
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "rarity": "common",
+      "printing": {
+        "set": "trk",
+        "number": "93"
+      }
+    },
+    {
+      "card": {
         "name": "Bat'leth",
         "mana_cost": "{2}{B}",
         "types": [
@@ -3727,6 +3910,67 @@
       "printing": {
         "set": "trk",
         "number": "99"
+      }
+    },
+    {
+      "card": {
+        "name": "D'Ghor Bloodletter",
+        "mana_cost": "{2}{B}",
+        "types": [
+          "creature"
+        ],
+        "subtypes": [
+          "klingon",
+          "assassin"
+        ],
+        "power": 2,
+        "toughness": 2,
+        "abilities": [
+          {
+            "triggered": {
+              "when": {
+                "enters": {}
+              },
+              "choose": 1,
+              "modes": [
+                {
+                  "effects": [
+                    {
+                      "pump": {
+                        "power": -1,
+                        "toughness": -1,
+                        "to": {
+                          "each": {
+                            "creature": {
+                              "other": true
+                            }
+                          }
+                        }
+                      }
+                    }
+                  ]
+                },
+                {
+                  "effects": [
+                    {
+                      "sacrifice_choice": {
+                        "filter": "creature",
+                        "to": {
+                          "each": "player"
+                        }
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "rarity": "uncommon",
+      "printing": {
+        "set": "trk",
+        "number": "101"
       }
     },
     {
@@ -4441,6 +4685,97 @@
     },
     {
       "card": {
+        "name": "In the Pale Moonlight",
+        "mana_cost": "{3}{B}{B}",
+        "types": [
+          "enchantment"
+        ],
+        "subtypes": [
+          "saga"
+        ],
+        "abilities": [
+          {
+            "chapter": {
+              "chapter": 1,
+              "effects": [
+                {
+                  "sacrifice_choice": {
+                    "filter": {
+                      "creature": {
+                        "token": false
+                      }
+                    },
+                    "to": "each_opponent"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "chapter": {
+              "chapter": 2,
+              "effects": [
+                {
+                  "create_token": {
+                    "token": "Clue"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "chapter": {
+              "chapter": 3,
+              "effects": [
+                {
+                  "may": {
+                    "effects": [
+                      {
+                        "sacrifice_choice": {
+                          "filter": {
+                            "permanent": {
+                              "any_of": [
+                                "artifact",
+                                "creature"
+                              ]
+                            }
+                          }
+                        }
+                      }
+                    ],
+                    "then": [
+                      {
+                        "create_token": {
+                          "token": {
+                            "name": "Romulan",
+                            "types": [
+                              "creature"
+                            ],
+                            "subtypes": [
+                              "romulan"
+                            ],
+                            "power": 2,
+                            "toughness": 2
+                          },
+                          "amount": 2
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "rarity": "uncommon",
+      "printing": {
+        "set": "trk",
+        "number": "117"
+      }
+    },
+    {
+      "card": {
         "name": "Kai Winn, Faithless Leader",
         "mana_cost": "{1}{B}",
         "types": [
@@ -4813,6 +5148,70 @@
     },
     {
       "card": {
+        "name": "Salt Vampire",
+        "mana_cost": "{1}{B}",
+        "types": [
+          "creature"
+        ],
+        "subtypes": [
+          "vampire",
+          "shapeshifter"
+        ],
+        "keywords": [
+          "lifelink"
+        ],
+        "power": 2,
+        "toughness": 2,
+        "abilities": [
+          {
+            "triggered": {
+              "when": {
+                "enters": {}
+              },
+              "targets": [
+                "opponent"
+              ],
+              "effects": [
+                {
+                  "choose_cards": {
+                    "from": {
+                      "hand": {
+                        "target": 0
+                      }
+                    },
+                    "look": true,
+                    "for": {
+                      "not_types": [
+                        "land"
+                      ]
+                    },
+                    "optional": true,
+                    "put": "exile",
+                    "then": [
+                      {
+                        "draw": {
+                          "amount": 1,
+                          "to": {
+                            "target": 0
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "rarity": "rare",
+      "printing": {
+        "set": "trk",
+        "number": "127"
+      }
+    },
+    {
+      "card": {
         "name": "Storied Veteran",
         "mana_cost": "{B}",
         "types": [
@@ -5030,6 +5429,69 @@
       "printing": {
         "set": "trk",
         "number": "133"
+      }
+    },
+    {
+      "card": {
+        "name": "Test of Loyalty",
+        "mana_cost": "{B}",
+        "types": [
+          "sorcery"
+        ],
+        "abilities": [
+          {
+            "spell": {
+              "choose": 1,
+              "modes": [
+                {
+                  "targets": [
+                    "graveyard_card"
+                  ],
+                  "effects": [
+                    {
+                      "exile": {
+                        "to": {
+                          "target": 0
+                        }
+                      }
+                    },
+                    {
+                      "draw": {
+                        "amount": 1
+                      }
+                    }
+                  ]
+                },
+                {
+                  "targets": [
+                    {
+                      "graveyard_card": {
+                        "controller": "you",
+                        "any_of": [
+                          "creature"
+                        ]
+                      }
+                    }
+                  ],
+                  "effects": [
+                    {
+                      "return_to_hand": {
+                        "to": {
+                          "target": 0
+                        }
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "rarity": "uncommon",
+      "printing": {
+        "set": "trk",
+        "number": "134"
       }
     },
     {
@@ -6778,6 +7240,71 @@
     },
     {
       "card": {
+        "name": "Will Riker, First in the Field",
+        "mana_cost": "{3}{R}",
+        "types": [
+          "creature"
+        ],
+        "supertypes": [
+          "legendary"
+        ],
+        "subtypes": [
+          "human",
+          "officer"
+        ],
+        "power": 4,
+        "toughness": 3,
+        "abilities": [
+          {
+            "triggered": {
+              "when": {
+                "step_begins": {
+                  "step": "beginning_of_combat"
+                }
+              },
+              "effects": [
+                {
+                  "reveal_until": {
+                    "for": {
+                      "types": [
+                        "land"
+                      ]
+                    },
+                    "count": 2,
+                    "put": "battlefield"
+                  }
+                },
+                {
+                  "delayed_trigger": {
+                    "when": {
+                      "step_begins": {
+                        "step": "end"
+                      }
+                    },
+                    "effects": [
+                      {
+                        "sacrifice": {
+                          "to": {
+                            "result": 0
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "rarity": "rare",
+      "printing": {
+        "set": "trk",
+        "number": "179"
+      }
+    },
+    {
+      "card": {
         "name": "Adversary by Algorithm",
         "mana_cost": "{2}{G}",
         "types": [
@@ -6866,6 +7393,45 @@
       "printing": {
         "set": "trk",
         "number": "184"
+      }
+    },
+    {
+      "card": {
+        "name": "Branching Timeline",
+        "mana_cost": "{6}{G}{G}",
+        "types": [
+          "sorcery"
+        ],
+        "abilities": [
+          {
+            "spell": {
+              "effects": [
+                {
+                  "dig": {
+                    "amount": {
+                      "distinct_names": {
+                        "each": "land",
+                        "controller": "you"
+                      }
+                    },
+                    "reveal": "all",
+                    "for": {
+                      "permanent": true
+                    },
+                    "count": "all",
+                    "put": "battlefield",
+                    "tapped": true
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "rarity": "rare",
+      "printing": {
+        "set": "trk",
+        "number": "185"
       }
     },
     {
@@ -7105,6 +7671,73 @@
     },
     {
       "card": {
+        "name": "Dathon and Picard at El-Adrel",
+        "mana_cost": "{2}{G}",
+        "types": [
+          "instant"
+        ],
+        "abilities": [
+          {
+            "spell": {
+              "choose": 1,
+              "modes": [
+                {
+                  "targets": [
+                    "creature"
+                  ],
+                  "effects": [
+                    {
+                      "pump": {
+                        "power": 3,
+                        "toughness": 3,
+                        "to": {
+                          "target": 0
+                        }
+                      }
+                    },
+                    {
+                      "grant": {
+                        "keywords": [
+                          "trample"
+                        ],
+                        "to": {
+                          "target": 0
+                        }
+                      }
+                    }
+                  ]
+                },
+                {
+                  "effects": [
+                    {
+                      "sacrifice_choice": {
+                        "filter": {
+                          "permanent": {
+                            "any_of": [
+                              "artifact",
+                              "enchantment"
+                            ],
+                            "token": false
+                          }
+                        },
+                        "to": "each_opponent"
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "rarity": "common",
+      "printing": {
+        "set": "trk",
+        "number": "192"
+      }
+    },
+    {
+      "card": {
         "name": "David and Carol Marcus, Creators",
         "mana_cost": "{2}{G}",
         "types": [
@@ -7191,6 +7824,64 @@
       "printing": {
         "set": "trk",
         "number": "193"
+      }
+    },
+    {
+      "card": {
+        "name": "Dominion Assault Force",
+        "mana_cost": "{3}{G}",
+        "types": [
+          "creature"
+        ],
+        "subtypes": [
+          "jemhadar",
+          "warrior"
+        ],
+        "keywords": [
+          "vigilance"
+        ],
+        "power": 4,
+        "toughness": 4,
+        "abilities": [
+          {
+            "triggered": {
+              "when": {
+                "enters": {}
+              },
+              "choose": 1,
+              "modes": [
+                {
+                  "targets": [
+                    "graveyard_card"
+                  ],
+                  "effects": [
+                    {
+                      "exile": {
+                        "to": {
+                          "target": 0
+                        }
+                      }
+                    }
+                  ]
+                },
+                {
+                  "effects": [
+                    {
+                      "surveil": {
+                        "amount": 1
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "rarity": "common",
+      "printing": {
+        "set": "trk",
+        "number": "194"
       }
     },
     {
@@ -7348,6 +8039,93 @@
       "printing": {
         "set": "trk",
         "number": "198"
+      }
+    },
+    {
+      "card": {
+        "name": "Genesis Device",
+        "mana_cost": "{2}{G}",
+        "types": [
+          "artifact"
+        ],
+        "supertypes": [
+          "legendary"
+        ],
+        "abilities": [
+          {
+            "triggered": {
+              "when": {
+                "enters": {}
+              },
+              "effects": [
+                {
+                  "search_library": {
+                    "for": {
+                      "any_of": [
+                        {
+                          "supertypes": [
+                            "basic"
+                          ],
+                          "types": [
+                            "land"
+                          ]
+                        },
+                        {
+                          "subtypes": [
+                            "planet"
+                          ]
+                        }
+                      ]
+                    },
+                    "put": "battlefield",
+                    "tapped": true
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "activated": {
+              "cost": [
+                {
+                  "mana": "{3}{G}{G}"
+                },
+                "tap",
+                "sacrifice"
+              ],
+              "timing": "sorcery",
+              "effects": [
+                {
+                  "sacrifice_choice": {
+                    "filter": "land",
+                    "count": "any"
+                  }
+                },
+                {
+                  "search_library": {
+                    "for": {
+                      "types": [
+                        "land"
+                      ]
+                    },
+                    "count": {
+                      "count": {
+                        "result": 0
+                      }
+                    },
+                    "put": "battlefield",
+                    "tapped": true
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "rarity": "rare",
+      "printing": {
+        "set": "trk",
+        "number": "200"
       }
     },
     {
@@ -8278,6 +9056,128 @@
     },
     {
       "card": {
+        "name": "Temporal Conqueror",
+        "mana_cost": "{2}{G}",
+        "types": [
+          "creature"
+        ],
+        "subtypes": [
+          "nakuhl",
+          "warrior"
+        ],
+        "power": 2,
+        "toughness": 3,
+        "abilities": [
+          {
+            "triggered": {
+              "when": {
+                "enters": {}
+              },
+              "effects": [
+                {
+                  "mill": {
+                    "amount": 3
+                  }
+                },
+                {
+                  "choose_cards": {
+                    "from": {
+                      "graveyard": "you"
+                    },
+                    "for": {
+                      "types": [
+                        "land"
+                      ]
+                    },
+                    "put": "hand",
+                    "otherwise": [
+                      {
+                        "create_token": {
+                          "token": "Treasure"
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "rarity": "common",
+      "printing": {
+        "set": "trk",
+        "number": "219"
+      }
+    },
+    {
+      "card": {
+        "name": "Test of Courage",
+        "mana_cost": "{G}",
+        "types": [
+          "instant"
+        ],
+        "abilities": [
+          {
+            "spell": {
+              "choose": 1,
+              "modes": [
+                {
+                  "targets": [
+                    "graveyard_card"
+                  ],
+                  "effects": [
+                    {
+                      "exile": {
+                        "to": {
+                          "target": 0
+                        }
+                      }
+                    },
+                    {
+                      "gain_life": {
+                        "amount": 2
+                      }
+                    }
+                  ]
+                },
+                {
+                  "targets": [
+                    {
+                      "permanent": {
+                        "any_of": [
+                          "artifact",
+                          "enchantment"
+                        ],
+                        "mana_value": {
+                          "at_most": 3
+                        }
+                      }
+                    }
+                  ],
+                  "effects": [
+                    {
+                      "destroy": {
+                        "to": {
+                          "target": 0
+                        }
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "rarity": "uncommon",
+      "printing": {
+        "set": "trk",
+        "number": "220"
+      }
+    },
+    {
+      "card": {
         "name": "U.S.S. Discovery, at Black Alert",
         "mana_cost": "{3}{G}{G}",
         "types": [
@@ -8330,6 +9230,63 @@
       "printing": {
         "set": "trk",
         "number": "221"
+      }
+    },
+    {
+      "card": {
+        "name": "U.S.S. Voyager, Lone Wanderer",
+        "mana_cost": "{3}{G}",
+        "types": [
+          "artifact"
+        ],
+        "supertypes": [
+          "legendary"
+        ],
+        "subtypes": [
+          "spacecraft"
+        ],
+        "keywords": [
+          "station"
+        ],
+        "abilities": [
+          {
+            "triggered": {
+              "when": {
+                "enters": {}
+              },
+              "effects": [
+                {
+                  "reveal_until": {
+                    "for": {
+                      "types": [
+                        "land"
+                      ]
+                    },
+                    "count": 2,
+                    "put": "battlefield",
+                    "tapped": true
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "station_symbol": {
+              "at": 8,
+              "keywords": [
+                "flying",
+                "vigilance"
+              ],
+              "power": 3,
+              "toughness": 3
+            }
+          }
+        ]
+      },
+      "rarity": "uncommon",
+      "printing": {
+        "set": "trk",
+        "number": "222"
       }
     },
     {
@@ -8515,6 +9472,103 @@
       "printing": {
         "set": "trk",
         "number": "225"
+      }
+    },
+    {
+      "card": {
+        "name": "All Good Things...",
+        "mana_cost": "{3}{G}{U}",
+        "types": [
+          "enchantment"
+        ],
+        "subtypes": [
+          "saga"
+        ],
+        "abilities": [
+          {
+            "chapter": {
+              "chapter": 1,
+              "effects": [
+                {
+                  "draw": {
+                    "amount": 2
+                  }
+                },
+                {
+                  "choose_cards": {
+                    "from": {
+                      "hand": "you"
+                    },
+                    "put": "exile",
+                    "link": true
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "chapter": {
+              "chapter": 2,
+              "effects": [
+                {
+                  "draw": {
+                    "amount": 2
+                  }
+                },
+                {
+                  "choose_cards": {
+                    "from": {
+                      "hand": "you"
+                    },
+                    "put": "exile",
+                    "link": true
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "chapter": {
+              "chapter": 3,
+              "effects": [
+                {
+                  "draw": {
+                    "amount": 2
+                  }
+                },
+                {
+                  "choose_cards": {
+                    "from": {
+                      "hand": "you"
+                    },
+                    "put": "exile",
+                    "link": true
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "chapter": {
+              "chapter": 4,
+              "effects": [
+                {
+                  "gain_life": {
+                    "amount": 10,
+                    "if": {
+                      "share_card_type": "exiled_with"
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "rarity": "rare",
+      "printing": {
+        "set": "trk",
+        "number": "226"
       }
     },
     {
@@ -9102,6 +10156,56 @@
     },
     {
       "card": {
+        "name": "Hit It!",
+        "mana_cost": "{1}{R}{G}",
+        "types": [
+          "enchantment"
+        ],
+        "abilities": [
+          {
+            "static": {
+              "affects": {
+                "each": "creature",
+                "controller": "you"
+              },
+              "keywords": [
+                "haste"
+              ]
+            }
+          },
+          {
+            "triggered": {
+              "when": {
+                "enters": {}
+              },
+              "effects": [
+                {
+                  "dig": {
+                    "amount": 5,
+                    "reveal": "all",
+                    "for": {
+                      "types": [
+                        "land"
+                      ]
+                    },
+                    "put": "battlefield",
+                    "tapped": true,
+                    "rest": "graveyard"
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "rarity": "rare",
+      "printing": {
+        "set": "trk",
+        "number": "240"
+      }
+    },
+    {
+      "card": {
         "name": "Locutus, the One Who Speaks",
         "mana_cost": "{W}{B}",
         "types": [
@@ -9516,6 +10620,56 @@
     },
     {
       "card": {
+        "name": "Spock, Always Your Friend",
+        "mana_cost": "{U}{R}",
+        "types": [
+          "creature"
+        ],
+        "supertypes": [
+          "legendary"
+        ],
+        "subtypes": [
+          "vulcan",
+          "human",
+          "scientist"
+        ],
+        "power": 2,
+        "toughness": 2,
+        "abilities": [
+          {
+            "triggered": {
+              "when": {
+                "enters": {}
+              },
+              "effects": [
+                {
+                  "dig": {
+                    "amount": 4,
+                    "for": {
+                      "not_types": [
+                        "creature",
+                        "land"
+                      ]
+                    },
+                    "optional": true,
+                    "reveal": "chosen",
+                    "put": "hand",
+                    "rest": "bottom_any"
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "rarity": "uncommon",
+      "printing": {
+        "set": "trk",
+        "number": "253"
+      }
+    },
+    {
+      "card": {
         "name": "The Traveler",
         "mana_cost": "{G}{U}",
         "types": [
@@ -9811,6 +10965,70 @@
       "printing": {
         "set": "trk",
         "number": "261"
+      }
+    },
+    {
+      "card": {
+        "name": "Cybernetic Specialist",
+        "mana_cost": "{2}",
+        "types": [
+          "artifact",
+          "creature"
+        ],
+        "subtypes": [
+          "human",
+          "scientist"
+        ],
+        "power": 2,
+        "toughness": 1,
+        "abilities": [
+          {
+            "triggered": {
+              "when": {
+                "enters": {}
+              },
+              "effects": [
+                {
+                  "surveil": {
+                    "amount": 1
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "activated": {
+              "cost": [
+                {
+                  "mana": "{1}"
+                },
+                "tap"
+              ],
+              "targets": [
+                {
+                  "graveyard_card": {
+                    "controller": "you"
+                  }
+                }
+              ],
+              "effects": [
+                {
+                  "put_in_library": {
+                    "to": {
+                      "target": 0
+                    },
+                    "position": "bottom"
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "rarity": "common",
+      "printing": {
+        "set": "trk",
+        "number": "262"
       }
     },
     {
@@ -10258,6 +11476,109 @@
     },
     {
       "card": {
+        "name": "Artificial Anomaly",
+        "types": [
+          "land"
+        ],
+        "abilities": [
+          {
+            "mana": {
+              "cost": [
+                "tap"
+              ],
+              "produce": "{C}"
+            }
+          },
+          {
+            "activated": {
+              "cost": [
+                {
+                  "mana": "{3}{B}"
+                },
+                "tap",
+                "sacrifice"
+              ],
+              "effects": [
+                {
+                  "lose_life": {
+                    "amount": 2,
+                    "to": "each_opponent"
+                  }
+                },
+                {
+                  "gain_life": {
+                    "amount": 2
+                  }
+                },
+                {
+                  "create_token": {
+                    "token": {
+                      "name": "New Planet",
+                      "types": [
+                        "land"
+                      ],
+                      "subtypes": [
+                        "planet"
+                      ],
+                      "abilities": [
+                        {
+                          "mana": {
+                            "cost": [
+                              "tap"
+                            ],
+                            "produce": "{W}"
+                          }
+                        },
+                        {
+                          "mana": {
+                            "cost": [
+                              "tap"
+                            ],
+                            "produce": "{U}"
+                          }
+                        },
+                        {
+                          "mana": {
+                            "cost": [
+                              "tap"
+                            ],
+                            "produce": "{B}"
+                          }
+                        },
+                        {
+                          "mana": {
+                            "cost": [
+                              "tap"
+                            ],
+                            "produce": "{R}"
+                          }
+                        },
+                        {
+                          "mana": {
+                            "cost": [
+                              "tap"
+                            ],
+                            "produce": "{G}"
+                          }
+                        }
+                      ]
+                    },
+                    "tapped": true
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "rarity": "uncommon",
+      "printing": {
+        "set": "trk",
+        "number": "276"
+      }
+    },
+    {
+      "card": {
         "name": "Bajor",
         "types": [
           "land"
@@ -10562,6 +11883,103 @@
       "printing": {
         "set": "trk",
         "number": "283"
+      }
+    },
+    {
+      "card": {
+        "name": "Gaseous Anomaly",
+        "types": [
+          "land"
+        ],
+        "abilities": [
+          {
+            "mana": {
+              "cost": [
+                "tap"
+              ],
+              "produce": "{C}"
+            }
+          },
+          {
+            "activated": {
+              "cost": [
+                {
+                  "mana": "{5}{U}"
+                },
+                "tap",
+                "sacrifice"
+              ],
+              "effects": [
+                {
+                  "draw": {
+                    "amount": 2
+                  }
+                },
+                {
+                  "create_token": {
+                    "token": {
+                      "name": "New Planet",
+                      "types": [
+                        "land"
+                      ],
+                      "subtypes": [
+                        "planet"
+                      ],
+                      "abilities": [
+                        {
+                          "mana": {
+                            "cost": [
+                              "tap"
+                            ],
+                            "produce": "{W}"
+                          }
+                        },
+                        {
+                          "mana": {
+                            "cost": [
+                              "tap"
+                            ],
+                            "produce": "{U}"
+                          }
+                        },
+                        {
+                          "mana": {
+                            "cost": [
+                              "tap"
+                            ],
+                            "produce": "{B}"
+                          }
+                        },
+                        {
+                          "mana": {
+                            "cost": [
+                              "tap"
+                            ],
+                            "produce": "{R}"
+                          }
+                        },
+                        {
+                          "mana": {
+                            "cost": [
+                              "tap"
+                            ],
+                            "produce": "{G}"
+                          }
+                        }
+                      ]
+                    },
+                    "tapped": true
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "rarity": "uncommon",
+      "printing": {
+        "set": "trk",
+        "number": "284"
       }
     },
     {
@@ -11076,6 +12494,109 @@
     },
     {
       "card": {
+        "name": "Spatial Anomaly",
+        "types": [
+          "land"
+        ],
+        "abilities": [
+          {
+            "mana": {
+              "cost": [
+                "tap"
+              ],
+              "produce": "{C}"
+            }
+          },
+          {
+            "activated": {
+              "cost": [
+                {
+                  "mana": "{4}{R}"
+                },
+                "tap",
+                "sacrifice"
+              ],
+              "targets": [
+                "creature"
+              ],
+              "effects": [
+                {
+                  "deal_damage": {
+                    "amount": 2,
+                    "to": {
+                      "target": 0
+                    }
+                  }
+                },
+                {
+                  "create_token": {
+                    "token": {
+                      "name": "New Planet",
+                      "types": [
+                        "land"
+                      ],
+                      "subtypes": [
+                        "planet"
+                      ],
+                      "abilities": [
+                        {
+                          "mana": {
+                            "cost": [
+                              "tap"
+                            ],
+                            "produce": "{W}"
+                          }
+                        },
+                        {
+                          "mana": {
+                            "cost": [
+                              "tap"
+                            ],
+                            "produce": "{U}"
+                          }
+                        },
+                        {
+                          "mana": {
+                            "cost": [
+                              "tap"
+                            ],
+                            "produce": "{B}"
+                          }
+                        },
+                        {
+                          "mana": {
+                            "cost": [
+                              "tap"
+                            ],
+                            "produce": "{R}"
+                          }
+                        },
+                        {
+                          "mana": {
+                            "cost": [
+                              "tap"
+                            ],
+                            "produce": "{G}"
+                          }
+                        }
+                      ]
+                    },
+                    "tapped": true
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "rarity": "uncommon",
+      "printing": {
+        "set": "trk",
+        "number": "296"
+      }
+    },
+    {
+      "card": {
         "name": "Steam Vents",
         "types": [
           "land"
@@ -11124,6 +12645,114 @@
     },
     {
       "card": {
+        "name": "Subspace Anomaly",
+        "types": [
+          "land"
+        ],
+        "abilities": [
+          {
+            "mana": {
+              "cost": [
+                "tap"
+              ],
+              "produce": "{C}"
+            }
+          },
+          {
+            "activated": {
+              "cost": [
+                {
+                  "mana": "{4}{W}"
+                },
+                "tap",
+                "sacrifice"
+              ],
+              "effects": [
+                {
+                  "create_token": {
+                    "token": {
+                      "name": "Officer",
+                      "types": [
+                        "creature"
+                      ],
+                      "subtypes": [
+                        "officer"
+                      ],
+                      "power": 1,
+                      "toughness": 1
+                    },
+                    "amount": 2
+                  }
+                },
+                {
+                  "create_token": {
+                    "token": {
+                      "name": "New Planet",
+                      "types": [
+                        "land"
+                      ],
+                      "subtypes": [
+                        "planet"
+                      ],
+                      "abilities": [
+                        {
+                          "mana": {
+                            "cost": [
+                              "tap"
+                            ],
+                            "produce": "{W}"
+                          }
+                        },
+                        {
+                          "mana": {
+                            "cost": [
+                              "tap"
+                            ],
+                            "produce": "{U}"
+                          }
+                        },
+                        {
+                          "mana": {
+                            "cost": [
+                              "tap"
+                            ],
+                            "produce": "{B}"
+                          }
+                        },
+                        {
+                          "mana": {
+                            "cost": [
+                              "tap"
+                            ],
+                            "produce": "{R}"
+                          }
+                        },
+                        {
+                          "mana": {
+                            "cost": [
+                              "tap"
+                            ],
+                            "produce": "{G}"
+                          }
+                        }
+                      ]
+                    },
+                    "tapped": true
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "rarity": "uncommon",
+      "printing": {
+        "set": "trk",
+        "number": "300"
+      }
+    },
+    {
+      "card": {
         "name": "Temple Garden",
         "types": [
           "land"
@@ -11144,6 +12773,165 @@
       "printing": {
         "set": "trk",
         "number": "301"
+      }
+    },
+    {
+      "card": {
+        "name": "Temporal Anomaly",
+        "types": [
+          "land"
+        ],
+        "abilities": [
+          {
+            "mana": {
+              "cost": [
+                "tap"
+              ],
+              "produce": "{C}"
+            }
+          },
+          {
+            "activated": {
+              "cost": [
+                {
+                  "mana": "{3}{G}"
+                },
+                "tap",
+                "sacrifice"
+              ],
+              "effects": [
+                {
+                  "mill": {
+                    "amount": 4
+                  }
+                },
+                {
+                  "choose_cards": {
+                    "from": {
+                      "result": 0
+                    },
+                    "for": {
+                      "permanent": true
+                    },
+                    "optional": true,
+                    "put": "hand"
+                  }
+                },
+                {
+                  "create_token": {
+                    "token": {
+                      "name": "New Planet",
+                      "types": [
+                        "land"
+                      ],
+                      "subtypes": [
+                        "planet"
+                      ],
+                      "abilities": [
+                        {
+                          "mana": {
+                            "cost": [
+                              "tap"
+                            ],
+                            "produce": "{W}"
+                          }
+                        },
+                        {
+                          "mana": {
+                            "cost": [
+                              "tap"
+                            ],
+                            "produce": "{U}"
+                          }
+                        },
+                        {
+                          "mana": {
+                            "cost": [
+                              "tap"
+                            ],
+                            "produce": "{B}"
+                          }
+                        },
+                        {
+                          "mana": {
+                            "cost": [
+                              "tap"
+                            ],
+                            "produce": "{R}"
+                          }
+                        },
+                        {
+                          "mana": {
+                            "cost": [
+                              "tap"
+                            ],
+                            "produce": "{G}"
+                          }
+                        }
+                      ]
+                    },
+                    "tapped": true
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "rarity": "uncommon",
+      "printing": {
+        "set": "trk",
+        "number": "302"
+      }
+    },
+    {
+      "card": {
+        "name": "Unexplored Territory",
+        "types": [
+          "land"
+        ],
+        "abilities": [
+          {
+            "mana": {
+              "cost": [
+                "tap"
+              ],
+              "produce": "{C}"
+            }
+          },
+          {
+            "activated": {
+              "cost": [
+                {
+                  "mana": "{1}"
+                },
+                "tap",
+                "sacrifice"
+              ],
+              "effects": [
+                {
+                  "search_library": {
+                    "for": {
+                      "supertypes": [
+                        "basic"
+                      ],
+                      "types": [
+                        "land"
+                      ]
+                    },
+                    "put": "battlefield",
+                    "tapped": true
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "rarity": "common",
+      "printing": {
+        "set": "trk",
+        "number": "303"
       }
     },
     {
@@ -11316,17 +13104,6 @@
     }
   ],
   "unsupported": [
-    {
-      "name": "70,000 Light-Years from Home",
-      "rarity": "uncommon",
-      "printing": {
-        "set": "trk",
-        "number": "1"
-      },
-      "missing": [
-        "exile"
-      ]
-    },
     {
       "name": "Antagonist Incorporator",
       "rarity": "rare",
@@ -11559,17 +13336,6 @@
       ]
     },
     {
-      "name": "Guidance Failure",
-      "rarity": "common",
-      "printing": {
-        "set": "trk",
-        "number": "60"
-      },
-      "missing": [
-        "other rules text"
-      ]
-    },
-    {
       "name": "Gwyndala, the Progeny",
       "rarity": "rare",
       "printing": {
@@ -11699,19 +13465,6 @@
       ]
     },
     {
-      "name": "Automated Warfare System",
-      "rarity": "common",
-      "printing": {
-        "set": "trk",
-        "number": "93"
-      },
-      "missing": [
-        "triggered ability",
-        "condition (if/unless/as long as)",
-        "sacrifice"
-      ]
-    },
-    {
       "name": "Blastoneuron",
       "rarity": "uncommon",
       "printing": {
@@ -11733,17 +13486,6 @@
       "printing": {
         "set": "trk",
         "number": "100"
-      },
-      "missing": [
-        "modal choice"
-      ]
-    },
-    {
-      "name": "D'Ghor Bloodletter",
-      "rarity": "uncommon",
-      "printing": {
-        "set": "trk",
-        "number": "101"
       },
       "missing": [
         "modal choice"
@@ -11789,20 +13531,6 @@
       ]
     },
     {
-      "name": "In the Pale Moonlight",
-      "rarity": "uncommon",
-      "printing": {
-        "set": "trk",
-        "number": "117"
-      },
-      "missing": [
-        "sacrifice",
-        "other rules text",
-        "condition (if/unless/as long as)",
-        "tokens"
-      ]
-    },
-    {
       "name": "Khan, Vengeful Heart",
       "rarity": "mythic",
       "printing": {
@@ -11829,19 +13557,6 @@
       ]
     },
     {
-      "name": "Salt Vampire",
-      "rarity": "rare",
-      "printing": {
-        "set": "trk",
-        "number": "127"
-      },
-      "missing": [
-        "triggered ability",
-        "condition (if/unless/as long as)",
-        "exile"
-      ]
-    },
-    {
       "name": "Sela, Tal Shiar Paradox",
       "rarity": "rare",
       "printing": {
@@ -11860,17 +13575,6 @@
       "printing": {
         "set": "trk",
         "number": "130"
-      },
-      "missing": [
-        "modal choice"
-      ]
-    },
-    {
-      "name": "Test of Loyalty",
-      "rarity": "uncommon",
-      "printing": {
-        "set": "trk",
-        "number": "134"
       },
       "missing": [
         "modal choice"
@@ -12064,18 +13768,6 @@
       ]
     },
     {
-      "name": "Will Riker, First in the Field",
-      "rarity": "rare",
-      "printing": {
-        "set": "trk",
-        "number": "179"
-      },
-      "missing": [
-        "triggered ability",
-        "sacrifice"
-      ]
-    },
-    {
       "name": "Worf, Intelligence Contractor",
       "rarity": "rare",
       "printing": {
@@ -12111,17 +13803,6 @@
       "missing": [
         "other rules text",
         "graveyard casting"
-      ]
-    },
-    {
-      "name": "Branching Timeline",
-      "rarity": "rare",
-      "printing": {
-        "set": "trk",
-        "number": "185"
-      },
-      "missing": [
-        "variable amount"
       ]
     },
     {
@@ -12163,28 +13844,6 @@
       ]
     },
     {
-      "name": "Dathon and Picard at El-Adrel",
-      "rarity": "common",
-      "printing": {
-        "set": "trk",
-        "number": "192"
-      },
-      "missing": [
-        "modal choice"
-      ]
-    },
-    {
-      "name": "Dominion Assault Force",
-      "rarity": "common",
-      "printing": {
-        "set": "trk",
-        "number": "194"
-      },
-      "missing": [
-        "modal choice"
-      ]
-    },
-    {
       "name": "Dr. Leonard \"Bones\" McCoy",
       "rarity": "rare",
       "printing": {
@@ -12205,20 +13864,6 @@
       "missing": [
         "condition (if/unless/as long as)",
         "library manipulation"
-      ]
-    },
-    {
-      "name": "Genesis Device",
-      "rarity": "rare",
-      "printing": {
-        "set": "trk",
-        "number": "200"
-      },
-      "missing": [
-        "triggered ability",
-        "library manipulation",
-        "variable amount",
-        "sacrifice"
       ]
     },
     {
@@ -12259,56 +13904,6 @@
         "exile",
         "counters",
         "graveyard casting"
-      ]
-    },
-    {
-      "name": "Temporal Conqueror",
-      "rarity": "common",
-      "printing": {
-        "set": "trk",
-        "number": "219"
-      },
-      "missing": [
-        "triggered ability",
-        "condition (if/unless/as long as)",
-        "tokens",
-        "library manipulation",
-        "static ability",
-        "graveyard casting"
-      ]
-    },
-    {
-      "name": "Test of Courage",
-      "rarity": "uncommon",
-      "printing": {
-        "set": "trk",
-        "number": "220"
-      },
-      "missing": [
-        "modal choice"
-      ]
-    },
-    {
-      "name": "U.S.S. Voyager, Lone Wanderer",
-      "rarity": "uncommon",
-      "printing": {
-        "set": "trk",
-        "number": "222"
-      },
-      "missing": [
-        "triggered ability"
-      ]
-    },
-    {
-      "name": "All Good Things...",
-      "rarity": "rare",
-      "printing": {
-        "set": "trk",
-        "number": "226"
-      },
-      "missing": [
-        "exile",
-        "condition (if/unless/as long as)"
       ]
     },
     {
@@ -12379,17 +13974,6 @@
         "static ability",
         "triggered ability",
         "discard"
-      ]
-    },
-    {
-      "name": "Hit It!",
-      "rarity": "rare",
-      "printing": {
-        "set": "trk",
-        "number": "240"
-      },
-      "missing": [
-        "triggered ability"
       ]
     },
     {
@@ -12473,18 +14057,6 @@
       ]
     },
     {
-      "name": "Spock, Always Your Friend",
-      "rarity": "uncommon",
-      "printing": {
-        "set": "trk",
-        "number": "253"
-      },
-      "missing": [
-        "triggered ability",
-        "library manipulation"
-      ]
-    },
-    {
       "name": "Worf, Honor-Bound Warrior",
       "rarity": "uncommon",
       "printing": {
@@ -12522,17 +14094,6 @@
         "triggered ability",
         "copy",
         "static ability"
-      ]
-    },
-    {
-      "name": "Cybernetic Specialist",
-      "rarity": "common",
-      "printing": {
-        "set": "trk",
-        "number": "262"
-      },
-      "missing": [
-        "graveyard casting"
       ]
     },
     {
@@ -12607,42 +14168,6 @@
       ]
     },
     {
-      "name": "Artificial Anomaly",
-      "rarity": "uncommon",
-      "printing": {
-        "set": "trk",
-        "number": "276"
-      },
-      "missing": [
-        "tokens",
-        "sacrifice"
-      ]
-    },
-    {
-      "name": "Gaseous Anomaly",
-      "rarity": "uncommon",
-      "printing": {
-        "set": "trk",
-        "number": "284"
-      },
-      "missing": [
-        "tokens",
-        "sacrifice"
-      ]
-    },
-    {
-      "name": "Spatial Anomaly",
-      "rarity": "uncommon",
-      "printing": {
-        "set": "trk",
-        "number": "296"
-      },
-      "missing": [
-        "tokens",
-        "sacrifice"
-      ]
-    },
-    {
       "name": "Starfleet Academy",
       "rarity": "mythic",
       "printing": {
@@ -12651,43 +14176,6 @@
       },
       "missing": [
         "variable amount"
-      ]
-    },
-    {
-      "name": "Subspace Anomaly",
-      "rarity": "uncommon",
-      "printing": {
-        "set": "trk",
-        "number": "300"
-      },
-      "missing": [
-        "tokens",
-        "sacrifice"
-      ]
-    },
-    {
-      "name": "Temporal Anomaly",
-      "rarity": "uncommon",
-      "printing": {
-        "set": "trk",
-        "number": "302"
-      },
-      "missing": [
-        "tokens",
-        "sacrifice",
-        "library manipulation"
-      ]
-    },
-    {
-      "name": "Unexplored Territory",
-      "rarity": "common",
-      "printing": {
-        "set": "trk",
-        "number": "303"
-      },
-      "missing": [
-        "sacrifice",
-        "library manipulation"
       ]
     },
     {

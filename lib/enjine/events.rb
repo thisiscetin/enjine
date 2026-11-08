@@ -88,6 +88,14 @@ module Enjine
     Unattached = define(:unattached, :object, :from) # CR 701.3d
     # A card in a hidden zone is shown to every player (CR 701.20a); it doesn't leave its zone (701.20b).
     CardRevealed = define(:card_revealed, :player, :object, :card)
+    # A player looks at cards in a hidden zone (CR 701.20e): only they (and the cards' owner) see which.
+    LookedAt = define(:looked_at, :player, :owner, :objects, :cards) do
+      def for_viewer(viewer)
+        return to_h if viewer == :observer || viewer == player || viewer == owner
+
+        { "type" => type, "player" => player, "owner" => owner, "count" => objects.size }
+      end
+    end
     ControlChanged = define(:control_changed, :object, :controller)
     ExtraTurnAdded = define(:extra_turn_added, :player) # CR 500.7
     DilemmaFaced = define(:dilemma_faced, :player, :object, :modes) # CR 700.17 (2026-11-06)

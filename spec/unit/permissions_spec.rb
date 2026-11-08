@@ -24,7 +24,7 @@ RSpec.describe "Play permissions, beam me up, free casts: card data validation (
       .to eq(["abilities[0].play_from: unknown parameter \"x\"",
               "abilities[0].play_from.zone: must be one of graveyard, exile, library_top",
               "abilities[0].play_from.play: must be one of cast, play",
-              "abilities[0].play_from.cards: must be \"card\" or an object (types, subtypes, supertypes, name, any_of)",
+              "abilities[0].play_from.cards: must be \"card\" or an object (#{Enjine::Mechanics::CardSpec::KEYS.join(", ")})",
               "abilities[0].play_from.once_each_turn: must be true or false",
               "abilities[0].play_from.enters_with.finality: must be an integer >= 1"])
     expect(text(creature([{ "play_from" => { "zone" => "graveyard", "enters_with" => { "finality" => 1 } } },
