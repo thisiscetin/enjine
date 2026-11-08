@@ -1,0 +1,2601 @@
+{
+  "format": 1,
+  "code": "tmt",
+  "name": "Teenage Mutant Ninja Turtles",
+  "released_at": "2026-03-06",
+  "standard_legal_until": "2029-01-01",
+  "standard_legal_until_estimated": true,
+  "converted_with": {
+    "engine_version": "0.1.0",
+    "rules_version": "2026-09-25"
+  },
+  "cards": [
+    {
+      "card": {
+        "name": "Plains",
+        "types": [
+          "land"
+        ],
+        "supertypes": [
+          "basic"
+        ],
+        "subtypes": [
+          "plains"
+        ]
+      },
+      "rarity": "common",
+      "printing": {
+        "set": "tmt",
+        "number": "315"
+      }
+    },
+    {
+      "card": {
+        "name": "Island",
+        "types": [
+          "land"
+        ],
+        "supertypes": [
+          "basic"
+        ],
+        "subtypes": [
+          "island"
+        ]
+      },
+      "rarity": "common",
+      "printing": {
+        "set": "tmt",
+        "number": "316"
+      }
+    },
+    {
+      "card": {
+        "name": "Swamp",
+        "types": [
+          "land"
+        ],
+        "supertypes": [
+          "basic"
+        ],
+        "subtypes": [
+          "swamp"
+        ]
+      },
+      "rarity": "common",
+      "printing": {
+        "set": "tmt",
+        "number": "317"
+      }
+    },
+    {
+      "card": {
+        "name": "Mountain",
+        "types": [
+          "land"
+        ],
+        "supertypes": [
+          "basic"
+        ],
+        "subtypes": [
+          "mountain"
+        ]
+      },
+      "rarity": "common",
+      "printing": {
+        "set": "tmt",
+        "number": "318"
+      }
+    },
+    {
+      "card": {
+        "name": "Forest",
+        "types": [
+          "land"
+        ],
+        "supertypes": [
+          "basic"
+        ],
+        "subtypes": [
+          "forest"
+        ]
+      },
+      "rarity": "common",
+      "printing": {
+        "set": "tmt",
+        "number": "319"
+      }
+    }
+  ],
+  "unsupported": [
+    {
+      "name": "Action News Crew",
+      "rarity": "common",
+      "printing": {
+        "set": "tmt",
+        "number": "1"
+      },
+      "missing": [
+        "keyword: vigilance",
+        "discard",
+        "counters"
+      ]
+    },
+    {
+      "name": "Agent Bishop, Man in Black",
+      "rarity": "rare",
+      "printing": {
+        "set": "tmt",
+        "number": "2"
+      },
+      "missing": [
+        "supertype: legendary",
+        "triggered ability",
+        "counters"
+      ]
+    },
+    {
+      "name": "April O'Neil, Kunoichi Trainee",
+      "rarity": "common",
+      "printing": {
+        "set": "tmt",
+        "number": "3"
+      },
+      "missing": [
+        "supertype: legendary",
+        "triggered ability",
+        "library manipulation",
+        "static ability"
+      ]
+    },
+    {
+      "name": "Dimensional Exile",
+      "rarity": "uncommon",
+      "printing": {
+        "set": "tmt",
+        "number": "4"
+      },
+      "missing": [
+        "equipment/aura",
+        "triggered ability",
+        "exile"
+      ]
+    },
+    {
+      "name": "East Wind Avatar",
+      "rarity": "common",
+      "printing": {
+        "set": "tmt",
+        "number": "5"
+      },
+      "missing": [
+        "keyword: flying",
+        "keyword: vigilance",
+        "triggered ability"
+      ]
+    },
+    {
+      "name": "Featherbrained Filcher",
+      "rarity": "uncommon",
+      "printing": {
+        "set": "tmt",
+        "number": "6"
+      },
+      "missing": [
+        "keyword: flying",
+        "triggered ability",
+        "tokens"
+      ]
+    },
+    {
+      "name": "Grounded for Life",
+      "rarity": "common",
+      "printing": {
+        "set": "tmt",
+        "number": "7"
+      },
+      "missing": [
+        "condition (if/unless/as long as)",
+        "static ability"
+      ]
+    },
+    {
+      "name": "Hamato Guardian Stance",
+      "rarity": "common",
+      "printing": {
+        "set": "tmt",
+        "number": "8"
+      },
+      "missing": [
+        "library manipulation"
+      ]
+    },
+    {
+      "name": "High-Flying Ace",
+      "rarity": "common",
+      "printing": {
+        "set": "tmt",
+        "number": "9"
+      },
+      "missing": [
+        "keyword: flying",
+        "other rules text"
+      ]
+    },
+    {
+      "name": "Jennika, Bad Apple Big Sister",
+      "rarity": "common",
+      "printing": {
+        "set": "tmt",
+        "number": "10"
+      },
+      "missing": [
+        "supertype: legendary",
+        "triggered ability",
+        "tokens",
+        "other rules text"
+      ]
+    },
+    {
+      "name": "Koya, Death from Above",
+      "rarity": "uncommon",
+      "printing": {
+        "set": "tmt",
+        "number": "11"
+      },
+      "missing": [
+        "supertype: legendary",
+        "keyword: flying",
+        "triggered ability",
+        "condition (if/unless/as long as)",
+        "exile"
+      ]
+    },
+    {
+      "name": "The Last Ronin's Technique",
+      "rarity": "uncommon",
+      "printing": {
+        "set": "tmt",
+        "number": "12"
+      },
+      "missing": [
+        "other rules text",
+        "condition (if/unless/as long as)",
+        "tokens"
+      ]
+    },
+    {
+      "name": "Leader's Talent",
+      "rarity": "rare",
+      "printing": {
+        "set": "tmt",
+        "number": "13"
+      },
+      "missing": [
+        "layout: class",
+        "triggered ability",
+        "counters",
+        "other rules text",
+        "condition (if/unless/as long as)"
+      ]
+    },
+    {
+      "name": "Leonardo, Big Brother",
+      "rarity": "common",
+      "printing": {
+        "set": "tmt",
+        "number": "14"
+      },
+      "missing": [
+        "supertype: legendary",
+        "other rules text",
+        "variable amount"
+      ]
+    },
+    {
+      "name": "Leonardo, Cutting Edge",
+      "rarity": "rare",
+      "printing": {
+        "set": "tmt",
+        "number": "15"
+      },
+      "missing": [
+        "supertype: legendary",
+        "other rules text",
+        "keyword: lifelink",
+        "triggered ability",
+        "counters"
+      ]
+    },
+    {
+      "name": "Leonardo, Leader in Blue",
+      "rarity": "uncommon",
+      "printing": {
+        "set": "tmt",
+        "number": "16"
+      },
+      "missing": [
+        "supertype: legendary",
+        "other rules text",
+        "triggered ability",
+        "condition (if/unless/as long as)",
+        "static ability"
+      ]
+    },
+    {
+      "name": "Leonardo, Sewer Samurai",
+      "rarity": "mythic",
+      "printing": {
+        "set": "tmt",
+        "number": "17"
+      },
+      "missing": [
+        "supertype: legendary",
+        "other rules text",
+        "keyword: double strike",
+        "condition (if/unless/as long as)",
+        "counters",
+        "graveyard casting"
+      ]
+    },
+    {
+      "name": "Leonardo's Technique",
+      "rarity": "rare",
+      "printing": {
+        "set": "tmt",
+        "number": "18"
+      },
+      "missing": [
+        "other rules text",
+        "graveyard casting"
+      ]
+    },
+    {
+      "name": "Lita, Little Orphan Amphibian",
+      "rarity": "uncommon",
+      "printing": {
+        "set": "tmt",
+        "number": "19"
+      },
+      "missing": [
+        "supertype: legendary",
+        "triggered ability",
+        "modal choice",
+        "counters",
+        "tokens",
+        "library manipulation"
+      ]
+    },
+    {
+      "name": "Make Your Move",
+      "rarity": "common",
+      "printing": {
+        "set": "tmt",
+        "number": "20"
+      },
+      "missing": [
+        "other rules text"
+      ]
+    },
+    {
+      "name": "Mighty Mutanimals",
+      "rarity": "uncommon",
+      "printing": {
+        "set": "tmt",
+        "number": "21"
+      },
+      "missing": [
+        "triggered ability",
+        "tokens",
+        "counters"
+      ]
+    },
+    {
+      "name": "Prehistoric Pet",
+      "rarity": "rare",
+      "printing": {
+        "set": "tmt",
+        "number": "22"
+      },
+      "missing": [
+        "static ability",
+        "return to hand"
+      ]
+    },
+    {
+      "name": "Quintessential Katana",
+      "rarity": "uncommon",
+      "printing": {
+        "set": "tmt",
+        "number": "23"
+      },
+      "missing": [
+        "triggered ability",
+        "equipment/aura"
+      ]
+    },
+    {
+      "name": "Sally Pride, Lioness Leader",
+      "rarity": "rare",
+      "printing": {
+        "set": "tmt",
+        "number": "24"
+      },
+      "missing": [
+        "supertype: legendary",
+        "triggered ability",
+        "tokens",
+        "variable amount",
+        "counters"
+      ]
+    },
+    {
+      "name": "Triceraton Commander",
+      "rarity": "mythic",
+      "printing": {
+        "set": "tmt",
+        "number": "25"
+      },
+      "missing": [
+        "keyword: flying",
+        "triggered ability",
+        "tokens"
+      ]
+    },
+    {
+      "name": "Turncoat Kunoichi",
+      "rarity": "rare",
+      "printing": {
+        "set": "tmt",
+        "number": "26"
+      },
+      "missing": [
+        "other rules text",
+        "triggered ability",
+        "condition (if/unless/as long as)",
+        "exile"
+      ]
+    },
+    {
+      "name": "Turtles Forever",
+      "rarity": "rare",
+      "printing": {
+        "set": "tmt",
+        "number": "27"
+      },
+      "missing": [
+        "library manipulation"
+      ]
+    },
+    {
+      "name": "Uneasy Alliance",
+      "rarity": "common",
+      "printing": {
+        "set": "tmt",
+        "number": "28"
+      },
+      "missing": [
+        "equipment/aura",
+        "static ability",
+        "tokens",
+        "exile",
+        "sacrifice"
+      ]
+    },
+    {
+      "name": "April O'Neil, Hacktivist",
+      "rarity": "rare",
+      "printing": {
+        "set": "tmt",
+        "number": "29"
+      },
+      "missing": [
+        "supertype: legendary",
+        "triggered ability",
+        "variable amount"
+      ]
+    },
+    {
+      "name": "April, Reporter of the Weird",
+      "rarity": "uncommon",
+      "printing": {
+        "set": "tmt",
+        "number": "30"
+      },
+      "missing": [
+        "supertype: legendary",
+        "triggered ability",
+        "discard"
+      ]
+    },
+    {
+      "name": "Bespoke Bō",
+      "rarity": "uncommon",
+      "printing": {
+        "set": "tmt",
+        "number": "31"
+      },
+      "missing": [
+        "triggered ability",
+        "return to hand",
+        "other rules text",
+        "equipment/aura"
+      ]
+    },
+    {
+      "name": "Buzz Bots",
+      "rarity": "common",
+      "printing": {
+        "set": "tmt",
+        "number": "32"
+      },
+      "missing": [
+        "keyword: flying",
+        "keyword: vigilance"
+      ]
+    },
+    {
+      "name": "Crustacean Commando",
+      "rarity": "common",
+      "printing": {
+        "set": "tmt",
+        "number": "33"
+      },
+      "missing": [
+        "triggered ability",
+        "tokens"
+      ]
+    },
+    {
+      "name": "Does Machines",
+      "rarity": "rare",
+      "printing": {
+        "set": "tmt",
+        "number": "34"
+      },
+      "missing": [
+        "layout: class",
+        "triggered ability",
+        "library manipulation",
+        "discard",
+        "other rules text",
+        "graveyard casting",
+        "condition (if/unless/as long as)",
+        "counters"
+      ]
+    },
+    {
+      "name": "Donatello, Gadget Master",
+      "rarity": "rare",
+      "printing": {
+        "set": "tmt",
+        "number": "35"
+      },
+      "missing": [
+        "supertype: legendary",
+        "other rules text",
+        "triggered ability",
+        "tokens",
+        "copy"
+      ]
+    },
+    {
+      "name": "Donatello, Mutant Mechanic",
+      "rarity": "mythic",
+      "printing": {
+        "set": "tmt",
+        "number": "36"
+      },
+      "missing": [
+        "supertype: legendary",
+        "condition (if/unless/as long as)",
+        "counters",
+        "triggered ability"
+      ]
+    },
+    {
+      "name": "Donatello, Turtle Techie",
+      "rarity": "common",
+      "printing": {
+        "set": "tmt",
+        "number": "37"
+      },
+      "missing": [
+        "supertype: legendary",
+        "triggered ability",
+        "condition (if/unless/as long as)"
+      ]
+    },
+    {
+      "name": "Donatello, Way with Machines",
+      "rarity": "uncommon",
+      "printing": {
+        "set": "tmt",
+        "number": "38"
+      },
+      "missing": [
+        "supertype: legendary",
+        "keyword: flying",
+        "triggered ability",
+        "counters"
+      ]
+    },
+    {
+      "name": "Donatello's Technique",
+      "rarity": "uncommon",
+      "printing": {
+        "set": "tmt",
+        "number": "39"
+      },
+      "missing": [
+        "other rules text"
+      ]
+    },
+    {
+      "name": "Fugitive Droid",
+      "rarity": "uncommon",
+      "printing": {
+        "set": "tmt",
+        "number": "40"
+      },
+      "missing": [
+        "condition (if/unless/as long as)",
+        "static ability",
+        "sacrifice"
+      ]
+    },
+    {
+      "name": "Kitsune, Dragon's Daughter",
+      "rarity": "rare",
+      "printing": {
+        "set": "tmt",
+        "number": "41"
+      },
+      "missing": [
+        "supertype: legendary",
+        "keyword: vigilance",
+        "triggered ability"
+      ]
+    },
+    {
+      "name": "Kitsune's Technique",
+      "rarity": "rare",
+      "printing": {
+        "set": "tmt",
+        "number": "42"
+      },
+      "missing": [
+        "other rules text"
+      ]
+    },
+    {
+      "name": "Krang, Master Mind",
+      "rarity": "rare",
+      "printing": {
+        "set": "tmt",
+        "number": "43"
+      },
+      "missing": [
+        "supertype: legendary",
+        "other rules text",
+        "triggered ability",
+        "condition (if/unless/as long as)",
+        "variable amount"
+      ]
+    },
+    {
+      "name": "Metalhead",
+      "rarity": "uncommon",
+      "printing": {
+        "set": "tmt",
+        "number": "44"
+      },
+      "missing": [
+        "supertype: legendary",
+        "triggered ability",
+        "return to hand",
+        "sacrifice",
+        "counters"
+      ]
+    },
+    {
+      "name": "Mind Transfer Protocol",
+      "rarity": "common",
+      "printing": {
+        "set": "tmt",
+        "number": "45"
+      },
+      "missing": [
+        "other rules text"
+      ]
+    },
+    {
+      "name": "Mondo Gecko",
+      "rarity": "mythic",
+      "printing": {
+        "set": "tmt",
+        "number": "46"
+      },
+      "missing": [
+        "supertype: legendary",
+        "discard",
+        "triggered ability",
+        "variable amount"
+      ]
+    },
+    {
+      "name": "Negate",
+      "rarity": "common",
+      "printing": {
+        "set": "tmt",
+        "number": "47"
+      },
+      "missing": [
+        "other rules text"
+      ]
+    },
+    {
+      "name": "Ooze Spill",
+      "rarity": "uncommon",
+      "printing": {
+        "set": "tmt",
+        "number": "48"
+      },
+      "missing": [
+        "tokens"
+      ]
+    },
+    {
+      "name": "Ray Fillet, Man Ray",
+      "rarity": "uncommon",
+      "printing": {
+        "set": "tmt",
+        "number": "49"
+      },
+      "missing": [
+        "supertype: legendary",
+        "keyword: flying",
+        "triggered ability",
+        "tokens",
+        "other rules text"
+      ]
+    },
+    {
+      "name": "Renet, Temporal Apprentice",
+      "rarity": "rare",
+      "printing": {
+        "set": "tmt",
+        "number": "50"
+      },
+      "missing": [
+        "supertype: legendary",
+        "triggered ability",
+        "return to hand"
+      ]
+    },
+    {
+      "name": "Retro-Mutation",
+      "rarity": "common",
+      "printing": {
+        "set": "tmt",
+        "number": "51"
+      },
+      "missing": [
+        "equipment/aura",
+        "static ability"
+      ]
+    },
+    {
+      "name": "Return to the Sewers",
+      "rarity": "common",
+      "printing": {
+        "set": "tmt",
+        "number": "52"
+      },
+      "missing": [
+        "tokens"
+      ]
+    },
+    {
+      "name": "Sewer-veillance Cam",
+      "rarity": "common",
+      "printing": {
+        "set": "tmt",
+        "number": "53"
+      },
+      "missing": [
+        "triggered ability",
+        "tap/untap effect",
+        "sacrifice"
+      ]
+    },
+    {
+      "name": "Stockman, Mad Fly-entist",
+      "rarity": "common",
+      "printing": {
+        "set": "tmt",
+        "number": "54"
+      },
+      "missing": [
+        "supertype: legendary",
+        "keyword: flying",
+        "triggered ability",
+        "discard",
+        "other rules text"
+      ]
+    },
+    {
+      "name": "Turtles in Time",
+      "rarity": "mythic",
+      "printing": {
+        "set": "tmt",
+        "number": "55"
+      },
+      "missing": [
+        "return to hand",
+        "exile"
+      ]
+    },
+    {
+      "name": "Utrom Scientists",
+      "rarity": "common",
+      "printing": {
+        "set": "tmt",
+        "number": "56"
+      },
+      "missing": [
+        "triggered ability",
+        "tap/untap effect",
+        "counters"
+      ]
+    },
+    {
+      "name": "Anchovy & Banana Pizza",
+      "rarity": "common",
+      "printing": {
+        "set": "tmt",
+        "number": "57"
+      },
+      "missing": [
+        "sacrifice"
+      ]
+    },
+    {
+      "name": "Armaggon, Future Shark",
+      "rarity": "rare",
+      "printing": {
+        "set": "tmt",
+        "number": "58"
+      },
+      "missing": [
+        "supertype: legendary",
+        "triggered ability"
+      ]
+    },
+    {
+      "name": "Bebop, Warthog Warrior",
+      "rarity": "common",
+      "printing": {
+        "set": "tmt",
+        "number": "59"
+      },
+      "missing": [
+        "supertype: legendary",
+        "keyword: menace",
+        "static ability",
+        "other rules text"
+      ]
+    },
+    {
+      "name": "The Cloning of Shredder",
+      "rarity": "mythic",
+      "printing": {
+        "set": "tmt",
+        "number": "60"
+      },
+      "missing": [
+        "layout: saga",
+        "tokens",
+        "exile",
+        "copy",
+        "graveyard casting"
+      ]
+    },
+    {
+      "name": "Death in the Family",
+      "rarity": "uncommon",
+      "printing": {
+        "set": "tmt",
+        "number": "61"
+      },
+      "missing": [
+        "exile"
+      ]
+    },
+    {
+      "name": "Dream Beavers",
+      "rarity": "uncommon",
+      "printing": {
+        "set": "tmt",
+        "number": "62"
+      },
+      "missing": [
+        "keyword: flying",
+        "triggered ability",
+        "library manipulation"
+      ]
+    },
+    {
+      "name": "Foot Mystic",
+      "rarity": "common",
+      "printing": {
+        "set": "tmt",
+        "number": "63"
+      },
+      "missing": [
+        "keyword: lifelink",
+        "triggered ability",
+        "condition (if/unless/as long as)",
+        "tokens"
+      ]
+    },
+    {
+      "name": "Insectoid Exterminator",
+      "rarity": "common",
+      "printing": {
+        "set": "tmt",
+        "number": "64"
+      },
+      "missing": [
+        "keyword: flying",
+        "triggered ability",
+        "condition (if/unless/as long as)",
+        "library manipulation"
+      ]
+    },
+    {
+      "name": "Lord Dregg, Insect Invader",
+      "rarity": "uncommon",
+      "printing": {
+        "set": "tmt",
+        "number": "65"
+      },
+      "missing": [
+        "supertype: legendary",
+        "keyword: flying",
+        "triggered ability",
+        "condition (if/unless/as long as)",
+        "tokens",
+        "sacrifice"
+      ]
+    },
+    {
+      "name": "Madame Null, Power Broker",
+      "rarity": "rare",
+      "printing": {
+        "set": "tmt",
+        "number": "66"
+      },
+      "missing": [
+        "supertype: legendary",
+        "keyword: deathtouch",
+        "triggered ability",
+        "condition (if/unless/as long as)",
+        "variable amount",
+        "counters"
+      ]
+    },
+    {
+      "name": "Ninja Teen",
+      "rarity": "rare",
+      "printing": {
+        "set": "tmt",
+        "number": "67"
+      },
+      "missing": [
+        "layout: class",
+        "triggered ability",
+        "other rules text",
+        "static ability",
+        "graveyard casting"
+      ]
+    },
+    {
+      "name": "Oroku Saki, Shredder Rising",
+      "rarity": "common",
+      "printing": {
+        "set": "tmt",
+        "number": "68"
+      },
+      "missing": [
+        "supertype: legendary",
+        "other rules text",
+        "triggered ability"
+      ]
+    },
+    {
+      "name": "Pain 101",
+      "rarity": "common",
+      "printing": {
+        "set": "tmt",
+        "number": "69"
+      },
+      "missing": [
+        "triggered ability"
+      ]
+    },
+    {
+      "name": "Paramecia Coloniex",
+      "rarity": "uncommon",
+      "printing": {
+        "set": "tmt",
+        "number": "70"
+      },
+      "missing": [
+        "triggered ability",
+        "library manipulation",
+        "exile",
+        "graveyard casting"
+      ]
+    },
+    {
+      "name": "Rat King, Verminister",
+      "rarity": "rare",
+      "printing": {
+        "set": "tmt",
+        "number": "71"
+      },
+      "missing": [
+        "supertype: legendary",
+        "triggered ability",
+        "condition (if/unless/as long as)",
+        "tokens",
+        "counters",
+        "sacrifice",
+        "graveyard casting"
+      ]
+    },
+    {
+      "name": "Savanti Romero, Time's Exile",
+      "rarity": "rare",
+      "printing": {
+        "set": "tmt",
+        "number": "72"
+      },
+      "missing": [
+        "supertype: legendary",
+        "keyword: trample",
+        "triggered ability",
+        "variable amount",
+        "counters"
+      ]
+    },
+    {
+      "name": "Shark Shredder, Killer Clone",
+      "rarity": "rare",
+      "printing": {
+        "set": "tmt",
+        "number": "73"
+      },
+      "missing": [
+        "supertype: legendary",
+        "other rules text",
+        "keyword: first strike",
+        "triggered ability"
+      ]
+    },
+    {
+      "name": "Shredder, Unrelenting",
+      "rarity": "uncommon",
+      "printing": {
+        "set": "tmt",
+        "number": "74"
+      },
+      "missing": [
+        "supertype: legendary",
+        "other rules text",
+        "keyword: deathtouch",
+        "triggered ability"
+      ]
+    },
+    {
+      "name": "Shredder's Armor",
+      "rarity": "uncommon",
+      "printing": {
+        "set": "tmt",
+        "number": "75"
+      },
+      "missing": [
+        "other rules text",
+        "triggered ability",
+        "sacrifice",
+        "equipment/aura"
+      ]
+    },
+    {
+      "name": "Shredder's Revenge",
+      "rarity": "common",
+      "printing": {
+        "set": "tmt",
+        "number": "76"
+      },
+      "missing": [
+        "modal choice",
+        "discard",
+        "other rules text"
+      ]
+    },
+    {
+      "name": "Shredder's Technique",
+      "rarity": "uncommon",
+      "printing": {
+        "set": "tmt",
+        "number": "77"
+      },
+      "missing": [
+        "other rules text",
+        "condition (if/unless/as long as)"
+      ]
+    },
+    {
+      "name": "South Wind Avatar",
+      "rarity": "rare",
+      "printing": {
+        "set": "tmt",
+        "number": "78"
+      },
+      "missing": [
+        "keyword: deathtouch",
+        "triggered ability",
+        "variable amount"
+      ]
+    },
+    {
+      "name": "Splinter, Hamato Yoshi",
+      "rarity": "uncommon",
+      "printing": {
+        "set": "tmt",
+        "number": "79"
+      },
+      "missing": [
+        "supertype: legendary",
+        "other rules text",
+        "keyword: menace",
+        "static ability"
+      ]
+    },
+    {
+      "name": "Splinter's Technique",
+      "rarity": "rare",
+      "printing": {
+        "set": "tmt",
+        "number": "80"
+      },
+      "missing": [
+        "other rules text",
+        "library manipulation"
+      ]
+    },
+    {
+      "name": "Squirrelanoids",
+      "rarity": "common",
+      "printing": {
+        "set": "tmt",
+        "number": "81"
+      },
+      "missing": [
+        "keyword: deathtouch"
+      ]
+    },
+    {
+      "name": "Stomped by the Foot",
+      "rarity": "common",
+      "printing": {
+        "set": "tmt",
+        "number": "82"
+      },
+      "missing": [
+        "sacrifice",
+        "condition (if/unless/as long as)"
+      ]
+    },
+    {
+      "name": "Super Shredder",
+      "rarity": "mythic",
+      "printing": {
+        "set": "tmt",
+        "number": "83"
+      },
+      "missing": [
+        "supertype: legendary",
+        "keyword: menace",
+        "triggered ability",
+        "counters"
+      ]
+    },
+    {
+      "name": "Tunnel Rats",
+      "rarity": "common",
+      "printing": {
+        "set": "tmt",
+        "number": "84"
+      },
+      "missing": [
+        "graveyard casting"
+      ]
+    },
+    {
+      "name": "Bot Bashing Time",
+      "rarity": "common",
+      "printing": {
+        "set": "tmt",
+        "number": "85"
+      },
+      "missing": [
+        "condition (if/unless/as long as)",
+        "exile"
+      ]
+    },
+    {
+      "name": "Broadcast Takeover",
+      "rarity": "mythic",
+      "printing": {
+        "set": "tmt",
+        "number": "86"
+      },
+      "missing": [
+        "other rules text"
+      ]
+    },
+    {
+      "name": "Casey Jones, Jury-Rig Justiciar",
+      "rarity": "uncommon",
+      "printing": {
+        "set": "tmt",
+        "number": "87"
+      },
+      "missing": [
+        "supertype: legendary",
+        "triggered ability",
+        "library manipulation"
+      ]
+    },
+    {
+      "name": "Casey Jones, Vigilante",
+      "rarity": "rare",
+      "printing": {
+        "set": "tmt",
+        "number": "88"
+      },
+      "missing": [
+        "supertype: legendary",
+        "triggered ability",
+        "discard"
+      ]
+    },
+    {
+      "name": "Cool but Rude",
+      "rarity": "rare",
+      "printing": {
+        "set": "tmt",
+        "number": "89"
+      },
+      "missing": [
+        "layout: class",
+        "triggered ability",
+        "condition (if/unless/as long as)",
+        "discard",
+        "other rules text",
+        "library manipulation"
+      ]
+    },
+    {
+      "name": "General Traag, Heart of Stone",
+      "rarity": "uncommon",
+      "printing": {
+        "set": "tmt",
+        "number": "90"
+      },
+      "missing": [
+        "supertype: legendary",
+        "keyword: trample",
+        "triggered ability",
+        "sacrifice"
+      ]
+    },
+    {
+      "name": "Hard-Won Jitte",
+      "rarity": "uncommon",
+      "printing": {
+        "set": "tmt",
+        "number": "91"
+      },
+      "missing": [
+        "other rules text",
+        "equipment/aura"
+      ]
+    },
+    {
+      "name": "Improvised Arsenal",
+      "rarity": "rare",
+      "printing": {
+        "set": "tmt",
+        "number": "92"
+      },
+      "missing": [
+        "variable amount",
+        "tokens",
+        "copy",
+        "equipment/aura"
+      ]
+    },
+    {
+      "name": "Jennika's Technique",
+      "rarity": "uncommon",
+      "printing": {
+        "set": "tmt",
+        "number": "93"
+      },
+      "missing": [
+        "other rules text"
+      ]
+    },
+    {
+      "name": "Manhole Missile",
+      "rarity": "common",
+      "printing": {
+        "set": "tmt",
+        "number": "94"
+      },
+      "missing": [
+        "condition (if/unless/as long as)"
+      ]
+    },
+    {
+      "name": "Mouser Attack!",
+      "rarity": "common",
+      "printing": {
+        "set": "tmt",
+        "number": "95"
+      },
+      "missing": [
+        "modal choice",
+        "tokens",
+        "other rules text"
+      ]
+    },
+    {
+      "name": "Mouser Foundry",
+      "rarity": "common",
+      "printing": {
+        "set": "tmt",
+        "number": "96"
+      },
+      "missing": [
+        "triggered ability",
+        "tokens",
+        "sacrifice"
+      ]
+    },
+    {
+      "name": "Mutant Town Musicians",
+      "rarity": "common",
+      "printing": {
+        "set": "tmt",
+        "number": "97"
+      },
+      "missing": [
+        "keyword: trample",
+        "triggered ability"
+      ]
+    },
+    {
+      "name": "Null Group Biological Assets",
+      "rarity": "common",
+      "printing": {
+        "set": "tmt",
+        "number": "98"
+      },
+      "missing": [
+        "other rules text",
+        "triggered ability",
+        "condition (if/unless/as long as)",
+        "discard"
+      ]
+    },
+    {
+      "name": "Old Hob, Alleycat Blues",
+      "rarity": "uncommon",
+      "printing": {
+        "set": "tmt",
+        "number": "99"
+      },
+      "missing": [
+        "supertype: legendary",
+        "triggered ability",
+        "tokens",
+        "other rules text"
+      ]
+    },
+    {
+      "name": "Purple Dragon Punks",
+      "rarity": "common",
+      "printing": {
+        "set": "tmt",
+        "number": "100"
+      },
+      "missing": [
+        "other rules text"
+      ]
+    },
+    {
+      "name": "Raphael, Most Attitude",
+      "rarity": "uncommon",
+      "printing": {
+        "set": "tmt",
+        "number": "101"
+      },
+      "missing": [
+        "supertype: legendary",
+        "keyword: menace",
+        "triggered ability",
+        "exile"
+      ]
+    },
+    {
+      "name": "Raphael, Ninja Destroyer",
+      "rarity": "mythic",
+      "printing": {
+        "set": "tmt",
+        "number": "102"
+      },
+      "missing": [
+        "supertype: legendary",
+        "condition (if/unless/as long as)",
+        "triggered ability"
+      ]
+    },
+    {
+      "name": "Raphael, the Nightwatcher",
+      "rarity": "rare",
+      "printing": {
+        "set": "tmt",
+        "number": "103"
+      },
+      "missing": [
+        "supertype: legendary",
+        "other rules text",
+        "static ability"
+      ]
+    },
+    {
+      "name": "Raphael, Tough Turtle",
+      "rarity": "common",
+      "printing": {
+        "set": "tmt",
+        "number": "104"
+      },
+      "missing": [
+        "supertype: legendary",
+        "triggered ability"
+      ]
+    },
+    {
+      "name": "Raphael's Technique",
+      "rarity": "rare",
+      "printing": {
+        "set": "tmt",
+        "number": "105"
+      },
+      "missing": [
+        "other rules text",
+        "discard"
+      ]
+    },
+    {
+      "name": "Ravenous Robots",
+      "rarity": "rare",
+      "printing": {
+        "set": "tmt",
+        "number": "106"
+      },
+      "missing": [
+        "triggered ability",
+        "tokens",
+        "other rules text"
+      ]
+    },
+    {
+      "name": "Rock Soldiers",
+      "rarity": "common",
+      "printing": {
+        "set": "tmt",
+        "number": "107"
+      },
+      "missing": [
+        "triggered ability"
+      ]
+    },
+    {
+      "name": "Slash, Reptile Rampager",
+      "rarity": "rare",
+      "printing": {
+        "set": "tmt",
+        "number": "108"
+      },
+      "missing": [
+        "supertype: legendary",
+        "triggered ability",
+        "tokens"
+      ]
+    },
+    {
+      "name": "Spicy Oatmeal Pizza",
+      "rarity": "uncommon",
+      "printing": {
+        "set": "tmt",
+        "number": "109"
+      },
+      "missing": [
+        "triggered ability",
+        "sacrifice"
+      ]
+    },
+    {
+      "name": "Wingnut, Bat on the Belfry",
+      "rarity": "uncommon",
+      "printing": {
+        "set": "tmt",
+        "number": "110"
+      },
+      "missing": [
+        "supertype: legendary",
+        "triggered ability"
+      ]
+    },
+    {
+      "name": "Zog, Triceraton Castaway",
+      "rarity": "common",
+      "printing": {
+        "set": "tmt",
+        "number": "111"
+      },
+      "missing": [
+        "supertype: legendary",
+        "keyword: reach",
+        "keyword: trample",
+        "triggered ability",
+        "static ability",
+        "other rules text"
+      ]
+    },
+    {
+      "name": "Courier of Comestibles",
+      "rarity": "uncommon",
+      "printing": {
+        "set": "tmt",
+        "number": "112"
+      },
+      "missing": [
+        "triggered ability",
+        "condition (if/unless/as long as)",
+        "tokens",
+        "library manipulation"
+      ]
+    },
+    {
+      "name": "Cowabunga!",
+      "rarity": "common",
+      "printing": {
+        "set": "tmt",
+        "number": "113"
+      },
+      "missing": [
+        "library manipulation"
+      ]
+    },
+    {
+      "name": "Frog Butler",
+      "rarity": "common",
+      "printing": {
+        "set": "tmt",
+        "number": "114"
+      },
+      "missing": [
+        "keyword: deathtouch",
+        "other rules text"
+      ]
+    },
+    {
+      "name": "Groundchuck & Dirtbag",
+      "rarity": "rare",
+      "printing": {
+        "set": "tmt",
+        "number": "115"
+      },
+      "missing": [
+        "supertype: legendary",
+        "keyword: trample",
+        "triggered ability"
+      ]
+    },
+    {
+      "name": "Guac & Marshmallow Pizza",
+      "rarity": "common",
+      "printing": {
+        "set": "tmt",
+        "number": "116"
+      },
+      "missing": [
+        "triggered ability",
+        "sacrifice"
+      ]
+    },
+    {
+      "name": "Leatherhead, Swamp Stalker",
+      "rarity": "rare",
+      "printing": {
+        "set": "tmt",
+        "number": "117"
+      },
+      "missing": [
+        "supertype: legendary",
+        "keyword: trample",
+        "counters",
+        "triggered ability"
+      ]
+    },
+    {
+      "name": "Michelangelo, Game Master",
+      "rarity": "common",
+      "printing": {
+        "set": "tmt",
+        "number": "118"
+      },
+      "missing": [
+        "supertype: legendary",
+        "triggered ability",
+        "condition (if/unless/as long as)",
+        "counters"
+      ]
+    },
+    {
+      "name": "Michelangelo, Improviser",
+      "rarity": "mythic",
+      "printing": {
+        "set": "tmt",
+        "number": "119"
+      },
+      "missing": [
+        "supertype: legendary",
+        "other rules text",
+        "triggered ability"
+      ]
+    },
+    {
+      "name": "Michelangelo, Mutant BFF",
+      "rarity": "uncommon",
+      "printing": {
+        "set": "tmt",
+        "number": "120"
+      },
+      "missing": [
+        "supertype: legendary",
+        "static ability",
+        "counters",
+        "triggered ability",
+        "tokens"
+      ]
+    },
+    {
+      "name": "Michelangelo, Weirdness to 11",
+      "rarity": "rare",
+      "printing": {
+        "set": "tmt",
+        "number": "121"
+      },
+      "missing": [
+        "supertype: legendary",
+        "triggered ability",
+        "tokens",
+        "condition (if/unless/as long as)"
+      ]
+    },
+    {
+      "name": "Michelangelo's Technique",
+      "rarity": "rare",
+      "printing": {
+        "set": "tmt",
+        "number": "122"
+      },
+      "missing": [
+        "other rules text",
+        "library manipulation"
+      ]
+    },
+    {
+      "name": "Mona Lisa, Science Geek",
+      "rarity": "uncommon",
+      "printing": {
+        "set": "tmt",
+        "number": "123"
+      },
+      "missing": [
+        "supertype: legendary",
+        "keyword: reach",
+        "other rules text"
+      ]
+    },
+    {
+      "name": "Mutagen Man, Living Ooze",
+      "rarity": "rare",
+      "printing": {
+        "set": "tmt",
+        "number": "124"
+      },
+      "missing": [
+        "supertype: legendary",
+        "keyword: trample",
+        "static ability",
+        "triggered ability",
+        "tokens"
+      ]
+    },
+    {
+      "name": "Mutant Chain Reaction",
+      "rarity": "common",
+      "printing": {
+        "set": "tmt",
+        "number": "125"
+      },
+      "missing": [
+        "tokens"
+      ]
+    },
+    {
+      "name": "New Generation's Technique",
+      "rarity": "uncommon",
+      "printing": {
+        "set": "tmt",
+        "number": "126"
+      },
+      "missing": [
+        "other rules text",
+        "library manipulation"
+      ]
+    },
+    {
+      "name": "Novel Nunchaku",
+      "rarity": "uncommon",
+      "printing": {
+        "set": "tmt",
+        "number": "127"
+      },
+      "missing": [
+        "triggered ability",
+        "other rules text",
+        "equipment/aura"
+      ]
+    },
+    {
+      "name": "Party Dude",
+      "rarity": "rare",
+      "printing": {
+        "set": "tmt",
+        "number": "128"
+      },
+      "missing": [
+        "layout: class",
+        "triggered ability",
+        "other rules text",
+        "variable amount"
+      ]
+    },
+    {
+      "name": "Primordial Pachyderm",
+      "rarity": "common",
+      "printing": {
+        "set": "tmt",
+        "number": "129"
+      },
+      "missing": [
+        "keyword: reach",
+        "keyword: trample"
+      ]
+    },
+    {
+      "name": "Ragamuffin Raptor",
+      "rarity": "common",
+      "printing": {
+        "set": "tmt",
+        "number": "130"
+      },
+      "missing": [
+        "triggered ability",
+        "graveyard casting"
+      ]
+    },
+    {
+      "name": "Rocksteady, Crash Courser",
+      "rarity": "common",
+      "printing": {
+        "set": "tmt",
+        "number": "131"
+      },
+      "missing": [
+        "supertype: legendary",
+        "static ability",
+        "other rules text"
+      ]
+    },
+    {
+      "name": "Saved by the Shell",
+      "rarity": "uncommon",
+      "printing": {
+        "set": "tmt",
+        "number": "132"
+      },
+      "missing": [
+        "condition (if/unless/as long as)",
+        "static ability",
+        "counters"
+      ]
+    },
+    {
+      "name": "Tenderize",
+      "rarity": "common",
+      "printing": {
+        "set": "tmt",
+        "number": "133"
+      },
+      "missing": [
+        "variable amount"
+      ]
+    },
+    {
+      "name": "Transdimensional Bovine",
+      "rarity": "rare",
+      "printing": {
+        "set": "tmt",
+        "number": "134"
+      },
+      "missing": [
+        "keyword: flying",
+        "other rules text"
+      ]
+    },
+    {
+      "name": "Turtle Power!",
+      "rarity": "rare",
+      "printing": {
+        "set": "tmt",
+        "number": "135"
+      },
+      "missing": [
+        "static ability"
+      ]
+    },
+    {
+      "name": "Venus, Torn Between Worlds",
+      "rarity": "uncommon",
+      "printing": {
+        "set": "tmt",
+        "number": "136"
+      },
+      "missing": [
+        "supertype: legendary",
+        "triggered ability",
+        "counters",
+        "condition (if/unless/as long as)"
+      ]
+    },
+    {
+      "name": "West Wind Avatar",
+      "rarity": "uncommon",
+      "printing": {
+        "set": "tmt",
+        "number": "137"
+      },
+      "missing": [
+        "keyword: trample",
+        "triggered ability",
+        "condition (if/unless/as long as)",
+        "sacrifice"
+      ]
+    },
+    {
+      "name": "Zoo Escapees",
+      "rarity": "common",
+      "printing": {
+        "set": "tmt",
+        "number": "138"
+      },
+      "missing": [
+        "triggered ability",
+        "tokens"
+      ]
+    },
+    {
+      "name": "Baxter Stockman",
+      "rarity": "uncommon",
+      "printing": {
+        "set": "tmt",
+        "number": "139"
+      },
+      "missing": [
+        "supertype: legendary",
+        "triggered ability",
+        "tokens"
+      ]
+    },
+    {
+      "name": "Bebop & Rocksteady",
+      "rarity": "rare",
+      "printing": {
+        "set": "tmt",
+        "number": "140"
+      },
+      "missing": [
+        "supertype: legendary",
+        "triggered ability",
+        "condition (if/unless/as long as)",
+        "sacrifice",
+        "discard"
+      ]
+    },
+    {
+      "name": "Brilliance Unleashed",
+      "rarity": "uncommon",
+      "printing": {
+        "set": "tmt",
+        "number": "141"
+      },
+      "missing": [
+        "modal choice",
+        "other rules text",
+        "condition (if/unless/as long as)"
+      ]
+    },
+    {
+      "name": "Dark Leo & Shredder",
+      "rarity": "mythic",
+      "printing": {
+        "set": "tmt",
+        "number": "142"
+      },
+      "missing": [
+        "supertype: legendary",
+        "other rules text",
+        "static ability",
+        "triggered ability",
+        "condition (if/unless/as long as)",
+        "tokens"
+      ]
+    },
+    {
+      "name": "Don & Leo, Problem Solvers",
+      "rarity": "rare",
+      "printing": {
+        "set": "tmt",
+        "number": "143"
+      },
+      "missing": [
+        "supertype: legendary",
+        "keyword: vigilance",
+        "triggered ability",
+        "exile"
+      ]
+    },
+    {
+      "name": "Don & Raph, Hard Science",
+      "rarity": "rare",
+      "printing": {
+        "set": "tmt",
+        "number": "144"
+      },
+      "missing": [
+        "supertype: legendary",
+        "keyword: menace",
+        "triggered ability"
+      ]
+    },
+    {
+      "name": "EPF Point Squad",
+      "rarity": "common",
+      "printing": {
+        "set": "tmt",
+        "number": "145"
+      },
+      "missing": [
+        "triggered ability",
+        "counters"
+      ]
+    },
+    {
+      "name": "Foot Elite",
+      "rarity": "common",
+      "printing": {
+        "set": "tmt",
+        "number": "146"
+      },
+      "missing": [
+        "triggered ability"
+      ]
+    },
+    {
+      "name": "Foot Ninjas",
+      "rarity": "common",
+      "printing": {
+        "set": "tmt",
+        "number": "147"
+      },
+      "missing": [
+        "other rules text"
+      ]
+    },
+    {
+      "name": "Genghis Frog",
+      "rarity": "uncommon",
+      "printing": {
+        "set": "tmt",
+        "number": "148"
+      },
+      "missing": [
+        "supertype: legendary",
+        "keyword: trample",
+        "triggered ability",
+        "tokens"
+      ]
+    },
+    {
+      "name": "Go Ninja Go",
+      "rarity": "uncommon",
+      "printing": {
+        "set": "tmt",
+        "number": "149"
+      },
+      "missing": [
+        "modal choice",
+        "exile",
+        "variable amount"
+      ]
+    },
+    {
+      "name": "Ice Cream Kitty",
+      "rarity": "common",
+      "printing": {
+        "set": "tmt",
+        "number": "150"
+      },
+      "missing": [
+        "sacrifice"
+      ]
+    },
+    {
+      "name": "Karai, Future of the Foot",
+      "rarity": "uncommon",
+      "printing": {
+        "set": "tmt",
+        "number": "151"
+      },
+      "missing": [
+        "supertype: legendary",
+        "other rules text",
+        "triggered ability",
+        "condition (if/unless/as long as)",
+        "graveyard casting"
+      ]
+    },
+    {
+      "name": "Karai's Technique",
+      "rarity": "uncommon",
+      "printing": {
+        "set": "tmt",
+        "number": "152"
+      },
+      "missing": [
+        "other rules text",
+        "modal choice"
+      ]
+    },
+    {
+      "name": "Krang & Shredder",
+      "rarity": "rare",
+      "printing": {
+        "set": "tmt",
+        "number": "153"
+      },
+      "missing": [
+        "supertype: legendary",
+        "triggered ability",
+        "exile",
+        "condition (if/unless/as long as)"
+      ]
+    },
+    {
+      "name": "The Last Ronin",
+      "rarity": "mythic",
+      "printing": {
+        "set": "tmt",
+        "number": "154"
+      },
+      "missing": [
+        "layout: saga",
+        "other rules text",
+        "triggered ability",
+        "library manipulation",
+        "graveyard casting",
+        "counters"
+      ]
+    },
+    {
+      "name": "Lessons from Life",
+      "rarity": "uncommon",
+      "printing": {
+        "set": "tmt",
+        "number": "155"
+      },
+      "missing": [
+        "other rules text"
+      ]
+    },
+    {
+      "name": "Mechanized Ninja Cavalry",
+      "rarity": "common",
+      "printing": {
+        "set": "tmt",
+        "number": "156"
+      },
+      "missing": [
+        "triggered ability",
+        "tokens"
+      ]
+    },
+    {
+      "name": "Mikey & Don, Party Planners",
+      "rarity": "rare",
+      "printing": {
+        "set": "tmt",
+        "number": "157"
+      },
+      "missing": [
+        "supertype: legendary",
+        "other rules text",
+        "library manipulation",
+        "condition (if/unless/as long as)",
+        "counters"
+      ]
+    },
+    {
+      "name": "Mikey & Leo, Chaos & Order",
+      "rarity": "rare",
+      "printing": {
+        "set": "tmt",
+        "number": "158"
+      },
+      "missing": [
+        "supertype: legendary",
+        "triggered ability",
+        "counters"
+      ]
+    },
+    {
+      "name": "Mouser Mark III",
+      "rarity": "common",
+      "printing": {
+        "set": "tmt",
+        "number": "159"
+      },
+      "missing": [
+        "condition (if/unless/as long as)",
+        "static ability"
+      ]
+    },
+    {
+      "name": "The Neutrinos",
+      "rarity": "uncommon",
+      "printing": {
+        "set": "tmt",
+        "number": "160"
+      },
+      "missing": [
+        "supertype: legendary",
+        "keyword: flying",
+        "triggered ability",
+        "exile"
+      ]
+    },
+    {
+      "name": "Nobody",
+      "rarity": "common",
+      "printing": {
+        "set": "tmt",
+        "number": "161"
+      },
+      "missing": [
+        "triggered ability",
+        "library manipulation",
+        "return to hand"
+      ]
+    },
+    {
+      "name": "North Wind Avatar",
+      "rarity": "mythic",
+      "printing": {
+        "set": "tmt",
+        "number": "162"
+      },
+      "missing": [
+        "keyword: flying",
+        "triggered ability",
+        "condition (if/unless/as long as)"
+      ]
+    },
+    {
+      "name": "Pizza Face, Gastromancer",
+      "rarity": "uncommon",
+      "printing": {
+        "set": "tmt",
+        "number": "163"
+      },
+      "missing": [
+        "supertype: legendary",
+        "triggered ability",
+        "tokens",
+        "condition (if/unless/as long as)",
+        "counters",
+        "sacrifice"
+      ]
+    },
+    {
+      "name": "Punk Frogs",
+      "rarity": "common",
+      "printing": {
+        "set": "tmt",
+        "number": "164"
+      },
+      "missing": [
+        "other rules text"
+      ]
+    },
+    {
+      "name": "Putrid Pals",
+      "rarity": "common",
+      "printing": {
+        "set": "tmt",
+        "number": "165"
+      },
+      "missing": [
+        "keyword: deathtouch",
+        "condition (if/unless/as long as)",
+        "counters"
+      ]
+    },
+    {
+      "name": "Raph & Leo, Sibling Rivals",
+      "rarity": "rare",
+      "printing": {
+        "set": "tmt",
+        "number": "166"
+      },
+      "missing": [
+        "supertype: legendary",
+        "triggered ability",
+        "condition (if/unless/as long as)"
+      ]
+    },
+    {
+      "name": "Raph & Mikey, Troublemakers",
+      "rarity": "rare",
+      "printing": {
+        "set": "tmt",
+        "number": "167"
+      },
+      "missing": [
+        "supertype: legendary",
+        "keyword: trample",
+        "triggered ability"
+      ]
+    },
+    {
+      "name": "Slithering Cryptid",
+      "rarity": "common",
+      "printing": {
+        "set": "tmt",
+        "number": "168"
+      },
+      "missing": [
+        "triggered ability",
+        "tokens"
+      ]
+    },
+    {
+      "name": "Splinter, Radical Rat",
+      "rarity": "rare",
+      "printing": {
+        "set": "tmt",
+        "number": "169"
+      },
+      "missing": [
+        "supertype: legendary",
+        "condition (if/unless/as long as)",
+        "static ability"
+      ]
+    },
+    {
+      "name": "Tainted Treats",
+      "rarity": "uncommon",
+      "printing": {
+        "set": "tmt",
+        "number": "170"
+      },
+      "missing": [
+        "condition (if/unless/as long as)",
+        "tokens"
+      ]
+    },
+    {
+      "name": "Tokka & Rahzar, Terrible Twos",
+      "rarity": "rare",
+      "printing": {
+        "set": "tmt",
+        "number": "171"
+      },
+      "missing": [
+        "supertype: legendary",
+        "static ability",
+        "keyword: menace",
+        "triggered ability",
+        "condition (if/unless/as long as)"
+      ]
+    },
+    {
+      "name": "Chrome Dome",
+      "rarity": "rare",
+      "printing": {
+        "set": "tmt",
+        "number": "172"
+      },
+      "missing": [
+        "static ability",
+        "triggered ability",
+        "tokens",
+        "sacrifice",
+        "copy"
+      ]
+    },
+    {
+      "name": "Everything Pizza",
+      "rarity": "uncommon",
+      "printing": {
+        "set": "tmt",
+        "number": "173"
+      },
+      "missing": [
+        "triggered ability",
+        "library manipulation",
+        "sacrifice",
+        "discard",
+        "counters"
+      ]
+    },
+    {
+      "name": "Henchbots",
+      "rarity": "uncommon",
+      "printing": {
+        "set": "tmt",
+        "number": "174"
+      },
+      "missing": [
+        "triggered ability",
+        "exile"
+      ]
+    },
+    {
+      "name": "Krang, Utrom Warlord",
+      "rarity": "mythic",
+      "printing": {
+        "set": "tmt",
+        "number": "175"
+      },
+      "missing": [
+        "supertype: legendary",
+        "keyword: flying",
+        "keyword: trample",
+        "keyword: indestructible",
+        "static ability"
+      ]
+    },
+    {
+      "name": "Omni-Cheese Pizza",
+      "rarity": "common",
+      "printing": {
+        "set": "tmt",
+        "number": "176"
+      },
+      "missing": [
+        "sacrifice"
+      ]
+    },
+    {
+      "name": "The Ooze",
+      "rarity": "rare",
+      "printing": {
+        "set": "tmt",
+        "number": "177"
+      },
+      "missing": [
+        "supertype: legendary",
+        "triggered ability",
+        "tokens",
+        "variable amount",
+        "counters",
+        "exile"
+      ]
+    },
+    {
+      "name": "Skateboard",
+      "rarity": "uncommon",
+      "printing": {
+        "set": "tmt",
+        "number": "178"
+      },
+      "missing": [
+        "triggered ability",
+        "tap/untap effect",
+        "other rules text",
+        "equipment/aura"
+      ]
+    },
+    {
+      "name": "Technodrome",
+      "rarity": "mythic",
+      "printing": {
+        "set": "tmt",
+        "number": "179"
+      },
+      "missing": [
+        "keyword: reach",
+        "keyword: trample",
+        "condition (if/unless/as long as)",
+        "static ability",
+        "sacrifice",
+        "counters"
+      ]
+    },
+    {
+      "name": "Turtle Blimp",
+      "rarity": "uncommon",
+      "printing": {
+        "set": "tmt",
+        "number": "180"
+      },
+      "missing": [
+        "keyword: flying",
+        "triggered ability",
+        "tokens",
+        "other rules text"
+      ]
+    },
+    {
+      "name": "Turtle Van",
+      "rarity": "rare",
+      "printing": {
+        "set": "tmt",
+        "number": "181"
+      },
+      "missing": [
+        "triggered ability",
+        "condition (if/unless/as long as)",
+        "variable amount",
+        "counters",
+        "other rules text"
+      ]
+    },
+    {
+      "name": "Weather Maker",
+      "rarity": "rare",
+      "printing": {
+        "set": "tmt",
+        "number": "182"
+      },
+      "missing": [
+        "triggered ability",
+        "counters",
+        "other rules text"
+      ]
+    },
+    {
+      "name": "Dimension X",
+      "rarity": "common",
+      "printing": {
+        "set": "tmt",
+        "number": "183"
+      },
+      "missing": [
+        "other rules text"
+      ]
+    },
+    {
+      "name": "Escape Tunnel",
+      "rarity": "common",
+      "printing": {
+        "set": "tmt",
+        "number": "184"
+      },
+      "missing": [
+        "sacrifice",
+        "library manipulation",
+        "static ability"
+      ]
+    },
+    {
+      "name": "Foot Headquarters",
+      "rarity": "common",
+      "printing": {
+        "set": "tmt",
+        "number": "185"
+      },
+      "missing": [
+        "other rules text"
+      ]
+    },
+    {
+      "name": "Illegitimate Business",
+      "rarity": "common",
+      "printing": {
+        "set": "tmt",
+        "number": "186"
+      },
+      "missing": [
+        "other rules text"
+      ]
+    },
+    {
+      "name": "Mutant Town",
+      "rarity": "common",
+      "printing": {
+        "set": "tmt",
+        "number": "187"
+      },
+      "missing": [
+        "other rules text"
+      ]
+    },
+    {
+      "name": "Northampton Farm",
+      "rarity": "rare",
+      "printing": {
+        "set": "tmt",
+        "number": "188"
+      },
+      "missing": [
+        "exile",
+        "sacrifice",
+        "return to hand"
+      ]
+    },
+    {
+      "name": "TCRI Building",
+      "rarity": "common",
+      "printing": {
+        "set": "tmt",
+        "number": "189"
+      },
+      "missing": [
+        "other rules text"
+      ]
+    },
+    {
+      "name": "Turtle Lair",
+      "rarity": "uncommon",
+      "printing": {
+        "set": "tmt",
+        "number": "190"
+      },
+      "missing": [
+        "other rules text",
+        "static ability"
+      ]
+    }
+  ]
+}
