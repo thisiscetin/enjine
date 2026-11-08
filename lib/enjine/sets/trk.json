@@ -12,6 +12,98 @@
   "cards": [
     {
       "card": {
+        "name": "Emergency Medical Hologram",
+        "mana_cost": "{W}",
+        "types": [
+          "artifact",
+          "creature"
+        ],
+        "subtypes": [
+          "illusion",
+          "doctor"
+        ],
+        "power": 0,
+        "toughness": 1,
+        "abilities": [
+          {
+            "triggered": {
+              "when": {
+                "enters": {}
+              },
+              "targets": [
+                "creature"
+              ],
+              "effects": [
+                {
+                  "add_counters": {
+                    "counter": "+1/+1",
+                    "amount": 1,
+                    "to": {
+                      "target": 0
+                    }
+                  }
+                },
+                {
+                  "gain_life": {
+                    "amount": 1
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "rarity": "common",
+      "printing": {
+        "set": "trk",
+        "number": "15"
+      }
+    },
+    {
+      "card": {
+        "name": "Xindi Surveyors",
+        "mana_cost": "{2}{G}",
+        "types": [
+          "creature"
+        ],
+        "subtypes": [
+          "xindi",
+          "scientist"
+        ],
+        "power": 3,
+        "toughness": 2,
+        "abilities": [
+          {
+            "triggered": {
+              "when": {
+                "enters": {
+                  "subject": {
+                    "each": "land",
+                    "controller": "you"
+                  }
+                }
+              },
+              "effects": [
+                {
+                  "add_counters": {
+                    "counter": "+1/+1",
+                    "amount": 1,
+                    "to": "self"
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "rarity": "common",
+      "printing": {
+        "set": "trk",
+        "number": "225"
+      }
+    },
+    {
+      "card": {
         "name": "Plains",
         "types": [
           "land"
@@ -292,18 +384,6 @@
       ]
     },
     {
-      "name": "Emergency Medical Hologram",
-      "rarity": "common",
-      "printing": {
-        "set": "trk",
-        "number": "15"
-      },
-      "missing": [
-        "triggered ability",
-        "counters"
-      ]
-    },
-    {
       "name": "Excalbian Gamemaster",
       "rarity": "mythic",
       "printing": {
@@ -352,8 +432,6 @@
         "number": "19"
       },
       "missing": [
-        "triggered ability",
-        "static ability",
         "other rules text"
       ]
     },
@@ -731,9 +809,7 @@
         "number": "48"
       },
       "missing": [
-        "other rules text",
-        "triggered ability",
-        "counters"
+        "other rules text"
       ]
     },
     {
@@ -1205,7 +1281,6 @@
         "number": "83"
       },
       "missing": [
-        "triggered ability",
         "station",
         "other rules text"
       ]
@@ -2614,8 +2689,6 @@
         "number": "189"
       },
       "missing": [
-        "triggered ability",
-        "counters",
         "static ability",
         "other rules text"
       ]
@@ -2696,7 +2769,6 @@
         "number": "195"
       },
       "missing": [
-        "triggered ability",
         "counters"
       ]
     },
@@ -3084,18 +3156,6 @@
       },
       "missing": [
         "other rules text"
-      ]
-    },
-    {
-      "name": "Xindi Surveyors",
-      "rarity": "common",
-      "printing": {
-        "set": "trk",
-        "number": "225"
-      },
-      "missing": [
-        "triggered ability",
-        "counters"
       ]
     },
     {
@@ -3700,7 +3760,6 @@
         "number": "269"
       },
       "missing": [
-        "triggered ability",
         "modal choice",
         "sacrifice",
         "other rules text"
@@ -3786,8 +3845,7 @@
         "number": "275"
       },
       "missing": [
-        "other rules text",
-        "triggered ability"
+        "other rules text"
       ]
     },
     {
@@ -3810,8 +3868,7 @@
         "number": "277"
       },
       "missing": [
-        "other rules text",
-        "triggered ability"
+        "other rules text"
       ]
     },
     {
@@ -3844,8 +3901,7 @@
         "number": "280"
       },
       "missing": [
-        "other rules text",
-        "triggered ability"
+        "other rules text"
       ]
     },
     {
@@ -3856,8 +3912,7 @@
         "number": "281"
       },
       "missing": [
-        "other rules text",
-        "triggered ability"
+        "other rules text"
       ]
     },
     {
@@ -3883,8 +3938,7 @@
         "number": "283"
       },
       "missing": [
-        "other rules text",
-        "triggered ability"
+        "other rules text"
       ]
     },
     {
@@ -3944,8 +3998,7 @@
         "number": "288"
       },
       "missing": [
-        "other rules text",
-        "triggered ability"
+        "other rules text"
       ]
     },
     {
@@ -3982,8 +4035,7 @@
         "number": "291"
       },
       "missing": [
-        "other rules text",
-        "triggered ability"
+        "other rules text"
       ]
     },
     {
@@ -4009,8 +4061,7 @@
         "number": "293"
       },
       "missing": [
-        "other rules text",
-        "triggered ability"
+        "other rules text"
       ]
     },
     {
@@ -4021,8 +4072,7 @@
         "number": "294"
       },
       "missing": [
-        "other rules text",
-        "triggered ability"
+        "other rules text"
       ]
     },
     {
@@ -4153,8 +4203,7 @@
         "number": "305"
       },
       "missing": [
-        "other rules text",
-        "triggered ability"
+        "other rules text"
       ]
     },
     {

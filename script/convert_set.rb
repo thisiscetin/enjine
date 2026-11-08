@@ -80,6 +80,7 @@ module SetConverter
   def translate_text(source, data, missing)
     text = source["oracle_text"].to_s.gsub(/\s*\([^)]*\)/, "") # reminder text is not rules
     text = text.gsub(source["name"], "CARDNAME")
+    text = text.gsub(/\bthis (creature|artifact|enchantment|land|planeswalker|permanent|Vehicle|Spacecraft)\b/, "CARDNAME")
     keywords = []
     abilities = []
     spell_effects = []
@@ -88,6 +89,8 @@ module SetConverter
       if (kw = keyword_line(line))
         unknown = kw - SUPPORTED_KEYWORDS.to_a
         unknown.empty? ? keywords.concat(kw) : missing.concat(unknown.map { "keyword: #{it}" })
+      elsif (triggered = triggered_ability(line))
+        abilities << triggered
       elsif (mana = mana_ability(line))
         abilities << mana
       elsif data["types"].intersect?(%w[instant sorcery])
@@ -115,6 +118,30 @@ module SetConverter
     end
       parts
     end
+  end
+
+  TRIGGERS = [
+    [/\AWhen CARDNAME enters, (.+)\z/, { "enters" => {} }],
+    [/\AWhen CARDNAME dies, (.+)\z/, { "dies" => {} }],
+    [/\AWhenever CARDNAME attacks, (.+)\z/, { "attacks" => {} }],
+    [/\AAt the beginning of your upkeep, (.+)\z/, { "step_begins" => { "step" => "upkeep" } }],
+    [/\AAt the beginning of your end step, (.+)\z/, { "step_begins" => { "step" => "end" } }],
+    [/\AAt the beginning of each upkeep, (.+)\z/, { "step_begins" => { "step" => "upkeep", "whose" => "each" } }],
+    [/\AWhenever another creature you control enters, (.+)\z/,
+     { "enters" => { "subject" => { "each" => "creature", "controller" => "you", "other" => true } } }],
+    [/\A(?:Landfall — )?Whenever a land you control enters, (.+)\z/,
+     { "enters" => { "subject" => { "each" => "land", "controller" => "you" } } }],
+    [/\AWhenever you cast a noncreature spell, (.+)\z/, { "cast" => { "spell" => "noncreature" } }]
+  ].freeze
+
+  def triggered_ability(line)
+    TRIGGERS.each do |pattern, trigger|
+      m = pattern.match(line) or next
+      body = m[1].sub(/\A./, &:upcase)
+      effects, targets = sentence_effects(body, 0)
+      return effects && { "triggered" => { "when" => trigger, "targets" => targets, "effects" => effects }.reject { |_, v| v.empty? } }
+    end
+    nil
   end
 
   def mana_ability(line)
@@ -177,6 +204,12 @@ module SetConverter
     when /\ADestroy (target creature|target permanent|target planeswalker)\z/
       { "destroy" => { "to" => target_ref(::Regexp.last_match(1), targets, offset) } }
     when /\ACounter (target spell)\z/ then { "counter" => { "to" => target_ref(::Regexp.last_match(1), targets, offset) } }
+    when %r{\APut (a|one|two|three|\d+) \+1/\+1 counters? on CARDNAME\z}
+      { "add_counters" => { "counter" => "+1/+1", "amount" => number(::Regexp.last_match(1)), "to" => "self" } }
+    when /\ACARDNAME deals (\d+) damage to each opponent\z/
+      { "deal_damage" => { "amount" => Integer(::Regexp.last_match(1)), "to" => "each_opponent" } }
+    when /\AYou draw (a|two|three|\d+) cards?\z/ then { "draw" => { "amount" => number(::Regexp.last_match(1)) } }
+    when /\AYou lose (\d+) life\z/ then { "lose_life" => { "amount" => Integer(::Regexp.last_match(1)), "to" => "you" } }
     when %r{\APut (a|one|two|three|\d+) \+1/\+1 counters? on (target creature)\z}
       { "add_counters" => { "counter" => "+1/+1", "amount" => number(::Regexp.last_match(1)),
                             "to" => target_ref(::Regexp.last_match(2), targets, offset) } }
