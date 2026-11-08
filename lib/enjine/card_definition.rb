@@ -1,0 +1,180 @@
+# frozen_string_literal: true
+
+module Enjine
+  # Immutable, validated blueprint of a card, built from a data block.
+  #
+  #   CardDefinition.from_h({"name" => "Forest", "types" => ["land"], ...})
+  #
+  # Every type, supertype, subtype with rules, ability and cost is looked up in
+  # Enjine.registry. Anything unknown is reported (with its path) in a single
+  # InvalidCardDefinition error.
+  class CardDefinition
+    KEYS = %w[name mana_cost types supertypes subtypes power toughness abilities rules_text].freeze
+    SUBTYPE_FORMAT = /\A[a-z][a-z0-9_]*\z/
+
+    attr_reader :id, :name, :mana_cost, :types, :supertypes, :subtypes, :power, :toughness,
+                :abilities, :rules_text, :type_modules, :source
+
+    # Canonical id derived from a card name: "Jace, the Mind Sculptor" -> "jace_the_mind_sculptor".
+    def self.slug(name)
+      name.to_s.unicode_normalize(:nfkd).gsub(/\p{Mn}/, "").downcase.delete("'’").gsub(/[^a-z0-9]+/, "_").gsub(/\A_+|_+\z/, "")
+    end
+
+    def self.from_h(hash)
+      return hash if hash.is_a?(CardDefinition)
+
+      errors = []
+      raise InvalidCardDefinition.new(["card definition must be an object, got #{hash.class}"]) unless hash.is_a?(Hash)
+
+      card = hash.transform_keys(&:to_s)
+      new(card, errors).tap do
+        raise InvalidCardDefinition.new(errors, name: card["name"]) unless errors.empty?
+      end
+    end
+
+    def initialize(card, errors)
+      (card.keys - KEYS).each { |k| errors << "#{k}: unknown field (allowed: #{KEYS.join(", ")})" }
+      @name = read_name(card, errors)
+      @id = self.class.slug(@name)
+      @types, @type_modules = read_names(card, "types", :type, errors, required: true)
+      @supertypes, = read_names(card, "supertypes", :supertype, errors)
+      @subtypes = read_subtypes(card, errors)
+      @mana_cost = card.key?("mana_cost") ? Mana.parse_cost(card["mana_cost"], errors) : nil
+      @power = read_stat(card, "power", errors)
+      @toughness = read_stat(card, "toughness", errors)
+      @rules_text = card["rules_text"]
+      errors << "rules_text: must be a string" unless @rules_text.nil? || @rules_text.is_a?(String)
+      @abilities = read_abilities(card, errors)
+      @type_modules.each { |mod| mod.validate(card, errors) }
+      @source = normalize(card)
+      freeze
+    end
+
+    def type?(type) = @types.include?(type.to_sym)
+    def supertype?(type) = @supertypes.include?(type.to_sym)
+    def permanent? = @type_modules.any?(&:permanent?)
+    def land? = type?(:land)
+    def deck_limit_exempt? = @supertypes.any? { |s| Enjine.registry.fetch(:supertype, s).deck_limit_exempt? }
+
+    def mana_abilities = @abilities.select(&:mana_ability?)
+
+    def type_line
+      left = (@supertypes + @types).map { |t| t.to_s.capitalize }.join(" ")
+      right = @subtypes.map { |t| t.to_s.split("_").map(&:capitalize).join(" ") }.join(" ")
+      right.empty? ? left : "#{left} — #{right}"
+    end
+
+    # Canonical data form; CardDefinition.from_h(defn.to_h) == defn.
+    def to_h = @source
+
+    def ==(other) = other.is_a?(CardDefinition) && other.to_h == to_h
+    alias eql? ==
+
+    def hash = @source.hash
+
+    private
+
+    def read_name(card, errors)
+      name = card["name"]
+      return name if name.is_a?(String) && !self.class.slug(name).empty?
+
+      errors << "name: required, must be a non-empty string"
+      "?"
+    end
+
+    def read_names(card, key, category, errors, required: false)
+      list = card.fetch(key, [])
+      if !list.is_a?(Array) || (required && list.empty?)
+        errors << "#{key}: must be a #{"non-empty " if required}list"
+        return [[].freeze, [].freeze]
+      end
+
+      modules = list.each_with_index.filter_map do |raw, i|
+        Enjine.registry.fetch(category, raw.to_s.downcase).tap do |mod|
+          unless mod
+            errors << "#{key}[#{i}]: unknown #{category} #{raw.inspect} " \
+                      "(supported: #{Enjine.registry.names(category).join(", ")})"
+          end
+        end
+      end
+      [modules.map { |m| m.primitive_name.to_sym }.uniq.freeze, modules.uniq.freeze]
+    end
+
+    def read_subtypes(card, errors)
+      list = card.fetch("subtypes", [])
+      unless list.is_a?(Array)
+        errors << "subtypes: must be a list"
+        return [].freeze
+      end
+
+      list.each_with_index.filter_map do |raw, i|
+        sub = raw.to_s.downcase.tr(" -", "__")
+        unless SUBTYPE_FORMAT.match?(sub)
+          errors << "subtypes[#{i}]: invalid subtype #{raw.inspect}"
+          next
+        end
+
+        rule = Enjine.registry.fetch(:subtype, sub)
+        if rule && !rule.applies_to.intersect?(@types)
+          errors << "subtypes[#{i}]: #{sub} is only valid for #{rule.applies_to.join("/")} cards (CR 205.3d)"
+        end
+        sub.to_sym
+      end.uniq.freeze
+    end
+
+    def read_stat(card, key, errors)
+      return nil unless card.key?(key)
+
+      value = card[key]
+      errors << "#{key}: must be an integer" unless value.is_a?(Integer)
+      value
+    end
+
+    def read_abilities(card, errors)
+      list = card.fetch("abilities", [])
+      unless list.is_a?(Array)
+        errors << "abilities: must be a list"
+        list = []
+      end
+
+      explicit = list.each_with_index.filter_map do |entry, i|
+        Mechanics.build_entry(:ability, entry, errors, "abilities[#{i}]")
+      end
+      intrinsic = @subtypes.flat_map do |sub|
+        rule = Enjine.registry.fetch(:subtype, sub)
+        rule.respond_to?(:intrinsic_abilities) ? rule.intrinsic_abilities : []
+      end
+      (explicit + intrinsic).freeze
+    end
+
+    def normalize(card)
+      out = { "name" => @name }
+      out["mana_cost"] = @mana_cost.to_s if @mana_cost
+      out["types"] = @types.map(&:to_s)
+      out["supertypes"] = @supertypes.map(&:to_s) unless @supertypes.empty?
+      out["subtypes"] = @subtypes.map(&:to_s) unless @subtypes.empty?
+      out["power"] = @power unless @power.nil?
+      out["toughness"] = @toughness unless @toughness.nil?
+      out["abilities"] = deep_stringify(card["abilities"]) if card["abilities"].is_a?(Array) && !card["abilities"].empty?
+      out["rules_text"] = @rules_text if @rules_text
+      deep_freeze(out)
+    end
+
+    def deep_stringify(value)
+      case value
+      when Hash then value.to_h { |k, v| [k.to_s, deep_stringify(v)] }
+      when Array then value.map { deep_stringify(it) }
+      when Symbol then value.to_s
+      else value
+      end
+    end
+
+    def deep_freeze(value)
+      case value
+      when Hash then value.each_value { deep_freeze(it) }
+      when Array then value.each { deep_freeze(it) }
+      end
+      value.freeze
+    end
+  end
+end

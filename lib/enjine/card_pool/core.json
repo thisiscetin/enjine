@@ -1,0 +1,10 @@
+[
+  { "name": "Plains", "types": ["land"], "supertypes": ["basic"], "subtypes": ["plains"] },
+  { "name": "Island", "types": ["land"], "supertypes": ["basic"], "subtypes": ["island"] },
+  { "name": "Swamp", "types": ["land"], "supertypes": ["basic"], "subtypes": ["swamp"] },
+  { "name": "Mountain", "types": ["land"], "supertypes": ["basic"], "subtypes": ["mountain"] },
+  { "name": "Forest", "types": ["land"], "supertypes": ["basic"], "subtypes": ["forest"] },
+  { "name": "Wastes", "types": ["land"], "supertypes": ["basic"],
+    "abilities": [{ "mana": { "cost": ["tap"], "produce": "{C}" } }],
+    "rules_text": "{T}: Add {C}." }
+]

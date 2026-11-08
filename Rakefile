@@ -1,0 +1,70 @@
+# frozen_string_literal: true
+
+require "bundler/gem_tasks"
+require "rspec/core/rake_task"
+require "rubocop/rake_task"
+
+RSpec::Core::RakeTask.new(:spec)
+RuboCop::RakeTask.new
+
+desc "Regenerate SUPPORTED.md and docs/reference from the primitive registry"
+task :docs do
+  require_relative "lib/enjine"
+  require_relative "lib/enjine/docs"
+  Enjine::Docs.write
+end
+
+desc "Play random games checking invariants: rake fuzz[games,seed]"
+task :fuzz, %i[games seed] do |_, args|
+  require_relative "lib/enjine"
+  require_relative "lib/enjine/card_pool/core"
+  games = Integer(args[:games] || 50)
+  seed = Integer(args[:seed] || 0)
+  rng = Enjine::Rng.from_seed(seed)
+  cards = Enjine::CardPool::Core.cards
+  players = %w[p1 p2].map { Enjine::Player.new(name: it, deck: Enjine::CardPool::DeckBuilder.random(cards, rng: rng)) }
+  result = Enjine::Fuzz.run(Enjine::Setup.new(*players), games: games, seed: seed, roundtrip_every: 251)
+  puts format("%<g>d games, %<d>d decisions, %<s>.2fs (%<r>.0f decisions/s) outcomes=%<o>s",
+              g: result.games, d: result.decisions, s: result.seconds, r: result.decisions / result.seconds,
+              o: result.outcomes)
+end
+
+desc "Benchmark random games per second (not a CI gate)"
+task :bench do
+  require_relative "lib/enjine"
+  require_relative "lib/enjine/card_pool/core"
+  require "benchmark/ips"
+  cards = Enjine::CardPool::Core.cards
+  rng = Enjine::Rng.from_seed(1)
+  players = %w[p1 p2].map { Enjine::Player.new(name: it, deck: Enjine::CardPool::DeckBuilder.random(cards, rng: rng)) }
+  setup = Enjine::Setup.new(*players)
+  seed = 0
+  Benchmark.ips do |x|
+    x.report("random game") do
+      game = setup.new_game(seed: seed += 1)
+      agent = Enjine::Agents::Random.new(seed: seed)
+      game.submit(agent.choose(game.pending_decision)) until game.over?
+    end
+  end
+end
+
+desc "Profile random games with stackprof: rake profile[games]"
+task :profile, %i[games] do |_, args|
+  require_relative "lib/enjine"
+  require_relative "lib/enjine/card_pool/core"
+  require "stackprof"
+  cards = Enjine::CardPool::Core.cards
+  rng = Enjine::Rng.from_seed(1)
+  players = %w[p1 p2].map { Enjine::Player.new(name: it, deck: Enjine::CardPool::DeckBuilder.random(cards, rng: rng)) }
+  setup = Enjine::Setup.new(*players)
+  StackProf.run(mode: :cpu, out: "tmp/stackprof.dump") do
+    Integer(args[:games] || 20).times do |i|
+      game = setup.new_game(seed: i)
+      agent = Enjine::Agents::Random.new(seed: i)
+      game.submit(agent.choose(game.pending_decision)) until game.over?
+    end
+  end
+  puts "wrote tmp/stackprof.dump — view with: bundle exec stackprof tmp/stackprof.dump --text"
+end
+
+task default: %i[spec rubocop]

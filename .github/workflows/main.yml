@@ -1,0 +1,24 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "4.0.1"
+          bundler-cache: true
+      - name: Specs (coverage gate, docs drift check)
+        run: bundle exec rspec
+      - name: RuboCop
+        run: bundle exec rubocop
+      - name: Fuzz
+        run: bundle exec rake "fuzz[40,${{ github.run_number }}]"
