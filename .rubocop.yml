@@ -26,8 +26,6 @@ Layout/LineLength:
 # A rules engine has a few long, linear methods that mirror the rules text.
 Metrics/MethodLength:
   Max: 40
-Metrics/PerceivedComplexity:
-  Max: 18
 Metrics/ClassLength:
   Max: 400
 Metrics/ModuleLength:
@@ -61,11 +59,13 @@ RSpec/InstanceVariable:
 Metrics/AbcSize:
   Max: 55
   Exclude:
+    - "script/convert_set.rb"
     - "lib/enjine/cli/text.rb"
     - "lib/enjine/snapshot.rb"
 Metrics/CyclomaticComplexity:
   Max: 18
   Exclude:
+    - "script/convert_set.rb"
     - "lib/enjine/cli/text.rb"
     - "lib/enjine/cli.rb"
 Naming/PredicateMethod:
@@ -76,3 +76,9 @@ Style/ItBlockParameter:
   Enabled: false
 Style/FormatStringToken:
   Enabled: false
+
+# The set converter's line translator is a long dispatch over card-text shapes.
+Metrics/PerceivedComplexity:
+  Max: 18
+  Exclude:
+    - "script/convert_set.rb"
