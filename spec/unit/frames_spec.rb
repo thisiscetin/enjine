@@ -48,7 +48,7 @@ RSpec.describe Enjine::Frames do
       end
     end.new
     fake_ability = Struct.new(:targets, :effects).new([Enjine::Mechanics::Filters::AnyTarget], [pausing])
-    allow_any_instance_of(Enjine::Engine).to receive(:resolving_ability).and_return(fake_ability)
+    allow(game.instance_variable_get(:@engine)).to receive(:resolving_ability).and_return(fake_ability)
     allow(Enjine::Frames::Resolve).to receive(:decisions).and_return(["priority"])
     pass_both(game)
     expect(game.state.frames.map { it["type"] }).to eq(["resolve"])

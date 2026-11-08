@@ -21,82 +21,82 @@ RSpec.describe "Regressions found by the design reviews" do
     allow(Enjine::Decisions::PlayOrDraw).to receive(:options).and_raise(NoMethodError, "engine bug")
     expect { Enjine::Game.import(game.export, catalog: game.catalog) }.to raise_error(NoMethodError, "engine bug")
   end
-end
 
-RSpec.describe "State#fork and Game#fork (P3)" do
-  it "copies everything: the fork serializes identically and diverges independently" do
-    setup = basics_setup
-    game = setup.new_game(seed: 9)
-    agent = Enjine::Agents::Random.new(seed: 9)
-    300.times { game.submit(agent.choose(game.pending_decision)) unless game.over? }
-    copy = game.fork
-    expect(copy.state.to_h).to eq(game.state.to_h)
-    expect(copy.pending_decision).to eq(game.pending_decision)
-    copy.submit(copy.legal_options.first)
-    expect(copy.state.to_h).not_to eq(game.state.to_h)
-    expect(game.history.size).to eq(copy.history.size - 1)
+  describe "State#fork and Game#fork (P3)" do
+    it "copies everything: the fork serializes identically and diverges independently" do
+      setup = basics_setup
+      game = setup.new_game(seed: 9)
+      agent = Enjine::Agents::Random.new(seed: 9)
+      300.times { game.submit(agent.choose(game.pending_decision)) unless game.over? }
+      copy = game.fork
+      expect(copy.state.to_h).to eq(game.state.to_h)
+      expect(copy.pending_decision).to eq(game.pending_decision)
+      copy.submit(copy.legal_options.first)
+      expect(copy.state.to_h).not_to eq(game.state.to_h)
+      expect(game.history.size).to eq(copy.history.size - 1)
+    end
+
+    it "deep-copies mid-cast context, combat and effects" do
+      game = build_game do
+        turn 3, active: "alice", step: :precombat_main
+        player("alice") do
+          hand "Grizzly Bears"
+          battlefield "Forest", "Forest"
+        end
+        player("bob")
+      end
+      game.submit(type: "cast", object: ids_in(game, "alice", :hand).first)
+      copy = game.state.fork
+      copy.frames.last["remaining"]["generic"] = 99
+      copy.players[0].mana_pool[:G] = 5
+      copy.objects.each_value { it.tapped = true }
+      expect(game.state.frames.last["remaining"]["generic"]).to eq(1)
+      expect(game.state.players[0].mana_pool[:G]).to eq(0)
+      expect(game.state.objects.values.none?(&:tapped)).to be(true)
+    end
   end
 
-  it "deep-copies mid-cast context, combat and effects" do
-    game = build_game do
-      turn 3, active: "alice", step: :precombat_main
-      player("alice") do
-        hand "Grizzly Bears"
-        battlefield "Forest", "Forest"
+  describe "The frame stack (F1)" do
+    it "exports and resumes mid-cast and mid-resolution identically" do
+      game = build_game do
+        turn 3, active: "alice", step: :precombat_main
+        player("alice") do
+          hand "Lightning Bolt"
+          battlefield "Mountain"
+          library "Forest", count: 3
+        end
+        player("bob") { library "Forest", count: 3 }
       end
-      player("bob")
+      game.submit(type: "cast", object: ids_in(game, "alice", :hand).first)
+      expect(game.state.frames.map { it["type"] }).to eq(["cast"])
+      copy = Enjine::Game.import(game.export, catalog: game.catalog)
+      expect(copy.pending_decision).to eq(game.pending_decision)
+      [game, copy].each do |g|
+        g.submit(type: "target", target: "player:bob")
+        g.submit(type: "activate_mana", object: g.state.battlefield.first, ability: 0)
+        g.submit(type: "pay_mana", mana: "R")
+        pass_both(g)
+      end
+      expect(copy.state.to_h).to eq(game.state.to_h)
+      expect(game.state.frames).to be_empty
+      expect(game.view_for(:observer)["players"][1]["life"]).to eq(17)
     end
-    game.submit(type: "cast", object: ids_in(game, "alice", :hand).first)
-    copy = game.state.fork
-    copy.frames.last["remaining"]["generic"] = 99
-    copy.players[0].mana_pool[:G] = 5
-    copy.objects.each_value { it.tapped = true }
-    expect(game.state.frames.last["remaining"]["generic"]).to eq(1)
-    expect(game.state.players[0].mana_pool[:G]).to eq(0)
-    expect(game.state.objects.values.none?(&:tapped)).to be(true)
-  end
-end
 
-RSpec.describe "The frame stack (F1)" do
-  it "exports and resumes mid-cast and mid-resolution identically" do
-    game = build_game do
-      turn 3, active: "alice", step: :precombat_main
-      player("alice") do
-        hand "Lightning Bolt"
-        battlefield "Mountain"
-        library "Forest", count: 3
+    it "rejects snapshots whose pending decision doesn't belong to the top frame" do
+      game = build_game do
+        turn 3, active: "alice", step: :precombat_main
+        player("alice") do
+          hand "Lightning Bolt"
+          battlefield "Mountain"
+        end
+        player("bob")
       end
-      player("bob") { library "Forest", count: 3 }
+      game.submit(type: "cast", object: ids_in(game, "alice", :hand).first)
+      data = game.to_h
+      data["state"]["pending"] = { "kind" => "discard", "player" => 0, "count" => 1 }
+      expect { Enjine::Game.import(data, catalog: game.catalog) }.to raise_error(Enjine::InvalidSnapshot, /cast frame/)
+      data["state"]["frames"] = [{ "type" => "warp" }]
+      expect { Enjine::Game.import(data, catalog: game.catalog) }.to raise_error(Enjine::InvalidSnapshot, /unknown frame/)
     end
-    game.submit(type: "cast", object: ids_in(game, "alice", :hand).first)
-    expect(game.state.frames.map { it["type"] }).to eq(["cast"])
-    copy = Enjine::Game.import(game.export, catalog: game.catalog)
-    expect(copy.pending_decision).to eq(game.pending_decision)
-    [game, copy].each do |g|
-      g.submit(type: "target", target: "player:bob")
-      g.submit(type: "activate_mana", object: g.state.battlefield.first, ability: 0)
-      g.submit(type: "pay_mana", mana: "R")
-      pass_both(g)
-    end
-    expect(copy.state.to_h).to eq(game.state.to_h)
-    expect(game.state.frames).to be_empty
-    expect(game.view_for(:observer)["players"][1]["life"]).to eq(17)
-  end
-
-  it "rejects snapshots whose pending decision doesn't belong to the top frame" do
-    game = build_game do
-      turn 3, active: "alice", step: :precombat_main
-      player("alice") do
-        hand "Lightning Bolt"
-        battlefield "Mountain"
-      end
-      player("bob")
-    end
-    game.submit(type: "cast", object: ids_in(game, "alice", :hand).first)
-    data = game.to_h
-    data["state"]["pending"] = { "kind" => "discard", "player" => 0, "count" => 1 }
-    expect { Enjine::Game.import(data, catalog: game.catalog) }.to raise_error(Enjine::InvalidSnapshot, /cast frame/)
-    data["state"]["frames"] = [{ "type" => "warp" }]
-    expect { Enjine::Game.import(data, catalog: game.catalog) }.to raise_error(Enjine::InvalidSnapshot, /unknown frame/)
   end
 end
