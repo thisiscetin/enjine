@@ -95,6 +95,7 @@ module Enjine
 
         if definition(obj).permanent?
           enters = enters_from_answer(obj.id, frame)
+          enters = (enters || {}).merge("attached_to" => frame.dig("ctx", "targets", 0)) if aura?(obj) # CR 608.3c
           pay_entering_life!(obj.controller, frame)
           move!(obj.id, :battlefield, controller: obj.controller, reason: "resolve", enters: enters) # CR 608.3
         else

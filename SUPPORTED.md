@@ -27,6 +27,8 @@ Rules version: Comprehensive Rules effective 2026-09-25.
 
 | Name | Rules | Description |
 | --- | --- | --- |
+| [`aura`](docs/reference/subtypes.md#aura) | 303.4, 303.4a, 303.4c, 303.4d, 608.3c, 704.5m | An enchantment that is cast targeting what its `enchant` ability allows and enters the battlefield attached to that target. If it's attached to something it can't enchant, or to nothing, it's put into its owner's graveyard (a state-based action). |
+| [`equipment`](docs/reference/subtypes.md#equipment) | 301.5, 301.5b, 301.5c, 704.5n | An artifact that can be attached to a creature (it enters unattached). If the creature it equips stops being a creature or leaves, it becomes unattached and stays on the battlefield (a state-based action). |
 | [`forest`](docs/reference/subtypes.md#forest) | 305.6, 205.3i | Basic land type. A land with this subtype has "{T}: Add {G}." |
 | [`island`](docs/reference/subtypes.md#island) | 305.6, 205.3i | Basic land type. A land with this subtype has "{T}: Add {U}." |
 | [`mountain`](docs/reference/subtypes.md#mountain) | 305.6, 205.3i | Basic land type. A land with this subtype has "{T}: Add {R}." |
@@ -57,12 +59,14 @@ Rules version: Comprehensive Rules effective 2026-09-25.
 | Name | Rules | Description |
 | --- | --- | --- |
 | [`activated`](docs/reference/abilities.md#activated) | 602.1, 602.2, 602.5d | An activated ability: announce it, choose targets, pay its costs, then it goes on the stack. `timing: "sorcery"` restricts it to sorcery speed. |
+| [`enchant`](docs/reference/abilities.md#enchant) | 702.5a, 115.1b, 303.4a | The Aura's enchant ability: a target filter for what its spell targets and what the Aura may be attached to, e.g. "creature" or {"permanent": {"any_of": ["artifact", "creature"]}}. Only Auras have it. |
 | [`enters_tapped`](docs/reference/abilities.md#enters_tapped) | 614.1c, 614.12 | This permanent enters the battlefield tapped (a self-replacement effect). |
 | [`enters_tapped_unless_pay_life`](docs/reference/abilities.md#enters_tapped_unless_pay_life) | 614.12, 119.4 | As this permanent enters, its controller may pay `life` life; if they don't, it enters tapped. You can't pay more life than you have. |
+| [`equip`](docs/reference/abilities.md#equip) | 702.6a, 301.5b, 301.5c, 701.3a | Equip: pay `cost` to attach this Equipment to target creature you control (not itself). Sorcery speed. Only Equipment have it. |
 | [`loyalty`](docs/reference/abilities.md#loyalty) | 606.3, 606.4, 606.5, 602.2b | A loyalty ability. Its cost adds (positive) or removes (negative) loyalty counters and is paid on activation. Sorcery speed, and only one loyalty ability per planeswalker per turn. |
 | [`mana`](docs/reference/abilities.md#mana) | 605.1a, 605.3a, 605.3b, 106.4 | An activated mana ability: pay the cost, add the mana to your mana pool immediately. It does not use the stack and can be activated whenever you have priority. |
 | [`spell`](docs/reference/abilities.md#spell) | 113.3a, 601.2c, 608.2b, 608.2c | The spell ability of an instant or sorcery: its targets are chosen while casting and its effects happen in order when it resolves. If every target is illegal on resolution, it doesn't resolve. |
-| [`static`](docs/reference/abilities.md#static) | 604.1, 611.3a, 613.1f, 613.4c | While its source is on the battlefield, every matching permanent gets `pump` and/or the `keywords`. `affects` is {"each": filter, "controller": you|opponent|any, "other": true} (relative to the source's controller). |
+| [`static`](docs/reference/abilities.md#static) | 604.1, 611.3a, 613.1f, 613.4c, 301.5f, 303.4m | While its source is on the battlefield, every matching permanent gets `pump` and/or the `keywords`. `affects` is {"each": filter, "controller": you|opponent|any, "other": true} (relative to the source's controller), or "attached": the permanent the source is attached to ("equipped/enchanted creature"). |
 | [`triggered`](docs/reference/abilities.md#triggered) | 603.2, 603.3, 603.3b, 603.3d | A triggered ability: when its trigger condition happens, it is put on the stack the next time a player would receive priority (in APNAP order), with targets chosen then. |
 
 ## Trigger conditions
@@ -88,6 +92,7 @@ Rules version: Comprehensive Rules effective 2026-09-25.
 | Name | Rules | Description |
 | --- | --- | --- |
 | [`add_counters`](docs/reference/effects.md#add_counters) | 122.1, 122.6, 613.4c | Put `amount` counters of kind `counter` (+1/+1, -1/-1, loyalty) on each referenced permanent. |
+| [`attach`](docs/reference/effects.md#attach) | 701.3a, 701.3b, 701.3c, 301.5c | Attach this Aura or Equipment (the ability's source) to the referenced permanent. Nothing happens if it can't legally be attached to it, if it's already attached to it, or if the source has left the battlefield. |
 | [`counter`](docs/reference/effects.md#counter) | 701.6a | Counter each referenced spell: it leaves the stack for its owner's graveyard without resolving. |
 | [`create_token`](docs/reference/effects.md#create_token) | 111.1, 111.10, 701.7a, 704.5d | Create `amount` tokens under the referenced player's control (default: you). `token` is a predefined token name (Treasure, Clue, Food) or an inline card definition. `tapped: true` creates them tapped. |
 | [`deal_damage`](docs/reference/effects.md#deal_damage) | 120.3a, 120.3c, 120.3e, 120.6 | Deal `amount` damage to each referenced creature, planeswalker or player. Damage to a player causes life loss; to a planeswalker removes loyalty counters; to a creature is marked until cleanup. |

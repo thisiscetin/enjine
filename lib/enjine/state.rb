@@ -4,7 +4,8 @@ module Enjine
   # A card or token in a zone (CR 109). Refers to its definition by id only.
   # A new GameObject (with a new id) is created on every zone change (CR 400.7).
   GameObject = Struct.new(:id, :card, :owner, :controller, :zone, :tapped, :controlled_since, :kind, :counters,
-                          :damage, :source, :ability, :targets, :loyalty_turn, :deathtouched, :modes) do
+                          :damage, :source, :ability, :targets, :loyalty_turn, :deathtouched, :modes,
+                          :attached_to) do
     def ability? = kind == "ability"
 
     def to_h
@@ -12,7 +13,7 @@ module Enjine
         "tapped" => tapped, "controlled_since" => controlled_since, "kind" => kind, "counters" => counters.dup,
         "damage" => damage, "source" => source, "ability" => ability, "targets" => targets&.dup,
         "loyalty_turn" => loyalty_turn, "deathtouched" => deathtouched,
-        "modes" => modes&.dup }
+        "modes" => modes&.dup, "attached_to" => attached_to }
     end
   end
 

@@ -91,7 +91,8 @@ module SetConverter
   def translate_text(source, data, missing)
     text = source["oracle_text"].to_s.gsub(/\s*\([^)]*\)/, "") # reminder text is not rules
     text = text.gsub(source["name"], "CARDNAME")
-    text = text.gsub(/\b[Tt]his (creature|artifact|enchantment|land|planeswalker|permanent|Vehicle|Spacecraft)\b/, "CARDNAME")
+    text = text.gsub(/\b[Tt]his (creature|artifact|enchantment|land|planeswalker|permanent|Vehicle|Spacecraft|Equipment|Aura)\b/,
+                     "CARDNAME")
     keywords = []
     abilities = []
     spell_effects = []
@@ -112,7 +113,7 @@ module SetConverter
         abilities << { "enters_tapped_unless_pay_life" => { "life" => Integer(m[1]) } }
       elsif line.match?(/\ACARDNAME enters tapped\.\z/)
         abilities << "enters_tapped"
-      elsif (static = static_line(line))
+      elsif (static = static_line(line) || attachment_line(line))
         abilities << static
       elsif line == "Activate only as a sorcery." && abilities.last.is_a?(Hash) && abilities.last["activated"]
         abilities.last["activated"]["timing"] = "sorcery"
@@ -157,7 +158,8 @@ module SetConverter
      { "enters" => { "subject" => { "each" => "creature", "controller" => "you", "other" => true } } }],
     [/\A(?:Landfall — )?Whenever a land you control enters, (.+)\z/,
      { "enters" => { "subject" => { "each" => "land", "controller" => "you" } } }],
-    [/\AWhenever you cast a noncreature spell, (.+)\z/, { "cast" => { "spell" => "noncreature" } }]
+    [/\AWhenever you cast a noncreature spell, (.+)\z/, { "cast" => { "spell" => "noncreature" } }],
+    [/\AWhenever equipped creature attacks, (.+)\z/, { "attacks" => { "subject" => "attached" } }]
   ].freeze
 
   def triggered_ability(line)
@@ -204,8 +206,8 @@ module SetConverter
   SUBJECTS = { "creatures" => "creature", "artifact creatures" => "creature", "lands" => "land", "artifacts" => "artifact" }.freeze
 
   STATIC_LINE = %r{
-    \A(Other\ )?(creatures|artifact\ creatures|artifacts)\ you\ control\
-    (?:get\ ([+-]\d+)/([+-]\d+)(?:\ and\ have\ ([a-z,\ ]+))?|have\ ([a-z,\ ]+))\.\z
+    \A(Other\ )?(creatures|artifact\ creatures|artifacts)\ you\ control
+    \ (?:get\ ([+-]\d+)/([+-]\d+)(?:\ and\ have\ ([a-z,\ ]+))?|have\ ([a-z,\ ]+))\.\z
   }x
 
   # "Other creatures you control get +1/+1." / "Creatures you control have vigilance."
@@ -222,6 +224,36 @@ module SetConverter
     static["pump"] = { "power" => Integer(m[3]), "toughness" => Integer(m[4]) } if m[3]
     static["keywords"] = keywords unless keywords.empty?
     { "static" => static }
+  end
+
+  ENCHANT = { "creature" => "creature", "artifact" => "artifact", "land" => "land", "permanent" => "permanent",
+              "planeswalker" => "planeswalker", "creature you control" => { "creature" => { "controller" => "you" } },
+              "creature an opponent controls" => { "creature" => { "controller" => "opponent" } },
+              "artifact or creature" => { "permanent" => { "any_of" => %w[artifact creature] } } }.freeze
+
+  ATTACHED_STATIC = %r{
+    \A(?:Equipped|Enchanted)\ creature
+    \ (?:gets\ ([+-]\d+)/([+-]\d+)(?:\ and\ has\ ([a-z,\ ]+))?|has\ ([a-z,\ ]+))\.\z
+  }x
+
+  # Keyword names as the text writes them ("double strike") are supported registry names ("double_strike").
+  def supported_keywords?(keywords) = (keywords.map { it.tr(" ", "_") } - SUPPORTED_KEYWORDS.to_a).empty?
+
+  # Auras and Equipment: "Enchant creature", "Equip {2}", "Equipped creature gets +1/+1 and has vigilance."
+  def attachment_line(line)
+    if (m = /\AEnchant (.+)\z/.match(line))
+      ENCHANT.key?(m[1]) ? { "enchant" => ENCHANT[m[1]] } : nil
+    elsif (m = /\AEquip ((?:\{[0-9WUBRGC]\})+)\z/.match(line))
+      { "equip" => { "cost" => [{ "mana" => m[1] }] } }
+    elsif (m = ATTACHED_STATIC.match(line))
+      keywords = (m[3] || m[4]).to_s.split(/, (?:and )?| and /).map(&:strip).reject(&:empty?)
+      return nil unless supported_keywords?(keywords)
+
+      static = { "affects" => "attached" }
+      static["pump"] = { "power" => Integer(m[1]), "toughness" => Integer(m[2]) } if m[1]
+      static["keywords"] = keywords.map { it.tr(" ", "_") } unless keywords.empty?
+      { "static" => static }
+    end
   end
 
   def mana_ability(line)
@@ -341,12 +373,16 @@ module SetConverter
     when /\A(Target player|Target opponent) discards (a|one|two|\d+) cards?\z/
       { "discard" => { "amount" => number(::Regexp.last_match(2)), "to" => target_ref(::Regexp.last_match(1).downcase, targets, offset) } }
     when /\ADiscard (a|one|two|\d+) cards?\z/ then { "discard" => { "amount" => number(::Regexp.last_match(1)) } }
-    when /\A(#{TARGET_PHRASES}|CARDNAME) gains ([a-z ,]+) until end of turn\z/o
+    when /\A(#{TARGET_PHRASES}|CARDNAME|(?:E|e)(?:nchanted|quipped) creature) gains ([a-z ,]+) until end of turn\z/o
+      who = ::Regexp.last_match(1)
       keywords = ::Regexp.last_match(2).split(/, (?:and )?| and /).map(&:strip)
-      return nil unless (keywords - SUPPORTED_KEYWORDS.to_a).empty?
+      return nil unless supported_keywords?(keywords)
 
-      to = ::Regexp.last_match(1) == "CARDNAME" ? "self" : target_ref(::Regexp.last_match(1), targets, offset)
-      { "grant" => { "keywords" => keywords, "to" => to } }
+      to = if who == "CARDNAME" then "self"
+           elsif who.match?(/\A[Ee](nchanted|quipped)/) then "attached" # CR 303.4m, 301.5f
+           else target_ref(who, targets, offset)
+           end
+      { "grant" => { "keywords" => keywords.map { it.tr(" ", "_") }, "to" => to } }
     when /\ADraw a card for each (creature|artifact|land) you control\z/
       { "draw" => { "amount" => { "count" => { "each" => ::Regexp.last_match(1), "controller" => "you" } } } }
     when /\ACreate (a|an|one|two|three|\d+) (tapped )?(Treasure|Clue|Food) tokens?\z/

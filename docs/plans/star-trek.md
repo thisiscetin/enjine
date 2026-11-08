@@ -46,7 +46,7 @@ A pattern census over the oracle text (fetched from the Scryfall API on
 | **Strange new worlds** (set mechanic) | 13 | todo |
 | copy | 12 | todo (707) |
 | Sagas | 10 | todo |
-| equipment / auras | 10 | todo |
+| equipment / auras | 10 | done: enchant, equip, attach, "equipped/enchanted creature" statics, 704.5m/n (Bat'leth, Captain's Tutelage, Tricorder convert; the rest need stun counters, copy, granted triggers or type changes) |
 | flying, menace, trample, vigilance, reach, lifelink, first strike, double strike, deathtouch, defender, ward | 1–9 each | todo (F11) |
 | landfall | 9 | todo (F5) |
 | **Face a dilemma** (set mechanic) | 8 | todo |

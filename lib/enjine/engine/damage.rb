@@ -75,10 +75,11 @@ module Enjine
         emit Events::CountersChanged.new(object: object.id, counter: kind, from: before, to: after)
       end
 
-      # CR 704.5f, 704.5g, 704.5i. All applicable actions happen simultaneously (CR 704.3).
-      # Returns true when anything happened, so the check repeats.
+      # CR 704.5f, 704.5g, 704.5i, 704.5m, 704.5n. All applicable actions happen simultaneously
+      # (CR 704.3). Returns true when anything happened, so the check repeats.
       def check_permanent_state_based_actions!
         ceased = remove_tokens_outside_battlefield! # CR 704.5d
+        ceased = unattach_illegal_attachments! || ceased # CR 704.5n, 704.5p
         doomed = nil
         state.battlefield.each do |id|
           obj = object(id)
@@ -86,6 +87,7 @@ module Enjine
           reason = if defn.creature? then creature_sba(obj)
                    elsif defn.planeswalker? && loyalty(obj) <= 0 then "sba_loyalty"
                    end
+          reason ||= "sba_aura" if illegal_aura?(obj) # CR 704.5m
           (doomed ||= []) << [id, reason] if reason
         end
         return ceased unless doomed

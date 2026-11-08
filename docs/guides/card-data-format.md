@@ -178,6 +178,7 @@ yet, so the card is unsupported.
 | `"you"` | "you" ("you gain 3 life", "draw a card") |
 | `"each_opponent"` | "each opponent" |
 | `"self"` | "this creature" / the card's own name, on a permanent |
+| `"attached"` | "equipped creature" / "enchanted creature", on an Equipment or Aura |
 | `{ "each": "creature", "controller": "you" }` | "creatures you control", "each creature you control" |
 | `{ "each": "creature", "controller": "opponent" }` | "creatures your opponents control" |
 | `{ "each": "creature" }` | "each creature", "all creatures" |
@@ -202,6 +203,23 @@ Anything with *conditions* ("if …", "unless …"), *choices* ("choose one —"
 end of turn*, *triggers* ("when/whenever/at") or *static abilities* ("creatures
 you control get +1/+1" with no duration) is **not supported yet**, so the card is
 unsupported.
+
+### 4.7 Auras and Equipment
+
+Give the card the subtype `aura` (enchantments only) or `equipment` (artifacts only).
+
+| Oracle text | Data |
+| --- | --- |
+| "Enchant creature" | `{ "enchant": "creature" }`. Any permanent filter works, e.g. `{ "enchant": { "permanent": { "any_of": ["artifact", "creature"] } } }`. Every Aura needs exactly one. The Aura spell targets with it (CR 303.4a), so don't add a `spell` ability. |
+| "Equip {2}" | `{ "equip": { "cost": [{ "mana": "{2}" }] } }`. Only Equipment have it. |
+| "Equipped creature gets +2/+0 and has trample." | `{ "static": { "affects": "attached", "pump": { "power": 2, "toughness": 0 }, "keywords": ["trample"] } }` |
+| "Whenever equipped creature attacks, …" | `{ "triggered": { "when": { "attacks": { "subject": "attached" } }, … } }` |
+| "When this Aura enters, enchanted creature gains … until end of turn." | an `enters` trigger with `{ "grant": { …, "to": "attached" } }` |
+| "attach it to target creature you control" | `{ "attach": { "to": { "target": 0 } } }` |
+
+Not supported yet: Auras that enchant players, Equipment that enters attached or
+equips for a non-mana cost, and granted triggered or activated abilities ("equipped
+creature has 'Whenever …'").
 
 ---
 

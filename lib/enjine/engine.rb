@@ -245,7 +245,7 @@ module Enjine
       state.objects[id] = GameObject.new(id: id, card: card, owner: owner, controller: owner, zone: zone,
                                          tapped: false, controlled_since: nil, kind: "card", counters: {},
                                          damage: 0, source: nil, ability: nil, targets: nil, loyalty_turn: nil,
-                                         deathtouched: false, modes: nil)
+                                         deathtouched: false, modes: nil, attached_to: nil)
     end
 
     # Moves an object to a zone as a new object (CR 400.7). Returns the new object.
@@ -312,6 +312,7 @@ module Enjine
         fresh.controlled_since = state.turn
         fresh.tapped = data["enters"]["tapped"]
         fresh.counters.merge!(data["enters"]["counters"])
+        fresh.attached_to = data["enters"]["attached_to"] # CR 608.3c: an Aura enters attached
       when :stack
         fresh.controller = data["controller"] || old.owner
       end

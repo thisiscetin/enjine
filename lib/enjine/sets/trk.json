@@ -297,6 +297,68 @@
     },
     {
       "card": {
+        "name": "Bat'leth",
+        "mana_cost": "{2}{B}",
+        "types": [
+          "artifact"
+        ],
+        "subtypes": [
+          "equipment"
+        ],
+        "abilities": [
+          {
+            "triggered": {
+              "when": {
+                "enters": {}
+              },
+              "targets": [
+                {
+                  "creature": {
+                    "controller": "opponent"
+                  }
+                }
+              ],
+              "effects": [
+                {
+                  "pump": {
+                    "power": -2,
+                    "toughness": -2,
+                    "to": {
+                      "target": 0
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "static": {
+              "affects": "attached",
+              "pump": {
+                "power": 2,
+                "toughness": 0
+              }
+            }
+          },
+          {
+            "equip": {
+              "cost": [
+                {
+                  "mana": "{2}"
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "rarity": "uncommon",
+      "printing": {
+        "set": "trk",
+        "number": "94"
+      }
+    },
+    {
+      "card": {
         "name": "Fugitive Listener",
         "mana_cost": "{2}{B}",
         "types": [
@@ -367,6 +429,57 @@
       "printing": {
         "set": "trk",
         "number": "114"
+      }
+    },
+    {
+      "card": {
+        "name": "Captain's Tutelage",
+        "mana_cost": "{1}{R}",
+        "types": [
+          "enchantment"
+        ],
+        "subtypes": [
+          "aura"
+        ],
+        "keywords": [
+          "flash"
+        ],
+        "abilities": [
+          {
+            "enchant": "creature"
+          },
+          {
+            "triggered": {
+              "when": {
+                "enters": {}
+              },
+              "effects": [
+                {
+                  "grant": {
+                    "keywords": [
+                      "first_strike"
+                    ],
+                    "to": "attached"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "static": {
+              "affects": "attached",
+              "pump": {
+                "power": 2,
+                "toughness": 0
+              }
+            }
+          }
+        ]
+      },
+      "rarity": "common",
+      "printing": {
+        "set": "trk",
+        "number": "144"
       }
     },
     {
@@ -468,6 +581,49 @@
       "printing": {
         "set": "trk",
         "number": "174"
+      }
+    },
+    {
+      "card": {
+        "name": "Moopsy",
+        "mana_cost": "{G}",
+        "types": [
+          "creature"
+        ],
+        "subtypes": [
+          "beast"
+        ],
+        "keywords": [
+          "deathtouch"
+        ],
+        "power": 1,
+        "toughness": 1,
+        "abilities": [
+          {
+            "activated": {
+              "cost": [
+                {
+                  "mana": "{2}"
+                }
+              ],
+              "effects": [
+                {
+                  "grant": {
+                    "keywords": [
+                      "reach"
+                    ],
+                    "to": "self"
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "rarity": "common",
+      "printing": {
+        "set": "trk",
+        "number": "207"
       }
     },
     {
@@ -653,6 +809,59 @@
       "printing": {
         "set": "trk",
         "number": "225"
+      }
+    },
+    {
+      "card": {
+        "name": "Tricorder",
+        "mana_cost": "{1}",
+        "types": [
+          "artifact"
+        ],
+        "subtypes": [
+          "equipment"
+        ],
+        "abilities": [
+          {
+            "static": {
+              "affects": "attached",
+              "pump": {
+                "power": 1,
+                "toughness": 1
+              }
+            }
+          },
+          {
+            "triggered": {
+              "when": {
+                "attacks": {
+                  "subject": "attached"
+                }
+              },
+              "effects": [
+                {
+                  "surveil": {
+                    "amount": 1
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "equip": {
+              "cost": [
+                {
+                  "mana": "{1}"
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "rarity": "common",
+      "printing": {
+        "set": "trk",
+        "number": "270"
       }
     },
     {
@@ -1554,7 +1763,6 @@
         "number": "7"
       },
       "missing": [
-        "static ability",
         "triggered ability",
         "tokens",
         "library manipulation",
@@ -2307,7 +2515,6 @@
         "number": "72"
       },
       "missing": [
-        "equipment/aura",
         "triggered ability",
         "condition (if/unless/as long as)",
         "static ability"
@@ -2568,19 +2775,6 @@
       ]
     },
     {
-      "name": "Bat'leth",
-      "rarity": "uncommon",
-      "printing": {
-        "set": "trk",
-        "number": "94"
-      },
-      "missing": [
-        "triggered ability",
-        "other rules text",
-        "equipment/aura"
-      ]
-    },
-    {
       "name": "Battle-Scarred Survivalist",
       "rarity": "common",
       "printing": {
@@ -2698,7 +2892,6 @@
         "number": "104"
       },
       "missing": [
-        "equipment/aura",
         "static ability",
         "triggered ability",
         "condition (if/unless/as long as)",
@@ -3170,19 +3363,6 @@
       ]
     },
     {
-      "name": "Captain's Tutelage",
-      "rarity": "common",
-      "printing": {
-        "set": "trk",
-        "number": "144"
-      },
-      "missing": [
-        "equipment/aura",
-        "triggered ability",
-        "other rules text"
-      ]
-    },
-    {
       "name": "D-7 Battle Cruiser",
       "rarity": "rare",
       "printing": {
@@ -3500,7 +3680,6 @@
         "number": "170"
       },
       "missing": [
-        "static ability",
         "triggered ability",
         "condition (if/unless/as long as)",
         "counters",
@@ -3922,17 +4101,6 @@
       "missing": [
         "triggered ability",
         "tokens"
-      ]
-    },
-    {
-      "name": "Moopsy",
-      "rarity": "common",
-      "printing": {
-        "set": "trk",
-        "number": "207"
-      },
-      "missing": [
-        "invalid: abilities[0].activated.effects[0].grant.to: required"
       ]
     },
     {
@@ -4565,8 +4733,7 @@
       "missing": [
         "triggered ability",
         "copy",
-        "static ability",
-        "equipment/aura"
+        "static ability"
       ]
     },
     {
@@ -4679,20 +4846,6 @@
       ]
     },
     {
-      "name": "Tricorder",
-      "rarity": "common",
-      "printing": {
-        "set": "trk",
-        "number": "270"
-      },
-      "missing": [
-        "other rules text",
-        "triggered ability",
-        "library manipulation",
-        "equipment/aura"
-      ]
-    },
-    {
       "name": "Type-2 Phaser",
       "rarity": "uncommon",
       "printing": {
@@ -4702,9 +4855,7 @@
       "missing": [
         "triggered ability",
         "tap/untap effect",
-        "counters",
-        "other rules text",
-        "equipment/aura"
+        "counters"
       ]
     },
     {
