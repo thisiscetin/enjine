@@ -334,22 +334,21 @@ The full lists are in `lib/enjine/mechanics/values.rb` (`Amount`, `Condition`).
 | "the number of counters on it" | `{ "counters": { "of": "self", "kind": "quest" } }` (no `kind`: every counter) |
 | "cards in your graveyard", "greatest power among …" | `{ "graveyard_size": "you" }`, `{ "greatest_power": <selector> }` |
 | "life you gained / that player lost this turn" | `{ "life_gained_this_turn": "you" }`, `{ "life_lost_this_turn": "each_opponent" }` |
-| "the life lost this way" | `{ "this_way": n }` (effect n of the same list) |
-| "if you draw three or more cards this way", "if you do" after a mandatory effect | `{ "amount": { "count": { "result": n } }, "at_least": 3 }` |
-| "while creatures you control have total power 8 or greater" | `"while": { "amount": { "power": { "each": "creature", "controller": "you" } }, "at_least": 8 }` on a trigger (checked only as it triggers) |
+| an amount an earlier effect changed (life it made a player lose) | `{ "this_way": n }` (effect n of the same list) |
+| N or more cards drawn by an earlier effect; "if you do" after a mandatory effect | `{ "amount": { "count": { "result": n } }, "at_least": 3 }` |
+| a trigger that also needs total power N or more of your creatures | `"while": { "amount": { "power": { "each": "creature", "controller": "you" } }, "at_least": 8 }` on a trigger (checked only as it triggers) |
 | "if a creature died this turn", "if you've cast a noncreature spell this turn" | `{ "amount": { "died_this_turn": { "each": "creature" } }, "at_least": 1 }`, `{ "spells_cast_this_turn": { "by": "you", "matching": { "spell": { "not": ["creature"] } } } }` |
-| "if this is the second time this ability has resolved this turn" | `{ "nth_resolution": 2 }` |
+| the Nth resolution of this ability this turn | `{ "nth_resolution": 2 }` |
 | "if it isn't a creature", "if it attacked this turn" | `{ "not": { "source": "creature" } }`, `{ "attacked_this_turn": true }` |
 | "its controller creates …" | `"to": { "controller_of": { "target": 0 } }` |
-| "Add an amount of {G} equal to …" | `{ "add_mana": { "produce": "{G}", "amount": <amount> } }` |
+| a fixed mana symbol added a computed number of times | `{ "add_mana": { "produce": "{G}", "amount": <amount> } }` |
 
 Static abilities (`static`) take `"affects": "self"` and an `if` ("as long as …",
 "during your turn": `{ "your_turn": true }`); `pump` amounts may be computed ("gets
-+1/+0 for each …"); `creature_types` sets the creature types ("is a Salamander");
-`abilities` grants triggered or mana abilities ("Creatures you control have '{T}: Add
-{G}{G}.'"). A `*` power or toughness is an amount in the card data (`"power": { "count":
-… }`, CR 604.3). "Becomes a Doctor until end of turn" is `set_creature_types`; "base
-power and toughness become 7/9" is `set_base_power_toughness` (`duration: "indefinite"`).
++1/+0 for each …"); `creature_types` sets the creature types;
+`abilities` grants triggered or mana abilities (each matching permanent has them). A `*` power or toughness is an amount in the card data (`"power": { "count":
+… }`, CR 604.3). Setting creature types until end of turn is `set_creature_types`; setting
+base power and toughness is `set_base_power_toughness` (`duration: "indefinite"` lasts while it stays).
 A token's or color-indicator card's colors are `"colors": ["R"]`; filters take `"colors"`.
 
 ---

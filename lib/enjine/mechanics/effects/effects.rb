@@ -184,7 +184,7 @@ module Enjine
                                        example: { "lose_life" => { "amount" => 2, "to" => "each_opponent" } }
         def apply(engine, ctx) = players(engine, ctx).each { LoseLife.change!(engine, it, -amount_for(engine, ctx)) }
 
-        # Changes a life total and records how much it changed ("the life lost this way", CR 608.2c).
+        # Changes a life total and records how much it changed (life lost "this way", CR 608.2c).
         def self.change!(engine, index, delta)
           before = engine.player(index).life
           engine.change_life!(index, delta)

@@ -3,8 +3,8 @@
 module Enjine
   class Engine
     # What happened this turn and this game, for effects and conditions that look back ("if a
-    # creature died this turn", "the life that player lost this turn", "the second time this
-    # ability has resolved this turn", CR 700.14 "this turn" wording).
+    # creature died this turn", life a player lost this turn, how many times an ability resolved this
+    # turn).
     #
     # Everything is recorded in one place, from the events the engine already emits, before
     # triggered abilities look at the event (so an intervening "if" sees it). A cast that is

@@ -17,7 +17,7 @@ module Enjine
     #    | "spells_cast_this_game": player selector}  this turn's (or game's) history, see Engine::TurnHistory
     #   {"spells_cast_this_turn": {"by": player selector, "matching": spell filter}}
     #   {"died_this_turn" | "entered_this_turn": {"each": filter, "controller": you|opponent|any}}
-    #   {"this_way": n}                               how much effect n of this list changed ("the life lost this way")
+    #   {"this_way": n}                               how much effect n of this list changed (life it took)
     #   {"times": [a, b]} / {"plus": [a, b]} / {"divide": [a, b]}   arithmetic on amounts; division rounds down
     #                                                 (CR 107.1a). "-X" is {"times": ["x", -1]}.
     # A source that has left the battlefield is used as it last existed (CR 608.2h).
@@ -164,7 +164,7 @@ module Enjine
       end
 
       # {"this_way": n}: how much effect n of the same list changed, e.g. the life a lose_life effect took
-      # ("you gain life equal to the life lost this way", CR 608.2c).
+      # (CR 608.2c).
       class ThisWay
         def self.build(index, errors, path, results_count)
           unless index.is_a?(Integer) && index >= 0 && index < results_count
@@ -281,8 +281,8 @@ module Enjine
 
     # A yes/no test about the game, checked when an effect resolves (CR 608.2c) or, as an
     # intervening "if" (CR 603.4), both when a trigger condition is met and on resolution:
-    #   {"amount": amount, "at_least": n, "at_most": n}   any Amount compared with bounds, e.g. "creatures you
-    #                                    control have total power 8 or greater": {"amount": {"power": {"each":
+    #   {"amount": amount, "at_least": n, "at_most": n}   any Amount compared with bounds, e.g. total power
+    #                                    of creatures you control N or more: {"amount": {"power": {"each":
     #                                    "creature", "controller": "you"}}, "at_least": 8}; "if you do" after a
     #                                    mandatory effect: {"amount": {"count": {"result": 0}}, "at_least": 1}
     #   {"controls": selector, "at_least": 3} / {"life": "you", ...} / {"hand_size": "you", ...}  (short forms)
@@ -435,7 +435,7 @@ module Enjine
         def to_s = "it's a #{@filter}"
       end
 
-      # "If this is the second time this ability has resolved this turn": the resolving ability (ctx.object)
+      # The nth resolution of an ability this turn: the resolving ability (ctx.object)
       # has finished resolving n - 1 times this turn (Engine::TurnHistory counts completed resolutions).
       class NthResolution
         def self.build(data, errors, path)

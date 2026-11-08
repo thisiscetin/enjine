@@ -40,7 +40,7 @@ Rules version: Comprehensive Rules effective 2026-09-25.
 
 | Name | Rules | Description |
 | --- | --- | --- |
-| [`attacks_despite_defender`](docs/reference/keywords.md#attacks_despite_defender) | 702.3b, 508.1c | This creature can attack as though it didn't have defender. |
+| [`attacks_despite_defender`](docs/reference/keywords.md#attacks_despite_defender) | 702.3b, 508.1c | Defender doesn't stop this creature from attacking. |
 | [`attacks_each_combat`](docs/reference/keywords.md#attacks_each_combat) | 508.1d | Requirement: this creature attacks each combat if able. Declaring attackers can't finish while it could still attack. |
 | [`cant_attack`](docs/reference/keywords.md#cant_attack) | 508.1c | Restriction: this creature can't attack. |
 | [`cant_be_blocked`](docs/reference/keywords.md#cant_be_blocked) | 509.1b | Restriction: this creature can't be blocked. |

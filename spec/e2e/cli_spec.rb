@@ -147,6 +147,19 @@ RSpec.describe Enjine::CLI do
     expect(out).to include("Nothing to undo")
   end
 
+  it "describes a granted mana ability from the granting card's data (CR 613.1f)" do
+    speaker = { "name" => "Sap Herald", "mana_cost" => "{G}", "types" => ["creature"], "power" => 1, "toughness" => 1,
+                "abilities" => [{ "static" => { "affects" => { "each" => "creature", "controller" => "you" },
+                                                "abilities" => [{ "mana" => { "cost" => ["tap"], "produce" => "{G}" } }] } }] }
+    game = build_game(catalog_with(speaker)) do
+      turn 2, active: "alice", step: :precombat_main
+      player("alice") { battlefield "Sap Herald", "Grizzly Bears" }
+      player("bob")
+    end
+    option = { type: "activate_mana", object: obj_id(game, "Grizzly Bears"), ability: "granted:sap_herald:printed:0:0" }
+    expect(described_class::Text.new(game).option(option)).to eq("Tap Grizzly Bears for mana ({T}: Add {G}.)")
+  end
+
   it "describes every option and event type in plain text" do
     game = build_game do
       turn 2, active: "alice", step: :precombat_main

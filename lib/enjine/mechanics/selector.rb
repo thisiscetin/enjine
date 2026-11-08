@@ -5,7 +5,7 @@ module Enjine
     # The context an effect runs in.
     # `results` lists, per earlier effect of the same effect list, the objects that effect
     # moved or created (CR 400.7j: "the card exiled this way"); see Selector {"result": n}.
-    # `amounts`: per earlier effect, how much it changed ("the life lost this way"); see Amount {"this_way": n}.
+    # `amounts`: per earlier effect, how much it changed (life an earlier effect took); see Amount {"this_way": n}.
     EffectContext = Struct.new(:controller, :source, :object, :targets, :results, :amounts)
 
     # Data form of "who/what does this effect apply to":

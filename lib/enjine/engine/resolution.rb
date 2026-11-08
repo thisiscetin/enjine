@@ -72,7 +72,7 @@ module Enjine
         @recorded = @recorded_amount = nil
       end
 
-      # "The life lost this way" (CR 608.2c): how much an effect changed, per effect (see {"this_way": n}).
+      # How much an effect changed, e.g. life it made a player lose (CR 608.2c), per effect (see {"this_way": n}).
       def record_amounts!(frame)
         amounts = (frame["ctx"]["amounts"] ||= {})
         amounts[frame["pc"].to_s] = amounts.fetch(frame["pc"].to_s, 0) + @recorded_amount

@@ -43,7 +43,7 @@ module Enjine
           return :done unless condition.nil? || condition.true?(engine, ctx)
 
           index = ctx.controller
-          return add(engine, index, @produce * amount_for(engine, ctx), ctx) unless @color # "an amount of {G} equal to"
+          return add(engine, index, @produce * amount_for(engine, ctx), ctx) unless @color # the fixed mana, `amount` times
 
           n = (locals["n"] ||= amount_for(engine, ctx))
           picks = answers(locals)

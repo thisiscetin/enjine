@@ -128,7 +128,7 @@ RSpec.describe "Layers: conditional and computed statics, type changes, granted 
     expect(monitor_findings(game)).to be_empty
   end
 
-  it "an Aura that makes the creature a Salamander, -4/-0, unable to block and to untap (CR 205.1a, 613.1d, 502.3)" do
+  it "an Aura that sets creature types, pumps, and stops blocking and untapping (CR 205.1a, 613.1d, 502.3)" do
     game = board(alice: ["Gene Hex"], bob: ["Hive Relay"])
     engine = engine_of(game)
     relay = obj_id(game, "Hive Relay")
@@ -144,7 +144,7 @@ RSpec.describe "Layers: conditional and computed statics, type changes, granted 
     expect(engine.object(relay).tapped).to be(true)
   end
 
-  it "'becomes a Doctor until end of turn' replaces creature types only (CR 205.1a)" do
+  it "setting creature types until end of turn replaces creature types only (CR 205.1a)" do
     game = board(alice: ["Forest", "Hive Relay"], hand: ["Identity Shift"])
     relay = obj_id(game, "Hive Relay")
     cast(game, "Identity Shift", target: relay, lands: [obj_id(game, "Forest")])
@@ -176,6 +176,9 @@ RSpec.describe "Layers: conditional and computed statics, type changes, granted 
     expect(game.legal_options).to include(option)
     game.submit(option)
     expect(game.state.players[0].mana_pool[:G]).to eq(2)
+    engine_of(game).object(bears).controlled_since = 3 # arrived this turn: no {T} abilities (CR 302.6)
+    engine_of(game).object(bears).tapped = false
+    expect(game.legal_options.map { it[:object] }).not_to include(bears)
   end
 
   it "defines power with a characteristic-defining ability in every zone (CR 604.3, 613.4a)" do
@@ -201,7 +204,7 @@ RSpec.describe "Layers: conditional and computed statics, type changes, granted 
     expect(pt(game, "Unbound Drone")).to eq([8, 10])
   end
 
-  it "can attack as though it didn't have defender once you've cast a noncreature spell this turn (CR 702.3b)" do
+  it "lets a defender attack while a history condition holds (CR 702.3b, 604.2)" do
     game = board(step: :precombat_main, alice: ["Spanner Sentry", "Mountain"], bob: ["Savannah Lions"], hand: ["Lightning Bolt"])
     engine = engine_of(game)
     sentry = obj_id(game, "Spanner Sentry")
@@ -223,7 +226,7 @@ RSpec.describe "Layers: conditional and computed statics, type changes, granted 
     expect(red.candidates(engine, 0)).to eq(tokens.map(&:id))
   end
 
-  it "gains the life lost this way (CR 608.2c)" do
+  it "gains as much life as an earlier effect took (CR 608.2c)" do
     game = board(alice: ["Swamp"], hand: ["Toll Collector"])
     engine = engine_of(game)
     engine.change_life!(1, -3)

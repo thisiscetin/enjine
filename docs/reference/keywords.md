@@ -4,7 +4,7 @@
 
 ## attacks_despite_defender
 
-This creature can attack as though it didn't have defender.
+Defender doesn't stop this creature from attacking.
 
 Rules: CR 702.3b, CR 508.1c
 

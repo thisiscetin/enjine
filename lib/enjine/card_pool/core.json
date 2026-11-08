@@ -2678,8 +2678,7 @@
           ]
         }
       }
-    ],
-    "rules_text": "During your turn, this creature has flying. Whenever you attack while creatures you control have total power 5 or greater, you gain 1 life."
+    ]
   },
   {
     "name": "Hoardling",
@@ -2707,8 +2706,7 @@
           }
         }
       }
-    ],
-    "rules_text": "This creature gets +1/+0 for each artifact you control."
+    ]
   },
   {
     "name": "Withering Hex",
@@ -2739,8 +2737,7 @@
           ]
         }
       }
-    ],
-    "rules_text": "Enchant creature. Enchanted creature gets -2/-0, can't block, doesn't untap during its controller's untap step, and is a Salamander."
+    ]
   },
   {
     "name": "Kinship Rite",
@@ -2800,8 +2797,7 @@
           ]
         }
       }
-    ],
-    "rules_text": "Put a +1/+1 counter on target creature you control. It gets +X/+X until end of turn, where X is the number of creature types among creatures you control, and becomes an Elf until end of turn."
+    ]
   },
   {
     "name": "Grove Speaker",
@@ -2834,8 +2830,7 @@
           ]
         }
       }
-    ],
-    "rules_text": "Creatures you control have \"{T}: Add {G}.\""
+    ]
   },
   {
     "name": "Signal Relay",
@@ -2883,8 +2878,7 @@
           ]
         }
       }
-    ],
-    "rules_text": "Artifact creatures you control have \"Whenever this creature deals combat damage to a player, draw a card.\""
+    ]
   },
   {
     "name": "Swarm Sentinel",
@@ -2908,8 +2902,7 @@
         "controller": "you"
       }
     },
-    "toughness": 2,
-    "rules_text": "Swarm Sentinel's power is equal to the number of artifact creatures you control."
+    "toughness": 2
   },
   {
     "name": "Ascendant Husk",
@@ -2944,8 +2937,7 @@
           ]
         }
       }
-    ],
-    "rules_text": "{3}: This creature's base power and toughness become 4/4. Activate only as a sorcery."
+    ]
   },
   {
     "name": "Wall of Gears",
@@ -2985,8 +2977,7 @@
           }
         }
       }
-    ],
-    "rules_text": "Defender. As long as you've cast a noncreature spell this turn, this creature can attack as though it didn't have defender."
+    ]
   },
   {
     "name": "Toll of Ruin",
@@ -3034,8 +3025,7 @@
           ]
         }
       }
-    ],
-    "rules_text": "Destroy target creature. Its controller creates a 1/1 black Spirit creature token."
+    ]
   },
   {
     "name": "Debt Collector",
@@ -3082,8 +3072,7 @@
           ]
         }
       }
-    ],
-    "rules_text": "At the beginning of each end step, each opponent loses half the life they lost this turn, rounded down. You gain life equal to the life lost this way."
+    ]
   },
   {
     "name": "Echo Shaman",
@@ -3128,8 +3117,7 @@
           ]
         }
       }
-    ],
-    "rules_text": "Whenever a land you control enters, this creature deals 1 damage to each opponent. If this is the second time this ability has resolved this turn, put a +1/+1 counter on this creature."
+    ]
   },
   {
     "name": "Grave Tally",
@@ -3169,8 +3157,7 @@
           ]
         }
       }
-    ],
-    "rules_text": "Grave Tally deals 2 damage to target creature, plus 2 more for each creature that died this turn."
+    ]
   },
   {
     "name": "Charge Battery",
@@ -3208,7 +3195,6 @@
           ]
         }
       }
-    ],
-    "rules_text": "At the beginning of your precombat main phase, put a charge counter on this artifact, then add {C} for each charge counter on it."
+    ]
   }
 ]

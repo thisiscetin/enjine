@@ -5,8 +5,8 @@ module Enjine
     module Abilities
       # A static ability that modifies permanents while its source is on the battlefield (CR 604,
       # 611.3, 613): "Creatures you control get +1/+1", "Other Elves you control have reach",
-      # "During your turn, this creature has flying", "Enchanted creature is a Salamander",
-      # "Creatures you control have '{T}: Add {G}{G}.'". Unlike a resolved effect, the set of affected
+      # a keyword only during your turn, an Aura that sets creature types, creatures that gain a mana
+      # ability. Unlike a resolved effect, the set of affected
       # objects is re-evaluated continuously (CR 611.3a).
       class StaticAbility < Primitive
         primitive :ability, :static,
@@ -212,7 +212,7 @@ module Enjine
         def to_s = "gains #{keywords.join(", ")} until end of turn → #{to}"
       end
 
-      # "Until end of turn, it becomes a Doctor (it loses all other creature types)" (CR 205.1a, 613.1d).
+      # Setting a creature's creature types until end of turn; its other creature types are lost (CR 205.1a, 613.1d).
       class SetCreatureTypes < Effect
         primitive :effect, :set_creature_types,
                   description: "Until end of turn, each referenced creature's creature types are exactly `types` (its " \
@@ -240,7 +240,7 @@ module Enjine
         def to_s = "becomes #{types.join(" ")} until end of turn → #{to}"
       end
 
-      # "Its base power and toughness become 7/9" (CR 613.4b): a setting effect, until end of turn or for
+      # Setting base power and toughness to fixed numbers (CR 613.4b): a setting effect, until end of turn or for
       # as long as the permanent stays on the battlefield (`duration: "indefinite"`, CR 611.2a-b).
       class SetBasePowerToughness < Effect
         DURATIONS = %w[end_of_turn indefinite].freeze
