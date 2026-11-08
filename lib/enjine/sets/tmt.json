@@ -695,6 +695,113 @@
     },
     {
       "card": {
+        "name": "Foot Elite",
+        "mana_cost": "{2}{W/B}",
+        "types": [
+          "creature"
+        ],
+        "subtypes": [
+          "human",
+          "ninja"
+        ],
+        "power": 2,
+        "toughness": 4,
+        "abilities": [
+          {
+            "triggered": {
+              "when": {
+                "attacks": {}
+              },
+              "targets": [
+                {
+                  "creature": {
+                    "controller": "you",
+                    "other": true
+                  }
+                }
+              ],
+              "effects": [
+                {
+                  "pump": {
+                    "power": 1,
+                    "toughness": 0,
+                    "to": {
+                      "target": 0
+                    }
+                  }
+                },
+                {
+                  "grant": {
+                    "keywords": [
+                      "indestructible"
+                    ],
+                    "to": {
+                      "target": 0
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "rarity": "common",
+      "printing": {
+        "set": "tmt",
+        "number": "146"
+      }
+    },
+    {
+      "card": {
+        "name": "Mechanized Ninja Cavalry",
+        "mana_cost": "{1}{R/W}",
+        "types": [
+          "artifact",
+          "creature"
+        ],
+        "subtypes": [
+          "robot",
+          "ninja"
+        ],
+        "power": 1,
+        "toughness": 1,
+        "abilities": [
+          {
+            "triggered": {
+              "when": {
+                "enters": {}
+              },
+              "effects": [
+                {
+                  "create_token": {
+                    "token": {
+                      "name": "Robot",
+                      "types": [
+                        "artifact",
+                        "creature"
+                      ],
+                      "subtypes": [
+                        "robot"
+                      ],
+                      "power": 1,
+                      "toughness": 1
+                    },
+                    "amount": 1
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "rarity": "common",
+      "printing": {
+        "set": "tmt",
+        "number": "156"
+      }
+    },
+    {
+      "card": {
         "name": "Krang, Utrom Warlord",
         "mana_cost": "{9}",
         "types": [
@@ -2741,17 +2848,6 @@
       ]
     },
     {
-      "name": "Foot Elite",
-      "rarity": "common",
-      "printing": {
-        "set": "tmt",
-        "number": "146"
-      },
-      "missing": [
-        "invalid: mana_cost: unsupported mana symbol {W/B}"
-      ]
-    },
-    {
       "name": "Foot Ninjas",
       "rarity": "common",
       "printing": {
@@ -2860,17 +2956,6 @@
       },
       "missing": [
         "other rules text"
-      ]
-    },
-    {
-      "name": "Mechanized Ninja Cavalry",
-      "rarity": "common",
-      "printing": {
-        "set": "tmt",
-        "number": "156"
-      },
-      "missing": [
-        "invalid: mana_cost: unsupported mana symbol {R/W}"
       ]
     },
     {

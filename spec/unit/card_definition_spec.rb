@@ -89,7 +89,7 @@ RSpec.describe Enjine::CardDefinition do
     expect(errors_for(forest.merge("types" => "land"))).to include("types: must be a non-empty list")
     expect(errors_for(forest.merge("subtypes" => "forest"))).to include("subtypes: must be a list")
     expect(errors_for(forest.merge("abilities" => {}))).to include("abilities: must be a list")
-    expect(errors_for(forest.merge("mana_cost" => "{G/W}"))).to include(a_string_matching(/unsupported mana symbol/))
+    expect(errors_for(forest.merge("mana_cost" => "{2/W}"))).to include(a_string_matching(/unsupported mana symbol/))
   end
 
   it "accepts free-form subtypes but checks those with rules against the card's types" do

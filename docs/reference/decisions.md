@@ -14,15 +14,19 @@ Right after a mulligan, put one card from the new hand on the bottom of the libr
 
 ## choose_cost
 
-While activating: `{type: "cost", object: id}` picks the permanent a cost uses (e.g. the creature to tap for station); `{type: "cancel"}` rewinds the activation. `cost` describes the cost.
+While casting/activating: `{type: "cost", object: id}` picks the permanent (or card) a cost uses (the creature to tap for station, the creature to sacrifice, the creature beamed up, ...); `{type: "cancel"}` rewinds. `cost` describes the cost.
+
+## choose_kicker
+
+While casting a spell with kicker: `{type: "kick"}` pays the kicker cost too, `{type: "no_kick"}` doesn't; `{type: "cancel"}` rewinds. `cost` describes the kicker cost.
 
 ## choose_mode
 
-Choose a mode of a modal ("choose one") spell or ability: `{type: "mode", mode: index}` (0-based, in printed order); `{type: "cancel"}` rewinds a cast. `choose` modes in total.
+Choose a mode of a modal ("choose one") spell or ability: `{type: "mode", mode: index}` (0-based, in printed order); `{type: "done"}` once enough are chosen when more are allowed; `{type: "cancel"}` rewinds a cast. `choose` modes in total (at least `min`).
 
 ## choose_target
 
-While casting/activating: `{type: "target", target: ref}` for the next target (ref is an object id or "player:<name>"), or `{type: "cancel"}` to rewind the whole cast.
+While casting/activating: `{type: "target", target: ref}` for the next target (ref is an object id or "player:<name>"); `{type: "done"}` chooses no more for an "up to" target; `{type: "cancel"}` rewinds the whole cast.
 
 ## choose_x
 
@@ -39,6 +43,10 @@ Declare one blocker: `{type: "block", object: id, attacker: id}`, `{type: "done"
 ## discard
 
 Cleanup step: discard one card, `{type: "discard", object: id}`, until the hand has 7 cards. `count` is how many remain (CR 514.1).
+
+## distribute
+
+While casting: `{type: "assign", target: ref}` gives one more of the divided amount to that target (each target already has one); `{type: "cancel"}` rewinds. `left` is what remains to divide.
 
 ## effect_choice
 
@@ -62,7 +70,7 @@ Put one of your pending triggered abilities on the stack next: `{type: "trigger"
 
 ## pay_cost
 
-While casting/activating: `{type: "pay_mana", mana: "R"}` spends one mana from the pool, `{type: "activate_mana", object: id, ability: ref}` taps a source, `{type: "cancel"}` rewinds. `remaining` shows what is left to pay.
+While casting/activating or paying a cost: `{type: "pay_mana", mana: "R"}` spends one mana from the pool, `{type: "activate_mana", object: id, ability: ref}` taps a source, `{type: "cancel"}` rewinds (or declines a payment asked for while resolving). Cancel isn't offered once a mana ability with a cost other than {T} (a Treasure) has been activated. `remaining` shows what is left to pay.
 
 ## play_or_draw
 

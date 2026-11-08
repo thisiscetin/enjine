@@ -15,8 +15,12 @@ module Enjine
         defn = definition(obj)
         return false unless defn.castable?
         return false unless defn.instant_speed? || sorcery_timing?(index)
+        return false unless additional_costs_payable?(obj) # CR 601.2f: e.g. "sacrifice a creature"
 
-        ability_targetable?(defn.spell_ability, index, id) && affordable?(index, total_cost(index, defn.mana_cost, spell: obj), nil)
+        cost = Mana.sum_costs([defn.mana_cost, *spell_extra_mana(obj, false)])
+        return true if ability_targetable?(defn.spell_ability, index, id) && affordable?(index, total_cost(index, cost, spell: obj), nil)
+
+        kicked_castable?(index, obj) # CR 702.33g: only the kicked spell has legal targets
       end
 
       def activatable?(index, id, ability_ref)
@@ -26,6 +30,7 @@ module Enjine
         return false unless obj.zone == ability.zone # CR 113.6: e.g. cycling only from the hand (702.29a)
         return false if ability.sorcery_speed? && !sorcery_timing?(index)
         return false unless ability.costs.reject(&:mana?).all? { it.payable?(self, obj) }
+        return false unless activation_allowed?(index, obj, ability_ref, ability) # CR 602.5b
 
         if (ability.kind == :loyalty) && (obj.loyalty_turn == state.turn || (loyalty(obj) + ability.loyalty_cost).negative?)
           # CR 606.3: once per turn. CR 118.3: a cost can't remove more counters than there are.
@@ -33,24 +38,30 @@ module Enjine
         end
 
         cost = total_cost(index, ability.mana_cost, ability: ability, source: id)
-        ability_targetable?(ability, index, nil, id) && affordable?(index, cost, needs_tap?(ability) ? id : nil)
+        ability_targetable?(ability, index, nil, id, ref: ability_ref) && affordable?(index, cost, needs_tap?(ability) ? id : nil)
       end
 
-      # Whether the ability can get legal targets: for modal abilities, enough modes must (CR 700.2).
-      def ability_targetable?(ability, index, exclude, source = nil)
+      # Whether the ability can get legal targets: for modal abilities, enough modes must (CR 700.2),
+      # not counting modes already chosen for the source of a "choose one that hasn't been chosen".
+      def ability_targetable?(ability, index, exclude, source = nil, ref: nil)
         return true if ability.nil?
         return targets_available?(ability.targets, index, exclude, source) unless ability.modal?
 
-        available_modes(ability, index, exclude, source).size >= ability.choose
+        (available_modes(ability, index, exclude, source) - used_modes(ability, source, ref)).size >= ability.choose
       end
 
       def available_modes(ability, index, exclude, source = nil)
         ability.modes.each_index.select { targets_available?(ability.modes[it].targets, index, exclude, source) }
       end
 
+      # "Up to one target" needs no candidate (CR 601.2c).
       def targets_available?(specs, index, exclude, source = nil)
-        specs.all? { |spec| spec.candidates_for(self, index, source).any? { it != exclude && targetable?(it, index) } }
+        specs.all? do |spec|
+          optional_target?(spec) || spec.candidates_for(self, index, source).any? { it != exclude && targetable?(it, index) }
+        end
       end
+
+      def optional_target?(spec) = spec.respond_to?(:optional?) && spec.optional?
 
       # CR 702.11b: hexproof permanents can't be targeted by their controller's opponents.
       def targetable?(ref, index)
@@ -61,32 +72,35 @@ module Enjine
       end
 
       # Whether the cost could be paid with the mana pool plus untapped mana sources (CR 601.2g-h).
-      # Each colored symbol needs mana of that color; generic is paid by anything left. This is
-      # exact while every source produces a fixed kind of mana; sources with a choice of colors
-      # will need a matching here.
+      # Each colored symbol needs mana of that color, a hybrid symbol mana of either of its colors
+      # (CR 107.4e); generic is paid by anything left.
       def affordable?(index, cost, excluded_source)
         return true if cost.nil? || cost.mana_value.zero?
 
         units = mana_units(index, excluded_source)
         return false if units.size < cost.mana_value
 
-        symbols = cost.colored.flat_map { |color, n| [color] * n }
-        match_colored(symbols, units)
+        match_colored(cost.requirements, units)
       end
 
       # Every unit of mana the player could make: pool mana (one fixed type each) and one unit per
       # untapped source, with the set of types it could produce (a Treasure: any color).
-      # A source that makes several mana ({C}{C}) gives that many units.
       def mana_units(index, excluded_source)
-        units = player(index).mana_pool.flat_map { |type, n| Array.new(n) { [type] } }
-        by_source = Hash.new { |h, k| h[k] = [] }
-        all_mana_sources(index).each do |id, ref|
-          by_source[id] << chars(id).ability(ref).produce unless id == excluded_source
-        end
-        units + by_source.values.flat_map { |options| Array.new(options.map(&:size).max) { options.flatten.uniq } }
+        player(index).mana_pool.flat_map { |type, n| Array.new(n) { [type] } } + source_units(index, [excluded_source])
       end
 
-      # Bipartite matching (augmenting paths): can every colored symbol get its own unit?
+      # One unit per untapped source not in `excluded`; a source that makes several mana ({C}{C})
+      # gives that many units.
+      def source_units(index, excluded)
+        by_source = Hash.new { |h, k| h[k] = [] }
+        all_mana_sources(index).each do |id, ref|
+          by_source[id] << chars(id).ability(ref).produce unless excluded.include?(id)
+        end
+        by_source.values.flat_map { |options| Array.new(options.map(&:size).max) { options.flatten.uniq } }
+      end
+
+      # Bipartite matching (augmenting paths): can every colored or hybrid symbol (the list of types
+      # that can pay it) get its own unit?
       def match_colored(symbols, units)
         owner = Array.new(units.size)
         symbols.each_index.all? { |s| augment(s, symbols, units, owner, Array.new(units.size, false)) }
@@ -94,7 +108,7 @@ module Enjine
 
       def augment(symbol, symbols, units, owner, seen)
         units.each_index.any? do |u|
-          next false if seen[u] || !units[u].include?(symbols[symbol])
+          next false if seen[u] || !units[u].intersect?(symbols[symbol])
 
           seen[u] = true
           next false unless owner[u].nil? || augment(owner[u], symbols, units, owner, seen)
@@ -142,6 +156,9 @@ module Enjine
 
       def needs_tap?(ability) = ability.costs.any?(Mechanics::Costs::Tap)
 
+      # The spell ability of a spell (printed, CR 113.3a).
+      def spell_ability_of(obj) = definition(obj).spell_ability
+
       # ---- starting ----------------------------------------------------------------
 
       # CR 601.2a: the card moves from where it is to the stack. `via` names how a card outside the
@@ -158,9 +175,6 @@ module Enjine
         cost = method ? method_cost(obj, method) : definition(obj).mana_cost
         start_casting!(index, obj.id, "spell", origin: origin, cost: cost, extra: extra)
       end
-
-      # The spell ability of a card (nil for a permanent spell other than an Aura).
-      def spell_ability_of(obj) = definition(obj).spell_ability
 
       # CR 602.2a: the ability is created on the stack.
       def begin_activation!(index, source_id, ability_ref)
@@ -182,7 +196,8 @@ module Enjine
         state.frames << { "type" => "cast", "player" => index, "object" => object_id, "kind" => kind,
                           "origin" => origin, "source" => source, "ability" => ability, "targets" => [], "modes" => [],
                           "x" => cost&.x_symbols&.positive? ? nil : 0, "remaining" => nil,
-                          "pool" => player(index).mana_pool.transform_keys(&:to_s), "tapped" => [] }.merge(extra)
+                          "pool" => player(index).mana_pool.transform_keys(&:to_s), "tapped" => [],
+                          "triggers_before" => state.pending_triggers.map { it["id"] } }.merge(extra)
         ask!(nil) # advance! now steps the cast frame
       end
 
@@ -204,9 +219,12 @@ module Enjine
       def continue_casting!
         ctx = casting
         ability = casting_ability
-        if ability&.modal? && ctx["modes"].size < ability.choose
-          ask!("kind" => "choose_mode", "player" => ctx["player"], "choose" => ability.choose,
-               "chosen" => ctx["modes"].size)
+        return :wait if ask_kicker!(ctx)
+
+        if ability&.modal? && modes_pending?(ctx, ability)
+          min, max = mode_range(ctx, ability)
+          ask!({ "kind" => "choose_mode", "player" => ctx["player"], "choose" => max, "chosen" => ctx["modes"].size }
+                 .merge(min == max ? {} : { "min" => min }))
           return :wait
         end
         return :wait if ask_x!(ctx)
@@ -216,10 +234,12 @@ module Enjine
           ask!("kind" => "choose_target", "player" => ctx["player"], "index" => ctx["targets"].size)
           return :wait
         end
+        return :wait if ask_distribution!(ctx, ability)
+
         lock_total_cost!(ctx) unless ctx["remaining"]
         if beam_choice_pending?(ctx) then ask_beam_choice!(ctx) # CR 702.196a (Engine::Permissions)
-        elsif (cost = next_cost_choice(ctx, ability)) then ask_cost_choice!(ctx, ability.costs[cost])
-        elsif ctx["remaining"].values.sum.positive?
+        elsif (cost = next_cost_choice(ctx)) then ask_cost_choice!(ctx, casting_costs(ctx)[cost])
+        elsif remaining_left?(ctx["remaining"])
           ask!("kind" => "pay_cost", "player" => ctx["player"], "remaining" => remaining_text)
           :wait
         else
@@ -228,62 +248,35 @@ module Enjine
         end
       end
 
-      def casting_targets = casting_ability&.targets_for(casting["modes"]) || []
+      def casting_targets = casting_ability&.targets_for(casting["modes"], kicked: casting["kicked"]) || []
 
-      # CR 601.2b: modes still choosable (distinct, with legal targets).
-      def mode_options
-        ctx = casting
-        available_modes(casting_ability, ctx["player"], ctx["object"], ctx["source"]) - ctx["modes"]
-      end
-
-      def choose_mode!(index)
-        casting["modes"] << index
-        ask!(nil)
-      end
-
-      # CR 601.2c: targets, in order; a spell or ability can't target itself (CR 115.5).
+      # CR 601.2c: targets, in order; a spell or ability can't target itself (CR 115.5), and the same
+      # object can't be chosen twice for one instance of the word "target" (`distinct_from`).
       def target_candidates
         ctx = casting
         spec = casting_targets[ctx["targets"].size]
-        spec.candidates_for(self, ctx["player"], ctx["source"]).reject { it == ctx["object"] || !targetable?(it, ctx["player"]) }
-      end
-
-      def choose_target!(ref)
-        ctx = casting
-        ctx["targets"] << ref
-        emit Events::TargetChosen.new(player: name(ctx["player"]), object: ctx["object"], target: ref)
-        ask!(nil)
-      end
-
-      # Mana types in the pool that can pay part of the remaining cost (CR 601.2h).
-      def payable_mana_types
-        ctx = casting
-        rem = ctx["remaining"]
-        player(ctx["player"]).mana_pool.filter_map do |type, n|
-          type.to_s if n.positive? && (rem.fetch(type.to_s, 0).positive? || rem["generic"].positive?)
+        taken = spec.respond_to?(:distinct_from) ? spec.distinct_from.map { ctx["targets"][it] } : []
+        spec.candidates_for(self, ctx["player"], ctx["source"]).reject do
+          it == ctx["object"] || taken.include?(it) || !targetable?(it, ctx["player"])
         end
       end
 
-      def pay_mana!(type)
-        ctx = casting
-        rem = ctx["remaining"]
-        player(ctx["player"]).mana_pool[type.to_sym] -= 1
-        rem.fetch(type, 0).positive? ? rem[type] -= 1 : rem["generic"] -= 1
-        (ctx["spent"] ||= []) << type # what was spent matters later (sunburst, CR 702.44a)
-        emit Events::ManaPaid.new(player: name(ctx["player"]), mana: "{#{type}}", object: ctx["object"])
-        ask!(nil)
+      # The target options; an "up to one" target may be left unchosen (`done`).
+      def target_options
+        options = target_candidates.map { { type: "target", target: it } }
+        optional_target?(casting_targets[casting["targets"].size]) ? options + [{ type: "done" }] : options
       end
 
-      # Mana sources usable during payment; a {T} ability's own source is excluded.
-      def payment_sources
+      # `ref` nil: no target chosen for an optional ("up to one") target. Abilities that trigger when
+      # something becomes a target (ward, CR 702.21a) learn which spell or ability targeted it.
+      def choose_target!(ref)
         ctx = casting
-        mana_sources(ctx["player"], payment_excluded_source(ctx))
-      end
-
-      def tap_for_payment!(id, ability_index)
-        ctx = casting
-        activate_mana_ability!(ctx["player"], id, ability_index)
-        ctx["tapped"] << id
+        ctx["targets"] << ref
+        if ref
+          queued = state.pending_triggers.size
+          emit Events::TargetChosen.new(player: name(ctx["player"]), object: ctx["object"], target: ref)
+          state.pending_triggers.drop(queued).each { it["memory"] = it["memory"].merge("targeted_by" => ctx["object"]) }
+        end
         ask!(nil)
       end
 
@@ -295,16 +288,19 @@ module Enjine
         obj.targets = ctx["targets"].dup
         obj.modes = ctx["modes"].dup unless ctx["modes"].empty?
         obj.mana_spent = ctx["spent"].dup if ctx["spent"]
+        record_announcements!(obj, ctx) # kicked (CR 702.33d), division (CR 601.2d), modes chosen before
         record_cast_choices!(obj, ctx) # cost choices; facing a dilemma (CR 700.17)
         if ctx["kind"] == "trigger"
           emit Events::TriggerPutOnStack.new(player: name(index), object: obj.id, source: ctx["source"], card: obj.card,
                                              ability: ctx["ability"], targets: obj.targets)
           return # placing continues in the put_triggers frame; no priority yet
         elsif ctx["kind"] == "ability"
-          pay_ability_costs!(ctx)
+          pay_ability_costs!(ctx, obj)
+          record_activation!(ctx) # CR 602.5b
           emit Events::AbilityActivated.new(player: name(index), object: obj.id, card: obj.card, source: ctx["source"],
                                             ability: ctx["ability"], targets: obj.targets)
         else
+          pay_chosen_costs!(ctx) # e.g. the creature sacrificed for an additional cost (CR 601.2h)
           finish_cast_method!(obj, ctx) # Engine::Permissions
           emit Events::SpellCast.new(player: name(index), object: obj.id, card: obj.card, targets: obj.targets,
                                      during_resolution: ctx["no_priority"] == true)
@@ -314,10 +310,15 @@ module Enjine
         action_taken!(index) # CR 117.3c (the frame is popped by advance!)
       end
 
-      def pay_ability_costs!(ctx)
+      # The non-mana costs (CR 602.2b): its own ({T}, sacrifice it, exile it from the graveyard), then
+      # the chosen ones (sacrifice another creature, remove counters). A source sacrificed as a cost is
+      # remembered as it last existed (its counters, CR 608.2h).
+      def pay_ability_costs!(ctx, obj)
         source = object(ctx["source"])
         ability = chars(source).ability(ctx["ability"])
+        obj.memory["source_counters"] = source.counters.dup if ability.costs.any?(Mechanics::Costs::SacrificeSelf)
         ability.costs.reject(&:mana?).each { it.pay!(self, source) }
+        pay_chosen_costs!(ctx)
         return unless ability.kind == :loyalty
 
         source.loyalty_turn = state.turn
@@ -325,16 +326,13 @@ module Enjine
         cost.negative? ? remove_counters!(source, "loyalty", -cost) : add_counters!(source, "loyalty", cost)
       end
 
-      # Rewinds an unfinished cast or activation.
+      # Rewinds an unfinished cast or activation (CR 733.1). Offered only while nothing irreversible
+      # has been paid (see Engine::Payment#cancellable?): tapping is undone, mana abilities' mana
+      # leaves the pool, and abilities that triggered meanwhile are dropped.
       def cancel_casting!
         ctx = casting
         index = ctx["player"]
-        # A source sacrificed for mana (a Treasure) is gone and isn't brought back yet (CR 733.1 would).
-        ctx["tapped"].select { state.objects.key?(it) }.each do |id|
-          object(id).tapped = false
-          emit Events::Untapped.new(object: id)
-        end
-        player(index).mana_pool = Mana::TYPES.to_h { |t| [t, ctx["pool"].fetch(t.to_s, 0)] }
+        rewind_payment!(ctx)
         obj = object(ctx["object"])
         state.stack.delete(obj.id)
         state.objects.delete(obj.id)

@@ -26,6 +26,15 @@ module Enjine
         def pay!(_engine, _object) = nil
         def to_s = "Tap another untapped creature you control"
 
+        def choices_needed = 1
+        def choice_options(engine, object, _chosen) = choice_candidates(engine, object).map { { object: it } }
+
+        def choose!(engine, option)
+          creature = engine.object(option[:object])
+          engine.tap!(creature)
+          { "object" => creature.id, "power" => engine.power(creature), "tapped" => true }
+        end
+
         def choice_candidates(engine, object)
           engine.state.battlefield.select do |id|
             other = engine.object(id)

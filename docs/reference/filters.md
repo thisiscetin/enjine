@@ -149,3 +149,17 @@ Rules: CR 112.1, CR 115.1
 ```json
 "spell"
 ```
+
+## stack_ability
+
+An activated or triggered ability on the stack (`kind`: "activated" or "triggered" for only one of them).
+
+Rules: CR 113.1b, CR 115.1, CR 605.3b
+
+| Parameter | Description |
+| --- | --- |
+| `kind` | activated | triggered |
+
+```json
+"stack_ability"
+```

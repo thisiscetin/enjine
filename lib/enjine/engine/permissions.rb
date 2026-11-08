@@ -90,16 +90,18 @@ module Enjine
         return false if c.land? || (method["alt"].nil? && c.mana_cost.nil?) # CR 305.9
         return false unless c.type?(:instant) || c.keyword?(:flash) || sorcery_timing?(index)
         return false if method.dig("alt", "beam") && beam_candidates(index, method["alt"]["not"]).empty?
+        return false unless additional_costs_payable?(obj) # CR 601.2f
 
-        ability_targetable?(spell_ability_of(obj), index, id) &&
-          affordable?(index, total_cost(index, method_cost(obj, method), spell: obj), nil)
+        cost = Mana.sum_costs([method_cost(obj, method), *spell_extra_mana(obj, false)])
+        ability_targetable?(spell_ability_of(obj), index, id) && affordable?(index, total_cost(index, cost, spell: obj), nil)
       end
 
       # CR 608.2g: whether a card could be cast now during resolution without paying its mana cost
       # (timing doesn't apply; lands can't be cast, CR 305.9; it needs legal targets, CR 601.2c).
       def free_castable?(index, id)
         obj = object(id)
-        obj.kind == "card" && !chars(obj).land? && ability_targetable?(spell_ability_of(obj), index, id)
+        obj.kind == "card" && !chars(obj).land? && additional_costs_payable?(obj) &&
+          ability_targetable?(spell_ability_of(obj), index, id)
       end
 
       # The mana cost paid with a method: the card's own, nothing (CR 118.9) or the beam me up cost.

@@ -1,4 +1,11 @@
 {
+  "Armus, Skin of Evil": {
+    "keywords": ["menace"],
+    "abilities": [
+      {"triggered":{"when":{"step_begins":{"step":"end","whose":"your"}},"targets":["opponent"],"effects":[{"discard":{"amount":2,"to":{"target":0}}}]}},
+      {"activated":{"cost":[{"mana":"{2}{B}"},"discard_self"],"targets":["creature"],"effects":[{"pump":{"power":-4,"toughness":-4,"to":{"target":0}}}]}}
+    ]
+  },
   "Adversary by Algorithm": {
     "abilities": [
       { "spell": { "effects": [
@@ -21,12 +28,29 @@
                                        "power": 1, "toughness": 1 } } } ] } }
     ]
   },
+  "Astute Terraformer": {
+    "abilities": [
+      {"activated":{"cost":[{"mana":"{6}"}],"limit":"once_each_turn","cost_reduction":{"amount":{"distinct_names":{"each":"land","controller":"you"}}},"effects":[{"pump":{"power":2,"toughness":2,"to":"self"}}]}}
+    ]
+  },
   "Bat'leth": {
     "abilities": [
       { "triggered": { "when": { "enters": {} }, "targets": [{ "creature": { "controller": "opponent" } }],
                        "effects": [{ "pump": { "power": -2, "toughness": -2, "to": { "target": 0 } } }] } },
       { "static": { "affects": "attached", "pump": { "power": 2, "toughness": 0 } } },
       { "equip": { "cost": [{ "mana": "{2}" }] } }
+    ]
+  },
+  "Captain James T. Kirk": {
+    "note": "token color isn't modeled (no color characteristic yet)",
+    "abilities": [
+      {"triggered":{"when":{"any_of":[{"enters":{}},{"attacks":{}}]},"choose":1,"choose_if":{"if":{"hand_size":"you","at_most":0},"choose":{"min":1,"max":3}},"modes":[{"effects":[{"discard":{"amount":1}},{"draw":{"amount":1,"to":"you"}}]},{"effects":[{"create_token":{"token":{"name":"Officer","types":["creature"],"subtypes":["officer"],"power":1,"toughness":1}}}]},{"effects":[{"pump":{"power":1,"toughness":0,"to":{"each":"creature","controller":"you"}}}]}]}}
+    ]
+  },
+  "Cetacean Ops": {
+    "abilities": [
+      {"ward":{"cost":"{1}"}},
+      {"triggered":{"when":{"cast":{"controller":"you","spell":"noncreature"}},"effects":[{"add_counters":{"counter":"+1/+1","amount":1,"to":"self"}}]}}
     ]
   },
   "Cleveland Booker, Empath": {
@@ -38,10 +62,25 @@
         { "pump": { "power": 2, "toughness": 0, "to": { "each": "creature", "controller": "you" } } } ] } }
     ]
   },
+  "Collation Trimatrix": {
+    "abilities": [
+      {"activated":{"cost":[{"tap_permanents":{"count":3,"filter":{"creature":{"types":["artifact"]}}}}],"effects":[{"draw":{"amount":1,"to":"you"}},{"lose_life":{"amount":1,"to":"you"}}]}}
+    ]
+  },
   "Command Subadjunct": {
     "abilities": [
       { "static": { "affects": { "each": { "creature": { "any_of": ["artifact"] } }, "controller": "you" },
                     "keywords": ["vigilance"] } }
+    ]
+  },
+  "Consider the Prime Directive": {
+    "abilities": [
+      {"spell":{"choose":1,"modes":[{"targets":["spell"],"effects":[{"counter_unless_pays":{"mana":"{3}","to":{"target":0}}}]},{"targets":[{"filter":"creature","optional":true}],"effects":[{"tap":{"to":{"target":0}}},{"add_counters":{"counter":"stun","amount":1,"to":{"target":0}}},{"draw":{"amount":1,"to":"you"}}]}]}}
+    ]
+  },
+  "Constable Odo": {
+    "abilities": [
+      {"triggered":{"when":{"enters":{}},"choose":1,"modes":[{"targets":[{"creature":{"controller":"opponent"}}],"effects":[{"tap":{"to":{"target":0}}},{"add_counters":{"counter":"stun","amount":2,"to":{"target":0}}}]},{"effects":[{"create_token":{"token":"Clue","amount":2}}]}]}}
     ]
   },
   "Culber and Stamets, Star-Crossed": {
@@ -50,6 +89,30 @@
         { "targets": ["creature"],
           "effects": [{ "add_counters": { "counter": "+1/+1", "amount": 1, "to": { "target": 0 } } }] },
         { "effects": [{ "add_mana": { "amount": 2, "color": "any_one" } }] } ] } }
+    ]
+  },
+  "D'Vana Tendi, Optimistic Ensign": {
+    "abilities": [
+      {"activated":{"cost":["tap"],"targets":[{"permanent":{"other":true}}],"effects":[{"untap":{"to":{"target":0}}}]}},
+      {"activated":{"cost":[{"mana":"{3}"}],"effects":[{"surveil":{"amount":1}}]}}
+    ]
+  },
+  "Dal R'El, Augment Orphan": {
+    "abilities": [
+      {"triggered":{"when":{"enters":{"subject":{"each":"land","controller":"you"}}},"effects":[{"add_mana":{"color":"any_one","colors":["R","G"]}}]}},
+      {"activated":{"cost":[{"mana":"{3}"},{"sacrifice_permanent":{"filter":"land"}}],"effects":[{"draw":{"amount":1,"to":"you"}}]}}
+    ]
+  },
+  "DOT-7 Repair Squad": {
+    "keywords": ["flying"],
+    "abilities": [
+      {"activated":{"cost":[{"mana":"{1}{W}"}],"targets":["creature"],"timing":"sorcery","limit":"once_each_turn","effects":[{"untap":{"to":{"target":0}}}]}}
+    ]
+  },
+  "Eject the Warp Core": {
+    "abilities": [
+      {"kicker":{"cost":[{"sacrifice_permanent":{"filter":{"permanent":{"any_of":["artifact","creature"]}}}}]}},
+      {"spell":{"targets":["creature"],"effects":[{"pump":{"power":-2,"toughness":-2,"to":{"target":0},"if":{"kicked":false}}},{"pump":{"power":-6,"toughness":-6,"to":{"target":0},"if":{"kicked":true}}}]}}
     ]
   },
   "Encounter the Unknown": {
@@ -90,6 +153,72 @@
           { "draw": { "amount": 1,
                       "if": { "controls": { "each": { "permanent": { "counters": true } }, "controller": "you" },
                               "at_least": 1 } } } ] } ] } }
+    ]
+  },
+  "General Chang, Cold Warrior": {
+    "abilities": [
+      {"activated":{"cost":[{"mana":"{1}"},{"sacrifice_permanent":{"filter":"creature"}}],"effects":[{"add_counters":{"counter":"+1/+1","amount":1,"to":{"each":{"creature":{"subtypes":["klingon"]}},"controller":"you"}}}]}}
+    ]
+  },
+  "Ghost of Illyria": {
+    "keywords": ["flying"],
+    "abilities": [
+      {"triggered":{"when":{"enters":{}},"targets":[{"filter":{"permanent":{"controller":"you","not":["land"],"other":true}},"optional":true}],"effects":[{"exile":{"to":{"target":0}}},{"delayed_trigger":{"when":{"step_begins":{"step":"end","whose":"each"}},"effects":[{"return_to_battlefield":{"to":{"result":0}}}]}}]}}
+    ]
+  },
+  "Gowron, Eager for Battle": {
+    "abilities": [
+      {"triggered":{"when":{"dies":{"subject":{"each":"creature","other":true}}},"effects":[{"add_counters":{"counter":"+1/+1","amount":1,"to":"self"}}]}},
+      {"activated":{"cost":[{"sacrifice_permanent":{"filter":"creature","other":true}}],"effects":[{"grant":{"keywords":["trample"],"to":"self"}},{"draw":{"amount":1,"if":{"sacrificed":{"subtypes":["klingon"]}}}},{"lose_life":{"amount":1,"to":"you","if":{"sacrificed":{"subtypes":["klingon"]}}}}]}}
+    ]
+  },
+  "Highly Illogical": {
+    "abilities": [
+      {"kicker":{"cost":[{"mana":"{1}{U}"}]}},
+      {"spell":{"targets":[{"spell":{"mana_value":{"at_most":2}}}],"kicked_targets":["spell"],"effects":[{"counter":{"to":{"target":0}}}]}}
+    ]
+  },
+  "Humpback Whales": {
+    "keywords": ["vigilance"],
+    "abilities": [
+      {"ward":{"cost":"{2}"}},
+      {"cycling":{"cost":"{2}","for":{"supertypes":["basic"],"types":["land"]}}}
+    ]
+  },
+  "L'Rell, Fierce Visionary": {
+    "note": "token color isn't modeled (no color characteristic yet)",
+    "abilities": [
+      {"triggered":{"when":{"step_begins":{"step":"beginning_of_combat","whose":"your"}},"effects":[{"create_token":{"token":{"name":"Klingon Warrior","types":["creature"],"subtypes":["klingon","warrior"],"power":2,"toughness":1,"keywords":["haste"]}}},{"delayed_trigger":{"when":{"step_begins":{"step":"end","whose":"each"}},"effects":[{"sacrifice":{"to":{"result":0}}}]}}]}},
+      {"activated":{"cost":[{"mana":"{2}"},{"sacrifice_permanent":{"filter":{"permanent":{"any_of":["artifact","creature"]}},"other":true}}],"effects":[{"surveil":{"amount":1}}]}}
+    ]
+  },
+  "Lieutenant Commander Data": {
+    "abilities": [
+      {"triggered":{"when":{"cast":{"controller":"any","spell":"noncreature"}},"effects":[{"add_counters":{"counter":"+1/+1","amount":1,"to":"self"}}]}},
+      {"activated":{"cost":[{"mana":"{1}"},{"remove_counters":{"count":3}}],"effects":[{"draw":{"amount":1,"to":"you"}}]}}
+    ]
+  },
+  "Lt. Cmdr. Geordi La Forge": {
+    "abilities": [
+      {"double_counters":{"affects":{"each":"artifact","controller":"you"},"counter":"charge"}}
+    ]
+  },
+  "Organic Avulsion Unit": {
+    "abilities": [
+      {"activated":{"cost":[{"mana":"{2}"}],"effects":[{"grant":{"keywords":["menace"],"to":{"each":{"creature":{"types":["artifact"]}},"controller":"you"}}}]}}
+    ]
+  },
+  "Photosynthetic Physician": {
+    "note": "token color isn't modeled (no color characteristic yet)",
+    "keywords": ["reach"],
+    "abilities": [
+      {"activated":{"cost":[{"mana":"{G}"},"exile_self_from_graveyard"],"timing":"sorcery","effects":[{"create_token":{"token":{"name":"Officer","types":["creature"],"subtypes":["officer"],"power":1,"toughness":1}}}]}}
+    ]
+  },
+  "Relentless Drednok": {
+    "keywords": ["lifelink"],
+    "abilities": [
+      {"activated":{"cost":[{"mana":"{2}{B}"},"exile_self_from_graveyard"],"effects":[{"draw":{"amount":1,"to":"you"}},{"lose_life":{"amount":1,"to":"you"}}]}}
     ]
   },
   "Federation Resupply": {
@@ -153,6 +282,17 @@
           { "add_counters": { "counter": "stun", "amount": 1, "to": { "target": 0 } } } ] },
         { "targets": [{ "creature": { "attacking": true } }], "effects": [
           { "deal_damage": { "amount": 3, "to": { "target": 0 } } } ] } ] } }
+    ]
+  },
+  "Subcommander T'Pol": {
+    "keywords": ["flash"],
+    "abilities": [
+      {"triggered":{"when":{"enters":{}},"choose":1,"modes":[{"targets":["stack_ability"],"effects":[{"counter":{"to":{"target":0}}}]},{"targets":[{"filter":{"permanent":{"any_of":["artifact","creature"]}},"optional":true}],"effects":[{"tap":{"to":{"target":0}}},{"add_counters":{"counter":"stun","amount":1,"to":{"target":0}}}]}]}}
+    ]
+  },
+  "Suus Mahna Practitioner": {
+    "abilities": [
+      {"activated":{"cost":[{"mana":"{4}{U}"},"tap"],"targets":["creature"],"cost_reduction":{"amount":{"distinct_names":{"each":"land","controller":"you"}}},"effects":[{"tap":{"to":{"target":0}}}]}}
     ]
   },
   "Shields Up!": {
@@ -219,6 +359,32 @@
     "abilities": [
       { "triggered": { "when": { "dies": {} }, "targets": ["any_target"], "effects": [
         { "deal_damage": { "amount": 1, "to": { "target": 0 } } } ] } }
+    ]
+  },
+  "The Doctor, EMH": {
+    "abilities": [
+      {"triggered":{"when":{"enters":{}},"targets":["creature"],"effects":[{"add_counters":{"counter":"+1/+1","amount":1,"to":{"target":0}}},{"add_counters":{"counter":"+1/+1","amount":1,"to":{"each":{"creature":{"counters":true}},"controller":"you"}}}]}}
+    ]
+  },
+  "The Duras Sisters": {
+    "note": "token color isn't modeled (no color characteristic yet)",
+    "abilities": [
+      {"triggered":{"when":{"dies":{}},"effects":[{"create_token":{"token":{"name":"Klingon Warrior","types":["creature"],"subtypes":["klingon","warrior"],"power":2,"toughness":1,"keywords":["haste"]}}}]}}
+    ]
+  },
+  "U.S.S. Enterprise-A, Free Spirit": {
+    "note": "token color isn't modeled (no color characteristic yet)",
+    "keywords": ["station"],
+    "abilities": [
+      {"ward":{"cost":"{2}"}},
+      {"triggered":{"when":{"enters":{}},"effects":[{"create_token":{"token":{"name":"Officer","types":["creature"],"subtypes":["officer"],"power":1,"toughness":1},"amount":3}}]}},
+      {"station_symbol":{"at":6,"keywords":["flying","lifelink"],"power":5,"toughness":5}}
+    ]
+  },
+  "Wesley Crusher, Starfleet Cadet": {
+    "keywords": ["flash"],
+    "abilities": [
+      {"triggered":{"when":{"enters":{}},"choose":2,"modes":[{"targets":[{"spell":{"not":["creature"]}}],"effects":[{"counter_unless_pays":{"mana":"{2}","to":{"target":0}}}]},{"targets":[{"creature":{"mana_value":{"at_most":2}}}],"effects":[{"return_to_hand":{"to":{"target":0}}}]},{"targets":["creature"],"effects":[{"grant":{"keywords":["cant_be_blocked"],"to":{"target":0}}}]},{"targets":["player"],"effects":[{"draw":{"amount":2,"to":{"target":0}}},{"discard":{"amount":2,"to":{"target":0}}}]}]}}
     ]
   },
   "Transporter Malfunction": {

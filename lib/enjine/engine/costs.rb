@@ -47,7 +47,9 @@ module Enjine
       def base_cost(ctx)
         obj = object(ctx["object"])
         case ctx["kind"]
-        when "spell" then ctx["method"] ? alternative_base_cost(ctx) : chars(obj).mana_cost # CR 118.9 (Permissions)
+        when "spell" # plus additional costs and kicker (CR 601.2f); alternative costs (CR 118.9, Permissions)
+          cost = ctx["method"] ? alternative_base_cost(ctx) : chars(obj).mana_cost
+          cost && Mana.sum_costs([cost, *spell_extra_mana(obj, ctx["kicked"])])
         when "ability" then stack_ability(obj).mana_cost
         end
       end
@@ -62,10 +64,7 @@ module Enjine
 
       # CR 601.2f: the total cost is determined once and locked in.
       def lock_total_cost!(ctx)
-        cost = frame_total_cost(ctx)
-        remaining = { "generic" => cost&.generic.to_i }
-        cost&.colored&.each { |color, n| remaining[color.to_s] = n }
-        ctx["remaining"] = remaining
+        ctx["remaining"] = remaining_hash(frame_total_cost(ctx))
       end
 
       # CR 601.2b: X is announced (once) before targets are chosen. True while waiting for it.
@@ -77,7 +76,9 @@ module Enjine
       end
 
       # A {T} ability's own source can't pay for it.
-      def payment_excluded_source(ctx) = ctx["kind"] == "ability" && needs_tap?(casting_ability) ? ctx["source"] : nil
+      def payment_excluded_source(ctx)
+        ctx["type"] == "cast" && ctx["kind"] == "ability" && needs_tap?(casting_ability) ? ctx["source"] : nil
+      end
 
       # The largest X the player could pay for: the mana available beyond the rest of the cost.
       def x_limit(ctx)
@@ -93,14 +94,6 @@ module Enjine
         object(ctx["object"]).x = value
         emit Events::XAnnounced.new(player: name(ctx["player"]), object: ctx["object"], value: value)
         ask!(nil)
-      end
-
-      # What is still to pay of the locked-in total cost, as mana symbols.
-      def remaining_text
-        rem = casting["remaining"]
-        cost = Mana::Cost.new(generic: rem["generic"], colored: rem.except("generic").transform_keys(&:to_sym)
-                                                                   .reject { |_, n| n.zero? })
-        cost.to_s
       end
     end
     include Costs

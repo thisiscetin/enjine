@@ -51,10 +51,11 @@ module Enjine
 
       # CR 608.2b: targets are checked once, as resolution begins.
       def start_resolution!(frame, obj, ability)
-        specs = ability&.targets_for(obj.modes || []) || []
+        specs = ability&.targets_for(obj.modes || [], kicked: obj.memory["kicked"]) || []
         targets = legal_targets(obj, specs)
         frame["pc"] = 0
-        frame["fizzled"] = (!specs.empty? && targets.none?) || !intervening_if_holds?(obj, ability)
+        # An "up to one" target left unchosen doesn't count: only chosen targets can all be illegal.
+        frame["fizzled"] = (!specs.empty? && obj.targets.to_a.any? && targets.none?) || !intervening_if_holds?(obj, ability)
         frame["ctx"] = { "controller" => obj.controller, "source" => obj.ability? ? obj.source : obj.id,
                          "object" => obj.id, "targets" => targets, "results" => {} }
         frame["ctx"]["linked"] = obj.memory["results"] if obj.memory.key?("results") # a delayed trigger's (CR 603.7c)

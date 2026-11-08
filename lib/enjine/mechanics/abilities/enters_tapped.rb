@@ -82,6 +82,7 @@ module Enjine
         end
 
         def mana? = false
+        def uses_source? = true
         def payable?(engine, object) = engine.state.battlefield.include?(object.id)
         def pay!(engine, object) = engine.move!(object.id, :graveyard, reason: "sacrifice")
         def to_s = "Sacrifice this"

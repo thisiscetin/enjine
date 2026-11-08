@@ -58,6 +58,20 @@ Rules: CR 509.1b
 }
 ```
 
+## cant_be_countered
+
+This spell can't be countered: counter effects leave it on the stack.
+
+Rules: CR 701.6a, CR 101.2
+
+```json
+{
+  "keywords": [
+    "cant be countered"
+  ]
+}
+```
+
 ## cant_block
 
 Restriction: this creature can't block.

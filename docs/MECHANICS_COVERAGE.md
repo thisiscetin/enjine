@@ -611,6 +611,14 @@ legend rule (704.5j), Auras (303.4), Equipment (301.5), planeswalker loyalty
 replacement/prevention (614–616), "dies" and leaves-the-battlefield triggers
 (603.6/603.10), and summoning sickness (302.6).
 
+### Costs, payment and targets: where they are implemented
+
+- 107.4e / 202.2d / 202.3f hybrid mana: `Mana::Cost#hybrid`; 601.2h payment `Engine::Payment`.
+- 733.1 / 605.3 rewinding a cast: offered until an irreversible mana ability is activated.
+- 601.2b-d kicker, additional costs, mode counts, optional and distinct targets, dividing: `Engine::CastChoices`.
+- 601.2h / 602.2b chosen costs (sacrifice, tap N, remove counters, graveyard costs): `Mechanics::Costs`.
+- 602.5b activation limits; 118.12 / 701.6a paying while resolving and countering abilities; 702.21 ward.
+
 ---
 
 ## Out of scope (listed for completeness)

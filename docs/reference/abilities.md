@@ -4,16 +4,18 @@
 
 ## activated
 
-An activated ability: announce it, choose targets, pay its costs, then it goes on the stack. `timing: "sorcery"` restricts it to sorcery speed.
+An activated ability: announce it, choose targets, pay its costs, then it goes on the stack. `timing: "sorcery"` restricts it to sorcery speed, `"your_turn"` to your turns; `limit: "once_each_turn"` to one activation per turn; `only_if` to when a condition holds.
 
-Rules: CR 602.1, CR 602.2, CR 602.5d
+Rules: CR 602.1, CR 602.2, CR 602.5b, CR 602.5d
 
 | Parameter | Description |
 | --- | --- |
 | `cost` | list of costs (tap, {"mana": "{1}"}, {"mana": "{X}"}) |
 | `targets` | list of target filters |
 | `effects` | list of effects |
-| `timing` | "instant" (default) or "sorcery" |
+| `timing` | "instant" (default), "sorcery" or "your_turn" |
+| `limit` | "once_each_turn" (CR 602.5b) |
+| `only_if` | condition ("activate only if ...") |
 | `cost_reduction` | {"amount": amount, "if": condition}: "this ability costs {N} less to activate" (CR 601.2f, 602.2b) |
 
 ```json
@@ -32,6 +34,30 @@ Rules: CR 602.1, CR 602.2, CR 602.5d
           "to": {
             "target": 0
           }
+        }
+      }
+    ]
+  }
+}
+```
+
+## additional_cost
+
+As an additional cost to cast this spell, pay `cost` too (mana and/or chosen costs such as `sacrifice_permanent`). The spell can't be cast without it.
+
+Rules: CR 601.2b, CR 601.2f, CR 601.2h, CR 118.8
+
+| Parameter | Description |
+| --- | --- |
+| `cost` | list of costs |
+
+```json
+{
+  "additional_cost": {
+    "cost": [
+      {
+        "sacrifice_permanent": {
+          "filter": "creature"
         }
       }
     ]
@@ -284,6 +310,28 @@ Rules: CR 702.196a, CR 702.196b, CR 604.1, CR 611.3a
 "grants_beam_me_up"
 ```
 
+## kicker
+
+Kicker: as you cast this spell you may also pay `cost` (mana and/or chosen costs such as `sacrifice_permanent`). The spell is then kicked: `{"kicked": true}` conditions hold and its `kicked_targets` are used.
+
+Rules: CR 702.33a, CR 702.33d, CR 702.33g, CR 601.2b, CR 601.2f, CR 601.2h
+
+| Parameter | Description |
+| --- | --- |
+| `cost` | list of costs, e.g. [{"mana": "{1}{U}"}] |
+
+```json
+{
+  "kicker": {
+    "cost": [
+      {
+        "mana": "{1}{U}"
+      }
+    ]
+  }
+}
+```
+
 ## look_at_top
 
 While this permanent is on the battlefield, its controller sees the top card of their library (the `library_top` of their view).
@@ -484,6 +532,24 @@ Rules: CR 603.2, CR 603.3, CR 603.3b, CR 603.3d
         }
       }
     ]
+  }
+}
+```
+
+## ward
+
+Ward: whenever this permanent becomes the target of a spell or ability an opponent controls, counter that spell or ability unless its controller pays `cost`.
+
+Rules: CR 702.21a, CR 601.2c, CR 603.2, CR 701.6a
+
+| Parameter | Description |
+| --- | --- |
+| `cost` | mana cost string, e.g. "{2}" |
+
+```json
+{
+  "ward": {
+    "cost": "{2}"
   }
 }
 ```

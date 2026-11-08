@@ -80,11 +80,9 @@ module Enjine
       new(seed: seed, **).build
     end
 
-    # The colors of a card: the colored symbols in its mana cost (CR 105.2, 202.2), in WUBRG order.
-    def self.colors_of(definition)
-      cost = definition.mana_cost
-      cost ? Mana::COLORS.select { cost.colored.key?(it) } : []
-    end
+    # The colors of a card: the colored and hybrid symbols in its mana cost (CR 105.2, 202.2, 202.2d),
+    # in WUBRG order. A hybrid card needs both of its colors in the deck.
+    def self.colors_of(definition) = definition.mana_cost&.colors || []
 
     # The colors a deck must be able to produce to use a card: its colors plus the colored
     # symbols in its activation costs, so an off-color activated ability never sneaks in.
