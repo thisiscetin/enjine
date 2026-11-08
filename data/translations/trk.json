@@ -1,4 +1,12 @@
 {
+  "A Good Day to Die": {
+    "abilities": [
+      { "spell": { "targets": ["creature"], "effects": [
+        { "pump": { "power": 2, "toughness": 0, "to": { "target": 0 } } },
+        { "delayed_trigger": { "when": { "dies": { "subject": "watched" } }, "watch": { "target": 0 }, "this_turn": true,
+                               "effects": [{ "draw": { "amount": 1 } }] } } ] } }
+    ]
+  },
   "Academy Instructor": {
     "abilities": [
       {"static":{"affects":"self","pump":{"power":{"count":{"each":{"permanent":{"subtypes":["officer"],"token":true}},"controller":"you"}},"toughness":0}}},
@@ -50,6 +58,13 @@
                        "effects": [{ "pump": { "power": -2, "toughness": -2, "to": { "target": 0 } } }] } },
       { "static": { "affects": "attached", "pump": { "power": 2, "toughness": 0 } } },
       { "equip": { "cost": [{ "mana": "{2}" }] } }
+    ]
+  },
+  "Battle-Scarred Survivalist": {
+    "keywords": ["menace"],
+    "abilities": [
+      { "triggered": { "when": { "dies": { "subject": { "each": "creature", "other": true } } }, "limit": "once_each_turn",
+                       "effects": [{ "add_counters": { "counter": "+1/+1", "amount": 1, "to": "self" } }] } }
     ]
   },
   "Cantankerous Captain": {
@@ -134,6 +149,34 @@
         { "effects": [{ "add_mana": { "amount": 2, "color": "any_one" } }] } ] } }
     ]
   },
+  "Dathon, His Heart Open": {
+    "abilities": [
+      { "triggered": { "when": { "cast": { "spell": { "spell": { "any_of": ["enchantment"] } } } }, "effects": [
+        { "draw": { "amount": 1 } },
+        { "deal_damage": { "amount": 2, "to": "each_opponent", "if": { "triggering": { "spell": { "subtypes": ["saga"] } } } } } ] } },
+      { "activated": { "cost": [{ "mana": "{2}" }], "timing": "sorcery",
+                       "targets": [{ "permanent": { "any_of": ["enchantment"], "controller": "you" } }],
+                       "effects": [{ "another_counter": { "to": { "target": 0 } } }] } }
+    ]
+  },
+  "David and Carol Marcus, Creators": {
+    "abilities": [
+      { "triggered": { "when": { "enters": {} }, "effects": [
+        { "create_token": { "tapped": true, "token": { "name": "New Planet", "types": ["land"], "subtypes": ["planet"],
+                            "abilities": [{ "mana": { "cost": ["tap"], "produce": "{W}" } },
+                                         { "mana": { "cost": ["tap"], "produce": "{U}" } },
+                                         { "mana": { "cost": ["tap"], "produce": "{B}" } },
+                                         { "mana": { "cost": ["tap"], "produce": "{R}" } },
+                                         { "mana": { "cost": ["tap"], "produce": "{G}" } }] } } } ] } }
+    ]
+  },
+  "Dr. Beverly Crusher": {
+    "abilities": [
+      { "additional_triggers": { "cause": "you_gain_life" } },
+      { "triggered": { "when": { "gains_life": {} },
+                       "effects": [{ "add_counters": { "counter": "+1/+1", "amount": 1, "to": "self" } }] } }
+    ]
+  },
   "De-evolve": {
     "abilities": [
       {"enchant":"creature"},
@@ -203,6 +246,84 @@
           { "draw": { "amount": 1,
                       "if": { "controls": { "each": { "permanent": { "counters": true } }, "controller": "you" },
                               "at_least": 1 } } } ] } ] } }
+    ]
+  },
+  "Federation Outpost": {
+    "abilities": [
+      { "enters_tapped_unless": { "condition": { "controls": { "each": "land", "controller": "you" }, "at_least": 2 } } },
+      { "triggered": { "when": { "enters": { "untapped": true } }, "choose": 1, "modes": [
+        { "effects": [{ "gain_life": { "amount": 2 } }] },
+        { "effects": [{ "surveil": { "amount": 1 } }] } ] } },
+      { "mana": { "cost": ["tap"], "produce": "{W}" } }
+    ]
+  },
+  "Kai Winn, Faithless Leader": {
+    "abilities": [
+      { "choose_card_name": { "not": ["land"] } },
+      { "triggered": { "when": { "any_of": [{ "cast": { "controller": "opponent", "name": "chosen" } },
+                                            { "activates_ability": { "controller": "opponent", "name": "chosen" } }] },
+                       "effects": [{ "lose_life": { "amount": 3, "to": { "triggering": "player" } } }] } }
+    ]
+  },
+  "Khan, Despot by Design": {
+    "keywords": ["trample"],
+    "abilities": [
+      { "triggered": { "when": { "enters": {} }, "effects": [
+        { "deal_damage": { "amount": 1, "to": "each_opponent" } },
+        { "deal_damage": { "amount": 1, "to": { "each": "creature", "controller": "opponent" } } } ] } }
+    ]
+  },
+  "MACO Strike Team": {
+    "abilities": [
+      { "triggered": { "when": { "becomes_target": { "subject": { "each": "creature", "controller": "you" }, "by": "opponent" } },
+                       "effects": [{ "create_token": { "tapped": true, "token": { "name": "Officer", "types": ["creature"],
+                                                                                   "subtypes": ["officer"], "power": 1, "toughness": 1 } } }] } }
+    ]
+  },
+  "Ni'Var Science Academy": {
+    "abilities": [
+      { "enters_tapped_unless": { "condition": { "controls": { "each": "land", "controller": "you" }, "at_least": 2 } } },
+      { "triggered": { "when": { "enters": { "untapped": true } }, "choose": 1, "modes": [
+        { "targets": ["creature"], "effects": [{ "grant": { "keywords": ["flying"], "to": { "target": 0 } } }] },
+        { "effects": [{ "surveil": { "amount": 1 } }] } ] } },
+      { "mana": { "cost": ["tap"], "produce": "{U}" } }
+    ]
+  },
+  "Nyota Uhura, Communications": {
+    "abilities": [
+      { "choose_number": { "min": 0, "max": 10 } },
+      { "triggered": { "when": { "cast": { "controller": "opponent", "mana_value": "chosen" } },
+                       "effects": [{ "draw": { "amount": 1 } }] } }
+    ]
+  },
+  "Planetary Patrol": {
+    "abilities": [
+      { "triggered": { "when": { "enters": { "subject": { "each": "land", "controller": "you" } } },
+                       "effects": [{ "pump": { "power": 1, "toughness": 1, "to": "self" } }] } }
+    ]
+  },
+  "Q Continuum": {
+    "abilities": [
+      { "enters_tapped_unless": { "condition": { "controls": { "each": "land", "controller": "you" }, "at_least": 2 } } },
+      { "triggered": { "when": { "enters": { "untapped": true } }, "choose": 1, "modes": [
+        { "targets": ["creature"], "effects": [{ "pump": { "power": 1, "toughness": 1, "to": { "target": 0 } } }, { "grant": { "keywords": ["vigilance"], "to": { "target": 0 } } }] },
+        { "effects": [{ "surveil": { "amount": 1 } }] } ] } },
+      { "mana": { "cost": ["tap"], "produce": "{G}" } }
+    ]
+  },
+  "Quark's Bar": {
+    "abilities": [
+      { "enters_tapped_unless": { "condition": { "controls": { "each": "land", "controller": "you" }, "at_least": 2 } } },
+      { "triggered": { "when": { "enters": { "untapped": true } }, "choose": 1, "modes": [
+        { "effects": [{ "deal_damage": { "amount": 1, "to": "each_opponent" } }] },
+        { "effects": [{ "surveil": { "amount": 1 } }] } ] } },
+      { "mana": { "cost": ["tap"], "produce": "{R}" } }
+    ]
+  },
+  "Ravenous Cosmozoan": {
+    "keywords": ["flying", "haste"],
+    "abilities": [
+      { "cost_reduction": { "amount": { "count": { "each": { "graveyard_card": { "not": ["creature", "land"] } }, "controller": "you" } } } }
     ]
   },
   "Genesis Effect": {
@@ -441,6 +562,20 @@
           { "deal_damage": { "amount": 3, "to": { "target": 0 } } } ] } ] } }
     ]
   },
+  "Starfleet Security": {
+    "keywords": ["haste"],
+    "abilities": [
+      { "triggered": { "when": { "dies": {} }, "if": { "your_turn": true }, "effects": [{ "create_token": { "token": "Clue" } }] } }
+    ]
+  },
+  "Tell Me What You See": {
+    "abilities": [
+      { "triggered": { "when": { "enters": {} }, "targets": ["opponent"], "effects": [
+        { "may": { "chooser": { "target": 0 }, "effects": [{ "draw": { "amount": 1 } }],
+                   "otherwise": [{ "lose_life": { "amount": 4, "to": { "target": 0 } } }, { "surveil": { "amount": 1 } }] } } ] } },
+      { "triggered": { "when": { "faces_dilemma": {} }, "effects": [{ "may": { "effects": [{ "return_to_hand": { "to": "self" } }] } }] } }
+    ]
+  },
   "Sickbay": {
     "abilities": [
       {"triggered":{"when":{"enters":{"subject":{"each":"creature","controller":"you"}}},"effects":[{"gain_life":{"amount":1}}]}},
@@ -501,6 +636,21 @@
         { "targets": ["opponent"], "effects": [
           { "draw": { "amount": 1, "to": { "target": 0 } } },
           { "draw": { "amount": 2 } } ] } ] } }
+    ]
+  },
+  "U.S.S. Reliant, From Hell's Heart": {
+    "keywords": ["station"],
+    "abilities": [
+      { "triggered": { "when": { "any_of": [{ "enters": {} }, { "deals_damage": { "combat": true, "to": "player" } }] },
+                       "targets": [{ "graveyard_card": { "any_of": ["creature"], "controller": "you", "mana_value": { "at_most": 4 } } }],
+                       "effects": [{ "return_to_battlefield": { "to": { "target": 0 }, "counters": { "finality": 1 } } }] } },
+      { "station_symbol": { "at": 10, "power": 4, "toughness": 3, "keywords": ["flying"] } }
+    ]
+  },
+  "Vash, Freelance Archaeologist": {
+    "abilities": [
+      { "triggered": { "when": { "step_begins": { "step": "upkeep" } }, "effects": [{ "surveil": { "amount": 1 } }] } },
+      { "triggered": { "when": { "leaves_graveyard": {} }, "limit": "once_each_turn", "effects": [{ "draw": { "amount": 1 } }] } }
     ]
   },
   "Death Is Irrelevant": {

@@ -323,6 +323,7 @@ module Enjine
         fresh.controller = data["controller"] || old.owner
         fresh.controlled_since = state.turn
         fresh.memory["cast"] = true if data["enters"]["cast"] # CR 400.7d: it remembers it was cast
+        fresh.memory.merge!(data["enters"]["memory"]) if data["enters"]["memory"] # CR 614.12: an "as this enters" choice
         fresh.tapped = data["enters"]["tapped"]
         fresh.counters.merge!(data["enters"]["counters"])
         fresh.x = old.x if old.zone == :stack # CR 107.3m: its ETB abilities use the spell's X

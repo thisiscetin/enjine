@@ -15,27 +15,45 @@ module Enjine
                                "owner's control (`under: \"you\"`: under the controller's), tapped if `tapped: true`. " \
                                "A card that is no longer in the zone it was expected in, or isn't a permanent card, " \
                                "stays where it is.",
-                  rules: %w[400.7 400.4a 110.2 111.8 603.7c],
+                  rules: %w[400.7 400.4a 110.2 111.8 603.7c 614.1c 122.6],
                   params: { "to" => "selector (usually {\"result\": n})", "tapped" => "boolean",
-                            "under" => UNDER.join(" | ") },
+                            "under" => UNDER.join(" | "),
+                            "counters" => "{counter name: n}: it enters with these counters (\"with a +1/+1 counter on it\")" },
                   example: { "return_to_battlefield" => { "to" => { "result" => 0 } } }
 
-        attr_reader :tapped, :under
+        attr_reader :tapped, :under, :counters
 
-        def self.keys = %w[to tapped under if]
+        def self.keys = %w[to tapped under counters if]
 
         def setup(params, errors, path)
           @tapped = Mechanics.fetch_param(params, :tapped) == true
           @under = Mechanics.fetch_param(params, :under) || "owner"
           errors << "#{path}.under: must be one of #{UNDER.join(", ")}" unless UNDER.include?(@under)
+          @counters = parse_counters(Mechanics.fetch_param(params, :counters) || {}, errors, "#{path}.counters")
         end
 
-        def to_s = "return to the battlefield#{" tapped" if tapped}#{" under your control" if under == "you"} → #{to}"
+        def parse_counters(raw, errors, path)
+          return (errors << "#{path}: must be an object of counter name => count") && {} unless raw.is_a?(Hash)
+
+          raw.to_h do |name, n|
+            kind = Counters.normalize(name.to_s)
+            message = Counters.error(kind)
+            errors << "#{path}.#{name}: #{message}" if message
+            errors << "#{path}.#{name}: must be a positive integer" unless n.is_a?(Integer) && n.positive?
+            [kind, n]
+          end.freeze
+        end
+
+        def to_s
+          extra = counters.map { |kind, n| " with #{n} #{kind} counter(s)" }.join
+          "return to the battlefield#{" tapped" if tapped}#{" under your control" if under == "you"}#{extra} → #{to}"
+        end
 
         def apply(engine, ctx)
+          enters = { "tapped" => tapped || nil, "counters" => counters.empty? ? nil : counters.dup }.compact
           cards(engine, ctx).each do |id|
             controller = under == "you" ? ctx.controller : engine.object(id).owner
-            engine.move!(id, :battlefield, controller: controller, reason: "return", enters: tapped ? { "tapped" => true } : nil)
+            engine.move!(id, :battlefield, controller: controller, reason: "return", enters: enters.empty? ? nil : enters)
           end
         end
 
@@ -80,13 +98,16 @@ module Enjine
                                "if every effect in `effects` can be done fully. On yes, `effects` then `then` (\"if you " \
                                "do\") happen; on no, `otherwise` (\"if you don't\"). Nested effects may name the results " \
                                "of earlier effects of the enclosing list.",
-                  rules: %w[118.12 118.3 608.2d],
+                  rules: %w[118.12 118.3 608.2d 608.2e],
                   params: { "effects" => "list of effects (the optional part)", "then" => "list of effects",
-                            "otherwise" => "list of effects" },
+                            "otherwise" => "list of effects",
+                            "chooser" => "who decides (default: the controller): a selector naming a player, or a " \
+                                         "permanent whose controller decides (e.g. {\"target\": 0}), or " \
+                                         "\"active_player\"" },
                   example: { "may" => { "effects" => [{ "discard" => { "amount" => 1 } }],
                                         "then" => [{ "draw" => { "amount" => 1 } }] } }
 
-        def self.keys = LISTS + %w[if]
+        def self.keys = LISTS + %w[if chooser]
         def self.default_to = "you"
 
         def setup(params, errors, path)
@@ -95,13 +116,27 @@ module Enjine
                                                                                               results_count: @results_count)]
           end.freeze
           errors << "#{path}.effects: needs at least one effect" if @lists["effects"].empty?
+          raw = Mechanics.fetch_param(params, :chooser)
+          @chooser = if raw.nil? || raw == "active_player" then raw
+                     else Selector.build(raw, errors, "#{path}.chooser", targets_count: @targets_count, results_count: @results_count)
+                     end
         end
 
         def effects = @lists["effects"]
         def nested_effects = @lists.values.flatten
 
+        # CR 608.2e: an effect may have a player other than its controller make a choice. The chooser is
+        # the named player, or the controller of the named permanent; nobody legal: the controller.
+        def chooser_index(engine, ctx)
+          return ctx.controller if @chooser.nil?
+          return engine.state.active if @chooser == "active_player"
+
+          ref = @chooser.resolve(engine, ctx).first
+          Filters.player_index(engine, ref) || engine.state.objects[ref]&.controller || ctx.controller
+        end
+
         def to_s
-          text = "you may: #{effects.join("; ")}"
+          text = "#{@chooser ? "#{@chooser} may have" : "you may"}: #{effects.join("; ")}"
           text += " — if you do: #{@lists["then"].join("; ")}" unless @lists["then"].empty?
           text += " — if you don't: #{@lists["otherwise"].join("; ")}" unless @lists["otherwise"].empty?
           text
@@ -123,7 +158,7 @@ module Enjine
         def ask_yes_no(engine, ctx, locals)
           choices = [{ "type" => "no" }]
           choices.unshift({ "type" => "yes" }) if effects.all? { it.possible?(engine, ctx) }
-          ask(engine, locals, ctx.controller, "You may: #{effects.join("; ")}", choices)
+          ask(engine, locals, chooser_index(engine, ctx), "You may: #{effects.join("; ")}", choices)
         end
 
         # The chosen list, one effect at a time; a waiting effect keeps its locals under "child"
@@ -149,13 +184,17 @@ module Enjine
                                "`effects` may use {\"result\": n} for what earlier effects of the creating list moved or " \
                                "created; those objects are affected only if they are still where they were put.",
                   rules: %w[603.7a 603.7b 603.7c 603.7d 603.7e],
-                  params: { "when" => "a trigger condition", "effects" => "list of effects" },
+                  params: { "when" => "a trigger condition", "effects" => "list of effects",
+                            "watch" => "selector resolved now (e.g. {\"target\": 0}): the objects its trigger subject " \
+                                       "\"watched\" and its effects' selector \"watched\" mean (\"when that creature dies\")",
+                            "this_turn" => "true: it lasts until the end of this turn and triggers each time " \
+                                           "(\"whenever ... this turn\", CR 603.7b)" },
                   example: { "delayed_trigger" => { "when" => { "step_begins" => { "step" => "end", "whose" => "each" } },
                                                     "effects" => [{ "sacrifice" => { "to" => { "result" => 0 } } }] } }
 
         attr_reader :ref, :delayed_ability
 
-        def self.keys = %w[when effects]
+        def self.keys = %w[when effects watch this_turn]
         def self.default_to = "you"
 
         def setup(params, errors, path)
@@ -165,17 +204,67 @@ module Enjine
           effects = Abilities::StackAbility.parse_effects(params, errors, path, 0, results_count: @results_count)
           errors << "#{path}.effects: needs at least one effect" if effects.empty?
           @delayed_ability = Abilities::TriggeredAbility.new(targets: [].freeze, effects: effects, trigger: trigger)
+          raw_watch = Mechanics.fetch_param(params, :watch)
+          @watch = raw_watch && Selector.build(raw_watch, errors, "#{path}.watch", targets_count: @targets_count,
+                                                                                   results_count: @results_count)
+          @this_turn = Mechanics.fetch_param(params, :this_turn)
+          errors << "#{path}.this_turn: must be true or false" unless [nil, true, false].include?(@this_turn)
         end
 
         def nested_effects = delayed_ability.effects
-        def to_s = "delayed: #{delayed_ability}"
+        def to_s = "delayed#{" this turn" if @this_turn}: #{delayed_ability}#{" (watching #{@watch})" if @watch}"
 
         # CR 603.7d-e: controlled by the resolving object's controller, from the same source. It
-        # remembers the results it may name (CR 603.7c).
+        # remembers the results it may name and the objects it watches (CR 603.7c).
         def apply(engine, ctx)
-          engine.create_delayed_trigger!("controller" => ctx.controller, "source" => ctx.source,
-                                         "card" => engine.object(ctx.object).card, "ability" => ref,
-                                         "results" => Snapshot.deep_copy(ctx.results || []))
+          entry = { "controller" => ctx.controller, "source" => ctx.source, "card" => engine.object(ctx.object).card,
+                    "ability" => ref, "results" => Snapshot.deep_copy(ctx.results || []) }
+          entry["watched"] = @watch.resolve(engine, ctx) if @watch
+          entry["turn"] = engine.state.turn if @this_turn
+          engine.create_delayed_trigger!(entry)
+        end
+      end
+
+      # A reflexive triggered ability (CR 603.12): "When you do, [effect]". Put it where the action it
+      # depends on is known to have happened, usually a "may"'s `then`. It triggers at once and goes on the
+      # stack the next time a player would receive priority, with its own targets chosen then (CR 603.3d).
+      class ReflexiveTrigger < Effect
+        primitive :effect, :reflexive_trigger,
+                  description: "Creates a reflexive triggered ability (\"when you do, ...\") that triggers immediately, " \
+                               "with the controller and source of the resolving spell or ability. Its `targets` are " \
+                               "chosen as it's put on the stack; its `effects` may name the results of earlier effects " \
+                               "of the creating list.",
+                  rules: %w[603.12 603.12a 603.7d 603.7e 603.3d],
+                  params: { "targets" => "list of target filters", "effects" => "list of effects" },
+                  example: { "reflexive_trigger" => { "targets" => ["any_target"],
+                                                      "effects" => [{ "deal_damage" => { "amount" => 2,
+                                                                                         "to" => { "target" => 0 } } }] } }
+
+        # Stands in for the trigger condition on the stack ability ("When you do").
+        WhenYouDo = Data.define do
+          def to_s = "When you do"
+        end
+
+        attr_reader :ref, :delayed_ability
+
+        def self.keys = %w[targets effects]
+        def self.default_to = "you"
+
+        def setup(params, errors, path)
+          @ref = "reflexive:#{path}"
+          targets = Abilities::StackAbility.parse_targets(params, errors, path)
+          effects = Abilities::StackAbility.parse_effects(params, errors, path, targets.size, results_count: @results_count)
+          errors << "#{path}.effects: needs at least one effect" if effects.empty?
+          @delayed_ability = Abilities::TriggeredAbility.new(targets: targets, effects: effects, trigger: WhenYouDo.new)
+        end
+
+        def nested_effects = delayed_ability.effects
+        def to_s = "reflexive: #{delayed_ability}"
+
+        def apply(engine, ctx)
+          source = { "id" => ctx.source, "card" => engine.object(ctx.object).card, "controller" => ctx.controller,
+                     "ability" => ref }
+          engine.queue_pending_trigger!(source, nil, { "results" => Snapshot.deep_copy(ctx.results || []) })
         end
       end
     end

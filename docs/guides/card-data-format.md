@@ -240,6 +240,31 @@ is a flicker ("exile …, then return it to the battlefield under its owner's co
   affected (CR 603.7c).
 - `{ "was_cast": true }` as a triggered ability's `if` is "if you cast it" (CR 603.4).
 
+### 4.5b More trigger shapes
+
+| Shape | Data |
+| --- | --- |
+| "Whenever ~ becomes tapped" | `{ "becomes_tapped": {} }` |
+| "Whenever one or more +1/+1 counters are put on ~" | `{ "counters_placed": { "counter": "+1/+1" } }` |
+| one of your creatures is targeted by an opponent's spell or ability | `{ "becomes_target": { "subject": { "each": "creature", "controller": "you" }, "by": "opponent" } }` |
+| "Whenever a card leaves your graveyard" / "one or more cards leave" | `{ "leaves_graveyard": {} }` / `{ "leaves_graveyard": { "batched": true } }` |
+| "Whenever an opponent activates an ability" (not mana abilities) | `{ "activates_ability": { "controller": "opponent" } }` |
+| "When you cast this spell" | `{ "cast": { "self": true } }` |
+| you cast a spell that is a creature or a Spacecraft | `{ "cast": { "spell": { "one_of": [{ "spell": { "any_of": ["creature"] } }, { "spell": { "subtypes": ["spacecraft"] } }] } } }` |
+| a number chosen as it enters (0 to 10) / spells whose mana value is that number | ability `{ "choose_number": { "min": 0, "max": 10 } }` / `"cast": { "mana_value": "chosen" }` |
+| a nonland card name chosen as it enters / spells or sources with that name | ability `{ "choose_card_name": { "not": ["land"] } }` / `"name": "chosen"` on `cast` or `activates_ability` |
+| triggers at most once per turn | `"limit": "once_each_turn"` on the `triggered` ability |
+| a triggered ability that works from the graveyard ("return this card from your graveyard") | `"zone": "graveyard"` on the `triggered` ability (CR 113.6k) |
+| "that creature", "that player", "that many" | selectors `{ "triggering": "object" }`, `{ "triggering": "player" }`, amount `{ "triggering": "amount" }` |
+| the triggering spell is a Saga | condition `{ "triggering": { "spell": { "subtypes": ["saga"] } } }` |
+| the targeted creature dying later this turn | `{ "delayed_trigger": { "when": { "dies": { "subject": "watched" } }, "watch": { "target": 0 }, "this_turn": true, "effects": [...] } }`; effects name the watched objects with the selector `"watched"` |
+| each of your creatures entering for the rest of the turn | `delayed_trigger` with `"this_turn": true` (it triggers each time until the turn ends) |
+| optional A; if it was done, a reflexive trigger B with its own target | `{ "may": { "effects": [A], "then": [{ "reflexive_trigger": { "targets": [...], "effects": [B] } }] } }` |
+| a targeted opponent decides whether A happens; B if not | `{ "may": { "chooser": { "target": 0 }, "effects": [A], "otherwise": [B] } }` |
+| your life gain makes your permanents' triggered abilities trigger one extra time | `{ "additional_triggers": { "cause": "you_gain_life" } }` |
+| tapped unless its controller has two other lands / a trigger only if it came in untapped | `{ "enters_tapped_unless": { "condition": { "controls": { "each": "land", "controller": "you" }, "at_least": 2 } } }` / `{ "enters": { "untapped": true } }` |
+| returned to the battlefield carrying a +1/+1 counter | `"counters": { "+1/+1": 1 }` on `return_to_battlefield` |
+
 ### 4.6 Effects
 
 See `docs/reference/effects.md` for the generated list. Currently:

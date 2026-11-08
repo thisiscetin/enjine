@@ -65,6 +65,24 @@ Rules: CR 601.2b, CR 601.2f, CR 601.2h, CR 118.8
 }
 ```
 
+## additional_triggers
+
+While this permanent is on the battlefield, a triggered ability of a permanent its controller controls that triggers because of `cause` triggers an additional time. `cause`: you_gain_life (its controller gaining life).
+
+Rules: CR 603.2d, CR 119.9
+
+| Parameter | Description |
+| --- | --- |
+| `cause` | you_gain_life |
+
+```json
+{
+  "additional_triggers": {
+    "cause": "you_gain_life"
+  }
+}
+```
+
 ## beam_me_up
 
 You may cast this instant or sorcery card from your graveyard for `cost` plus returning a creature you control to its owner's hand, instead of its mana cost. If you do, it's exiled whenever it would leave the stack. Offered as a cast option with `via: "beam:<ref>"`.
@@ -107,6 +125,46 @@ Rules: CR 715.2, CR 715.2b, CR 715.2c, CR 715.2d, CR 122.6
         }
       }
     ]
+  }
+}
+```
+
+## choose_card_name
+
+As this permanent enters, its controller chooses a card name among the cards in the game (`not`: card types the named card mustn't have, e.g. ["land"]); abilities of it that say "the chosen name" use it.
+
+Rules: CR 614.12, CR 614.12a, CR 201.4, CR 201.4a, CR 607.2
+
+| Parameter | Description |
+| --- | --- |
+| `not` | list of card types |
+
+```json
+{
+  "choose_card_name": {
+    "not": [
+      "land"
+    ]
+  }
+}
+```
+
+## choose_number
+
+As this permanent enters, its controller chooses a number from `min` to `max`; abilities of it that say "the chosen number" use it.
+
+Rules: CR 614.12, CR 614.12a, CR 607.2
+
+| Parameter | Description |
+| --- | --- |
+| `min` | integer (default 0) |
+| `max` | integer |
+
+```json
+{
+  "choose_number": {
+    "min": 0,
+    "max": 10
   }
 }
 ```
@@ -232,6 +290,30 @@ Rules: CR 614.1c, CR 614.12
 
 ```json
 "enters_tapped"
+```
+
+## enters_tapped_unless
+
+This permanent enters tapped unless `condition` is true as it would enter (checked for its controller; the permanent itself isn't on the battlefield yet).
+
+Rules: CR 614.1c, CR 614.12
+
+| Parameter | Description |
+| --- | --- |
+| `condition` | a condition, e.g. {"controls": {"each": "land", "controller": "you"}, "at_least": 2} |
+
+```json
+{
+  "enters_tapped_unless": {
+    "condition": {
+      "controls": {
+        "each": "land",
+        "controller": "you"
+      },
+      "at_least": 2
+    }
+  }
+}
 ```
 
 ## enters_tapped_unless_pay_life
@@ -523,6 +605,8 @@ Rules: CR 603.2, CR 603.3, CR 603.3b, CR 603.3d
 | `effects` | list of effects |
 | `if` | condition: an intervening "if", checked when it triggers and on resolution (CR 603.4) |
 | `while` | condition checked only when it triggers ("whenever you attack while ...", CR 603.2) |
+| `limit` | "once_each_turn": it triggers at most once each turn (per object) |
+| `zone` | "graveyard": the ability functions only while its card is in a graveyard (CR 113.6k) |
 
 ```json
 {

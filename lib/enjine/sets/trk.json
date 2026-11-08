@@ -374,6 +374,52 @@
     },
     {
       "card": {
+        "name": "Dr. Beverly Crusher",
+        "mana_cost": "{2}{W}",
+        "types": [
+          "creature"
+        ],
+        "supertypes": [
+          "legendary"
+        ],
+        "subtypes": [
+          "human",
+          "doctor"
+        ],
+        "power": 2,
+        "toughness": 2,
+        "abilities": [
+          {
+            "additional_triggers": {
+              "cause": "you_gain_life"
+            }
+          },
+          {
+            "triggered": {
+              "when": {
+                "gains_life": {}
+              },
+              "effects": [
+                {
+                  "add_counters": {
+                    "counter": "+1/+1",
+                    "amount": 1,
+                    "to": "self"
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "rarity": "mythic",
+      "printing": {
+        "set": "trk",
+        "number": "13"
+      }
+    },
+    {
+      "card": {
         "name": "Emergency Medical Hologram",
         "mana_cost": "{W}",
         "types": [
@@ -2416,6 +2462,54 @@
     },
     {
       "card": {
+        "name": "Nyota Uhura, Communications",
+        "mana_cost": "{2}{U}",
+        "types": [
+          "creature"
+        ],
+        "supertypes": [
+          "legendary"
+        ],
+        "subtypes": [
+          "human",
+          "officer"
+        ],
+        "power": 2,
+        "toughness": 4,
+        "abilities": [
+          {
+            "choose_number": {
+              "min": 0,
+              "max": 10
+            }
+          },
+          {
+            "triggered": {
+              "when": {
+                "cast": {
+                  "controller": "opponent",
+                  "mana_value": "chosen"
+                }
+              },
+              "effects": [
+                {
+                  "draw": {
+                    "amount": 1
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "rarity": "rare",
+      "printing": {
+        "set": "trk",
+        "number": "75"
+      }
+    },
+    {
+      "card": {
         "name": "Open Communications",
         "mana_cost": "{U}",
         "types": [
@@ -3197,6 +3291,53 @@
     },
     {
       "card": {
+        "name": "Battle-Scarred Survivalist",
+        "mana_cost": "{1}{B}",
+        "types": [
+          "creature"
+        ],
+        "subtypes": [
+          "klingon",
+          "scout"
+        ],
+        "keywords": [
+          "menace"
+        ],
+        "power": 1,
+        "toughness": 1,
+        "abilities": [
+          {
+            "triggered": {
+              "when": {
+                "dies": {
+                  "subject": {
+                    "each": "creature",
+                    "other": true
+                  }
+                }
+              },
+              "limit": "once_each_turn",
+              "effects": [
+                {
+                  "add_counters": {
+                    "counter": "+1/+1",
+                    "amount": 1,
+                    "to": "self"
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "rarity": "common",
+      "printing": {
+        "set": "trk",
+        "number": "95"
+      }
+    },
+    {
+      "card": {
         "name": "Cha'DIch Investigator",
         "mana_cost": "{4}{B}",
         "types": [
@@ -3749,6 +3890,60 @@
     },
     {
       "card": {
+        "name": "A Good Day to Die",
+        "mana_cost": "{B}",
+        "types": [
+          "instant"
+        ],
+        "abilities": [
+          {
+            "spell": {
+              "targets": [
+                "creature"
+              ],
+              "effects": [
+                {
+                  "pump": {
+                    "power": 2,
+                    "toughness": 0,
+                    "to": {
+                      "target": 0
+                    }
+                  }
+                },
+                {
+                  "delayed_trigger": {
+                    "when": {
+                      "dies": {
+                        "subject": "watched"
+                      }
+                    },
+                    "watch": {
+                      "target": 0
+                    },
+                    "this_turn": true,
+                    "effects": [
+                      {
+                        "draw": {
+                          "amount": 1
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "rarity": "common",
+      "printing": {
+        "set": "trk",
+        "number": "111"
+      }
+    },
+    {
+      "card": {
         "name": "Gul Dukat, Colonial Prefect",
         "mana_cost": "{4}{B}{B}{B}",
         "types": [
@@ -3915,6 +4110,68 @@
       "printing": {
         "set": "trk",
         "number": "116"
+      }
+    },
+    {
+      "card": {
+        "name": "Kai Winn, Faithless Leader",
+        "mana_cost": "{1}{B}",
+        "types": [
+          "creature"
+        ],
+        "supertypes": [
+          "legendary"
+        ],
+        "subtypes": [
+          "bajoran",
+          "cleric"
+        ],
+        "power": 3,
+        "toughness": 1,
+        "abilities": [
+          {
+            "choose_card_name": {
+              "not": [
+                "land"
+              ]
+            }
+          },
+          {
+            "triggered": {
+              "when": {
+                "any_of": [
+                  {
+                    "cast": {
+                      "controller": "opponent",
+                      "name": "chosen"
+                    }
+                  },
+                  {
+                    "activates_ability": {
+                      "controller": "opponent",
+                      "name": "chosen"
+                    }
+                  }
+                ]
+              },
+              "effects": [
+                {
+                  "lose_life": {
+                    "amount": 3,
+                    "to": {
+                      "triggering": "player"
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "rarity": "rare",
+      "printing": {
+        "set": "trk",
+        "number": "118"
       }
     },
     {
@@ -4325,6 +4582,83 @@
     },
     {
       "card": {
+        "name": "Tell Me What You See",
+        "mana_cost": "{1}{B}",
+        "types": [
+          "enchantment"
+        ],
+        "abilities": [
+          {
+            "triggered": {
+              "when": {
+                "enters": {}
+              },
+              "targets": [
+                "opponent"
+              ],
+              "effects": [
+                {
+                  "may": {
+                    "chooser": {
+                      "target": 0
+                    },
+                    "effects": [
+                      {
+                        "draw": {
+                          "amount": 1
+                        }
+                      }
+                    ],
+                    "otherwise": [
+                      {
+                        "lose_life": {
+                          "amount": 4,
+                          "to": {
+                            "target": 0
+                          }
+                        }
+                      },
+                      {
+                        "surveil": {
+                          "amount": 1
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "triggered": {
+              "when": {
+                "faces_dilemma": {}
+              },
+              "effects": [
+                {
+                  "may": {
+                    "effects": [
+                      {
+                        "return_to_hand": {
+                          "to": "self"
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "rarity": "uncommon",
+      "printing": {
+        "set": "trk",
+        "number": "132"
+      }
+    },
+    {
+      "card": {
         "name": "Tenacious Drone",
         "mana_cost": "{1}{B}",
         "types": [
@@ -4369,6 +4703,83 @@
       "printing": {
         "set": "trk",
         "number": "133"
+      }
+    },
+    {
+      "card": {
+        "name": "U.S.S. Reliant, From Hell's Heart",
+        "mana_cost": "{2}{B}{B}",
+        "types": [
+          "artifact"
+        ],
+        "supertypes": [
+          "legendary"
+        ],
+        "subtypes": [
+          "spacecraft"
+        ],
+        "keywords": [
+          "station"
+        ],
+        "abilities": [
+          {
+            "triggered": {
+              "when": {
+                "any_of": [
+                  {
+                    "enters": {}
+                  },
+                  {
+                    "deals_damage": {
+                      "combat": true,
+                      "to": "player"
+                    }
+                  }
+                ]
+              },
+              "targets": [
+                {
+                  "graveyard_card": {
+                    "any_of": [
+                      "creature"
+                    ],
+                    "controller": "you",
+                    "mana_value": {
+                      "at_most": 4
+                    }
+                  }
+                }
+              ],
+              "effects": [
+                {
+                  "return_to_battlefield": {
+                    "to": {
+                      "target": 0
+                    },
+                    "counters": {
+                      "finality": 1
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "station_symbol": {
+              "at": 10,
+              "power": 4,
+              "toughness": 3,
+              "keywords": [
+                "flying"
+              ]
+            }
+          }
+        ]
+      },
+      "rarity": "rare",
+      "printing": {
+        "set": "trk",
+        "number": "135"
       }
     },
     {
@@ -5085,6 +5496,58 @@
     },
     {
       "card": {
+        "name": "Khan, Despot by Design",
+        "mana_cost": "{4}{R}",
+        "types": [
+          "creature"
+        ],
+        "supertypes": [
+          "legendary"
+        ],
+        "subtypes": [
+          "human",
+          "rogue"
+        ],
+        "keywords": [
+          "trample"
+        ],
+        "power": 5,
+        "toughness": 4,
+        "abilities": [
+          {
+            "triggered": {
+              "when": {
+                "enters": {}
+              },
+              "effects": [
+                {
+                  "deal_damage": {
+                    "amount": 1,
+                    "to": "each_opponent"
+                  }
+                },
+                {
+                  "deal_damage": {
+                    "amount": 1,
+                    "to": {
+                      "each": "creature",
+                      "controller": "opponent"
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "rarity": "uncommon",
+      "printing": {
+        "set": "trk",
+        "number": "155"
+      }
+    },
+    {
+      "card": {
         "name": "La'An Noonien-Singh, Security",
         "mana_cost": "{2}{R}{R}",
         "types": [
@@ -5345,6 +5808,48 @@
     },
     {
       "card": {
+        "name": "Planetary Patrol",
+        "mana_cost": "{1}{R}",
+        "types": [
+          "creature"
+        ],
+        "subtypes": [
+          "scout"
+        ],
+        "power": 2,
+        "toughness": 2,
+        "abilities": [
+          {
+            "triggered": {
+              "when": {
+                "enters": {
+                  "subject": {
+                    "each": "land",
+                    "controller": "you"
+                  }
+                }
+              },
+              "effects": [
+                {
+                  "pump": {
+                    "power": 1,
+                    "toughness": 1,
+                    "to": "self"
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "rarity": "common",
+      "printing": {
+        "set": "trk",
+        "number": "163"
+      }
+    },
+    {
+      "card": {
         "name": "Plasma Cascade",
         "mana_cost": "{2}{R}",
         "types": [
@@ -5392,6 +5897,48 @@
       "printing": {
         "set": "trk",
         "number": "164"
+      }
+    },
+    {
+      "card": {
+        "name": "Ravenous Cosmozoan",
+        "mana_cost": "{5}{R}",
+        "types": [
+          "creature"
+        ],
+        "subtypes": [
+          "fish"
+        ],
+        "keywords": [
+          "flying",
+          "haste"
+        ],
+        "power": 3,
+        "toughness": 3,
+        "abilities": [
+          {
+            "cost_reduction": {
+              "amount": {
+                "count": {
+                  "each": {
+                    "graveyard_card": {
+                      "not": [
+                        "creature",
+                        "land"
+                      ]
+                    }
+                  },
+                  "controller": "you"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "rarity": "uncommon",
+      "printing": {
+        "set": "trk",
+        "number": "167"
       }
     },
     {
@@ -5635,6 +6182,48 @@
       "printing": {
         "set": "trk",
         "number": "172"
+      }
+    },
+    {
+      "card": {
+        "name": "Starfleet Security",
+        "mana_cost": "{R}",
+        "types": [
+          "creature"
+        ],
+        "subtypes": [
+          "human",
+          "officer"
+        ],
+        "keywords": [
+          "haste"
+        ],
+        "power": 1,
+        "toughness": 1,
+        "abilities": [
+          {
+            "triggered": {
+              "when": {
+                "dies": {}
+              },
+              "if": {
+                "your_turn": true
+              },
+              "effects": [
+                {
+                  "create_token": {
+                    "token": "Clue"
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "rarity": "common",
+      "printing": {
+        "set": "trk",
+        "number": "173"
       }
     },
     {
@@ -6067,6 +6656,96 @@
     },
     {
       "card": {
+        "name": "David and Carol Marcus, Creators",
+        "mana_cost": "{2}{G}",
+        "types": [
+          "creature"
+        ],
+        "supertypes": [
+          "legendary"
+        ],
+        "subtypes": [
+          "human",
+          "scientist"
+        ],
+        "power": 1,
+        "toughness": 3,
+        "abilities": [
+          {
+            "triggered": {
+              "when": {
+                "enters": {}
+              },
+              "effects": [
+                {
+                  "create_token": {
+                    "tapped": true,
+                    "token": {
+                      "name": "New Planet",
+                      "types": [
+                        "land"
+                      ],
+                      "subtypes": [
+                        "planet"
+                      ],
+                      "abilities": [
+                        {
+                          "mana": {
+                            "cost": [
+                              "tap"
+                            ],
+                            "produce": "{W}"
+                          }
+                        },
+                        {
+                          "mana": {
+                            "cost": [
+                              "tap"
+                            ],
+                            "produce": "{U}"
+                          }
+                        },
+                        {
+                          "mana": {
+                            "cost": [
+                              "tap"
+                            ],
+                            "produce": "{B}"
+                          }
+                        },
+                        {
+                          "mana": {
+                            "cost": [
+                              "tap"
+                            ],
+                            "produce": "{R}"
+                          }
+                        },
+                        {
+                          "mana": {
+                            "cost": [
+                              "tap"
+                            ],
+                            "produce": "{G}"
+                          }
+                        }
+                      ]
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "rarity": "uncommon",
+      "printing": {
+        "set": "trk",
+        "number": "193"
+      }
+    },
+    {
+      "card": {
         "name": "Dominion Supervisor",
         "mana_cost": "{2}{G}",
         "types": [
@@ -6364,6 +7043,59 @@
       "printing": {
         "set": "trk",
         "number": "205"
+      }
+    },
+    {
+      "card": {
+        "name": "MACO Strike Team",
+        "mana_cost": "{G}",
+        "types": [
+          "creature"
+        ],
+        "subtypes": [
+          "human",
+          "soldier"
+        ],
+        "power": 2,
+        "toughness": 1,
+        "abilities": [
+          {
+            "triggered": {
+              "when": {
+                "becomes_target": {
+                  "subject": {
+                    "each": "creature",
+                    "controller": "you"
+                  },
+                  "by": "opponent"
+                }
+              },
+              "effects": [
+                {
+                  "create_token": {
+                    "tapped": true,
+                    "token": {
+                      "name": "Officer",
+                      "types": [
+                        "creature"
+                      ],
+                      "subtypes": [
+                        "officer"
+                      ],
+                      "power": 1,
+                      "toughness": 1
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "rarity": "rare",
+      "printing": {
+        "set": "trk",
+        "number": "206"
       }
     },
     {
@@ -7059,6 +7791,97 @@
     },
     {
       "card": {
+        "name": "Dathon, His Heart Open",
+        "mana_cost": "{G}{U}{R}",
+        "types": [
+          "creature"
+        ],
+        "supertypes": [
+          "legendary"
+        ],
+        "subtypes": [
+          "tamarian",
+          "officer"
+        ],
+        "power": 3,
+        "toughness": 3,
+        "abilities": [
+          {
+            "triggered": {
+              "when": {
+                "cast": {
+                  "spell": {
+                    "spell": {
+                      "any_of": [
+                        "enchantment"
+                      ]
+                    }
+                  }
+                }
+              },
+              "effects": [
+                {
+                  "draw": {
+                    "amount": 1
+                  }
+                },
+                {
+                  "deal_damage": {
+                    "amount": 2,
+                    "to": "each_opponent",
+                    "if": {
+                      "triggering": {
+                        "spell": {
+                          "subtypes": [
+                            "saga"
+                          ]
+                        }
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "activated": {
+              "cost": [
+                {
+                  "mana": "{2}"
+                }
+              ],
+              "timing": "sorcery",
+              "targets": [
+                {
+                  "permanent": {
+                    "any_of": [
+                      "enchantment"
+                    ],
+                    "controller": "you"
+                  }
+                }
+              ],
+              "effects": [
+                {
+                  "another_counter": {
+                    "to": {
+                      "target": 0
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "rarity": "rare",
+      "printing": {
+        "set": "trk",
+        "number": "233"
+      }
+    },
+    {
+      "card": {
         "name": "The Doctor, EMH",
         "mana_cost": "{3}{G/W}{G/W}",
         "types": [
@@ -7718,6 +8541,63 @@
       "printing": {
         "set": "trk",
         "number": "254"
+      }
+    },
+    {
+      "card": {
+        "name": "Vash, Freelance Archaeologist",
+        "mana_cost": "{1}{B}{G}",
+        "types": [
+          "creature"
+        ],
+        "supertypes": [
+          "legendary"
+        ],
+        "subtypes": [
+          "human",
+          "rogue",
+          "scientist"
+        ],
+        "power": 2,
+        "toughness": 4,
+        "abilities": [
+          {
+            "triggered": {
+              "when": {
+                "step_begins": {
+                  "step": "upkeep"
+                }
+              },
+              "effects": [
+                {
+                  "surveil": {
+                    "amount": 1
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "triggered": {
+              "when": {
+                "leaves_graveyard": {}
+              },
+              "limit": "once_each_turn",
+              "effects": [
+                {
+                  "draw": {
+                    "amount": 1
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "rarity": "uncommon",
+      "printing": {
+        "set": "trk",
+        "number": "255"
       }
     },
     {
@@ -8431,6 +9311,70 @@
     },
     {
       "card": {
+        "name": "Federation Outpost",
+        "types": [
+          "land"
+        ],
+        "abilities": [
+          {
+            "enters_tapped_unless": {
+              "condition": {
+                "controls": {
+                  "each": "land",
+                  "controller": "you"
+                },
+                "at_least": 2
+              }
+            }
+          },
+          {
+            "triggered": {
+              "when": {
+                "enters": {
+                  "untapped": true
+                }
+              },
+              "choose": 1,
+              "modes": [
+                {
+                  "effects": [
+                    {
+                      "gain_life": {
+                        "amount": 2
+                      }
+                    }
+                  ]
+                },
+                {
+                  "effects": [
+                    {
+                      "surveil": {
+                        "amount": 1
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "mana": {
+              "cost": [
+                "tap"
+              ],
+              "produce": "{W}"
+            }
+          }
+        ]
+      },
+      "rarity": "rare",
+      "printing": {
+        "set": "trk",
+        "number": "282"
+      }
+    },
+    {
+      "card": {
         "name": "Ferenginar",
         "types": [
           "land"
@@ -8528,6 +9472,78 @@
     },
     {
       "card": {
+        "name": "Ni'Var Science Academy",
+        "types": [
+          "land"
+        ],
+        "abilities": [
+          {
+            "enters_tapped_unless": {
+              "condition": {
+                "controls": {
+                  "each": "land",
+                  "controller": "you"
+                },
+                "at_least": 2
+              }
+            }
+          },
+          {
+            "triggered": {
+              "when": {
+                "enters": {
+                  "untapped": true
+                }
+              },
+              "choose": 1,
+              "modes": [
+                {
+                  "targets": [
+                    "creature"
+                  ],
+                  "effects": [
+                    {
+                      "grant": {
+                        "keywords": [
+                          "flying"
+                        ],
+                        "to": {
+                          "target": 0
+                        }
+                      }
+                    }
+                  ]
+                },
+                {
+                  "effects": [
+                    {
+                      "surveil": {
+                        "amount": 1
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "mana": {
+              "cost": [
+                "tap"
+              ],
+              "produce": "{U}"
+            }
+          }
+        ]
+      },
+      "rarity": "rare",
+      "printing": {
+        "set": "trk",
+        "number": "287"
+      }
+    },
+    {
+      "card": {
         "name": "Orion",
         "types": [
           "land"
@@ -8601,6 +9617,87 @@
     },
     {
       "card": {
+        "name": "Q Continuum",
+        "types": [
+          "land"
+        ],
+        "abilities": [
+          {
+            "enters_tapped_unless": {
+              "condition": {
+                "controls": {
+                  "each": "land",
+                  "controller": "you"
+                },
+                "at_least": 2
+              }
+            }
+          },
+          {
+            "triggered": {
+              "when": {
+                "enters": {
+                  "untapped": true
+                }
+              },
+              "choose": 1,
+              "modes": [
+                {
+                  "targets": [
+                    "creature"
+                  ],
+                  "effects": [
+                    {
+                      "pump": {
+                        "power": 1,
+                        "toughness": 1,
+                        "to": {
+                          "target": 0
+                        }
+                      }
+                    },
+                    {
+                      "grant": {
+                        "keywords": [
+                          "vigilance"
+                        ],
+                        "to": {
+                          "target": 0
+                        }
+                      }
+                    }
+                  ]
+                },
+                {
+                  "effects": [
+                    {
+                      "surveil": {
+                        "amount": 1
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "mana": {
+              "cost": [
+                "tap"
+              ],
+              "produce": "{G}"
+            }
+          }
+        ]
+      },
+      "rarity": "rare",
+      "printing": {
+        "set": "trk",
+        "number": "290"
+      }
+    },
+    {
+      "card": {
         "name": "Qo'noS",
         "types": [
           "land"
@@ -8646,6 +9743,71 @@
       "printing": {
         "set": "trk",
         "number": "291"
+      }
+    },
+    {
+      "card": {
+        "name": "Quark's Bar",
+        "types": [
+          "land"
+        ],
+        "abilities": [
+          {
+            "enters_tapped_unless": {
+              "condition": {
+                "controls": {
+                  "each": "land",
+                  "controller": "you"
+                },
+                "at_least": 2
+              }
+            }
+          },
+          {
+            "triggered": {
+              "when": {
+                "enters": {
+                  "untapped": true
+                }
+              },
+              "choose": 1,
+              "modes": [
+                {
+                  "effects": [
+                    {
+                      "deal_damage": {
+                        "amount": 1,
+                        "to": "each_opponent"
+                      }
+                    }
+                  ]
+                },
+                {
+                  "effects": [
+                    {
+                      "surveil": {
+                        "amount": 1
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "mana": {
+              "cost": [
+                "tap"
+              ],
+              "produce": "{R}"
+            }
+          }
+        ]
+      },
+      "rarity": "rare",
+      "printing": {
+        "set": "trk",
+        "number": "292"
       }
     },
     {
@@ -9078,19 +10240,6 @@
       ]
     },
     {
-      "name": "Dr. Beverly Crusher",
-      "rarity": "mythic",
-      "printing": {
-        "set": "trk",
-        "number": "13"
-      },
-      "missing": [
-        "condition (if/unless/as long as)",
-        "triggered ability",
-        "counters"
-      ]
-    },
-    {
       "name": "Dr. McCoy, Surly Surgeon",
       "rarity": "uncommon",
       "printing": {
@@ -9405,19 +10554,6 @@
       ]
     },
     {
-      "name": "Nyota Uhura, Communications",
-      "rarity": "rare",
-      "printing": {
-        "set": "trk",
-        "number": "75"
-      },
-      "missing": [
-        "other rules text",
-        "triggered ability",
-        "variable amount"
-      ]
-    },
-    {
       "name": "Rules of Acquisition",
       "rarity": "uncommon",
       "printing": {
@@ -9492,18 +10628,6 @@
       ]
     },
     {
-      "name": "Battle-Scarred Survivalist",
-      "rarity": "common",
-      "printing": {
-        "set": "trk",
-        "number": "95"
-      },
-      "missing": [
-        "triggered ability",
-        "counters"
-      ]
-    },
-    {
       "name": "Blastoneuron",
       "rarity": "uncommon",
       "printing": {
@@ -9569,17 +10693,6 @@
       ]
     },
     {
-      "name": "A Good Day to Die",
-      "rarity": "common",
-      "printing": {
-        "set": "trk",
-        "number": "111"
-      },
-      "missing": [
-        "triggered ability"
-      ]
-    },
-    {
       "name": "Grand Nagus Zek",
       "rarity": "rare",
       "printing": {
@@ -9617,18 +10730,6 @@
         "other rules text",
         "condition (if/unless/as long as)",
         "tokens"
-      ]
-    },
-    {
-      "name": "Kai Winn, Faithless Leader",
-      "rarity": "rare",
-      "printing": {
-        "set": "trk",
-        "number": "118"
-      },
-      "missing": [
-        "other rules text",
-        "triggered ability"
       ]
     },
     {
@@ -9695,20 +10796,6 @@
       ]
     },
     {
-      "name": "Tell Me What You See",
-      "rarity": "uncommon",
-      "printing": {
-        "set": "trk",
-        "number": "132"
-      },
-      "missing": [
-        "triggered ability",
-        "condition (if/unless/as long as)",
-        "library manipulation",
-        "return to hand"
-      ]
-    },
-    {
       "name": "Test of Loyalty",
       "rarity": "uncommon",
       "printing": {
@@ -9717,19 +10804,6 @@
       },
       "missing": [
         "modal choice"
-      ]
-    },
-    {
-      "name": "U.S.S. Reliant, From Hell's Heart",
-      "rarity": "rare",
-      "printing": {
-        "set": "trk",
-        "number": "135"
-      },
-      "missing": [
-        "triggered ability",
-        "counters",
-        "graveyard casting"
       ]
     },
     {
@@ -9850,17 +10924,6 @@
       ]
     },
     {
-      "name": "Khan, Despot by Design",
-      "rarity": "uncommon",
-      "printing": {
-        "set": "trk",
-        "number": "155"
-      },
-      "missing": [
-        "triggered ability"
-      ]
-    },
-    {
       "name": "Lwaxana Troi, Charming Guest",
       "rarity": "rare",
       "printing": {
@@ -9884,17 +10947,6 @@
         "triggered ability",
         "counters",
         "sacrifice"
-      ]
-    },
-    {
-      "name": "Planetary Patrol",
-      "rarity": "common",
-      "printing": {
-        "set": "trk",
-        "number": "163"
-      },
-      "missing": [
-        "triggered ability"
       ]
     },
     {
@@ -9922,29 +10974,6 @@
       "missing": [
         "sacrifice",
         "static ability"
-      ]
-    },
-    {
-      "name": "Ravenous Cosmozoan",
-      "rarity": "uncommon",
-      "printing": {
-        "set": "trk",
-        "number": "167"
-      },
-      "missing": [
-        "variable amount",
-        "static ability"
-      ]
-    },
-    {
-      "name": "Starfleet Security",
-      "rarity": "common",
-      "printing": {
-        "set": "trk",
-        "number": "173"
-      },
-      "missing": [
-        "triggered ability"
       ]
     },
     {
@@ -10098,18 +11127,6 @@
       ]
     },
     {
-      "name": "David and Carol Marcus, Creators",
-      "rarity": "uncommon",
-      "printing": {
-        "set": "trk",
-        "number": "193"
-      },
-      "missing": [
-        "triggered ability",
-        "tokens"
-      ]
-    },
-    {
       "name": "Dominion Assault Force",
       "rarity": "common",
       "printing": {
@@ -10190,18 +11207,6 @@
       "missing": [
         "triggered ability",
         "graveyard casting",
-        "tokens"
-      ]
-    },
-    {
-      "name": "MACO Strike Team",
-      "rarity": "rare",
-      "printing": {
-        "set": "trk",
-        "number": "206"
-      },
-      "missing": [
-        "triggered ability",
         "tokens"
       ]
     },
@@ -10389,19 +11394,6 @@
       ]
     },
     {
-      "name": "Dathon, His Heart Open",
-      "rarity": "rare",
-      "printing": {
-        "set": "trk",
-        "number": "233"
-      },
-      "missing": [
-        "triggered ability",
-        "condition (if/unless/as long as)",
-        "counters"
-      ]
-    },
-    {
       "name": "Gray and Adira, Forever Joined",
       "rarity": "uncommon",
       "printing": {
@@ -10542,17 +11534,6 @@
       "missing": [
         "triggered ability",
         "library manipulation"
-      ]
-    },
-    {
-      "name": "Vash, Freelance Archaeologist",
-      "rarity": "uncommon",
-      "printing": {
-        "set": "trk",
-        "number": "255"
-      },
-      "missing": [
-        "triggered ability"
       ]
     },
     {
@@ -10714,18 +11695,6 @@
       ]
     },
     {
-      "name": "Federation Outpost",
-      "rarity": "rare",
-      "printing": {
-        "set": "trk",
-        "number": "282"
-      },
-      "missing": [
-        "condition (if/unless/as long as)",
-        "modal choice"
-      ]
-    },
-    {
       "name": "Gaseous Anomaly",
       "rarity": "uncommon",
       "printing": {
@@ -10735,42 +11704,6 @@
       "missing": [
         "tokens",
         "sacrifice"
-      ]
-    },
-    {
-      "name": "Ni'Var Science Academy",
-      "rarity": "rare",
-      "printing": {
-        "set": "trk",
-        "number": "287"
-      },
-      "missing": [
-        "condition (if/unless/as long as)",
-        "modal choice"
-      ]
-    },
-    {
-      "name": "Q Continuum",
-      "rarity": "rare",
-      "printing": {
-        "set": "trk",
-        "number": "290"
-      },
-      "missing": [
-        "condition (if/unless/as long as)",
-        "modal choice"
-      ]
-    },
-    {
-      "name": "Quark's Bar",
-      "rarity": "rare",
-      "printing": {
-        "set": "trk",
-        "number": "292"
-      },
-      "missing": [
-        "condition (if/unless/as long as)",
-        "modal choice"
       ]
     },
     {

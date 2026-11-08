@@ -49,6 +49,26 @@ Rules: CR 106.1a, CR 106.4, CR 608.2d, CR 605.1a
 }
 ```
 
+## another_counter
+
+For each referenced permanent, the controller chooses a kind of counter already on it (asked only when there are several kinds) and puts one more counter of that kind on it.
+
+Rules: CR 122.1, CR 122.6
+
+| Parameter | Description |
+| --- | --- |
+| `to` | selector |
+
+```json
+{
+  "another_counter": {
+    "to": {
+      "target": 0
+    }
+  }
+}
+```
+
 ## assimilate
 
 Assimilate each referenced permanent or permanent card: you gain control of it (or put it onto the battlefield under your control) with a +1/+1 counter, and it becomes a Borg artifact creature while it stays on the battlefield.
@@ -220,6 +240,8 @@ Rules: CR 603.7a, CR 603.7b, CR 603.7c, CR 603.7d, CR 603.7e
 | --- | --- |
 | `when` | a trigger condition |
 | `effects` | list of effects |
+| `watch` | selector resolved now (e.g. {"target": 0}): the objects its trigger subject "watched" and its effects' selector "watched" mean ("when that creature dies") |
+| `this_turn` | true: it lasts until the end of this turn and triggers each time ("whenever ... this turn", CR 603.7b) |
 
 ```json
 {
@@ -466,13 +488,14 @@ Rules: CR 119.3
 
 An optional effect. The controller chooses yes or no as it resolves; yes is offered only if every effect in `effects` can be done fully. On yes, `effects` then `then` ("if you do") happen; on no, `otherwise` ("if you don't"). Nested effects may name the results of earlier effects of the enclosing list.
 
-Rules: CR 118.12, CR 118.3, CR 608.2d
+Rules: CR 118.12, CR 118.3, CR 608.2d, CR 608.2e
 
 | Parameter | Description |
 | --- | --- |
 | `effects` | list of effects (the optional part) |
 | `then` | list of effects |
 | `otherwise` | list of effects |
+| `chooser` | who decides (default: the controller): a selector naming a player, or a permanent whose controller decides (e.g. {"target": 0}), or "active_player" |
 
 ```json
 {
@@ -593,17 +616,49 @@ Rules: CR 611.2a, CR 611.2c, CR 613.4c, CR 514.2
 }
 ```
 
+## reflexive_trigger
+
+Creates a reflexive triggered ability ("when you do, ...") that triggers immediately, with the controller and source of the resolving spell or ability. Its `targets` are chosen as it's put on the stack; its `effects` may name the results of earlier effects of the creating list.
+
+Rules: CR 603.12, CR 603.12a, CR 603.7d, CR 603.7e, CR 603.3d
+
+| Parameter | Description |
+| --- | --- |
+| `targets` | list of target filters |
+| `effects` | list of effects |
+
+```json
+{
+  "reflexive_trigger": {
+    "targets": [
+      "any_target"
+    ],
+    "effects": [
+      {
+        "deal_damage": {
+          "amount": 2,
+          "to": {
+            "target": 0
+          }
+        }
+      }
+    ]
+  }
+}
+```
+
 ## return_to_battlefield
 
 Put each referenced card that is in exile or a graveyard onto the battlefield under its owner's control (`under: "you"`: under the controller's), tapped if `tapped: true`. A card that is no longer in the zone it was expected in, or isn't a permanent card, stays where it is.
 
-Rules: CR 400.7, CR 400.4a, CR 110.2, CR 111.8, CR 603.7c
+Rules: CR 400.7, CR 400.4a, CR 110.2, CR 111.8, CR 603.7c, CR 614.1c, CR 122.6
 
 | Parameter | Description |
 | --- | --- |
 | `to` | selector (usually {"result": n}) |
 | `tapped` | boolean |
 | `under` | owner | you |
+| `counters` | {counter name: n}: it enters with these counters ("with a +1/+1 counter on it") |
 
 ```json
 {

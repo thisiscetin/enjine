@@ -18,18 +18,23 @@ module Enjine
     #   {"result": 0}                               what effect 0 of this list moved or created (CR 400.7j)
     #   {"controller_of": {"target": 0}}            the player who controls the first target ("its controller");
     #                                               one that has left the battlefield as it last existed (CR 608.2h)
+    #   {"triggering": "object" | "player"}        what the trigger event was about ("that creature",
+    #                                               "that player", CR 603.2); see Triggers.event_facts
+    #   "watched"                                   what a delayed triggered ability watches (CR 603.7c)
     class Selector
       CONTROLLERS = %w[you opponent any].freeze
+      TRIGGERING = %w[object player].freeze
 
       attr_reader :kind, :value, :controller
 
       def self.build(data, errors, path, targets_count:, results_count: 0)
         case data
-        when "self", "you", "each_opponent", "attached" then new(data.to_sym)
+        when "self", "you", "each_opponent", "attached", "watched" then new(data.to_sym)
         when Hash
           data = data.transform_keys(&:to_s)
           return build_result(data, errors, path, results_count) if data.key?("result")
           return build_controller_of(data, errors, path, targets_count, results_count) if data.key?("controller_of")
+          return build_triggering(data, errors, path) if data.key?("triggering")
 
           build_hash(data, errors, path, targets_count)
         else
@@ -53,6 +58,12 @@ module Enjine
         inner = build(data["controller_of"], errors, "#{path}.controller_of", targets_count: targets_count,
                                                                               results_count: results_count)
         new(:controller_of, inner)
+      end
+
+      def self.build_triggering(data, errors, path)
+        Mechanics.check_keys(data, %w[triggering], errors, path)
+        errors << "#{path}.triggering: must be one of #{TRIGGERING.join(", ")}" unless TRIGGERING.include?(data["triggering"])
+        new(:triggering, data["triggering"])
       end
 
       def self.build_hash(data, errors, path, targets_count)
@@ -89,6 +100,8 @@ module Enjine
         when :controller_of then "the controller of #{value}"
         when :self then "itself"
         when :attached then "the attached permanent"
+        when :triggering then "the triggering #{value}"
+        when :watched then "the watched object(s)"
         when :you then "you"
         when :each_opponent then "each opponent"
         when :each then "each #{value.primitive_name.tr("_",
@@ -104,6 +117,8 @@ module Enjine
         when :result then Array(ctx.results&.[](value))
         when :self then engine.state.battlefield.include?(ctx.source) ? [ctx.source] : []
         when :attached then attached(engine, ctx)
+        when :triggering then triggering(engine, ctx)
+        when :watched then Array(Selector.memory(engine, ctx)["watched"])
         when :you then [Filters.player_ref(engine, ctx.controller)]
         when :each_opponent
           engine.state.players.each_index.reject { it == ctx.controller }.map { Filters.player_ref(engine, it) }
@@ -111,6 +126,9 @@ module Enjine
         when :controller_of then controllers(engine, ctx)
         end
       end
+
+      # What the resolving triggered ability remembers (the event facts, watched objects).
+      def self.memory(engine, ctx) = engine.state.objects[ctx.object]&.memory || {}
 
       private
 
@@ -125,6 +143,13 @@ module Enjine
                        end
           controller && Filters.player_ref(engine, controller)
         end.uniq
+      end
+
+      def triggering(engine, ctx)
+        found = Selector.memory(engine, ctx).fetch("triggering", {})[value]
+        return [] if found.nil?
+
+        value == "player" ? [Filters.player_ref(engine, found)] : [found]
       end
 
       # CR 301.5f / 303.4m: "equipped/enchanted creature" is whatever the source is attached to now.
