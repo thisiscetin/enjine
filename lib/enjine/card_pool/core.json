@@ -948,5 +948,234 @@
       }
     ],
     "rules_text": "When this creature enters, create a Clue token."
+  },
+  {
+    "name": "Tidewarden Phaser",
+    "mana_cost": "{1}{W}",
+    "types": [
+      "instant"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "targets": [
+            {
+              "creature": {
+                "controller": "you"
+              }
+            }
+          ],
+          "effects": [
+            {
+              "exile": {
+                "to": {
+                  "target": 0
+                }
+              }
+            },
+            {
+              "delayed_trigger": {
+                "when": {
+                  "step_begins": {
+                    "step": "end",
+                    "whose": "each"
+                  }
+                },
+                "effects": [
+                  {
+                    "return_to_battlefield": {
+                      "to": {
+                        "result": 0
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "Exile target creature you control. At the beginning of the next end step, return that card to the battlefield under its owner's control."
+  },
+  {
+    "name": "Mirrorstep Blink",
+    "mana_cost": "{W}",
+    "types": [
+      "instant"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "targets": [
+            "creature"
+          ],
+          "effects": [
+            {
+              "exile": {
+                "to": {
+                  "target": 0
+                }
+              }
+            },
+            {
+              "return_to_battlefield": {
+                "to": {
+                  "result": 0
+                }
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "Exile target creature, then return it to the battlefield under its owner's control."
+  },
+  {
+    "name": "Ashcaller Warlord",
+    "mana_cost": "{2}{R}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "goblin",
+      "warrior"
+    ],
+    "power": 2,
+    "toughness": 2,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "step_begins": {
+              "step": "beginning_of_combat"
+            }
+          },
+          "effects": [
+            {
+              "create_token": {
+                "token": {
+                  "name": "Ash Raider",
+                  "types": [
+                    "creature"
+                  ],
+                  "subtypes": [
+                    "goblin"
+                  ],
+                  "power": 2,
+                  "toughness": 1,
+                  "keywords": [
+                    "haste"
+                  ]
+                }
+              }
+            },
+            {
+              "delayed_trigger": {
+                "when": {
+                  "step_begins": {
+                    "step": "end",
+                    "whose": "each"
+                  }
+                },
+                "effects": [
+                  {
+                    "sacrifice": {
+                      "to": {
+                        "result": 0
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "At the beginning of combat on your turn, create a 2/1 Goblin creature token with haste. Sacrifice it at the beginning of the next end step."
+  },
+  {
+    "name": "Gambler's Insight",
+    "mana_cost": "{1}{U}",
+    "types": [
+      "sorcery"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "effects": [
+            {
+              "draw": {
+                "amount": 1
+              }
+            },
+            {
+              "may": {
+                "effects": [
+                  {
+                    "discard": {
+                      "amount": 1
+                    }
+                  }
+                ],
+                "then": [
+                  {
+                    "draw": {
+                      "amount": 2
+                    }
+                  }
+                ],
+                "otherwise": [
+                  {
+                    "scry": {
+                      "amount": 1
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "Draw a card. You may discard a card. If you do, draw two cards. If you don't, scry 1."
+  },
+  {
+    "name": "Wakeful Colossus",
+    "mana_cost": "{3}{G}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "giant"
+    ],
+    "power": 4,
+    "toughness": 4,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "enters": {}
+          },
+          "if": {
+            "was_cast": true
+          },
+          "effects": [
+            {
+              "add_counters": {
+                "counter": "+1/+1",
+                "amount": 1,
+                "to": {
+                  "each": "creature",
+                  "controller": "you"
+                }
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "When this creature enters, if you cast it, put a +1/+1 counter on each creature you control."
   }
 ]

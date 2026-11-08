@@ -26,6 +26,30 @@ module Enjine
           instances.each { |inst| queue_trigger(inst, event, source) }
         end
         watch_leaving!(event)
+        watch_delayed!(event) unless state.delayed_triggers.empty?
+      end
+
+      # CR 603.7: creates a delayed triggered ability. `entry` names the card and the ability ref
+      # (see Effects::DelayedTrigger) plus what it remembers ("results").
+      def create_delayed_trigger!(entry)
+        state.delayed_triggers << entry.merge("id" => "d#{next_timestamp!}")
+      end
+
+      # CR 603.7b: a delayed triggered ability triggers only once, the next time its event occurs.
+      def watch_delayed!(event)
+        fired, state.delayed_triggers = state.delayed_triggers.partition do |entry|
+          trigger = catalog.fetch(entry["card"]).ability(entry["ability"]).trigger
+          event.is_a?(trigger.event_class) && trigger.match?(self, event, delayed_source(entry))
+        end
+        fired.each do |entry|
+          source = delayed_source(entry).merge("ability" => entry["ability"])
+          queue_pending_trigger!(source, event, { "results" => entry["results"] })
+        end
+      end
+
+      # CR 603.7d-e: its source and controller are those of the spell or ability that created it.
+      def delayed_source(entry)
+        { "id" => entry["source"], "card" => entry["card"], "controller" => entry["controller"] }
       end
 
       # Battlefield permanents with triggered abilities, cached with the layer pass
@@ -60,11 +84,18 @@ module Enjine
         return unless event.is_a?(trigger.event_class) && trigger.match?(self, event, source)
         return unless inst.ability.condition_met?(self, source["controller"], source["id"]) # CR 603.4
 
+        memory = state.objects[source["id"]]&.memory&.[]("cast") ? { "source_cast" => true } : {}
+        queue_pending_trigger!(source.merge("ability" => inst.ref), event, memory)
+      end
+
+      # `memory` travels to the ability on the stack (its source's last known status, a delayed
+      # trigger's remembered objects).
+      def queue_pending_trigger!(source, event, memory)
         state.pending_triggers << { "id" => "t#{next_timestamp!}", "controller" => source["controller"],
-                                    "source" => source["id"], "card" => source["card"], "ability" => inst.ref,
-                                    "event" => event.to_h }
+                                    "source" => source["id"], "card" => source["card"], "ability" => source["ability"],
+                                    "event" => event.to_h, "memory" => memory }
         emit Events::AbilityTriggered.new(player: name(source["controller"]), source: source["id"],
-                                          card: source["card"], ability: inst.ref)
+                                          card: source["card"], ability: source["ability"])
       end
 
       # CR 117.5 / 603.3: before a player receives priority, pending triggers go on the stack.
@@ -125,6 +156,7 @@ module Enjine
         obj.kind = "ability"
         obj.source = trigger["source"]
         obj.ability = trigger["ability"]
+        obj.memory = Snapshot.deep_copy(trigger.fetch("memory", {}))
         state.stack.unshift(obj.id)
         start_casting!(trigger["controller"], obj.id, "trigger", source: trigger["source"], ability: trigger["ability"],
                                                                  cost: nil)

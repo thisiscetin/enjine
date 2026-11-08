@@ -192,6 +192,50 @@
     },
     {
       "card": {
+        "name": "Cloistered Telepath",
+        "mana_cost": "{1}{U}",
+        "types": [
+          "creature"
+        ],
+        "subtypes": [
+          "talosian",
+          "advisor"
+        ],
+        "keywords": [
+          "flash"
+        ],
+        "power": 2,
+        "toughness": 1,
+        "abilities": [
+          {
+            "triggered": {
+              "when": {
+                "enters": {}
+              },
+              "effects": [
+                {
+                  "draw": {
+                    "amount": 1
+                  }
+                },
+                {
+                  "discard": {
+                    "amount": 1
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "rarity": "common",
+      "printing": {
+        "set": "trk",
+        "number": "50"
+      }
+    },
+    {
+      "card": {
         "name": "Federation Probe",
         "mana_cost": "{U}",
         "types": [
@@ -297,6 +341,80 @@
     },
     {
       "card": {
+        "name": "Test of Priorities",
+        "mana_cost": "{1}{U}",
+        "types": [
+          "instant"
+        ],
+        "abilities": [
+          {
+            "spell": {
+              "choose": 1,
+              "modes": [
+                {
+                  "effects": [
+                    {
+                      "surveil": {
+                        "amount": 2
+                      }
+                    },
+                    {
+                      "draw": {
+                        "amount": 1
+                      }
+                    }
+                  ]
+                },
+                {
+                  "targets": [
+                    {
+                      "creature": {
+                        "controller": "you"
+                      }
+                    }
+                  ],
+                  "effects": [
+                    {
+                      "exile": {
+                        "to": {
+                          "target": 0
+                        }
+                      }
+                    },
+                    {
+                      "delayed_trigger": {
+                        "when": {
+                          "step_begins": {
+                            "step": "end",
+                            "whose": "each"
+                          }
+                        },
+                        "effects": [
+                          {
+                            "return_to_battlefield": {
+                              "to": {
+                                "result": 0
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "rarity": "uncommon",
+      "printing": {
+        "set": "trk",
+        "number": "85"
+      }
+    },
+    {
+      "card": {
         "name": "Fugitive Listener",
         "mana_cost": "{2}{B}",
         "types": [
@@ -367,6 +485,110 @@
       "printing": {
         "set": "trk",
         "number": "114"
+      }
+    },
+    {
+      "card": {
+        "name": "Perils of the Past",
+        "mana_cost": "{1}{R}",
+        "types": [
+          "instant"
+        ],
+        "abilities": [
+          {
+            "spell": {
+              "choose": 1,
+              "modes": [
+                {
+                  "targets": [
+                    "creature"
+                  ],
+                  "effects": [
+                    {
+                      "pump": {
+                        "power": 3,
+                        "toughness": 2,
+                        "to": {
+                          "target": 0
+                        }
+                      }
+                    }
+                  ]
+                },
+                {
+                  "targets": [
+                    "artifact"
+                  ],
+                  "effects": [
+                    {
+                      "destroy": {
+                        "to": {
+                          "target": 0
+                        }
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "rarity": "common",
+      "printing": {
+        "set": "trk",
+        "number": "161"
+      }
+    },
+    {
+      "card": {
+        "name": "Plasma Cascade",
+        "mana_cost": "{2}{R}",
+        "types": [
+          "instant"
+        ],
+        "abilities": [
+          {
+            "spell": {
+              "targets": [
+                "any_target"
+              ],
+              "effects": [
+                {
+                  "deal_damage": {
+                    "amount": 3,
+                    "to": {
+                      "target": 0
+                    }
+                  }
+                },
+                {
+                  "may": {
+                    "effects": [
+                      {
+                        "discard": {
+                          "amount": 1
+                        }
+                      }
+                    ],
+                    "then": [
+                      {
+                        "draw": {
+                          "amount": 1
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "rarity": "common",
+      "printing": {
+        "set": "trk",
+        "number": "164"
       }
     },
     {
@@ -653,6 +875,56 @@
       "printing": {
         "set": "trk",
         "number": "225"
+      }
+    },
+    {
+      "card": {
+        "name": "Crystalline Entity",
+        "mana_cost": "{8}",
+        "types": [
+          "artifact",
+          "creature"
+        ],
+        "subtypes": [
+          "elemental"
+        ],
+        "keywords": [
+          "flying"
+        ],
+        "power": 7,
+        "toughness": 7,
+        "abilities": [
+          {
+            "triggered": {
+              "when": {
+                "enters": {}
+              },
+              "if": {
+                "was_cast": true
+              },
+              "effects": [
+                {
+                  "destroy": {
+                    "to": {
+                      "each": {
+                        "creature": {
+                          "not": [
+                            "artifact"
+                          ]
+                        }
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "rarity": "mythic",
+      "printing": {
+        "set": "trk",
+        "number": "261"
       }
     },
     {
@@ -1554,7 +1826,6 @@
         "number": "7"
       },
       "missing": [
-        "static ability",
         "triggered ability",
         "tokens",
         "library manipulation",
@@ -2046,18 +2317,6 @@
       ]
     },
     {
-      "name": "Cloistered Telepath",
-      "rarity": "common",
-      "printing": {
-        "set": "trk",
-        "number": "50"
-      },
-      "missing": [
-        "triggered ability",
-        "discard"
-      ]
-    },
-    {
       "name": "Consider the Prime Directive",
       "rarity": "common",
       "printing": {
@@ -2456,17 +2715,6 @@
         "variable amount",
         "static ability",
         "tap/untap effect"
-      ]
-    },
-    {
-      "name": "Test of Priorities",
-      "rarity": "uncommon",
-      "printing": {
-        "set": "trk",
-        "number": "85"
-      },
-      "missing": [
-        "modal choice"
       ]
     },
     {
@@ -3386,17 +3634,6 @@
       ]
     },
     {
-      "name": "Perils of the Past",
-      "rarity": "common",
-      "printing": {
-        "set": "trk",
-        "number": "161"
-      },
-      "missing": [
-        "modal choice"
-      ]
-    },
-    {
       "name": "Planetary Bombardment",
       "rarity": "common",
       "printing": {
@@ -3416,18 +3653,6 @@
       },
       "missing": [
         "triggered ability"
-      ]
-    },
-    {
-      "name": "Plasma Cascade",
-      "rarity": "common",
-      "printing": {
-        "set": "trk",
-        "number": "164"
-      },
-      "missing": [
-        "condition (if/unless/as long as)",
-        "discard"
       ]
     },
     {
@@ -3500,7 +3725,6 @@
         "number": "170"
       },
       "missing": [
-        "static ability",
         "triggered ability",
         "condition (if/unless/as long as)",
         "counters",
@@ -4570,18 +4794,6 @@
       ]
     },
     {
-      "name": "Crystalline Entity",
-      "rarity": "mythic",
-      "printing": {
-        "set": "trk",
-        "number": "261"
-      },
-      "missing": [
-        "triggered ability",
-        "condition (if/unless/as long as)"
-      ]
-    },
-    {
       "name": "Cybernetic Specialist",
       "rarity": "common",
       "printing": {
@@ -4639,8 +4851,7 @@
         "number": "266"
       },
       "missing": [
-        "other rules text",
-        "discard"
+        "other rules text"
       ]
     },
     {

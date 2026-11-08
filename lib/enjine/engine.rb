@@ -245,7 +245,7 @@ module Enjine
       state.objects[id] = GameObject.new(id: id, card: card, owner: owner, controller: owner, zone: zone,
                                          tapped: false, controlled_since: nil, kind: "card", counters: {},
                                          damage: 0, source: nil, ability: nil, targets: nil, loyalty_turn: nil,
-                                         deathtouched: false, modes: nil)
+                                         deathtouched: false, modes: nil, memory: {})
     end
 
     # Moves an object to a zone as a new object (CR 400.7). Returns the new object.
@@ -298,6 +298,7 @@ module Enjine
       arrive!(fresh, old, data)
       list = state.zone_list(to, old.owner)
       data["position"] == :bottom ? list.push(fresh.id) : list.unshift(fresh.id)
+      record_result!(fresh.id)
       event = Events::ZoneChanged.new(card: old.card, old_id: id, new_id: fresh.id, owner: name(old.owner),
                                       from: old.zone.to_s, to: to.to_s, reason: data["reason"])
       lki ? with_last_known(id, lki) { emit event } : emit(event)
@@ -310,6 +311,7 @@ module Enjine
       when :battlefield
         fresh.controller = data["controller"] || old.owner
         fresh.controlled_since = state.turn
+        fresh.memory["cast"] = true if data["enters"]["cast"] # CR 400.7d: it remembers it was cast
         fresh.tapped = data["enters"]["tapped"]
         fresh.counters.merge!(data["enters"]["counters"])
       when :stack
@@ -323,6 +325,7 @@ module Enjine
       obj.controlled_since = state.turn
       obj.tapped = tapped
       state.battlefield.unshift(obj.id)
+      record_result!(obj.id)
       emit Events::ZoneChanged.new(card: definition.id, old_id: nil, new_id: obj.id, owner: name(controller),
                                    from: "none", to: "battlefield", reason: "create_token")
       obj

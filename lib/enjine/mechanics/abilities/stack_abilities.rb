@@ -42,10 +42,13 @@ module Enjine
           end.freeze
         end
 
-        def self.parse_effects(params, errors, path, targets_count)
-          list = Mechanics.list_param(params, :effects, errors, path)
+        # Effect i may name the results of effects 0...i ({"result": n}). A nested list (`results_count`
+        # given) sees only its parent's earlier results.
+        def self.parse_effects(params, errors, path, targets_count, key: :effects, results_count: nil)
+          list = Mechanics.list_param(params, key, errors, path)
           list.each_with_index.filter_map do |entry, i|
-            Mechanics.build_entry(:effect, entry, errors, "#{path}.effects[#{i}]", targets_count: targets_count)
+            Mechanics.build_entry(:effect, entry, errors, "#{path}.#{key}[#{i}]", targets_count: targets_count,
+                                                                                  results_count: results_count || i)
           end.freeze
         end
 
@@ -71,14 +74,15 @@ module Enjine
         # Targets in order for the chosen modes (or the ability's own targets).
         def targets_for(chosen) = modal? ? chosen.sort.flat_map { modes[it].targets } : targets
 
-        # [[effect, target offset, target count], ...] in resolution order (modes in printed order, CR 700.2a).
+        # [[effect, target offset, target count, index in its list], ...] in resolution order (modes in
+        # printed order, CR 700.2a). The index lets {"result": n} find results within the same list.
         def effect_plan(chosen)
-          return effects.map { [it, 0, targets.size] } unless modal?
+          return effects.each_with_index.map { |e, i| [e, 0, targets.size, i] } unless modal?
 
           offset = 0
           chosen.sort.flat_map do |index|
             mode = modes[index]
-            plan = mode.effects.map { [it, offset, mode.targets.size] }
+            plan = mode.effects.each_with_index.map { |e, i| [e, offset, mode.targets.size, i] }
             offset += mode.targets.size
             plan
           end
@@ -186,8 +190,8 @@ module Enjine
         end
 
         # CR 603.4: an intervening "if" must be true when the trigger event happens and on resolution.
-        def condition_met?(engine, controller, source)
-          condition.nil? || condition.true?(engine, EffectContext.new(controller, source, nil, []))
+        def condition_met?(engine, controller, source, object = nil)
+          condition.nil? || condition.true?(engine, EffectContext.new(controller, source, object, []))
         end
 
         def kind = :triggered

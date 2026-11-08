@@ -152,6 +152,7 @@ module SetConverter
     [/\AWhenever CARDNAME attacks, (.+)\z/, { "attacks" => {} }],
     [/\AAt the beginning of your upkeep, (.+)\z/, { "step_begins" => { "step" => "upkeep" } }],
     [/\AAt the beginning of your end step, (.+)\z/, { "step_begins" => { "step" => "end" } }],
+    [/\AAt the beginning of combat on your turn, (.+)\z/, { "step_begins" => { "step" => "beginning_of_combat" } }],
     [/\AAt the beginning of each upkeep, (.+)\z/, { "step_begins" => { "step" => "upkeep", "whose" => "each" } }],
     [/\AWhenever another creature you control enters, (.+)\z/,
      { "enters" => { "subject" => { "each" => "creature", "controller" => "you", "other" => true } } }],
@@ -163,9 +164,10 @@ module SetConverter
   def triggered_ability(line)
     TRIGGERS.each do |pattern, trigger|
       m = pattern.match(line) or next
-      body = m[1].sub(/\A./, &:upcase)
-      effects, targets = sentence_effects(body, 0)
-      return effects && { "triggered" => { "when" => trigger, "targets" => targets, "effects" => effects }.reject { |_, v| v.empty? } }
+      cast = m[1].start_with?("if you cast it, ") # intervening "if" (CR 603.4)
+      effects, targets = sentence_effects(capitalize(m[1].delete_prefix("if you cast it, ")), 0)
+      ability = { "when" => trigger, "if" => cast ? { "was_cast" => true } : nil, "targets" => targets, "effects" => effects }
+      return effects && { "triggered" => ability.reject { |_, v| v.nil? || v.empty? } }
     end
     nil
   end
@@ -189,7 +191,7 @@ module SetConverter
 
     choose, prefix, *texts = line.delete_prefix("CHOOSE ").split("|")
     modes = texts.map do |text|
-      effects, targets = sentence_effects(text.sub(/\A./, &:upcase), 0)
+      effects, targets = sentence_effects(capitalize(text.sub(/\A[A-Z][^—.]* — /, "")), 0) # drop a mode's name
       return nil unless effects
 
       { "targets" => targets, "effects" => effects }.reject { |_, v| v.empty? }
@@ -204,7 +206,7 @@ module SetConverter
   SUBJECTS = { "creatures" => "creature", "artifact creatures" => "creature", "lands" => "land", "artifacts" => "artifact" }.freeze
 
   STATIC_LINE = %r{
-    \A(Other\ )?(creatures|artifact\ creatures|artifacts)\ you\ control\
+    \A(Other\ )?(creatures|artifact\ creatures|artifacts)\ you\ control[ ]
     (?:get\ ([+-]\d+)/([+-]\d+)(?:\ and\ have\ ([a-z,\ ]+))?|have\ ([a-z,\ ]+))\.\z
   }x
 
@@ -268,15 +270,66 @@ module SetConverter
   # Longest phrases first so "target creature you control" wins over "target creature".
   TARGET_PHRASES = TARGETS.keys.sort_by { -it.size }.map { Regexp.escape(it) }.join("|")
 
-  # Translates a line of plain sentences; nil when any sentence isn't understood.
+  # Translates a line of plain sentences; nil when any sentence isn't understood. "X, then Y" is two
+  # sentences; "You may X. If you do, Y." is one optional effect; "it" / "that card" in a follow-up
+  # sentence is what the previous effect moved or created ({"result": n}).
   def sentence_effects(line, target_offset)
     effects = []
     targets = []
-    line.split(/(?<=\.)\s+/).each do |sentence|
-      effect = sentence_effect(sentence.delete_suffix("."), targets, target_offset) or return nil
+    sentences = line.split(/(?<=\.)\s+/).flat_map { it.delete_suffix(".").split(", then ").map { capitalize(it) } }
+    until sentences.empty?
+      sentence = sentences.shift
+      effect = optional_effect(sentence, sentences, targets, target_offset) ||
+               follow_up_effect(sentence, effects) ||
+               sentence_effect(sentence, targets, target_offset) or return nil
       effects << effect
     end
     [effects, targets]
+  end
+
+  def capitalize(text) = text.sub(/\A./, &:upcase)
+
+  # "You may X." optionally followed by "If you do, Y." (consumed from `rest`).
+  def optional_effect(sentence, rest, targets, offset)
+    m = /\AYou may (.+)\z/.match(sentence) or return nil
+    optional = sentence_effect(capitalize(m[1]), targets, offset) or return nil
+    may = { "effects" => [optional] }
+    if (follow = /\AIf you do, (.+)\z/.match(rest.first.to_s))
+      rest.shift
+      then_effect = sentence_effect(capitalize(follow[1]), targets, offset) or return nil
+      may["then"] = [then_effect]
+    end
+    { "may" => may }
+  end
+
+  NEXT_END_STEP = { "the next end step" => { "step_begins" => { "step" => "end", "whose" => "each" } },
+                    "your next end step" => { "step_begins" => { "step" => "end", "whose" => "your" } } }.freeze
+  IT = /(?:it|them|that card|those cards|that token|those tokens|that creature)/
+  AT_END = /at the beginning of (the next end step|your next end step)/
+  RETURN_IT = /Return #{IT} to the battlefield under (?:its|their) owners?'s? control/o
+  FOLLOW_UPS = [
+    # [pattern, effect key the previous effect must have, builder(match, result selector)]
+    [/\A(Sacrifice|Exile|Destroy) #{IT} #{AT_END}\z/o, %w[create_token return_to_battlefield],
+     ->(m, ref) { delayed(m[2], { m[1].downcase => { "to" => ref } }) }],
+    [/\A#{RETURN_IT} #{AT_END}\z/o, %w[exile], ->(m, ref) { delayed(m[1], { "return_to_battlefield" => { "to" => ref } }) }],
+    [/\A#{RETURN_IT}\z/o, %w[exile], ->(_m, ref) { { "return_to_battlefield" => { "to" => ref } } }],
+    [/\A(?:It|They|That token|Those tokens) gains? ([a-z ,]+) until end of turn\z/, %w[create_token],
+     lambda do |m, ref|
+       keywords = m[1].split(/, (?:and )?| and /).map(&:strip)
+       { "grant" => { "keywords" => keywords, "to" => ref } } if (keywords - SUPPORTED_KEYWORDS.to_a).empty?
+     end]
+  ].freeze
+
+  def delayed(step, effect) = { "delayed_trigger" => { "when" => NEXT_END_STEP.fetch(step), "effects" => [effect] } }
+
+  # A sentence about what the previous effect moved or created (CR 400.7j).
+  def follow_up_effect(sentence, effects)
+    previous = effects.last or return nil
+    FOLLOW_UPS.each do |pattern, after, build|
+      m = pattern.match(sentence) or next
+      return after.include?(previous.keys.first) ? build.call(m, { "result" => effects.size - 1 }) : nil
+    end
+    nil
   end
 
   def target_ref(phrase, targets, offset)
@@ -321,6 +374,9 @@ module SetConverter
     when %r{\ACreatures you control get \+(\d+)/\+(\d+) until end of turn\z}
       { "pump" => { "power" => Integer(::Regexp.last_match(1)), "toughness" => Integer(::Regexp.last_match(2)),
                     "to" => { "each" => "creature", "controller" => "you" } } }
+    when /\ADestroy all (?:non(artifact|land) )?creatures\z/
+      filter = ::Regexp.last_match(1) ? { "creature" => { "not" => [::Regexp.last_match(1)] } } : "creature"
+      { "destroy" => { "to" => { "each" => filter } } }
     when /\ADestroy (#{TARGET_PHRASES})\z/o
       { "destroy" => { "to" => target_ref(::Regexp.last_match(1), targets, offset) } }
     when /\ACounter (target spell)\z/ then { "counter" => { "to" => target_ref(::Regexp.last_match(1), targets, offset) } }

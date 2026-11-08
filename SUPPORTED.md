@@ -91,6 +91,7 @@ Rules version: Comprehensive Rules effective 2026-09-25.
 | [`counter`](docs/reference/effects.md#counter) | 701.6a | Counter each referenced spell: it leaves the stack for its owner's graveyard without resolving. |
 | [`create_token`](docs/reference/effects.md#create_token) | 111.1, 111.10, 701.7a, 704.5d | Create `amount` tokens under the referenced player's control (default: you). `token` is a predefined token name (Treasure, Clue, Food) or an inline card definition. `tapped: true` creates them tapped. |
 | [`deal_damage`](docs/reference/effects.md#deal_damage) | 120.3a, 120.3c, 120.3e, 120.6 | Deal `amount` damage to each referenced creature, planeswalker or player. Damage to a player causes life loss; to a planeswalker removes loyalty counters; to a creature is marked until cleanup. |
+| [`delayed_trigger`](docs/reference/effects.md#delayed_trigger) | 603.7a, 603.7b, 603.7c, 603.7d, 603.7e | Creates a delayed triggered ability with the controller and source of the resolving spell or ability. It triggers only once, the next time `when` happens (e.g. {"step_begins": {"step": "end", "whose": "each"}} for the next end step). Its `effects` may use {"result": n} for what earlier effects of the creating list moved or created; those objects are affected only if they are still where they were put. |
 | [`destroy`](docs/reference/effects.md#destroy) | 701.8a | Destroy each referenced permanent (it goes to its owner's graveyard). |
 | [`discard`](docs/reference/effects.md#discard) | 701.9a, 701.9b | Each referenced player discards `amount` cards of their choice (default: you). |
 | [`draw`](docs/reference/effects.md#draw) | 121.1, 121.2 | Each referenced player draws `amount` cards (default: you). |
@@ -98,9 +99,12 @@ Rules version: Comprehensive Rules effective 2026-09-25.
 | [`gain_life`](docs/reference/effects.md#gain_life) | 119.3 | Each referenced player gains `amount` life (default: you). |
 | [`grant`](docs/reference/effects.md#grant) | 611.2a, 611.2c, 613.1f, 514.2 | Each referenced permanent gains the `keywords` until end of turn. |
 | [`lose_life`](docs/reference/effects.md#lose_life) | 119.3 | Each referenced player loses `amount` life. |
+| [`may`](docs/reference/effects.md#may) | 118.12, 118.3, 608.2d | An optional effect. The controller chooses yes or no as it resolves; yes is offered only if every effect in `effects` can be done fully. On yes, `effects` then `then` ("if you do") happen; on no, `otherwise` ("if you don't"). Nested effects may name the results of earlier effects of the enclosing list. |
 | [`mill`](docs/reference/effects.md#mill) | 701.17a | Each referenced player puts the top `amount` cards of their library into their graveyard (default: you). |
 | [`pump`](docs/reference/effects.md#pump) | 611.2a, 611.2c, 613.4c, 514.2 | Each referenced creature gets +power/+toughness until end of turn. The set of affected creatures is locked in when the effect starts. |
+| [`return_to_battlefield`](docs/reference/effects.md#return_to_battlefield) | 400.7, 400.4a, 110.2, 111.8, 603.7c | Put each referenced card that is in exile or a graveyard onto the battlefield under its owner's control (`under: "you"`: under the controller's), tapped if `tapped: true`. A card that is no longer in the zone it was expected in, or isn't a permanent card, stays where it is. |
 | [`return_to_hand`](docs/reference/effects.md#return_to_hand) | 400.6 | Return each referenced permanent to its owner's hand. |
+| [`sacrifice`](docs/reference/effects.md#sacrifice) | 701.21a | The controller sacrifices each referenced permanent they control (it goes to its owner's graveyard; it isn't destroyed, so indestructible doesn't stop it). |
 | [`scry`](docs/reference/effects.md#scry) | 701.22a | Look at the top `amount` cards of your library; put any number on the bottom and the rest on top in any order. |
 | [`surveil`](docs/reference/effects.md#surveil) | 701.25a | Look at the top `amount` cards of your library; put any number into your graveyard and the rest on top in any order. |
 | [`tap`](docs/reference/effects.md#tap) | 701.26a | Tap each referenced permanent. |

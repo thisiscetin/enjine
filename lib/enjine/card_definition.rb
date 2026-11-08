@@ -77,18 +77,20 @@ module Enjine
     # Characteristics as printed: the starting point of the layer system (CR 613).
     attr_reader :printed_characteristics
 
-    def ability(ref) = @ability_instances.find { it.ref == ref }&.ability
+    # A printed or intrinsic ability, or a delayed triggered ability one of its effects creates
+    # ("delayed:<path>", see Effects::DelayedTrigger).
+    def ability(ref) = @ability_instances.find { it.ref == ref }&.ability || @delayed_abilities[ref]
 
     def permanent? = @permanent
     def token? = @token
 
     # Token definitions this card's effects can create; catalogs register them with the card.
     def token_definitions
-      @abilities.flat_map do |ability|
-        effects = ability.respond_to?(:modes) && ability.modal? ? ability.modes.flat_map(&:effects) : ability.try_effects
-        effects.filter_map { it.definition if it.is_a?(Mechanics::Effects::CreateToken) }
-      end.uniq(&:id)
+      @all_effects.filter_map { it.definition if it.is_a?(Mechanics::Effects::CreateToken) }.uniq(&:id)
     end
+
+    # Every effect of every ability, including effects nested in other effects ("may", delayed triggers).
+    attr_reader :all_effects
 
     def triggered? = @triggered
     def land? = @land
@@ -130,7 +132,13 @@ module Enjine
       @deck_limit_exempt = @supertypes.any? { Enjine.registry.fetch(:supertype, it).deck_limit_exempt? }
       @spell_ability = @abilities.find { it.kind == :spell }
       @triggered = @abilities.any? { it.kind == :triggered }
+      @all_effects = nested(@abilities.flat_map do |ability|
+        ability.respond_to?(:modes) && ability.modal? ? ability.modes.flat_map(&:effects) : ability.try_effects
+      end).freeze
+      @delayed_abilities = @all_effects.select { it.respond_to?(:delayed_ability) }.to_h { [it.ref, it.delayed_ability] }.freeze
     end
+
+    def nested(effects) = effects.flat_map { [it, *nested(it.nested_effects)] }
 
     def validate_type_specific(errors)
       errors << "power/toughness: only creatures have power and toughness" if !creature? && (@power || @toughness)

@@ -15,21 +15,24 @@ module Enjine
         def self.keys = %w[amount to if]
         def self.default_to = nil
 
-        def self.build(params, errors, path, targets_count: 0, **)
+        # `results_count`: how many earlier effects of the enclosing list a {"result": n} selector may name.
+        def self.build(params, errors, path, targets_count: 0, results_count: 0, **)
           Mechanics.check_keys(params, keys, errors, path)
           raw_to = Mechanics.fetch_param(params, :to) || default_to
           to = if raw_to.nil?
                  errors << "#{path}.to: required"
                  nil
                else
-                 Selector.build(raw_to, errors, "#{path}.to", targets_count: targets_count)
+                 Selector.build(raw_to, errors, "#{path}.to", targets_count: targets_count, results_count: results_count)
                end
-          new(to: to, params: params, errors: errors, path: path, targets_count: targets_count)
+          new(to: to, params: params, errors: errors, path: path, targets_count: targets_count, results_count: results_count)
         end
 
-        def initialize(to:, params:, errors:, path:, targets_count: 0)
+        def initialize(to:, params:, errors:, path:, targets_count: 0, results_count: 0)
           super()
           @to = to
+          @targets_count = targets_count
+          @results_count = results_count
           if self.class.keys.include?("amount")
             raw = Mechanics.fetch_param(params, :amount)
             @amount = if raw.nil?
@@ -50,6 +53,12 @@ module Enjine
         def amount_for(engine, ctx) = @amount.value(engine, ctx)
 
         def setup(_params, _errors, _path) = nil
+
+        # Effects nested inside this one (a "may" or delayed trigger's list); see CardDefinition#all_effects.
+        def nested_effects = []
+
+        # CR 118.3: whether the effect can be done fully now (an optional effect offered as a cost).
+        def possible?(_engine, _ctx) = true
 
         # Runs the effect during resolution. Effects that need a player's choice override this,
         # keep their progress in `locals` (plain JSON data) and return :wait after asking.

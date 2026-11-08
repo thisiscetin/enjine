@@ -22,7 +22,7 @@ module Enjine
         def self.keys = %w[token amount tapped to if]
         def self.default_to = "you"
 
-        def initialize(to:, params:, errors:, path:, targets_count: 0)
+        def initialize(to:, params:, errors:, path:, targets_count: 0, results_count: 0)
           params = params.transform_keys(&:to_s)
           params["amount"] = 1 unless params.key?("amount")
           super

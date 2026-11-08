@@ -137,6 +137,9 @@ module Enjine
                                      example: { "discard" => { "amount" => 1, "to" => "each_opponent" } }
         def self.default_to = "you"
 
+        # CR 118.3: "you may discard a card" needs a card to discard.
+        def possible?(engine, ctx) = players(engine, ctx).all? { engine.player(it).hand.size >= amount_for(engine, ctx) }
+
         def run(engine, ctx, locals)
           queue = (locals["players"] ||= players(engine, ctx).flat_map { |i| [i] * amount_for(engine, ctx) })
           chosen = answers(locals)

@@ -24,8 +24,15 @@ module Enjine
         "exile" => state.exile.map { object_view(engine, it) },
         "pending" => pending_view(engine, viewer),
         "result" => state.result&.dup,
-        "effects" => state.effects.map { it.except("controller").merge("controller" => engine.name(it["controller"])) }
+        "effects" => state.effects.map { it.except("controller").merge("controller" => engine.name(it["controller"])) },
+        "delayed_triggers" => state.delayed_triggers.map { delayed_view(engine, it) }
       }
+    end
+
+    # A delayed triggered ability waiting for its event (CR 603.7): public, like the spell that made it.
+    def delayed_view(engine, entry)
+      defn = engine.catalog.fetch(entry["card"])
+      { "controller" => engine.name(entry["controller"]), "card" => defn.name, "ability" => defn.ability(entry["ability"]).to_s }
     end
 
     def player_view(engine, player, sees_hand, sees_library)

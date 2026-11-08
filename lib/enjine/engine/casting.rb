@@ -328,7 +328,7 @@ module Enjine
         state.objects[origin["id"]] = GameObject.new(
           id: origin["id"], card: obj.card, owner: obj.owner, controller: obj.owner, zone: :hand, tapped: false,
           controlled_since: nil, kind: "card", counters: {}, damage: 0, source: nil, ability: nil, targets: nil,
-          loyalty_turn: nil, deathtouched: false, modes: nil
+          loyalty_turn: nil, deathtouched: false, modes: nil, memory: {}
         )
         player(obj.owner).hand.insert(origin["index"], origin["id"])
       end

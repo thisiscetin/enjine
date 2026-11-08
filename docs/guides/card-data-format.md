@@ -181,6 +181,32 @@ yet, so the card is unsupported.
 | `{ "each": "creature", "controller": "you" }` | "creatures you control", "each creature you control" |
 | `{ "each": "creature", "controller": "opponent" }` | "creatures your opponents control" |
 | `{ "each": "creature" }` | "each creature", "all creatures" |
+| `{ "result": 0 }` | "it" / "that card" / "the token": what effect 0 of the same list moved or created (CR 400.7j) |
+
+### 4.5a Results, optional effects and delayed triggers
+
+Every effect records the objects it moved or created (the new object ids, CR 400.7).
+A later effect of the same effect list names them with `{ "result": n }`, where `n`
+is the earlier effect's index (inside a mode: the index within that mode's list).
+Lists nested in a `may` or a `delayed_trigger` see the results of their parent's
+earlier effects.
+
+```json
+[{ "exile": { "to": { "target": 0 } } },
+ { "return_to_battlefield": { "to": { "result": 0 } } }]
+```
+is a flicker ("exile …, then return it to the battlefield under its owner's control").
+
+- `may` (CR 118.12): `{ "may": { "effects": [...], "then": [...], "otherwise": [...] } }`
+  is "you may [effects]. If you do, [then]. If you don't, [otherwise]." The controller
+  answers yes/no as it resolves (an `effect_choice`); yes is offered only when the
+  optional part can be done fully (CR 118.3).
+- `delayed_trigger` (CR 603.7): `{ "delayed_trigger": { "when": { "step_begins":
+  { "step": "end", "whose": "each" } }, "effects": [{ "sacrifice": { "to": { "result": 0 } } }] } }`
+  is "… at the beginning of the next end step". It triggers once, with the controller
+  and source of what created it; a remembered object that has changed zones is not
+  affected (CR 603.7c).
+- `{ "was_cast": true }` as a triggered ability's `if` is "if you cast it" (CR 603.4).
 
 ### 4.6 Effects
 

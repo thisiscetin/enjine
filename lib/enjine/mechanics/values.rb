@@ -74,6 +74,7 @@ module Enjine
     #   {"life": "you", "at_least": 10} / {"life": "you", "at_most": 5}
     #   {"hand_size": "you", "at_most": 0}
     #   {"your_turn": true}
+    #   {"was_cast": true}                          "if you cast it": the source permanent was cast (CR 400.7d)
     #   {"not": condition}, {"all": [conditions]}, {"any": [conditions]}
     class Condition
       def self.build(data, errors, path, targets_count: 0)
@@ -88,6 +89,7 @@ module Enjine
           parts = Array(data[key]).each_with_index.map { |c, i| build(c, errors, "#{path}.#{key}[#{i}]", targets_count: targets_count) }
           Many.new(key, parts.compact)
         elsif data.key?("your_turn") then YourTurn.new(data["your_turn"] != false)
+        elsif data.key?("was_cast") then WasCast.new(data["was_cast"] != false)
         else Compare.build(data, errors, path, targets_count)
         end
       end
@@ -99,7 +101,7 @@ module Enjine
         def self.build(data, errors, path, targets_count)
           subject = (data.keys & SUBJECTS.keys).first
           unless subject
-            errors << "#{path}: unknown condition (use controls, life, hand_size, your_turn, not, all, any)"
+            errors << "#{path}: unknown condition (use controls, life, hand_size, your_turn, was_cast, not, all, any)"
             return nil
           end
           Mechanics.check_keys(data, [subject, "at_least", "at_most"], errors, path)
@@ -137,6 +139,24 @@ module Enjine
 
         def true?(engine, ctx) = (engine.state.active == ctx.controller) == @wanted
         def to_s = @wanted ? "it's your turn" : "it's not your turn"
+      end
+
+      # "If you cast it" / "if it was cast": the source permanent entered as a resolving spell
+      # (CR 400.7d). Once the source has left, its triggered ability remembers it (last known
+      # information, CR 603.4 / 608.2h).
+      class WasCast
+        def initialize(wanted)
+          @wanted = wanted
+          freeze
+        end
+
+        def true?(engine, ctx)
+          source = engine.state.objects[ctx.source]
+          cast = source ? source.memory["cast"] : engine.state.objects[ctx.object]&.memory&.[]("source_cast")
+          (cast == true) == @wanted
+        end
+
+        def to_s = @wanted ? "it was cast" : "it wasn't cast"
       end
 
       # Negation.

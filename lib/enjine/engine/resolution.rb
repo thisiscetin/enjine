@@ -11,10 +11,12 @@ module Enjine
                           "locals" => {} }
       end
 
-      # Records a player's answer for the effect that is asking (see Effects::ChoiceEffect).
+      # Records a player's answer for the effect that is asking (see Effects::ChoiceEffect). An effect
+      # running a nested effect (a "may") keeps that effect's locals under "child": the innermost asks.
       def effect_answer!(option)
         frame = state.frames.rfind { it["type"] == "resolve" }
         locals = frame["locals"][frame["pc"].to_s]
+        locals = locals["child"] while locals["child"]
         (locals["answers"] ||= []) << option.transform_keys(&:to_s)
         ask!(nil)
       end
@@ -31,10 +33,10 @@ module Enjine
 
         plan = ability ? ability.effect_plan(obj.modes || []) : []
         while frame["pc"] < plan.size
-          effect, offset, count = plan[frame["pc"]]
-          ctx = effect_context(frame["ctx"], offset, count)
+          effect, offset, count, index = plan[frame["pc"]]
+          ctx = effect_context(frame["ctx"], offset, count, index ? frame["pc"] - index : 0)
           locals = (frame["locals"][frame["pc"].to_s] ||= {})
-          return :wait if effect.run(self, ctx, locals) == :wait
+          return :wait if recording_results(frame) { effect.run(self, ctx, locals) } == :wait
 
           frame["pc"] += 1
         end
@@ -54,20 +56,38 @@ module Enjine
         frame["pc"] = 0
         frame["fizzled"] = (!specs.empty? && targets.none?) || !intervening_if_holds?(obj, ability)
         frame["ctx"] = { "controller" => obj.controller, "source" => obj.ability? ? obj.source : obj.id,
-                         "object" => obj.id, "targets" => targets }
+                         "object" => obj.id, "targets" => targets, "results" => {} }
+        frame["ctx"]["linked"] = obj.memory["results"] if obj.memory.key?("results") # a delayed trigger's (CR 603.7c)
       end
+
+      # CR 400.7j / 608.2c: objects an effect moves or creates, so later effects can refer to them
+      # ("the card exiled this way"). Kept per effect in the frame, so a waiting effect accumulates.
+      def recording_results(frame)
+        @recorded = []
+        yield
+      ensure
+        (frame["ctx"]["results"] ||= {})[frame["pc"].to_s] = (frame["ctx"]["results"][frame["pc"].to_s] || []) + @recorded
+        @recorded = nil
+      end
+
+      # Called by zone changes and token creation while an effect runs.
+      def record_result!(id) = @recorded&.push(id)
 
       # The context for one effect; a modal ability's effects see only their mode's targets.
       # CR 603.4: a triggered ability whose intervening "if" is false on resolution does nothing.
       def intervening_if_holds?(obj, ability)
         return true unless obj.ability? && ability.respond_to?(:condition_met?)
 
-        ability.condition_met?(self, obj.controller, obj.source)
+        ability.condition_met?(self, obj.controller, obj.source, obj.id)
       end
 
-      def effect_context(data, offset = 0, count = nil)
+      # `base` is the plan position of the first effect of this effect's list: result n is at base + n.
+      # A delayed trigger's effects see the results of the list that created it instead.
+      def effect_context(data, offset = 0, count = nil, base = 0)
         targets = count ? data["targets"][offset, count] || [] : data["targets"]
-        Mechanics::EffectContext.new(data["controller"], data["source"], data["object"], targets)
+        own = data["results"] || {}
+        results = data["linked"] || Array.new([own.size - base, 0].max) { own[(base + it).to_s] || [] }
+        Mechanics::EffectContext.new(data["controller"], data["source"], data["object"], targets, results)
       end
 
       def finish_fizzle!(_frame, obj)
@@ -94,7 +114,7 @@ module Enjine
         return unless state.stack.include?(obj.id) # it may have left the stack during resolution
 
         if definition(obj).permanent?
-          enters = enters_from_answer(obj.id, frame)
+          enters = (enters_from_answer(obj.id, frame) || {}).merge("cast" => true)
           pay_entering_life!(obj.controller, frame)
           move!(obj.id, :battlefield, controller: obj.controller, reason: "resolve", enters: enters) # CR 608.3
         else

@@ -22,6 +22,7 @@ module Enjine
       validate_objects(data, catalog, errors)
       validate_combat(data, errors) if errors.empty?
       validate_turn(data, errors) if errors.empty?
+      validate_delayed_triggers(data, catalog, errors) if errors.empty?
       errors
     end
 
@@ -48,6 +49,7 @@ module Enjine
       state.effects = deep_copy(data.fetch("effects", []))
       state.frames = deep_copy(data.fetch("frames", []))
       state.pending_triggers = deep_copy(data.fetch("pending_triggers", []))
+      state.delayed_triggers = deep_copy(data.fetch("delayed_triggers", []))
       state.repeat_cleanup = data.fetch("repeat_cleanup", false)
       state.combat_damage_pass = data["combat_damage_pass"]
       state.attacks_declared = data.fetch("attacks_declared", 0)
@@ -66,7 +68,8 @@ module Enjine
                      kind: hash.fetch("kind", "card"), counters: deep_copy(hash.fetch("counters", {})),
                      damage: hash.fetch("damage", 0), source: hash["source"], ability: hash["ability"],
                      targets: deep_copy(hash["targets"]), loyalty_turn: hash["loyalty_turn"],
-                     deathtouched: hash.fetch("deathtouched", false), modes: hash["modes"]&.dup)
+                     deathtouched: hash.fetch("deathtouched", false), modes: hash["modes"]&.dup,
+                     memory: deep_copy(hash.fetch("memory", {})))
     end
 
     def deep_copy(value) = Marshal.load(Marshal.dump(value))
@@ -156,6 +159,7 @@ module Enjine
         errors << "#{path}.counters: must map counter kinds to non-negative integers"
       end
       errors << "#{path}.damage: must be a non-negative integer" unless non_negative?(obj.fetch("damage", 0))
+      errors << "#{path}.memory: must be an object" unless obj.fetch("memory", {}).is_a?(Hash)
       return if zone == "battlefield"
 
       return unless counters.values.any?(&:positive?) || obj["damage"].to_i.positive?
@@ -193,6 +197,24 @@ module Enjine
       return unless top && kind && !Frames.fetch(top["type"]).decisions.include?(kind)
 
       errors << "pending: #{kind} can't be pending while a #{top["type"]} frame is in progress"
+    end
+
+    # CR 603.7: each delayed triggered ability names a card in the catalog and one of its delayed abilities.
+    def validate_delayed_triggers(data, catalog, errors)
+      list = data.fetch("delayed_triggers", [])
+      return errors << "delayed_triggers: must be a list" unless list.is_a?(Array)
+
+      list.each_with_index do |entry, i|
+        path = "delayed_triggers[#{i}]"
+        next errors << "#{path}: must be an object" unless entry.is_a?(Hash)
+
+        errors << "#{path}.controller: must be 0 or 1" unless [0, 1].include?(entry["controller"])
+        errors << "#{path}.results: must be a list" unless entry.fetch("results", []).is_a?(Array)
+        card = catalog.include?(entry["card"].to_s) && catalog.fetch(entry["card"])
+        next if card && card.ability(entry["ability"].to_s).respond_to?(:trigger)
+
+        errors << "#{path}: #{entry["card"].inspect} has no delayed ability #{entry["ability"].inspect}"
+      end
     end
 
     def validate_zone_membership(data, objects, errors)

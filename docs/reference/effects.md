@@ -100,6 +100,39 @@ Rules: CR 120.3a, CR 120.3c, CR 120.3e, CR 120.6
 }
 ```
 
+## delayed_trigger
+
+Creates a delayed triggered ability with the controller and source of the resolving spell or ability. It triggers only once, the next time `when` happens (e.g. {"step_begins": {"step": "end", "whose": "each"}} for the next end step). Its `effects` may use {"result": n} for what earlier effects of the creating list moved or created; those objects are affected only if they are still where they were put.
+
+Rules: CR 603.7a, CR 603.7b, CR 603.7c, CR 603.7d, CR 603.7e
+
+| Parameter | Description |
+| --- | --- |
+| `when` | a trigger condition |
+| `effects` | list of effects |
+
+```json
+{
+  "delayed_trigger": {
+    "when": {
+      "step_begins": {
+        "step": "end",
+        "whose": "each"
+      }
+    },
+    "effects": [
+      {
+        "sacrifice": {
+          "to": {
+            "result": 0
+          }
+        }
+      }
+    ]
+  }
+}
+```
+
 ## destroy
 
 Destroy each referenced permanent (it goes to its owner's graveyard).
@@ -242,6 +275,39 @@ Rules: CR 119.3
 }
 ```
 
+## may
+
+An optional effect. The controller chooses yes or no as it resolves; yes is offered only if every effect in `effects` can be done fully. On yes, `effects` then `then` ("if you do") happen; on no, `otherwise` ("if you don't"). Nested effects may name the results of earlier effects of the enclosing list.
+
+Rules: CR 118.12, CR 118.3, CR 608.2d
+
+| Parameter | Description |
+| --- | --- |
+| `effects` | list of effects (the optional part) |
+| `then` | list of effects |
+| `otherwise` | list of effects |
+
+```json
+{
+  "may": {
+    "effects": [
+      {
+        "discard": {
+          "amount": 1
+        }
+      }
+    ],
+    "then": [
+      {
+        "draw": {
+          "amount": 1
+        }
+      }
+    ]
+  }
+}
+```
+
 ## mill
 
 Each referenced player puts the top `amount` cards of their library into their graveyard (default: you).
@@ -286,6 +352,28 @@ Rules: CR 611.2a, CR 611.2c, CR 613.4c, CR 514.2
 }
 ```
 
+## return_to_battlefield
+
+Put each referenced card that is in exile or a graveyard onto the battlefield under its owner's control (`under: "you"`: under the controller's), tapped if `tapped: true`. A card that is no longer in the zone it was expected in, or isn't a permanent card, stays where it is.
+
+Rules: CR 400.7, CR 400.4a, CR 110.2, CR 111.8, CR 603.7c
+
+| Parameter | Description |
+| --- | --- |
+| `to` | selector (usually {"result": n}) |
+| `tapped` | boolean |
+| `under` | owner | you |
+
+```json
+{
+  "return_to_battlefield": {
+    "to": {
+      "result": 0
+    }
+  }
+}
+```
+
 ## return_to_hand
 
 Return each referenced permanent to its owner's hand.
@@ -301,6 +389,26 @@ Rules: CR 400.6
   "return_to_hand": {
     "to": {
       "target": 0
+    }
+  }
+}
+```
+
+## sacrifice
+
+The controller sacrifices each referenced permanent they control (it goes to its owner's graveyard; it isn't destroyed, so indestructible doesn't stop it).
+
+Rules: CR 701.21a
+
+| Parameter | Description |
+| --- | --- |
+| `to` | selector |
+
+```json
+{
+  "sacrifice": {
+    "to": {
+      "result": 0
     }
   }
 }

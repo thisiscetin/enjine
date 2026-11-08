@@ -3,7 +3,9 @@
 module Enjine
   module Mechanics
     # The context an effect runs in.
-    EffectContext = Struct.new(:controller, :source, :object, :targets)
+    # `results` lists, per earlier effect of the same effect list, the objects that effect
+    # moved or created (CR 400.7j: "the card exiled this way"); see Selector {"result": n}.
+    EffectContext = Struct.new(:controller, :source, :object, :targets, :results)
 
     # Data form of "who/what does this effect apply to":
     #   {"target": 0}                               the first chosen target
@@ -11,19 +13,34 @@ module Enjine
     #   "you"                                       the controller
     #   "each_opponent"                             every opponent
     #   {"each": "creature", "controller": "you"}  every matching object (you | opponent | any)
+    #   {"result": 0}                               what effect 0 of this list moved or created (CR 400.7j)
     class Selector
       CONTROLLERS = %w[you opponent any].freeze
 
       attr_reader :kind, :value, :controller
 
-      def self.build(data, errors, path, targets_count:)
+      def self.build(data, errors, path, targets_count:, results_count: 0)
         case data
         when "self", "you", "each_opponent" then new(data.to_sym)
-        when Hash then build_hash(data.transform_keys(&:to_s), errors, path, targets_count)
+        when Hash
+          data = data.transform_keys(&:to_s)
+          return build_result(data, errors, path, results_count) if data.key?("result")
+
+          build_hash(data, errors, path, targets_count)
         else
           errors << "#{path}: must be {\"target\": n}, \"self\", \"you\", \"each_opponent\" or {\"each\": filter}"
           nil
         end
+      end
+
+      # {"result": n}: n must name an earlier effect of the same list (a nested list sees its parent's).
+      def self.build_result(data, errors, path, results_count)
+        Mechanics.check_keys(data, %w[result], errors, path)
+        index = data["result"]
+        unless index.is_a?(Integer) && index >= 0 && index < results_count
+          errors << "#{path}.result: must refer to one of the #{results_count} earlier effects"
+        end
+        new(:result, index)
       end
 
       def self.build_hash(data, errors, path, targets_count)
@@ -56,6 +73,7 @@ module Enjine
       def to_s
         case kind
         when :target then "target ##{value + 1}"
+        when :result then "the object(s) from effect ##{value + 1}"
         when :self then "itself"
         when :you then "you"
         when :each_opponent then "each opponent"
@@ -69,6 +87,7 @@ module Enjine
       def resolve(engine, ctx)
         case kind
         when :target then [ctx.targets[value]].compact
+        when :result then Array(ctx.results&.[](value))
         when :self then engine.state.battlefield.include?(ctx.source) ? [ctx.source] : []
         when :you then [Filters.player_ref(engine, ctx.controller)]
         when :each_opponent
