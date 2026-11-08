@@ -91,6 +91,7 @@ module SetConverter
   def translate_text(source, data, missing)
     text = source["oracle_text"].to_s.gsub(/\s*\([^)]*\)/, "") # reminder text is not rules
     text = text.gsub(source["name"], "CARDNAME")
+    text = short_name(text, source["name"])
     text = text.gsub(/\b[Tt]his (creature|artifact|enchantment|land|planeswalker|permanent|Vehicle|Spacecraft)\b/, "CARDNAME")
     keywords = []
     abilities = []
@@ -112,6 +113,8 @@ module SetConverter
         abilities << { "enters_tapped_unless_pay_life" => { "life" => Integer(m[1]) } }
       elsif line.match?(/\ACARDNAME enters tapped\.\z/)
         abilities << "enters_tapped"
+      elsif (flag = RESTRICTION_LINES[line])
+        keywords << flag
       elsif (static = static_line(line))
         abilities << static
       elsif line == "Activate only as a sorcery." && abilities.last.is_a?(Hash) && abilities.last["activated"]
@@ -137,6 +140,17 @@ module SetConverter
     data["abilities"] = abilities unless abilities.empty?
   end
 
+  # Combat restrictions and requirements printed as their own line (CR 508.1c-d, 509.1b).
+  RESTRICTION_LINES = { "CARDNAME can't block." => "cant_block", "CARDNAME can't attack." => "cant_attack",
+                        "CARDNAME can't be blocked." => "cant_be_blocked",
+                        "CARDNAME attacks each combat if able." => "attacks_each_combat" }.freeze
+
+  # A legendary card refers to itself by the part of its name before the comma.
+  def short_name(text, name)
+    short = name.to_s.split(", ", 2).first
+    short == name || short.to_s.empty? ? text : text.gsub(/\b#{Regexp.escape(short)}\b/, "CARDNAME")
+  end
+
   def keyword_line(line)
     parts = line.split(/,\s*/).map(&:downcase)
     if parts.all? do
@@ -145,6 +159,25 @@ module SetConverter
       parts
     end
   end
+
+  # Combat and event triggers (deals combat damage, attacking, blocking, life, draws, dies).
+  YOURS = { "each" => "creature", "controller" => "you" }.freeze
+  COMBAT_TRIGGERS = [
+    [/\AWhenever CARDNAME deals combat damage to a player, (.+)\z/, { "deals_damage" => { "combat" => true, "to" => "player" } }],
+    [/\AWhenever CARDNAME deals combat damage, (.+)\z/, { "deals_damage" => { "combat" => true } }],
+    [/\AWhenever CARDNAME enters or attacks, (.+)\z/, { "any_of" => [{ "enters" => {} }, { "attacks" => {} }] }],
+    [/\AWhenever CARDNAME enters or deals combat damage to a player, (.+)\z/,
+     { "any_of" => [{ "enters" => {} }, { "deals_damage" => { "combat" => true, "to" => "player" } }] }],
+    [/\AWhenever (?:you attack|one or more creatures you control attack), (.+)\z/, { "player_attacks" => {} }],
+    [/\AWhenever CARDNAME becomes blocked, (.+)\z/, { "becomes_blocked" => {} }],
+    [/\AWhenever you gain life, (.+)\z/, { "gains_life" => {} }],
+    [/\AWhenever an opponent loses life, (.+)\z/, { "loses_life" => { "controller" => "opponent" } }],
+    [/\AWhenever you draw a card, (.+)\z/, { "draws" => {} }],
+    [/\AWhenever (?:a creature you control|CARDNAME or another creature you control) dies, (.+)\z/, { "dies" => { "subject" => YOURS } }],
+    [/\AWhenever another creature you control dies, (.+)\z/, { "dies" => { "subject" => YOURS.merge("other" => true) } }],
+    [/\AWhenever a creature dies, (.+)\z/, { "dies" => { "subject" => { "each" => "creature" } } }],
+    [/\AWhenever another creature dies, (.+)\z/, { "dies" => { "subject" => { "each" => "creature", "other" => true } } }]
+  ].freeze
 
   TRIGGERS = [
     [/\AWhen CARDNAME enters, (.+)\z/, { "enters" => {} }],
@@ -157,7 +190,8 @@ module SetConverter
      { "enters" => { "subject" => { "each" => "creature", "controller" => "you", "other" => true } } }],
     [/\A(?:Landfall — )?Whenever a land you control enters, (.+)\z/,
      { "enters" => { "subject" => { "each" => "land", "controller" => "you" } } }],
-    [/\AWhenever you cast a noncreature spell, (.+)\z/, { "cast" => { "spell" => "noncreature" } }]
+    [/\AWhenever you cast a noncreature spell, (.+)\z/, { "cast" => { "spell" => "noncreature" } }],
+    *COMBAT_TRIGGERS
   ].freeze
 
   def triggered_ability(line)
@@ -204,8 +238,8 @@ module SetConverter
   SUBJECTS = { "creatures" => "creature", "artifact creatures" => "creature", "lands" => "land", "artifacts" => "artifact" }.freeze
 
   STATIC_LINE = %r{
-    \A(Other\ )?(creatures|artifact\ creatures|artifacts)\ you\ control\
-    (?:get\ ([+-]\d+)/([+-]\d+)(?:\ and\ have\ ([a-z,\ ]+))?|have\ ([a-z,\ ]+))\.\z
+    \A(Other\ )?(creatures|artifact\ creatures|artifacts)\ you\ control
+    \ (?:get\ ([+-]\d+)/([+-]\d+)(?:\ and\ have\ ([a-z,\ ]+))?|have\ ([a-z,\ ]+))\.\z
   }x
 
   # "Other creatures you control get +1/+1." / "Creatures you control have vigilance."
@@ -288,8 +322,8 @@ module SetConverter
   def number(word) = NUMBER[word] || Integer(word, exception: false)
 
   CREATURE_TOKEN = %r{
-    \ACreate\ (a|an|one|two|three|\d+)\ (tapped\ )?(\d+)/(\d+)\
-    (?:(?:white|blue|black|red|green|colorless)(?:\ and\ \w+)?\ )?
+    \ACreate\ (a|an|one|two|three|\d+)\ (tapped\ )?(\d+)/(\d+)
+    \ (?:(?:white|blue|black|red|green|colorless)(?:\ and\ \w+)?\ )?
     ([A-Z][\w\ ]*?)\ (artifact\ )?creature\ tokens?(?:\ with\ ([a-z,\ ]+))?\z
   }x
 
@@ -347,6 +381,9 @@ module SetConverter
 
       to = ::Regexp.last_match(1) == "CARDNAME" ? "self" : target_ref(::Regexp.last_match(1), targets, offset)
       { "grant" => { "keywords" => keywords, "to" => to } }
+    when /\A(#{TARGET_PHRASES}|CARDNAME) can't (block|be blocked) this turn\z/o
+      to = ::Regexp.last_match(1) == "CARDNAME" ? "self" : target_ref(::Regexp.last_match(1), targets, offset)
+      { "grant" => { "keywords" => [::Regexp.last_match(2) == "block" ? "cant_block" : "cant_be_blocked"], "to" => to } }
     when /\ADraw a card for each (creature|artifact|land) you control\z/
       { "draw" => { "amount" => { "count" => { "each" => ::Regexp.last_match(1), "controller" => "you" } } } }
     when /\ACreate (a|an|one|two|three|\d+) (tapped )?(Treasure|Clue|Food) tokens?\z/

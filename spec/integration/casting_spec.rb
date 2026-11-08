@@ -107,7 +107,7 @@ RSpec.describe "Casting spells and the stack (CR 601, 608)" do
     entry = nil
     2.times { entry = game.submit(type: "pass") }
     expect(entry.events.map(&:to_h)).to include(
-      { "type" => "damage_dealt", "source" => bolt_on_stack, "target" => "player:bob", "amount" => 3 },
+      { "type" => "damage_dealt", "source" => bolt_on_stack, "target" => "player:bob", "amount" => 3, "combat" => false },
       { "type" => "life_changed", "player" => "bob", "from" => 20, "to" => 17 }
     )
     expect(game.view_for("alice")["players"][0]["graveyard"].map { it["name"] }).to eq(["Lightning Bolt"])

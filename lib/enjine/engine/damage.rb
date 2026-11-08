@@ -4,31 +4,35 @@ module Enjine
   class Engine
     # Damage, life, counters and permanent state-based actions.
     module Damage
-      # CR 120.3: results of damage depend on what receives it.
-      def deal_damage!(source, ref, amount)
-        return unless amount.positive?
+      # CR 120.3: results of damage depend on what receives it. `combat`: combat damage (CR 510.2).
+      # Returns the damage dealt. With `lifelink: false` the caller applies lifelink itself
+      # (simultaneous combat damage: one life gain event per source, CR 120.3f, 119.9).
+      def deal_damage!(source, ref, amount, combat: false, lifelink: true)
+        return 0 unless amount.positive?
 
-        amount = propose("damage", { "source" => source, "target" => ref, "amount" => amount }).data["amount"]
-        return unless amount.positive? # prevention (CR 615) will reduce it here
+        amount = propose("damage", { "source" => source, "target" => ref, "amount" => amount, "combat" => combat })
+                 .data["amount"]
+        return 0 unless amount.positive? # prevention (CR 615) will reduce it here
 
         source_chars = damage_source_chars(source)
         index = Mechanics::Filters.player_index(self, ref)
         if index
-          emit Events::DamageDealt.new(source: source, target: ref, amount: amount)
+          emit Events::DamageDealt.new(source: source, target: ref, amount: amount, combat: combat)
           change_life!(index, -amount) # CR 120.3a
         else
-          return unless state.battlefield.include?(ref)
+          return 0 unless state.battlefield.include?(ref)
 
           obj = object(ref)
           defn = chars(obj)
-          emit Events::DamageDealt.new(source: source, target: ref, amount: amount)
+          emit Events::DamageDealt.new(source: source, target: ref, amount: amount, combat: combat)
           if defn.creature?
             obj.damage += amount # CR 120.3e
             obj.deathtouched = true if source_chars&.keyword?(:deathtouch) # CR 702.2b
           end
           remove_counters!(obj, "loyalty", amount) if defn.planeswalker? # CR 120.3c
         end
-        lifelink!(source, amount) if source_chars&.keyword?(:lifelink)
+        lifelink!(source, amount) if lifelink && source_chars&.keyword?(:lifelink)
+        amount
       end
 
       # Characteristics of a damage source: a permanent, or the spell/ability on the stack.

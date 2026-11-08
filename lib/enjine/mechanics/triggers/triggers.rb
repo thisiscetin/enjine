@@ -34,13 +34,13 @@ module Enjine
         end
 
         # Does the object `object_id` (controlled by `object_controller`, of card `card`) count?
-        def match?(engine, object_id, object_controller, card, source)
+        # `types`: its card types at the time (current or last known, CR 603.10a); printed if omitted.
+        def match?(engine, object_id, object_controller, card, source, types: nil)
           return object_id == source["id"] if @kind == :self
           return false if @other && object_id == source["id"]
           return false unless controller_ok?(object_controller, source["controller"])
 
-          types = engine.catalog.fetch(card).types
-          @filter.matches_types?(types)
+          @filter.matches_types?(types || engine.catalog.fetch(card).types)
         end
 
         def controller_ok?(object_controller, you)
@@ -74,6 +74,9 @@ module Enjine
 
         def setup(_params, _errors, _path) = nil
         def leaves_battlefield? = false
+
+        # Whether this trigger looks at `event` at all (one event class by default).
+        def watches?(event) = event.is_a?(event_class)
       end
 
       # "When ~ enters" / "Whenever a creature you control enters" (landfall: lands you control).
@@ -90,7 +93,7 @@ module Enjine
           return false unless event.to == "battlefield"
 
           obj = engine.state.objects[event.new_id] or return false
-          @subject.match?(engine, event.new_id, obj.controller, event.card, source)
+          @subject.match?(engine, event.new_id, obj.controller, event.card, source, types: engine.chars(obj).types)
         end
 
         def to_s = "When #{@subject} enters"
@@ -111,7 +114,7 @@ module Enjine
           return false unless event.from == "battlefield" && event.to == "graveyard"
 
           lki = engine.last_known(event.old_id) or return false
-          @subject.match?(engine, event.old_id, lki["controller"], event.card, source)
+          @subject.match?(engine, event.old_id, lki["controller"], event.card, source, types: lki["types"])
         end
 
         def to_s = "When #{@subject} dies"
@@ -127,7 +130,7 @@ module Enjine
 
         def match?(engine, event, source)
           obj = engine.state.objects[event.object] or return false
-          @subject.match?(engine, event.object, obj.controller, obj.card, source)
+          @subject.match?(engine, event.object, obj.controller, obj.card, source, types: engine.chars(obj).types)
         end
 
         def to_s = "Whenever #{@subject} attacks"

@@ -60,8 +60,15 @@ module Enjine
     CastCancelled = define(:cast_cancelled, :player, :object, :card)
     Resolved = define(:resolved, :object, :card, :kind)
     Fizzled = define(:fizzled, :object, :card)
-    DamageDealt = define(:damage_dealt, :source, :target, :amount)
-    LifeChanged = define(:life_changed, :player, :from, :to)
+    # `combat`: dealt as combat damage (CR 510.2); triggers such as "deals combat damage to a player" read it.
+    DamageDealt = define(:damage_dealt, :source, :target, :amount, :combat) do
+      def initialize(source:, target:, amount:, combat: false) = super
+    end
+    # A life total changed. CR 119.9: a gain is a life gain event, a loss a life loss event.
+    LifeChanged = define(:life_changed, :player, :from, :to) do
+      def gain = [to - from, 0].max
+      def loss = [from - to, 0].max
+    end
     CountersChanged = define(:counters_changed, :object, :counter, :from, :to)
     EffectStarted = define(:effect_started, :kind, :affected, :details)
     EffectsEnded = define(:effects_ended, :count)
@@ -73,6 +80,9 @@ module Enjine
     TriggerRemoved = define(:trigger_removed, :player, :source, :card, :reason)
     TokenCeased = define(:token_ceased, :object, :card, :zone)
     LibraryReordered = define(:library_reordered, :player, :top, :bottom)
+    # Combat declarations once final (CR 508.3d "whenever [a player] attacks", 509.3c "becomes blocked").
+    AttacksDeclared = define(:attacks_declared, :player, :attackers)
+    BecameBlocked = define(:became_blocked, :object, :blockers)
 
     # A card moved between zones; old_id stops existing and new_id is born (CR 400.7).
     ZoneChanged = define(:zone_changed, :card, :old_id, :new_id, :owner, :from, :to, :reason) do

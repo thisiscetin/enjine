@@ -192,6 +192,48 @@
     },
     {
       "card": {
+        "name": "Data, New Life",
+        "mana_cost": "{1}{U}",
+        "types": [
+          "artifact",
+          "creature"
+        ],
+        "supertypes": [
+          "legendary"
+        ],
+        "subtypes": [
+          "android",
+          "scientist"
+        ],
+        "power": 0,
+        "toughness": 1,
+        "abilities": [
+          {
+            "triggered": {
+              "when": {
+                "draws": {}
+              },
+              "effects": [
+                {
+                  "add_counters": {
+                    "counter": "+1/+1",
+                    "amount": 1,
+                    "to": "self"
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "rarity": "uncommon",
+      "printing": {
+        "set": "trk",
+        "number": "52"
+      }
+    },
+    {
+      "card": {
         "name": "Federation Probe",
         "mana_cost": "{U}",
         "types": [
@@ -297,6 +339,57 @@
     },
     {
       "card": {
+        "name": "Cha'DIch Investigator",
+        "mana_cost": "{4}{B}",
+        "types": [
+          "creature"
+        ],
+        "subtypes": [
+          "klingon",
+          "warrior"
+        ],
+        "power": 4,
+        "toughness": 4,
+        "abilities": [
+          {
+            "triggered": {
+              "when": {
+                "enters": {}
+              },
+              "effects": [
+                {
+                  "create_token": {
+                    "token": {
+                      "name": "Klingon Warrior",
+                      "types": [
+                        "creature"
+                      ],
+                      "subtypes": [
+                        "klingon",
+                        "warrior"
+                      ],
+                      "power": 2,
+                      "toughness": 1,
+                      "keywords": [
+                        "haste"
+                      ]
+                    },
+                    "amount": 1
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "rarity": "common",
+      "printing": {
+        "set": "trk",
+        "number": "97"
+      }
+    },
+    {
+      "card": {
         "name": "Fugitive Listener",
         "mana_cost": "{2}{B}",
         "types": [
@@ -367,6 +460,99 @@
       "printing": {
         "set": "trk",
         "number": "114"
+      }
+    },
+    {
+      "card": {
+        "name": "Tenacious Drone",
+        "mana_cost": "{1}{B}",
+        "types": [
+          "artifact",
+          "creature"
+        ],
+        "subtypes": [
+          "borg"
+        ],
+        "power": 2,
+        "toughness": 1,
+        "abilities": [
+          {
+            "triggered": {
+              "when": {
+                "dies": {}
+              },
+              "effects": [
+                {
+                  "create_token": {
+                    "token": {
+                      "name": "Borg",
+                      "types": [
+                        "artifact",
+                        "creature"
+                      ],
+                      "subtypes": [
+                        "borg"
+                      ],
+                      "power": 1,
+                      "toughness": 1
+                    },
+                    "amount": 1
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "rarity": "common",
+      "printing": {
+        "set": "trk",
+        "number": "133"
+      }
+    },
+    {
+      "card": {
+        "name": "Munitions Enthusiast",
+        "mana_cost": "{1}{R}",
+        "types": [
+          "creature"
+        ],
+        "subtypes": [
+          "klingon",
+          "warrior"
+        ],
+        "keywords": [
+          "trample"
+        ],
+        "power": 3,
+        "toughness": 2,
+        "abilities": [
+          {
+            "triggered": {
+              "when": {
+                "dies": {}
+              },
+              "targets": [
+                "any_target"
+              ],
+              "effects": [
+                {
+                  "deal_damage": {
+                    "amount": 1,
+                    "to": {
+                      "target": 0
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "rarity": "uncommon",
+      "printing": {
+        "set": "trk",
+        "number": "158"
       }
     },
     {
@@ -493,6 +679,62 @@
       "printing": {
         "set": "trk",
         "number": "208"
+      }
+    },
+    {
+      "card": {
+        "name": "Neelix, Moral Support",
+        "mana_cost": "{1}{G}",
+        "types": [
+          "creature"
+        ],
+        "supertypes": [
+          "legendary"
+        ],
+        "subtypes": [
+          "talaxian",
+          "advisor"
+        ],
+        "power": 1,
+        "toughness": 1,
+        "abilities": [
+          {
+            "triggered": {
+              "when": {
+                "enters": {}
+              },
+              "effects": [
+                {
+                  "create_token": {
+                    "token": "Food",
+                    "amount": 1
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "triggered": {
+              "when": {
+                "gains_life": {}
+              },
+              "effects": [
+                {
+                  "add_counters": {
+                    "counter": "+1/+1",
+                    "amount": 1,
+                    "to": "self"
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "rarity": "uncommon",
+      "printing": {
+        "set": "trk",
+        "number": "209"
       }
     },
     {
@@ -1554,7 +1796,6 @@
         "number": "7"
       },
       "missing": [
-        "static ability",
         "triggered ability",
         "tokens",
         "library manipulation",
@@ -1629,9 +1870,8 @@
         "number": "14"
       },
       "missing": [
-        "triggered ability",
-        "counters",
-        "condition (if/unless/as long as)"
+        "condition (if/unless/as long as)",
+        "counters"
       ]
     },
     {
@@ -1644,8 +1884,7 @@
       "missing": [
         "triggered ability",
         "tokens",
-        "variable amount",
-        "counters"
+        "variable amount"
       ]
     },
     {
@@ -1947,7 +2186,6 @@
         "number": "41"
       },
       "missing": [
-        "static ability",
         "triggered ability",
         "tokens",
         "copy"
@@ -1974,8 +2212,6 @@
       },
       "missing": [
         "other rules text",
-        "triggered ability",
-        "tokens",
         "station"
       ]
     },
@@ -2066,18 +2302,6 @@
       },
       "missing": [
         "modal choice"
-      ]
-    },
-    {
-      "name": "Data, New Life",
-      "rarity": "uncommon",
-      "printing": {
-        "set": "trk",
-        "number": "52"
-      },
-      "missing": [
-        "triggered ability",
-        "counters"
       ]
     },
     {
@@ -2609,18 +2833,6 @@
       ]
     },
     {
-      "name": "Cha'DIch Investigator",
-      "rarity": "common",
-      "printing": {
-        "set": "trk",
-        "number": "97"
-      },
-      "missing": [
-        "triggered ability",
-        "tokens"
-      ]
-    },
-    {
       "name": "Collation Trimatrix",
       "rarity": "rare",
       "printing": {
@@ -2983,7 +3195,6 @@
         "number": "129"
       },
       "missing": [
-        "static ability",
         "condition (if/unless/as long as)",
         "counters",
         "graveyard casting"
@@ -3023,18 +3234,6 @@
         "condition (if/unless/as long as)",
         "library manipulation",
         "return to hand"
-      ]
-    },
-    {
-      "name": "Tenacious Drone",
-      "rarity": "common",
-      "printing": {
-        "set": "trk",
-        "number": "133"
-      },
-      "missing": [
-        "triggered ability",
-        "tokens"
       ]
     },
     {
@@ -3084,9 +3283,7 @@
         "number": "137"
       },
       "missing": [
-        "variable amount",
-        "triggered ability",
-        "tokens"
+        "variable amount"
       ]
     },
     {
@@ -3111,7 +3308,6 @@
         "number": "139"
       },
       "missing": [
-        "tokens",
         "other rules text"
       ]
     },
@@ -3346,17 +3542,6 @@
       ]
     },
     {
-      "name": "Munitions Enthusiast",
-      "rarity": "uncommon",
-      "printing": {
-        "set": "trk",
-        "number": "158"
-      },
-      "missing": [
-        "triggered ability"
-      ]
-    },
-    {
       "name": "The Naked Time",
       "rarity": "uncommon",
       "printing": {
@@ -3500,7 +3685,6 @@
         "number": "170"
       },
       "missing": [
-        "static ability",
         "triggered ability",
         "condition (if/unless/as long as)",
         "counters",
@@ -3629,7 +3813,6 @@
         "number": "182"
       },
       "missing": [
-        "tokens",
         "other rules text"
       ]
     },
@@ -3857,8 +4040,6 @@
         "number": "201"
       },
       "missing": [
-        "triggered ability",
-        "tokens",
         "condition (if/unless/as long as)"
       ]
     },
@@ -3933,19 +4114,6 @@
       },
       "missing": [
         "invalid: abilities[0].activated.effects[0].grant.to: required"
-      ]
-    },
-    {
-      "name": "Neelix, Moral Support",
-      "rarity": "uncommon",
-      "printing": {
-        "set": "trk",
-        "number": "209"
-      },
-      "missing": [
-        "triggered ability",
-        "tokens",
-        "counters"
       ]
     },
     {
@@ -4044,7 +4212,6 @@
       },
       "missing": [
         "triggered ability",
-        "library manipulation",
         "exile",
         "counters",
         "graveyard casting"
@@ -4172,9 +4339,8 @@
         "number": "229"
       },
       "missing": [
-        "triggered ability",
-        "tokens",
-        "static ability"
+        "invalid: mana_cost: unsupported mana symbol {R/G}",
+        "invalid: mana_cost: unsupported mana symbol {R/G}"
       ]
     },
     {
@@ -4268,8 +4434,6 @@
         "number": "237"
       },
       "missing": [
-        "triggered ability",
-        "counters",
         "condition (if/unless/as long as)",
         "sacrifice"
       ]
@@ -4387,7 +4551,8 @@
         "number": "246"
       },
       "missing": [
-        "modal choice"
+        "invalid: mana_cost: unsupported mana symbol {U/B}",
+        "invalid: mana_cost: unsupported mana symbol {U/B}"
       ]
     },
     {
@@ -4715,8 +4880,6 @@
         "number": "272"
       },
       "missing": [
-        "triggered ability",
-        "tokens",
         "station",
         "other rules text"
       ]

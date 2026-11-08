@@ -8,12 +8,14 @@ module Enjine
     class DeclareAttackers < Base
       def self.doc
         'Declare one attacker: `{type: "attack", object: id, target: ref}` (the defending player ' \
-          'or one of their planeswalkers), or `{type: "done"}`.'
+          'or one of their planeswalkers), or `{type: "done"}` (withheld while a creature that attacks ' \
+          "each combat if able could still attack, CR 508.1d)."
       end
 
       def self.options(engine, _pending)
         targets = engine.attack_targets
-        [DONE] + engine.eligible_attackers.flat_map { |id| targets.map { { type: "attack", object: id, target: it } } }
+        done = engine.unmet_attack_requirements.empty? ? [DONE] : [] # CR 508.1d
+        done + engine.eligible_attackers.flat_map { |id| targets.map { { type: "attack", object: id, target: it } } }
       end
 
       def self.submit(engine, _pending, option)
@@ -40,7 +42,7 @@ module Enjine
 
       def self.submit(engine, _pending, option)
         case option[:type]
-        when "done" then engine.turn_based_actions_done!
+        when "done" then engine.finish_blockers!
         when "unblock" then engine.remove_blocker!(option[:object])
         else engine.declare_blocker!(option[:object], option[:attacker])
         end
