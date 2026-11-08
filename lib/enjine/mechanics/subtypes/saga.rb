@@ -38,7 +38,7 @@ module Enjine
           freeze
         end
 
-        def event?(event) = event.is_a?(Events::CountersChanged) || event.is_a?(Events::ZoneChanged)
+        def watches?(event) = event.is_a?(Events::CountersChanged) || event.is_a?(Events::ZoneChanged)
         def leaves_battlefield? = false
 
         def match?(engine, event, source)

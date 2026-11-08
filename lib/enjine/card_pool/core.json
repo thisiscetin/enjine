@@ -2307,5 +2307,328 @@
       }
     ],
     "rules_text": "When this creature enters, you gain life equal to the number of differently named lands you control."
+  },
+  {
+    "name": "Dockside Pickpocket",
+    "mana_cost": "{1}{B}",
+    "types": [
+      "creature"
+    ],
+    "power": 2,
+    "toughness": 1,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "deals_damage": {
+              "combat": true,
+              "to": "player"
+            }
+          },
+          "effects": [
+            {
+              "draw": {
+                "amount": 1
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Warhorn Herald",
+    "mana_cost": "{2}{R}",
+    "types": [
+      "creature"
+    ],
+    "power": 2,
+    "toughness": 2,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "player_attacks": {}
+          },
+          "effects": [
+            {
+              "pump": {
+                "power": 1,
+                "toughness": 0,
+                "to": {
+                  "each": {
+                    "creature": {
+                      "attacking": true
+                    }
+                  },
+                  "controller": "you"
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Ambush Bait",
+    "mana_cost": "{1}{G}",
+    "types": [
+      "creature"
+    ],
+    "power": 2,
+    "toughness": 2,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "becomes_blocked": {}
+          },
+          "effects": [
+            {
+              "pump": {
+                "power": 2,
+                "toughness": 2,
+                "to": "self"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Dawnhymn Acolyte",
+    "mana_cost": "{1}{W}",
+    "types": [
+      "creature"
+    ],
+    "power": 1,
+    "toughness": 3,
+    "keywords": [
+      "lifelink"
+    ],
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "gains_life": {}
+          },
+          "effects": [
+            {
+              "add_counters": {
+                "counter": "+1/+1",
+                "amount": 1,
+                "to": "self"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Archive Gremlin",
+    "mana_cost": "{2}{U}",
+    "types": [
+      "creature"
+    ],
+    "power": 1,
+    "toughness": 3,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "draws": {}
+          },
+          "effects": [
+            {
+              "lose_life": {
+                "amount": 1,
+                "to": "each_opponent"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Bloodfeast Imp",
+    "mana_cost": "{1}{B}",
+    "types": [
+      "creature"
+    ],
+    "power": 1,
+    "toughness": 1,
+    "keywords": [
+      "flying"
+    ],
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "loses_life": {
+              "controller": "opponent"
+            }
+          },
+          "effects": [
+            {
+              "gain_life": {
+                "amount": 1
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Carrion Warden",
+    "mana_cost": "{3}{B}",
+    "types": [
+      "creature"
+    ],
+    "power": 2,
+    "toughness": 3,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "dies": {
+              "subject": {
+                "each": "creature",
+                "controller": "you",
+                "other": true
+              }
+            }
+          },
+          "effects": [
+            {
+              "gain_life": {
+                "amount": 2
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Rampaging Brute",
+    "mana_cost": "{2}{R}",
+    "types": [
+      "creature"
+    ],
+    "power": 4,
+    "toughness": 3,
+    "keywords": [
+      "cant_block",
+      "attacks_each_combat"
+    ]
+  },
+  {
+    "name": "Fogveil Stalker",
+    "mana_cost": "{3}{U}",
+    "types": [
+      "creature"
+    ],
+    "power": 2,
+    "toughness": 2,
+    "keywords": [
+      "cant_be_blocked"
+    ]
+  },
+  {
+    "name": "Ridgeline Skirmisher",
+    "mana_cost": "{1}{R}",
+    "types": [
+      "creature"
+    ],
+    "power": 2,
+    "toughness": 1,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "any_of": [
+              {
+                "enters": {}
+              },
+              {
+                "attacks": {}
+              }
+            ]
+          },
+          "effects": [
+            {
+              "deal_damage": {
+                "amount": 1,
+                "to": "each_opponent"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Shadow Passage",
+    "mana_cost": "{U}",
+    "types": [
+      "instant"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "targets": [
+            "creature"
+          ],
+          "effects": [
+            {
+              "grant": {
+                "keywords": [
+                  "cant_be_blocked"
+                ],
+                "to": {
+                  "target": 0
+                }
+              }
+            },
+            {
+              "draw": {
+                "amount": 1
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Cower in Fear",
+    "mana_cost": "{1}{R}",
+    "types": [
+      "sorcery"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "effects": [
+            {
+              "grant": {
+                "keywords": [
+                  "cant_block"
+                ],
+                "to": {
+                  "each": "creature",
+                  "controller": "opponent"
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
   }
 ]

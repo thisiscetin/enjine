@@ -887,8 +887,6 @@
         "number": "3"
       },
       "missing": [
-        "triggered ability",
-        "library manipulation",
         "static ability"
       ]
     },
@@ -970,8 +968,6 @@
         "number": "10"
       },
       "missing": [
-        "triggered ability",
-        "tokens",
         "other rules text"
       ]
     },
@@ -1010,10 +1006,10 @@
       },
       "missing": [
         "layout: class",
-        "triggered ability",
-        "counters",
         "other rules text",
-        "condition (if/unless/as long as)"
+        "triggered ability",
+        "condition (if/unless/as long as)",
+        "counters"
       ]
     },
     {
@@ -1036,9 +1032,7 @@
         "number": "15"
       },
       "missing": [
-        "other rules text",
-        "triggered ability",
-        "counters"
+        "other rules text"
       ]
     },
     {
@@ -1106,7 +1100,6 @@
       },
       "missing": [
         "triggered ability",
-        "tokens",
         "counters"
       ]
     },
@@ -2107,8 +2100,7 @@
         "number": "108"
       },
       "missing": [
-        "triggered ability",
-        "tokens"
+        "triggered ability"
       ]
     },
     {
@@ -2457,8 +2449,7 @@
         "number": "139"
       },
       "missing": [
-        "triggered ability",
-        "tokens"
+        "triggered ability"
       ]
     },
     {
@@ -2546,7 +2537,7 @@
         "number": "146"
       },
       "missing": [
-        "triggered ability"
+        "invalid: mana_cost: unsupported mana symbol {W/B}"
       ]
     },
     {
@@ -2670,8 +2661,7 @@
         "number": "156"
       },
       "missing": [
-        "triggered ability",
-        "tokens"
+        "invalid: mana_cost: unsupported mana symbol {R/W}"
       ]
     },
     {
@@ -2758,7 +2748,6 @@
       },
       "missing": [
         "triggered ability",
-        "tokens",
         "condition (if/unless/as long as)",
         "counters",
         "sacrifice"
@@ -2948,8 +2937,6 @@
         "number": "180"
       },
       "missing": [
-        "triggered ability",
-        "tokens",
         "other rules text"
       ]
     },

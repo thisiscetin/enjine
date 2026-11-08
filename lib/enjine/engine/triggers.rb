@@ -9,6 +9,15 @@ module Enjine
       # being matched (CR 603.10a). Nil otherwise.
       def last_known(id) = @last_known&.[](id)
 
+      # What a permanent looked like as it last existed on the battlefield (CR 603.10a, 608.2h):
+      # controller and current characteristics, so "a creature you control dies" checks the
+      # types it had then, not its printed ones.
+      def last_known_info(obj)
+        current = chars(obj)
+        { "controller" => obj.controller, "card" => obj.card, "types" => current.types,
+          "power" => current.power, "toughness" => current.toughness, "counters" => obj.counters.dup }
+      end
+
       def with_last_known(id, info)
         (@last_known ||= {})[id] = info
         yield
@@ -81,7 +90,7 @@ module Enjine
 
       def queue_trigger(inst, event, source)
         trigger = inst.ability.trigger
-        return unless trigger.event?(event) && trigger.match?(self, event, source)
+        return unless trigger.watches?(event) && trigger.match?(self, event, source)
         return unless inst.ability.condition_met?(self, source["controller"], source["id"]) # CR 603.4
 
         memory = state.objects[source["id"]]&.memory&.[]("cast") ? { "source_cast" => true } : {}

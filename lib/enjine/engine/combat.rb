@@ -16,13 +16,19 @@ module Enjine
       end
 
       # CR 508.1a: untapped creatures you've controlled continuously since your turn began (or with haste).
+      # CR 508.1c: restrictions (defender, "can't attack") are obeyed.
       def eligible_attackers
         state.battlefield.select do |id|
           obj = object(id)
-          obj.controller == state.active && !obj.tapped && chars(obj).creature? && !chars(obj).keyword?(:defender) &&
-            !attackers.key?(id) && !summoning_sick_for_tap?(obj)
+          current = chars(obj)
+          obj.controller == state.active && !obj.tapped && current.creature? && !current.keyword?(:defender) &&
+            !current.keyword?(:cant_attack) && !attackers.key?(id) && !summoning_sick_for_tap?(obj)
         end
       end
+
+      # CR 508.1d: creatures that attack each combat if able and could still be declared. The
+      # declaration may end only once every such requirement is obeyed (no attack has a cost yet).
+      def unmet_attack_requirements = eligible_attackers.select { chars(it).keyword?(:attacks_each_combat) }
 
       # CR 506.3, 508.1b: the defending player or a planeswalker they control.
       def attack_targets
@@ -38,9 +44,11 @@ module Enjine
         eligible_attackers.empty? ? finish_attackers! : nil
       end
 
-      # CR 508.1f: attacking creatures become tapped.
+      # CR 508.1f: attacking creatures become tapped. CR 508.3d: "whenever you attack" triggers
+      # once the declaration is complete, if one or more creatures attack.
       def finish_attackers!
         attackers.each_key { |id| tap!(object(id)) unless chars(id).keyword?(:vigilance) } # CR 702.20b
+        emit Events::AttacksDeclared.new(player: name(state.active), attackers: attackers.keys) unless attackers.empty?
         turn_based_actions_done!
       end
 
@@ -52,10 +60,12 @@ module Enjine
         ask!("kind" => "declare_blockers", "player" => defending_player)
       end
 
+      # CR 509.1a; CR 509.1b: a creature that can't block is never offered.
       def eligible_blockers
         state.battlefield.select do |id|
           obj = object(id)
-          obj.controller == defending_player && !obj.tapped && chars(obj).creature? && !state.blockers.key?(id)
+          obj.controller == defending_player && !obj.tapped && chars(obj).creature? && !state.blockers.key?(id) &&
+            !chars(obj).keyword?(:cant_block)
         end
       end
 
@@ -63,11 +73,20 @@ module Enjine
         state.blockers[id] = attacker
         attackers[attacker]["blocked"] = true # CR 509.1h: stays blocked even if the blocker leaves
         emit Events::BlockerDeclared.new(object: id, attacker: attacker)
-        turn_based_actions_done! if block_options.empty? && blocks_legal?
+        finish_blockers! if block_options.empty? && blocks_legal?
       end
 
-      # CR 509.1b-c restrictions: flying (702.9b) / reach (702.17b).
+      # The declaration is final: each blocked attacker "becomes blocked" once (CR 509.1h, 509.3c, 603.2e).
+      def finish_blockers!
+        attackers.each do |id, info|
+          emit Events::BecameBlocked.new(object: id, blockers: blockers_of(id)) if info["blocked"]
+        end
+        turn_based_actions_done!
+      end
+
+      # CR 509.1b restrictions: "can't be blocked", flying (702.9b) / reach (702.17b).
       def can_block?(blocker, attacker)
+        return false if chars(attacker).keyword?(:cant_be_blocked)
         return true unless chars(attacker).keyword?(:flying)
 
         chars(blocker).keyword?(:flying) || chars(blocker).keyword?(:reach)
@@ -194,7 +213,12 @@ module Enjine
         state.blockers.each do |blocker, attacker|
           hits << [blocker, attacker, power(object(blocker))] if deals_damage_now?(blocker)
         end
-        simultaneous_damage { hits.each { |source, target, amount| deal_damage!(source, target, amount) } } # CR 510.2
+        simultaneous_damage do # CR 510.2
+          dealt = Hash.new(0)
+          lifelinked = hits.map(&:first).uniq.select { damage_source_chars(it)&.keyword?(:lifelink) }
+          hits.each { |source, target, amount| dealt[source] += deal_damage!(source, target, amount, combat: true, lifelink: false) }
+          lifelinked.each { lifelink!(it, dealt[it]) if dealt[it].positive? } # CR 120.3f, 119.9: one gain per source
+        end
         turn_based_actions_done!
       end
 

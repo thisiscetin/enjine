@@ -123,6 +123,8 @@ module SetConverter
         abilities << "enters_tapped"
       elsif (entering = enters_with_line(line))
         abilities << entering
+      elsif (flag = RESTRICTION_LINES[line])
+        keywords << flag
       elsif (static = static_line(line) || cost_line(line) || attachment_line(line))
         abilities << static
       elsif line == "Activate only as a sorcery." && abilities.last.is_a?(Hash) && abilities.last["activated"]
@@ -152,6 +154,11 @@ module SetConverter
     text_x = JSON.generate(abilities).include?('"amount":"x"')
     missing << "variable amount" if text_x && !"#{data["mana_cost"]}#{JSON.generate(abilities)}".include?("{X}")
   end
+
+  # Combat restrictions and requirements printed as their own line (CR 508.1c-d, 509.1b).
+  RESTRICTION_LINES = { "CARDNAME can't block." => "cant_block", "CARDNAME can't attack." => "cant_attack",
+                        "CARDNAME can't be blocked." => "cant_be_blocked",
+                        "CARDNAME attacks each combat if able." => "attacks_each_combat" }.freeze
 
   def keyword_line(line)
     parts = line.split(/,\s*/).map(&:downcase)
@@ -264,6 +271,25 @@ module SetConverter
     m[1].split(", ").map { { "chapter" => { "chapter" => ROMAN.fetch(it) }.merge(body) } }
   end
 
+  # Combat and event triggers (deals combat damage, attacking, blocking, life, draws, dies).
+  YOURS = { "each" => "creature", "controller" => "you" }.freeze
+  COMBAT_TRIGGERS = [
+    [/\AWhenever CARDNAME deals combat damage to a player, (.+)\z/, { "deals_damage" => { "combat" => true, "to" => "player" } }],
+    [/\AWhenever CARDNAME deals combat damage, (.+)\z/, { "deals_damage" => { "combat" => true } }],
+    [/\AWhenever CARDNAME enters or attacks, (.+)\z/, { "any_of" => [{ "enters" => {} }, { "attacks" => {} }] }],
+    [/\AWhenever CARDNAME enters or deals combat damage to a player, (.+)\z/,
+     { "any_of" => [{ "enters" => {} }, { "deals_damage" => { "combat" => true, "to" => "player" } }] }],
+    [/\AWhenever (?:you attack|one or more creatures you control attack), (.+)\z/, { "player_attacks" => {} }],
+    [/\AWhenever CARDNAME becomes blocked, (.+)\z/, { "becomes_blocked" => {} }],
+    [/\AWhenever you gain life, (.+)\z/, { "gains_life" => {} }],
+    [/\AWhenever an opponent loses life, (.+)\z/, { "loses_life" => { "controller" => "opponent" } }],
+    [/\AWhenever you draw a card, (.+)\z/, { "draws" => {} }],
+    [/\AWhenever (?:a creature you control|CARDNAME or another creature you control) dies, (.+)\z/, { "dies" => { "subject" => YOURS } }],
+    [/\AWhenever another creature you control dies, (.+)\z/, { "dies" => { "subject" => YOURS.merge("other" => true) } }],
+    [/\AWhenever a creature dies, (.+)\z/, { "dies" => { "subject" => { "each" => "creature" } } }],
+    [/\AWhenever another creature dies, (.+)\z/, { "dies" => { "subject" => { "each" => "creature", "other" => true } } }]
+  ].freeze
+
   TRIGGERS = [
     [/\AWhen CARDNAME enters, (.+)\z/, { "enters" => {} }],
     [/\AWhen CARDNAME dies, (.+)\z/, { "dies" => {} }],
@@ -278,7 +304,8 @@ module SetConverter
      { "enters" => { "subject" => { "each" => "land", "controller" => "you" } } }],
     [/\AWhenever you cast a noncreature spell, (.+)\z/, { "cast" => { "spell" => "noncreature" } }],
     [/\AWhenever equipped creature attacks, (.+)\z/, { "attacks" => { "subject" => "attached" } }],
-    [/\AWhenever you face a dilemma, (.+)\z/, { "faces_dilemma" => {} }]
+    [/\AWhenever you face a dilemma, (.+)\z/, { "faces_dilemma" => {} }],
+    *COMBAT_TRIGGERS
   ].freeze
 
   def triggered_ability(line)

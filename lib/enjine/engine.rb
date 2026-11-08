@@ -299,10 +299,10 @@ module Enjine
       id = data["object"]
       to = data["to"]
       old = object(id)
+      lki = old.zone == :battlefield ? last_known_info(old) : nil # before it leaves (CR 603.10a)
       state.zone_list(old.zone, old.owner).delete(id)
       state.objects.delete(id)
       fresh = create_object(old.card, old.owner, to)
-      lki = old.zone == :battlefield ? { "controller" => old.controller, "card" => old.card, "counters" => old.counters } : nil
       leave_combat!(id) if old.zone == :battlefield
       arrive!(fresh, old, data)
       list = state.zone_list(to, old.owner)

@@ -40,6 +40,10 @@ Rules version: Comprehensive Rules effective 2026-09-25.
 
 | Name | Rules | Description |
 | --- | --- | --- |
+| [`attacks_each_combat`](docs/reference/keywords.md#attacks_each_combat) | 508.1d | Requirement: this creature attacks each combat if able. Declaring attackers can't finish while it could still attack. |
+| [`cant_attack`](docs/reference/keywords.md#cant_attack) | 508.1c | Restriction: this creature can't attack. |
+| [`cant_be_blocked`](docs/reference/keywords.md#cant_be_blocked) | 509.1b | Restriction: this creature can't be blocked. |
+| [`cant_block`](docs/reference/keywords.md#cant_block) | 509.1b | Restriction: this creature can't block. |
 | [`deathtouch`](docs/reference/keywords.md#deathtouch) | 702.2b, 702.2c, 704.5h | Any damage it deals to a creature is enough to destroy it; 1 damage counts as lethal when assigning combat damage. |
 | [`defender`](docs/reference/keywords.md#defender) | 702.3b | Can't attack. |
 | [`double_strike`](docs/reference/keywords.md#double_strike) | 702.4b, 510.4 | Deals combat damage in both the first-strike and the regular combat damage step. |
@@ -83,11 +87,18 @@ Rules version: Comprehensive Rules effective 2026-09-25.
 
 | Name | Rules | Description |
 | --- | --- | --- |
+| [`any_of`](docs/reference/triggers.md#any_of) | 603.2, 603.2c | Triggers when any of the listed trigger conditions is met. |
 | [`attacks`](docs/reference/triggers.md#attacks) | 508.3a | The subject is declared as an attacker. |
+| [`becomes_blocked`](docs/reference/triggers.md#becomes_blocked) | 509.3c, 509.1h, 603.2e | The subject becomes blocked: once per combat when blockers are declared, even if several creatures block it. |
 | [`cast`](docs/reference/triggers.md#cast) | 603.2, 601.2i | A player casts a spell. `controller`: you (default) | opponent | any; `spell`: optional filter on the spell's card types (e.g. "creature", "noncreature"). |
+| [`deals_damage`](docs/reference/triggers.md#deals_damage) | 510.2, 603.2, 603.2c, 120.3 | The subject deals damage. `combat: true` only counts combat damage; `to`: player | creature | any (default). Triggers once per damage event (each combat damage step is one, so double strike can trigger twice). |
 | [`dies`](docs/reference/triggers.md#dies) | 603.6c, 603.10a, 700.4 | The subject is put into a graveyard from the battlefield. Looks back in time (CR 603.10a). |
+| [`draws`](docs/reference/triggers.md#draws) | 121.1, 121.2 | A player draws a card; triggers once per card (draws happen one at a time). `controller`: you (default) | opponent | any. |
 | [`enters`](docs/reference/triggers.md#enters) | 603.6a, 603.2 | The subject enters the battlefield. |
 | [`faces_dilemma`](docs/reference/triggers.md#faces_dilemma) | 700.17, 700.2, 601.2b, 603.3c | A player faces a dilemma: they chose one or more modes for a spell or ability (cast, activated, or a triggered ability put on the stack). `controller`: you (default) | opponent | any. CR 700.17 of the 2026-11-06 rules. |
+| [`gains_life`](docs/reference/triggers.md#gains_life) | 119.9, 120.3f | A player gains life (once per life gain event; lifelink combat damage is one event per source). `controller`: you (default) | opponent | any. |
+| [`loses_life`](docs/reference/triggers.md#loses_life) | 119.3, 120.3a | A player loses life (damage to a player is life loss, CR 120.3a). `controller`: you (default) | opponent | any. |
+| [`player_attacks`](docs/reference/triggers.md#player_attacks) | 508.3d, 508.1 | A player declares one or more attackers (once per combat, not per creature). `controller`: you (default) | opponent | any. |
 | [`step_begins`](docs/reference/triggers.md#step_begins) | 603.6b, 503.1a, 513.1a | A step begins. `whose`: "your" (default), "each" or "opponent". |
 
 ## Costs
