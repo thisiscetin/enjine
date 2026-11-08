@@ -95,7 +95,9 @@ module Enjine
 
       decider = engine.name(pending["player"])
       view = pending.merge("player" => decider)
-      view["options"] = engine.options.map { it.transform_keys(&:to_s) } if viewer == :observer || viewer == decider
+      return view.except("choices") unless viewer == :observer || viewer == decider # e.g. the cards a search sees
+
+      view["options"] = engine.options.map { it.transform_keys(&:to_s) }
       view
     end
   end

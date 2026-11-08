@@ -1988,5 +1988,104 @@
       }
     ],
     "rules_text": "Enchant creature an opponent controls\nEnchanted creature gets -1/-1."
+  },
+  {
+    "name": "Sandsea Behemoth",
+    "mana_cost": "{5}{G}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "beast"
+    ],
+    "power": 6,
+    "toughness": 5,
+    "abilities": [
+      {
+        "cycling": {
+          "cost": "{2}",
+          "for": {
+            "supertypes": [
+              "basic"
+            ],
+            "types": [
+              "land"
+            ]
+          }
+        }
+      }
+    ]
+  },
+  {
+    "name": "Cinder Gleaner",
+    "mana_cost": "{1}{R}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "goblin"
+    ],
+    "power": 2,
+    "toughness": 1,
+    "abilities": [
+      {
+        "cycling": {
+          "cost": "{1}"
+        }
+      }
+    ]
+  },
+  {
+    "name": "Marsh Stalker",
+    "mana_cost": "{3}{B}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "horror"
+    ],
+    "power": 4,
+    "toughness": 3,
+    "abilities": [
+      {
+        "cycling": {
+          "cost": "{2}",
+          "for": {
+            "subtypes": [
+              "swamp"
+            ]
+          }
+        }
+      }
+    ]
+  },
+  {
+    "name": "Wayfinder Charm",
+    "mana_cost": "{1}{G}",
+    "types": [
+      "sorcery"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "effects": [
+            {
+              "search_library": {
+                "for": {
+                  "supertypes": [
+                    "basic"
+                  ],
+                  "types": [
+                    "land"
+                  ]
+                },
+                "put": "battlefield",
+                "tapped": true
+              }
+            }
+          ]
+        }
+      }
+    ]
   }
 ]

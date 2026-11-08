@@ -91,6 +91,10 @@ module Enjine
         def mana_ability? = false
         def loyalty_cost = nil
 
+        # The zone the ability functions in (CR 113.6): a cost that moves the card out of a zone
+        # (e.g. discarding it from hand) says where it can be activated (CR 113.6m).
+        def zone = costs.find { it.respond_to?(:zone) }&.zone || :battlefield
+
         def effects_text
           return effects.join("; ") unless modal?
 
@@ -157,6 +161,7 @@ module Enjine
           errors << "#{path}.cost: must be a non-empty list" if costs.empty? && errors.none? { it.start_with?("#{path}.cost") }
           raw = Mechanics.fetch_param(params, :cost_reduction)
           reduction = raw && Reduction.build(raw, errors, "#{path}.cost_reduction")
+          check_cost_zones(costs, errors, path)
           body = parse_body(params, errors, path)
           check_mana_ability(body, errors, path)
           new(**body, costs: costs, sorcery: timing == "sorcery", cost_reduction: reduction)
@@ -170,6 +175,14 @@ module Enjine
 
           errors << "#{path}: an activated ability without targets that adds mana is a mana ability (CR 605.1a); " \
                     "use a \"mana\" ability"
+        end
+
+        # CR 113.6m: an ability can't both function from the hand and tap or sacrifice its permanent.
+        def self.check_cost_zones(costs, errors, path)
+          return unless costs.any? { it.respond_to?(:zone) && it.zone == :hand }
+          return unless costs.any? { it.is_a?(Costs::Tap) || it.is_a?(Costs::SacrificeSelf) }
+
+          errors << "#{path}.cost: a cost paid from the hand can't be combined with tap or sacrifice"
         end
 
         attr_reader :cost_reduction

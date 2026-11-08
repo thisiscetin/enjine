@@ -62,6 +62,7 @@ Rules version: Comprehensive Rules effective 2026-09-25.
 | [`activated`](docs/reference/abilities.md#activated) | 602.1, 602.2, 602.5d | An activated ability: announce it, choose targets, pay its costs, then it goes on the stack. `timing: "sorcery"` restricts it to sorcery speed. |
 | [`cost_modifier`](docs/reference/abilities.md#cost_modifier) | 601.2f, 118.7a, 604.1 | While on the battlefield: spells cast by `caster` (you, opponent or any; default you) whose card types match `spells` ({"any_of": [types], "not": [types]}, default all spells) cost `reduce` less or `increase` more generic mana. |
 | [`cost_reduction`](docs/reference/abilities.md#cost_reduction) | 601.2f, 118.7a, 702.41a | This spell costs `amount` generic mana less to cast, if the optional `if` condition holds when its total cost is determined (after targets are chosen). `amount` may be computed, e.g. {"count": {"each": "artifact", "controller": "you"}} for affinity for artifacts (CR 702.41a). It can't reduce colored mana or go below {0}. |
+| [`cycling`](docs/reference/abilities.md#cycling) | 702.29a, 702.29b, 702.29e, 702.29f, 113.6m, 602.2a | Cycling: pay `cost` and discard this card from your hand to draw a card. With `for` it is typecycling: instead search your library for a card matching `for`, reveal it, put it into your hand, then shuffle. |
 | [`double_counters`](docs/reference/abilities.md#double_counters) | 614.1a, 122.6, 122.6a, 616.1 | While this permanent is on the battlefield, if its controller would put one or more counters (only `counter`, if given) on a permanent matching `affects` ({"each": filter, "controller": you|opponent|any}, relative to this permanent's controller), the number put is doubled. This includes counters a permanent enters with. |
 | [`enchant`](docs/reference/abilities.md#enchant) | 702.5a, 115.1b, 303.4a | The Aura's enchant ability: a target filter for what its spell targets and what the Aura may be attached to, e.g. "creature" or {"permanent": {"any_of": ["artifact", "creature"]}}. Only Auras have it. |
 | [`enters_tapped`](docs/reference/abilities.md#enters_tapped) | 614.1c, 614.12 | This permanent enters the battlefield tapped (a self-replacement effect). |
@@ -88,6 +89,7 @@ Rules version: Comprehensive Rules effective 2026-09-25.
 
 | Name | Rules | Description |
 | --- | --- | --- |
+| [`discard_self`](docs/reference/costs.md#discard_self) | 701.9a, 602.2b, 113.6m, 118.3 | Discard the card the ability belongs to (it goes from your hand to your graveyard). An ability with this cost is activated from your hand. |
 | [`mana`](docs/reference/costs.md#mana) | 601.2g, 601.2h, 602.2b | Pay mana as part of an activation. Paid during the activation by spending mana from your pool, tapping sources one at a time. |
 | [`sacrifice`](docs/reference/costs.md#sacrifice) | 701.21a, 602.2b, 118.3 | Sacrifice the permanent the ability belongs to (it goes to its owner's graveyard). |
 | [`tap`](docs/reference/costs.md#tap) | 107.5, 602.5a | {T} — tap the permanent the ability belongs to. Requires it to be untapped. |
@@ -117,6 +119,7 @@ Rules version: Comprehensive Rules effective 2026-09-25.
 | [`return_to_hand`](docs/reference/effects.md#return_to_hand) | 400.6 | Return each referenced permanent to its owner's hand. |
 | [`sacrifice`](docs/reference/effects.md#sacrifice) | 701.21a | The controller sacrifices each referenced permanent they control (it goes to its owner's graveyard; it isn't destroyed, so indestructible doesn't stop it). |
 | [`scry`](docs/reference/effects.md#scry) | 701.22a | Look at the top `amount` cards of your library; put any number on the bottom and the rest on top in any order. |
+| [`search_library`](docs/reference/effects.md#search_library) | 701.23a, 701.23b, 701.23d, 701.23e, 701.20a, 701.24a, 701.24b | Search your library for up to `count` cards matching `for`, then put them into your hand (or onto the battlefield, tapped if `tapped`) and shuffle. With a stated quality you may find fewer (or none); a search for just "a card" must find one if it can. `reveal` shows the found cards to every player. |
 | [`surveil`](docs/reference/effects.md#surveil) | 701.25a | Look at the top `amount` cards of your library; put any number into your graveyard and the rest on top in any order. |
 | [`tap`](docs/reference/effects.md#tap) | 701.26a | Tap each referenced permanent. |
 | [`untap`](docs/reference/effects.md#untap) | 701.26b | Untap each referenced permanent. |

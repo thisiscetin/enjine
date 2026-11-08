@@ -70,7 +70,7 @@ The player holding priority takes an action or passes. Options come from the pri
 
 ## Priority actions
 
-- `activate` — `{type: "activate", object: id, ability: ref}` — start activating an ability (CR 602.2), including planeswalker loyalty abilities (CR 606).
+- `activate` — `{type: "activate", object: id, ability: ref}` — start activating an ability (CR 602.2), including planeswalker loyalty abilities (CR 606) and abilities of cards in your hand (cycling, CR 702.29).
 - `activate_mana` — `{type: "activate_mana", object: id, ability: ref}` — activate a mana ability; it resolves immediately (CR 605.3).
 - `cast` — `{type: "cast", object: id}` — start casting a card from your hand (CR 601.2). Offered only when timing allows, targets exist and enough mana is available.
 - `pass` — `{type: "pass"}` — pass priority. When all players pass in succession with an empty stack, the step ends (CR 117.4).

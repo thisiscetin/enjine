@@ -87,6 +87,33 @@ Rules: CR 601.2f, CR 118.7a, CR 702.41a
 }
 ```
 
+## cycling
+
+Cycling: pay `cost` and discard this card from your hand to draw a card. With `for` it is typecycling: instead search your library for a card matching `for`, reveal it, put it into your hand, then shuffle.
+
+Rules: CR 702.29a, CR 702.29b, CR 702.29e, CR 702.29f, CR 113.6m, CR 602.2a
+
+| Parameter | Description |
+| --- | --- |
+| `cost` | mana cost string, e.g. "{2}" |
+| `for` | optional card spec for typecycling (see search_library) |
+
+```json
+{
+  "cycling": {
+    "cost": "{2}",
+    "for": {
+      "supertypes": [
+        "basic"
+      ],
+      "types": [
+        "land"
+      ]
+    }
+  }
+}
+```
+
 ## double_counters
 
 While this permanent is on the battlefield, if its controller would put one or more counters (only `counter`, if given) on a permanent matching `affects` ({"each": filter, "controller": you|opponent|any}, relative to this permanent's controller), the number put is doubled. This includes counters a permanent enters with.

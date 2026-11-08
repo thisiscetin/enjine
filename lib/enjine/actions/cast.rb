@@ -17,24 +17,27 @@ module Enjine
     end
     register("cast", Cast)
 
-    # CR 602 / 606: activate a non-mana activated or loyalty ability of a permanent you control.
+    # CR 602 / 606: activate a non-mana activated or loyalty ability of a permanent you control,
+    # or an ability that functions from your hand, such as cycling (CR 113.6m, 702.29a).
     class Activate
       def self.doc
         '`{type: "activate", object: id, ability: ref}` — start activating an ability (CR 602.2), ' \
-          "including planeswalker loyalty abilities (CR 606)."
+          "including planeswalker loyalty abilities (CR 606) and abilities of cards in your hand (cycling, CR 702.29)."
       end
 
       def self.options(engine, index)
         out = []
         engine.state.battlefield.each do |id|
-          obj = engine.object(id)
-          next unless obj.controller == index
-
-          engine.chars(obj).activated_abilities.each do |inst|
-            out << { type: "activate", object: id, ability: inst.ref } if engine.activatable?(index, id, inst.ref)
-          end
+          add_options(engine, index, id, out) if engine.object(id).controller == index
         end
+        engine.player(index).hand.each { add_options(engine, index, it, out) } # CR 602.2: the owner activates
         out
+      end
+
+      def self.add_options(engine, index, id, out)
+        engine.chars(id).activated_abilities.each do |inst|
+          out << { type: "activate", object: id, ability: inst.ref } if engine.activatable?(index, id, inst.ref)
+        end
       end
 
       def self.perform(engine, index, option) = engine.begin_activation!(index, option[:object], option[:ability])
