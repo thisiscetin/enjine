@@ -29,12 +29,14 @@ module Enjine
       self
     end
 
+    # Accepts an id ("lightning_bolt") or a display name ("Lightning Bolt"). Ids hit an exact
+    # lookup; only names pay for slugging (Unicode normalization), so the engine's hot path stays cheap.
     def fetch(ref)
-      @definitions.fetch(CardDefinition.slug(ref)) { raise KeyError, "unknown card #{ref.inspect}" }
+      @definitions[ref] || @definitions.fetch(CardDefinition.slug(ref)) { raise KeyError, "unknown card #{ref.inspect}" }
     end
 
-    def [](ref) = @definitions[CardDefinition.slug(ref)]
-    def include?(ref) = @definitions.key?(CardDefinition.slug(ref))
+    def [](ref) = @definitions[ref] || @definitions[CardDefinition.slug(ref)]
+    def include?(ref) = @definitions.key?(ref) || @definitions.key?(CardDefinition.slug(ref))
     def ids = @definitions.keys
     def size = @definitions.size
     def each(&) = @definitions.each_value(&)

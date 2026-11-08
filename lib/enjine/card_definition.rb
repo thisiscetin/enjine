@@ -48,6 +48,7 @@ module Enjine
       errors << "rules_text: must be a string" unless @rules_text.nil? || @rules_text.is_a?(String)
       @abilities = read_abilities(card, errors)
       @type_modules.each { |mod| mod.validate(card, errors) }
+      precompute_predicates
       validate_type_specific(errors)
       @source = normalize(card)
       freeze
@@ -55,21 +56,24 @@ module Enjine
 
     def type?(type) = @types.include?(type.to_sym)
     def supertype?(type) = @supertypes.include?(type.to_sym)
-    def permanent? = @type_modules.any?(&:permanent?)
-    def land? = type?(:land)
-    def deck_limit_exempt? = @supertypes.any? { |s| Enjine.registry.fetch(:supertype, s).deck_limit_exempt? }
-
-    def mana_abilities = @abilities.select(&:mana_ability?)
     def keyword?(keyword) = @keywords.include?(keyword.to_sym)
-    def creature? = type?(:creature)
-    def planeswalker? = type?(:planeswalker)
-    def spell_ability = @abilities.find { it.kind == :spell }
+
+    # Predicates below are computed once at construction: they sit on the engine's hot path.
+    attr_reader :mana_ability_indices, :activated_ability_indices, :spell_ability
+
+    def permanent? = @permanent
+    def land? = @land
+    def creature? = @creature
+    def planeswalker? = @planeswalker
+    def deck_limit_exempt? = @deck_limit_exempt
 
     # Whether this card can be cast at instant speed (CR 304.1, 702.8a).
-    def instant_speed? = @type_modules.any?(&:instant_speed?) || keyword?(:flash)
+    def instant_speed? = @instant_speed
 
     # Lands are played, not cast; a card without a mana cost can't be cast normally (CR 202.1b).
-    def castable? = !land? && !@mana_cost.nil?
+    def castable? = @castable
+
+    def mana_abilities = @mana_ability_indices.map { @abilities[it] }
 
     def type_line
       left = (@supertypes + @types).map { |t| t.to_s.capitalize }.join(" ")
@@ -86,6 +90,19 @@ module Enjine
     def hash = @source.hash
 
     private
+
+    def precompute_predicates
+      @land = @types.include?(:land)
+      @creature = @types.include?(:creature)
+      @planeswalker = @types.include?(:planeswalker)
+      @permanent = @type_modules.any?(&:permanent?)
+      @instant_speed = @type_modules.any?(&:instant_speed?) || @keywords.include?(:flash)
+      @castable = !@land && !@mana_cost.nil?
+      @deck_limit_exempt = @supertypes.any? { Enjine.registry.fetch(:supertype, it).deck_limit_exempt? }
+      @spell_ability = @abilities.find { it.kind == :spell }
+      @mana_ability_indices = @abilities.each_index.select { @abilities[it].mana_ability? }.freeze
+      @activated_ability_indices = @abilities.each_index.select { %i[activated loyalty].include?(@abilities[it].kind) }.freeze
+    end
 
     def validate_type_specific(errors)
       errors << "power/toughness: only creatures have power and toughness" if !creature? && (@power || @toughness)

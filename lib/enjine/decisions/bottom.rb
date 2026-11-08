@@ -7,7 +7,7 @@ module Enjine
     # before the next keep/mulligan declaration.
     class Bottom < Base
       def self.doc
-        'Right after a mulligan, put one card from the new hand on the bottom of the library: ' \
+        "Right after a mulligan, put one card from the new hand on the bottom of the library: " \
           '`{type: "bottom", object: id}`, once per mulligan taken so far, before declaring again. ' \
           "Hidden from the opponent (CR 103.5)."
       end

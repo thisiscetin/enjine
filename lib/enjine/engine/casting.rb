@@ -44,21 +44,42 @@ module Enjine
         return true if cost.nil? || cost.mana_value.zero?
 
         available = player(index).mana_pool.values.sum
-        available += mana_sources(index, excluded_source).size
+        list = all_mana_sources(index)
+        available += excluded_source ? list.count { it[0] != excluded_source } : list.size
         available >= cost.mana_value
       end
 
       def mana_sources(index, excluded_source)
-        state.battlefield.flat_map do |id|
-          next [] if id == excluded_source
+        list = all_mana_sources(index)
+        excluded_source ? list.reject { it[0] == excluded_source } : list
+      end
 
+      # Every activatable mana ability [id, ability_index] the player controls. Memoized only
+      # while legal options are being computed (state can't change then); recomputed otherwise.
+      def all_mana_sources(index)
+        return scan_mana_sources(index) unless @options_memo
+
+        @options_memo[index] ||= scan_mana_sources(index)
+      end
+
+      def scan_mana_sources(index)
+        out = []
+        state.battlefield.each do |id|
           obj = object(id)
-          next [] unless obj.controller == index
+          next unless obj.controller == index
 
-          definition(obj).abilities.each_with_index.filter_map do |ability, i|
-            [id, i] if ability.mana_ability? && ability.activatable?(self, obj)
-          end
+          defn = definition(obj)
+          defn.mana_ability_indices.each { |i| out << [id, i] if defn.abilities[i].activatable?(self, obj) }
         end
+        out
+      end
+
+      # CR 605.3: pay the ability's costs and add its mana immediately. Shared by priority and payment.
+      def activate_mana_ability!(index, id, ability_index)
+        obj = object(id)
+        ability = definition(obj).abilities.fetch(ability_index)
+        ability.costs.each { |cost| cost.pay!(self, obj) }
+        add_mana!(index, ability.produce, id)
       end
 
       def needs_tap?(ability) = ability.costs.any?(Mechanics::Costs::Tap)
@@ -163,11 +184,8 @@ module Enjine
 
       def tap_for_payment!(id, ability_index)
         ctx = state.casting
-        obj = object(id)
-        ability = definition(obj).abilities.fetch(ability_index)
-        ability.costs.each { |cost| cost.pay!(self, obj) }
+        activate_mana_ability!(ctx["player"], id, ability_index)
         ctx["tapped"] << id
-        add_mana!(ctx["player"], ability.produce, id)
         continue_casting!
       end
 

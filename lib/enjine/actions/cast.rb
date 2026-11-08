@@ -25,14 +25,16 @@ module Enjine
       end
 
       def self.options(engine, index)
-        engine.state.battlefield.flat_map do |id|
+        out = []
+        engine.state.battlefield.each do |id|
           obj = engine.object(id)
-          next [] unless obj.controller == index
+          next unless obj.controller == index
 
-          engine.definition(obj).abilities.each_index.filter_map do |i|
-            { type: "activate", object: id, ability: i } if engine.activatable?(index, id, i)
+          engine.definition(obj).activated_ability_indices.each do |i|
+            out << { type: "activate", object: id, ability: i } if engine.activatable?(index, id, i)
           end
         end
+        out
       end
 
       def self.perform(engine, index, option) = engine.begin_activation!(index, option[:object], option[:ability])

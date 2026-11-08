@@ -14,8 +14,8 @@ module Enjine
 
     # What `viewer` (a player name or :observer) may know about this entry.
     def for_viewer(viewer)
-      shown = if option.nil? || viewer == :observer || viewer == player
-                option
+      shown = if option.nil? || viewer == :observer || viewer == player || !Decisions::KINDS.key?(kind)
+                option # concessions (and other non-decision entries) are public
               else
                 Decisions.fetch(kind).redact(option, false)
               end

@@ -348,7 +348,10 @@ module Enjine
     def options
       return [] unless state.pending
 
+      @options_memo = {}
       Decisions.fetch(state.pending["kind"]).options(self, state.pending)
+    ensure
+      @options_memo = nil
     end
 
     def submit!(option)

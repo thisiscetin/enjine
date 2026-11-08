@@ -8,7 +8,7 @@ module Enjine
   #   decision = game.pending_decision   # => Decision(player:, kind:, options:)
   #   game.submit(decision.options.first)
   #
-  # Every call either fully succeeds or raises and leaves the game untouched.
+  # An illegal submission raises and never changes the game; `apply` and `import` are all or nothing.
   class Game
     # The decision the engine is waiting for.
     Decision = Data.define(:player, :kind, :options, :details) do
@@ -29,11 +29,14 @@ module Enjine
       data = snapshot.is_a?(String) ? parse_json(snapshot) : Snapshot.deep_stringify(snapshot)
       raise InvalidSnapshot, ["snapshot must contain \"state\""] unless data.is_a?(Hash) && data["state"]
 
-      state = Snapshot.load(data["state"], catalog)
-      history = Array(data["history"]).map { HistoryEntry.from_h(it) }
+      state, history = load_parts(data, catalog)
       game = new(catalog, state, history)
-      verify_pending!(game)
+      verify_pending!(game) # engine errors here are bugs and propagate unchanged
       game
+    end
+
+    def self.load_parts(data, catalog)
+      [Snapshot.load(data["state"], catalog), Array(data["history"]).map { HistoryEntry.from_h(it) }]
     rescue ArgumentError, KeyError, NoMethodError, TypeError => e
       raise InvalidSnapshot, ["malformed snapshot: #{e.message}"]
     end
@@ -49,9 +52,10 @@ module Enjine
 
       raise InvalidSnapshot, ["pending #{game.state.pending["kind"]} decision has no legal options"]
     end
-    private_class_method :parse_json, :verify_pending!
+    private_class_method :parse_json, :verify_pending!, :load_parts
 
     def initialize(catalog, state, history = [])
+      @version = 0
       @catalog = catalog
       @history = history
       @subscribers = []
@@ -140,6 +144,10 @@ module Enjine
     end
 
     def to_h = { "state" => state.to_h, "history" => @history.map(&:to_h) }
+
+    # An independent copy of this game (state and history) for search or lookahead.
+    # Subscribers are not copied.
+    def fork = Game.new(@catalog, state.fork, @history.dup)
     def export = JSON.generate(to_h)
 
     private
@@ -157,7 +165,7 @@ module Enjine
     end
 
     def transaction
-      saved = Marshal.dump(state)
+      saved = state.fork
       history_size = @history.size
       @in_transaction = true
       yield
@@ -165,7 +173,7 @@ module Enjine
       deliver(@history[history_size..].flat_map(&:events))
     rescue StandardError
       @in_transaction = false
-      @engine.state = Marshal.load(saved) # rubocop:disable Security/MarshalLoad
+      @engine.state = saved
       @version += 1
       @history = @history.first(history_size)
       raise

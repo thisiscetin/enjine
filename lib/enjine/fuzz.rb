@@ -36,7 +36,9 @@ module Enjine
       end
       Result.new(games: games, decisions: totals[:decisions], turns: totals[:turns],
                  outcomes: totals[:outcomes].to_h,
-                 casts: totals[:casts].sort_by { |card, n| [-n, card] }.to_h, seconds: Process.clock_gettime(Process::CLOCK_MONOTONIC) - started)
+                 casts: totals[:casts].sort_by do |card, n|
+                   [-n, card]
+                 end.to_h, seconds: Process.clock_gettime(Process::CLOCK_MONOTONIC) - started)
     end
 
     def play(game, agent, seed, max_decisions, roundtrip_every, invariants)

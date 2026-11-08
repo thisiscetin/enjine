@@ -52,16 +52,26 @@ module Enjine
       # CR 704.5f, 704.5g, 704.5i. All applicable actions happen simultaneously (CR 704.3).
       # Returns true when anything happened, so the check repeats.
       def check_permanent_state_based_actions!
-        doomed = state.battlefield.filter_map do |id|
+        doomed = nil
+        state.battlefield.each do |id|
           obj = object(id)
           defn = definition(obj)
-          if defn.creature? && toughness(obj) <= 0 then [id, "sba_toughness"]
-          elsif defn.creature? && obj.damage.positive? && obj.damage >= toughness(obj) then [id, "sba_lethal_damage"]
-          elsif defn.planeswalker? && loyalty(obj) <= 0 then [id, "sba_loyalty"]
-          end
+          reason = if defn.creature? then creature_sba(obj)
+                   elsif defn.planeswalker? && loyalty(obj) <= 0 then "sba_loyalty"
+                   end
+          (doomed ||= []) << [id, reason] if reason
         end
+        return false unless doomed
+
         doomed.each { |id, reason| move!(id, :graveyard, reason: reason) }
-        !doomed.empty?
+        true
+      end
+
+      def creature_sba(obj)
+        toughness = toughness(obj)
+        if toughness <= 0 then "sba_toughness"
+        elsif obj.damage.positive? && obj.damage >= toughness then "sba_lethal_damage"
+        end
       end
     end
     include Damage

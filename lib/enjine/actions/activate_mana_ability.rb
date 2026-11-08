@@ -10,21 +10,11 @@ module Enjine
       end
 
       def self.options(engine, index)
-        engine.state.battlefield.flat_map do |id|
-          obj = engine.object(id)
-          next [] unless obj.controller == index
-
-          engine.definition(obj).abilities.each_with_index.filter_map do |ability, i|
-            { type: "activate_mana", object: id, ability: i } if ability.mana_ability? && ability.activatable?(engine, obj)
-          end
-        end
+        engine.all_mana_sources(index).map { |id, i| { type: "activate_mana", object: id, ability: i } }
       end
 
       def self.perform(engine, index, option)
-        obj = engine.object(option[:object])
-        ability = engine.definition(obj).abilities.fetch(option[:ability])
-        ability.costs.each { |cost| cost.pay!(engine, obj) }
-        engine.add_mana!(index, ability.produce, obj.id)
+        engine.activate_mana_ability!(index, option[:object], option[:ability])
         engine.action_taken!(index)
       end
     end
