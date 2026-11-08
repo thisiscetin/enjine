@@ -43,6 +43,10 @@ Rules for the agent:
 - **Store the canonical form.** Store `report.valid[i].card` (the output of
   `CardDefinition#to_h`), not your input. It is normalized: mana costs are
   re-rendered and empty fields are dropped.
+- **Record the printing, not a vendor id.** Store the set code and collector
+  number printed on the card (`trk`, `12`). Any card source resolves them
+  (Scryfall `/cards/trk/12`, MTGJSON set + `number`), so images and prices stay
+  one lookup away without tying your data to a single provider.
 - **Version your rows.** Store `rules_version` and `engine_version` from the
   report next to each card. When Enjine gains a mechanic, re-run the unsupported
   table, not the whole database.
@@ -299,14 +303,16 @@ CREATE TABLE enjine_cards (
   id              TEXT PRIMARY KEY,      -- CardDefinition#id, e.g. 'lightning_bolt'
   name            TEXT NOT NULL UNIQUE,
   data            JSONB NOT NULL,        -- CardDefinition#to_h (canonical)
-  source          TEXT,                  -- e.g. 'scryfall:<uuid>'
+  printing_set    TEXT,                  -- set code printed on the card, e.g. 'trk'
+  printing_number TEXT,                  -- collector number printed on the card, e.g. '12'
   rules_version   TEXT NOT NULL,         -- report.rules_version
   engine_version  TEXT NOT NULL,         -- report.engine_version
   updated_at      TIMESTAMPTZ DEFAULT now()
 );
 CREATE TABLE enjine_unsupported (
   name            TEXT PRIMARY KEY,
-  source          TEXT,
+  printing_set    TEXT,
+  printing_number TEXT,
   errors          JSONB NOT NULL,        -- report.invalid[i].errors
   engine_version  TEXT NOT NULL,
   updated_at      TIMESTAMPTZ DEFAULT now()

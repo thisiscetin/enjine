@@ -6,10 +6,14 @@ validation, and is verified in play. Then the README lists `trk` as a
 **verified set**.
 
 Data goes in `lib/enjine/sets/trk.json`. It ships with the gem and isn't loaded
-by default. It contains structured card data plus Scryfall identifiers
-(`scryfall_id`, `oracle_id`, `set`, `collector_number`) so that images and prices
-are one API call away. It does **not** contain oracle text. The legal-until date
-is estimated from the usual rotation pattern and flagged as an estimate.
+by default. It contains structured card data plus each card's **printing
+identifier**: the set code and collector number printed on the card
+(`"printing": {"set": "trk", "number": "12"}`). That identifier belongs to the
+card, not to any database. Scryfall (`/cards/trk/12`), MTGJSON (set + `number`),
+Gatherer and most price sites can all resolve it, so images and prices are one
+lookup away without tying Enjine to a vendor. The file does **not** contain
+oracle text. The legal-until date is estimated from the usual rotation pattern
+and flagged as an estimate.
 
 ## Census: what the cards need
 
@@ -89,10 +93,10 @@ F6 replacement seam). Each phase below ends with `bundle exec rake` and
 ## Pipeline
 
 `script/convert_set` (to be written, run from the repo with network access):
-1. Fetch the set from the Scryfall API (`/cards/search?q=e:trk&unique=cards`).
+1. Fetch the set from a card source (today the Scryfall API, `/cards/search?q=e:trk&unique=cards`; the converter keeps the source behind an adapter).
 2. Map each card to Enjine data. Mechanical fields are mapped automatically, and
    abilities from a hand-maintained translation file:
-   `data/translations/trk.json`, keyed by `oracle_id`.
+   `data/translations/trk.json`, keyed by card name (names are unique across Magic).
 3. Validate with `CardDefinition.from_h`, and write `lib/enjine/sets/trk.json`
    with `cards` (valid) and `unsupported` (name plus the missing capabilities).
 4. The run prints the remaining count; the target is 0 unsupported.
