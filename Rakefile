@@ -22,11 +22,17 @@ task :fuzz, %i[games seed] do |_, args|
   seed = Integer(args[:seed] || 0)
   rng = Enjine::Rng.from_seed(seed)
   cards = Enjine::CardPool::Core.cards
-  players = %w[p1 p2].map { Enjine::Player.new(name: it, deck: Enjine::CardPool::DeckBuilder.random(cards, rng: rng)) }
+  decks = Enjine::CardPool::Core.deck_names
+  # Even seeds pit two sample decks against each other; odd seeds use random pool decks.
+  players = %w[p1 p2].map do |name|
+    deck = seed.even? ? Enjine::CardPool::Core.deck(decks[rng.rand(decks.size)]) : Enjine::CardPool::DeckBuilder.random(cards, rng: rng)
+    Enjine::Player.new(name: name, deck: deck)
+  end
   result = Enjine::Fuzz.run(Enjine::Setup.new(*players), games: games, seed: seed, roundtrip_every: 251)
   puts format("%<g>d games, %<d>d decisions, %<s>.2fs (%<r>.0f decisions/s) outcomes=%<o>s",
               g: result.games, d: result.decisions, s: result.seconds, r: result.decisions / result.seconds,
               o: result.outcomes)
+  puts "casts/activations by card: #{result.casts}"
 end
 
 desc "Benchmark random games per second (not a CI gate)"

@@ -16,17 +16,18 @@ module Enjine
       end
     end
 
-    Result = Data.define(:games, :decisions, :turns, :outcomes, :seconds)
+    Result = Data.define(:games, :decisions, :turns, :outcomes, :casts, :seconds)
 
     module_function
 
     # roundtrip_every: export+import and compare every N decisions (0 disables).
     def run(setup, games:, seed: 0, max_decisions: 20_000, roundtrip_every: 0, invariants: true)
       started = Process.clock_gettime(Process::CLOCK_MONOTONIC)
-      totals = { decisions: 0, turns: 0, outcomes: Hash.new(0) }
+      totals = { decisions: 0, turns: 0, outcomes: Hash.new(0), casts: Hash.new(0) }
       games.times do |i|
         game_seed = seed + i
         game = setup.new_game(seed: game_seed)
+        game.subscribe { |e| totals[:casts][e.card] += 1 if e.is_a?(Events::SpellCast) || e.is_a?(Events::AbilityActivated) }
         decisions = play(game, Agents::Random.new(seed: game_seed), game_seed, max_decisions, roundtrip_every,
                          invariants)
         totals[:decisions] += decisions
@@ -34,7 +35,8 @@ module Enjine
         totals[:outcomes][game.result["reason"]] += 1
       end
       Result.new(games: games, decisions: totals[:decisions], turns: totals[:turns],
-                 outcomes: totals[:outcomes].to_h, seconds: Process.clock_gettime(Process::CLOCK_MONOTONIC) - started)
+                 outcomes: totals[:outcomes].to_h,
+                 casts: totals[:casts].sort_by { |card, n| [-n, card] }.to_h, seconds: Process.clock_gettime(Process::CLOCK_MONOTONIC) - started)
     end
 
     def play(game, agent, seed, max_decisions, roundtrip_every, invariants)

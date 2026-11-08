@@ -9,6 +9,24 @@ description and a suggested milestone. This is a planning document; it is not
 generated, and it does not claim anything is implemented (see `SUPPORTED.md`
 for that).
 
+## Priority: Standard first
+
+The project builds mechanics in this order:
+
+1. **Evergreen mechanics.** These are on cards in every Standard set: the ★ keywords
+   (flying, first strike, deathtouch, trample, lifelink, vigilance, reach, menace,
+   ward, hexproof, indestructible, defender, double strike), triggered abilities,
+   static abilities and layers, replacement effects, tokens, auras and equipment,
+   sacrifice, scry/surveil, mill, and X costs.
+2. **Mechanics on cards currently legal in Standard.** Check a set's mechanics
+   against the current Standard rotation before scheduling it.
+3. **Mechanics that exist only on cards no longer in Standard.** These are
+   low priority. They stay in this checklist for completeness, but they aren't
+   scheduled.
+
+The ★ marks below are about how common a mechanic is. Within each milestone,
+build ★ items that appear in current Standard first.
+
 ## Sources
 
 All rule numbers and wording below were checked against the **plain-text** CR,

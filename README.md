@@ -30,7 +30,7 @@ simulations, bots and reinforcement learning, or for a game client.
 ## Try it: play both sides in your terminal
 
 ```sh
-git clone https://github.com/<you>/enjine && cd enjine
+git clone https://github.com/thisiscetin/enjine && cd enjine
 bundle install
 bundle exec exe/enjine                     # hot-seat: you play both players
 bundle exec exe/enjine --list-decks        # sample decks

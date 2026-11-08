@@ -71,6 +71,9 @@ module Enjine
       resolve_mulligan_round!
     end
 
+    # CR 103.5: all declared mulligans happen at the same time. Taking a mulligan is:
+    # shuffle the hand away, draw a new hand, then put N cards (N = mulligans taken so
+    # far) on the bottom. Only then does the next round of declarations start.
     def resolve_mulligan_round!
       turn_order.each do |i|
         pl = player(i)
@@ -82,10 +85,7 @@ module Enjine
         end
         pl.mulligan_choice = nil
       end
-      next_player = turn_order.find { |i| !player(i).kept }
-      return ask!("kind" => "mulligan", "player" => next_player) if next_player
-
-      next_bottom_or_start!
+      next_bottom_or_declaration!
     end
 
     def take_mulligan!(index)
@@ -97,21 +97,23 @@ module Enjine
       emit Events::MulliganTaken.new(player: pl.name, mulligans: pl.mulligans)
     end
 
-    # After keeping, each player who mulliganed N times puts N cards on the bottom.
-    def next_bottom_or_start!
+    # Bottoms owed from this round's mulligans (in turn order), then the next round of
+    # declarations, then the first turn.
+    def next_bottom_or_declaration!
       index = turn_order.find { |i| bottom_remaining(i).positive? }
-      if index
-        ask!("kind" => "bottom", "player" => index, "count" => bottom_remaining(index))
-      else
-        ask!(nil)
-        begin_turn!(state.starting_player)
-        advance!
-      end
+      return ask!("kind" => "bottom", "player" => index, "count" => bottom_remaining(index)) if index
+
+      next_player = turn_order.find { |i| !player(i).kept }
+      return ask!("kind" => "mulligan", "player" => next_player) if next_player
+
+      ask!(nil)
+      begin_turn!(state.starting_player)
+      advance!
     end
 
     def bottom_remaining(index)
       pl = player(index)
-      pl.kept ? pl.mulligans - (HAND_SIZE - pl.hand.size) : 0
+      [pl.hand.size - (HAND_SIZE - pl.mulligans), 0].max
     end
 
     # ---- turn structure (CR 500) --------------------------------------------
