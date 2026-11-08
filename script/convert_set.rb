@@ -91,8 +91,12 @@ module SetConverter
         unknown.empty? ? keywords.concat(kw) : missing.concat(unknown.map { "keyword: #{it}" })
       elsif (triggered = triggered_ability(line))
         abilities << triggered
+      elsif line.match?(/\ACARDNAME enters tapped\.\z/)
+        abilities << "enters_tapped"
+      elsif line == "Activate only as a sorcery." && abilities.last.is_a?(Hash) && abilities.last["activated"]
+        abilities.last["activated"]["timing"] = "sorcery"
       elsif (mana = mana_ability(line))
-        abilities << mana
+        abilities.concat(mana)
       elsif data["types"].intersect?(%w[instant sorcery])
         effects, targets = sentence_effects(line, spell_targets.size)
         effects ? (spell_effects.concat(effects) && spell_targets.concat(targets)) : missing.concat(classify(line))
@@ -144,17 +148,26 @@ module SetConverter
     nil
   end
 
+  # "{T}: Add {G}." / "{T}: Add {W} or {U}." / "{T}: Add one mana of any color." Choices between
+  # kinds of mana become one mana ability per kind: the same decisions, no new rules.
   def mana_ability(line)
-    m = /\A\{T\}: Add ((?:\{[WUBRGC]\})+)\.\z/.match(line) or return nil
-    { "mana" => { "cost" => ["tap"], "produce" => m[1] } }
+    m = /\A\{T\}: Add (.+)\.\z/.match(line) or return nil
+    produced = case m[1]
+               when /\A(?:\{[WUBRGC]\})+\z/ then [m[1]]
+               when /\A(\{[WUBRGC]\})(?:, (\{[WUBRGC]\}))*,? or (\{[WUBRGC]\})\z/ then m[1].scan(/\{[WUBRGC]\}/)
+               when "one mana of any color" then %w[{W} {U} {B} {R} {G}]
+               else return nil
+               end
+    produced.map { { "mana" => { "cost" => ["tap"], "produce" => it } } }
   end
 
   # "{2}, {T}: CARDNAME deals 1 damage to any target." and similar.
   def activated_ability(line)
-    m = /\A((?:\{[^}]+\}(?:, )?)+): (.+)\z/.match(line) or return nil
+    m = /\A((?:(?:\{[^}]+\}|Sacrifice CARDNAME)(?:, )?)+): (.+)\z/.match(line) or return nil
     costs = m[1].split(", ").map do |cost|
       case cost
       when "{T}" then "tap"
+      when "Sacrifice CARDNAME" then "sacrifice"
       when /\A(\{[0-9WUBRGC]\})+\z/ then { "mana" => cost }
       else return nil
       end

@@ -86,6 +86,68 @@
     },
     {
       "card": {
+        "name": "Xenobotanist",
+        "mana_cost": "{1}{G}",
+        "types": [
+          "creature"
+        ],
+        "subtypes": [
+          "vulcan",
+          "scientist"
+        ],
+        "power": 1,
+        "toughness": 3,
+        "abilities": [
+          {
+            "mana": {
+              "cost": [
+                "tap"
+              ],
+              "produce": "{W}"
+            }
+          },
+          {
+            "mana": {
+              "cost": [
+                "tap"
+              ],
+              "produce": "{U}"
+            }
+          },
+          {
+            "mana": {
+              "cost": [
+                "tap"
+              ],
+              "produce": "{B}"
+            }
+          },
+          {
+            "mana": {
+              "cost": [
+                "tap"
+              ],
+              "produce": "{R}"
+            }
+          },
+          {
+            "mana": {
+              "cost": [
+                "tap"
+              ],
+              "produce": "{G}"
+            }
+          }
+        ]
+      },
+      "rarity": "common",
+      "printing": {
+        "set": "trk",
+        "number": "224"
+      }
+    },
+    {
+      "card": {
         "name": "Xindi Surveyors",
         "mana_cost": "{2}{G}",
         "types": [
@@ -3057,17 +3119,6 @@
       ]
     },
     {
-      "name": "Xenobotanist",
-      "rarity": "common",
-      "printing": {
-        "set": "trk",
-        "number": "224"
-      },
-      "missing": [
-        "other rules text"
-      ]
-    },
-    {
       "name": "All Good Things...",
       "rarity": "rare",
       "printing": {
@@ -3508,8 +3559,8 @@
         "number": "259"
       },
       "missing": [
-        "other rules text",
-        "station"
+        "station",
+        "other rules text"
       ]
     },
     {

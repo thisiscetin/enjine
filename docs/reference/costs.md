@@ -18,6 +18,16 @@ Rules: CR 601.2g, CR 601.2h, CR 602.2b
 }
 ```
 
+## sacrifice
+
+Sacrifice the permanent the ability belongs to (it goes to its owner's graveyard).
+
+Rules: CR 701.21a, CR 602.2b, CR 118.3
+
+```json
+"sacrifice"
+```
+
 ## tap
 
 {T} — tap the permanent the ability belongs to. Requires it to be untapped.

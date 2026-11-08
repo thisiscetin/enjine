@@ -72,12 +72,12 @@ RSpec.describe Enjine::CardDefinition do
 
   it "rejects unknown costs and parameters inside abilities" do
     errors = errors_for("name" => "X", "types" => ["land"],
-                        "abilities" => [{ "mana" => { "cost" => ["sacrifice", { "tap" => { "x" => 1 } }],
+                        "abilities" => [{ "mana" => { "cost" => ["pay_with_wishes", { "tap" => { "x" => 1 } }],
                                                       "produce" => "{G}", "extra" => true } },
                                         { "mana" => "bad" }])
     expect(errors).to include(
       a_string_matching(/abilities\[0\]\.mana: unknown parameter "extra"/),
-      a_string_matching(/abilities\[0\]\.mana\.cost\[0\]: unknown cost "sacrifice"/),
+      a_string_matching(/abilities\[0\]\.mana\.cost\[0\]: unknown cost "pay_with_wishes"/),
       a_string_matching(/abilities\[0\]\.mana\.cost\[1\]\.tap: unknown parameter "x"/),
       a_string_matching(/abilities\[1\]\.mana: parameters must be an object/)
     )

@@ -28,6 +28,10 @@ module Enjine
     # CR 614.12-style status the permanent enters with, from its card types.
     def entering!(engine, proposal)
       obj = engine.object(proposal.data["object"])
+      # Self-replacement effects of the entering permanent (CR 614.12: as it would exist on the battlefield).
+      engine.definition(obj).ability_instances.each do |inst|
+        inst.ability.modify_entering(proposal.data["enters"]) if inst.ability.respond_to?(:modify_entering)
+      end
       engine.chars(obj).types.each do |type|
         mod = Enjine.registry.fetch(:type, type)
         mod.entering(engine.definition(obj), proposal.data["enters"]) if mod.respond_to?(:entering)

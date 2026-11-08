@@ -53,6 +53,62 @@
     },
     {
       "card": {
+        "name": "Anchovy & Banana Pizza",
+        "mana_cost": "{2}{B}{B}",
+        "types": [
+          "artifact"
+        ],
+        "subtypes": [
+          "food"
+        ],
+        "abilities": [
+          {
+            "triggered": {
+              "when": {
+                "enters": {}
+              },
+              "targets": [
+                "creature"
+              ],
+              "effects": [
+                {
+                  "destroy": {
+                    "to": {
+                      "target": 0
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "activated": {
+              "cost": [
+                {
+                  "mana": "{2}"
+                },
+                "tap",
+                "sacrifice"
+              ],
+              "effects": [
+                {
+                  "gain_life": {
+                    "amount": 3
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "rarity": "common",
+      "printing": {
+        "set": "tmt",
+        "number": "57"
+      }
+    },
+    {
+      "card": {
         "name": "Squirrelanoids",
         "mana_cost": "{B}",
         "types": [
@@ -863,8 +919,7 @@
       },
       "missing": [
         "triggered ability",
-        "tap/untap effect",
-        "sacrifice"
+        "tap/untap effect"
       ]
     },
     {
@@ -903,17 +958,6 @@
         "triggered ability",
         "tap/untap effect",
         "counters"
-      ]
-    },
-    {
-      "name": "Anchovy & Banana Pizza",
-      "rarity": "common",
-      "printing": {
-        "set": "tmt",
-        "number": "57"
-      },
-      "missing": [
-        "sacrifice"
       ]
     },
     {
@@ -1548,8 +1592,7 @@
         "number": "109"
       },
       "missing": [
-        "triggered ability",
-        "sacrifice"
+        "triggered ability"
       ]
     },
     {
@@ -1631,8 +1674,7 @@
         "number": "116"
       },
       "missing": [
-        "triggered ability",
-        "sacrifice"
+        "triggered ability"
       ]
     },
     {

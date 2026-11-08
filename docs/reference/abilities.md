@@ -38,6 +38,16 @@ Rules: CR 602.1, CR 602.2, CR 602.5d
 }
 ```
 
+## enters_tapped
+
+This permanent enters the battlefield tapped (a self-replacement effect).
+
+Rules: CR 614.1c, CR 614.12
+
+```json
+"enters_tapped"
+```
+
 ## loyalty
 
 A loyalty ability. Its cost adds (positive) or removes (negative) loyalty counters and is paid on activation. Sorcery speed, and only one loyalty ability per planeswalker per turn.
