@@ -324,6 +324,36 @@ Rules: CR 701.22a
 }
 ```
 
+## search_library
+
+Search your library for up to `count` cards matching `for`, then put them into your hand (or onto the battlefield, tapped if `tapped`) and shuffle. With a stated quality you may find fewer (or none); a search for just "a card" must find one if it can. `reveal` shows the found cards to every player.
+
+Rules: CR 701.23a, CR 701.23b, CR 701.23d, CR 701.23e, CR 701.20a, CR 701.24a, CR 701.24b
+
+| Parameter | Description |
+| --- | --- |
+| `for` | card spec: "card" (default), {"types"|"subtypes"|"supertypes": [...], "name": "..."} or {"any_of": [spec, ...]} |
+| `count` | integer (default 1) or "any" (any number) |
+| `put` | "hand" (default) or "battlefield" |
+| `tapped` | true: the cards enter tapped (with put: battlefield) |
+| `reveal` | true: reveal the found cards |
+
+```json
+{
+  "search_library": {
+    "for": {
+      "supertypes": [
+        "basic"
+      ],
+      "types": [
+        "land"
+      ]
+    },
+    "reveal": true
+  }
+}
+```
+
 ## surveil
 
 Look at the top `amount` cards of your library; put any number into your graveyard and the rest on top in any order.

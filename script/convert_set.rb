@@ -99,7 +99,9 @@ module SetConverter
     spell_modes = []
     text = fold_modes(text)
     text.split("\n").map(&:strip).reject(&:empty?).each do |line|
-      if (kw = keyword_line(line))
+      if (cycling = cycling_line(line))
+        abilities << cycling
+      elsif (kw = keyword_line(line))
         unknown = kw - SUPPORTED_KEYWORDS.to_a
         unknown.empty? ? keywords.concat(kw) : missing.concat(unknown.map { "keyword: #{it}" })
       elsif (modal = modal_line(line, data))
@@ -127,6 +129,7 @@ module SetConverter
         missing.concat(classify(line))
       end
     end
+    abilities = name_self(abilities, source["name"])
     data["keywords"] = keywords.uniq unless keywords.empty?
     abilities.unshift({ "spell" => { "choose" => spell_modes.first, "modes" => spell_modes.drop(1) } }) unless spell_modes.empty?
     unless spell_effects.empty?
@@ -144,6 +147,68 @@ module SetConverter
     end
       parts
     end
+  end
+
+  # "Cycling {2}", "Basic landcycling {2}", "Swampcycling {2}", "Landcycling {2}" (CR 702.29a, 702.29e).
+  def cycling_line(line)
+    m = /\A(?:(Basic land|Land|[A-Z][a-z]+)c|C)ycling ((?:\{[0-9WUBRGC]\})+)\z/.match(line) or return nil
+    ability = { "cost" => m[2] }
+    ability["for"] = card_spec(m[1].downcase) if m[1]
+    { "cycling" => ability }
+  end
+
+  CARD_TYPES = Enjine.registry.names(:type).to_set.freeze
+
+  # "basic land" -> {"supertypes": ["basic"], "types": ["land"]}; "Swamp" -> {"subtypes": ["swamp"]};
+  # "Type, Type, or Type" / "basic land card or Type" -> {"any_of": [...]}.
+  def card_spec(phrase)
+    parts = phrase.split(/,? or |, /).map { it.delete_suffix(" card").strip }
+    return { "any_of" => parts.map { card_spec(it) } } if parts.size > 1
+
+    spec = Hash.new { |h, k| h[k] = [] }
+    phrase.split.each do |word|
+      word = word.downcase
+      key = if word == "basic" then "supertypes"
+            elsif CARD_TYPES.include?(word) then "types"
+            else "subtypes"
+            end
+      spec[key] << word
+    end
+    spec.to_h
+  end
+
+  SEARCH = /
+    \A(You\ may\ search|Search)\ your\ library\ for\ (a|an|up\ to\ (?:two|three|\d+)|any\ number\ of)\ (.+?),
+    \ (reveal\ (?:it|them|that\ card),\ )?put\ (?:it|them|that\ card)\ (into\ your\ hand|onto\ the\ battlefield(?:\ tapped)?),
+    \ then\ shuffle\z
+  /x
+
+  # "Search your library for a basic land card, reveal it, put it into your hand, then shuffle" (CR 701.23).
+  def search_effect(match)
+    optional, count, what, reveal, put = match.captures
+    count = case count
+            when "a", "an" then 1
+            when "any number of" then "any"
+            else number(count.delete_prefix("up to "))
+            end
+    spec = if what.match?(/\Acards?\z/) then "card"
+           elsif (name = what[/\Acards? named (.+)\z/, 1]) then { "name" => name }
+           elsif what.match?(/ cards?\z/) then card_spec(what.sub(/ cards?\z/, ""))
+           else return nil
+           end
+    return nil if spec == "card" && optional.start_with?("You may") # an optional search for any card: no data form yet
+
+    effect = { "for" => spec }
+    effect["count"] = count unless count == 1
+    effect["reveal"] = true if reveal
+    effect["put"] = "battlefield" if put.start_with?("onto")
+    effect["tapped"] = true if put.end_with?("tapped")
+    { "search_library" => effect }
+  end
+
+  # A search for cards with the card's own name: the text uses CARDNAME for it.
+  def name_self(abilities, name)
+    JSON.parse(JSON.generate(abilities).gsub('"name":"CARDNAME"', "\"name\":#{JSON.generate(name)}"))
   end
 
   TRIGGERS = [
@@ -204,8 +269,8 @@ module SetConverter
   SUBJECTS = { "creatures" => "creature", "artifact creatures" => "creature", "lands" => "land", "artifacts" => "artifact" }.freeze
 
   STATIC_LINE = %r{
-    \A(Other\ )?(creatures|artifact\ creatures|artifacts)\ you\ control\
-    (?:get\ ([+-]\d+)/([+-]\d+)(?:\ and\ have\ ([a-z,\ ]+))?|have\ ([a-z,\ ]+))\.\z
+    \A(Other\ )?(creatures|artifact\ creatures|artifacts)\ you\ control
+    \ (?:get\ ([+-]\d+)/([+-]\d+)(?:\ and\ have\ ([a-z,\ ]+))?|have\ ([a-z,\ ]+))\.\z
   }x
 
   # "Other creatures you control get +1/+1." / "Creatures you control have vigilance."
@@ -354,6 +419,7 @@ module SetConverter
                             "tapped" => !::Regexp.last_match(2).nil? }.reject { |k, v| k == "tapped" && !v } }
     when CREATURE_TOKEN
       creature_token(::Regexp.last_match)
+    when SEARCH then search_effect(::Regexp.last_match)
     when %r{\APut (a|one|two|three|\d+) \+1/\+1 counters? on CARDNAME\z}
       { "add_counters" => { "counter" => "+1/+1", "amount" => number(::Regexp.last_match(1)), "to" => "self" } }
     when /\ACARDNAME deals (\d+) damage to each opponent\z/

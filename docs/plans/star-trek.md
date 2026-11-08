@@ -40,7 +40,7 @@ A pattern census over the oracle text (fetched from the Scryfall API on
 | discard | 20 | todo |
 | bounce | 17 | todo |
 | **Station** (set mechanic) | 17 | todo |
-| search library | 16 | todo |
+| search library | 16 | partial (`search_library`: hand or battlefield, tapped, reveal, count) |
 | mana of any color / choices | 15 | todo (F10) |
 | dies / leaves triggers (last-known information) | 13 | todo (F5) |
 | **Strange new worlds** (set mechanic) | 13 | todo |
@@ -50,7 +50,7 @@ A pattern census over the oracle text (fetched from the Scryfall API on
 | flying, menace, trample, vigilance, reach, lifelink, first strike, double strike, deathtouch, defender, ward | 1–9 each | todo (F11) |
 | landfall | 9 | todo (F5) |
 | **Face a dilemma** (set mechanic) | 8 | todo |
-| cycling, landcycling, typecycling | 5 each | todo |
+| cycling, landcycling, typecycling | 5 each | done (`cycling`, CR 702.29) |
 | kicker, affinity, threshold, sunburst, explore, discover, fight, mill, investigate | 1–6 each | todo |
 | **Assimilate** (set mechanic, CR 701.72 in the 2026-11-06 CR) | 2 | todo |
 | one-off named abilities (flavor-named activated/triggered abilities) | ~40 | covered by the general ability system |

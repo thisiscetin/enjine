@@ -57,6 +57,7 @@ Rules version: Comprehensive Rules effective 2026-09-25.
 | Name | Rules | Description |
 | --- | --- | --- |
 | [`activated`](docs/reference/abilities.md#activated) | 602.1, 602.2, 602.5d | An activated ability: announce it, choose targets, pay its costs, then it goes on the stack. `timing: "sorcery"` restricts it to sorcery speed. |
+| [`cycling`](docs/reference/abilities.md#cycling) | 702.29a, 702.29b, 702.29e, 702.29f, 113.6m, 602.2a | Cycling: pay `cost` and discard this card from your hand to draw a card. With `for` it is typecycling: instead search your library for a card matching `for`, reveal it, put it into your hand, then shuffle. |
 | [`enters_tapped`](docs/reference/abilities.md#enters_tapped) | 614.1c, 614.12 | This permanent enters the battlefield tapped (a self-replacement effect). |
 | [`enters_tapped_unless_pay_life`](docs/reference/abilities.md#enters_tapped_unless_pay_life) | 614.12, 119.4 | As this permanent enters, its controller may pay `life` life; if they don't, it enters tapped. You can't pay more life than you have. |
 | [`loyalty`](docs/reference/abilities.md#loyalty) | 606.3, 606.4, 606.5, 602.2b | A loyalty ability. Its cost adds (positive) or removes (negative) loyalty counters and is paid on activation. Sorcery speed, and only one loyalty ability per planeswalker per turn. |
@@ -79,6 +80,7 @@ Rules version: Comprehensive Rules effective 2026-09-25.
 
 | Name | Rules | Description |
 | --- | --- | --- |
+| [`discard_self`](docs/reference/costs.md#discard_self) | 701.9a, 602.2b, 113.6m, 118.3 | Discard the card the ability belongs to (it goes from your hand to your graveyard). An ability with this cost is activated from your hand. |
 | [`mana`](docs/reference/costs.md#mana) | 601.2g, 601.2h, 602.2b | Pay mana as part of an activation. Paid during the activation by spending mana from your pool, tapping sources one at a time. |
 | [`sacrifice`](docs/reference/costs.md#sacrifice) | 701.21a, 602.2b, 118.3 | Sacrifice the permanent the ability belongs to (it goes to its owner's graveyard). |
 | [`tap`](docs/reference/costs.md#tap) | 107.5, 602.5a | {T} — tap the permanent the ability belongs to. Requires it to be untapped. |
@@ -102,6 +104,7 @@ Rules version: Comprehensive Rules effective 2026-09-25.
 | [`pump`](docs/reference/effects.md#pump) | 611.2a, 611.2c, 613.4c, 514.2 | Each referenced creature gets +power/+toughness until end of turn. The set of affected creatures is locked in when the effect starts. |
 | [`return_to_hand`](docs/reference/effects.md#return_to_hand) | 400.6 | Return each referenced permanent to its owner's hand. |
 | [`scry`](docs/reference/effects.md#scry) | 701.22a | Look at the top `amount` cards of your library; put any number on the bottom and the rest on top in any order. |
+| [`search_library`](docs/reference/effects.md#search_library) | 701.23a, 701.23b, 701.23d, 701.23e, 701.20a, 701.24a, 701.24b | Search your library for up to `count` cards matching `for`, then put them into your hand (or onto the battlefield, tapped if `tapped`) and shuffle. With a stated quality you may find fewer (or none); a search for just "a card" must find one if it can. `reveal` shows the found cards to every player. |
 | [`surveil`](docs/reference/effects.md#surveil) | 701.25a | Look at the top `amount` cards of your library; put any number into your graveyard and the rest on top in any order. |
 | [`tap`](docs/reference/effects.md#tap) | 701.26a | Tap each referenced permanent. |
 | [`untap`](docs/reference/effects.md#untap) | 701.26b | Untap each referenced permanent. |

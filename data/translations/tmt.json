@@ -1,0 +1,18 @@
+{
+  "Jennika, Bad Apple Big Sister": {
+    "abilities": [
+      { "triggered": { "when": { "enters": {} }, "effects": [
+        { "create_token": { "token": { "name": "Mutant", "types": ["creature"], "subtypes": ["mutant"],
+                                       "power": 2, "toughness": 2 } } } ] } },
+      { "cycling": { "cost": "{2}", "for": { "subtypes": ["plains"] } } }
+    ]
+  },
+  "Stockman, Mad Fly-entist": {
+    "keywords": ["flying"],
+    "abilities": [
+      { "triggered": { "when": { "enters": {} }, "effects": [
+        { "draw": { "amount": 1 } }, { "discard": { "amount": 1 } } ] } },
+      { "cycling": { "cost": "{2}", "for": { "subtypes": ["island"] } } }
+    ]
+  }
+}

@@ -12,6 +12,46 @@
   "cards": [
     {
       "card": {
+        "name": "Andromedan Automatons",
+        "mana_cost": "{2}{W}",
+        "types": [
+          "artifact",
+          "creature"
+        ],
+        "subtypes": [
+          "android"
+        ],
+        "power": 3,
+        "toughness": 1,
+        "abilities": [
+          {
+            "triggered": {
+              "when": {
+                "enters": {}
+              },
+              "effects": [
+                {
+                  "search_library": {
+                    "for": {
+                      "name": "Andromedan Automatons"
+                    },
+                    "count": "any",
+                    "reveal": true
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "rarity": "common",
+      "printing": {
+        "set": "trk",
+        "number": "2"
+      }
+    },
+    {
+      "card": {
         "name": "Assembly Specialist",
         "mana_cost": "{1}{W}",
         "types": [
@@ -143,6 +183,61 @@
       "printing": {
         "set": "trk",
         "number": "15"
+      }
+    },
+    {
+      "card": {
+        "name": "Free Borg Revolutionaries",
+        "mana_cost": "{3}{W}{W}",
+        "types": [
+          "artifact",
+          "creature"
+        ],
+        "subtypes": [
+          "borg",
+          "rebel"
+        ],
+        "power": 4,
+        "toughness": 5,
+        "abilities": [
+          {
+            "triggered": {
+              "when": {
+                "enters": {}
+              },
+              "effects": [
+                {
+                  "pump": {
+                    "power": 1,
+                    "toughness": 1,
+                    "to": {
+                      "each": "creature",
+                      "controller": "you"
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "cycling": {
+              "cost": "{2}",
+              "for": {
+                "supertypes": [
+                  "basic"
+                ],
+                "types": [
+                  "land"
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "rarity": "common",
+      "printing": {
+        "set": "trk",
+        "number": "19"
       }
     },
     {
@@ -367,6 +462,106 @@
       "printing": {
         "set": "trk",
         "number": "114"
+      }
+    },
+    {
+      "card": {
+        "name": "Rogue Artificial Intelligence",
+        "mana_cost": "{4}{B}{B}",
+        "types": [
+          "artifact",
+          "creature"
+        ],
+        "subtypes": [
+          "construct"
+        ],
+        "power": 6,
+        "toughness": 5,
+        "abilities": [
+          {
+            "triggered": {
+              "when": {
+                "enters": {}
+              },
+              "choose": 1,
+              "modes": [
+                {
+                  "effects": [
+                    {
+                      "gain_life": {
+                        "amount": 3
+                      }
+                    }
+                  ]
+                },
+                {
+                  "effects": [
+                    {
+                      "surveil": {
+                        "amount": 2
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "cycling": {
+              "cost": "{2}",
+              "for": {
+                "supertypes": [
+                  "basic"
+                ],
+                "types": [
+                  "land"
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "rarity": "common",
+      "printing": {
+        "set": "trk",
+        "number": "126"
+      }
+    },
+    {
+      "card": {
+        "name": "Horta",
+        "mana_cost": "{4}{R}{R}",
+        "types": [
+          "creature"
+        ],
+        "subtypes": [
+          "elemental"
+        ],
+        "keywords": [
+          "trample"
+        ],
+        "power": 7,
+        "toughness": 6,
+        "abilities": [
+          {
+            "cycling": {
+              "cost": "{2}",
+              "for": {
+                "supertypes": [
+                  "basic"
+                ],
+                "types": [
+                  "land"
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "rarity": "common",
+      "printing": {
+        "set": "trk",
+        "number": "152"
       }
     },
     {
@@ -1314,6 +1509,56 @@
     },
     {
       "card": {
+        "name": "Unexplored Territory",
+        "types": [
+          "land"
+        ],
+        "abilities": [
+          {
+            "mana": {
+              "cost": [
+                "tap"
+              ],
+              "produce": "{C}"
+            }
+          },
+          {
+            "activated": {
+              "cost": [
+                {
+                  "mana": "{1}"
+                },
+                "tap",
+                "sacrifice"
+              ],
+              "effects": [
+                {
+                  "search_library": {
+                    "for": {
+                      "supertypes": [
+                        "basic"
+                      ],
+                      "types": [
+                        "land"
+                      ]
+                    },
+                    "put": "battlefield",
+                    "tapped": true
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "rarity": "common",
+      "printing": {
+        "set": "trk",
+        "number": "303"
+      }
+    },
+    {
+      "card": {
         "name": "Vulcan",
         "types": [
           "land"
@@ -1494,19 +1739,6 @@
       ]
     },
     {
-      "name": "Andromedan Automatons",
-      "rarity": "common",
-      "printing": {
-        "set": "trk",
-        "number": "2"
-      },
-      "missing": [
-        "triggered ability",
-        "variable amount",
-        "library manipulation"
-      ]
-    },
-    {
       "name": "Antagonist Incorporator",
       "rarity": "rare",
       "printing": {
@@ -1554,7 +1786,6 @@
         "number": "7"
       },
       "missing": [
-        "static ability",
         "triggered ability",
         "tokens",
         "library manipulation",
@@ -1667,18 +1898,6 @@
         "number": "18"
       },
       "missing": [
-        "library manipulation",
-        "other rules text"
-      ]
-    },
-    {
-      "name": "Free Borg Revolutionaries",
-      "rarity": "common",
-      "printing": {
-        "set": "trk",
-        "number": "19"
-      },
-      "missing": [
         "other rules text"
       ]
     },
@@ -1766,8 +1985,6 @@
         "number": "26"
       },
       "missing": [
-        "triggered ability",
-        "library manipulation",
         "station",
         "other rules text"
       ]
@@ -2939,17 +3156,6 @@
       ]
     },
     {
-      "name": "Rogue Artificial Intelligence",
-      "rarity": "common",
-      "printing": {
-        "set": "trk",
-        "number": "126"
-      },
-      "missing": [
-        "other rules text"
-      ]
-    },
-    {
       "name": "Salt Vampire",
       "rarity": "rare",
       "printing": {
@@ -3274,17 +3480,6 @@
       ]
     },
     {
-      "name": "Horta",
-      "rarity": "common",
-      "printing": {
-        "set": "trk",
-        "number": "152"
-      },
-      "missing": [
-        "other rules text"
-      ]
-    },
-    {
       "name": "Infinite Diversity",
       "rarity": "mythic",
       "printing": {
@@ -3500,7 +3695,6 @@
         "number": "170"
       },
       "missing": [
-        "static ability",
         "triggered ability",
         "condition (if/unless/as long as)",
         "counters",
@@ -3717,8 +3911,7 @@
         "number": "189"
       },
       "missing": [
-        "static ability",
-        "other rules text"
+        "static ability"
       ]
     },
     {
@@ -3819,7 +4012,6 @@
         "number": "198"
       },
       "missing": [
-        "library manipulation",
         "other rules text"
       ]
     },
@@ -3843,10 +4035,9 @@
         "number": "200"
       },
       "missing": [
-        "triggered ability",
-        "library manipulation",
         "variable amount",
-        "sacrifice"
+        "sacrifice",
+        "library manipulation"
       ]
     },
     {
@@ -4112,8 +4303,6 @@
       },
       "missing": [
         "other rules text",
-        "triggered ability",
-        "library manipulation",
         "variable amount",
         "sacrifice",
         "static ability"
@@ -4743,8 +4932,6 @@
         "number": "274"
       },
       "missing": [
-        "triggered ability",
-        "library manipulation",
         "counters"
       ]
     },
@@ -4864,18 +5051,6 @@
       },
       "missing": [
         "tokens",
-        "sacrifice",
-        "library manipulation"
-      ]
-    },
-    {
-      "name": "Unexplored Territory",
-      "rarity": "common",
-      "printing": {
-        "set": "trk",
-        "number": "303"
-      },
-      "missing": [
         "sacrifice",
         "library manipulation"
       ]

@@ -23,6 +23,7 @@ module Enjine
         obj = object(id)
         ability = chars(obj).ability(ability_ref)
         return false unless ability && %i[activated loyalty].include?(ability.kind)
+        return false unless obj.zone == ability.zone # CR 113.6: e.g. cycling only from the hand (702.29a)
         return false if ability.sorcery_speed? && !sorcery_timing?(index)
         return false unless ability.costs.reject(&:mana?).all? { it.payable?(self, obj) }
 
@@ -154,6 +155,8 @@ module Enjine
       def begin_activation!(index, source_id, ability_ref)
         source = object(source_id)
         ability = chars(source).ability(ability_ref)
+        # CR 602.2a: activating from a hidden zone reveals the card.
+        emit Events::CardRevealed.new(player: name(index), object: source_id, card: source.card) if source.zone == :hand
         obj = create_object(source.card, index, :stack)
         obj.kind = "ability"
         obj.source = source_id

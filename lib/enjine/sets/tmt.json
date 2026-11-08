@@ -12,6 +12,66 @@
   "cards": [
     {
       "card": {
+        "name": "Jennika, Bad Apple Big Sister",
+        "mana_cost": "{4}{W}",
+        "types": [
+          "creature"
+        ],
+        "supertypes": [
+          "legendary"
+        ],
+        "subtypes": [
+          "mutant",
+          "ninja",
+          "turtle"
+        ],
+        "power": 3,
+        "toughness": 3,
+        "abilities": [
+          {
+            "triggered": {
+              "when": {
+                "enters": {}
+              },
+              "effects": [
+                {
+                  "create_token": {
+                    "token": {
+                      "name": "Mutant",
+                      "types": [
+                        "creature"
+                      ],
+                      "subtypes": [
+                        "mutant"
+                      ],
+                      "power": 2,
+                      "toughness": 2
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "cycling": {
+              "cost": "{2}",
+              "for": {
+                "subtypes": [
+                  "plains"
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "rarity": "common",
+      "printing": {
+        "set": "tmt",
+        "number": "10"
+      }
+    },
+    {
+      "card": {
         "name": "Buzz Bots",
         "mana_cost": "{1}{U}",
         "types": [
@@ -49,6 +109,64 @@
       "printing": {
         "set": "tmt",
         "number": "32"
+      }
+    },
+    {
+      "card": {
+        "name": "Stockman, Mad Fly-entist",
+        "mana_cost": "{4}{U}",
+        "types": [
+          "creature"
+        ],
+        "supertypes": [
+          "legendary"
+        ],
+        "subtypes": [
+          "insect",
+          "mutant",
+          "scientist"
+        ],
+        "keywords": [
+          "flying"
+        ],
+        "power": 3,
+        "toughness": 4,
+        "abilities": [
+          {
+            "triggered": {
+              "when": {
+                "enters": {}
+              },
+              "effects": [
+                {
+                  "draw": {
+                    "amount": 1
+                  }
+                },
+                {
+                  "discard": {
+                    "amount": 1
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "cycling": {
+              "cost": "{2}",
+              "for": {
+                "subtypes": [
+                  "island"
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "rarity": "common",
+      "printing": {
+        "set": "tmt",
+        "number": "54"
       }
     },
     {
@@ -652,19 +770,6 @@
       ]
     },
     {
-      "name": "Jennika, Bad Apple Big Sister",
-      "rarity": "common",
-      "printing": {
-        "set": "tmt",
-        "number": "10"
-      },
-      "missing": [
-        "triggered ability",
-        "tokens",
-        "other rules text"
-      ]
-    },
-    {
       "name": "Koya, Death from Above",
       "rarity": "uncommon",
       "printing": {
@@ -1200,19 +1305,6 @@
       ]
     },
     {
-      "name": "Stockman, Mad Fly-entist",
-      "rarity": "common",
-      "printing": {
-        "set": "tmt",
-        "number": "54"
-      },
-      "missing": [
-        "triggered ability",
-        "discard",
-        "other rules text"
-      ]
-    },
-    {
       "name": "Turtles in Time",
       "rarity": "mythic",
       "printing": {
@@ -1256,8 +1348,7 @@
         "number": "59"
       },
       "missing": [
-        "static ability",
-        "other rules text"
+        "static ability"
       ]
     },
     {
@@ -1526,8 +1617,7 @@
         "number": "80"
       },
       "missing": [
-        "other rules text",
-        "library manipulation"
+        "other rules text"
       ]
     },
     {
@@ -1887,8 +1977,7 @@
       },
       "missing": [
         "triggered ability",
-        "static ability",
-        "other rules text"
+        "static ability"
       ]
     },
     {
@@ -2068,8 +2157,7 @@
         "number": "126"
       },
       "missing": [
-        "other rules text",
-        "library manipulation"
+        "other rules text"
       ]
     },
     {
@@ -2119,8 +2207,7 @@
         "number": "131"
       },
       "missing": [
-        "static ability",
-        "other rules text"
+        "static ability"
       ]
     },
     {
@@ -2639,8 +2726,6 @@
         "number": "173"
       },
       "missing": [
-        "triggered ability",
-        "library manipulation",
         "sacrifice",
         "discard",
         "counters"
@@ -2762,7 +2847,6 @@
       },
       "missing": [
         "sacrifice",
-        "library manipulation",
         "static ability"
       ]
     },
