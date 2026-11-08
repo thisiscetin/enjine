@@ -46,7 +46,7 @@ A choice made while an effect resolves (scry, surveil, discard...): submit one o
 
 ## enter_choice
 
-Before `object` enters: `{type: "pay_life", life: n}` (only with enough life) or `{type: "enter_tapped"}` (CR 614.12, 119.4).
+Before `object` enters: `{type: "pay_life", life: n}` (only with enough life) or `{type: "enter_tapped"}` (CR 614.12, 119.4); `{type: "number", number: n}` for "choose a number"; `{type: "name", name: "..."}` for "choose a card name" (CR 201.4).
 
 ## legend_rule
 

@@ -151,6 +151,18 @@ Class-F Shuttlecraft, Suurok-Class Science Vessel, U.S.S. Cerritos, U.S.S. Excel
 Adjudicator, Seven of Nine (dilemma); Death Is Irrelevant (assimilate, translation);
 Excalbian Gamemaster (strange new worlds, translation).
 
+Trigger capabilities (group 4: becomes tapped, counters put, becomes the target, leaves a
+graveyard, activates an ability, cast filters and chosen values, once each turn, additional
+triggers, created and reflexive triggers, `may` decided by another player, as-enters number and
+card-name choices, enters tapped unless, enters untapped triggers, another counter of a kind).
+Converted by translation: A Good Day to Die, Battle-Scarred Survivalist, Dathon, David and Carol
+Marcus, Dr. Beverly Crusher, Federation Outpost, Kai Winn, Khan, Ni'Var Science Academy, Nyota
+Uhura, Planetary Patrol, Q Continuum, Quark's Bar, Ravenous Cosmozoan, Starfleet Security, Tell
+Me What You See, U.S.S. Reliant, Vash. Their trigger primitives are in place but they still wait
+for other groups: Captain Jean-Luc Picard, Sulu, Jett Reno, Gabriel Lorca, Sela, Beckett Mariner,
+Hologram Stalker, MACO Strike Team, Support Mission, The Unicomplex, Dahar Master, The Naked Time,
+Dr. Leonard "Bones" McCoy, Sylvia Tilly, The Inner Light.
+
 ## Pipeline
 
 `script/convert_set` (to be written, run from the repo with network access):

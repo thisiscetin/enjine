@@ -231,6 +231,7 @@ These rules cut across every mechanic. All numbers were checked in the
 | 601.3 | Permission to cast (from hand by default; "may cast from X" effects) | M2 |
 | 602 | Activating activated abilities; {T}/{Q} plus summoning sickness (602.5a); "activate only once each turn"/as a sorcery/as an instant (602.5b–e) | M2 |
 | 603 | Triggered abilities: trigger events, APNAP ordering (603.3b), intervening "if" (603.4), zone-change triggers (603.6), delayed triggers (603.7), look-back (603.10), state triggers, reflexive triggers | M2 |
+| 603.2c–e, 603.7b–c, 603.12, 113.6k | Done: becomes tapped, counters put, becomes the target, leaves a graveyard (per card or "one or more" per event batch), activates an ability, "when you cast this spell", spell filters and chosen name / mana value on cast triggers; "only once each turn"; triggering an additional time (603.2d); "this turn" and object-watching delayed triggers; reflexive "when you do" triggers; triggers that function from a graveyard; the triggering object, player and amount as effect references. Not yet: "for the first time each turn" | M2 |
 | 604 | Static abilities; characteristic-defining abilities (604.3) | M3 |
 | 605 | Mana abilities: classification (605.1a/b, **includes the Aug 2026 library-movement exclusion**), no stack, activation mid-cast | M1 |
 | 606 | Loyalty abilities: one per permanent per turn, sorcery timing (606.3) | M4 |

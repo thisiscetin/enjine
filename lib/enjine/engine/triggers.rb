@@ -35,30 +35,44 @@ module Enjine
           instances.each { |inst| queue_trigger(inst, event, source) }
         end
         watch_leaving!(event)
+        watch_own_cast!(event) if event.is_a?(Events::SpellCast)
+        watch_graveyards!(event)
         watch_delayed!(event) unless state.delayed_triggers.empty?
       end
 
       # CR 603.7: creates a delayed triggered ability. `entry` names the card and the ability ref
-      # (see Effects::DelayedTrigger) plus what it remembers ("results").
+      # (see Effects::DelayedTrigger) plus what it remembers ("results", "watched" objects) and, for
+      # one with a duration ("this turn"), the turn it lasts for ("turn").
       def create_delayed_trigger!(entry)
         state.delayed_triggers << entry.merge("id" => "d#{next_timestamp!}")
       end
 
-      # CR 603.7b: a delayed triggered ability triggers only once, the next time its event occurs.
+      # CR 603.7b: a delayed triggered ability triggers only once, the next time its event occurs, unless
+      # it has a stated duration ("whenever ... this turn"): then it triggers each time until the turn ends.
       def watch_delayed!(event)
-        fired, state.delayed_triggers = state.delayed_triggers.partition do |entry|
+        state.delayed_triggers.reject! { it["turn"] && it["turn"] != state.turn } # "this turn" has ended
+        fired = []
+        state.delayed_triggers.each do |entry|
           trigger = catalog.fetch(entry["card"]).ability(entry["ability"]).trigger
-          event.is_a?(trigger.event_class) && trigger.match?(self, event, delayed_source(entry))
+          next unless trigger.watches?(event)
+
+          found = Mechanics::Triggers.occurrences(trigger, self, event, delayed_source(entry))
+          found = found.first(1) unless entry["turn"]
+          fired << entry unless found.empty?
+          found.each do
+            queue_pending_trigger!(delayed_source(entry).merge("ability" => entry["ability"]), event, delayed_memory(entry, it))
+          end
         end
-        fired.each do |entry|
-          source = delayed_source(entry).merge("ability" => entry["ability"])
-          queue_pending_trigger!(source, event, { "results" => entry["results"] })
-        end
+        state.delayed_triggers -= fired.reject { it["turn"] }
+      end
+
+      def delayed_memory(entry, facts)
+        { "results" => entry["results"], "watched" => entry["watched"], "triggering" => facts }.compact
       end
 
       # CR 603.7d-e: its source and controller are those of the spell or ability that created it.
       def delayed_source(entry)
-        { "id" => entry["source"], "card" => entry["card"], "controller" => entry["controller"] }
+        { "id" => entry["source"], "card" => entry["card"], "controller" => entry["controller"], "watched" => entry["watched"] }
       end
 
       # Battlefield permanents with triggered abilities, cached with the layer pass
@@ -69,7 +83,7 @@ module Enjine
         @trigger_epoch = @epoch
         @trigger_state = state
         @trigger_sources = state.battlefield.filter_map do |id|
-          instances = chars(id).triggered_abilities
+          instances = chars(id).triggered_abilities.select { it.ability.zone == :battlefield }
           [id, instances] unless instances.empty?
         end
       end
@@ -84,25 +98,110 @@ module Enjine
 
         source = { "id" => event.old_id, "card" => event.card, "controller" => lki["controller"] }
         defn.ability_instances.each do |inst|
-          queue_trigger(inst, event, source) if inst.ability.kind == :triggered && inst.ability.trigger.leaves_battlefield?
+          ability = inst.ability
+          queue_trigger(inst, event, source) if ability.kind == :triggered && ability.zone == :battlefield &&
+                                                ability.trigger.leaves_battlefield?
+        end
+      end
+
+      # "When you cast this spell" (CR 601.2i): the spell's own ability, functioning on the stack.
+      def watch_own_cast!(event)
+        obj = state.objects[event.object] or return
+        source = { "id" => obj.id, "card" => obj.card, "controller" => obj.controller }
+        chars(obj).triggered_abilities.each do |inst|
+          queue_trigger(inst, event, source) if inst.ability.trigger.respond_to?(:own_spell?) && inst.ability.trigger.own_spell?
+        end
+      end
+
+      # CR 113.6k: triggered abilities that function from a graveyard, controlled by the card's owner.
+      def watch_graveyards!(event)
+        state.players.each_with_index do |pl, owner|
+          pl.graveyard.each do |id|
+            instances = graveyard_triggers(object(id).card)
+            next if instances.empty?
+
+            source = { "id" => id, "card" => object(id).card, "controller" => owner }
+            instances.each { queue_trigger(it, event, source) }
+          end
+        end
+      end
+
+      def graveyard_triggers(card)
+        (@graveyard_triggers ||= {})[card] ||= catalog.fetch(card).ability_instances.select do |inst|
+          inst.ability.kind == :triggered && inst.ability.zone == :graveyard
         end
       end
 
       def queue_trigger(inst, event, source)
-        trigger = inst.ability.trigger
-        return unless trigger.watches?(event) && trigger.match?(self, event, source)
-        return unless inst.ability.condition_met?(self, source["controller"], source["id"]) # CR 603.4
+        ability = inst.ability
+        trigger = ability.trigger
+        return unless trigger.watches?(event)
+
+        found = Mechanics::Triggers.occurrences(trigger, self, event, source)
+        return if found.empty?
+        return unless ability.condition_met?(self, source["controller"], source["id"]) # CR 603.4
+        return if once_each_turn_used!(ability, inst.ref, source)
 
         memory = state.objects[source["id"]]&.memory&.[]("cast") ? { "source_cast" => true } : {}
-        queue_pending_trigger!(source.merge("ability" => inst.ref), event, memory)
+        batch = trigger.respond_to?(:batched?) && trigger.batched? ? event_batch : nil
+        times = 1 + additional_triggers(event, source)
+        found.first(limited?(ability) ? 1 : found.size).each do |facts|
+          next if batch && batched_pending?(source, inst.ref, batch)
+
+          times.times do
+            queue_pending_trigger!(source.merge("ability" => inst.ref), event, memory.merge("triggering" => facts), batch: batch)
+          end
+        end
+      end
+
+      # A once-each-turn limit: remembered on the source object, so the same card
+      # as a new object (CR 400.7) may trigger again.
+      def limited?(ability) = ability.respond_to?(:limit) && !ability.limit.nil?
+
+      def once_each_turn_used!(ability, ref, source)
+        return false unless limited?(ability)
+
+        obj = state.objects[source["id"]] or return false
+        used = (obj.memory["triggered_turn"] ||= {})
+        return true if used[ref] == state.turn
+
+        used[ref] = state.turn
+        false
+      end
+
+      # CR 603.2d: static abilities such as "if you gaining life causes a triggered ability of a permanent
+      # you control to trigger, that ability triggers an additional time". Only abilities of permanents;
+      # never delayed or reflexive triggered abilities.
+      def additional_triggers(event, source)
+        return 0 unless state.battlefield.include?(source["id"])
+
+        state.battlefield.sum do |id|
+          obj = object(id)
+          chars(obj).abilities.count do |inst|
+            inst.ability.respond_to?(:additional_trigger?) && inst.ability.additional_trigger?(self, event, obj, source)
+          end
+        end
+      end
+
+      # The event batch an event belongs to, for "one or more" triggers (CR 603.2c): everything one effect
+      # of a resolving spell or ability does, or one cast or activation (its costs). Outside those, each
+      # event is its own batch.
+      def event_batch
+        frame = state.frames.last or return "event:#{state.next_id}"
+        "#{frame["type"]}:#{frame["object"]}:#{frame["pc"]}"
+      end
+
+      def batched_pending?(source, ref, batch)
+        state.pending_triggers.any? { it["source"] == source["id"] && it["ability"] == ref && it["batch"] == batch }
       end
 
       # `memory` travels to the ability on the stack (its source's last known status, a delayed
-      # trigger's remembered objects).
-      def queue_pending_trigger!(source, event, memory)
+      # trigger's remembered objects, the event facts it may refer to). `event` is nil for a reflexive
+      # triggered ability (CR 603.12), which triggers on something done during a resolution.
+      def queue_pending_trigger!(source, event, memory, batch: nil)
         state.pending_triggers << { "id" => "t#{next_timestamp!}", "controller" => source["controller"],
                                     "source" => source["id"], "card" => source["card"], "ability" => source["ability"],
-                                    "event" => event.to_h, "memory" => memory }
+                                    "event" => event.to_h, "memory" => memory, "batch" => batch }.compact
         emit Events::AbilityTriggered.new(player: name(source["controller"]), source: source["id"],
                                           card: source["card"], ability: source["ability"])
       end

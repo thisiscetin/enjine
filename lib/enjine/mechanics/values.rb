@@ -18,6 +18,7 @@ module Enjine
       def self.build(data, errors, path, targets_count:, min: 0)
         return Fixed.new(data) if data.is_a?(Integer) && data >= min
         return X::INSTANCE if data == "x"
+        return Triggering::INSTANCE if data == { "triggering" => "amount" } # "that many" (CR 603.2)
 
         unless data.is_a?(Hash) && data.size == 1 && KINDS.include?(data.keys.first.to_s)
           errors << "#{path}: must be an integer >= #{min}, \"x\" or one of {#{KINDS.join("|")}: selector}"
@@ -68,6 +69,15 @@ module Enjine
         def to_s = "X"
       end
 
+      # "That many": the number in the event that triggered the resolving ability (damage dealt, life
+      # gained, counters put), see Triggers.event_facts. 0 outside a triggered ability.
+      class Triggering
+        INSTANCE = new.freeze
+
+        def value(engine, ctx) = Selector.memory(engine, ctx).fetch("triggering", {})["amount"].to_i
+        def to_s = "that many"
+      end
+
       # A fixed number.
       class Fixed
         attr_reader :n
@@ -108,6 +118,7 @@ module Enjine
         elsif data.key?("was_cast") then WasCast.new(data["was_cast"] != false)
         elsif data.key?("targets") then Targets.build(data, errors, path)
         elsif data.key?("attacked") then Attacked.new(data["attacked"] != false)
+        elsif data.key?("triggering") then TriggeringIs.build(data, errors, path)
         else Compare.build(data, errors, path, targets_count)
         end
       end
@@ -212,6 +223,30 @@ module Enjine
         end
 
         def to_s = @wanted ? "it was cast" : "it wasn't cast"
+      end
+
+      # {"triggering": filter}: "if it's a Saga spell" — the card the trigger event was about matches a
+      # filter on its card's characteristics (types, subtypes, ...), wherever it is now.
+      class TriggeringIs
+        def self.build(data, errors, path)
+          Mechanics.check_keys(data, %w[triggering], errors, path)
+          new(Mechanics.build_entry(:filter, data["triggering"], errors, "#{path}.triggering"))
+        end
+
+        def initialize(filter)
+          @filter = filter
+          freeze
+        end
+
+        def true?(engine, ctx)
+          card = Selector.memory(engine, ctx).fetch("triggering", {})["card"]
+          return false unless card && @filter
+
+          defn = engine.catalog.fetch(card)
+          @filter.matches_facts?(Filters::Facts.new(chars: defn.printed_characteristics, counters: {}, token: defn.token?))
+        end
+
+        def to_s = "it's a #{@filter.respond_to?(:primitive_name) ? @filter.primitive_name.tr("_", " ") : @filter}"
       end
 
       # Negation.

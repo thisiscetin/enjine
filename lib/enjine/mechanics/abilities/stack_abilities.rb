@@ -204,25 +204,39 @@ module Enjine
                                "next time a player would receive priority (in APNAP order), with targets chosen then.",
                   rules: %w[603.2 603.3 603.3b 603.3d],
                   params: { "when" => "a trigger condition, e.g. {\"enters\": {}}", "targets" => "list of target filters",
-                            "effects" => "list of effects" },
+                            "effects" => "list of effects",
+                            "limit" => "\"once_each_turn\": it triggers at most once each turn (per object)",
+                            "zone" => "\"graveyard\": the ability functions only while its card is in a graveyard (CR 113.6k)" },
                   example: { "triggered" => { "when" => { "enters" => {} }, "effects" => [{ "draw" => { "amount" => 1 } }] } }
 
-        attr_reader :trigger, :condition
+        attr_reader :trigger, :condition, :limit
+
+        LIMITS = %w[once_each_turn].freeze
+        ZONES = %w[battlefield graveyard].freeze
 
         def self.build(params, errors, path, **)
-          Mechanics.check_keys(params, %w[when if] + BODY_KEYS, errors, path)
+          Mechanics.check_keys(params, %w[when if limit zone] + BODY_KEYS, errors, path)
           raw = Mechanics.fetch_param(params, :when)
           trigger = raw.nil? ? ((errors << "#{path}.when: required") && nil) : Mechanics.build_entry(:trigger, raw, errors, "#{path}.when")
           raw_if = Mechanics.fetch_param(params, :if)
           condition = raw_if && Condition.build(raw_if, errors, "#{path}.if")
-          new(**parse_body(params, errors, path), trigger: trigger, condition: condition)
+          limit = Mechanics.fetch_param(params, :limit)
+          errors << "#{path}.limit: must be one of #{LIMITS.join(", ")}" unless limit.nil? || LIMITS.include?(limit)
+          zone = Mechanics.fetch_param(params, :zone) || "battlefield"
+          errors << "#{path}.zone: must be one of #{ZONES.join(", ")}" unless ZONES.include?(zone)
+          new(**parse_body(params, errors, path), trigger: trigger, condition: condition, limit: limit, zone: zone.to_sym)
         end
 
-        def initialize(trigger:, condition: nil, **)
+        def initialize(trigger:, condition: nil, limit: nil, zone: :battlefield, **)
           @trigger = trigger
           @condition = condition
+          @limit = limit
+          @zone = zone
           super(**)
         end
+
+        # CR 113.6k: a trigger condition that can't trigger from the battlefield functions where it can.
+        attr_reader :zone
 
         # CR 603.4: an intervening "if" must be true when the trigger event happens and on resolution.
         def condition_met?(engine, controller, source, object = nil)
@@ -230,7 +244,11 @@ module Enjine
         end
 
         def kind = :triggered
-        def to_s = "#{trigger}, #{"if #{condition}, " if condition}#{effects_text}"
+
+        def to_s
+          "#{trigger}, #{"if #{condition}, " if condition}#{effects_text}#{" (only once each turn)" if limit}" \
+            "#{" (from a graveyard)" if zone == :graveyard}"
+        end
       end
 
       # A planeswalker loyalty ability "+N: ..." / "-N: ..." (CR 606).

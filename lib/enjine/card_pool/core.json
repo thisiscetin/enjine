@@ -2630,5 +2630,843 @@
         }
       }
     ]
+  },
+  {
+    "name": "Gearwatch Pilot",
+    "mana_cost": "{1}{W}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "human",
+      "pilot"
+    ],
+    "power": 2,
+    "toughness": 2,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "becomes_tapped": {}
+          },
+          "effects": [
+            {
+              "gain_life": {
+                "amount": 1
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Bloomtrack Sage",
+    "mana_cost": "{1}{G}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "elf"
+    ],
+    "power": 1,
+    "toughness": 2,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "counters_placed": {
+              "counter": "+1/+1"
+            }
+          },
+          "effects": [
+            {
+              "gain_life": {
+                "amount": 1
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Wardline Sentinel",
+    "mana_cost": "{G}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "human",
+      "soldier"
+    ],
+    "power": 2,
+    "toughness": 1,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "becomes_target": {
+              "subject": {
+                "each": "creature",
+                "controller": "you"
+              },
+              "by": "opponent"
+            }
+          },
+          "effects": [
+            {
+              "add_counters": {
+                "counter": "+1/+1",
+                "amount": 1,
+                "to": {
+                  "triggering": "object"
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Cryptborn Scavenger",
+    "mana_cost": "{1}{B}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "rat"
+    ],
+    "power": 1,
+    "toughness": 2,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "leaves_graveyard": {
+              "batched": true
+            }
+          },
+          "effects": [
+            {
+              "gain_life": {
+                "amount": 1
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Relic Hoarder",
+    "mana_cost": "{1}{B}{G}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "human",
+      "rogue"
+    ],
+    "power": 2,
+    "toughness": 3,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "leaves_graveyard": {}
+          },
+          "limit": "once_each_turn",
+          "effects": [
+            {
+              "draw": {
+                "amount": 1
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Levy Collector",
+    "mana_cost": "{1}{B}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "human",
+      "advisor"
+    ],
+    "power": 2,
+    "toughness": 1,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "activates_ability": {
+              "controller": "opponent"
+            }
+          },
+          "effects": [
+            {
+              "lose_life": {
+                "amount": 1,
+                "to": {
+                  "triggering": "player"
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Pyre Harbinger",
+    "mana_cost": "{2}{R}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "elemental"
+    ],
+    "power": 2,
+    "toughness": 2,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "cast": {
+              "self": true
+            }
+          },
+          "effects": [
+            {
+              "deal_damage": {
+                "amount": 1,
+                "to": "each_opponent"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Gravewail Specter",
+    "mana_cost": "{2}{B}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "spirit"
+    ],
+    "power": 2,
+    "toughness": 2,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "dies": {
+              "subject": {
+                "each": "creature",
+                "controller": "you"
+              }
+            }
+          },
+          "zone": "graveyard",
+          "effects": [
+            {
+              "lose_life": {
+                "amount": 1,
+                "to": "each_opponent"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Hullwright Patron",
+    "mana_cost": "{1}{W}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "human",
+      "artificer"
+    ],
+    "power": 1,
+    "toughness": 2,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "cast": {
+              "spell": {
+                "one_of": [
+                  {
+                    "spell": {
+                      "any_of": [
+                        "enchantment"
+                      ]
+                    }
+                  },
+                  {
+                    "spell": {
+                      "any_of": [
+                        "artifact"
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          },
+          "effects": [
+            {
+              "gain_life": {
+                "amount": 1
+              }
+            },
+            {
+              "draw": {
+                "amount": 1,
+                "if": {
+                  "triggering": {
+                    "spell": {
+                      "subtypes": [
+                        "saga"
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Mendwell Cleric",
+    "mana_cost": "{2}{W}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "human",
+      "cleric"
+    ],
+    "power": 2,
+    "toughness": 2,
+    "abilities": [
+      {
+        "additional_triggers": {
+          "cause": "you_gain_life"
+        }
+      },
+      {
+        "triggered": {
+          "when": {
+            "gains_life": {}
+          },
+          "effects": [
+            {
+              "add_counters": {
+                "counter": "+1/+1",
+                "amount": 1,
+                "to": "self"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Oathbinder Rite",
+    "mana_cost": "{B}",
+    "types": [
+      "instant"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "targets": [
+            "creature"
+          ],
+          "effects": [
+            {
+              "pump": {
+                "power": 2,
+                "toughness": 0,
+                "to": {
+                  "target": 0
+                }
+              }
+            },
+            {
+              "delayed_trigger": {
+                "when": {
+                  "dies": {
+                    "subject": "watched"
+                  }
+                },
+                "watch": {
+                  "target": 0
+                },
+                "this_turn": true,
+                "effects": [
+                  {
+                    "draw": {
+                      "amount": 1
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Surge Pageant",
+    "mana_cost": "{1}{G}",
+    "types": [
+      "sorcery"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "effects": [
+            {
+              "draw": {
+                "amount": 1
+              }
+            },
+            {
+              "delayed_trigger": {
+                "when": {
+                  "enters": {
+                    "subject": {
+                      "each": "creature",
+                      "controller": "you"
+                    }
+                  }
+                },
+                "this_turn": true,
+                "effects": [
+                  {
+                    "add_counters": {
+                      "counter": "+1/+1",
+                      "amount": 1,
+                      "to": {
+                        "triggering": "object"
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Kinbond Ritual",
+    "mana_cost": "{G}",
+    "types": [
+      "instant"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "targets": [
+            {
+              "creature": {
+                "controller": "you"
+              }
+            }
+          ],
+          "effects": [
+            {
+              "delayed_trigger": {
+                "when": {
+                  "deals_damage": {
+                    "subject": "watched",
+                    "combat": true,
+                    "to": "player"
+                  }
+                },
+                "watch": {
+                  "target": 0
+                },
+                "this_turn": true,
+                "effects": [
+                  {
+                    "gain_life": {
+                      "amount": {
+                        "triggering": "amount"
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Ember Duelist",
+    "mana_cost": "{3}{R}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "human",
+      "warrior"
+    ],
+    "power": 3,
+    "toughness": 3,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "enters": {}
+          },
+          "effects": [
+            {
+              "may": {
+                "effects": [
+                  {
+                    "lose_life": {
+                      "amount": 2,
+                      "to": "you"
+                    }
+                  }
+                ],
+                "then": [
+                  {
+                    "reflexive_trigger": {
+                      "targets": [
+                        "any_target"
+                      ],
+                      "effects": [
+                        {
+                          "deal_damage": {
+                            "amount": 2,
+                            "to": {
+                              "target": 0
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Bargainer's Writ",
+    "mana_cost": "{1}{B}",
+    "types": [
+      "enchantment"
+    ],
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "enters": {}
+          },
+          "targets": [
+            "opponent"
+          ],
+          "effects": [
+            {
+              "may": {
+                "chooser": {
+                  "target": 0
+                },
+                "effects": [
+                  {
+                    "draw": {
+                      "amount": 1
+                    }
+                  }
+                ],
+                "otherwise": [
+                  {
+                    "lose_life": {
+                      "amount": 3,
+                      "to": {
+                        "target": 0
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Signal Adept",
+    "mana_cost": "{2}{U}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "human",
+      "wizard"
+    ],
+    "power": 2,
+    "toughness": 3,
+    "abilities": [
+      {
+        "choose_number": {
+          "min": 0,
+          "max": 6
+        }
+      },
+      {
+        "triggered": {
+          "when": {
+            "cast": {
+              "controller": "opponent",
+              "mana_value": "chosen"
+            }
+          },
+          "effects": [
+            {
+              "draw": {
+                "amount": 1
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Edict Warden",
+    "mana_cost": "{1}{B}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "human",
+      "cleric"
+    ],
+    "power": 3,
+    "toughness": 1,
+    "abilities": [
+      {
+        "choose_card_name": {
+          "not": [
+            "land"
+          ]
+        }
+      },
+      {
+        "triggered": {
+          "when": {
+            "any_of": [
+              {
+                "cast": {
+                  "controller": "opponent",
+                  "name": "chosen"
+                }
+              },
+              {
+                "activates_ability": {
+                  "controller": "opponent",
+                  "name": "chosen"
+                }
+              }
+            ]
+          },
+          "effects": [
+            {
+              "lose_life": {
+                "amount": 2,
+                "to": {
+                  "triggering": "player"
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Verdant Overlook",
+    "types": [
+      "land"
+    ],
+    "abilities": [
+      {
+        "enters_tapped_unless": {
+          "condition": {
+            "controls": {
+              "each": "land",
+              "controller": "you"
+            },
+            "at_least": 2
+          }
+        }
+      },
+      {
+        "triggered": {
+          "when": {
+            "enters": {
+              "untapped": true
+            }
+          },
+          "effects": [
+            {
+              "gain_life": {
+                "amount": 1
+              }
+            }
+          ]
+        }
+      },
+      {
+        "mana": {
+          "cost": [
+            "tap"
+          ],
+          "produce": "{G}"
+        }
+      }
+    ]
+  },
+  {
+    "name": "Tally Engraver",
+    "mana_cost": "{2}",
+    "types": [
+      "artifact"
+    ],
+    "abilities": [
+      {
+        "activated": {
+          "cost": [
+            {
+              "mana": "{2}"
+            },
+            "tap"
+          ],
+          "timing": "sorcery",
+          "targets": [
+            {
+              "permanent": {
+                "controller": "you",
+                "counters": true
+              }
+            }
+          ],
+          "effects": [
+            {
+              "another_counter": {
+                "to": {
+                  "target": 0
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Gravebound Return",
+    "mana_cost": "{2}{B}",
+    "types": [
+      "sorcery"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "targets": [
+            {
+              "graveyard_card": {
+                "any_of": [
+                  "creature"
+                ],
+                "controller": "you"
+              }
+            }
+          ],
+          "effects": [
+            {
+              "return_to_battlefield": {
+                "to": {
+                  "target": 0
+                },
+                "counters": {
+                  "+1/+1": 1
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Scarred Packleader",
+    "mana_cost": "{1}{R}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "goblin",
+      "warrior"
+    ],
+    "keywords": [
+      "menace"
+    ],
+    "power": 1,
+    "toughness": 1,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "dies": {
+              "subject": {
+                "each": "creature",
+                "other": true
+              }
+            }
+          },
+          "limit": "once_each_turn",
+          "effects": [
+            {
+              "add_counters": {
+                "counter": "+1/+1",
+                "amount": 1,
+                "to": "self"
+              }
+            }
+          ]
+        }
+      }
+    ]
   }
 ]
