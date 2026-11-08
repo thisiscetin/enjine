@@ -27,6 +27,23 @@ simulations, bots and reinforcement learning, or for a game client.
 > See [`SUPPORTED.md`](SUPPORTED.md) (generated from the code) and the
 > [mechanics coverage checklist](docs/MECHANICS_COVERAGE.md).
 
+## Verified sets
+
+A set is **verified** when every card in it is imported and playable, every
+mechanic it uses is implemented and tested, and observed sample games with random
+decks built from it finish with zero rules findings. See the
+[definition](docs/plans/standard.md#definition-of-verified) and the full
+[Standard program](docs/plans/standard.md).
+
+| Set | Code | Cards playable | Status |
+| --- | --- | ---: | --- |
+| Star Trek | `trk` | 5 / 311 | in progress |
+
+Other Standard sets follow newest first: Reality Fracture, The Hobbit, Marvel
+Super Heroes, and so on back to Wilds of Eldraine. Card data lives in
+`lib/enjine/sets/<code>.json`. It ships with the gem, isn't loaded by default, and
+the [deck builder](docs/guides/deck-builder.md) reads it (`--random-deck sets=trk`).
+
 ## Try it: play both sides in your terminal
 
 ```sh
