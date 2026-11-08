@@ -2856,6 +2856,59 @@
     },
     {
       "card": {
+        "name": "MACO Strike Team",
+        "mana_cost": "{G}",
+        "types": [
+          "creature"
+        ],
+        "subtypes": [
+          "human",
+          "soldier"
+        ],
+        "power": 2,
+        "toughness": 1,
+        "abilities": [
+          {
+            "triggered": {
+              "when": {
+                "becomes_target": {
+                  "subject": {
+                    "each": "creature",
+                    "controller": "you"
+                  },
+                  "by": "opponent"
+                }
+              },
+              "effects": [
+                {
+                  "create_token": {
+                    "tapped": true,
+                    "token": {
+                      "name": "Officer",
+                      "types": [
+                        "creature"
+                      ],
+                      "subtypes": [
+                        "officer"
+                      ],
+                      "power": 1,
+                      "toughness": 1
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "rarity": "rare",
+      "printing": {
+        "set": "trk",
+        "number": "206"
+      }
+    },
+    {
+      "card": {
         "name": "Moopsy",
         "mana_cost": "{G}",
         "types": [
@@ -6705,18 +6758,6 @@
       "missing": [
         "triggered ability",
         "condition (if/unless/as long as)"
-      ]
-    },
-    {
-      "name": "MACO Strike Team",
-      "rarity": "rare",
-      "printing": {
-        "set": "trk",
-        "number": "206"
-      },
-      "missing": [
-        "triggered ability",
-        "tokens"
       ]
     },
     {

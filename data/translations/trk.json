@@ -118,6 +118,13 @@
         { "deal_damage": { "amount": 1, "to": { "each": "creature", "controller": "opponent" } } } ] } }
     ]
   },
+  "MACO Strike Team": {
+    "abilities": [
+      { "triggered": { "when": { "becomes_target": { "subject": { "each": "creature", "controller": "you" }, "by": "opponent" } },
+                       "effects": [{ "create_token": { "tapped": true, "token": { "name": "Officer", "types": ["creature"],
+                                                                                   "subtypes": ["officer"], "power": 1, "toughness": 1 } } }] } }
+    ]
+  },
   "Ni'Var Science Academy": {
     "abilities": [
       { "enters_tapped_unless": { "condition": { "controls": { "each": "land", "controller": "you" }, "at_least": 2 } } },

@@ -121,6 +121,18 @@ RSpec.describe "Converted trk cards with trigger mechanics" do
     expect(game.pending_decision.player).to eq("alice") # surveil
   end
 
+  it "MACO Strike Team: an opponent targeting your creature creates a tapped Officer token" do
+    game = board do
+      player("alice") { battlefield "MACO Strike Team", "Grizzly Bears" }
+      player("bob", mana_pool: { R: 1 }) { hand "Lightning Bolt" }
+      priority "bob"
+    end
+    cast(game, "Lightning Bolt", player: "bob", targets: [obj_id(game, "Grizzly Bears")])
+    settle(game)
+    officer = game.state.battlefield.find { game.state.object(it).card.start_with?("officer_token") }
+    expect(game.state.object(officer)).to have_attributes(controller: 0, tapped: true)
+  end
+
   it "U.S.S. Reliant: returns a creature card with mana value 4 or less with a finality counter as it enters" do
     game = board do
       player("alice", mana_pool: { B: 4 }) do
