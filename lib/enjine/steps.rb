@@ -75,15 +75,18 @@ module Enjine
 
     # CR 514: discard to maximum hand size, then end "until end of turn" effects; no priority.
     class Cleanup < Step
-      MAX_HAND_SIZE = 7
-
       def priority? = false
 
-      # CR 514.2: remove marked damage and end "until end of turn" effects.
-      def finish(engine) = engine.cleanup_turn!
+      # CR 514.2: remove marked damage and end "until end of turn" effects (control returns first).
+      def finish(engine)
+        engine.revert_temporary_control!
+        engine.cleanup_turn!
+      end
 
+      # CR 514.1 / 402.2: discard down to the maximum hand size, if the player has one.
       def begin(engine)
-        excess = engine.active_player.hand.size - MAX_HAND_SIZE
+        max = engine.max_hand_size(engine.state.active)
+        excess = max ? engine.active_player.hand.size - max : 0
         if excess.positive?
           engine.ask!("kind" => "discard", "player" => engine.state.active, "count" => excess)
         else

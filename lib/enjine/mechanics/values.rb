@@ -325,6 +325,7 @@ module Enjine
         elsif (flag = FLAGS.find { data.key?(it) }) then Flag.new(flag, data[flag] != false)
         elsif data.key?("targets") then Targets.build(data, errors, path)
         elsif data.key?("triggering") then TriggeringIs.build(data, errors, path)
+        elsif data.key?("began_extra_turn") then BeganExtraTurn.new(data["began_extra_turn"] != false) # CR 500.7
         elsif data.key?("source") then Source.build(data, errors, path)
         elsif data.key?("nth_resolution") then NthResolution.build(data, errors, path)
         else Compare.build(data, errors, path, **context)

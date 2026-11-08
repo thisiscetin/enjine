@@ -9,17 +9,24 @@ module Enjine
       def self.doc
         'Declare one attacker: `{type: "attack", object: id, target: ref}` (the defending player ' \
           'or one of their planeswalkers), or `{type: "done"}` (withheld while a creature that attacks ' \
-          "each combat if able could still attack, CR 508.1d)."
+          "each combat if able could still attack, CR 508.1d, or while a creature that can't attack alone " \
+          'attacks alone, CR 506.5; then `{type: "withdraw", object: id}` undoes an attack).'
       end
 
       def self.options(engine, _pending)
         targets = engine.attack_targets
-        done = engine.unmet_attack_requirements.empty? ? [DONE] : [] # CR 508.1d
-        done + engine.eligible_attackers.flat_map { |id| targets.map { { type: "attack", object: id, target: it } } }
+        legal = engine.attack_declaration_legal?
+        done = engine.unmet_attack_requirements.empty? && legal ? [DONE] : [] # CR 508.1c-d
+        withdraw = legal ? [] : engine.attackers.keys.map { { type: "withdraw", object: it } }
+        done + engine.attack_candidates.flat_map { |id| targets.map { { type: "attack", object: id, target: it } } } + withdraw
       end
 
       def self.submit(engine, _pending, option)
-        option[:type] == "done" ? engine.finish_attackers! : engine.declare_attacker!(option[:object], option[:target])
+        case option[:type]
+        when "done" then engine.finish_attackers!
+        when "withdraw" then engine.withdraw_attacker!(option[:object])
+        else engine.declare_attacker!(option[:object], option[:target])
+        end
       end
     end
     register("declare_attackers", DeclareAttackers)

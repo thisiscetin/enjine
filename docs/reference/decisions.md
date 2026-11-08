@@ -34,7 +34,7 @@ While casting/activating a spell or ability with {X} in its cost: `{type: "x", v
 
 ## declare_attackers
 
-Declare one attacker: `{type: "attack", object: id, target: ref}` (the defending player or one of their planeswalkers), or `{type: "done"}` (withheld while a creature that attacks each combat if able could still attack, CR 508.1d).
+Declare one attacker: `{type: "attack", object: id, target: ref}` (the defending player or one of their planeswalkers), or `{type: "done"}` (withheld while a creature that attacks each combat if able could still attack, CR 508.1d, or while a creature that can't attack alone attacks alone, CR 506.5; then `{type: "withdraw", object: id}` undoes an attack).
 
 ## declare_blockers
 

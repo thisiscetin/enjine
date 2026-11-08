@@ -125,6 +125,7 @@ module Enjine
     # ---- turn structure (CR 500) --------------------------------------------
 
     def begin_turn!(index)
+      end_effects_until_turn_of!(index) # "until your next turn" (CR 611.2a)
       state.turn += 1
       state.active = index
       state.players.each { it.lands_played = 0 }
@@ -193,7 +194,7 @@ module Enjine
       index = Steps.index(state.step) + 1
       index += 1 while index < Steps::ORDER.size && Steps::ORDER[index].skip?(self)
       if index >= Steps::ORDER.size
-        begin_turn!(state.opponent(state.active))
+        begin_turn!(take_next_turn!) # an extra turn comes first (CR 500.7)
       else
         enter_step!(Steps::ORDER[index].name)
       end
@@ -252,15 +253,16 @@ module Enjine
     # Moves an object to a zone as a new object (CR 400.7). Returns the new object.
     # Proposes a state change, lets replacement effects modify it (CR 614), and returns
     # the final proposal for the caller to execute.
-    def propose(kind, data) = Replacements.apply(self, Proposal.new(kind, data, []))
+    # `applied`: replacement effects that already modified the event this one replaces (CR 614.5).
+    def propose(kind, data, applied = []) = Replacements.apply(self, Proposal.new(kind, data, applied.dup))
 
     def move!(id, to, reason:, position: :top, controller: nil, enters: nil)
       data = { "object" => id, "to" => to, "position" => position, "reason" => reason, "controller" => controller }
-      data["enters"] = { "tapped" => false, "counters" => {} } if to == :battlefield
+      data["enters"] = { "tapped" => enters&.fetch("tapped", false) == true, "counters" => {} } if to == :battlefield
       data = propose("zone_change", data).data
       return nil if data["cancelled"] # e.g. a shield counter instead of being destroyed (CR 122.1c)
 
-      merge_enters!(data["enters"], enters) if enters && data["enters"]
+      merge_enters!(data["enters"], enters.except("tapped")) if enters && data["enters"] # tapped: replaceable (614.12)
       execute_zone_change!(data)
     end
 
@@ -328,6 +330,7 @@ module Enjine
         fresh.counters.merge!(data["enters"]["counters"])
         fresh.x = old.x if old.zone == :stack # CR 107.3m: its ETB abilities use the spell's X
         fresh.attached_to = data["enters"]["attached_to"] # CR 608.3c: an Aura enters attached
+        enter_attacking!(fresh) if data["enters"]["attacking"] # CR 508.4
       when :stack
         fresh.controller = data["controller"] || old.owner
       end
@@ -336,6 +339,7 @@ module Enjine
     # CR 111.1: a token enters the battlefield under its creator's control. Entering replacement
     # effects apply to it like to any permanent (CR 614.1c, 614.12).
     def create_token!(definition, controller, tapped: false)
+      definition = catalog.fetch(propose("create_token", { "player" => controller, "token" => definition.id }).data["token"])
       obj = create_object(definition.id, controller, :battlefield)
       enters = propose("zone_change", { "object" => obj.id, "to" => :battlefield, "controller" => controller,
                                         "reason" => "create_token",
@@ -344,14 +348,19 @@ module Enjine
       obj.tapped = enters["tapped"]
       obj.counters.merge!(enters["counters"])
       state.battlefield.unshift(obj.id)
+      enter_attacking!(obj) if enters["attacking"] # CR 508.4
       record_result!(obj.id)
       emit Events::ZoneChanged.new(card: definition.id, old_id: nil, new_id: obj.id, owner: name(controller),
                                    from: "none", to: "battlefield", reason: "create_token")
       obj
     end
 
-    def draw!(index)
-      return unless propose("draw", { "player" => index }).data["player"]
+    # CR 121.2: one card at a time. A replacement may turn one draw into several (CR 614.11); those
+    # draws are the modified event, so the replacement that made them doesn't apply again (CR 614.5).
+    def draw!(index, applied: [])
+      proposal = propose("draw", { "player" => index, "count" => 1 }, applied)
+      return unless proposal.data["player"]
+      return proposal.data["count"].times { draw!(index, applied: proposal.applied) } if proposal.data["count"] != 1
 
       pl = player(index)
       if pl.library.empty?
@@ -429,7 +438,7 @@ module Enjine
       state.players.each_with_index do |pl, i|
         next if pl.lost
 
-        reason = if pl.life <= 0 then "life" # CR 704.5a
+        reason = if loses_for_life?(i) then "life" # CR 704.5a (unless an effect says otherwise)
                  elsif pl.drew_from_empty then "empty_library" # CR 704.5b
                  elsif pl.poison >= 10 then "poison" # CR 704.5c
                  end

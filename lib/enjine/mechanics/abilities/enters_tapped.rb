@@ -83,7 +83,8 @@ module Enjine
 
         def mana? = false
         def uses_source? = true
-        def payable?(engine, object) = engine.state.battlefield.include?(object.id)
+        # CR 701.21a, 614.17b: only a permanent on the battlefield its controller may sacrifice.
+        def payable?(engine, object) = engine.can_sacrifice?(object, object.controller)
         def pay!(engine, object) = engine.move!(object.id, :graveyard, reason: "sacrifice")
         def to_s = "Sacrifice this"
       end

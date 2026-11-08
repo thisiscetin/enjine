@@ -38,11 +38,13 @@ module Enjine
       def own_layers(obj, printed, effects)
         symbols = obj.counters.fetch("charge", 0).positive? ? active_station_symbols(obj) : []
         assimilated = !effects.empty? && effects.any? { it["kind"] == "assimilate" && it["affected"].include?(obj.id) }
-        return printed if symbols.empty? && !assimilated
+        added = effects.empty? ? [] : added_subtypes(obj, effects)
+        return printed if symbols.empty? && !assimilated && added.empty?
 
         attrs = printed.to_h
         symbols.each { station_symbol_layers(attrs, it, catalog.fetch(obj.card)) }
         assimilated_layers(attrs) if assimilated
+        attrs[:subtypes] = attrs[:subtypes] | added
         Enjine::Characteristics.new(**attrs.transform_values { it.is_a?(Array) ? it.freeze : it })
       end
 
@@ -131,14 +133,21 @@ module Enjine
       end
 
       # A control change with indefinite duration (CR 613.1b): it becomes a new controller's
-      # permanent, newly under their control (CR 302.6), and leaves combat (CR 506.4).
-      def gain_control!(obj, controller)
+      # permanent, newly under their control (CR 302.6), and leaves combat (CR 506.4). The newest
+      # control change is remembered, so an older "until end of turn" one doesn't undo it as it ends.
+      def gain_control!(obj, controller, timestamp = next_timestamp!)
+        obj.memory["control_timestamp"] = timestamp
         return if obj.controller == controller
 
         leave_combat!(obj.id)
         obj.controller = controller
         obj.controlled_since = state.turn
         emit Events::ControlChanged.new(object: obj.id, controller: name(controller))
+      end
+
+      # Layer 4 (CR 613.1d, 205.1b): "becomes a [subtype] in addition to its other types" until end of turn.
+      def added_subtypes(obj, effects)
+        effects.flat_map { it["kind"] == "add_subtypes" && it["affected"].include?(obj.id) ? it["subtypes"].map(&:to_sym) : [] }
       end
     end
     include SetMechanics

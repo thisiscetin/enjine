@@ -82,7 +82,7 @@ module Enjine
         def apply(engine, ctx) = mine(engine, ctx).each { engine.move!(it, :graveyard, reason: "sacrifice") }
 
         # CR 701.21a: a player can't sacrifice a permanent they don't control.
-        def mine(engine, ctx) = objects(engine, ctx).select { engine.object(it).controller == ctx.controller }
+        def mine(engine, ctx) = objects(engine, ctx).select { engine.can_sacrifice?(engine.object(it), ctx.controller) }
         def possible?(engine, ctx) = !mine(engine, ctx).empty?
       end
 

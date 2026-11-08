@@ -224,6 +224,45 @@ for other groups: Captain Jean-Luc Picard, Sulu, Jett Reno, Gabriel Lorca, Sela,
 Hologram Stalker, Support Mission, The Unicomplex, Dahar Master, The Naked Time,
 Dr. Leonard "Bones" McCoy, Sylvia Tilly, The Inner Light.
 
+## Replacement, prevention and player rules (group 5)
+
+| Capability | Card data | Rules | Status |
+| --- | --- | --- | --- |
+| Draw replacement ("draw two instead") | ability `draw_replacement` | 614.11, 614.5 | done (one per draw; another applies to each draw it makes) |
+| Destruction replacement (remove counters / damage instead) | ability `destroy_replacement` | 614.1a, 614.8, 704.5g-h | done (effects, lethal damage, deathtouch; not sacrifice or 0 toughness) |
+| Token replacement ("that many X tokens instead") | ability `token_replacement` | 614.1a, 614.16, 111.1 | done |
+| Lands enter untapped | ability `enters_untapped` | 614.12, 616.1 | done (applied after every "enters tapped") |
+| Enters tapped and attacking | ability `enters_attacking` | 614.1c, 508.4 | done (attacks the defending player; choosing a planeswalker isn't offered yet) |
+| "+1 of each kind" counters until end of turn | effect `counter_bonus` | 614.1a, 616.1 | done (applied before doubling) |
+| "If it would die this turn, exile it instead" | effect `exile_if_dies` | 614.1a, 700.4 | done |
+| Exile this spell as it resolves | effect `exile_this_spell` | 608.2n | done |
+| Player hexproof, prevent all damage to a player, no maximum hand size, can't attack | effect `player_rule` (end_of_turn / until_your_next_turn) | 702.11c, 615.1, 402.2, 508.1c | done |
+| Don't lose for 0 life, can't sacrifice [filter] | ability `player_rule` | 704.5a, 701.21a, 614.17b | done (`Engine#can_sacrifice?` guards sacrifice costs and effects) |
+| Win / lose the game | effects `win_game`, `lose_game` | 104.2b, 104.3e | done (the rest of the resolving list stops) |
+| Extra turns, "haven't begun an extra turn" | effect `extra_turn`, condition `began_extra_turn` | 500.7 | done (`state.extra_turns`: queue + players who began one) |
+| Gain control (indefinite, until end of turn, by another player) | effect `gain_control` | 613.1b, 108.4, 506.4 | done (control returns in cleanup unless a newer change happened) |
+| Add creature subtypes until end of turn | effect `add_subtypes` | 613.1d, 205.1b | done |
+| Can't attack alone; can't be blocked by [filter]; can't be targeted by abilities from [sources] | keyword `cant_attack_alone`; abilities `cant_be_blocked_by`, `cant_be_targeted_by` | 506.5, 508.1c, 509.1b, 115.4 | done |
+| Fight, bite, remove counters / all counters / damage | effects `fight`, `bite`, `remove_counters`, `remove_all_counters`, `remove_damage` | 701.14, 122.8, 120.6 | done |
+
+CR 616.1 lets the affected player order several applicable replacement effects. Every pair
+implemented so far has an order that player always prefers (stay on the battlefield before being
+exiled, "+1" before doubling, untapped after tapped), so the engine applies that order without
+asking; a decision frame is needed once two effects can be usefully ordered either way.
+
+Converted: Mr. Spock, Pet Sehlat, Cold-Blooded Crew, Species 8472, Holo-Engineer, Deep Space Scan,
+Georgiou (Officer tokens without color, like other token translations), Quark, Dr. McCoy, H.M.S.
+Bounty, Warp Speed, Dr. Joseph M'Benga, Saru, Saurian Explorer, Stable Wormhole, Phlox, Tea, Earl
+Grey, Hot, Warp Core.
+
+Waiting on other capabilities: Brad Boimler ("becomes tapped" trigger), The Needs of the Many
+(additional sacrifice cost), Peace in Our Time ("that player may", peace counter count), Kobayashi Maru
+Scenario (modes not chosen before, up to one target), Khaaaaaaaaaaaannn! (twice X), Kira Nerys (the
+entering creature as the trigger's object), Live Long and Prosper (can't be countered),
+Rules of Acquisition (the target's controller, "if they do"), Worf (one target per opponent,
+up to one), The Wrath of Khan (next-combat delayed trigger, exile from hand, edict), Amok Time (up to
+one target, return from graveyard), Common Goal (one or two targets).
+
 ## Pipeline
 
 `script/convert_set` (to be written, run from the repo with network access):

@@ -122,6 +122,9 @@ module Enjine
           end
         end
 
+        # CR 701.21a, 614.17b: only permanents their controller may sacrifice (Engine::Rules).
+        def candidates(engine, object) = matching(engine, object).select { engine.can_sacrifice?(engine.object(it), object.controller) }
+
         def to_s = "Sacrifice #{amount_words} #{what}"
       end
 

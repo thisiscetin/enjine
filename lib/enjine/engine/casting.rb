@@ -57,14 +57,17 @@ module Enjine
       # "Up to one target" needs no candidate (CR 601.2c).
       def targets_available?(specs, index, exclude, source = nil)
         specs.all? do |spec|
-          optional_target?(spec) || spec.candidates_for(self, index, source).any? { it != exclude && targetable?(it, index) }
+          optional_target?(spec) || spec.candidates_for(self, index, source).any? { it != exclude && targetable?(it, index, source) }
         end
       end
 
       def optional_target?(spec) = spec.respond_to?(:optional?) && spec.optional?
 
-      # CR 702.11b: hexproof permanents can't be targeted by their controller's opponents.
-      def targetable?(ref, index)
+      # CR 702.11b: hexproof permanents can't be targeted by their controller's opponents. `source`: the
+      # permanent whose ability targets (nil for a spell); see Engine::Rules#targeting_forbidden?.
+      def targetable?(ref, index, source = nil)
+        return false if targeting_forbidden?(ref, index, source) # CR 702.11c, 115.4
+
         obj = state.objects[ref]
         return true unless obj && obj.zone == :battlefield && obj.controller != index
 
@@ -257,7 +260,7 @@ module Enjine
         spec = casting_targets[ctx["targets"].size]
         taken = spec.respond_to?(:distinct_from) ? spec.distinct_from.map { ctx["targets"][it] } : []
         spec.candidates_for(self, ctx["player"], ctx["source"]).reject do
-          it == ctx["object"] || taken.include?(it) || !targetable?(it, ctx["player"])
+          it == ctx["object"] || taken.include?(it) || !targetable?(it, ctx["player"], ctx["source"])
         end
       end
 
