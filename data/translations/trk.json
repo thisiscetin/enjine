@@ -1,0 +1,15 @@
+{
+  "Assembly Specialist": {
+    "abilities": [
+      { "triggered": { "when": { "enters": {} }, "effects": [
+        { "create_token": { "token": { "name": "Borg", "types": ["artifact", "creature"], "subtypes": ["borg"],
+                                       "power": 1, "toughness": 1 } } } ] } }
+    ]
+  },
+  "Command Subadjunct": {
+    "abilities": [
+      { "static": { "affects": { "each": { "creature": { "any_of": ["artifact"] } }, "controller": "you" },
+                    "keywords": ["vigilance"] } }
+    ]
+  }
+}

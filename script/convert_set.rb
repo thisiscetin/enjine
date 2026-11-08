@@ -52,8 +52,15 @@ module SetConverter
 
   # ---- one card ----------------------------------------------------------------------
 
+  # Hand-written translations, keyed by card name: {"abilities": [...], "keywords": [...]} replacing what
+  # the text parser would produce. Structured data only; never the card's text.
+  def translations(code)
+    path = File.expand_path("../data/translations/#{code}.json", __dir__)
+    File.exist?(path) ? JSON.parse(File.read(path)) : {}
+  end
+
   # Returns [card_data, nil] or [nil, missing_capabilities].
-  def convert(source)
+  def convert(source, translation = nil)
     missing = []
     missing << "layout: #{source["layout"]}" unless source["layout"] == "normal"
     left, right = source["type_line"].to_s.split(" — ", 2)
@@ -69,7 +76,11 @@ module SetConverter
 
       Integer(source[stat], exception: false) ? data[stat] = Integer(source[stat]) : missing << "variable #{stat}"
     end
-    translate_text(source, data, missing)
+    if translation
+      data.merge!(translation.except("note"))
+    else
+      translate_text(source, data, missing)
+    end
     return [nil, missing.uniq] unless missing.empty?
 
     [Enjine::CardDefinition.from_h(data).to_h, nil]
@@ -101,6 +112,8 @@ module SetConverter
         abilities << { "enters_tapped_unless_pay_life" => { "life" => Integer(m[1]) } }
       elsif line.match?(/\ACARDNAME enters tapped\.\z/)
         abilities << "enters_tapped"
+      elsif (static = static_line(line))
+        abilities << static
       elsif line == "Activate only as a sorcery." && abilities.last.is_a?(Hash) && abilities.last["activated"]
         abilities.last["activated"]["timing"] = "sorcery"
       elsif (mana = mana_ability(line))
@@ -186,6 +199,24 @@ module SetConverter
     elsif (trigger = TRIGGERS.find { |pattern, _| pattern.match?("#{prefix} X") }&.last)
       { ability: { "triggered" => { "when" => trigger, "choose" => Integer(choose), "modes" => modes } } }
     end
+  end
+
+  SUBJECTS = { "creatures" => "creature", "artifact creatures" => "creature", "lands" => "land", "artifacts" => "artifact" }.freeze
+
+  # "Other creatures you control get +1/+1." / "Creatures you control have vigilance."
+  def static_line(line)
+    m = %r{\A(Other )?(creatures|artifact creatures|artifacts) you control (?:get ([+-]\d+)/([+-]\d+)(?: and have ([a-z, ]+))?|have ([a-z, ]+))\.\z}.match(line)
+    return nil unless m
+
+    keywords = (m[5] || m[6]).to_s.split(/, (?:and )?| and /).map(&:strip).reject(&:empty?)
+    return nil unless (keywords - SUPPORTED_KEYWORDS.to_a).empty?
+
+    affects = { "each" => SUBJECTS.fetch(m[2]), "controller" => "you" }
+    affects["other"] = true if m[1]
+    static = { "affects" => affects }
+    static["pump"] = { "power" => Integer(m[3]), "toughness" => Integer(m[4]) } if m[3]
+    static["keywords"] = keywords unless keywords.empty?
+    { "static" => static }
   end
 
   def mana_ability(line)
@@ -305,6 +336,14 @@ module SetConverter
     when /\A(Target player|Target opponent) discards (a|one|two|\d+) cards?\z/
       { "discard" => { "amount" => number(::Regexp.last_match(2)), "to" => target_ref(::Regexp.last_match(1).downcase, targets, offset) } }
     when /\ADiscard (a|one|two|\d+) cards?\z/ then { "discard" => { "amount" => number(::Regexp.last_match(1)) } }
+    when /\A(#{TARGET_PHRASES}|CARDNAME) gains ([a-z ,]+) until end of turn\z/o
+      keywords = ::Regexp.last_match(2).split(/, (?:and )?| and /).map(&:strip)
+      return nil unless (keywords - SUPPORTED_KEYWORDS.to_a).empty?
+
+      to = ::Regexp.last_match(1) == "CARDNAME" ? "self" : target_ref(::Regexp.last_match(1), targets, offset)
+      { "grant" => { "keywords" => keywords, "to" => to } }
+    when /\ADraw a card for each (creature|artifact|land) you control\z/
+      { "draw" => { "amount" => { "count" => { "each" => ::Regexp.last_match(1), "controller" => "you" } } } }
     when /\ACreate (a|an|one|two|three|\d+) (tapped )?(Treasure|Clue|Food) tokens?\z/
       { "create_token" => { "token" => ::Regexp.last_match(3), "amount" => number(::Regexp.last_match(1)),
                             "tapped" => !::Regexp.last_match(2).nil? }.reject { |k, v| k == "tapped" && !v } }
@@ -349,10 +388,11 @@ module SetConverter
 
   def build(code, sources)
     first = sources.first or raise "no cards for set #{code}"
+    manual = translations(code)
     entries = []
     unsupported = []
     sources.sort_by { [it["collector_number"].to_i, it["collector_number"]] }.each do |source|
-      data, missing = convert(source)
+      data, missing = convert(source, manual[source["name"]])
       printing = { "set" => source["set"], "number" => source["collector_number"] }
       if data
         entries << { "card" => data, "rarity" => source["rarity"], "printing" => printing }

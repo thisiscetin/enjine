@@ -12,6 +12,92 @@
   "cards": [
     {
       "card": {
+        "name": "Assembly Specialist",
+        "mana_cost": "{1}{W}",
+        "types": [
+          "artifact",
+          "creature"
+        ],
+        "subtypes": [
+          "borg"
+        ],
+        "power": 1,
+        "toughness": 1,
+        "abilities": [
+          {
+            "triggered": {
+              "when": {
+                "enters": {}
+              },
+              "effects": [
+                {
+                  "create_token": {
+                    "token": {
+                      "name": "Borg",
+                      "types": [
+                        "artifact",
+                        "creature"
+                      ],
+                      "subtypes": [
+                        "borg"
+                      ],
+                      "power": 1,
+                      "toughness": 1
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "rarity": "uncommon",
+      "printing": {
+        "set": "trk",
+        "number": "4"
+      }
+    },
+    {
+      "card": {
+        "name": "Command Subadjunct",
+        "mana_cost": "{W}",
+        "types": [
+          "artifact",
+          "creature"
+        ],
+        "subtypes": [
+          "borg"
+        ],
+        "power": 2,
+        "toughness": 1,
+        "abilities": [
+          {
+            "static": {
+              "affects": {
+                "each": {
+                  "creature": {
+                    "any_of": [
+                      "artifact"
+                    ]
+                  }
+                },
+                "controller": "you"
+              },
+              "keywords": [
+                "vigilance"
+              ]
+            }
+          }
+        ]
+      },
+      "rarity": "uncommon",
+      "printing": {
+        "set": "trk",
+        "number": "9"
+      }
+    },
+    {
+      "card": {
         "name": "Emergency Medical Hologram",
         "mana_cost": "{W}",
         "types": [
@@ -1435,18 +1521,6 @@
       ]
     },
     {
-      "name": "Assembly Specialist",
-      "rarity": "uncommon",
-      "printing": {
-        "set": "trk",
-        "number": "4"
-      },
-      "missing": [
-        "triggered ability",
-        "tokens"
-      ]
-    },
-    {
       "name": "Brad Boimler, Eager Ensign",
       "rarity": "uncommon",
       "printing": {
@@ -1480,7 +1554,6 @@
         "number": "7"
       },
       "missing": [
-        "static ability",
         "triggered ability",
         "tokens",
         "library manipulation",
@@ -1496,17 +1569,6 @@
       },
       "missing": [
         "modal choice"
-      ]
-    },
-    {
-      "name": "Command Subadjunct",
-      "rarity": "uncommon",
-      "printing": {
-        "set": "trk",
-        "number": "9"
-      },
-      "missing": [
-        "static ability"
       ]
     },
     {
@@ -3437,7 +3499,6 @@
         "number": "170"
       },
       "missing": [
-        "static ability",
         "triggered ability",
         "condition (if/unless/as long as)",
         "counters",
@@ -3869,7 +3930,7 @@
         "number": "207"
       },
       "missing": [
-        "other rules text"
+        "invalid: abilities[0].activated.effects[0].grant.to: required"
       ]
     },
     {

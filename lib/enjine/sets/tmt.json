@@ -172,6 +172,53 @@
     },
     {
       "card": {
+        "name": "Krang, Utrom Warlord",
+        "mana_cost": "{9}",
+        "types": [
+          "artifact",
+          "creature"
+        ],
+        "supertypes": [
+          "legendary"
+        ],
+        "subtypes": [
+          "utrom",
+          "robot"
+        ],
+        "keywords": [
+          "flying",
+          "trample",
+          "indestructible",
+          "haste"
+        ],
+        "power": 9,
+        "toughness": 9,
+        "abilities": [
+          {
+            "static": {
+              "affects": {
+                "each": "creature",
+                "controller": "you",
+                "other": true
+              },
+              "keywords": [
+                "flying",
+                "trample",
+                "indestructible",
+                "haste"
+              ]
+            }
+          }
+        ]
+      },
+      "rarity": "mythic",
+      "printing": {
+        "set": "tmt",
+        "number": "175"
+      }
+    },
+    {
+      "card": {
         "name": "Dimension X",
         "types": [
           "land"
@@ -1877,7 +1924,7 @@
         "number": "114"
       },
       "missing": [
-        "other rules text"
+        "invalid: abilities[5].activated.effects[0].grant.to: required"
       ]
     },
     {
@@ -2578,7 +2625,6 @@
         "number": "172"
       },
       "missing": [
-        "static ability",
         "triggered ability",
         "tokens",
         "sacrifice",
@@ -2610,17 +2656,6 @@
       "missing": [
         "triggered ability",
         "exile"
-      ]
-    },
-    {
-      "name": "Krang, Utrom Warlord",
-      "rarity": "mythic",
-      "printing": {
-        "set": "tmt",
-        "number": "175"
-      },
-      "missing": [
-        "static ability"
       ]
     },
     {
