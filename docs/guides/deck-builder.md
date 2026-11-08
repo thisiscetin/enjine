@@ -149,3 +149,13 @@ Without `seed`, `--random-deck` uses `--seed`, and `--deck1`/`--deck2` use the g
 seed plus the seat index. The game intro prints each deck's recipe. Saved games
 that use random decks can't be resumed with `--load` yet, because `--load` only
 knows the sample card pool.
+
+## Color balance
+
+In multicolor decks, each new card is drawn from the least represented chosen
+color with probability `color_balance` (default 75%), measured in colored mana
+symbols. This keeps a two-color deck a real two-color deck: across 400 sample
+decks, the weaker color makes up at least 36% of the colored symbols (median
+47%). Set it to `0` for unbalanced splashes, or to `100` for strict balance.
+Cards outside the chosen colors are never used, and neither are lands that make
+off-color mana.

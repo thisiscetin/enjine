@@ -21,15 +21,16 @@ module Enjine
     module_function
 
     # roundtrip_every: export+import and compare every N decisions (0 disables).
-    def run(setup, games:, seed: 0, max_decisions: 20_000, roundtrip_every: 0, invariants: true)
+    def run(setup, games:, seed: 0, max_decisions: 20_000, roundtrip_every: 0, invariants: true, monitor: true)
       started = Process.clock_gettime(Process::CLOCK_MONOTONIC)
       totals = { decisions: 0, turns: 0, outcomes: Hash.new(0), casts: Hash.new(0) }
       games.times do |i|
         game_seed = seed + i
         game = setup.new_game(seed: game_seed)
         game.subscribe { |e| totals[:casts][e.card] += 1 if e.is_a?(Events::SpellCast) || e.is_a?(Events::AbilityActivated) }
+        watcher = monitor ? RulesMonitor.new(game) : nil
         decisions = play(game, Agents::Random.new(seed: game_seed), game_seed, max_decisions, roundtrip_every,
-                         invariants)
+                         invariants, watcher)
         totals[:decisions] += decisions
         totals[:turns] += game.turn
         totals[:outcomes][game.result["reason"]] += 1
@@ -41,13 +42,13 @@ module Enjine
                  end.to_h, seconds: Process.clock_gettime(Process::CLOCK_MONOTONIC) - started)
     end
 
-    def play(game, agent, seed, max_decisions, roundtrip_every, invariants)
+    def play(game, agent, seed, max_decisions, roundtrip_every, invariants, watcher = nil)
       count = 0
       until game.over?
         raise Failure.new("game exceeded #{max_decisions} decisions", seed: seed, decisions: count) if count >= max_decisions
 
         begin
-          game.submit(agent.choose(game.pending_decision))
+          entry = game.submit(agent.choose(game.pending_decision))
         rescue Failure
           raise
         rescue StandardError => e
@@ -55,9 +56,18 @@ module Enjine
         end
         count += 1
         check!(game, seed, count) if invariants
+        watch!(watcher, entry, seed, count) if watcher
         roundtrip!(game, seed, count) if roundtrip_every.positive? && (count % roundtrip_every).zero?
       end
       count
+    end
+
+    def watch!(watcher, entry, seed, count)
+      found = watcher.check!(entry)
+      return if found.empty?
+
+      first = found.first
+      raise Failure.new("rules finding CR #{first.rule}: #{first.message}", seed: seed, decisions: count)
     end
 
     def check!(game, seed, count)

@@ -51,7 +51,11 @@ module Enjine
       # a mono-color deck plays a few utility lands, a multicolor deck several duals.
       nonbasic_lands: { mono: 0..4, multi: 2..8 },
       # Number of colors when `colors: :any`: two-color decks are the most common.
-      random_colors: { 1 => 30, 2 => 50, 3 => 20 }
+      random_colors: { 1 => 30, 2 => 50, 3 => 20 },
+      # In multicolor decks, the % chance that the next card is drawn from the least
+      # represented chosen color (by colored mana symbols), so no chosen color ends up a
+      # token splash. 0 disables balancing; 100 forces strict balance.
+      color_balance: 75
     }.freeze
 
     BASIC_LAND_NAMES = { W: "Plains", U: "Island", B: "Swamp", R: "Mountain", G: "Forest" }.freeze
@@ -210,7 +214,7 @@ module Enjine
         colored = candidates.select { self.class.colors_of(it).include?(color) }
         filled = take(colored.empty? ? nil : by_curve(colored), candidates, chosen, filled, target)
       end
-      filled = take(by_curve(candidates), candidates, chosen, filled, target) while filled < target && !candidates.empty?
+      filled = take(by_curve(balanced(candidates)), candidates, chosen, filled, target) while filled < target && !candidates.empty?
       top_up(chosen, filled, target)
     end
 
@@ -236,6 +240,19 @@ module Enjine
         end
       end
       filled
+    end
+
+    # Candidates restricted to the least represented chosen color (see profile :color_balance).
+    def balanced(candidates)
+      return candidates if @colors.size < 2 || @rng.rand(100) >= @profile[:color_balance]
+
+      symbols = Hash.new(0)
+      (@creatures.to_a + @others.to_a).each do |id, n|
+        definition(id).mana_cost&.colored&.each { |color, k| symbols[color] += k * n }
+      end
+      weakest = @colors.min_by { [symbols[it], it] }
+      preferred = candidates.select { self.class.colors_of(it).include?(weakest) }
+      preferred.empty? ? candidates : preferred
     end
 
     # Multicolor decks start with one card of each color not yet represented.

@@ -9,7 +9,9 @@ RSpec.describe "Guardrails" do
       "lib/enjine/engine/casting.rb" => "spells in hand/stack (printed) and stack abilities (CR 113.7a)",
       "lib/enjine/engine/resolution.rb" => "spell abilities and permanence of the printed spell",
       "lib/enjine/replacements.rb" => "entering status from printed card types",
-      "lib/enjine/view.rb" => "printed name, cost and rules text"
+      "lib/enjine/view.rb" => "printed name, cost and rules text",
+      "lib/enjine/deck_builder.rb" => "deck construction works on printed cards, not game objects",
+      "lib/enjine/rules_monitor.rb" => "independent checker recomputes from printed values on purpose"
     }
   end
 

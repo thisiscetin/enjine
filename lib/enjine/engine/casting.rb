@@ -38,15 +38,25 @@ module Enjine
         specs.all? { |spec| spec.candidates(self, index).any? { it != exclude } }
       end
 
-      # A legality bound, not a solver: mana in pool plus untapped mana sources must
-      # at least cover the mana value.
+      # Whether the cost could be paid with the mana pool plus untapped mana sources (CR 601.2g-h).
+      # Each colored symbol needs mana of that color; generic is paid by anything left. This is
+      # exact while every source produces a fixed kind of mana; sources with a choice of colors
+      # will need a matching here.
       def affordable?(index, cost, excluded_source)
         return true if cost.nil? || cost.mana_value.zero?
 
-        available = player(index).mana_pool.values.sum
-        list = all_mana_sources(index)
-        available += excluded_source ? list.count { it[0] != excluded_source } : list.size
-        available >= cost.mana_value
+        available = player(index).mana_pool.dup
+        all_mana_sources(index).each do |id, ref|
+          next if id == excluded_source
+
+          chars(id).ability(ref).produce.each { available[it] += 1 }
+        end
+        cost.colored.each do |color, n|
+          return false if available[color] < n
+
+          available[color] -= n
+        end
+        available.values.sum >= cost.generic
       end
 
       def mana_sources(index, excluded_source)
