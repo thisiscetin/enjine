@@ -21,8 +21,23 @@ module Enjine
 
       def self.perform(engine, index, option)
         engine.player(index).lands_played += 1
+        if engine.entering_choice(option[:object])
+          engine.state.frames << { "type" => "play_land", "object" => option[:object], "player" => index }
+          return engine.ask!(nil)
+        end
         engine.move!(option[:object], :battlefield, controller: index, reason: "play_land")
         engine.action_taken!(index) # CR 117.3c: the player receives priority again
+      end
+
+      # The play_land frame: ask the "as this enters" choice, then put the land onto the battlefield.
+      def self.step(engine, frame)
+        return engine.ask_enter_choice!(frame["object"], frame["player"]) unless frame["enter"]
+
+        enters = engine.enters_from_answer(frame["object"], frame)
+        engine.pay_entering_life!(frame["player"], frame)
+        engine.move!(frame["object"], :battlefield, controller: frame["player"], reason: "play_land", enters: enters)
+        engine.action_taken!(frame["player"])
+        :done
       end
     end
     register("play_land", PlayLand)

@@ -38,8 +38,12 @@ module Enjine
 
           frame["pc"] += 1
         end
+        if !obj.ability? && definition(obj).permanent? && entering_choice(obj.id) && !frame["enter"]
+          return ask_enter_choice!(obj.id, obj.controller) # CR 614.12: decided before it enters
+        end
+
         emit Events::Resolved.new(object: obj.id, card: obj.card, kind: obj.kind)
-        finish_resolution!(obj)
+        finish_resolution!(obj, frame)
         after_resolution!
       end
 
@@ -78,12 +82,14 @@ module Enjine
         end
       end
 
-      def finish_resolution!(obj)
+      def finish_resolution!(obj, frame = {})
         return remove_stack_object!(obj.id) if obj.ability?
         return unless state.stack.include?(obj.id) # it may have left the stack during resolution
 
         if definition(obj).permanent?
-          move!(obj.id, :battlefield, controller: obj.controller, reason: "resolve") # CR 608.3
+          enters = enters_from_answer(obj.id, frame)
+          pay_entering_life!(obj.controller, frame)
+          move!(obj.id, :battlefield, controller: obj.controller, reason: "resolve", enters: enters) # CR 608.3
         else
           move!(obj.id, :graveyard, reason: "resolve") # CR 608.2n
         end

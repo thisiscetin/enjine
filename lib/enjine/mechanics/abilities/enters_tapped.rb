@@ -26,6 +26,44 @@ module Enjine
         # Called by the replacement pass for the entering object.
         def modify_entering(enters) = enters["tapped"] = true
       end
+
+      # "As this enters, you may pay N life. If you don't, it enters tapped." (CR 614.12, 119.4).
+      # The controller chooses before it enters.
+      class EntersTappedUnlessPayLife < Primitive
+        primitive :ability, :enters_tapped_unless_pay_life,
+                  description: "As this permanent enters, its controller may pay `life` life; if they don't, it enters " \
+                               "tapped. You can't pay more life than you have.",
+                  rules: %w[614.12 119.4],
+                  params: { "life" => "integer" },
+                  example: { "enters_tapped_unless_pay_life" => { "life" => 2 } }
+
+        attr_reader :life
+
+        def self.build(params, errors, path, **)
+          Mechanics.check_keys(params, %w[life], errors, path)
+          new(Mechanics.integer_param(params, :life, errors, path, min: 1))
+        end
+
+        def initialize(life)
+          super()
+          @life = life
+          freeze
+        end
+
+        def kind = :entering_choice
+        def mana_ability? = false
+        def allowed_types = nil
+        def try_effects = []
+        def to_s = "as this enters, pay #{life} life or it enters tapped"
+
+        # Options for the controller (CR 119.4: paying life needs at least that much).
+        def options(engine, controller)
+          pay = engine.player(controller).life >= life ? [{ type: "pay_life", life: life }] : []
+          pay + [{ type: "enter_tapped" }]
+        end
+
+        def enters_for(answer) = { "tapped" => answer[:type] != "pay_life" }
+      end
     end
 
     module Costs

@@ -524,6 +524,54 @@
     },
     {
       "card": {
+        "name": "Blood Crypt",
+        "types": [
+          "land"
+        ],
+        "subtypes": [
+          "swamp",
+          "mountain"
+        ],
+        "abilities": [
+          {
+            "enters_tapped_unless_pay_life": {
+              "life": 2
+            }
+          }
+        ]
+      },
+      "rarity": "rare",
+      "printing": {
+        "set": "trk",
+        "number": "278"
+      }
+    },
+    {
+      "card": {
+        "name": "Breeding Pool",
+        "types": [
+          "land"
+        ],
+        "subtypes": [
+          "forest",
+          "island"
+        ],
+        "abilities": [
+          {
+            "enters_tapped_unless_pay_life": {
+              "life": 2
+            }
+          }
+        ]
+      },
+      "rarity": "rare",
+      "printing": {
+        "set": "trk",
+        "number": "279"
+      }
+    },
+    {
+      "card": {
         "name": "Cardassia Prime",
         "types": [
           "land"
@@ -671,6 +719,54 @@
     },
     {
       "card": {
+        "name": "Godless Shrine",
+        "types": [
+          "land"
+        ],
+        "subtypes": [
+          "plains",
+          "swamp"
+        ],
+        "abilities": [
+          {
+            "enters_tapped_unless_pay_life": {
+              "life": 2
+            }
+          }
+        ]
+      },
+      "rarity": "rare",
+      "printing": {
+        "set": "trk",
+        "number": "285"
+      }
+    },
+    {
+      "card": {
+        "name": "Hallowed Fountain",
+        "types": [
+          "land"
+        ],
+        "subtypes": [
+          "plains",
+          "island"
+        ],
+        "abilities": [
+          {
+            "enters_tapped_unless_pay_life": {
+              "life": 2
+            }
+          }
+        ]
+      },
+      "rarity": "rare",
+      "printing": {
+        "set": "trk",
+        "number": "286"
+      }
+    },
+    {
+      "card": {
         "name": "Orion",
         "types": [
           "land"
@@ -716,6 +812,30 @@
       "printing": {
         "set": "trk",
         "number": "288"
+      }
+    },
+    {
+      "card": {
+        "name": "Overgrown Tomb",
+        "types": [
+          "land"
+        ],
+        "subtypes": [
+          "swamp",
+          "forest"
+        ],
+        "abilities": [
+          {
+            "enters_tapped_unless_pay_life": {
+              "life": 2
+            }
+          }
+        ]
+      },
+      "rarity": "rare",
+      "printing": {
+        "set": "trk",
+        "number": "289"
       }
     },
     {
@@ -867,6 +987,102 @@
     },
     {
       "card": {
+        "name": "Sacred Foundry",
+        "types": [
+          "land"
+        ],
+        "subtypes": [
+          "mountain",
+          "plains"
+        ],
+        "abilities": [
+          {
+            "enters_tapped_unless_pay_life": {
+              "life": 2
+            }
+          }
+        ]
+      },
+      "rarity": "rare",
+      "printing": {
+        "set": "trk",
+        "number": "295"
+      }
+    },
+    {
+      "card": {
+        "name": "Steam Vents",
+        "types": [
+          "land"
+        ],
+        "subtypes": [
+          "island",
+          "mountain"
+        ],
+        "abilities": [
+          {
+            "enters_tapped_unless_pay_life": {
+              "life": 2
+            }
+          }
+        ]
+      },
+      "rarity": "rare",
+      "printing": {
+        "set": "trk",
+        "number": "298"
+      }
+    },
+    {
+      "card": {
+        "name": "Stomping Ground",
+        "types": [
+          "land"
+        ],
+        "subtypes": [
+          "mountain",
+          "forest"
+        ],
+        "abilities": [
+          {
+            "enters_tapped_unless_pay_life": {
+              "life": 2
+            }
+          }
+        ]
+      },
+      "rarity": "rare",
+      "printing": {
+        "set": "trk",
+        "number": "299"
+      }
+    },
+    {
+      "card": {
+        "name": "Temple Garden",
+        "types": [
+          "land"
+        ],
+        "subtypes": [
+          "forest",
+          "plains"
+        ],
+        "abilities": [
+          {
+            "enters_tapped_unless_pay_life": {
+              "life": 2
+            }
+          }
+        ]
+      },
+      "rarity": "rare",
+      "printing": {
+        "set": "trk",
+        "number": "301"
+      }
+    },
+    {
+      "card": {
         "name": "Vulcan",
         "types": [
           "land"
@@ -912,6 +1128,30 @@
       "printing": {
         "set": "trk",
         "number": "305"
+      }
+    },
+    {
+      "card": {
+        "name": "Watery Grave",
+        "types": [
+          "land"
+        ],
+        "subtypes": [
+          "island",
+          "swamp"
+        ],
+        "abilities": [
+          {
+            "enters_tapped_unless_pay_life": {
+              "life": 2
+            }
+          }
+        ]
+      },
+      "rarity": "rare",
+      "printing": {
+        "set": "trk",
+        "number": "306"
       }
     },
     {
@@ -4350,28 +4590,6 @@
       ]
     },
     {
-      "name": "Blood Crypt",
-      "rarity": "rare",
-      "printing": {
-        "set": "trk",
-        "number": "278"
-      },
-      "missing": [
-        "condition (if/unless/as long as)"
-      ]
-    },
-    {
-      "name": "Breeding Pool",
-      "rarity": "rare",
-      "printing": {
-        "set": "trk",
-        "number": "279"
-      },
-      "missing": [
-        "condition (if/unless/as long as)"
-      ]
-    },
-    {
       "name": "Federation Outpost",
       "rarity": "rare",
       "printing": {
@@ -4396,28 +4614,6 @@
       ]
     },
     {
-      "name": "Godless Shrine",
-      "rarity": "rare",
-      "printing": {
-        "set": "trk",
-        "number": "285"
-      },
-      "missing": [
-        "condition (if/unless/as long as)"
-      ]
-    },
-    {
-      "name": "Hallowed Fountain",
-      "rarity": "rare",
-      "printing": {
-        "set": "trk",
-        "number": "286"
-      },
-      "missing": [
-        "condition (if/unless/as long as)"
-      ]
-    },
-    {
       "name": "Ni'Var Science Academy",
       "rarity": "rare",
       "printing": {
@@ -4427,17 +4623,6 @@
       "missing": [
         "condition (if/unless/as long as)",
         "modal choice"
-      ]
-    },
-    {
-      "name": "Overgrown Tomb",
-      "rarity": "rare",
-      "printing": {
-        "set": "trk",
-        "number": "289"
-      },
-      "missing": [
-        "condition (if/unless/as long as)"
       ]
     },
     {
@@ -4465,17 +4650,6 @@
       ]
     },
     {
-      "name": "Sacred Foundry",
-      "rarity": "rare",
-      "printing": {
-        "set": "trk",
-        "number": "295"
-      },
-      "missing": [
-        "condition (if/unless/as long as)"
-      ]
-    },
-    {
       "name": "Spatial Anomaly",
       "rarity": "uncommon",
       "printing": {
@@ -4499,28 +4673,6 @@
       ]
     },
     {
-      "name": "Steam Vents",
-      "rarity": "rare",
-      "printing": {
-        "set": "trk",
-        "number": "298"
-      },
-      "missing": [
-        "condition (if/unless/as long as)"
-      ]
-    },
-    {
-      "name": "Stomping Ground",
-      "rarity": "rare",
-      "printing": {
-        "set": "trk",
-        "number": "299"
-      },
-      "missing": [
-        "condition (if/unless/as long as)"
-      ]
-    },
-    {
       "name": "Subspace Anomaly",
       "rarity": "uncommon",
       "printing": {
@@ -4530,17 +4682,6 @@
       "missing": [
         "tokens",
         "sacrifice"
-      ]
-    },
-    {
-      "name": "Temple Garden",
-      "rarity": "rare",
-      "printing": {
-        "set": "trk",
-        "number": "301"
-      },
-      "missing": [
-        "condition (if/unless/as long as)"
       ]
     },
     {
@@ -4578,17 +4719,6 @@
       "missing": [
         "condition (if/unless/as long as)",
         "modal choice"
-      ]
-    },
-    {
-      "name": "Watery Grave",
-      "rarity": "rare",
-      "printing": {
-        "set": "trk",
-        "number": "306"
-      },
-      "missing": [
-        "condition (if/unless/as long as)"
       ]
     }
   ]

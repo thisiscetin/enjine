@@ -97,6 +97,8 @@ module SetConverter
         missing << "modal choice"
       elsif (triggered = triggered_ability(line))
         abilities << triggered
+      elsif (m = /\AAs CARDNAME enters, you may pay (\d+) life\. If you don't, it enters tapped\.\z/.match(line))
+        abilities << { "enters_tapped_unless_pay_life" => { "life" => Integer(m[1]) } }
       elsif line.match?(/\ACARDNAME enters tapped\.\z/)
         abilities << "enters_tapped"
       elsif line == "Activate only as a sorcery." && abilities.last.is_a?(Hash) && abilities.last["activated"]

@@ -48,6 +48,24 @@ Rules: CR 614.1c, CR 614.12
 "enters_tapped"
 ```
 
+## enters_tapped_unless_pay_life
+
+As this permanent enters, its controller may pay `life` life; if they don't, it enters tapped. You can't pay more life than you have.
+
+Rules: CR 614.12, CR 119.4
+
+| Parameter | Description |
+| --- | --- |
+| `life` | integer |
+
+```json
+{
+  "enters_tapped_unless_pay_life": {
+    "life": 2
+  }
+}
+```
+
 ## loyalty
 
 A loyalty ability. Its cost adds (positive) or removes (negative) loyalty counters and is paid on activation. Sorcery speed, and only one loyalty ability per planeswalker per turn.

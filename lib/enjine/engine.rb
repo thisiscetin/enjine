@@ -253,10 +253,37 @@ module Enjine
     # the final proposal for the caller to execute.
     def propose(kind, data) = Replacements.apply(self, Proposal.new(kind, data, []))
 
-    def move!(id, to, reason:, position: :top, controller: nil)
+    def move!(id, to, reason:, position: :top, controller: nil, enters: nil)
       data = { "object" => id, "to" => to, "position" => position, "reason" => reason, "controller" => controller }
       data["enters"] = { "tapped" => false, "counters" => {} } if to == :battlefield
-      execute_zone_change!(propose("zone_change", data).data)
+      data = propose("zone_change", data).data
+      data["enters"].merge!(enters) if enters && data["enters"]
+      execute_zone_change!(data)
+    end
+
+    # An "as this enters" choice the controller must make before `id` enters (CR 614.12).
+    def entering_choice(id) = chars(id).abilities.map(&:ability).find { it.kind == :entering_choice }
+
+    # Records the answer to an enter_choice decision on the frame that asked.
+    def enter_choice!(option)
+      state.frames.last["enter"] = option.transform_keys(&:to_s)
+      ask!(nil)
+    end
+
+    def ask_enter_choice!(id, controller)
+      ask!("kind" => "enter_choice", "player" => controller, "object" => id)
+      :wait
+    end
+
+    def enters_from_answer(id, frame)
+      choice = entering_choice(id)
+      choice && frame["enter"] ? choice.enters_for(frame["enter"].transform_keys(&:to_sym)) : nil
+    end
+
+    def pay_entering_life!(controller, frame)
+      return unless frame["enter"] && frame["enter"]["type"] == "pay_life"
+
+      change_life!(controller, -frame["enter"]["life"])
     end
 
     def execute_zone_change!(data)

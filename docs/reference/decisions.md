@@ -36,6 +36,10 @@ Cleanup step: discard one card, `{type: "discard", object: id}`, until the hand 
 
 A choice made while an effect resolves (scry, surveil, discard...): submit one of the `choices` exactly as listed; `prompt` describes it.
 
+## enter_choice
+
+Before `object` enters: `{type: "pay_life", life: n}` (only with enough life) or `{type: "enter_tapped"}` (CR 614.12, 119.4).
+
 ## legend_rule
 
 Keep one of your legendary permanents named `name`: `{type: "keep", object: id}`; the others go to the graveyard (CR 704.5j).

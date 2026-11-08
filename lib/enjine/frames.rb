@@ -42,7 +42,7 @@ module Enjine
     # Resolving the top object of the stack, one effect at a time (CR 608).
     class Resolve < Base
       def self.step(engine, frame) = engine.step_resolution!(frame)
-      def self.decisions = %w[effect_choice]
+      def self.decisions = %w[effect_choice enter_choice]
 
       def self.validate(frame, data, errors)
         errors << "frames: resolving object #{frame["object"]} is not on the stack" unless data["stack"].include?(frame["object"])
@@ -70,5 +70,12 @@ module Enjine
       def self.decisions = %w[legend_rule]
     end
     register("legend_rule", LegendRule)
+
+    # Playing a land that asks an "as this enters" choice first (CR 614.12).
+    class PlayLand < Base
+      def self.step(engine, frame) = Actions::PlayLand.step(engine, frame)
+      def self.decisions = %w[enter_choice]
+    end
+    register("play_land", PlayLand)
   end
 end
