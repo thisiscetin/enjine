@@ -6,7 +6,7 @@ module Enjine
     # at a time: announce -> choose targets -> pay mana (tapping sources manually)
     # -> cast. Until every cost is paid the whole process can be cancelled and is
     # rewound (CR 733, "Handling Illegal Actions"). The in-progress context lives in
-    # state.casting so a game can be exported mid-cast.
+    # casting so a game can be exported mid-cast.
     module Casting
       # ---- what can be started ---------------------------------------------------
 
@@ -110,34 +110,45 @@ module Enjine
       def start_casting!(index, object_id, kind, cost:, origin: nil, source: nil, ability: nil)
         remaining = { "generic" => cost&.generic.to_i }
         cost&.colored&.each { |color, n| remaining[color.to_s] = n }
-        state.casting = { "player" => index, "object" => object_id, "kind" => kind, "origin" => origin,
-                          "source" => source, "ability" => ability, "targets" => [], "remaining" => remaining,
-                          "pool" => player(index).mana_pool.transform_keys(&:to_s), "tapped" => [] }
-        continue_casting!
+        state.frames << { "type" => "cast", "player" => index, "object" => object_id, "kind" => kind,
+                          "origin" => origin, "source" => source, "ability" => ability, "targets" => [],
+                          "remaining" => remaining, "pool" => player(index).mana_pool.transform_keys(&:to_s),
+                          "tapped" => [] }
+        ask!(nil) # advance! now steps the cast frame
+      end
+
+      # The cast/activation in progress (the top frame while a cast decision is pending).
+      def casting
+        frame = state.frames.last
+        frame if frame && frame["type"] == "cast"
       end
 
       def casting_ability
-        ctx = state.casting
+        ctx = casting
         obj = object(ctx["object"])
         ctx["kind"] == "spell" ? definition(obj).spell_ability : definition(obj).abilities[ctx["ability"]]
       end
 
       # ---- the in-progress steps --------------------------------------------------
 
+      # Steps the cast frame: asks for the next target, then for payment, then finishes.
       def continue_casting!
-        ctx = state.casting
+        ctx = casting
         specs = casting_ability&.targets || []
         if ctx["targets"].size < specs.size
           ask!("kind" => "choose_target", "player" => ctx["player"], "index" => ctx["targets"].size)
+          :wait
         elsif ctx["remaining"].values.sum.positive?
           ask!("kind" => "pay_cost", "player" => ctx["player"], "remaining" => remaining_text)
+          :wait
         else
           finish_casting!
+          :done
         end
       end
 
       def remaining_text
-        rem = state.casting["remaining"]
+        rem = casting["remaining"]
         cost = Mana::Cost.new(generic: rem["generic"], colored: rem.except("generic").transform_keys(&:to_sym)
                                                                    .reject { |_, n| n.zero? })
         cost.to_s
@@ -145,21 +156,21 @@ module Enjine
 
       # CR 601.2c: targets, in order; a spell or ability can't target itself (CR 115.5).
       def target_candidates
-        ctx = state.casting
+        ctx = casting
         spec = casting_ability.targets[ctx["targets"].size]
         spec.candidates(self, ctx["player"]).reject { it == ctx["object"] }
       end
 
       def choose_target!(ref)
-        ctx = state.casting
+        ctx = casting
         ctx["targets"] << ref
         emit Events::TargetChosen.new(player: name(ctx["player"]), object: ctx["object"], target: ref)
-        continue_casting!
+        ask!(nil)
       end
 
       # Mana types in the pool that can pay part of the remaining cost (CR 601.2h).
       def payable_mana_types
-        ctx = state.casting
+        ctx = casting
         rem = ctx["remaining"]
         player(ctx["player"]).mana_pool.filter_map do |type, n|
           type.to_s if n.positive? && (rem.fetch(type.to_s, 0).positive? || rem["generic"].positive?)
@@ -167,31 +178,31 @@ module Enjine
       end
 
       def pay_mana!(type)
-        ctx = state.casting
+        ctx = casting
         rem = ctx["remaining"]
         player(ctx["player"]).mana_pool[type.to_sym] -= 1
         rem.fetch(type, 0).positive? ? rem[type] -= 1 : rem["generic"] -= 1
         emit Events::ManaPaid.new(player: name(ctx["player"]), mana: "{#{type}}", object: ctx["object"])
-        continue_casting!
+        ask!(nil)
       end
 
       # Mana sources usable during payment; a {T} ability's own source is excluded.
       def payment_sources
-        ctx = state.casting
+        ctx = casting
         excluded = ctx["kind"] == "ability" && needs_tap?(casting_ability) ? ctx["source"] : nil
         mana_sources(ctx["player"], excluded)
       end
 
       def tap_for_payment!(id, ability_index)
-        ctx = state.casting
+        ctx = casting
         activate_mana_ability!(ctx["player"], id, ability_index)
         ctx["tapped"] << id
-        continue_casting!
+        ask!(nil)
       end
 
       # CR 601.2h-i / 602.2b: remaining costs are paid, the spell becomes cast.
       def finish_casting!
-        ctx = state.casting
+        ctx = casting
         index = ctx["player"]
         obj = object(ctx["object"])
         obj.targets = ctx["targets"].dup
@@ -202,8 +213,7 @@ module Enjine
         else
           emit Events::SpellCast.new(player: name(index), object: obj.id, card: obj.card, targets: obj.targets)
         end
-        state.casting = nil
-        action_taken!(index) # CR 117.3c
+        action_taken!(index) # CR 117.3c (the frame is popped by advance!)
       end
 
       def pay_ability_costs!(ctx)
@@ -219,7 +229,7 @@ module Enjine
 
       # Rewinds an unfinished cast or activation.
       def cancel_casting!
-        ctx = state.casting
+        ctx = casting
         index = ctx["player"]
         ctx["tapped"].each do |id|
           object(id).tapped = false
@@ -231,7 +241,7 @@ module Enjine
         state.objects.delete(obj.id)
         restore_to_hand!(obj, ctx["origin"]) if ctx["kind"] == "spell"
         emit Events::CastCancelled.new(player: name(index), object: obj.id, card: obj.card)
-        state.casting = nil
+        state.frames.pop
         give_priority!(index)
       end
 

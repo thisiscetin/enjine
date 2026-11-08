@@ -6,7 +6,7 @@ module Enjine
   # The validation doubles as the engine's invariant check: the fuzzer runs it
   # after every decision of every random game.
   module Snapshot
-    VERSION = 1
+    VERSION = 2
     PLAYER_KEYS = %w[name life poison library hand graveyard mana_pool lands_played drew_from_empty lost
                      mulligans kept mulligan_choice].freeze
 
@@ -46,8 +46,7 @@ module Enjine
       state.attackers = deep_copy(data.fetch("attackers", {}))
       state.blockers = deep_copy(data.fetch("blockers", {}))
       state.effects = deep_copy(data.fetch("effects", []))
-      state.casting = deep_copy(data["casting"])
-      state.combat_damage = deep_copy(data["combat_damage"])
+      state.frames = deep_copy(data.fetch("frames", []))
       state.attacks_declared = data.fetch("attacks_declared", 0)
       %w[turn active step_state priority passes next_id starting_player].each do |k|
         state.public_send("#{k}=", data[k])
@@ -172,13 +171,24 @@ module Enjine
         errors << "blockers: #{id} blocks #{attacker}, which is not attacking" unless attackers.key?(attacker)
       end
       errors << "effects: must be a list" unless data.fetch("effects", []).is_a?(Array)
-      casting = data["casting"]
-      return if casting.nil?
+      validate_frames(data, errors)
+    end
 
-      errors << "casting: object #{casting["object"]} is not on the stack" unless data["stack"].include?(casting["object"])
-      return if %w[choose_target pay_cost].include?(data.dig("pending", "kind"))
+    def validate_frames(data, errors)
+      frames = data.fetch("frames", [])
+      return errors << "frames: must be a list" unless frames.is_a?(Array)
 
-      errors << "casting: a cast in progress needs a choose_target or pay_cost decision"
+      frames.each_with_index do |frame, i|
+        klass = frame.is_a?(Hash) && Frames::KINDS[frame["type"]]
+        next errors << "frames[#{i}]: unknown frame #{frame.inspect[0, 60]}" unless klass
+
+        klass.validate(frame, data, errors)
+      end
+      top = frames.last
+      kind = data.dig("pending", "kind")
+      return unless top && kind && !Frames.fetch(top["type"]).decisions.include?(kind)
+
+      errors << "pending: #{kind} can't be pending while a #{top["type"]} frame is in progress"
     end
 
     def validate_zone_membership(data, objects, errors)

@@ -45,7 +45,7 @@ module Enjine
 
     attr_accessor :seed, :rng, :decklists, :players, :objects, :battlefield, :stack, :exile, :turn, :active,
                   :step, :step_state, :priority, :passes, :next_id, :starting_player, :pending, :result,
-                  :attackers, :blockers, :effects, :casting, :combat_damage, :attacks_declared
+                  :attackers, :blockers, :effects, :frames, :attacks_declared
 
     def self.initial(names:, decklists:, seed:)
       state = new
@@ -60,8 +60,7 @@ module Enjine
       state.attackers = {}
       state.blockers = {}
       state.effects = []
-      state.casting = nil
-      state.combat_damage = nil
+      state.frames = []
       state.attacks_declared = 0
       state.turn = 0
       state.passes = 0
@@ -92,7 +91,7 @@ module Enjine
         "players" => players.map(&:to_h), "objects" => objects.values.map(&:to_h),
         "battlefield" => battlefield.dup, "stack" => stack.dup, "exile" => exile.dup,
         "attackers" => attackers.dup, "blockers" => blockers.dup, "effects" => effects.map { deep_dup(it) },
-        "casting" => casting && deep_dup(casting), "combat_damage" => combat_damage && deep_dup(combat_damage),
+        "frames" => deep_dup(frames),
         "attacks_declared" => attacks_declared }
     end
 

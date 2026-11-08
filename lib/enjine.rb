@@ -15,6 +15,7 @@ require_relative "enjine/player"
 require_relative "enjine/state"
 require_relative "enjine/events"
 require_relative "enjine/steps"
+require_relative "enjine/frames"
 require_relative "enjine/decisions"
 Dir[File.join(__dir__, "enjine/decisions/*.rb")].each { |f| require f }
 require_relative "enjine/actions"

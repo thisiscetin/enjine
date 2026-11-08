@@ -135,7 +135,13 @@ module Enjine
 
     # Runs the game forward until a decision is pending or the game is over.
     def advance!
-      until state.pending || state.over? || state.step.nil?
+      until state.pending || state.over?
+        if (frame = state.frames.last)
+          step_frame!(frame)
+          next
+        end
+        break if state.step.nil?
+
         case state.step_state
         when "begin"
           state.step_state = "active"
@@ -145,6 +151,12 @@ module Enjine
         else raise Error, "engine stalled in #{state.step} (#{state.step_state}) with no pending decision"
         end
       end
+    end
+
+    # Steps the innermost in-progress process (see Enjine::Frames).
+    def step_frame!(frame)
+      result = Frames.fetch(frame["type"]).step(self, frame)
+      state.frames.delete_at(state.frames.rindex { it.equal?(frame) }) if result == :done && state.frames.include?(frame)
     end
 
     # Called once a step's turn-based actions (and any decisions they needed) are complete.
@@ -192,7 +204,8 @@ module Enjine
       emit Events::PriorityPassed.new(player: name(index))
       state.passes += 1
       if state.passes >= state.players.size && !state.stack.empty?
-        resolve_top! # CR 117.4, 608
+        ask!(nil)
+        begin_resolution! # CR 117.4, 608
       elsif state.passes >= state.players.size
         # CR 117.4 / 500.2: all players passed with an empty stack -> the step ends.
         ask!(nil)
@@ -340,6 +353,7 @@ module Enjine
       reason = losers.map(&:lost).uniq.join(",")
       state.result = { "winner" => winner, "reason" => reason }
       ask!(nil)
+      state.frames.clear
       emit Events::GameEnded.new(winner: winner, reason: reason)
     end
 

@@ -36,6 +36,13 @@ module Enjine
 
         def setup(_params, _errors, _path) = nil
 
+        # Runs the effect during resolution. Effects that need a player's choice override this,
+        # keep their progress in `locals` (plain JSON data) and return :wait after asking.
+        def run(engine, ctx, _locals)
+          apply(engine, ctx)
+          :done
+        end
+
         def refs(engine, ctx) = to ? to.resolve(engine, ctx) : []
 
         def to_s

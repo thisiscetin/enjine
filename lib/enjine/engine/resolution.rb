@@ -2,26 +2,62 @@
 
 module Enjine
   class Engine
-    # Resolving the top object of the stack (CR 608).
+    # Resolving the top object of the stack (CR 608), as a resumable "resolve" frame:
+    # the frame remembers which effect is next ("pc") and each effect's scratch data
+    # ("locals"), so an effect may stop to ask a player and continue after the answer.
     module Resolution
-      def resolve_top!
-        id = state.stack.first
-        obj = object(id)
-        ability = obj.ability? ? definition(obj).abilities[obj.ability] : definition(obj).spell_ability
+      def begin_resolution!
+        state.frames << { "type" => "resolve", "object" => state.stack.first, "pc" => nil, "ctx" => nil,
+                          "locals" => {} }
+      end
+
+      def resolving_ability(obj)
+        obj.ability? ? definition(obj).abilities[obj.ability] : definition(obj).spell_ability
+      end
+
+      def step_resolution!(frame)
+        obj = object(frame["object"])
+        ability = resolving_ability(obj)
+        start_resolution!(frame, obj, ability) if frame["pc"].nil?
+        return finish_fizzle!(frame, obj) if frame["fizzled"]
+
+        effects = ability&.effects || []
+        ctx = effect_context(frame["ctx"])
+        while frame["pc"] < effects.size
+          locals = (frame["locals"][frame["pc"].to_s] ||= {})
+          return :wait if effects[frame["pc"]].run(self, ctx, locals) == :wait
+
+          frame["pc"] += 1
+        end
+        emit Events::Resolved.new(object: obj.id, card: obj.card, kind: obj.kind)
+        finish_resolution!(obj)
+        after_resolution!
+      end
+
+      # CR 608.2b: targets are checked once, as resolution begins.
+      def start_resolution!(frame, obj, ability)
         specs = ability&.targets || []
         targets = legal_targets(obj, specs)
+        frame["pc"] = 0
+        frame["fizzled"] = !specs.empty? && targets.none?
+        frame["ctx"] = { "controller" => obj.controller, "source" => obj.ability? ? obj.source : obj.id,
+                         "object" => obj.id, "targets" => targets }
+      end
 
-        if !specs.empty? && targets.none? # CR 608.2b: every target illegal -> it doesn't resolve
-          emit Events::Fizzled.new(object: id, card: obj.card)
-          obj.ability? ? remove_stack_object!(id) : move!(id, :graveyard, reason: "fizzled")
-        else
-          ctx = Mechanics::EffectContext.new(obj.controller, obj.ability? ? obj.source : id, id, targets)
-          ability&.effects&.each { it.apply(self, ctx) } # CR 608.2c: in order
-          emit Events::Resolved.new(object: id, card: obj.card, kind: obj.kind)
-          finish_resolution!(obj)
-        end
+      def effect_context(data)
+        Mechanics::EffectContext.new(data["controller"], data["source"], data["object"], data["targets"])
+      end
+
+      def finish_fizzle!(_frame, obj)
+        emit Events::Fizzled.new(object: obj.id, card: obj.card)
+        obj.ability? ? remove_stack_object!(obj.id) : move!(obj.id, :graveyard, reason: "fizzled")
+        after_resolution!
+      end
+
+      def after_resolution!
         state.passes = 0
         give_priority!(state.active) # CR 117.3b
+        :done
       end
 
       # Targets that are still legal; illegal ones become nil and are ignored (CR 608.2b).

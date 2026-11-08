@@ -4,3 +4,4 @@
 /tmp/
 .rspec_status
 Gemfile.lock.bak
+/.claude/

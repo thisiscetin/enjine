@@ -74,35 +74,35 @@ module Enjine
       # as its controller chooses — asked one point at a time.
       def begin_combat_damage!
         queue = attackers.keys.select { |id| blockers_of(id).size > 1 && power(object(id)).positive? }
-        state.combat_damage = { "queue" => queue, "assigned" => {} }
-        next_damage_assignment!
+        state.frames << { "type" => "combat_damage", "queue" => queue, "assigned" => {} }
       end
 
-      def next_damage_assignment!
-        cd = state.combat_damage
-        attacker = cd["queue"].first
-        return deal_combat_damage! unless attacker
+      def combat_damage_frame = state.frames.last
 
-        assigned = cd["assigned"][attacker] ||= {}
-        remaining = power(object(attacker)) - assigned.values.sum
-        if remaining.positive?
-          ask!("kind" => "assign_damage", "player" => state.active, "attacker" => attacker, "remaining" => remaining)
-        else
-          cd["queue"].shift
-          next_damage_assignment!
+      # Steps the combat_damage frame: ask for the next point of damage to divide, or deal it all.
+      def step_combat_damage!(frame)
+        while (attacker = frame["queue"].first)
+          assigned = frame["assigned"][attacker] ||= {}
+          remaining = power(object(attacker)) - assigned.values.sum
+          if remaining.positive?
+            ask!("kind" => "assign_damage", "player" => state.active, "attacker" => attacker, "remaining" => remaining)
+            return :wait
+          end
+          frame["queue"].shift
         end
+        deal_combat_damage!(frame["assigned"])
+        :done
       end
 
       def assign_damage!(attacker, blocker)
-        assigned = state.combat_damage["assigned"][attacker]
+        assigned = combat_damage_frame["assigned"][attacker]
         assigned[blocker] = assigned.fetch(blocker, 0) + 1
         emit Events::DamageAssigned.new(attacker: attacker, blocker: blocker)
-        next_damage_assignment!
+        ask!(nil)
       end
 
       # CR 510.2: all combat damage is dealt simultaneously.
-      def deal_combat_damage!
-        assigned = state.combat_damage["assigned"]
+      def deal_combat_damage!(assigned)
         hits = []
         attackers.each do |id, info|
           amount = power(object(id))
@@ -116,7 +116,6 @@ module Enjine
           end
         end
         state.blockers.each { |blocker, attacker| hits << [blocker, attacker, power(object(blocker))] }
-        state.combat_damage = nil
         hits.each { |source, target, amount| deal_damage!(source, target, amount) }
         turn_based_actions_done!
       end
