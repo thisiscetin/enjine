@@ -59,6 +59,58 @@
     },
     {
       "card": {
+        "name": "Command Decision",
+        "mana_cost": "{1}{W}",
+        "types": [
+          "sorcery"
+        ],
+        "abilities": [
+          {
+            "spell": {
+              "choose": 1,
+              "modes": [
+                {
+                  "targets": [
+                    {
+                      "creature": {
+                        "power": {
+                          "at_least": 4
+                        }
+                      }
+                    }
+                  ],
+                  "effects": [
+                    {
+                      "destroy": {
+                        "to": {
+                          "target": 0
+                        }
+                      }
+                    }
+                  ]
+                },
+                {
+                  "effects": [
+                    {
+                      "draw": {
+                        "amount": 1
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "rarity": "common",
+      "printing": {
+        "set": "trk",
+        "number": "8"
+      }
+    },
+    {
+      "card": {
         "name": "Command Subadjunct",
         "mana_cost": "{W}",
         "types": [
@@ -94,6 +146,44 @@
       "printing": {
         "set": "trk",
         "number": "9"
+      }
+    },
+    {
+      "card": {
+        "name": "Deanna Troi, Psychic Counsel",
+        "mana_cost": "{1}{W}",
+        "types": [
+          "creature"
+        ],
+        "supertypes": [
+          "legendary"
+        ],
+        "subtypes": [
+          "betazoid",
+          "human",
+          "advisor"
+        ],
+        "power": 2,
+        "toughness": 2,
+        "abilities": [
+          {
+            "enters_with_counters": {
+              "counters": {
+                "+1/+1": 1
+              },
+              "affects": {
+                "each": "creature",
+                "controller": "you",
+                "other": true
+              }
+            }
+          }
+        ]
+      },
+      "rarity": "rare",
+      "printing": {
+        "set": "trk",
+        "number": "11"
       }
     },
     {
@@ -143,6 +233,209 @@
       "printing": {
         "set": "trk",
         "number": "15"
+      }
+    },
+    {
+      "card": {
+        "name": "Federation Field Medic",
+        "mana_cost": "{3}{W}",
+        "types": [
+          "creature"
+        ],
+        "subtypes": [
+          "human",
+          "doctor"
+        ],
+        "keywords": [
+          "vigilance"
+        ],
+        "power": 3,
+        "toughness": 2,
+        "abilities": [
+          {
+            "triggered": {
+              "when": {
+                "enters": {}
+              },
+              "choose": 1,
+              "modes": [
+                {
+                  "targets": [
+                    "creature"
+                  ],
+                  "effects": [
+                    {
+                      "add_counters": {
+                        "counter": "+1/+1",
+                        "amount": 1,
+                        "to": {
+                          "target": 0
+                        }
+                      }
+                    },
+                    {
+                      "grant": {
+                        "keywords": [
+                          "vigilance"
+                        ],
+                        "to": {
+                          "target": 0
+                        }
+                      }
+                    }
+                  ]
+                },
+                {
+                  "effects": [
+                    {
+                      "draw": {
+                        "amount": 1,
+                        "if": {
+                          "controls": {
+                            "each": {
+                              "permanent": {
+                                "counters": true
+                              }
+                            },
+                            "controller": "you"
+                          },
+                          "at_least": 1
+                        }
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "rarity": "common",
+      "printing": {
+        "set": "trk",
+        "number": "17"
+      }
+    },
+    {
+      "card": {
+        "name": "Set Phasers to . . .",
+        "mana_cost": "{W}",
+        "types": [
+          "instant"
+        ],
+        "abilities": [
+          {
+            "spell": {
+              "choose": 1,
+              "modes": [
+                {
+                  "targets": [
+                    "creature"
+                  ],
+                  "effects": [
+                    {
+                      "tap": {
+                        "to": {
+                          "target": 0
+                        }
+                      }
+                    },
+                    {
+                      "add_counters": {
+                        "counter": "stun",
+                        "amount": 1,
+                        "to": {
+                          "target": 0
+                        }
+                      }
+                    }
+                  ]
+                },
+                {
+                  "targets": [
+                    {
+                      "creature": {
+                        "attacking": true
+                      }
+                    }
+                  ],
+                  "effects": [
+                    {
+                      "deal_damage": {
+                        "amount": 3,
+                        "to": {
+                          "target": 0
+                        }
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "rarity": "common",
+      "printing": {
+        "set": "trk",
+        "number": "34"
+      }
+    },
+    {
+      "card": {
+        "name": "Test of Conviction",
+        "mana_cost": "{1}{W}",
+        "types": [
+          "sorcery"
+        ],
+        "abilities": [
+          {
+            "spell": {
+              "choose": 1,
+              "modes": [
+                {
+                  "effects": [
+                    {
+                      "add_counters": {
+                        "counter": "+1/+1",
+                        "amount": 1,
+                        "to": {
+                          "each": "creature",
+                          "controller": "you"
+                        }
+                      }
+                    }
+                  ]
+                },
+                {
+                  "targets": [
+                    "opponent"
+                  ],
+                  "effects": [
+                    {
+                      "draw": {
+                        "amount": 1,
+                        "to": {
+                          "target": 0
+                        }
+                      }
+                    },
+                    {
+                      "draw": {
+                        "amount": 2
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "rarity": "uncommon",
+      "printing": {
+        "set": "trk",
+        "number": "39"
       }
     },
     {
@@ -293,6 +586,46 @@
       "printing": {
         "set": "trk",
         "number": "66"
+      }
+    },
+    {
+      "card": {
+        "name": "Assault Drone",
+        "mana_cost": "{3}{B}",
+        "types": [
+          "artifact",
+          "creature"
+        ],
+        "subtypes": [
+          "borg"
+        ],
+        "power": 2,
+        "toughness": 4,
+        "abilities": [
+          {
+            "static": {
+              "affects": {
+                "each": {
+                  "creature": {
+                    "types": [
+                      "artifact"
+                    ]
+                  }
+                },
+                "controller": "you"
+              },
+              "pump": {
+                "power": 1,
+                "toughness": 0
+              }
+            }
+          }
+        ]
+      },
+      "rarity": "common",
+      "printing": {
+        "set": "trk",
+        "number": "92"
       }
     },
     {
@@ -468,6 +801,64 @@
       "printing": {
         "set": "trk",
         "number": "174"
+      }
+    },
+    {
+      "card": {
+        "name": "Dominion Supervisor",
+        "mana_cost": "{2}{G}",
+        "types": [
+          "creature"
+        ],
+        "subtypes": [
+          "vorta",
+          "doctor"
+        ],
+        "power": 3,
+        "toughness": 1,
+        "abilities": [
+          {
+            "triggered": {
+              "when": {
+                "enters": {}
+              },
+              "targets": [
+                "creature"
+              ],
+              "effects": [
+                {
+                  "add_counters": {
+                    "counter": "+1/+1",
+                    "amount": 1,
+                    "to": {
+                      "target": 0
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "static": {
+              "affects": {
+                "each": {
+                  "creature": {
+                    "counters": true
+                  }
+                },
+                "controller": "you"
+              },
+              "keywords": [
+                "trample"
+              ]
+            }
+          }
+        ]
+      },
+      "rarity": "common",
+      "printing": {
+        "set": "trk",
+        "number": "195"
       }
     },
     {
@@ -1554,22 +1945,10 @@
         "number": "7"
       },
       "missing": [
-        "static ability",
         "triggered ability",
         "tokens",
         "library manipulation",
         "counters"
-      ]
-    },
-    {
-      "name": "Command Decision",
-      "rarity": "common",
-      "printing": {
-        "set": "trk",
-        "number": "8"
-      },
-      "missing": [
-        "modal choice"
       ]
     },
     {
@@ -1583,17 +1962,6 @@
         "triggered ability",
         "condition (if/unless/as long as)",
         "tokens",
-        "counters"
-      ]
-    },
-    {
-      "name": "Deanna Troi, Psychic Counsel",
-      "rarity": "rare",
-      "printing": {
-        "set": "trk",
-        "number": "11"
-      },
-      "missing": [
         "counters"
       ]
     },
@@ -1646,17 +2014,6 @@
         "tokens",
         "variable amount",
         "counters"
-      ]
-    },
-    {
-      "name": "Federation Field Medic",
-      "rarity": "common",
-      "printing": {
-        "set": "trk",
-        "number": "17"
-      },
-      "missing": [
-        "modal choice"
       ]
     },
     {
@@ -1856,17 +2213,6 @@
       ]
     },
     {
-      "name": "Set Phasers to . . .",
-      "rarity": "common",
-      "printing": {
-        "set": "trk",
-        "number": "34"
-      },
-      "missing": [
-        "modal choice"
-      ]
-    },
-    {
       "name": "Shields Up!",
       "rarity": "common",
       "printing": {
@@ -1914,17 +2260,6 @@
         "triggered ability",
         "static ability",
         "counters"
-      ]
-    },
-    {
-      "name": "Test of Conviction",
-      "rarity": "uncommon",
-      "printing": {
-        "set": "trk",
-        "number": "39"
-      },
-      "missing": [
-        "modal choice"
       ]
     },
     {
@@ -2149,9 +2484,6 @@
         "number": "58"
       },
       "missing": [
-        "triggered ability",
-        "tap/untap effect",
-        "counters",
         "station",
         "other rules text"
       ]
@@ -2544,17 +2876,6 @@
       ]
     },
     {
-      "name": "Assault Drone",
-      "rarity": "common",
-      "printing": {
-        "set": "trk",
-        "number": "92"
-      },
-      "missing": [
-        "static ability"
-      ]
-    },
-    {
       "name": "Automated Warfare System",
       "rarity": "common",
       "printing": {
@@ -2673,7 +2994,6 @@
         "number": "102"
       },
       "missing": [
-        "static ability",
         "triggered ability"
       ]
     },
@@ -3500,7 +3820,6 @@
         "number": "170"
       },
       "missing": [
-        "static ability",
         "triggered ability",
         "condition (if/unless/as long as)",
         "counters",
@@ -3778,17 +4097,6 @@
       ]
     },
     {
-      "name": "Dominion Supervisor",
-      "rarity": "common",
-      "printing": {
-        "set": "trk",
-        "number": "195"
-      },
-      "missing": [
-        "counters"
-      ]
-    },
-    {
       "name": "Dr. Joseph M'Benga",
       "rarity": "mythic",
       "printing": {
@@ -3796,8 +4104,8 @@
         "number": "196"
       },
       "missing": [
-        "counters",
-        "condition (if/unless/as long as)"
+        "condition (if/unless/as long as)",
+        "counters"
       ]
     },
     {
@@ -4310,7 +4618,6 @@
         "number": "240"
       },
       "missing": [
-        "static ability",
         "triggered ability"
       ]
     },
@@ -4375,7 +4682,6 @@
         "number": "245"
       },
       "missing": [
-        "static ability",
         "discard"
       ]
     },

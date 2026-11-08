@@ -194,7 +194,7 @@ module Enjine
         state.blockers.each do |blocker, attacker|
           hits << [blocker, attacker, power(object(blocker))] if deals_damage_now?(blocker)
         end
-        hits.each { |source, target, amount| deal_damage!(source, target, amount) }
+        simultaneous_damage { hits.each { |source, target, amount| deal_damage!(source, target, amount) } } # CR 510.2
         turn_based_actions_done!
       end
 

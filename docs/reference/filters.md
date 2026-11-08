@@ -52,6 +52,38 @@ Rules: CR 115.1
 "land"
 ```
 
+## one_of
+
+Anything at least one of the listed filters matches (each may have restrictions).
+
+Rules: CR 115.1, CR 109.2
+
+| Parameter | Description |
+| --- | --- |
+| `(list)` | two or more filters |
+
+```json
+{
+  "one_of": [
+    {
+      "permanent": {
+        "any_of": [
+          "artifact",
+          "enchantment"
+        ]
+      }
+    },
+    {
+      "creature": {
+        "power": {
+          "at_least": 4
+        }
+      }
+    }
+  ]
+}
+```
+
 ## opponent
 
 An opponent of the ability's controller.

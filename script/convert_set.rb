@@ -112,6 +112,8 @@ module SetConverter
         abilities << { "enters_tapped_unless_pay_life" => { "life" => Integer(m[1]) } }
       elsif line.match?(/\ACARDNAME enters tapped\.\z/)
         abilities << "enters_tapped"
+      elsif (entering = enters_with_line(line))
+        abilities << entering
       elsif (static = static_line(line))
         abilities << static
       elsif line == "Activate only as a sorcery." && abilities.last.is_a?(Hash) && abilities.last["activated"]
@@ -201,10 +203,11 @@ module SetConverter
     end
   end
 
-  SUBJECTS = { "creatures" => "creature", "artifact creatures" => "creature", "lands" => "land", "artifacts" => "artifact" }.freeze
+  SUBJECTS = { "creatures" => "creature", "artifact creatures" => { "creature" => { "types" => ["artifact"] } },
+               "lands" => "land", "artifacts" => "artifact" }.freeze
 
   STATIC_LINE = %r{
-    \A(Other\ )?(creatures|artifact\ creatures|artifacts)\ you\ control\
+    \A(Other\ )?((?i:creatures|artifact\ creatures|artifacts))\ you\ control\ (with\ counters\ on\ them\ )?
     (?:get\ ([+-]\d+)/([+-]\d+)(?:\ and\ have\ ([a-z,\ ]+))?|have\ ([a-z,\ ]+))\.\z
   }x
 
@@ -213,15 +216,24 @@ module SetConverter
     m = STATIC_LINE.match(line)
     return nil unless m
 
-    keywords = (m[5] || m[6]).to_s.split(/, (?:and )?| and /).map(&:strip).reject(&:empty?)
+    keywords = (m[6] || m[7]).to_s.split(/, (?:and )?| and /).map(&:strip).reject(&:empty?)
     return nil unless (keywords - SUPPORTED_KEYWORDS.to_a).empty?
 
-    affects = { "each" => SUBJECTS.fetch(m[2]), "controller" => "you" }
+    affects = { "each" => static_subject(m[2].downcase, m[3]), "controller" => "you" }
     affects["other"] = true if m[1]
     static = { "affects" => affects }
-    static["pump"] = { "power" => Integer(m[3]), "toughness" => Integer(m[4]) } if m[3]
+    static["pump"] = { "power" => Integer(m[4]), "toughness" => Integer(m[5]) } if m[4]
     static["keywords"] = keywords unless keywords.empty?
     { "static" => static }
+  end
+
+  # The static's filter; "with counters on them" restricts it to permanents with a counter (CR 122).
+  def static_subject(words, with_counters)
+    filter = SUBJECTS.fetch(words)
+    return filter unless with_counters
+
+    name, restrictions = filter.is_a?(String) ? [filter, {}] : filter.first
+    { name => restrictions.merge("counters" => true) }
   end
 
   def mana_ability(line)
@@ -263,10 +275,22 @@ module SetConverter
               "target artifact or creature" => { "permanent" => { "any_of" => %w[artifact creature] } },
               "target artifact" => "artifact", "target attacking creature" => { "creature" => { "attacking" => true } },
               "target attacking or blocking creature" => "creature",
-              "target tapped creature" => { "creature" => { "tapped" => true } } }.freeze
+              "target tapped creature" => { "creature" => { "tapped" => true } },
+              "target noncreature spell" => { "spell" => { "not" => ["creature"] } },
+              "target artifact or enchantment" => { "permanent" => { "any_of" => %w[artifact enchantment] } },
+              "target noncreature artifact" => { "artifact" => { "not" => ["creature"] } },
+              "target nonartifact creature" => { "creature" => { "not" => ["artifact"] } },
+              "target nontoken artifact" => { "artifact" => { "token" => false } },
+              "target nontoken creature" => { "creature" => { "token" => false } },
+              "target legendary creature" => { "creature" => { "supertypes" => ["legendary"] } },
+              "target token" => { "permanent" => { "token" => true } } }.freeze
+
+  # "... with power 4 or greater" / "... with mana value 3 or less" after a target phrase.
+  TARGET_STAT = /\A(.+) with (power|toughness|mana value) (\d+) or (greater|less)\z/
 
   # Longest phrases first so "target creature you control" wins over "target creature".
-  TARGET_PHRASES = TARGETS.keys.sort_by { -it.size }.map { Regexp.escape(it) }.join("|")
+  TARGET_PHRASES = "(?:#{TARGETS.keys.sort_by { -it.size }.map { Regexp.escape(it) }.join("|")})" \
+                   "(?: with (?:power|toughness|mana value) \\d+ or (?:greater|less))?".freeze
 
   # Translates a line of plain sentences; nil when any sentence isn't understood.
   def sentence_effects(line, target_offset)
@@ -274,15 +298,30 @@ module SetConverter
     targets = []
     line.split(/(?<=\.)\s+/).each do |sentence|
       effect = sentence_effect(sentence.delete_suffix("."), targets, target_offset) or return nil
-      effects << effect
+      effect.is_a?(Array) ? effects.concat(effect) : effects << effect
     end
     [effects, targets]
   end
 
   def target_ref(phrase, targets, offset)
-    filter = TARGETS[phrase] or return nil
+    filter = target_filter(phrase) or return nil
     targets << filter
     { "target" => offset + targets.size - 1 }
+  end
+
+  # A target phrase as a filter, with a power/toughness/mana value comparison when it has one.
+  def target_filter(phrase)
+    m = TARGET_STAT.match(phrase) or return TARGETS[phrase]
+    base = TARGETS[m[1]] or return nil
+    name, restrictions = base.is_a?(String) ? [base, {}] : base.first
+    range = { m[4] == "greater" ? "at_least" : "at_most" => Integer(m[3]) }
+    { name => restrictions.merge(m[2].tr(" ", "_") => range) }
+  end
+
+  # "Put a stun counter on ..." / "Put two +1/+1 counters on ...": the counter name, or nil.
+  def counter_name(word)
+    name = word.downcase.tr(" -", "__")
+    Enjine::Mechanics::Counters.valid?(name) ? name : nil
   end
 
   def number(word) = NUMBER[word] || Integer(word, exception: false)
@@ -323,7 +362,8 @@ module SetConverter
                     "to" => { "each" => "creature", "controller" => "you" } } }
     when /\ADestroy (#{TARGET_PHRASES})\z/o
       { "destroy" => { "to" => target_ref(::Regexp.last_match(1), targets, offset) } }
-    when /\ACounter (target spell)\z/ then { "counter" => { "to" => target_ref(::Regexp.last_match(1), targets, offset) } }
+    when /\ACounter (target spell|target noncreature spell|target spell with mana value \d+ or (?:greater|less))\z/
+      { "counter" => { "to" => target_ref(::Regexp.last_match(1), targets, offset) } }
     when /\AExile (#{TARGET_PHRASES})\z/o
       { "exile" => { "to" => target_ref(::Regexp.last_match(1), targets, offset) } }
     when /\AReturn (#{TARGET_PHRASES}) to its owner's hand\z/o
@@ -354,15 +394,44 @@ module SetConverter
                             "tapped" => !::Regexp.last_match(2).nil? }.reject { |k, v| k == "tapped" && !v } }
     when CREATURE_TOKEN
       creature_token(::Regexp.last_match)
-    when %r{\APut (a|one|two|three|\d+) \+1/\+1 counters? on CARDNAME\z}
-      { "add_counters" => { "counter" => "+1/+1", "amount" => number(::Regexp.last_match(1)), "to" => "self" } }
+    when %r{\APut (a|an|one|two|three|\d+) ([+-]\d+/[+-]\d+|[a-z]+) counters? on CARDNAME\z}
+      counter_effect(::Regexp.last_match(2), ::Regexp.last_match(1), "self")
+    when %r{\APut (a|one|two|three|\d+) ([+-]\d+/[+-]\d+|[a-z]+) counters? on each creature you control\z}
+      counter_effect(::Regexp.last_match(2), ::Regexp.last_match(1), { "each" => "creature", "controller" => "you" })
+    when /\ATap (#{TARGET_PHRASES}) and put (a|one|two|three|\d+) ([a-z]+) counters? on it\z/o
+      to = target_ref(::Regexp.last_match(1), targets, offset)
+      counters = counter_effect(::Regexp.last_match(3), ::Regexp.last_match(2), to)
+      counters && [{ "tap" => { "to" => to } }, counters]
     when /\ACARDNAME deals (\d+) damage to each opponent\z/
       { "deal_damage" => { "amount" => Integer(::Regexp.last_match(1)), "to" => "each_opponent" } }
     when /\AYou lose (\d+) life\z/ then { "lose_life" => { "amount" => Integer(::Regexp.last_match(1)), "to" => "you" } }
-    when %r{\APut (a|one|two|three|\d+) \+1/\+1 counters? on (#{TARGET_PHRASES})\z}o
-      { "add_counters" => { "counter" => "+1/+1", "amount" => number(::Regexp.last_match(1)),
-                            "to" => target_ref(::Regexp.last_match(2), targets, offset) } }
+    when %r{\APut (a|an|one|two|three|\d+) ([+-]\d+/[+-]\d+|[a-z]+) counters? on (#{TARGET_PHRASES})\z}o
+      counter_effect(::Regexp.last_match(2), ::Regexp.last_match(1), target_ref(::Regexp.last_match(3), targets, offset))
     end
+  end
+
+  def counter_effect(word, amount, to)
+    name = counter_name(word) or return nil
+    { "add_counters" => { "counter" => name, "amount" => number(amount), "to" => to } }
+  end
+
+  ENTERS_WITH = %r{
+    \A(?:CARDNAME\ enters|(Other\ )?(creatures)\ you\ control\ enter)\ with
+    \ (a|an|one|two|three|\d+)\ (?:additional\ )?([+-]\d+/[+-]\d+|[a-z]+)\ counters?\ on\ (?:it|them)\.\z
+  }x
+
+  # "CARDNAME enters with two +1/+1 counters on it." / "Other creatures you control enter with an
+  # additional +1/+1 counter on them." (CR 614.1c)
+  def enters_with_line(line)
+    m = ENTERS_WITH.match(line) or return nil
+    other, subject, count, word = m.captures
+    name = counter_name(word) or return nil
+    ability = { "counters" => { name => number(count) } }
+    return { "enters_with_counters" => ability } unless subject
+
+    ability["affects"] = { "each" => SUBJECTS.fetch(subject), "controller" => "you" }
+    ability["affects"]["other"] = true if other
+    { "enters_with_counters" => ability }
   end
 
   # Capability labels for text the converter can't translate (never the text itself).

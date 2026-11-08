@@ -28,6 +28,9 @@ module Enjine
           end
           Mechanics.check_keys(affects, %w[each controller other], errors, "#{path}.affects")
           filter = Mechanics.build_entry(:filter, affects["each"], errors, "#{path}.affects.each")
+          live = filter ? filter.live_keys : []
+          # CR 613.8: these would make the layer pass depend on its own result.
+          errors << "#{path}.affects.each: #{live.join(", ")} can't be used in a static ability yet" unless live.empty?
           pump = Mechanics.fetch_param(params, :pump) || {}
           keywords = Array(Mechanics.fetch_param(params, :keywords)).map { it.to_s.downcase.tr(" -", "__") }
           keywords.each { errors << "#{path}.keywords: unknown keyword #{it.inspect}" unless Enjine.registry.fetch(:keyword, it) }
@@ -52,12 +55,13 @@ module Enjine
         def allowed_types = nil
         def try_effects = []
 
-        # Uses printed types so the layer pass never depends on its own result.
-        def affects?(object, source, printed_types)
+        # Matches on printed characteristics and counters (Filters::Facts), so the layer pass never
+        # depends on its own result.
+        def affects?(object, source, facts)
           return false if @other && object.id == source.id
           return false unless @controller == "any" || (@controller == "you") == (object.controller == source.controller)
 
-          @filter.respond_to?(:matches_types?) ? @filter.matches_types?(printed_types) : true
+          @filter.matches_facts?(facts)
         end
 
         def to_s

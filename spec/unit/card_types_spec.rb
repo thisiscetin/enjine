@@ -103,7 +103,7 @@ RSpec.describe "Creating cards of every type from data" do
                           "effects" => [{ "explode" => {} },
                                         { "deal_damage" => { "amount" => -1, "to" => { "target" => 5 } } },
                                         { "pump" => { "to" => "everyone" } },
-                                        { "add_counters" => { "counter" => "+2/+2", "amount" => 1, "to" => "self" } },
+                                        { "add_counters" => { "counter" => "+2/x", "amount" => 1, "to" => "self" } },
                                         { "destroy" => { "to" => { "each" => "creature", "controller" => "nobody" } } },
                                         { "destroy" => { "to" => {} } },
                                         { "destroy" => {} }]
@@ -115,7 +115,7 @@ RSpec.describe "Creating cards of every type from data" do
       a_string_matching(/deal_damage\.amount: must be an integer >= 0/),
       a_string_matching(/deal_damage\.to\.target: must refer to one of the \d declared targets/),
       a_string_matching(/pump\.to: must be/),
-      a_string_matching(/add_counters\.counter: must be one of/),
+      a_string_matching(/add_counters\.counter: must be a counter name/),
       a_string_matching(/destroy\.to\.controller: must be one of/),
       a_string_matching(/effects\[5\]\.destroy\.to: needs "target" or "each"/),
       a_string_matching(/effects\[6\]\.destroy\.to: required/)

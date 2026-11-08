@@ -38,6 +38,28 @@ Rules: CR 602.1, CR 602.2, CR 602.5d
 }
 ```
 
+## double_counters
+
+While this permanent is on the battlefield, if its controller would put one or more counters (only `counter`, if given) on a permanent matching `affects` ({"each": filter, "controller": you|opponent|any}, relative to this permanent's controller), twice that many are put on it instead. This includes counters a permanent enters with.
+
+Rules: CR 614.1a, CR 122.6, CR 122.6a, CR 616.1
+
+| Parameter | Description |
+| --- | --- |
+| `affects` | {"each": filter, "controller": ...} |
+| `counter` | optional counter name |
+
+```json
+{
+  "double_counters": {
+    "affects": {
+      "each": "creature",
+      "controller": "you"
+    }
+  }
+}
+```
+
 ## enters_tapped
 
 This permanent enters the battlefield tapped (a self-replacement effect).
@@ -62,6 +84,32 @@ Rules: CR 614.12, CR 119.4
 {
   "enters_tapped_unless_pay_life": {
     "life": 2
+  }
+}
+```
+
+## enters_with_counters
+
+Without `affects`: this permanent enters with the `counters` on it. With `affects` ({"each": filter, "controller": you|opponent|any, "other": true}, relative to this permanent's controller): while this permanent is on the battlefield, each matching permanent enters with the `counters` in addition to any others.
+
+Rules: CR 614.1c, CR 614.12, CR 122.6, CR 122.6a
+
+| Parameter | Description |
+| --- | --- |
+| `counters` | {counter name: n} (n >= 1) |
+| `affects` | optional {"each": filter, "controller": ..., "other": bool} |
+
+```json
+{
+  "enters_with_counters": {
+    "counters": {
+      "+1/+1": 1
+    },
+    "affects": {
+      "each": "creature",
+      "controller": "you",
+      "other": true
+    }
   }
 }
 ```

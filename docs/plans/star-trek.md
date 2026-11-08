@@ -26,7 +26,7 @@ A pattern census over the oracle text (fetched from the Scryfall API on
 | legendary permanents (legend rule, 704.5j) | 104 | todo |
 | triggered: enters the battlefield | 102 | todo (F5) |
 | triggered: other "whenever" | 79 | todo (F5) |
-| counters (+1/+1 and named counters) | 66 | partial (+1/+1, -1/-1, loyalty) |
+| counters (+1/+1 and named counters) | 66 | done: any named counter; stun, shield, finality, keyword counters; enters-with and doubling replacements |
 | tokens (create; Treasure, Food, Clue, creature tokens) | 61 | todo (F12) |
 | X costs and variable amounts ("equal to", "for each") | 55 | todo (F8, F10) |
 | exile | 53 | todo |

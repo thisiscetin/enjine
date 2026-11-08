@@ -257,6 +257,8 @@ module Enjine
       data = { "object" => id, "to" => to, "position" => position, "reason" => reason, "controller" => controller }
       data["enters"] = { "tapped" => false, "counters" => {} } if to == :battlefield
       data = propose("zone_change", data).data
+      return nil if data["cancelled"] # e.g. a shield counter instead of being destroyed (CR 122.1c)
+
       data["enters"].merge!(enters) if enters && data["enters"]
       execute_zone_change!(data)
     end
@@ -293,7 +295,7 @@ module Enjine
       state.zone_list(old.zone, old.owner).delete(id)
       state.objects.delete(id)
       fresh = create_object(old.card, old.owner, to)
-      lki = old.zone == :battlefield ? { "controller" => old.controller, "card" => old.card } : nil
+      lki = old.zone == :battlefield ? { "controller" => old.controller, "card" => old.card, "counters" => old.counters } : nil
       leave_combat!(id) if old.zone == :battlefield
       arrive!(fresh, old, data)
       list = state.zone_list(to, old.owner)
@@ -317,11 +319,16 @@ module Enjine
       end
     end
 
-    # CR 111.1: a token enters the battlefield under its creator's control.
+    # CR 111.1: a token enters the battlefield under its creator's control. Entering replacement
+    # effects apply to it like to any permanent (CR 614.1c, 614.12).
     def create_token!(definition, controller, tapped: false)
       obj = create_object(definition.id, controller, :battlefield)
+      enters = propose("zone_change", { "object" => obj.id, "to" => :battlefield, "controller" => controller,
+                                        "reason" => "create_token",
+                                        "enters" => { "tapped" => tapped, "counters" => {} } }).data["enters"]
       obj.controlled_since = state.turn
-      obj.tapped = tapped
+      obj.tapped = enters["tapped"]
+      obj.counters.merge!(enters["counters"])
       state.battlefield.unshift(obj.id)
       emit Events::ZoneChanged.new(card: definition.id, old_id: nil, new_id: obj.id, owner: name(controller),
                                    from: "none", to: "battlefield", reason: "create_token")
@@ -349,20 +356,21 @@ module Enjine
       emit Events::Tapped.new(object: object.id)
     end
 
+    # CR 701.26b: only tapped permanents can be untapped. Replacement effects (a stun counter,
+    # CR 122.1d) may stop it.
     def untap!(object)
       return unless object.tapped
+      return if propose("untap", { "object" => object.id }).data["cancelled"]
 
       object.tapped = false
       emit Events::Untapped.new(object: object.id)
     end
 
+    # CR 502.3: the active player's permanents untap.
     def untap_all!(index)
       state.battlefield.each do |id|
         obj = object(id)
-        next unless obj.controller == index && obj.tapped
-
-        obj.tapped = false
-        emit Events::Untapped.new(object: id)
+        untap!(obj) if obj.controller == index
       end
     end
 

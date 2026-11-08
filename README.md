@@ -37,8 +37,8 @@ decks built from it finish with zero rules findings. See the
 
 | Set | Code | Cards playable | Status |
 | --- | --- | ---: | --- |
-| Star Trek | `trk` | 39 / 311 | in progress |
-| Teenage Mutant Ninja Turtles | `tmt` | 15 / 195 | imported, waiting on mechanics |
+| Star Trek | `trk` | 46 / 311 | in progress |
+| Teenage Mutant Ninja Turtles | `tmt` | 18 / 195 | imported, waiting on mechanics |
 
 Other Standard sets follow newest first: Reality Fracture, The Hobbit, Marvel
 Super Heroes, and so on back to Foundations. Sets that leave Standard at the next

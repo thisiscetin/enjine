@@ -10,7 +10,8 @@ module Enjine
   module Docs
     CATEGORY_TITLES = {
       type: "Card types", supertype: "Supertypes", subtype: "Subtypes with rules", keyword: "Keyword abilities",
-      ability: "Abilities", trigger: "Trigger conditions", cost: "Costs", effect: "Effects", filter: "Target filters and selectors"
+      ability: "Abilities", trigger: "Trigger conditions", cost: "Costs", effect: "Effects", filter: "Target filters and selectors",
+      counter: "Counters with rules"
     }.freeze
     ROOT = File.expand_path("../..", __dir__)
 

@@ -39,8 +39,13 @@ module Enjine
           return false if @other && object_id == source["id"]
           return false unless controller_ok?(object_controller, source["controller"])
 
-          types = engine.catalog.fetch(card).types
-          @filter.matches_types?(types)
+          obj = engine.state.objects[object_id]
+          return @filter.match_for?(engine, object_id, source["controller"], source["id"]) if obj&.zone == :battlefield
+
+          # Left the battlefield: as it last existed (CR 603.10a), from its card and last known counters.
+          defn = engine.catalog.fetch(card)
+          counters = engine.last_known(object_id)&.fetch("counters", nil) || {}
+          @filter.matches_facts?(Filters::Facts.new(chars: defn.printed_characteristics, counters: counters, token: defn.token?))
         end
 
         def controller_ok?(object_controller, you)

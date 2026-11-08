@@ -57,8 +57,10 @@ Rules version: Comprehensive Rules effective 2026-09-25.
 | Name | Rules | Description |
 | --- | --- | --- |
 | [`activated`](docs/reference/abilities.md#activated) | 602.1, 602.2, 602.5d | An activated ability: announce it, choose targets, pay its costs, then it goes on the stack. `timing: "sorcery"` restricts it to sorcery speed. |
+| [`double_counters`](docs/reference/abilities.md#double_counters) | 614.1a, 122.6, 122.6a, 616.1 | While this permanent is on the battlefield, if its controller would put one or more counters (only `counter`, if given) on a permanent matching `affects` ({"each": filter, "controller": you|opponent|any}, relative to this permanent's controller), twice that many are put on it instead. This includes counters a permanent enters with. |
 | [`enters_tapped`](docs/reference/abilities.md#enters_tapped) | 614.1c, 614.12 | This permanent enters the battlefield tapped (a self-replacement effect). |
 | [`enters_tapped_unless_pay_life`](docs/reference/abilities.md#enters_tapped_unless_pay_life) | 614.12, 119.4 | As this permanent enters, its controller may pay `life` life; if they don't, it enters tapped. You can't pay more life than you have. |
+| [`enters_with_counters`](docs/reference/abilities.md#enters_with_counters) | 614.1c, 614.12, 122.6, 122.6a | Without `affects`: this permanent enters with the `counters` on it. With `affects` ({"each": filter, "controller": you|opponent|any, "other": true}, relative to this permanent's controller): while this permanent is on the battlefield, each matching permanent enters with the `counters` in addition to any others. |
 | [`loyalty`](docs/reference/abilities.md#loyalty) | 606.3, 606.4, 606.5, 602.2b | A loyalty ability. Its cost adds (positive) or removes (negative) loyalty counters and is paid on activation. Sorcery speed, and only one loyalty ability per planeswalker per turn. |
 | [`mana`](docs/reference/abilities.md#mana) | 605.1a, 605.3a, 605.3b, 106.4 | An activated mana ability: pay the cost, add the mana to your mana pool immediately. It does not use the stack and can be activated whenever you have priority. |
 | [`spell`](docs/reference/abilities.md#spell) | 113.3a, 601.2c, 608.2b, 608.2c | The spell ability of an instant or sorcery: its targets are chosen while casting and its effects happen in order when it resolves. If every target is illegal on resolution, it doesn't resolve. |
@@ -87,7 +89,7 @@ Rules version: Comprehensive Rules effective 2026-09-25.
 
 | Name | Rules | Description |
 | --- | --- | --- |
-| [`add_counters`](docs/reference/effects.md#add_counters) | 122.1, 122.6, 613.4c | Put `amount` counters of kind `counter` (+1/+1, -1/-1, loyalty) on each referenced permanent. |
+| [`add_counters`](docs/reference/effects.md#add_counters) | 122.1, 122.6, 613.4c | Put `amount` counters named `counter` on each referenced permanent. Any counter name works (+1/+1, -1/-1, loyalty, stun, shield, oil, a keyword, ...); see docs/reference/counters.md for the ones with rules. |
 | [`counter`](docs/reference/effects.md#counter) | 701.6a | Counter each referenced spell: it leaves the stack for its owner's graveyard without resolving. |
 | [`create_token`](docs/reference/effects.md#create_token) | 111.1, 111.10, 701.7a, 704.5d | Create `amount` tokens under the referenced player's control (default: you). `token` is a predefined token name (Treasure, Clue, Food) or an inline card definition. `tapped: true` creates them tapped. |
 | [`deal_damage`](docs/reference/effects.md#deal_damage) | 120.3a, 120.3c, 120.3e, 120.6 | Deal `amount` damage to each referenced creature, planeswalker or player. Damage to a player causes life loss; to a planeswalker removes loyalty counters; to a creature is marked until cleanup. |
@@ -115,11 +117,24 @@ Rules version: Comprehensive Rules effective 2026-09-25.
 | [`creature`](docs/reference/filters.md#creature) | 115.1 | A creature on the battlefield. |
 | [`creature_or_planeswalker`](docs/reference/filters.md#creature_or_planeswalker) | 115.1 | A creature or planeswalker on the battlefield. |
 | [`land`](docs/reference/filters.md#land) | 115.1 | A land on the battlefield. |
+| [`one_of`](docs/reference/filters.md#one_of) | 115.1, 109.2 | Anything at least one of the listed filters matches (each may have restrictions). |
 | [`opponent`](docs/reference/filters.md#opponent) | 102.2 | An opponent of the ability's controller. |
 | [`permanent`](docs/reference/filters.md#permanent) | 110.1 | Any permanent on the battlefield. |
 | [`planeswalker`](docs/reference/filters.md#planeswalker) | 115.1 | A planeswalker on the battlefield. |
 | [`player`](docs/reference/filters.md#player) | 115.1 | A player. |
 | [`spell`](docs/reference/filters.md#spell) | 112.1, 115.1 | A spell on the stack. |
+
+## Counters with rules
+
+| Name | Rules | Description |
+| --- | --- | --- |
+| [`+1/+1`](docs/reference/counters.md#+1/+1) | 122.1a, 122.3, 613.4c, 704.5q | Adds 1 to power and toughness (layer 7c). Any +X/+Y or -X/-Y counter works the same way. If a permanent has both +1/+1 and -1/-1 counters, N of each are removed as a state-based action (N = the smaller count). |
+| [`-1/-1`](docs/reference/counters.md#-1/-1) | 122.1a, 122.3, 613.4c, 704.5q | Subtracts 1 from power and toughness (layer 7c). |
+| [`finality`](docs/reference/counters.md#finality) | 122.1h, 614.1a | If the permanent would be put into a graveyard from the battlefield, it is exiled instead. |
+| [`keyword`](docs/reference/counters.md#keyword) | 122.1b, 613.1f | A counter named after a keyword (flying, first_strike, double_strike, deathtouch, haste, hexproof, indestructible, lifelink, menace, reach, trample, vigilance) gives the permanent that keyword (layer 6). Write the keyword itself as the counter name. |
+| [`loyalty`](docs/reference/counters.md#loyalty) | 122.1e, 306.5b, 704.5i | A planeswalker's loyalty; at 0 it is put into its owner's graveyard. |
+| [`shield`](docs/reference/counters.md#shield) | 122.1c, 614.1a, 615.1a, 701.8b | If the permanent would be destroyed by an effect, instead remove a shield counter. If damage would be dealt to it, prevent it and remove a shield counter (simultaneous damage, such as combat damage, removes only one). |
+| [`stun`](docs/reference/counters.md#stun) | 122.1d, 502.3, 701.26b | If the permanent would become untapped (untap step or an effect), instead one stun counter is removed from it. |
 
 ## Decisions
 

@@ -31,6 +31,17 @@ module Enjine
         lifelink!(source, amount) if source_chars&.keyword?(:lifelink)
       end
 
+      # Damage dealt at the same time (combat damage, CR 510.2) is one event for prevention effects
+      # that apply once per event (a shield counter, CR 122.1c). Nil outside such a batch.
+      attr_reader :damage_batch
+
+      def simultaneous_damage
+        @damage_batch = []
+        yield
+      ensure
+        @damage_batch = nil
+      end
+
       # Characteristics of a damage source: a permanent, or the spell/ability on the stack.
       def damage_source_chars(source)
         obj = state.objects[source]
@@ -55,10 +66,12 @@ module Enjine
         emit Events::LifeChanged.new(player: pl.name, from: before, to: pl.life)
       end
 
-      def add_counters!(object, kind, amount)
+      # `by_player`: the player putting the counters (CR 122.6a; default the permanent's controller).
+      def add_counters!(object, kind, amount, by_player: nil)
         return unless amount.positive?
 
-        amount = propose("counters", { "object" => object.id, "counter" => kind, "amount" => amount }).data["amount"]
+        data = { "object" => object.id, "counter" => kind, "amount" => amount, "player" => by_player || object.controller }
+        amount = propose("counters", data).data["amount"]
         return unless amount.positive?
 
         before = object.counters.fetch(kind, 0)
@@ -75,10 +88,11 @@ module Enjine
         emit Events::CountersChanged.new(object: object.id, counter: kind, from: before, to: after)
       end
 
-      # CR 704.5f, 704.5g, 704.5i. All applicable actions happen simultaneously (CR 704.3).
+      # CR 704.5d, 704.5f, 704.5g, 704.5i, 704.5q. All applicable actions happen simultaneously (CR 704.3).
       # Returns true when anything happened, so the check repeats.
       def check_permanent_state_based_actions!
         ceased = remove_tokens_outside_battlefield! # CR 704.5d
+        ceased = annihilate_counters! || ceased # CR 704.5q
         doomed = nil
         state.battlefield.each do |id|
           obj = object(id)
@@ -92,6 +106,20 @@ module Enjine
 
         doomed.each { |id, reason| move!(id, :graveyard, reason: reason) }
         true
+      end
+
+      # CR 704.5q, 122.3: N +1/+1 and N -1/-1 counters are removed, N the smaller count.
+      def annihilate_counters!
+        hit = state.battlefield.filter_map do |id|
+          obj = object(id)
+          n = [obj.counters.fetch("+1/+1", 0), obj.counters.fetch("-1/-1", 0)].min
+          [obj, n] if n.positive?
+        end
+        hit.each do |obj, n|
+          remove_counters!(obj, "+1/+1", n)
+          remove_counters!(obj, "-1/-1", n)
+        end
+        !hit.empty?
       end
 
       # CR 704.5d / 111.7: a token in a zone other than the battlefield ceases to exist.
