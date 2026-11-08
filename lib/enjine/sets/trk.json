@@ -120,6 +120,79 @@
     },
     {
       "card": {
+        "name": "Antagonist Incorporator",
+        "mana_cost": "{1}{W}",
+        "types": [
+          "artifact",
+          "creature"
+        ],
+        "subtypes": [
+          "borg"
+        ],
+        "power": 2,
+        "toughness": 3,
+        "abilities": [
+          {
+            "static": {
+              "affects": {
+                "each": {
+                  "creature": {
+                    "types": [
+                      "artifact"
+                    ]
+                  }
+                },
+                "controller": "you"
+              },
+              "abilities": [
+                {
+                  "triggered": {
+                    "when": {
+                      "deals_damage": {
+                        "combat": true,
+                        "to": "player"
+                      }
+                    },
+                    "effects": [
+                      {
+                        "pay": {
+                          "mana": "{1}",
+                          "then": [
+                            {
+                              "create_token": {
+                                "token": {
+                                  "name": "Borg",
+                                  "types": [
+                                    "artifact",
+                                    "creature"
+                                  ],
+                                  "subtypes": [
+                                    "borg"
+                                  ],
+                                  "power": 1,
+                                  "toughness": 1
+                                }
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "rarity": "rare",
+      "printing": {
+        "set": "trk",
+        "number": "3"
+      }
+    },
+    {
+      "card": {
         "name": "Assembly Specialist",
         "mana_cost": "{1}{W}",
         "types": [
@@ -163,6 +236,48 @@
       "printing": {
         "set": "trk",
         "number": "4"
+      }
+    },
+    {
+      "card": {
+        "name": "Brad Boimler, Eager Ensign",
+        "mana_cost": "{1}{W}",
+        "types": [
+          "creature"
+        ],
+        "supertypes": [
+          "legendary"
+        ],
+        "subtypes": [
+          "human",
+          "officer"
+        ],
+        "keywords": [
+          "lifelink"
+        ],
+        "power": 2,
+        "toughness": 2,
+        "abilities": [
+          {
+            "triggered": {
+              "when": {
+                "becomes_tapped": {}
+              },
+              "effects": [
+                {
+                  "counter_bonus": {
+                    "amount": 1
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "rarity": "uncommon",
+      "printing": {
+        "set": "trk",
+        "number": "5"
       }
     },
     {
@@ -2583,6 +2698,78 @@
     },
     {
       "card": {
+        "name": "Jett Reno, Problem Solver",
+        "mana_cost": "{1}{U}",
+        "types": [
+          "creature"
+        ],
+        "supertypes": [
+          "legendary"
+        ],
+        "subtypes": [
+          "human",
+          "artificer"
+        ],
+        "power": 1,
+        "toughness": 2,
+        "abilities": [
+          {
+            "triggered": {
+              "when": {
+                "becomes_tapped": {}
+              },
+              "effects": [
+                {
+                  "surveil": {
+                    "amount": 1,
+                    "if": {
+                      "amount": {
+                        "power": "self"
+                      },
+                      "at_most": 3
+                    }
+                  }
+                },
+                {
+                  "draw": {
+                    "amount": 1,
+                    "if": {
+                      "amount": {
+                        "power": "self"
+                      },
+                      "at_least": 4
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "triggered": {
+              "when": {
+                "faces_dilemma": {}
+              },
+              "effects": [
+                {
+                  "add_counters": {
+                    "counter": "+1/+1",
+                    "amount": 1,
+                    "to": "self"
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "rarity": "uncommon",
+      "printing": {
+        "set": "trk",
+        "number": "67"
+      }
+    },
+    {
+      "card": {
         "name": "Lieutenant Commander Data",
         "mana_cost": "{2}{U}",
         "types": [
@@ -4515,6 +4702,85 @@
     },
     {
       "card": {
+        "name": "Grand Nagus Zek",
+        "mana_cost": "{2}{B}",
+        "types": [
+          "creature"
+        ],
+        "supertypes": [
+          "legendary"
+        ],
+        "subtypes": [
+          "ferengi",
+          "noble"
+        ],
+        "power": 1,
+        "toughness": 1,
+        "abilities": [
+          {
+            "static": {
+              "affects": "self",
+              "pump": {
+                "power": {
+                  "count": {
+                    "each": {
+                      "permanent": {
+                        "subtypes": [
+                          "treasure"
+                        ]
+                      }
+                    },
+                    "controller": "you"
+                  }
+                },
+                "toughness": {
+                  "count": {
+                    "each": {
+                      "permanent": {
+                        "subtypes": [
+                          "treasure"
+                        ]
+                      }
+                    },
+                    "controller": "you"
+                  }
+                }
+              }
+            }
+          },
+          {
+            "triggered": {
+              "when": {
+                "dies": {
+                  "subject": {
+                    "each": {
+                      "creature": {
+                        "other": true
+                      }
+                    }
+                  }
+                }
+              },
+              "limit": "once_each_turn",
+              "effects": [
+                {
+                  "create_token": {
+                    "token": "Treasure"
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "rarity": "rare",
+      "printing": {
+        "set": "trk",
+        "number": "112"
+      }
+    },
+    {
+      "card": {
         "name": "Gul Dukat, Colonial Prefect",
         "mana_cost": "{4}{B}{B}{B}",
         "types": [
@@ -4603,6 +4869,68 @@
       "printing": {
         "set": "trk",
         "number": "114"
+      }
+    },
+    {
+      "card": {
+        "name": "Hive Mind Coprocessor",
+        "mana_cost": "{4}{B}",
+        "types": [
+          "artifact",
+          "creature"
+        ],
+        "subtypes": [
+          "borg"
+        ],
+        "power": 4,
+        "toughness": 4,
+        "abilities": [
+          {
+            "static": {
+              "affects": {
+                "each": {
+                  "creature": {
+                    "types": [
+                      "artifact"
+                    ]
+                  }
+                },
+                "controller": "you"
+              },
+              "abilities": [
+                {
+                  "triggered": {
+                    "when": {
+                      "deals_damage": {
+                        "combat": true,
+                        "to": "player"
+                      }
+                    },
+                    "effects": [
+                      {
+                        "pay": {
+                          "life": 1,
+                          "then": [
+                            {
+                              "draw": {
+                                "amount": 1
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "rarity": "uncommon",
+      "printing": {
+        "set": "trk",
+        "number": "115"
       }
     },
     {
@@ -5718,6 +6046,137 @@
     },
     {
       "card": {
+        "name": "Beckett Mariner, Impetuous Ensign",
+        "mana_cost": "{1}{R}",
+        "types": [
+          "creature"
+        ],
+        "supertypes": [
+          "legendary"
+        ],
+        "subtypes": [
+          "human",
+          "officer"
+        ],
+        "keywords": [
+          "first_strike"
+        ],
+        "power": 2,
+        "toughness": 1,
+        "abilities": [
+          {
+            "triggered": {
+              "when": {
+                "becomes_tapped": {}
+              },
+              "effects": [
+                {
+                  "add_counters": {
+                    "counter": "promotion",
+                    "amount": 1,
+                    "to": "self"
+                  }
+                },
+                {
+                  "deal_damage": {
+                    "amount": 2,
+                    "to": "each_opponent",
+                    "if": {
+                      "amount": {
+                        "counters": {
+                          "of": "self",
+                          "kind": "promotion"
+                        }
+                      },
+                      "at_least": 3
+                    }
+                  }
+                },
+                {
+                  "remove_all_counters": {
+                    "counter": "promotion",
+                    "to": "self",
+                    "if": {
+                      "amount": {
+                        "counters": {
+                          "of": "self",
+                          "kind": "promotion"
+                        }
+                      },
+                      "at_least": 3
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "rarity": "uncommon",
+      "printing": {
+        "set": "trk",
+        "number": "138"
+      }
+    },
+    {
+      "card": {
+        "name": "Brazen Bluff",
+        "mana_cost": "{R}{R}",
+        "types": [
+          "instant"
+        ],
+        "abilities": [
+          {
+            "spell": {
+              "targets": [
+                {
+                  "spell": {
+                    "not": [
+                      "creature"
+                    ],
+                    "controller": "opponent"
+                  }
+                }
+              ],
+              "effects": [
+                {
+                  "may": {
+                    "chooser": {
+                      "target": 0
+                    },
+                    "effects": [
+                      {
+                        "exile": {
+                          "to": {
+                            "target": 0
+                          }
+                        }
+                      }
+                    ],
+                    "otherwise": [
+                      {
+                        "cast_free": {
+                          "not_types": [
+                            "creature"
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "rarity": "rare",
+      "printing": {
+        "set": "trk",
+        "number": "140"
+      }
+    },
+    {
+      "card": {
         "name": "Cantankerous Captain",
         "mana_cost": "{2}{R}",
         "types": [
@@ -6281,6 +6740,51 @@
       "printing": {
         "set": "trk",
         "number": "152"
+      }
+    },
+    {
+      "card": {
+        "name": "Khaaaaaaaaaaaannn!",
+        "mana_cost": "{X}{R}",
+        "types": [
+          "instant"
+        ],
+        "abilities": [
+          {
+            "spell": {
+              "targets": [
+                "creature"
+              ],
+              "effects": [
+                {
+                  "deal_damage": {
+                    "amount": {
+                      "times": [
+                        "x",
+                        2
+                      ]
+                    },
+                    "to": {
+                      "target": 0
+                    }
+                  }
+                },
+                {
+                  "exile_if_dies": {
+                    "to": {
+                      "target": 0
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "rarity": "uncommon",
+      "printing": {
+        "set": "trk",
+        "number": "154"
       }
     },
     {
@@ -7605,6 +8109,71 @@
       "printing": {
         "set": "trk",
         "number": "189"
+      }
+    },
+    {
+      "card": {
+        "name": "Common Goal",
+        "mana_cost": "{1}{G}",
+        "types": [
+          "sorcery"
+        ],
+        "abilities": [
+          {
+            "spell": {
+              "targets": [
+                {
+                  "creature": {
+                    "controller": "you"
+                  }
+                },
+                {
+                  "filter": {
+                    "creature": {
+                      "controller": "you"
+                    }
+                  },
+                  "optional": true,
+                  "distinct_from": [
+                    0
+                  ]
+                },
+                {
+                  "creature": {
+                    "controller": "opponent"
+                  }
+                }
+              ],
+              "effects": [
+                {
+                  "bite": {
+                    "from": {
+                      "target": 0
+                    },
+                    "to": {
+                      "target": 2
+                    }
+                  }
+                },
+                {
+                  "bite": {
+                    "from": {
+                      "target": 1
+                    },
+                    "to": {
+                      "target": 2
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "rarity": "common",
+      "printing": {
+        "set": "trk",
+        "number": "190"
       }
     },
     {
@@ -10206,6 +10775,51 @@
     },
     {
       "card": {
+        "name": "Live Long and Prosper",
+        "mana_cost": "{5}{W}{U}",
+        "types": [
+          "sorcery"
+        ],
+        "keywords": [
+          "cant_be_countered"
+        ],
+        "abilities": [
+          {
+            "spell": {
+              "effects": [
+                {
+                  "gain_life": {
+                    "amount": {
+                      "life": "you"
+                    }
+                  }
+                },
+                {
+                  "draw": {
+                    "amount": {
+                      "hand_size": "you"
+                    }
+                  }
+                },
+                {
+                  "player_rule": {
+                    "rule": "no_max_hand_size",
+                    "duration": "until_your_next_turn"
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "rarity": "rare",
+      "printing": {
+        "set": "trk",
+        "number": "244"
+      }
+    },
+    {
+      "card": {
         "name": "Locutus, the One Who Speaks",
         "mana_cost": "{W}{B}",
         "types": [
@@ -11029,6 +11643,58 @@
       "printing": {
         "set": "trk",
         "number": "262"
+      }
+    },
+    {
+      "card": {
+        "name": "Engineered Explosives",
+        "mana_cost": "{X}",
+        "types": [
+          "artifact"
+        ],
+        "keywords": [
+          "sunburst"
+        ],
+        "abilities": [
+          {
+            "activated": {
+              "cost": [
+                {
+                  "mana": "{2}"
+                },
+                "sacrifice"
+              ],
+              "effects": [
+                {
+                  "destroy": {
+                    "to": {
+                      "each": {
+                        "permanent": {
+                          "not": [
+                            "land"
+                          ],
+                          "mana_value": {
+                            "equal": {
+                              "counters": {
+                                "of": "self",
+                                "kind": "charge"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "rarity": "rare",
+      "printing": {
+        "set": "trk",
+        "number": "264"
       }
     },
     {
@@ -13105,32 +13771,6 @@
   ],
   "unsupported": [
     {
-      "name": "Antagonist Incorporator",
-      "rarity": "rare",
-      "printing": {
-        "set": "trk",
-        "number": "3"
-      },
-      "missing": [
-        "triggered ability",
-        "condition (if/unless/as long as)",
-        "tokens",
-        "static ability"
-      ]
-    },
-    {
-      "name": "Brad Boimler, Eager Ensign",
-      "rarity": "uncommon",
-      "printing": {
-        "set": "trk",
-        "number": "5"
-      },
-      "missing": [
-        "triggered ability",
-        "condition (if/unless/as long as)"
-      ]
-    },
-    {
       "name": "Captain Benjamin Sisko",
       "rarity": "rare",
       "printing": {
@@ -13363,19 +14003,6 @@
       ]
     },
     {
-      "name": "Jett Reno, Problem Solver",
-      "rarity": "uncommon",
-      "printing": {
-        "set": "trk",
-        "number": "67"
-      },
-      "missing": [
-        "triggered ability",
-        "condition (if/unless/as long as)",
-        "library manipulation"
-      ]
-    },
-    {
       "name": "Kobayashi Maru Scenario",
       "rarity": "mythic",
       "printing": {
@@ -13505,32 +14132,6 @@
       ]
     },
     {
-      "name": "Grand Nagus Zek",
-      "rarity": "rare",
-      "printing": {
-        "set": "trk",
-        "number": "112"
-      },
-      "missing": [
-        "variable amount",
-        "triggered ability",
-        "tokens"
-      ]
-    },
-    {
-      "name": "Hive Mind Coprocessor",
-      "rarity": "uncommon",
-      "printing": {
-        "set": "trk",
-        "number": "115"
-      },
-      "missing": [
-        "triggered ability",
-        "condition (if/unless/as long as)",
-        "static ability"
-      ]
-    },
-    {
       "name": "Khan, Vengeful Heart",
       "rarity": "mythic",
       "printing": {
@@ -13581,20 +14182,6 @@
       ]
     },
     {
-      "name": "Beckett Mariner, Impetuous Ensign",
-      "rarity": "uncommon",
-      "printing": {
-        "set": "trk",
-        "number": "138"
-      },
-      "missing": [
-        "keyword: first strike",
-        "triggered ability",
-        "condition (if/unless/as long as)",
-        "counters"
-      ]
-    },
-    {
       "name": "Boarding Action",
       "rarity": "common",
       "printing": {
@@ -13603,18 +14190,6 @@
       },
       "missing": [
         "other rules text"
-      ]
-    },
-    {
-      "name": "Brazen Bluff",
-      "rarity": "rare",
-      "printing": {
-        "set": "trk",
-        "number": "140"
-      },
-      "missing": [
-        "condition (if/unless/as long as)",
-        "exile"
       ]
     },
     {
@@ -13683,18 +14258,6 @@
         "exile",
         "copy",
         "graveyard casting"
-      ]
-    },
-    {
-      "name": "Khaaaaaaaaaaaannn!",
-      "rarity": "uncommon",
-      "printing": {
-        "set": "trk",
-        "number": "154"
-      },
-      "missing": [
-        "condition (if/unless/as long as)",
-        "exile"
       ]
     },
     {
@@ -13830,17 +14393,6 @@
         "variable amount",
         "library manipulation",
         "other rules text"
-      ]
-    },
-    {
-      "name": "Common Goal",
-      "rarity": "common",
-      "printing": {
-        "set": "trk",
-        "number": "190"
-      },
-      "missing": [
-        "variable amount"
       ]
     },
     {
@@ -14016,18 +14568,6 @@
       ]
     },
     {
-      "name": "Live Long and Prosper",
-      "rarity": "rare",
-      "printing": {
-        "set": "trk",
-        "number": "244"
-      },
-      "missing": [
-        "static ability",
-        "variable amount"
-      ]
-    },
-    {
       "name": "Mirror Universe Intrusion",
       "rarity": "rare",
       "printing": {
@@ -14106,19 +14646,6 @@
       "missing": [
         "triggered ability",
         "exile"
-      ]
-    },
-    {
-      "name": "Engineered Explosives",
-      "rarity": "rare",
-      "printing": {
-        "set": "trk",
-        "number": "264"
-      },
-      "missing": [
-        "variable amount",
-        "sacrifice",
-        "counters"
       ]
     },
     {

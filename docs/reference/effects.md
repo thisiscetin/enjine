@@ -496,7 +496,7 @@ Rules: CR 121.1, CR 121.2
 
 ## exile
 
-Exile each referenced permanent, or card in a graveyard or hand. `link: true`: the cards are exiled with the source, for its "exiled with" abilities (the `exiled_with` selector). `until_source_leaves: true`: they return to the battlefield under their owners' control when the source leaves the battlefield; if it already has, nothing is exiled.
+Exile each referenced permanent, spell, or card in a graveyard or hand. `link: true`: the cards are exiled with the source, for its "exiled with" abilities (the `exiled_with` selector). `until_source_leaves: true`: they return to the battlefield under their owners' control when the source leaves the battlefield; if it already has, nothing is exiled.
 
 Rules: CR 406.1, CR 701.13a, CR 607.2a, CR 406.6, CR 610.3, CR 610.3a, CR 610.3b, CR 610.3c
 

@@ -712,6 +712,98 @@
       {"activated":{"cost":[{"mana":"{1}"},{"remove_counters":{"count":3}}],"effects":[{"draw":{"amount":1,"to":"you"}}]}}
     ]
   },
+  "Antagonist Incorporator": {
+    "abilities": [
+      { "static": { "affects": { "each": { "creature": { "types": ["artifact"] } }, "controller": "you" }, "abilities": [
+        { "triggered": { "when": { "deals_damage": { "combat": true, "to": "player" } }, "effects": [
+          { "pay": { "mana": "{1}", "then": [
+            { "create_token": { "token": { "name": "Borg", "types": ["artifact", "creature"], "subtypes": ["borg"],
+                                           "power": 1, "toughness": 1 } } } ] } } ] } } ] } }
+    ]
+  },
+  "Beckett Mariner, Impetuous Ensign": {
+    "note": "the damage and the removal share one condition; the removal follows the damage so the condition still holds",
+    "keywords": ["first_strike"],
+    "abilities": [
+      { "triggered": { "when": { "becomes_tapped": {} }, "effects": [
+        { "add_counters": { "counter": "promotion", "amount": 1, "to": "self" } },
+        { "deal_damage": { "amount": 2, "to": "each_opponent",
+                           "if": { "amount": { "counters": { "of": "self", "kind": "promotion" } }, "at_least": 3 } } },
+        { "remove_all_counters": { "counter": "promotion", "to": "self",
+                                   "if": { "amount": { "counters": { "of": "self", "kind": "promotion" } }, "at_least": 3 } } } ] } }
+    ]
+  },
+  "Brad Boimler, Eager Ensign": {
+    "keywords": ["lifelink"],
+    "abilities": [
+      { "triggered": { "when": { "becomes_tapped": {} }, "effects": [{ "counter_bonus": { "amount": 1 } }] } }
+    ]
+  },
+  "Brazen Bluff": {
+    "abilities": [
+      { "spell": { "targets": [{ "spell": { "not": ["creature"], "controller": "opponent" } }], "effects": [
+        { "may": { "chooser": { "target": 0 }, "effects": [{ "exile": { "to": { "target": 0 } } }],
+                   "otherwise": [{ "cast_free": { "not_types": ["creature"] } }] } } ] } }
+    ]
+  },
+  "Common Goal": {
+    "abilities": [
+      { "spell": { "targets": [{ "creature": { "controller": "you" } },
+                               { "filter": { "creature": { "controller": "you" } }, "optional": true, "distinct_from": [0] },
+                               { "creature": { "controller": "opponent" } }],
+                   "effects": [
+                     { "bite": { "from": { "target": 0 }, "to": { "target": 2 } } },
+                     { "bite": { "from": { "target": 1 }, "to": { "target": 2 } } } ] } }
+    ]
+  },
+  "Engineered Explosives": {
+    "keywords": ["sunburst"],
+    "abilities": [
+      { "activated": { "cost": [{ "mana": "{2}" }, "sacrifice"], "effects": [
+        { "destroy": { "to": { "each": { "permanent": { "not": ["land"],
+                                                        "mana_value": { "equal": { "counters": { "of": "self", "kind": "charge" } } } } } } } } ] } }
+    ]
+  },
+  "Grand Nagus Zek": {
+    "abilities": [
+      { "static": { "affects": "self", "pump": {
+        "power": { "count": { "each": { "permanent": { "subtypes": ["treasure"] } }, "controller": "you" } },
+        "toughness": { "count": { "each": { "permanent": { "subtypes": ["treasure"] } }, "controller": "you" } } } } },
+      { "triggered": { "when": { "dies": { "subject": { "each": { "creature": { "other": true } } } } }, "limit": "once_each_turn",
+                       "effects": [{ "create_token": { "token": "Treasure" } }] } }
+    ]
+  },
+  "Hive Mind Coprocessor": {
+    "abilities": [
+      { "static": { "affects": { "each": { "creature": { "types": ["artifact"] } }, "controller": "you" }, "abilities": [
+        { "triggered": { "when": { "deals_damage": { "combat": true, "to": "player" } }, "effects": [
+          { "pay": { "life": 1, "then": [{ "draw": { "amount": 1 } }] } } ] } } ] } }
+    ]
+  },
+  "Jett Reno, Problem Solver": {
+    "abilities": [
+      { "triggered": { "when": { "becomes_tapped": {} }, "effects": [
+        { "surveil": { "amount": 1, "if": { "amount": { "power": "self" }, "at_most": 3 } } },
+        { "draw": { "amount": 1, "if": { "amount": { "power": "self" }, "at_least": 4 } } } ] } },
+      { "triggered": { "when": { "faces_dilemma": {} }, "effects": [{ "add_counters": { "counter": "+1/+1", "amount": 1, "to": "self" } }] } }
+    ]
+  },
+  "Khaaaaaaaaaaaannn!": {
+    "abilities": [
+      { "spell": { "targets": ["creature"], "effects": [
+        { "deal_damage": { "amount": { "times": ["x", 2] }, "to": { "target": 0 } } },
+        { "exile_if_dies": { "to": { "target": 0 } } } ] } }
+    ]
+  },
+  "Live Long and Prosper": {
+    "keywords": ["cant_be_countered"],
+    "abilities": [
+      { "spell": { "effects": [
+        { "gain_life": { "amount": { "life": "you" } } },
+        { "draw": { "amount": { "hand_size": "you" } } },
+        { "player_rule": { "rule": "no_max_hand_size", "duration": "until_your_next_turn" } } ] } }
+    ]
+  },
   "Lt. Cmdr. Geordi La Forge": {
     "abilities": [
       {"double_counters":{"affects":{"each":"artifact","controller":"you"},"counter":"charge"}}
