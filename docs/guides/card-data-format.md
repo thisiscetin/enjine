@@ -321,6 +321,28 @@ Rule numbers are from the 2026-11-06 Comprehensive Rules.
   named lands you control" is the amount
   `{ "distinct_names": { "each": "land", "controller": "you" } }`.
 
+### 4.10 Libraries, hands, graveyards and edicts
+
+Generic shapes (N, [quality] and [zone] stand for whatever the card says):
+
+| Shape | Data |
+| --- | --- |
+| look at the top N; you may reveal a [quality] card among them and put it into your hand; the rest go to the bottom in a random order | `{ "dig": { "amount": N, "for": spec, "optional": true, "reveal": "chosen", "put": "hand" } }` |
+| look at the top N; one goes to your hand, the rest to your graveyard | `{ "dig": { "amount": N, "rest": "graveyard" } }` |
+| reveal the top N; every [quality] card goes onto the battlefield tapped | `{ "dig": { "amount": N, "reveal": "all", "for": spec, "count": "all", "put": "battlefield", "tapped": true } }` |
+| the rest go to the bottom in any order | `"rest": "bottom_any"` |
+| reveal from the top until N [quality] cards are revealed; put them into [zone] | `{ "reveal_until": { "for": spec, "count": N, "put": "battlefield" } }` |
+| exile the top N; the permanent cards exiled this way enter the battlefield | `exile_top`, then `{ "return_to_battlefield": { "to": { "result": 0 }, "under": "you" } }` |
+| mill N; you may put a [quality] card from among them into your hand | `mill`, then `{ "choose_cards": { "from": { "result": 0 }, "for": spec, "optional": true, "put": "hand" } }` |
+| return a [quality] card from your graveyard to your hand; if you can't, [effect] | `{ "choose_cards": { "from": { "graveyard": "you" }, "for": spec, "put": "hand", "otherwise": [ … ] } }` |
+| look at a player's hand; you may choose a [quality] card; if you do, [effect] | `{ "choose_cards": { "from": { "hand": { "target": 0 } }, "look": true, "for": spec, "optional": true, "put": "exile", "then": [ … ] } }` |
+| each player sacrifices a [quality] permanent of their choice | `{ "sacrifice_choice": { "filter": filter, "to": { "each": "player" } } }` (`"count": "any"`: any number) |
+| exile a target card in a graveyard; return a target card from your graveyard to your hand | `exile` / `return_to_hand` with a `graveyard_card` target |
+| its owner puts it on the top or bottom of their library, as they choose | `{ "put_in_library": { "to": { "target": 0 }, "position": "owner_choice" } }` |
+| cards exiled with this; exile until this leaves the battlefield | `exile` with `"link": true` / `"until_source_leaves": true`; the selector `"exiled_with"` |
+| that permanent's controller may search their library | `search_library` with `"searcher": { "controller_of": { "target": 0 } }, "may": true` |
+| a permanent explores | `{ "explore": { "to": … } }` |
+
 ---
 
 ## 5. Worked examples

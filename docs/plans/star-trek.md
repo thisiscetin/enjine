@@ -151,6 +151,41 @@ Class-F Shuttlecraft, Suurok-Class Science Vessel, U.S.S. Cerritos, U.S.S. Excel
 Adjudicator, Seven of Nine (dilemma); Death Is Irrelevant (assimilate, translation);
 Excalbian Gamemaster (strange new worlds, translation).
 
+### Zone effects: library, hand, graveyard, edicts, linked exile
+
+Primitives (2026-09-25 numbering unless noted): `dig` (look at or reveal the top N, take
+cards matching a card spec, the rest to the bottom in a random order via the game RNG, in a
+chosen order, or into the graveyard; 701.20a/e, 401.4), `reveal_until` (701.20a), `exile_top`
+(its results are the exiled cards, for later effects and impulse permissions), `explore`
+(701.44a), `choose_cards` (choose from an earlier effect's results, a hand or a graveyard, with
+`then`/`otherwise` for "if you do"/"if you can't"), `sacrifice_choice` (edicts, in APNAP order,
+101.4), `put_in_library` (top, bottom, or the owner's choice), `shuffle_into_library`
+(701.24c), `shuffle_library`, `look_at_hand` (event `looked_at`, shown only to the looker and the
+owner). `exile` and `return_to_hand` also move cards in graveyards (and hands/exile); `exile`
+takes `link` (cards "exiled with" the source, 607.2a, kept in the source's memory) and
+`until_source_leaves` (610.3). Selectors `"exiled_with"` and `{"controller_of": selector}` (last
+known controller of what a resolving effect moved), condition `{"share_card_type": selector}`.
+Card specs gained `not_types`, `permanent` and `mana_value`. `search_library` gained `searcher`,
+`may`, a computed `count` ("up to that many") and `counters`.
+
+Converted with these: 70,000 Light-Years from Home, All Good Things..., Automated Warfare
+System, Branching Timeline, Cybernetic Specialist, D'Ghor Bloodletter, Dathon and Picard at
+El-Adrel, Dominion Assault Force, Genesis Device, Guidance Failure, Hit It!, In the Pale
+Moonlight, Salt Vampire, Spock, Always Your Friend, Temporal Conqueror, Test of Courage, Test of
+Loyalty, U.S.S. Voyager, Will Riker, Temporal Anomaly, Artificial/Gaseous/Spatial/Subspace
+Anomaly, Unexplored Territory (translations). Waiting on other capabilities: The Measure of a
+Man, Those Old Scientists, Stray from History, Borg Cube ("up to N" / "one or two" targets);
+Malfunctioning Holodeck (ward); Rutherford (cast trigger for a subtype), Erica Ortegas
+(becomes tapped), Captain Kathryn Janeway ("that creature" trigger selector; an additional land
+play static); Hoshi Sato (creature types among creatures), First Contact (first spell this
+game), Deep Space 9 (the rules monitor's static pumps); V'Ger ("until your next turn");
+There's Coffee in that Nebula, Pattern Buffer Preservation (beam me up).
+
+Still to do: `RulesMonitor#keyword?` ignores keywords granted by static abilities, so a trk
+fuzz game with Hit It! (creatures you control have haste) reports a false CR 302.6 finding
+("summoning-sick … attacked"); flying/reach grants would do the same for 702.9b. The engine
+applies the grant correctly; the monitor needs the static-ability layer pass.
+
 ## Pipeline
 
 `script/convert_set` (to be written, run from the repo with network access):

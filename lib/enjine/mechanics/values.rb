@@ -91,6 +91,7 @@ module Enjine
     #   {"was_cast": true}                          "if you cast it": the source permanent was cast (CR 400.7d)
     #   {"targets": filter}        one of the chosen targets matches (e.g. "if it targets a tapped creature")
     #   {"attacked": true}         a creature is attacking you (CR 508.1b)
+    #   {"share_card_type": selector}  the referenced objects share a card type ("exiled_with": linked cards)
     #   {"not": condition}, {"all": [conditions]}, {"any": [conditions]}
     class Condition
       def self.build(data, errors, path, targets_count: 0)
@@ -108,6 +109,7 @@ module Enjine
         elsif data.key?("was_cast") then WasCast.new(data["was_cast"] != false)
         elsif data.key?("targets") then Targets.build(data, errors, path)
         elsif data.key?("attacked") then Attacked.new(data["attacked"] != false)
+        elsif data.key?("share_card_type") then ShareCardType.build(data, errors, path, targets_count) # effects/zones.rb
         else Compare.build(data, errors, path, targets_count)
         end
       end

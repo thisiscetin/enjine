@@ -15,6 +15,8 @@ module Enjine
     #   "attached"                                  what the source is attached to ("enchanted creature", CR 303.4m)
     #   {"each": "creature", "controller": "you"}  every matching object (you | opponent | any)
     #   {"result": 0}                               what effect 0 of this list moved or created (CR 400.7j)
+    #   "exiled_with"                               cards in exile exiled with the source (linked abilities, CR 607.2a)
+    #   {"controller_of": selector}                 the controller of each referenced object (last known if it left)
     class Selector
       CONTROLLERS = %w[you opponent any].freeze
 
@@ -22,10 +24,11 @@ module Enjine
 
       def self.build(data, errors, path, targets_count:, results_count: 0)
         case data
-        when "self", "you", "each_opponent", "attached" then new(data.to_sym)
+        when "self", "you", "each_opponent", "attached", "exiled_with" then new(data.to_sym)
         when Hash
           data = data.transform_keys(&:to_s)
           return build_result(data, errors, path, results_count) if data.key?("result")
+          return Linked.controller_of(data, errors, path, targets_count, results_count) if data.key?("controller_of")
 
           build_hash(data, errors, path, targets_count)
         else
@@ -79,6 +82,8 @@ module Enjine
         when :attached then "the attached permanent"
         when :you then "you"
         when :each_opponent then "each opponent"
+        when :exiled_with then "the cards exiled with it"
+        when :controller_of then "the controller of #{value}"
         when :each then "each #{value.primitive_name.tr("_",
                                                         " ")}#{{ "you" => " you control",
                                                                  "opponent" => " an opponent controls" }[controller]}"
@@ -96,6 +101,7 @@ module Enjine
         when :each_opponent
           engine.state.players.each_index.reject { it == ctx.controller }.map { Filters.player_ref(engine, it) }
         when :each then each(engine, ctx)
+        when :exiled_with, :controller_of then Linked.resolve(self, engine, ctx)
         end
       end
 
@@ -108,7 +114,7 @@ module Enjine
       end
 
       def each(engine, ctx)
-        value.candidates(engine, ctx.controller).select do |ref|
+        value.candidates_for(engine, ctx.controller, ctx.source).select do |ref|
           index = Filters.player_index(engine, ref)
           owner = index || engine.object(ref).controller
           controller == "any" || (controller == "you") == (owner == ctx.controller)

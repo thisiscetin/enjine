@@ -69,7 +69,7 @@ module SetConverter
     missing.concat((supertypes & UNSUPPORTED_SUPERTYPES).map { "supertype: #{it.downcase}" })
     data = { "name" => source["name"], "types" => (words - SUPERTYPES).map(&:downcase) }
     data["supertypes"] = (supertypes - UNSUPPORTED_SUPERTYPES).map(&:downcase) unless (supertypes - UNSUPPORTED_SUPERTYPES).empty?
-    data["subtypes"] = right.split.map { it.downcase.tr("-", "_") } if right
+    data["subtypes"] = right.split.map { it.downcase.tr("-", "_").delete("'") } if right # Jem'Hadar -> jemhadar
     data["mana_cost"] = source["mana_cost"] unless source["mana_cost"].to_s.empty? || data["types"].include?("land")
     %w[power toughness loyalty].each do |stat|
       next unless source[stat]
