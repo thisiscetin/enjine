@@ -191,7 +191,7 @@ module SetConverter
     when /\A(?:CARDNAME|This spell) deals (\d+) damage to (.+)\z/
       to = target_ref(::Regexp.last_match(2), targets, offset) || (::Regexp.last_match(2) == "each opponent" && "each_opponent")
       to && { "deal_damage" => { "amount" => Integer(::Regexp.last_match(1)), "to" => to } }
-    when /\ADraw (a|two|three|\d+) cards?\z/ then { "draw" => { "amount" => number(::Regexp.last_match(1)) } }
+    when /\A(?:You draw|Draw) (a|two|three|\d+) cards?\z/ then { "draw" => { "amount" => number(::Regexp.last_match(1)) } }
     when /\AYou gain (\d+) life\z/ then { "gain_life" => { "amount" => Integer(::Regexp.last_match(1)) } }
     when /\AEach opponent loses (\d+) life\z/ then { "lose_life" => { "amount" => Integer(::Regexp.last_match(1)),
                                                                       "to" => "each_opponent" } }
@@ -208,7 +208,6 @@ module SetConverter
       { "add_counters" => { "counter" => "+1/+1", "amount" => number(::Regexp.last_match(1)), "to" => "self" } }
     when /\ACARDNAME deals (\d+) damage to each opponent\z/
       { "deal_damage" => { "amount" => Integer(::Regexp.last_match(1)), "to" => "each_opponent" } }
-    when /\AYou draw (a|two|three|\d+) cards?\z/ then { "draw" => { "amount" => number(::Regexp.last_match(1)) } }
     when /\AYou lose (\d+) life\z/ then { "lose_life" => { "amount" => Integer(::Regexp.last_match(1)), "to" => "you" } }
     when %r{\APut (a|one|two|three|\d+) \+1/\+1 counters? on (target creature)\z}
       { "add_counters" => { "counter" => "+1/+1", "amount" => number(::Regexp.last_match(1)),
