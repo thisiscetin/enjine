@@ -15,8 +15,8 @@ module Enjine
   #
   # Applies, in order: the entering permanent's own self-replacement effects and the rules' own
   # entering modifications from card types (e.g. a planeswalker enters with loyalty counters,
-  # CR 306.5b, 616.1a), entering replacements of permanents already on the battlefield ("other
-  # creatures you control enter with an additional +1/+1 counter", CR 614.1c, 614.12), and the
+  # CR 306.5b, 616.1a), entering replacements of permanents already on the battlefield (extra
+  # counters on permanents entering under their controller's control, CR 614.1c, 614.12), and the
   # effects of counters on the affected permanent (stun and shield counters, CR 122.1c-d).
   # When two or more effects could be ordered differently, the affected player will choose the
   # order (CR 616.1) through a frame (see Enjine::Frames).

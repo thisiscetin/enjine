@@ -181,7 +181,7 @@ once-per-turn are automatic.
 | "with a counter on it", "with a +1/+1 counter on it" | `{ "creature": { "counters": true } }`, `{ "creature": { "counters": "+1/+1" } }` |
 | "modified" (CR 700.9) | `{ "creature": { "modified": true } }` |
 | "attacking", "tapped" | `{ "creature": { "attacking": true } }`, `{ "creature": { "tapped": true } }` |
-| "artifact, enchantment, or creature with power 4 or greater" | `{ "one_of": [{ "permanent": { "any_of": ["artifact", "enchantment"] } }, { "creature": { "power": { "at_least": 4 } } }] }` |
+| "land, or creature with power 6 or greater" | `{ "one_of": [{ "permanent": { "any_of": ["land"] } }, { "creature": { "power": { "at_least": 6 } } }] }` |
 | "noncreature spell" | `{ "spell": { "not": ["creature"] } }` |
 
 "Target creature with flying" (keyword restrictions) is not supported yet.

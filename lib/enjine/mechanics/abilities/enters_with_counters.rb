@@ -3,9 +3,10 @@
 module Enjine
   module Mechanics
     module Abilities
-      # "This creature enters with two +1/+1 counters on it." / "Other creatures you control enter with
-      # an additional +1/+1 counter on them." Replacement effects that modify how a permanent enters
-      # (CR 614.1c, 614.12); counters given as it enters count as counters put on it (CR 122.6).
+      # Entering with counters: a permanent's own counters as it enters, or extra counters a permanent
+      # on the battlefield gives to matching permanents as they enter. Replacement effects that modify
+      # how a permanent enters (CR 614.1c, 614.12); counters given as it enters count as counters put
+      # on it (CR 122.6).
       class EntersWithCounters < Primitive
         primitive :ability, :enters_with_counters,
                   description: "Without `affects`: this permanent enters with the `counters` on it. With `affects` " \

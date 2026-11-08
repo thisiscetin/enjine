@@ -420,8 +420,8 @@ module SetConverter
     \ (a|an|one|two|three|\d+)\ (?:additional\ )?([+-]\d+/[+-]\d+|[a-z]+)\ counters?\ on\ (?:it|them)\.\z
   }x
 
-  # "CARDNAME enters with two +1/+1 counters on it." / "Other creatures you control enter with an
-  # additional +1/+1 counter on them." (CR 614.1c)
+  # A permanent entering with N counters of a kind, or (other) creatures you control entering with
+  # extra counters (CR 614.1c).
   def enters_with_line(line)
     m = ENTERS_WITH.match(line) or return nil
     other, subject, count, word = m.captures

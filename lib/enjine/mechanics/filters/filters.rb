@@ -326,8 +326,8 @@ module Enjine
         def self.match_object?(_engine, object, _controller) = object.kind == "card"
       end
 
-      # Matches what any of its filters matches: "target artifact, enchantment, or creature with power
-      # 4 or greater" is [{"permanent": {"any_of": ["artifact", "enchantment"]}}, {"creature": {"power": ...}}].
+      # Matches what any of its filters matches: "a land, or a creature with power 6 or more" is
+      # [{"land": {}}, {"creature": {"power": {"at_least": 6}}}] (a union of restricted filters, CR 115.1).
       class OneOf < Filter
         primitive :filter, :one_of,
                   description: "Anything at least one of the listed filters matches (each may have restrictions).",

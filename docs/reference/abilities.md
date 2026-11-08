@@ -40,7 +40,7 @@ Rules: CR 602.1, CR 602.2, CR 602.5d
 
 ## double_counters
 
-While this permanent is on the battlefield, if its controller would put one or more counters (only `counter`, if given) on a permanent matching `affects` ({"each": filter, "controller": you|opponent|any}, relative to this permanent's controller), twice that many are put on it instead. This includes counters a permanent enters with.
+While this permanent is on the battlefield, if its controller would put one or more counters (only `counter`, if given) on a permanent matching `affects` ({"each": filter, "controller": you|opponent|any}, relative to this permanent's controller), the number put is doubled. This includes counters a permanent enters with.
 
 Rules: CR 614.1a, CR 122.6, CR 122.6a, CR 616.1
 

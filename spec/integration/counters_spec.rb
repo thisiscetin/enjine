@@ -172,7 +172,7 @@ RSpec.describe "Counters with rules (CR 122) and entering with counters (CR 614.
       expect(engine(game).power_toughness(hatchling)).to eq([3, 3])
     end
 
-    it "other creatures you control enter with an additional counter, tokens included; not the opponent's" do
+    it "a permanent gives extra counters to your other entering creatures, tokens included; not the opponent's" do
       game = board(alice: ["Hive Warden"], hand: ["Call Recruits"])
       cast(game)
       recruit = game.state.battlefield.find { game.state.object(it).card.start_with?("recruit") }

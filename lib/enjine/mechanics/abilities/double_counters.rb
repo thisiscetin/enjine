@@ -3,16 +3,16 @@
 module Enjine
   module Mechanics
     module Abilities
-      # "If you would put one or more counters on a creature you control, put twice that many of each of
-      # those kinds of counters on it instead." A replacement effect (CR 614.1a) of a permanent on the
-      # battlefield. Counters a permanent enters with are counters put on it (CR 122.6), by its
-      # controller unless an effect says otherwise (CR 122.6a).
+      # Counter doubling: a replacement effect (CR 614.1a) of a permanent on the battlefield that
+      # doubles the number of counters its controller puts on matching permanents. Counters a
+      # permanent enters with are counters put on it (CR 122.6), by its controller unless an effect
+      # says otherwise (CR 122.6a).
       class DoubleCounters < Primitive
         primitive :ability, :double_counters,
                   description: "While this permanent is on the battlefield, if its controller would put one or more " \
                                "counters (only `counter`, if given) on a permanent matching `affects` " \
                                "({\"each\": filter, \"controller\": you|opponent|any}, relative to this permanent's " \
-                               "controller), twice that many are put on it instead. This includes counters a " \
+                               "controller), the number put is doubled. This includes counters a " \
                                "permanent enters with.",
                   rules: %w[614.1a 122.6 122.6a 616.1],
                   params: { "affects" => "{\"each\": filter, \"controller\": ...}", "counter" => "optional counter name" },

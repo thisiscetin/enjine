@@ -982,7 +982,7 @@
         }
       }
     ],
-    "rules_text": "Tap target creature and put a stun counter on it."
+    "rules_text": "The chosen creature becomes tapped and gets one stun counter."
   },
   {
     "name": "Aegis Initiate",
@@ -1005,7 +1005,7 @@
         }
       }
     ],
-    "rules_text": "This creature enters with a shield counter on it."
+    "rules_text": "Arrives on the battlefield carrying one shield counter."
   },
   {
     "name": "Brood Matron",
@@ -1033,7 +1033,7 @@
         }
       }
     ],
-    "rules_text": "Other creatures you control enter with an additional +1/+1 counter on them."
+    "rules_text": "Each creature of yours other than this one arrives with one extra +1/+1 counter."
   },
   {
     "name": "Ripple Sage",
@@ -1075,7 +1075,7 @@
         }
       }
     ],
-    "rules_text": "If you would put counters on a creature you control, put twice that many instead. Creatures you control with counters on them have trample."
+    "rules_text": "Counters you would place on your creatures are doubled. Your creatures that have any counters gain trample."
   },
   {
     "name": "Titan Snare",
@@ -1107,7 +1107,7 @@
         }
       }
     ],
-    "rules_text": "Destroy target creature with power 4 or greater."
+    "rules_text": "Destroy the chosen creature; it must have power 4 or more."
   },
   {
     "name": "Scrap Sweep",
@@ -1152,7 +1152,7 @@
         }
       }
     ],
-    "rules_text": "Exile target nontoken creature with mana value 2 or less or target modified nonlegendary creature."
+    "rules_text": "Exile the chosen creature: a nontoken one of mana value 2 or less, or a nonlegendary one that is modified."
   },
   {
     "name": "Oilcask Tender",
@@ -1222,7 +1222,7 @@
         }
       }
     ],
-    "rules_text": "{T}: Put an oil counter on this creature. {2}, {T}: Put a -1/-1 counter on target Construct and a +1/+1 counter on this creature. Activate only as a sorcery."
+    "rules_text": "Tap: one oil counter here. Two mana and tap, sorcery speed: one -1/-1 counter on the chosen Construct and one +1/+1 counter here."
   },
   {
     "name": "Ashen Revenant",
@@ -1245,6 +1245,6 @@
         }
       }
     ],
-    "rules_text": "This creature enters with a finality counter and a menace counter on it."
+    "rules_text": "Arrives carrying one finality counter and one menace counter."
   }
 ]
