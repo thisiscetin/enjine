@@ -235,6 +235,12 @@ module SetConverter
 
   def number(word) = NUMBER[word] || Integer(word, exception: false)
 
+  CREATURE_TOKEN = %r{
+    \ACreate\ (a|an|one|two|three|\d+)\ (tapped\ )?(\d+)/(\d+)\
+    (?:(?:white|blue|black|red|green|colorless)(?:\ and\ \w+)?\ )?
+    ([A-Z][\w\ ]*?)\ (artifact\ )?creature\ tokens?(?:\ with\ ([a-z,\ ]+))?\z
+  }x
+
   def creature_token(match)
     amount, tapped, power, toughness, subtypes, artifact, keywords = match.captures
     keywords = keywords.to_s.split(/, (?:and )?| and /).map(&:strip).reject(&:empty?)
@@ -269,7 +275,7 @@ module SetConverter
     when /\ACreate (a|an|one|two|three|\d+) (tapped )?(Treasure|Clue|Food) tokens?\z/
       { "create_token" => { "token" => ::Regexp.last_match(3), "amount" => number(::Regexp.last_match(1)),
                             "tapped" => !::Regexp.last_match(2).nil? }.reject { |k, v| k == "tapped" && !v } }
-    when %r{\ACreate (a|an|one|two|three|\d+) (tapped )?(\d+)/(\d+) (?:(?:white|blue|black|red|green|colorless)(?: and \w+)? )?([A-Z][\w ]*?) (artifact )?creature tokens?(?: with ([a-z, ]+))?\z}
+    when CREATURE_TOKEN
       creature_token(::Regexp.last_match)
     when %r{\APut (a|one|two|three|\d+) \+1/\+1 counters? on CARDNAME\z}
       { "add_counters" => { "counter" => "+1/+1", "amount" => number(::Regexp.last_match(1)), "to" => "self" } }

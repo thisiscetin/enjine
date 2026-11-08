@@ -26,10 +26,14 @@ Layout/LineLength:
 # A rules engine has a few long, linear methods that mirror the rules text.
 Metrics/MethodLength:
   Max: 40
+  Exclude:
+    - "script/convert_set.rb"
 Metrics/ClassLength:
   Max: 400
 Metrics/ModuleLength:
   Max: 250
+  Exclude:
+    - "script/convert_set.rb"
 Metrics/ParameterLists:
   Max: 7
   # Keyword arguments name themselves; the deck builder's options are all keywords.
