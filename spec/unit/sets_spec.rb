@@ -48,7 +48,7 @@ RSpec.describe Enjine::Sets do
   it "moves cards that no longer validate to unsupported and never loads them" do
     Dir.mktmpdir do |tmp|
       write_set(tmp, "tst", "format" => 1, "name" => "Test",
-                            "cards" => [{ "card" => { "name" => "Bad Angel", "types" => ["creature"], "keywords" => ["flying"] } },
+                            "cards" => [{ "card" => { "name" => "Bad Angel", "types" => ["creature"], "keywords" => ["banding"] } },
                                         "not an entry",
                                         { "card" => { "name" => "Forest", "types" => ["land"], "supertypes" => ["basic"],
                                                       "subtypes" => ["forest"] } }])
@@ -56,7 +56,7 @@ RSpec.describe Enjine::Sets do
       expect(set.cards.map(&:name)).to eq(["Forest"])
       expect(set.entries.first).to have_attributes(printing: nil, id: nil)
       expect(set.unsupported.map { it["name"] }).to eq(["Bad Angel", nil])
-      expect(set.unsupported.first["missing"]).to include(/unknown keyword "flying"/)
+      expect(set.unsupported.first["missing"]).to include(/unknown keyword "banding"/)
       expect(set).to have_attributes(code: "tst", released_at: nil, standard_legal_until: nil)
       expect(set.standard_legal?(Date.new(2000, 1, 1))).to be(true)
     end

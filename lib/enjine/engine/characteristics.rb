@@ -80,7 +80,10 @@ module Enjine
 
       # CR 514.2: damage wears off and "until end of turn" effects end.
       def cleanup_turn!
-        state.battlefield.each { object(it).damage = 0 }
+        state.battlefield.each do |id|
+          object(id).damage = 0
+          object(id).deathtouched = false
+        end
         ending = state.effects.count { it["duration"] == "end_of_turn" }
         return if ending.zero?
 

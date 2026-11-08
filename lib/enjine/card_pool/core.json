@@ -672,5 +672,189 @@
       }
     ],
     "rules_text": "Whenever this creature attacks, you gain 1 life."
+  },
+  {
+    "name": "Cloud Kite",
+    "mana_cost": "{1}{U}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "bird"
+    ],
+    "power": 1,
+    "toughness": 2,
+    "keywords": [
+      "flying"
+    ],
+    "rules_text": "Flying"
+  },
+  {
+    "name": "Canopy Stalker",
+    "mana_cost": "{1}{G}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "spider"
+    ],
+    "power": 1,
+    "toughness": 3,
+    "keywords": [
+      "reach"
+    ],
+    "rules_text": "Reach"
+  },
+  {
+    "name": "Vigil Knight",
+    "mana_cost": "{2}{W}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "human",
+      "knight"
+    ],
+    "power": 2,
+    "toughness": 3,
+    "keywords": [
+      "vigilance",
+      "first strike"
+    ],
+    "rules_text": "Vigilance, first strike"
+  },
+  {
+    "name": "Alley Bruiser",
+    "mana_cost": "{2}{B}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "human",
+      "rogue"
+    ],
+    "power": 3,
+    "toughness": 2,
+    "keywords": [
+      "menace"
+    ],
+    "rules_text": "Menace"
+  },
+  {
+    "name": "Marsh Viper",
+    "mana_cost": "{B}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "snake"
+    ],
+    "power": 1,
+    "toughness": 1,
+    "keywords": [
+      "deathtouch"
+    ],
+    "rules_text": "Deathtouch"
+  },
+  {
+    "name": "Tusk Charger",
+    "mana_cost": "{3}{G}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "boar"
+    ],
+    "power": 4,
+    "toughness": 3,
+    "keywords": [
+      "trample"
+    ],
+    "rules_text": "Trample"
+  },
+  {
+    "name": "Mercy Acolyte",
+    "mana_cost": "{1}{W}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "human",
+      "cleric"
+    ],
+    "power": 2,
+    "toughness": 1,
+    "keywords": [
+      "lifelink"
+    ],
+    "rules_text": "Lifelink"
+  },
+  {
+    "name": "Wall of Timber",
+    "mana_cost": "{1}{G}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "plant",
+      "wall"
+    ],
+    "power": 0,
+    "toughness": 5,
+    "keywords": [
+      "defender"
+    ],
+    "rules_text": "Defender"
+  },
+  {
+    "name": "Twinblade Duelist",
+    "mana_cost": "{3}{R}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "human",
+      "warrior"
+    ],
+    "power": 2,
+    "toughness": 2,
+    "keywords": [
+      "double strike"
+    ],
+    "rules_text": "Double strike"
+  },
+  {
+    "name": "Shrouded Lurker",
+    "mana_cost": "{2}{U}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "human",
+      "rogue"
+    ],
+    "power": 2,
+    "toughness": 2,
+    "keywords": [
+      "hexproof"
+    ],
+    "rules_text": "Hexproof"
+  },
+  {
+    "name": "Bastion Golem",
+    "mana_cost": "{4}",
+    "types": [
+      "artifact",
+      "creature"
+    ],
+    "subtypes": [
+      "golem"
+    ],
+    "power": 3,
+    "toughness": 3,
+    "keywords": [
+      "indestructible"
+    ],
+    "rules_text": "Indestructible"
   }
 ]

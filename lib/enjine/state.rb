@@ -4,14 +4,14 @@ module Enjine
   # A card or token in a zone (CR 109). Refers to its definition by id only.
   # A new GameObject (with a new id) is created on every zone change (CR 400.7).
   GameObject = Struct.new(:id, :card, :owner, :controller, :zone, :tapped, :controlled_since, :kind, :counters,
-                          :damage, :source, :ability, :targets, :loyalty_turn) do
+                          :damage, :source, :ability, :targets, :loyalty_turn, :deathtouched) do
     def ability? = kind == "ability"
 
     def to_h
       { "id" => id, "card" => card, "owner" => owner, "controller" => controller, "zone" => zone.to_s,
         "tapped" => tapped, "controlled_since" => controlled_since, "kind" => kind, "counters" => counters.dup,
         "damage" => damage, "source" => source, "ability" => ability, "targets" => targets&.dup,
-        "loyalty_turn" => loyalty_turn }
+        "loyalty_turn" => loyalty_turn, "deathtouched" => deathtouched }
     end
   end
 
@@ -46,7 +46,7 @@ module Enjine
     attr_accessor :seed, :rng, :decklists, :players, :objects, :battlefield, :stack, :exile, :turn, :active,
                   :step, :step_state, :priority, :passes, :next_id, :starting_player, :pending, :result,
                   :attackers, :blockers, :effects, :frames, :attacks_declared,
-                  :pending_triggers, :repeat_cleanup
+                  :pending_triggers, :repeat_cleanup, :combat_damage_pass
 
     def self.initial(names:, decklists:, seed:)
       state = new
@@ -64,6 +64,7 @@ module Enjine
       state.frames = []
       state.pending_triggers = []
       state.repeat_cleanup = false
+      state.combat_damage_pass = nil
       state.attacks_declared = 0
       state.turn = 0
       state.passes = 0
@@ -95,7 +96,7 @@ module Enjine
         "battlefield" => battlefield.dup, "stack" => stack.dup, "exile" => exile.dup,
         "attackers" => attackers.dup, "blockers" => blockers.dup, "effects" => effects.map { deep_dup(it) },
         "frames" => deep_dup(frames), "pending_triggers" => deep_dup(pending_triggers),
-        "repeat_cleanup" => repeat_cleanup,
+        "repeat_cleanup" => repeat_cleanup, "combat_damage_pass" => combat_damage_pass,
         "attacks_declared" => attacks_declared }
     end
 

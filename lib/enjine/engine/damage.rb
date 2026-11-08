@@ -11,19 +11,36 @@ module Enjine
         amount = propose("damage", { "source" => source, "target" => ref, "amount" => amount }).data["amount"]
         return unless amount.positive? # prevention (CR 615) will reduce it here
 
+        source_chars = damage_source_chars(source)
         index = Mechanics::Filters.player_index(self, ref)
         if index
           emit Events::DamageDealt.new(source: source, target: ref, amount: amount)
           change_life!(index, -amount) # CR 120.3a
-          return
-        end
-        return unless state.battlefield.include?(ref)
+        else
+          return unless state.battlefield.include?(ref)
 
-        obj = object(ref)
-        defn = chars(obj)
-        emit Events::DamageDealt.new(source: source, target: ref, amount: amount)
-        obj.damage += amount if defn.creature? # CR 120.3e
-        remove_counters!(obj, "loyalty", amount) if defn.planeswalker? # CR 120.3c
+          obj = object(ref)
+          defn = chars(obj)
+          emit Events::DamageDealt.new(source: source, target: ref, amount: amount)
+          if defn.creature?
+            obj.damage += amount # CR 120.3e
+            obj.deathtouched = true if source_chars&.keyword?(:deathtouch) # CR 702.2b
+          end
+          remove_counters!(obj, "loyalty", amount) if defn.planeswalker? # CR 120.3c
+        end
+        lifelink!(source, amount) if source_chars&.keyword?(:lifelink)
+      end
+
+      # Characteristics of a damage source: a permanent, or the spell/ability on the stack.
+      def damage_source_chars(source)
+        obj = state.objects[source]
+        obj && obj.kind == "card" ? chars(obj) : nil
+      end
+
+      # CR 702.15b: damage dealt by a source with lifelink makes its controller gain that much life.
+      def lifelink!(source, amount)
+        obj = state.objects[source] or return
+        change_life!(obj.controller, amount)
       end
 
       def change_life!(index, delta)
@@ -78,8 +95,11 @@ module Enjine
 
       def creature_sba(obj)
         toughness = toughness(obj)
-        if toughness <= 0 then "sba_toughness"
-        elsif obj.damage.positive? && obj.damage >= toughness then "sba_lethal_damage"
+        return "sba_toughness" if toughness <= 0 # CR 704.5f (indestructible doesn't help)
+        return nil if chars(obj).keyword?(:indestructible) # CR 702.12b
+
+        if obj.damage.positive? && obj.damage >= toughness then "sba_lethal_damage" # CR 704.5g
+        elsif obj.deathtouched && obj.damage.positive? then "sba_deathtouch" # CR 704.5h
         end
       end
     end

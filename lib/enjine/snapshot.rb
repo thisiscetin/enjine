@@ -49,6 +49,7 @@ module Enjine
       state.frames = deep_copy(data.fetch("frames", []))
       state.pending_triggers = deep_copy(data.fetch("pending_triggers", []))
       state.repeat_cleanup = data.fetch("repeat_cleanup", false)
+      state.combat_damage_pass = data["combat_damage_pass"]
       state.attacks_declared = data.fetch("attacks_declared", 0)
       %w[turn active step_state priority passes next_id starting_player].each do |k|
         state.public_send("#{k}=", data[k])
@@ -64,7 +65,8 @@ module Enjine
                      zone: hash["zone"].to_sym, tapped: hash["tapped"], controlled_since: hash["controlled_since"],
                      kind: hash.fetch("kind", "card"), counters: deep_copy(hash.fetch("counters", {})),
                      damage: hash.fetch("damage", 0), source: hash["source"], ability: hash["ability"],
-                     targets: deep_copy(hash["targets"]), loyalty_turn: hash["loyalty_turn"])
+                     targets: deep_copy(hash["targets"]), loyalty_turn: hash["loyalty_turn"],
+                     deathtouched: hash.fetch("deathtouched", false))
     end
 
     def deep_copy(value) = Marshal.load(Marshal.dump(value))

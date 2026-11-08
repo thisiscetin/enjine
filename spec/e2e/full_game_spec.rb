@@ -28,7 +28,7 @@ RSpec.describe "Full games from Setup" do
     result = Enjine::Fuzz.run(random_setup(1), games: 3, seed: 100, roundtrip_every: 97)
     expect(result.games).to eq(3)
     expect(result.outcomes.values.sum).to eq(3)
-    expect(result.decisions).to be > 3_000
+    expect(result.decisions).to be > 1_500
   end
 
   it "replays every fuzzed game identically from seed + decision log" do

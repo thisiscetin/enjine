@@ -53,6 +53,7 @@ module Enjine
       when Events::SpellCast then spell_cast!(event)
       when Events::AbilityActivated then ability_activated!(event)
       when Events::AttackerDeclared then attacker_declared!(event)
+      when Events::BlockerDeclared then blocker_declared!(event)
       when Events::CountersChanged then @stats["counters_#{event.counter}"] += event.to - event.from
       end
     end
@@ -128,6 +129,17 @@ module Enjine
       active_turn = state.turn
       sick = obj.controlled_since.nil? || obj.controlled_since >= active_turn
       finding("302.6", "summoning-sick #{event.object} attacked") if sick && !card.keyword?(:haste)
+      finding("702.3b", "#{event.object} has defender but attacked") if card.keyword?(:defender)
+    end
+
+    # CR 702.9b: a creature with flying can be blocked only by creatures with flying or reach.
+    def blocker_declared!(event)
+      blocker = state.objects[event.object]
+      attacker = state.objects[event.attacker]
+      return unless blocker && attacker && defn(attacker.card).keyword?(:flying)
+      return if defn(blocker.card).keyword?(:flying) || defn(blocker.card).keyword?(:reach)
+
+      finding("702.9b", "#{event.object} without flying or reach blocked flying #{event.attacker}")
     end
 
     # ---- state checks after each decision ------------------------------------------

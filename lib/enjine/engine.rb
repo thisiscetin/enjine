@@ -183,6 +183,8 @@ module Enjine
     def next_step!
       empty_mana_pools!
       end_combat! if state.step == :end_of_combat # CR 511.3
+      return enter_step!(:combat_damage) if second_combat_damage_step? # CR 510.4
+
       if state.step == :cleanup && state.repeat_cleanup
         state.repeat_cleanup = false
         return enter_step!(:cleanup)
@@ -241,7 +243,8 @@ module Enjine
       state.next_id += 1
       state.objects[id] = GameObject.new(id: id, card: card, owner: owner, controller: owner, zone: zone,
                                          tapped: false, controlled_since: nil, kind: "card", counters: {},
-                                         damage: 0, source: nil, ability: nil, targets: nil, loyalty_turn: nil)
+                                         damage: 0, source: nil, ability: nil, targets: nil, loyalty_turn: nil,
+                                         deathtouched: false)
     end
 
     # Moves an object to a zone as a new object (CR 400.7). Returns the new object.

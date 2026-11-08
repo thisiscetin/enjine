@@ -61,6 +61,31 @@
     },
     {
       "card": {
+        "name": "Mugato",
+        "mana_cost": "{3}{G}{G}",
+        "types": [
+          "creature"
+        ],
+        "subtypes": [
+          "ape",
+          "beast"
+        ],
+        "keywords": [
+          "reach",
+          "vigilance",
+          "deathtouch"
+        ],
+        "power": 6,
+        "toughness": 6
+      },
+      "rarity": "uncommon",
+      "printing": {
+        "set": "trk",
+        "number": "208"
+      }
+    },
+    {
+      "card": {
         "name": "Xindi Surveyors",
         "mana_cost": "{2}{G}",
         "types": [
@@ -258,7 +283,6 @@
       },
       "missing": [
         "supertype: legendary",
-        "keyword: lifelink",
         "triggered ability",
         "condition (if/unless/as long as)"
       ]
@@ -351,7 +375,6 @@
         "number": "12"
       },
       "missing": [
-        "keyword: flying",
         "tap/untap effect"
       ]
     },
@@ -405,7 +428,6 @@
         "number": "17"
       },
       "missing": [
-        "keyword: vigilance",
         "triggered ability",
         "modal choice",
         "counters",
@@ -443,7 +465,6 @@
         "number": "20"
       },
       "missing": [
-        "keyword: flying",
         "triggered ability",
         "exile"
       ]
@@ -955,7 +976,6 @@
         "number": "59"
       },
       "missing": [
-        "keyword: flying",
         "triggered ability",
         "modal choice",
         "other rules text",
@@ -1147,8 +1167,6 @@
         "number": "73"
       },
       "missing": [
-        "keyword: flying",
-        "keyword: vigilance",
         "triggered ability",
         "counters"
       ]
@@ -1253,7 +1271,6 @@
         "number": "81"
       },
       "missing": [
-        "keyword: defender",
         "condition (if/unless/as long as)"
       ]
     },
@@ -1335,7 +1352,6 @@
       },
       "missing": [
         "supertype: legendary",
-        "keyword: flying",
         "triggered ability",
         "modal choice",
         "other rules text"
@@ -1395,7 +1411,6 @@
       },
       "missing": [
         "supertype: legendary",
-        "keyword: menace",
         "triggered ability",
         "discard"
       ]
@@ -1419,7 +1434,6 @@
         "number": "93"
       },
       "missing": [
-        "keyword: flying",
         "triggered ability",
         "condition (if/unless/as long as)",
         "sacrifice"
@@ -1446,7 +1460,6 @@
         "number": "95"
       },
       "missing": [
-        "keyword: menace",
         "triggered ability",
         "counters"
       ]
@@ -1459,7 +1472,6 @@
         "number": "96"
       },
       "missing": [
-        "keyword: flying",
         "triggered ability",
         "tokens",
         "exile",
@@ -1593,7 +1605,6 @@
       },
       "missing": [
         "supertype: legendary",
-        "keyword: menace",
         "triggered ability"
       ]
     },
@@ -1618,7 +1629,6 @@
       },
       "missing": [
         "supertype: legendary",
-        "keyword: menace",
         "triggered ability",
         "condition (if/unless/as long as)",
         "graveyard casting"
@@ -1686,7 +1696,6 @@
       },
       "missing": [
         "supertype: legendary",
-        "keyword: menace",
         "triggered ability",
         "variable amount"
       ]
@@ -1825,7 +1834,6 @@
         "number": "124"
       },
       "missing": [
-        "keyword: lifelink",
         "exile",
         "graveyard casting"
       ]
@@ -1865,7 +1873,6 @@
         "number": "127"
       },
       "missing": [
-        "keyword: lifelink",
         "triggered ability",
         "condition (if/unless/as long as)",
         "exile"
@@ -2085,7 +2092,6 @@
       },
       "missing": [
         "supertype: legendary",
-        "keyword: trample",
         "triggered ability",
         "condition (if/unless/as long as)",
         "counters"
@@ -2206,7 +2212,6 @@
         "number": "152"
       },
       "missing": [
-        "keyword: trample",
         "other rules text"
       ]
     },
@@ -2245,7 +2250,6 @@
       },
       "missing": [
         "supertype: legendary",
-        "keyword: trample",
         "triggered ability"
       ]
     },
@@ -2283,7 +2287,6 @@
         "number": "158"
       },
       "missing": [
-        "keyword: trample",
         "triggered ability"
       ]
     },
@@ -2402,8 +2405,7 @@
       },
       "missing": [
         "variable amount",
-        "static ability",
-        "keyword: flying"
+        "static ability"
       ]
     },
     {
@@ -2465,7 +2467,6 @@
         "number": "172"
       },
       "missing": [
-        "keyword: reach",
         "triggered ability",
         "exile"
       ]
@@ -2501,7 +2502,6 @@
         "number": "175"
       },
       "missing": [
-        "keyword: menace",
         "triggered ability",
         "condition (if/unless/as long as)",
         "sacrifice"
@@ -2754,7 +2754,6 @@
         "number": "194"
       },
       "missing": [
-        "keyword: vigilance",
         "triggered ability",
         "modal choice",
         "exile",
@@ -2924,21 +2923,7 @@
         "number": "207"
       },
       "missing": [
-        "keyword: deathtouch",
         "other rules text"
-      ]
-    },
-    {
-      "name": "Mugato",
-      "rarity": "uncommon",
-      "printing": {
-        "set": "trk",
-        "number": "208"
-      },
-      "missing": [
-        "keyword: reach",
-        "keyword: vigilance",
-        "keyword: deathtouch"
       ]
     },
     {
@@ -2963,7 +2948,6 @@
         "number": "210"
       },
       "missing": [
-        "keyword: reach",
         "tokens",
         "exile",
         "graveyard casting"
@@ -3069,7 +3053,6 @@
         "number": "218"
       },
       "missing": [
-        "keyword: trample",
         "triggered ability",
         "counters"
       ]
@@ -3393,7 +3376,6 @@
       },
       "missing": [
         "supertype: legendary",
-        "keyword: trample",
         "condition (if/unless/as long as)",
         "triggered ability"
       ]
@@ -3492,7 +3474,6 @@
       },
       "missing": [
         "supertype: legendary",
-        "keyword: menace",
         "triggered ability",
         "condition (if/unless/as long as)",
         "library manipulation",
@@ -3508,7 +3489,6 @@
       },
       "missing": [
         "supertype: legendary",
-        "keyword: trample",
         "triggered ability",
         "counters"
       ]
@@ -3562,8 +3542,6 @@
       "missing": [
         "supertype: legendary",
         "variable power",
-        "keyword: reach",
-        "keyword: vigilance",
         "variable amount"
       ]
     },
@@ -3615,7 +3593,6 @@
       },
       "missing": [
         "supertype: legendary",
-        "keyword: lifelink",
         "triggered ability",
         "condition (if/unless/as long as)",
         "exile",
@@ -3656,7 +3633,6 @@
         "number": "261"
       },
       "missing": [
-        "keyword: flying",
         "triggered ability",
         "condition (if/unless/as long as)"
       ]

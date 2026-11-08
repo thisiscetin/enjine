@@ -36,8 +36,20 @@ Rules version: Comprehensive Rules effective 2026-09-25.
 
 | Name | Rules | Description |
 | --- | --- | --- |
+| [`deathtouch`](docs/reference/keywords.md#deathtouch) | 702.2b, 702.2c, 704.5h | Any damage it deals to a creature is enough to destroy it; 1 damage counts as lethal when assigning combat damage. |
+| [`defender`](docs/reference/keywords.md#defender) | 702.3b | Can't attack. |
+| [`double_strike`](docs/reference/keywords.md#double_strike) | 702.4b, 510.4 | Deals combat damage in both the first-strike and the regular combat damage step. |
+| [`first_strike`](docs/reference/keywords.md#first_strike) | 702.7b, 510.4 | Deals combat damage in a first combat damage step, before creatures without first strike. |
 | [`flash`](docs/reference/keywords.md#flash) | 702.8a | You may cast this spell any time you could cast an instant. |
+| [`flying`](docs/reference/keywords.md#flying) | 702.9b | Can't be blocked except by creatures with flying or reach. |
 | [`haste`](docs/reference/keywords.md#haste) | 702.10a, 302.6 | This creature can attack and use {T} abilities even if it hasn't been under your control continuously since your most recent turn began. |
+| [`hexproof`](docs/reference/keywords.md#hexproof) | 702.11b | Can't be the target of spells or abilities your opponents control. |
+| [`indestructible`](docs/reference/keywords.md#indestructible) | 702.12b | Can't be destroyed: lethal damage, deathtouch and "destroy" effects don't put it into the graveyard. |
+| [`lifelink`](docs/reference/keywords.md#lifelink) | 702.15b | Damage dealt by this source also causes its controller to gain that much life. |
+| [`menace`](docs/reference/keywords.md#menace) | 702.111b | Can't be blocked except by two or more creatures. |
+| [`reach`](docs/reference/keywords.md#reach) | 702.17b | Can block creatures with flying. |
+| [`trample`](docs/reference/keywords.md#trample) | 702.19b, 702.19e | Excess combat damage beyond lethal damage to its blockers can be assigned to the player or planeswalker it's attacking. |
+| [`vigilance`](docs/reference/keywords.md#vigilance) | 702.20b | Attacking doesn't cause this creature to tap. |
 
 ## Abilities
 

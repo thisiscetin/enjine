@@ -35,7 +35,15 @@ module Enjine
       end
 
       def targets_available?(specs, index, exclude)
-        specs.all? { |spec| spec.candidates(self, index).any? { it != exclude } }
+        specs.all? { |spec| spec.candidates(self, index).any? { it != exclude && targetable?(it, index) } }
+      end
+
+      # CR 702.11b: hexproof permanents can't be targeted by their controller's opponents.
+      def targetable?(ref, index)
+        obj = state.objects[ref]
+        return true unless obj && obj.zone == :battlefield && obj.controller != index
+
+        !chars(obj).keyword?(:hexproof)
       end
 
       # Whether the cost could be paid with the mana pool plus untapped mana sources (CR 601.2g-h).
@@ -171,7 +179,7 @@ module Enjine
       def target_candidates
         ctx = casting
         spec = casting_ability.targets[ctx["targets"].size]
-        spec.candidates(self, ctx["player"]).reject { it == ctx["object"] }
+        spec.candidates(self, ctx["player"]).reject { it == ctx["object"] || !targetable?(it, ctx["player"]) }
       end
 
       def choose_target!(ref)
@@ -266,7 +274,7 @@ module Enjine
         state.objects[origin["id"]] = GameObject.new(
           id: origin["id"], card: obj.card, owner: obj.owner, controller: obj.owner, zone: :hand, tapped: false,
           controlled_since: nil, kind: "card", counters: {}, damage: 0, source: nil, ability: nil, targets: nil,
-          loyalty_turn: nil
+          loyalty_turn: nil, deathtouched: false
         )
         player(obj.owner).hand.insert(origin["index"], origin["id"])
       end

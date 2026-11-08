@@ -137,7 +137,7 @@ module Enjine
       end
 
       modules = list.each_with_index.filter_map do |raw, i|
-        Enjine.registry.fetch(category, raw.to_s.downcase).tap do |mod|
+        Enjine.registry.fetch(category, raw.to_s.downcase.tr(" -", "__")).tap do |mod|
           unless mod
             errors << "#{key}[#{i}]: unknown #{category} #{raw.inspect} " \
                       "(supported: #{Enjine.registry.names(category).join(", ")})"

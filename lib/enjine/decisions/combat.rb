@@ -24,15 +24,26 @@ module Enjine
 
     # CR 509.1: the defending player declares blockers one at a time, then `done`.
     class DeclareBlockers < Base
-      def self.doc = 'Declare one blocker: `{type: "block", object: id, attacker: id}`, or `{type: "done"}`.'
+      def self.doc
+        'Declare one blocker: `{type: "block", object: id, attacker: id}`, `{type: "done"}` (only when the ' \
+          'blocks are legal), or `{type: "unblock", object: id}` to fix an illegal menace block.'
+      end
 
+      # "done" is offered only when the blocks are legal (menace); otherwise blocks can be removed.
       def self.options(engine, _pending)
-        attackers = engine.attackers.keys
-        [DONE] + engine.eligible_blockers.flat_map { |id| attackers.map { { type: "block", object: id, attacker: it } } }
+        blocks = engine.block_options.map { |id, attacker| { type: "block", object: id, attacker: attacker } }
+        removals = engine.menace_violations.flat_map do |attacker|
+          engine.blockers_of(attacker).map { { type: "unblock", object: it } }
+        end
+        (engine.blocks_legal? ? [DONE] : []) + blocks + removals
       end
 
       def self.submit(engine, _pending, option)
-        option[:type] == "done" ? engine.turn_based_actions_done! : engine.declare_blocker!(option[:object], option[:attacker])
+        case option[:type]
+        when "done" then engine.turn_based_actions_done!
+        when "unblock" then engine.remove_blocker!(option[:object])
+        else engine.declare_blocker!(option[:object], option[:attacker])
+        end
       end
     end
     register("declare_blockers", DeclareBlockers)
@@ -45,7 +56,7 @@ module Enjine
       end
 
       def self.options(engine, pending)
-        engine.blockers_of(pending["attacker"]).map { { type: "assign", object: it } }
+        engine.assignment_targets(pending["attacker"]).map { { type: "assign", object: it } }
       end
 
       def self.submit(engine, pending, option) = engine.assign_damage!(pending["attacker"], option[:object])
