@@ -42,6 +42,22 @@ Rules: CR 115.1
 "creature_or_planeswalker"
 ```
 
+## graveyard_card
+
+A card in a graveyard (any player's, in seat order; restrict with `controller` for its owner and `any_of`/`not` for its card types).
+
+Rules: CR 404.1, CR 115.1
+
+```json
+{
+  "graveyard_card": {
+    "any_of": [
+      "creature"
+    ]
+  }
+}
+```
+
 ## land
 
 A land on the battlefield.

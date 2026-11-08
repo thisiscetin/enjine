@@ -268,7 +268,7 @@ end of turn*, *triggers* ("when/whenever/at") or *static abilities* ("creatures
 you control get +1/+1" with no duration) is **not supported yet**, so the card is
 unsupported.
 
-### 4.7 Auras and Equipment
+### 4.8 Auras and Equipment
 
 Give the card the subtype `aura` (enchantments only) or `equipment` (artifacts only).
 
@@ -284,6 +284,42 @@ Give the card the subtype `aura` (enchantments only) or `equipment` (artifacts o
 Not supported yet: Auras that enchant players, Equipment that enters attached or
 equips for a non-mana cost, and granted triggered or activated abilities ("equipped
 creature has 'Whenever …'").
+
+### 4.9 Station cards, Sagas and other set mechanics
+
+Rule numbers are from the 2026-11-06 Comprehensive Rules.
+
+- **Station cards** (CR 702.184, 722). Put `"station"` in `keywords`: that is the
+  station activated ability. Each `N+ | …` striation is a `station_symbol` ability.
+  The card's power/toughness box goes on the symbol it's printed with (the one the
+  reminder text says makes it an artifact creature, else the last one), **not** on the card,
+  because a station card has no P/T until it's a creature (CR 722.2c):
+
+  ```json
+  { "name": "Example Skiff", "mana_cost": "{2}", "types": ["artifact"], "subtypes": ["spacecraft"],
+    "keywords": ["station"],
+    "abilities": [{ "station_symbol": { "at": 4, "power": 3, "toughness": 3, "keywords": ["flying"],
+                                        "abilities": [] } }] }
+  ```
+
+  Abilities printed after the first station symbol belong to its striation: list
+  them in that symbol's `abilities`.
+- **Sagas** (CR 715). `"subtypes": ["saga"]` on an enchantment, and one `chapter`
+  ability per chapter number. "I, II — effect" is two chapter abilities (CR 715.2c):
+
+  ```json
+  { "chapter": { "chapter": 1, "targets": ["creature"],
+                 "effects": [{ "deal_damage": { "amount": 2, "to": { "target": 0 } } }] } }
+  ```
+
+  The lore counters, the precombat-main counter and the sacrifice are automatic.
+- **Face a dilemma** (CR 700.17): the trigger `{ "faces_dilemma": {} }` ("whenever
+  you face a dilemma"; `"controller": "opponent"` or `"any"` for others).
+- **Assimilate** (CR 701.72): the effect `{ "assimilate": { "to": … } }`. "Target
+  creature card from a graveyard" is the filter `{ "graveyard_card": { "any_of": ["creature"] } }`.
+- **Strange new worlds** is an ability word: drop it. "The number of differently
+  named lands you control" is the amount
+  `{ "distinct_names": { "each": "land", "controller": "you" } }`.
 
 ---
 

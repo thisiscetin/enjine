@@ -2087,5 +2087,225 @@
         }
       }
     ]
+  },
+  {
+    "name": "Chronicle of Embers",
+    "mana_cost": "{1}{R}",
+    "types": [
+      "enchantment"
+    ],
+    "subtypes": [
+      "saga"
+    ],
+    "abilities": [
+      {
+        "chapter": {
+          "chapter": 1,
+          "effects": [
+            {
+              "deal_damage": {
+                "amount": 1,
+                "to": "each_opponent"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "chapter": {
+          "chapter": 2,
+          "targets": [
+            "creature"
+          ],
+          "effects": [
+            {
+              "deal_damage": {
+                "amount": 2,
+                "to": {
+                  "target": 0
+                }
+              }
+            }
+          ]
+        }
+      },
+      {
+        "chapter": {
+          "chapter": 3,
+          "effects": [
+            {
+              "draw": {
+                "amount": 1
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "Saga. I: 1 damage to each opponent. II: 2 damage to target creature. III: draw a card."
+  },
+  {
+    "name": "Longreach Skiff",
+    "mana_cost": "{2}",
+    "types": [
+      "artifact"
+    ],
+    "subtypes": [
+      "spacecraft"
+    ],
+    "keywords": [
+      "station"
+    ],
+    "abilities": [
+      {
+        "station_symbol": {
+          "at": 3,
+          "power": 3,
+          "toughness": 3,
+          "keywords": [
+            "flying"
+          ]
+        }
+      }
+    ],
+    "rules_text": "Station. 3+: flying; a 3/3 artifact creature."
+  },
+  {
+    "name": "Crossroads Oracle",
+    "mana_cost": "{1}{U}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "human",
+      "wizard"
+    ],
+    "power": 1,
+    "toughness": 3,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "faces_dilemma": {}
+          },
+          "effects": [
+            {
+              "add_counters": {
+                "counter": "+1/+1",
+                "amount": 1,
+                "to": "self"
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "Whenever you face a dilemma, put a +1/+1 counter on this creature."
+  },
+  {
+    "name": "Forked Path",
+    "mana_cost": "{1}{U}",
+    "types": [
+      "instant"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "modes": [
+            {
+              "effects": [
+                {
+                  "draw": {
+                    "amount": 1
+                  }
+                }
+              ]
+            },
+            {
+              "targets": [
+                "creature"
+              ],
+              "effects": [
+                {
+                  "tap": {
+                    "to": {
+                      "target": 0
+                    }
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "Choose one: draw a card; or tap target creature."
+  },
+  {
+    "name": "Hive Reclaimer",
+    "mana_cost": "{3}{B}",
+    "types": [
+      "sorcery"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "targets": [
+            {
+              "graveyard_card": {
+                "any_of": [
+                  "creature"
+                ]
+              }
+            }
+          ],
+          "effects": [
+            {
+              "assimilate": {
+                "to": {
+                  "target": 0
+                }
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "Assimilate target creature card from a graveyard."
+  },
+  {
+    "name": "Wayfinder Cartographer",
+    "mana_cost": "{2}{G}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "elf",
+      "scout"
+    ],
+    "power": 2,
+    "toughness": 2,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "enters": {}
+          },
+          "effects": [
+            {
+              "gain_life": {
+                "amount": {
+                  "distinct_names": {
+                    "each": "land",
+                    "controller": "you"
+                  }
+                }
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "When this creature enters, you gain life equal to the number of differently named lands you control."
   }
 ]

@@ -28,7 +28,7 @@ module Enjine
       # keeps the cached layer pass. Replacing the whole state (import, fork, rollback) is
       # detected separately by identity.
       LAYER_EVENTS = [Events::ZoneChanged, Events::CountersChanged, Events::EffectStarted,
-                      Events::EffectsEnded, Events::Attached, Events::Unattached].freeze
+                      Events::EffectsEnded, Events::Attached, Events::Unattached, Events::ControlChanged].freeze
 
       def touch! = @epoch = @epoch.to_i + 1
 
@@ -60,7 +60,8 @@ module Enjine
       # in timestamp order (CR 613.7); static abilities come before resolved effects.
       def layered(obj, statics, effects)
         defn = definition(obj)
-        base = defn.printed_characteristics
+        printed = defn.printed_characteristics
+        base = own_layers(obj, printed, effects) # layers 4 and 7b from the object's own state (see Engine::SetMechanics)
         keywords = base.keywords | Mechanics::Counters.keywords(obj.counters) # CR 122.1b (layer 6)
         delta = Mechanics::Counters.power_toughness(obj.counters) # CR 122.1a (layer 7c)
         facts = Mechanics::Filters::Facts.new(chars: base, counters: obj.counters, token: defn.token?)
@@ -76,7 +77,7 @@ module Enjine
           keywords |= effect["keywords"].map(&:to_sym) if effect["kind"] == "grant"
           delta = [delta[0] + effect["power"], delta[1] + effect["toughness"]] if effect["kind"] == "pump"
         end
-        return nil if delta == [0, 0] && keywords == base.keywords
+        return nil if base.equal?(printed) && delta == [0, 0] && keywords == base.keywords
 
         base.with(power: base.power && (base.power + delta[0]), toughness: base.toughness && (base.toughness + delta[1]),
                   keywords: keywords.freeze)
@@ -87,7 +88,7 @@ module Enjine
       def static_sources
         state.battlefield.flat_map do |id|
           obj = object(id)
-          definition(obj).ability_instances.filter_map { [obj, it.ability] if it.ability.kind == :static }
+          own_ability_instances(obj).filter_map { [obj, it.ability] if it.ability.kind == :static }
         end
       end
 

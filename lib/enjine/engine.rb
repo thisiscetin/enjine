@@ -259,12 +259,15 @@ module Enjine
       data = propose("zone_change", data).data
       return nil if data["cancelled"] # e.g. a shield counter instead of being destroyed (CR 122.1c)
 
-      if enters && data["enters"]
-        counters = data["enters"]["counters"].dup
-        enters.fetch("counters", {}).each { |kind, n| counters[kind] = counters.fetch(kind, 0) + n }
-        data["enters"].merge!(enters, "counters" => counters)
-      end
+      merge_enters!(data["enters"], enters) if enters && data["enters"]
       execute_zone_change!(data)
+    end
+
+    # Counters from the caller ("with a +1/+1 counter", CR 701.72b) add to the ones replacements gave it.
+    def merge_enters!(status, extra)
+      extra.each do |key, value|
+        status[key] = key == "counters" ? status.fetch(key, {}).merge(value) { |_, a, b| a + b } : value
+      end
     end
 
     # An "as this enters" choice the controller must make before `id` enters (CR 614.12).

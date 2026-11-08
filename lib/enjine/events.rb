@@ -78,6 +78,8 @@ module Enjine
     Unattached = define(:unattached, :object, :from) # CR 701.3d
     # A card in a hidden zone is shown to every player (CR 701.20a); it doesn't leave its zone (701.20b).
     CardRevealed = define(:card_revealed, :player, :object, :card)
+    ControlChanged = define(:control_changed, :object, :controller)
+    DilemmaFaced = define(:dilemma_faced, :player, :object, :modes) # CR 700.17 (2026-11-06)
 
     # A card moved between zones; old_id stops existing and new_id is born (CR 400.7).
     ZoneChanged = define(:zone_changed, :card, :old_id, :new_id, :owner, :from, :to, :reason) do

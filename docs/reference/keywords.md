@@ -170,6 +170,20 @@ Rules: CR 702.17b
 }
 ```
 
+## station
+
+An activated ability: tap another untapped creature you control to put charge counters equal to its power on this permanent. Sorcery speed. Pair with `station_symbol` abilities for what the counters unlock.
+
+Rules: CR 702.184a, CR 722.4
+
+```json
+{
+  "keywords": [
+    "station"
+  ]
+}
+```
+
 ## sunburst
 
 As this permanent enters from the stack as a resolving spell, it gets a +1/+1 counter (a creature) or a charge counter (otherwise) for each color of mana spent to cast it.

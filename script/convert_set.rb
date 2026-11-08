@@ -62,7 +62,7 @@ module SetConverter
   # Returns [card_data, nil] or [nil, missing_capabilities].
   def convert(source, translation = nil)
     missing = []
-    missing << "layout: #{source["layout"]}" unless source["layout"] == "normal"
+    missing << "layout: #{source["layout"]}" unless %w[normal saga].include?(source["layout"])
     left, right = source["type_line"].to_s.split(" — ", 2)
     words = left.to_s.split
     supertypes = words & SUPERTYPES
@@ -73,6 +73,7 @@ module SetConverter
     data["mana_cost"] = source["mana_cost"] unless source["mana_cost"].to_s.empty? || data["types"].include?("land")
     %w[power toughness loyalty].each do |stat|
       next unless source[stat]
+      next if stat != "loyalty" && station_card?(source) # a station card's P/T box belongs to a station symbol (CR 722.2b-c)
 
       Integer(source[stat], exception: false) ? data[stat] = Integer(source[stat]) : missing << "variable #{stat}"
     end
@@ -91,8 +92,11 @@ module SetConverter
   def translate_text(source, data, missing)
     text = source["oracle_text"].to_s.gsub(/\s*\([^)]*\)/, "") # reminder text is not rules
     text = text.gsub(source["name"], "CARDNAME")
-    text = text.gsub(/\b[Tt]his (creature|artifact|enchantment|land|planeswalker|permanent|Vehicle|Spacecraft|Equipment|Aura)\b/,
+    short = source["name"].split(", ").first # a legendary card may call itself by its first name
+    text = text.gsub(/(?<![\w.])#{Regexp.escape(short)}(?!\w)/, "CARDNAME") if short != source["name"]
+    text = text.gsub(/\b[Tt]his (creature|artifact|enchantment|land|planeswalker|permanent|Vehicle|Spacecraft|Saga|Equipment|Aura)\b/,
                      "CARDNAME")
+    text, station = translate_station_symbols(source, text, data, missing)
     keywords = []
     abilities = []
     spell_effects = []
@@ -111,6 +115,8 @@ module SetConverter
         missing << "modal choice"
       elsif (triggered = triggered_ability(line))
         abilities << triggered
+      elsif (chapters = chapter_line(line))
+        chapters.empty? ? missing.concat(classify(line)) : abilities.concat(chapters)
       elsif (m = /\AAs CARDNAME enters, you may pay (\d+) life\. If you don't, it enters tapped\.\z/.match(line))
         abilities << { "enters_tapped_unless_pay_life" => { "life" => Integer(m[1]) } }
       elsif line.match?(/\ACARDNAME enters tapped\.\z/)
@@ -140,6 +146,7 @@ module SetConverter
         v.empty?
       end })
     end
+    abilities.concat(station)
     data["abilities"] = abilities unless abilities.empty?
     # "X" is only the announced X when a cost has {X} (CR 107.3a); otherwise the text defines it.
     text_x = JSON.generate(abilities).include?('"amount":"x"')
@@ -217,6 +224,46 @@ module SetConverter
     JSON.parse(JSON.generate(abilities).gsub('"name":"CARDNAME"', "\"name\":#{JSON.generate(name)}"))
   end
 
+  STATION_LINE = /^(\d+)\+ \| /
+
+  # A station card: its text has station symbols "N+ | ..." (CR 722.1).
+  def station_card?(source) = source["oracle_text"].to_s.match?(STATION_LINE)
+
+  # Station symbols (CR 722.2): every line from the first "N+ | " on belongs to a striation. Each
+  # becomes a station_symbol ability; the card's power/toughness goes to the symbol that makes it a
+  # creature (the "artifact creature at N+" reminder, else the last symbol). Returns the other text.
+  def translate_station_symbols(source, text, data, missing)
+    start = text.index(STATION_LINE) or return [text, []]
+    creature_at = source["oracle_text"][/artifact creature at (\d+)\+/, 1]&.to_i
+    sections = text[start..].split(/^(?=\d+\+ \| )/)
+    thresholds = sections.map { Integer(it[/\A\d+/]) }
+    creature_at ||= thresholds.max if source["power"]
+    symbols = sections.each_with_index.map do |section, i|
+      inner = { "types" => data["types"] }
+      translate_text({ "name" => source["name"], "oracle_text" => section.sub(STATION_LINE, "") }, inner, missing)
+      symbol = { "at" => thresholds[i] }.merge(inner.slice("keywords", "abilities"))
+      if creature_at == thresholds[i] && source["power"]
+        %w[power toughness].each { |k| Integer(source[k], exception: false) ? symbol[k] = Integer(source[k]) : missing << "variable #{k}" }
+      end
+      { "station_symbol" => symbol }
+    end
+    [text[0...start], symbols]
+  end
+
+  ROMAN = { "I" => 1, "II" => 2, "III" => 3, "IV" => 4, "V" => 5, "VI" => 6 }.freeze
+  CHAPTER_LINE = /\A((?:I|II|III|IV|V|VI)(?:, (?:I|II|III|IV|V|VI))*) — (.+)\z/
+
+  # A Saga's chapter line "I, II — effect" (CR 715.2): one chapter ability per number (CR 715.2c).
+  # Returns nil for other lines, [] when the effect isn't understood.
+  def chapter_line(line)
+    m = CHAPTER_LINE.match(line) or return nil
+    effects, targets = sentence_effects(m[2], 0)
+    return [] unless effects
+
+    body = { "targets" => targets, "effects" => effects }.reject { |_, v| v.empty? }
+    m[1].split(", ").map { { "chapter" => { "chapter" => ROMAN.fetch(it) }.merge(body) } }
+  end
+
   TRIGGERS = [
     [/\AWhen CARDNAME enters, (.+)\z/, { "enters" => {} }],
     [/\AWhen CARDNAME dies, (.+)\z/, { "dies" => {} }],
@@ -230,7 +277,8 @@ module SetConverter
     [/\A(?:Landfall — )?Whenever a land you control enters, (.+)\z/,
      { "enters" => { "subject" => { "each" => "land", "controller" => "you" } } }],
     [/\AWhenever you cast a noncreature spell, (.+)\z/, { "cast" => { "spell" => "noncreature" } }],
-    [/\AWhenever equipped creature attacks, (.+)\z/, { "attacks" => { "subject" => "attached" } }]
+    [/\AWhenever equipped creature attacks, (.+)\z/, { "attacks" => { "subject" => "attached" } }],
+    [/\AWhenever you face a dilemma, (.+)\z/, { "faces_dilemma" => {} }]
   ].freeze
 
   def triggered_ability(line)
@@ -388,7 +436,9 @@ module SetConverter
               "target nontoken artifact" => { "artifact" => { "token" => false } },
               "target nontoken creature" => { "creature" => { "token" => false } },
               "target legendary creature" => { "creature" => { "supertypes" => ["legendary"] } },
-              "target token" => { "permanent" => { "token" => true } } }.freeze
+              "target token" => { "permanent" => { "token" => true } },
+              "target tapped creature an opponent controls" => { "creature" => { "tapped" => true, "controller" => "opponent" } },
+              "target creature card from a graveyard" => { "graveyard_card" => { "any_of" => ["creature"] } } }.freeze
 
   # "... with power 4 or greater" / "... with mana value 3 or less" after a target phrase.
   TARGET_STAT = /\A(.+) with (power|toughness|mana value) (\d+) or (greater|less)\z/
@@ -403,6 +453,7 @@ module SetConverter
   def sentence_effects(line, target_offset)
     effects = []
     targets = []
+    line = line.gsub(/ and (you gain \d+ life\.)/) { ". #{::Regexp.last_match(1).capitalize}" } # two effects
     sentences = line.split(/(?<=\.)\s+/).flat_map { it.delete_suffix(".").split(", then ").map { capitalize(it) } }
     until sentences.empty?
       sentence = sentences.shift
@@ -529,8 +580,8 @@ module SetConverter
   end
 
   CREATURE_TOKEN = %r{
-    \ACreate\ (a|an|one|two|three|\d+)\ (tapped\ )?(\d+)/(\d+)\
-    (?:(?:white|blue|black|red|green|colorless)(?:\ and\ \w+)?\ )?
+    \ACreate\ (a|an|one|two|three|\d+)\ (tapped\ )?(\d+)/(\d+)
+    \ (?:(?:white|blue|black|red|green|colorless)(?:\ and\ \w+)?\ )?
     ([A-Z][\w\ ]*?)\ (artifact\ )?creature\ tokens?(?:\ with\ ([a-z,\ ]+))?\z
   }x
 
@@ -550,7 +601,8 @@ module SetConverter
   def sentence_effect(sentence, targets, offset)
     case sentence
     when /\A(?:CARDNAME|This spell) deals (\d+|X) damage to (.+)\z/
-      to = target_ref(::Regexp.last_match(2), targets, offset) || (::Regexp.last_match(2) == "each opponent" && "each_opponent")
+      to = target_ref(::Regexp.last_match(2), targets, offset) || { "each opponent" => "each_opponent",
+                                                                    "each player" => { "each" => "player" } }[::Regexp.last_match(2)]
       to && { "deal_damage" => { "amount" => amount(::Regexp.last_match(1)), "to" => to } }
     when /\AAdd ((?:\{[WUBRGC]\})+)\z/ then { "add_mana" => { "produce" => ::Regexp.last_match(1) } }
     when /\AAdd (one|two|three) mana of any (?:one )?color\z/
@@ -558,6 +610,8 @@ module SetConverter
     when /\AAdd (two|three) mana in any combination of colors\z/
       { "add_mana" => { "amount" => number(::Regexp.last_match(1)), "color" => "any" } }
     when /\A(?:You draw|Draw) (a|two|three|\d+|X) cards?\z/ then { "draw" => { "amount" => amount(::Regexp.last_match(1)) } }
+    when /\AEach player draws (a|two|three|\d+) cards?\z/
+      { "draw" => { "amount" => number(::Regexp.last_match(1)), "to" => { "each" => "player" } } }
     when /\AYou gain (\d+|X) life\z/ then { "gain_life" => { "amount" => amount(::Regexp.last_match(1)) } }
     when /\AEach opponent loses (\d+) life\z/ then { "lose_life" => { "amount" => Integer(::Regexp.last_match(1)),
                                                                       "to" => "each_opponent" } }
@@ -574,6 +628,8 @@ module SetConverter
       { "destroy" => { "to" => target_ref(::Regexp.last_match(1), targets, offset) } }
     when /\ACounter (target spell|target noncreature spell|target spell with mana value \d+ or (?:greater|less))\z/
       { "counter" => { "to" => target_ref(::Regexp.last_match(1), targets, offset) } }
+    when /\AAssimilate (#{TARGET_PHRASES})\z/o
+      { "assimilate" => { "to" => target_ref(::Regexp.last_match(1), targets, offset) } }
     when /\AExile (#{TARGET_PHRASES})\z/o
       { "exile" => { "to" => target_ref(::Regexp.last_match(1), targets, offset) } }
     when /\AReturn (#{TARGET_PHRASES}) to its owner's hand\z/o

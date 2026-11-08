@@ -70,7 +70,7 @@ module Enjine
                      targets: deep_copy(hash["targets"]), loyalty_turn: hash["loyalty_turn"],
                      deathtouched: hash.fetch("deathtouched", false), modes: hash["modes"]&.dup,
                      memory: deep_copy(hash.fetch("memory", {})), x: hash["x"], mana_spent: hash["mana_spent"]&.dup,
-                     attached_to: hash["attached_to"])
+                     attached_to: hash["attached_to"], paid: hash["paid"] && deep_copy(hash["paid"]))
     end
 
     def deep_copy(value) = Marshal.load(Marshal.dump(value))

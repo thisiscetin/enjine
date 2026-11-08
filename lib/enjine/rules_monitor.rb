@@ -96,9 +96,28 @@ module Enjine
       return if card.instant_speed?
 
       caster = event.player
+      # Triggered abilities put on the stack later in the same decision (e.g. "whenever you cast") don't count.
+      stack = state.stack - @entry.events.grep(Events::TriggerPutOnStack).map(&:object)
       unless state.players[state.active].name == caster && %i[precombat_main postcombat_main].include?(state.step) &&
-             state.stack.size == 1
-        finding("307.1", "#{caster} cast sorcery-speed #{event.card} at #{state.step} (stack #{state.stack.size})")
+             stack.size == 1
+        finding("307.1", "#{caster} cast sorcery-speed #{event.card} at #{state.step} (stack #{stack.size})")
+      end
+    end
+
+    # Printed keywords plus those of station symbols with enough charge counters (CR 722.2a), recomputed
+    # from the raw counters, and keywords granted until end of turn.
+    def keyword?(obj, keyword)
+      card = defn(obj.card)
+      return true if card.keyword?(keyword)
+
+      charge = obj.counters.fetch("charge", 0)
+      stationed = card.ability_instances.any? do |inst|
+        inst.ability.kind == :station_symbol && charge >= inst.ability.threshold && inst.ability.keywords.include?(keyword)
+      end
+      return true if stationed || attached_grants(obj.id).any? { it["keywords"].include?(keyword.to_s) }
+
+      state.effects.any? do |e|
+        e["kind"] == "grant" && e["affected"].include?(obj.id) && e["keywords"].include?(keyword.to_s)
       end
     end
 
@@ -125,11 +144,10 @@ module Enjine
       obj = state.objects[event.object]
       return unless obj
 
-      card = defn(obj.card)
       active_turn = state.turn
       sick = obj.controlled_since.nil? || obj.controlled_since >= active_turn
       finding("302.6", "summoning-sick #{event.object} attacked") if sick && !keyword?(obj, :haste)
-      finding("702.3b", "#{event.object} has defender but attacked") if card.keyword?(:defender)
+      finding("702.3b", "#{event.object} has defender but attacked") if keyword?(obj, :defender)
     end
 
     # CR 702.9b: a creature with flying can be blocked only by creatures with flying or reach.
@@ -168,10 +186,6 @@ module Enjine
     end
 
     # Printed keyword, or granted by an Aura/Equipment attached to it (CR 301.5f, 303.4m).
-    def keyword?(obj, keyword)
-      defn(obj.card).keyword?(keyword) || attached_grants(obj.id).any? { it["keywords"].include?(keyword.to_s) }
-    end
-
     # "Equipped/enchanted creature gets/has ..." of every permanent attached to `id`, read from
     # the raw card data: [{"power" => n, "toughness" => n, "keywords" => [...]}].
     def attached_grants(id)

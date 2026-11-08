@@ -208,7 +208,8 @@ module Enjine
           return :wait
         end
         lock_total_cost!(ctx) unless ctx["remaining"]
-        if ctx["remaining"].values.sum.positive?
+        if (cost = next_cost_choice(ctx, ability)) then ask_cost_choice!(ctx, ability.costs[cost])
+        elsif ctx["remaining"].values.sum.positive?
           ask!("kind" => "pay_cost", "player" => ctx["player"], "remaining" => remaining_text)
           :wait
         else
@@ -291,6 +292,7 @@ module Enjine
         obj.targets = ctx["targets"].dup
         obj.modes = ctx["modes"].dup unless ctx["modes"].empty?
         obj.mana_spent = ctx["spent"].dup if ctx["spent"]
+        record_cast_choices!(obj, ctx) # cost choices; facing a dilemma (CR 700.17)
         if ctx["kind"] == "trigger"
           emit Events::TriggerPutOnStack.new(player: name(index), object: obj.id, source: ctx["source"], card: obj.card,
                                              ability: ctx["ability"], targets: obj.targets)
@@ -320,7 +322,8 @@ module Enjine
       def cancel_casting!
         ctx = casting
         index = ctx["player"]
-        ctx["tapped"].each do |id|
+        # A source sacrificed for mana (a Treasure) is gone and isn't brought back yet (CR 733.1 would).
+        ctx["tapped"].select { state.objects.key?(it) }.each do |id|
           object(id).tapped = false
           emit Events::Untapped.new(object: id)
         end

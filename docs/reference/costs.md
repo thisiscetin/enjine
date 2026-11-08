@@ -47,3 +47,13 @@ Rules: CR 107.5, CR 602.5a
 ```json
 "tap"
 ```
+
+## tap_another_creature
+
+Tap another untapped creature you control, chosen while activating. A creature that came under your control this turn can be tapped this way.
+
+Rules: CR 702.184a, CR 601.2h, CR 602.2b, CR 302.6
+
+```json
+"tap_another_creature"
+```

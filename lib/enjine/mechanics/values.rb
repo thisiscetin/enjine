@@ -10,8 +10,10 @@ module Enjine
     #   {"hand_size": "you"}                           cards in a player's hand
     #   {"life": "you"}                                a player's life total
     #   "x"                                            the X announced for this spell or ability (CR 107.3)
+    #   {"distinct_names": {"each": "land", "controller": "you"}}  how many different names they have
+    #                                                  ("differently named lands you control", strange new worlds)
     class Amount
-      KINDS = %w[count power toughness hand_size life].freeze
+      KINDS = %w[count power toughness hand_size life distinct_names].freeze
 
       def self.build(data, errors, path, targets_count:, min: 0)
         return Fixed.new(data) if data.is_a?(Integer) && data >= min
@@ -40,6 +42,7 @@ module Enjine
         when "toughness" then refs.sum { object_stat(engine, it, :toughness) }
         when "hand_size" then refs.sum { player_of(engine, it)&.hand&.size.to_i }
         when "life" then refs.sum { player_of(engine, it)&.life.to_i }
+        when "distinct_names" then refs.filter_map { engine.state.objects[it] && engine.chars(it).name }.uniq.size
         end
       end
 

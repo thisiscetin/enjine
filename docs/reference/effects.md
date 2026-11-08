@@ -48,6 +48,26 @@ Rules: CR 106.1a, CR 106.4, CR 608.2d, CR 605.1a
 }
 ```
 
+## assimilate
+
+Assimilate each referenced permanent or permanent card: you gain control of it (or put it onto the battlefield under your control) with a +1/+1 counter, and it becomes a Borg artifact creature while it stays on the battlefield.
+
+Rules: CR 701.72a, CR 701.72b, CR 205.1b, CR 613.1b, CR 613.1d
+
+| Parameter | Description |
+| --- | --- |
+| `to` | selector (permanents, or a target card in a graveyard) |
+
+```json
+{
+  "assimilate": {
+    "to": {
+      "target": 0
+    }
+  }
+}
+```
+
 ## attach
 
 Attach this Aura or Equipment (the ability's source) to the referenced permanent. Nothing happens if it can't legally be attached to it, if it's already attached to it, or if the source has left the battlefield.

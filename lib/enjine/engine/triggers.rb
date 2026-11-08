@@ -81,7 +81,7 @@ module Enjine
 
       def queue_trigger(inst, event, source)
         trigger = inst.ability.trigger
-        return unless event.is_a?(trigger.event_class) && trigger.match?(self, event, source)
+        return unless trigger.event?(event) && trigger.match?(self, event, source)
         return unless inst.ability.condition_met?(self, source["controller"], source["id"]) # CR 603.4
 
         memory = state.objects[source["id"]]&.memory&.[]("cast") ? { "source_cast" => true } : {}

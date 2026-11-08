@@ -5,7 +5,8 @@ module Enjine
   # A new GameObject (with a new id) is created on every zone change (CR 400.7).
   GameObject = Struct.new(:id, :card, :owner, :controller, :zone, :tapped, :controlled_since, :kind, :counters,
                           :damage, :source, :ability, :targets, :loyalty_turn, :deathtouched, :modes, :memory,
-                          :x, :mana_spent, :attached_to) do
+                          :x, :mana_spent, :attached_to,
+                          :paid) do # paid: choices made paying costs, e.g. the creature tapped (CR 702.184a)
     def ability? = kind == "ability"
 
     def to_h
@@ -14,7 +15,7 @@ module Enjine
         "damage" => damage, "source" => source, "ability" => ability, "targets" => targets&.dup,
         "loyalty_turn" => loyalty_turn, "deathtouched" => deathtouched,
         "modes" => modes&.dup, "memory" => Marshal.load(Marshal.dump(memory || {})), "x" => x,
-        "mana_spent" => mana_spent&.dup, "attached_to" => attached_to }
+        "mana_spent" => mana_spent&.dup, "attached_to" => attached_to, "paid" => paid&.map(&:dup) }
     end
   end
 
