@@ -3,6 +3,8 @@
 # Fixture sets and synthetic card pools for the deck builder specs.
 module DeckBuilderHelpers
   SET_FIXTURES = File.expand_path("../fixtures/sets", __dir__)
+  # A collection spanning both fixture sets, with every way to identify a card and a few unplayable entries.
+  BINDER = File.expand_path("../fixtures/collections/binder.json", __dir__)
 
   def build_deck(**) = Enjine::DeckBuilder.build(sets_dir: SET_FIXTURES, **)
 

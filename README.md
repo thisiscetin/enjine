@@ -44,7 +44,8 @@ Super Heroes, and so on back to Foundations. Sets that leave Standard at the nex
 rotation aren't imported. Each set file records the date it stops being Standard
 (`standard_legal_until`), and `sets=standard` only uses sets legal on that day. Card data lives in
 `lib/enjine/sets/<code>.json`. It ships with the gem, isn't loaded by default, and
-the [deck builder](docs/guides/deck-builder.md) reads it (`--random-deck sets=trk`).
+the [deck builder](docs/guides/deck-builder.md) reads it (`--random-deck sets=trk`),
+or builds only from the cards you own across sets (`--collection mine.json`).
 
 ## Try it: play both sides in your terminal
 
@@ -161,7 +162,7 @@ SUPPORTED.md                generated list of everything the engine supports
 | [docs/reference/](docs/reference) | parameters and examples for every primitive and decision (generated) |
 | [docs/guides/card-data-format.md](docs/guides/card-data-format.md) | the card data format, Scryfall mapping, validation, DB schema |
 | [docs/guides/decision-api.md](docs/guides/decision-api.md) | playing a game through the API |
-| [docs/guides/deck-builder.md](docs/guides/deck-builder.md) | random decks from card sets, in chosen or random colors (`--random-deck`) |
+| [docs/guides/deck-builder.md](docs/guides/deck-builder.md) | random decks from card sets or from your own collection, in chosen or random colors (`--random-deck`, `--collection`) |
 | [docs/guides/adding-a-mechanic.md](docs/guides/adding-a-mechanic.md) | how to extend the engine |
 | [docs/MECHANICS_COVERAGE.md](docs/MECHANICS_COVERAGE.md) | the full CR checklist with milestones and priorities |
 | [docs/reviews/VERDICT.md](docs/reviews/VERDICT.md) | design review verdict and the prioritized work queue (elegance, performance, future-proofness) |

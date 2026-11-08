@@ -2,6 +2,7 @@
 
 require "enjine"
 require "enjine/sets"
+require "enjine/collection"
 
 module Enjine
   # Builds random, legal, *plausibly shaped* constructed decks from one or more card
@@ -11,6 +12,7 @@ module Enjine
   #   Enjine::DeckBuilder.build(sets: %w[trk], colors: %w[W U], seed: 7)   # explicit colors
   #   Enjine::DeckBuilder.build(sets: %w[trk abc], colors: 2, seed: 7)     # two random colors
   #   Enjine::DeckBuilder.build(colors: :any, seed: 7)                     # every set in Sets.dir
+  #   Enjine::DeckBuilder.build(collection: "mine.json", colors: 2, seed: 7) # only cards you own
   #
   # Returns a deck document ({"name", "description", "cards", "main"}) that
   # Enjine::Player.new(name:, deck:) accepts. Same inputs and seed, same deck.
@@ -64,14 +66,18 @@ module Enjine
       { "name" => name, "types" => ["land"], "supertypes" => ["basic"], "subtypes" => [name.downcase] }.freeze
     end.freeze
     BASE_SIZE = 60
+    BASICS = %i[unlimited owned].freeze
 
-    attr_reader :colors, :sets, :size, :profile
+    attr_reader :colors, :sets, :size, :profile, :collection
 
-    # sets:     set codes and/or Sets::CardSet objects (nil: every set in sets_dir unless cards: is given)
-    # cards:    extra card data blocks / CardDefinitions to draw from (e.g. CardPool::Core.cards)
-    # colors:   %w[W U], "WU", an Integer 1-5 (random colors), or :any (random count, see random_colors)
-    def self.build(seed:, sets: nil, cards: nil, colors: :any, size: BASE_SIZE, profile: {}, sets_dir: Sets.dir)
-      new(seed: seed, sets: sets, cards: cards, colors: colors, size: size, profile: profile, sets_dir: sets_dir).build
+    # sets:       set codes and/or Sets::CardSet objects (nil: every set in sets_dir unless cards: is given)
+    # cards:      extra card data blocks / CardDefinitions to draw from (e.g. CardPool::Core.cards); with
+    #             collection:, extra data the collection's entries may resolve against
+    # colors:     %w[W U], "WU", an Integer 1-5 (random colors), or :any (random count, see random_colors)
+    # collection: a Collection, collection document or JSON path: use only owned cards, at most the copies owned
+    # basics:     with collection:, :unlimited (basic lands are always available) or :owned (only listed basics)
+    def self.build(seed:, **)
+      new(seed: seed, **).build
     end
 
     # The colors of a card: the colored symbols in its mana cost (CR 105.2, 202.2), in WUBRG order.
@@ -110,19 +116,25 @@ module Enjine
       Mana::COLORS.select { symbols.include?(it) }
     end
 
-    def initialize(seed:, sets: nil, cards: nil, colors: :any, size: BASE_SIZE, profile: {}, sets_dir: Sets.dir)
+    def initialize(seed:, sets: nil, cards: nil, colors: :any, size: BASE_SIZE, profile: {}, sets_dir: Sets.dir,
+                   collection: nil, basics: :unlimited)
       raise ArgumentError, "size must be an Integer of at least #{Deck::MIN_SIZE}" unless size.is_a?(Integer) && size >= Deck::MIN_SIZE
 
       @rng = Rng.from_seed(seed)
       @seed = seed
       @size = size
       @profile = merge_profile(profile)
-      @sets = load_sets(sets, cards, sets_dir)
-      @pool = build_pool(cards)
+      @basics = resolve_basics(basics, collection)
+      @collection = collection && Collection.load(collection, sets_dir: sets_dir, cards: cards)
+      raise ArgumentError, "pass either sets: or collection:, not both" if @collection && sets
+
+      @sets = @collection ? [] : load_sets(sets, cards, sets_dir)
+      @pool = @collection ? @collection.definitions : build_pool(cards)
       @colors = resolve_colors(colors)
     end
 
     def build
+      check_colors!
       lands = scaled(sample(@profile[:lands]))
       creatures = scaled(sample(@profile[:creatures])).clamp(0, @size - lands)
       @creatures = {}
@@ -143,6 +155,14 @@ module Enjine
         value = overrides.fetch(key, overrides.fetch(key.to_s, default))
         [key, default.is_a?(Hash) ? default.merge(value) : value]
       end
+    end
+
+    def resolve_basics(value, collection)
+      basics = value.to_s.to_sym
+      raise ArgumentError, "basics: must be one of #{BASICS.join(", ")}, not #{value.inspect}" unless BASICS.include?(basics)
+      raise ArgumentError, "basics: :owned needs a collection:" if basics == :owned && collection.nil?
+
+      basics
     end
 
     def load_sets(sets, cards, dir)
@@ -186,7 +206,14 @@ module Enjine
     end
 
     def spells_for(colors) = @pool.select { it.castable? && self.class.fits?(it, colors) }
-    def capacity(definitions) = definitions.sum { it.deck_limit_exempt? ? @size : Deck::MAX_COPIES }
+    def capacity(definitions) = definitions.sum { limit(it) }
+
+    # Most copies of a card the deck may hold: 4 (CR 100.2a) or any number if exempt, and never
+    # more than a collection owns.
+    def limit(definition)
+      rule = definition.deck_limit_exempt? ? @size : Deck::MAX_COPIES
+      @collection ? [rule, @collection.count(definition.id)].min : rule
+    end
 
     # --- spells ---------------------------------------------------------------------------------------
 
@@ -222,14 +249,14 @@ module Enjine
       return filled if definition.nil? || filled >= target
 
       candidates.delete(definition)
-      copies = [weighted(@profile[:copies]), target - filled].min
+      copies = [weighted(@profile[:copies]), target - filled, limit(definition)].min
       chosen[definition.id] = [copies, 1].max
       filled + chosen[definition.id]
     end
 
     def top_up(chosen, filled, target)
       while filled < target
-        open = chosen.keys.select { chosen[it] < Deck::MAX_COPIES }
+        open = chosen.keys.select { chosen[it] < limit(definition(it)) }
         break if open.empty?
 
         open.each do |id|
@@ -270,15 +297,34 @@ module Enjine
     end
 
     def not_enough!(creature_pool, other_pool, lands, missing)
-      details = { sets: @sets.map(&:code), colors: @colors.join, size: @size, lands: lands,
-                  creatures_available: creature_pool.size, others_available: other_pool.size,
-                  max_spell_copies: capacity(creature_pool + other_pool), missing: missing }
+      details = base_details.merge(lands: lands, creatures_available: creature_pool.size, others_available: other_pool.size,
+                                   max_spell_copies: capacity(creature_pool + other_pool), missing: missing)
       raise NotEnoughCards.new(
         "cannot build a #{@size}-card #{@colors.join} deck from #{source_label}: only #{creature_pool.size} creature and " \
         "#{other_pool.size} other non-land cards are playable in those colors (at most #{details[:max_spell_copies]} copies), " \
         "#{missing} short of the #{@size - lands} non-land cards needed even with #{lands} lands. " \
-        "Add sets or colors, or lower the profile's ranges.", details
+        "#{@collection ? "Add cards to the collection" : "Add sets"} or colors, or lower the profile's ranges.", details
       )
+    end
+
+    # A collection deck needs at least one owned card of every deck color (a "WU" deck with no blue cards isn't one).
+    def check_colors!
+      lacking = colors_without_cards
+      return if @collection.nil? || lacking.empty?
+
+      raise NotEnoughCards.new(
+        "cannot build a #{@colors.join} deck from #{source_label}: it has no playable #{lacking.join(", ")} cards", base_details
+      )
+    end
+
+    def colors_without_cards
+      spells = spells_for(@colors)
+      @colors.reject { |c| spells.any? { self.class.colors_of(it).include?(c) } }
+    end
+
+    def base_details
+      { sets: @sets.map(&:code), collection: @collection && collection_label, colors: @colors.join, size: @size,
+        colors_without_cards: colors_without_cards.join }.compact
     end
 
     # --- lands ----------------------------------------------------------------------------------------
@@ -322,7 +368,31 @@ module Enjine
       shares.each { |c, share| split[c] += share.floor }
       leftover = count - split.values.sum
       shares.sort_by { |c, share| [-(share - share.floor), @colors.index(c)] }.first(leftover).each { split[it[0]] += 1 }
-      split.reject { |_, n| n.zero? }
+      owned_basics(split.reject { |_, n| n.zero? }, count)
+    end
+
+    # With basics: :owned, caps each basic at the copies owned and gives the shortfall to colors with spares.
+    def owned_basics(split, count)
+      return split if @basics == :unlimited
+
+      owned = @colors.to_h { [it, @collection.count(BASIC_LAND_NAMES.fetch(it))] }
+      capped = @colors.to_h { [it, [split.fetch(it, 0), owned[it]].min] }
+      short = count - capped.values.sum
+      @colors.each do |c|
+        extra = [owned[c] - capped[c], short].min
+        capped[c] += extra
+        short -= extra
+      end
+      not_enough_basics!(owned, count) if short.positive?
+      capped.reject { |_, n| n.zero? }
+    end
+
+    def not_enough_basics!(owned, count)
+      raise NotEnoughCards.new(
+        "cannot build a #{@size}-card #{@colors.join} deck from #{source_label} with basics: :owned: it needs #{count} basic " \
+        "lands but owns #{owned.values.sum} in those colors. Add basic lands, or use basics: :unlimited.",
+        base_details.merge(basics_needed: count, basics_owned: owned.transform_keys(&:to_s))
+      )
     end
 
     # --- output ---------------------------------------------------------------------------------------
@@ -338,7 +408,8 @@ module Enjine
     end
 
     def description(lands, main)
-      "random deck: sets=#{@sets.map(&:code).join(",")} colors=#{@colors.join} seed=#{@seed} — " \
+      source = @collection ? "collection=#{collection_label}#{" basics=owned" if @basics == :owned}" : "sets=#{@sets.map(&:code).join(",")}"
+      "random deck: #{source} colors=#{@colors.join} seed=#{@seed} — " \
         "#{lands} lands, #{@creatures.values.sum} creatures, #{@others.values.sum} other spells, " \
         "#{main.size} distinct cards"
     end
@@ -379,6 +450,12 @@ module Enjine
       weights.each { |key, w| (roll -= w).negative? && (return key) }
     end
 
-    def source_label = @sets.empty? ? "the given cards" : @sets.map(&:code).join("+")
+    def source_label
+      return "the collection #{collection_label}" if @collection
+
+      @sets.empty? ? "the given cards" : @sets.map(&:code).join("+")
+    end
+
+    def collection_label = @collection.source ? File.basename(@collection.source) : "(#{@collection.size} cards)"
   end
 end

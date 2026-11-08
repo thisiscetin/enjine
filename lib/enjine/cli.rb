@@ -38,6 +38,7 @@ module Enjine
       return list_decks if @options[:list_decks]
       return validate(@options[:validate]) if @options[:validate]
       return list_sets if @options[:list_sets]
+      return collection_report(@options[:collection_report]) if @options[:collection_report]
       return random_deck(@options[:random_deck]) if @options.key?(:random_deck)
 
       @game = start_game or return 1
@@ -66,6 +67,10 @@ module Enjine
         end
         o.on("--sets-dir DIR", "Directory of card set files (default: #{Sets::DEFAULT_DIR})") { @options[:sets_dir] = it }
         o.on("--list-sets", "List the card sets in the sets directory") { @options[:list_sets] = true }
+        o.on("--collection FILE", "Build random decks only from the cards in this collection (JSON)") { @options[:collection] = it }
+        o.on("--collection-report FILE", "Resolve a collection against the sets; prints a JSON report") do
+          @options[:collection_report] = it
+        end
         o.on("--names A,B", Array, "Player names (default alice,bob)") { @options[:names] = it }
         o.on("--list-decks", "List the sample decks") { @options[:list_decks] = true }
         o.on("--validate FILE", "Validate a JSON array of card data blocks; prints a JSON report") { @options[:validate] = it }
@@ -109,6 +114,16 @@ module Enjine
       0
     end
 
+    # What a collection resolved to: resolved, unsupported and unknown entries. Exit code 1 if any are unknown.
+    def collection_report(path)
+      report = Collection.load(path, sets_dir: @options[:sets_dir]).report
+      say JSON.pretty_generate(report)
+      report["unknown"].empty? ? 0 : 1
+    rescue Error => e
+      say JSON.generate("error" => e.message)
+      1
+    end
+
     # Prints a random deck document; exit code 1 with a message if it can't be built.
     def random_deck(spec)
       say JSON.pretty_generate(build_random_deck(spec, @options[:seed]))
@@ -120,13 +135,13 @@ module Enjine
 
     # SPEC: whitespace- or comma-separated key=value pairs; a bare word continues the previous
     # value, so "sets=trk,abc,colors=WU" works. Keys: sets (codes, "all" or "standard"), colors
-    # (letters like WU, a count 1-5, or any), seed, size.
+    # (letters like WU, a count 1-5, or any), seed, size, and with --collection, basics (unlimited or owned).
     def build_random_deck(spec, default_seed)
       args = parse_spec(spec.to_s)
       sets = args.delete("sets")
       DeckBuilder.build(sets: resolve_sets(sets), colors: args.delete("colors") || :any,
                         seed: Integer(args.delete("seed") || default_seed), size: Integer(args.delete("size") || 60),
-                        sets_dir: @options[:sets_dir]).tap do
+                        sets_dir: @options[:sets_dir], collection: collection, basics: args.delete("basics") || :unlimited).tap do
         raise ArgumentError, "unknown random deck option(s): #{args.keys.join(", ")}" unless args.empty?
       end
     end
@@ -145,6 +160,13 @@ module Enjine
       end
     end
 
+    # The --collection, loaded once for every deck built in this run.
+    def collection
+      return nil unless @options[:collection]
+
+      @collection ||= Collection.load(@options[:collection], sets_dir: @options[:sets_dir])
+    end
+
     def resolve_sets(value)
       case value
       when nil, "all" then nil
@@ -155,7 +177,7 @@ module Enjine
 
     def start_game
       @options[:load] ? load_game : new_game
-    rescue DeckBuilder::NotEnoughCards, Sets::InvalidSet, ArgumentError => e
+    rescue DeckBuilder::NotEnoughCards, Sets::InvalidSet, Collection::InvalidCollection, ArgumentError => e
       say "error: #{e.message}"
       nil
     end
