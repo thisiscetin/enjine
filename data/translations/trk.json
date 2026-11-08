@@ -1,4 +1,19 @@
 {
+  "Adversary by Algorithm": {
+    "abilities": [
+      { "spell": { "effects": [
+        { "create_token": { "token": { "name": "Illusion", "types": ["artifact", "creature"], "subtypes": ["illusion"],
+                                       "power": 3, "toughness": 3 } } } ] } },
+      { "beam_me_up": { "cost": "{3}{G}" } }
+    ]
+  },
+  "Andromedan Automatons": {
+    "abilities": [
+      { "triggered": { "when": { "enters": {} }, "effects": [
+        { "may": { "effects": [
+          { "search_library": { "for": { "name": "Andromedan Automatons" }, "count": "any", "reveal": true } } ] } } ] } }
+    ]
+  },
   "Assembly Specialist": {
     "abilities": [
       { "triggered": { "when": { "enters": {} }, "effects": [
@@ -37,6 +52,33 @@
         { "effects": [{ "add_mana": { "amount": 2, "color": "any_one" } }] } ] } }
     ]
   },
+  "Encounter the Unknown": {
+    "abilities": [
+      { "spell": { "choose": 1, "modes": [
+        { "effects": [
+          { "exile_top": { "amount": 2 } },
+          { "play_permission": { "to": { "result": 0 }, "duration": "end_of_your_next_turn" } } ] },
+        { "effects": [
+          { "deal_damage": { "amount": 2, "to": { "each": "creature" } } },
+          { "deal_damage": { "amount": 2, "to": { "each": "player" } } } ] } ] } }
+    ]
+  },
+  "Energize": {
+    "abilities": [
+      { "spell": { "targets": [{ "creature": { "controller": "opponent" } }],
+                   "effects": [{ "return_to_hand": { "to": { "target": 0 } } }] } },
+      { "beam_me_up": { "cost": "{3}{U}" } }
+    ]
+  },
+  "Ensign Pavel Chekov": {
+    "note": "strange new worlds: X is distinct_names over lands you control",
+    "abilities": [
+      { "triggered": { "when": { "enters": {} }, "effects": [
+        { "exile_top": { "amount": { "distinct_names": { "each": "land", "controller": "you" } }, "to": "each_opponent" } },
+        { "play_permission": { "to": { "result": 0 }, "for": { "types": ["land"] }, "choose": "one_per_owner",
+                               "duration": "while_exiled" } } ] } }
+    ]
+  },
   "Federation Field Medic": {
     "keywords": ["vigilance"],
     "abilities": [
@@ -50,6 +92,59 @@
                               "at_least": 1 } } } ] } ] } }
     ]
   },
+  "Federation Resupply": {
+    "abilities": [
+      { "spell": { "effects": [
+        { "search_library": { "for": { "any_of": [{ "subtypes": ["aura"] }, { "subtypes": ["equipment"] },
+                                                  { "subtypes": ["spacecraft"] }] }, "reveal": true } } ] } },
+      { "beam_me_up": { "cost": "{3}{W}" } }
+    ]
+  },
+  "Final Frontier": {
+    "abilities": [
+      { "spell": { "effects": [
+        { "search_library": { "for": { "any_of": [{ "supertypes": ["basic"], "types": ["land"] }, { "subtypes": ["planet"] }] },
+                              "put": "battlefield", "tapped": true } } ] } },
+      { "beam_me_up": { "cost": "{1}{G}" } }
+    ]
+  },
+  "Oberth-Class Starship": {
+    "keywords": ["station"],
+    "abilities": [
+      { "triggered": { "when": { "enters": {} }, "effects": [
+        { "search_library": { "for": { "supertypes": ["basic"], "subtypes": ["plains"] }, "reveal": true } } ] } },
+      { "station_symbol": { "at": 6, "keywords": ["flying"], "power": 2, "toughness": 2 } }
+    ]
+  },
+  "Open Communications": {
+    "abilities": [
+      { "spell": { "effects": [{ "draw": { "amount": 1 } }] } },
+      { "beam_me_up": { "cost": "{2}{U}" } }
+    ]
+  },
+  "Overflow Submatrix": {
+    "abilities": [
+      { "play_from": { "zone": "graveyard", "cards": { "types": ["artifact", "creature"] }, "once_each_turn": true,
+                       "enters_with": { "finality": 1 } } }
+    ]
+  },
+  "Primary Unimatrix Adjunct": {
+    "abilities": [
+      { "static": { "affects": { "each": { "creature": { "types": ["artifact"] } }, "controller": "you" },
+                    "keywords": ["double_strike"] } }
+    ]
+  },
+  "Reckless Impulse": {
+    "abilities": [
+      { "spell": { "effects": [
+        { "exile_top": { "amount": 2 } },
+        { "play_permission": { "to": { "result": 0 }, "duration": "end_of_your_next_turn" } } ] } }
+    ]
+  },
+  "Scotty, Miracle Worker": {
+    "note": "grants_beam_me_up: this creature can't be returned to cast a spell its way (any other beam me up may return it)",
+    "abilities": ["grants_beam_me_up"]
+  },
   "Set Phasers to . . .": {
     "abilities": [
       { "spell": { "choose": 1, "modes": [
@@ -59,6 +154,25 @@
         { "targets": [{ "creature": { "attacking": true } }], "effects": [
           { "deal_damage": { "amount": 3, "to": { "target": 0 } } } ] } ] } }
     ]
+  },
+  "Shields Up!": {
+    "abilities": [
+      { "spell": { "targets": [{ "permanent": { "any_of": ["artifact", "creature"], "controller": "you" } }], "effects": [
+        { "grant": { "keywords": ["hexproof", "indestructible"], "to": { "target": 0 } } },
+        { "add_counters": { "counter": "+1/+1", "amount": 1, "to": { "target": 0 }, "if": { "targets": "creature" } } } ] } }
+    ]
+  },
+  "Silicate Surveyor": {
+    "keywords": ["reach"],
+    "abilities": [
+      { "triggered": { "when": { "enters": {} }, "effects": [
+        { "exile_top": { "amount": 1 } },
+        { "play_permission": { "to": { "result": 0 }, "duration": "end_of_your_next_turn" } } ] } }
+    ]
+  },
+  "Storied Veteran": {
+    "keywords": ["cant_block"],
+    "abilities": [{ "play_from": { "zone": "graveyard", "enters_with": { "finality": 1 } } }]
   },
   "Test of Conviction": {
     "abilities": [
@@ -105,6 +219,27 @@
     "abilities": [
       { "triggered": { "when": { "dies": {} }, "targets": ["any_target"], "effects": [
         { "deal_damage": { "amount": 1, "to": { "target": 0 } } } ] } }
+    ]
+  },
+  "Transporter Malfunction": {
+    "abilities": [
+      { "spell": { "targets": ["any_target"], "effects": [{ "deal_damage": { "amount": 3, "to": { "target": 0 } } }] } },
+      { "beam_me_up": { "cost": "{3}{R}{R}{R}" } }
+    ]
+  },
+  "U.S.S. Discovery, at Black Alert": {
+    "keywords": ["station"],
+    "abilities": [
+      { "triggered": { "when": { "any_of": [{ "enters": {} }, { "attacks": {} }] }, "effects": [{ "discover": { "amount": 5 } }] } },
+      { "station_symbol": { "at": 6, "keywords": ["flying"], "power": 5, "toughness": 5 } }
+    ]
+  },
+  "Zefram Cochrane, Warp Pioneer": {
+    "abilities": [
+      "look_at_top",
+      { "play_from": { "zone": "library_top", "cards": { "types": ["artifact"] }, "once_each_turn": true } },
+      { "enters_with_counters": { "counters": { "charge": 2 },
+                                  "affects": { "each": { "permanent": { "subtypes": ["spacecraft"] } }, "controller": "you" } } }
     ]
   }
 }

@@ -12,6 +12,52 @@
   "cards": [
     {
       "card": {
+        "name": "Andromedan Automatons",
+        "mana_cost": "{2}{W}",
+        "types": [
+          "artifact",
+          "creature"
+        ],
+        "subtypes": [
+          "android"
+        ],
+        "power": 3,
+        "toughness": 1,
+        "abilities": [
+          {
+            "triggered": {
+              "when": {
+                "enters": {}
+              },
+              "effects": [
+                {
+                  "may": {
+                    "effects": [
+                      {
+                        "search_library": {
+                          "for": {
+                            "name": "Andromedan Automatons"
+                          },
+                          "count": "any",
+                          "reveal": true
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "rarity": "common",
+      "printing": {
+        "set": "trk",
+        "number": "2"
+      }
+    },
+    {
+      "card": {
         "name": "Assembly Specialist",
         "mana_cost": "{1}{W}",
         "types": [
@@ -399,6 +445,57 @@
     },
     {
       "card": {
+        "name": "Federation Resupply",
+        "mana_cost": "{1}{W}",
+        "types": [
+          "sorcery"
+        ],
+        "abilities": [
+          {
+            "spell": {
+              "effects": [
+                {
+                  "search_library": {
+                    "for": {
+                      "any_of": [
+                        {
+                          "subtypes": [
+                            "aura"
+                          ]
+                        },
+                        {
+                          "subtypes": [
+                            "equipment"
+                          ]
+                        },
+                        {
+                          "subtypes": [
+                            "spacecraft"
+                          ]
+                        }
+                      ]
+                    },
+                    "reveal": true
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "beam_me_up": {
+              "cost": "{3}{W}"
+            }
+          }
+        ]
+      },
+      "rarity": "rare",
+      "printing": {
+        "set": "trk",
+        "number": "18"
+      }
+    },
+    {
+      "card": {
         "name": "Free Borg Revolutionaries",
         "mana_cost": "{3}{W}{W}",
         "types": [
@@ -450,6 +547,99 @@
       "printing": {
         "set": "trk",
         "number": "19"
+      }
+    },
+    {
+      "card": {
+        "name": "Oberth-Class Starship",
+        "mana_cost": "{1}{W}",
+        "types": [
+          "artifact"
+        ],
+        "subtypes": [
+          "spacecraft"
+        ],
+        "keywords": [
+          "station"
+        ],
+        "abilities": [
+          {
+            "triggered": {
+              "when": {
+                "enters": {}
+              },
+              "effects": [
+                {
+                  "search_library": {
+                    "for": {
+                      "supertypes": [
+                        "basic"
+                      ],
+                      "subtypes": [
+                        "plains"
+                      ]
+                    },
+                    "reveal": true
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "station_symbol": {
+              "at": 6,
+              "keywords": [
+                "flying"
+              ],
+              "power": 2,
+              "toughness": 2
+            }
+          }
+        ]
+      },
+      "rarity": "common",
+      "printing": {
+        "set": "trk",
+        "number": "26"
+      }
+    },
+    {
+      "card": {
+        "name": "Primary Unimatrix Adjunct",
+        "mana_cost": "{3}{W}",
+        "types": [
+          "artifact",
+          "creature"
+        ],
+        "subtypes": [
+          "borg"
+        ],
+        "power": 2,
+        "toughness": 3,
+        "abilities": [
+          {
+            "static": {
+              "affects": {
+                "each": {
+                  "creature": {
+                    "types": [
+                      "artifact"
+                    ]
+                  }
+                },
+                "controller": "you"
+              },
+              "keywords": [
+                "double_strike"
+              ]
+            }
+          }
+        ]
+      },
+      "rarity": "rare",
+      "printing": {
+        "set": "trk",
+        "number": "30"
       }
     },
     {
@@ -515,6 +705,62 @@
       "printing": {
         "set": "trk",
         "number": "34"
+      }
+    },
+    {
+      "card": {
+        "name": "Shields Up!",
+        "mana_cost": "{1}{W}",
+        "types": [
+          "instant"
+        ],
+        "abilities": [
+          {
+            "spell": {
+              "targets": [
+                {
+                  "permanent": {
+                    "any_of": [
+                      "artifact",
+                      "creature"
+                    ],
+                    "controller": "you"
+                  }
+                }
+              ],
+              "effects": [
+                {
+                  "grant": {
+                    "keywords": [
+                      "hexproof",
+                      "indestructible"
+                    ],
+                    "to": {
+                      "target": 0
+                    }
+                  }
+                },
+                {
+                  "add_counters": {
+                    "counter": "+1/+1",
+                    "amount": 1,
+                    "to": {
+                      "target": 0
+                    },
+                    "if": {
+                      "targets": "creature"
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "rarity": "common",
+      "printing": {
+        "set": "trk",
+        "number": "35"
       }
     },
     {
@@ -766,6 +1012,106 @@
     },
     {
       "card": {
+        "name": "Energize",
+        "mana_cost": "{1}{U}",
+        "types": [
+          "sorcery"
+        ],
+        "abilities": [
+          {
+            "spell": {
+              "targets": [
+                {
+                  "creature": {
+                    "controller": "opponent"
+                  }
+                }
+              ],
+              "effects": [
+                {
+                  "return_to_hand": {
+                    "to": {
+                      "target": 0
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "beam_me_up": {
+              "cost": "{3}{U}"
+            }
+          }
+        ]
+      },
+      "rarity": "uncommon",
+      "printing": {
+        "set": "trk",
+        "number": "56"
+      }
+    },
+    {
+      "card": {
+        "name": "Ensign Pavel Chekov",
+        "mana_cost": "{3}{U}",
+        "types": [
+          "creature"
+        ],
+        "supertypes": [
+          "legendary"
+        ],
+        "subtypes": [
+          "human",
+          "pilot"
+        ],
+        "power": 1,
+        "toughness": 5,
+        "abilities": [
+          {
+            "triggered": {
+              "when": {
+                "enters": {}
+              },
+              "effects": [
+                {
+                  "exile_top": {
+                    "amount": {
+                      "distinct_names": {
+                        "each": "land",
+                        "controller": "you"
+                      }
+                    },
+                    "to": "each_opponent"
+                  }
+                },
+                {
+                  "play_permission": {
+                    "to": {
+                      "result": 0
+                    },
+                    "for": {
+                      "types": [
+                        "land"
+                      ]
+                    },
+                    "choose": "one_per_owner",
+                    "duration": "while_exiled"
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "rarity": "uncommon",
+      "printing": {
+        "set": "trk",
+        "number": "57"
+      }
+    },
+    {
+      "card": {
         "name": "Enterprise NX-01",
         "mana_cost": "{3}{U}",
         "types": [
@@ -981,6 +1327,64 @@
     },
     {
       "card": {
+        "name": "Open Communications",
+        "mana_cost": "{U}",
+        "types": [
+          "sorcery"
+        ],
+        "abilities": [
+          {
+            "spell": {
+              "effects": [
+                {
+                  "draw": {
+                    "amount": 1
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "beam_me_up": {
+              "cost": "{2}{U}"
+            }
+          }
+        ]
+      },
+      "rarity": "common",
+      "printing": {
+        "set": "trk",
+        "number": "76"
+      }
+    },
+    {
+      "card": {
+        "name": "Scotty, Miracle Worker",
+        "mana_cost": "{1}{U}{U}",
+        "types": [
+          "creature"
+        ],
+        "supertypes": [
+          "legendary"
+        ],
+        "subtypes": [
+          "human",
+          "artificer"
+        ],
+        "power": 2,
+        "toughness": 3,
+        "abilities": [
+          "grants_beam_me_up"
+        ]
+      },
+      "rarity": "mythic",
+      "printing": {
+        "set": "trk",
+        "number": "79"
+      }
+    },
+    {
+      "card": {
         "name": "Suurok-Class Science Vessel",
         "mana_cost": "{2}{U}",
         "types": [
@@ -1097,6 +1501,60 @@
       "printing": {
         "set": "trk",
         "number": "85"
+      }
+    },
+    {
+      "card": {
+        "name": "Zefram Cochrane, Warp Pioneer",
+        "mana_cost": "{2}{U}",
+        "types": [
+          "creature"
+        ],
+        "supertypes": [
+          "legendary"
+        ],
+        "subtypes": [
+          "human",
+          "pilot"
+        ],
+        "power": 2,
+        "toughness": 3,
+        "abilities": [
+          "look_at_top",
+          {
+            "play_from": {
+              "zone": "library_top",
+              "cards": {
+                "types": [
+                  "artifact"
+                ]
+              },
+              "once_each_turn": true
+            }
+          },
+          {
+            "enters_with_counters": {
+              "counters": {
+                "charge": 2
+              },
+              "affects": {
+                "each": {
+                  "permanent": {
+                    "subtypes": [
+                      "spacecraft"
+                    ]
+                  }
+                },
+                "controller": "you"
+              }
+            }
+          }
+        ]
+      },
+      "rarity": "uncommon",
+      "printing": {
+        "set": "trk",
+        "number": "90"
       }
     },
     {
@@ -1479,6 +1937,43 @@
     },
     {
       "card": {
+        "name": "Overflow Submatrix",
+        "mana_cost": "{2}{B}",
+        "types": [
+          "artifact",
+          "creature"
+        ],
+        "subtypes": [
+          "borg"
+        ],
+        "power": 3,
+        "toughness": 3,
+        "abilities": [
+          {
+            "play_from": {
+              "zone": "graveyard",
+              "cards": {
+                "types": [
+                  "artifact",
+                  "creature"
+                ]
+              },
+              "once_each_turn": true,
+              "enters_with": {
+                "finality": 1
+              }
+            }
+          }
+        ]
+      },
+      "rarity": "rare",
+      "printing": {
+        "set": "trk",
+        "number": "122"
+      }
+    },
+    {
+      "card": {
         "name": "Rogue Artificial Intelligence",
         "mana_cost": "{4}{B}{B}",
         "types": [
@@ -1538,6 +2033,39 @@
       "printing": {
         "set": "trk",
         "number": "126"
+      }
+    },
+    {
+      "card": {
+        "name": "Storied Veteran",
+        "mana_cost": "{B}",
+        "types": [
+          "creature"
+        ],
+        "subtypes": [
+          "klingon",
+          "advisor"
+        ],
+        "keywords": [
+          "cant_block"
+        ],
+        "power": 2,
+        "toughness": 1,
+        "abilities": [
+          {
+            "play_from": {
+              "zone": "graveyard",
+              "enters_with": {
+                "finality": 1
+              }
+            }
+          }
+        ]
+      },
+      "rarity": "uncommon",
+      "printing": {
+        "set": "trk",
+        "number": "129"
       }
     },
     {
@@ -1730,6 +2258,66 @@
     },
     {
       "card": {
+        "name": "Encounter the Unknown",
+        "mana_cost": "{1}{R}{R}",
+        "types": [
+          "instant"
+        ],
+        "abilities": [
+          {
+            "spell": {
+              "choose": 1,
+              "modes": [
+                {
+                  "effects": [
+                    {
+                      "exile_top": {
+                        "amount": 2
+                      }
+                    },
+                    {
+                      "play_permission": {
+                        "to": {
+                          "result": 0
+                        },
+                        "duration": "end_of_your_next_turn"
+                      }
+                    }
+                  ]
+                },
+                {
+                  "effects": [
+                    {
+                      "deal_damage": {
+                        "amount": 2,
+                        "to": {
+                          "each": "creature"
+                        }
+                      }
+                    },
+                    {
+                      "deal_damage": {
+                        "amount": 2,
+                        "to": {
+                          "each": "player"
+                        }
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "rarity": "rare",
+      "printing": {
+        "set": "trk",
+        "number": "148"
+      }
+    },
+    {
+      "card": {
         "name": "Horta",
         "mana_cost": "{4}{R}{R}",
         "types": [
@@ -1916,6 +2504,41 @@
     },
     {
       "card": {
+        "name": "Reckless Impulse",
+        "mana_cost": "{1}{R}",
+        "types": [
+          "sorcery"
+        ],
+        "abilities": [
+          {
+            "spell": {
+              "effects": [
+                {
+                  "exile_top": {
+                    "amount": 2
+                  }
+                },
+                {
+                  "play_permission": {
+                    "to": {
+                      "result": 0
+                    },
+                    "duration": "end_of_your_next_turn"
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "rarity": "common",
+      "printing": {
+        "set": "trk",
+        "number": "168"
+      }
+    },
+    {
+      "card": {
         "name": "Red Alert!",
         "mana_cost": "{2}{R}",
         "types": [
@@ -2004,6 +2627,53 @@
     },
     {
       "card": {
+        "name": "Silicate Surveyor",
+        "mana_cost": "{4}{R}",
+        "types": [
+          "creature"
+        ],
+        "subtypes": [
+          "tholian",
+          "scout"
+        ],
+        "keywords": [
+          "reach"
+        ],
+        "power": 4,
+        "toughness": 4,
+        "abilities": [
+          {
+            "triggered": {
+              "when": {
+                "enters": {}
+              },
+              "effects": [
+                {
+                  "exile_top": {
+                    "amount": 1
+                  }
+                },
+                {
+                  "play_permission": {
+                    "to": {
+                      "result": 0
+                    },
+                    "duration": "end_of_your_next_turn"
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "rarity": "common",
+      "printing": {
+        "set": "trk",
+        "number": "172"
+      }
+    },
+    {
+      "card": {
         "name": "Tal Shiar Analyst",
         "mana_cost": "{2}{R}",
         "types": [
@@ -2053,6 +2723,87 @@
       "printing": {
         "set": "trk",
         "number": "174"
+      }
+    },
+    {
+      "card": {
+        "name": "Transporter Malfunction",
+        "mana_cost": "{1}{R}",
+        "types": [
+          "sorcery"
+        ],
+        "abilities": [
+          {
+            "spell": {
+              "targets": [
+                "any_target"
+              ],
+              "effects": [
+                {
+                  "deal_damage": {
+                    "amount": 3,
+                    "to": {
+                      "target": 0
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "beam_me_up": {
+              "cost": "{3}{R}{R}{R}"
+            }
+          }
+        ]
+      },
+      "rarity": "uncommon",
+      "printing": {
+        "set": "trk",
+        "number": "178"
+      }
+    },
+    {
+      "card": {
+        "name": "Adversary by Algorithm",
+        "mana_cost": "{2}{G}",
+        "types": [
+          "sorcery"
+        ],
+        "abilities": [
+          {
+            "spell": {
+              "effects": [
+                {
+                  "create_token": {
+                    "token": {
+                      "name": "Illusion",
+                      "types": [
+                        "artifact",
+                        "creature"
+                      ],
+                      "subtypes": [
+                        "illusion"
+                      ],
+                      "power": 3,
+                      "toughness": 3
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "beam_me_up": {
+              "cost": "{3}{G}"
+            }
+          }
+        ]
+      },
+      "rarity": "uncommon",
+      "printing": {
+        "set": "trk",
+        "number": "182"
       }
     },
     {
@@ -2173,6 +2924,56 @@
       "printing": {
         "set": "trk",
         "number": "195"
+      }
+    },
+    {
+      "card": {
+        "name": "Final Frontier",
+        "mana_cost": "{2}{G}",
+        "types": [
+          "sorcery"
+        ],
+        "abilities": [
+          {
+            "spell": {
+              "effects": [
+                {
+                  "search_library": {
+                    "for": {
+                      "any_of": [
+                        {
+                          "supertypes": [
+                            "basic"
+                          ],
+                          "types": [
+                            "land"
+                          ]
+                        },
+                        {
+                          "subtypes": [
+                            "planet"
+                          ]
+                        }
+                      ]
+                    },
+                    "put": "battlefield",
+                    "tapped": true
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "beam_me_up": {
+              "cost": "{1}{G}"
+            }
+          }
+        ]
+      },
+      "rarity": "common",
+      "printing": {
+        "set": "trk",
+        "number": "198"
       }
     },
     {
@@ -2352,6 +3153,62 @@
       "printing": {
         "set": "trk",
         "number": "218"
+      }
+    },
+    {
+      "card": {
+        "name": "U.S.S. Discovery, at Black Alert",
+        "mana_cost": "{3}{G}{G}",
+        "types": [
+          "artifact"
+        ],
+        "supertypes": [
+          "legendary"
+        ],
+        "subtypes": [
+          "spacecraft"
+        ],
+        "keywords": [
+          "station"
+        ],
+        "abilities": [
+          {
+            "triggered": {
+              "when": {
+                "any_of": [
+                  {
+                    "enters": {}
+                  },
+                  {
+                    "attacks": {}
+                  }
+                ]
+              },
+              "effects": [
+                {
+                  "discover": {
+                    "amount": 5
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "station_symbol": {
+              "at": 6,
+              "keywords": [
+                "flying"
+              ],
+              "power": 5,
+              "toughness": 5
+            }
+          }
+        ]
+      },
+      "rarity": "rare",
+      "printing": {
+        "set": "trk",
+        "number": "221"
       }
     },
     {
@@ -3731,19 +4588,6 @@
       ]
     },
     {
-      "name": "Andromedan Automatons",
-      "rarity": "common",
-      "printing": {
-        "set": "trk",
-        "number": "2"
-      },
-      "missing": [
-        "triggered ability",
-        "variable amount",
-        "library manipulation"
-      ]
-    },
-    {
       "name": "Antagonist Incorporator",
       "rarity": "rare",
       "printing": {
@@ -3848,18 +4692,6 @@
       ]
     },
     {
-      "name": "Federation Resupply",
-      "rarity": "rare",
-      "printing": {
-        "set": "trk",
-        "number": "18"
-      },
-      "missing": [
-        "library manipulation",
-        "other rules text"
-      ]
-    },
-    {
       "name": "Ghost of Illyria",
       "rarity": "uncommon",
       "printing": {
@@ -3935,18 +4767,6 @@
       ]
     },
     {
-      "name": "Oberth-Class Starship",
-      "rarity": "common",
-      "printing": {
-        "set": "trk",
-        "number": "26"
-      },
-      "missing": [
-        "triggered ability",
-        "library manipulation"
-      ]
-    },
-    {
       "name": "Peace in Our Time",
       "rarity": "rare",
       "printing": {
@@ -3983,17 +4803,6 @@
       ]
     },
     {
-      "name": "Primary Unimatrix Adjunct",
-      "rarity": "rare",
-      "printing": {
-        "set": "trk",
-        "number": "30"
-      },
-      "missing": [
-        "static ability"
-      ]
-    },
-    {
       "name": "Pure Energy",
       "rarity": "common",
       "printing": {
@@ -4027,18 +4836,6 @@
       "missing": [
         "triggered ability",
         "variable amount"
-      ]
-    },
-    {
-      "name": "Shields Up!",
-      "rarity": "common",
-      "printing": {
-        "set": "trk",
-        "number": "35"
-      },
-      "missing": [
-        "condition (if/unless/as long as)",
-        "counters"
       ]
     },
     {
@@ -4226,31 +5023,6 @@
       ]
     },
     {
-      "name": "Energize",
-      "rarity": "uncommon",
-      "printing": {
-        "set": "trk",
-        "number": "56"
-      },
-      "missing": [
-        "other rules text"
-      ]
-    },
-    {
-      "name": "Ensign Pavel Chekov",
-      "rarity": "uncommon",
-      "printing": {
-        "set": "trk",
-        "number": "57"
-      },
-      "missing": [
-        "triggered ability",
-        "condition (if/unless/as long as)",
-        "variable amount",
-        "exile"
-      ]
-    },
-    {
       "name": "Guidance Failure",
       "rarity": "common",
       "printing": {
@@ -4426,17 +5198,6 @@
       ]
     },
     {
-      "name": "Open Communications",
-      "rarity": "common",
-      "printing": {
-        "set": "trk",
-        "number": "76"
-      },
-      "missing": [
-        "other rules text"
-      ]
-    },
-    {
       "name": "Romulan Bird-of-Prey",
       "rarity": "rare",
       "printing": {
@@ -4458,18 +5219,6 @@
       },
       "missing": [
         "modal choice"
-      ]
-    },
-    {
-      "name": "Scotty, Miracle Worker",
-      "rarity": "mythic",
-      "printing": {
-        "set": "trk",
-        "number": "79"
-      },
-      "missing": [
-        "variable amount",
-        "static ability"
       ]
     },
     {
@@ -4566,19 +5315,6 @@
       },
       "missing": [
         "modal choice"
-      ]
-    },
-    {
-      "name": "Zefram Cochrane, Warp Pioneer",
-      "rarity": "uncommon",
-      "printing": {
-        "set": "trk",
-        "number": "90"
-      },
-      "missing": [
-        "library manipulation",
-        "other rules text",
-        "counters"
       ]
     },
     {
@@ -4868,19 +5604,6 @@
       ]
     },
     {
-      "name": "Overflow Submatrix",
-      "rarity": "rare",
-      "printing": {
-        "set": "trk",
-        "number": "122"
-      },
-      "missing": [
-        "condition (if/unless/as long as)",
-        "counters",
-        "graveyard casting"
-      ]
-    },
-    {
       "name": "Pattern Buffer Preservation",
       "rarity": "common",
       "printing": {
@@ -4939,19 +5662,6 @@
         "triggered ability",
         "exile",
         "tokens"
-      ]
-    },
-    {
-      "name": "Storied Veteran",
-      "rarity": "uncommon",
-      "printing": {
-        "set": "trk",
-        "number": "129"
-      },
-      "missing": [
-        "condition (if/unless/as long as)",
-        "counters",
-        "graveyard casting"
       ]
     },
     {
@@ -5145,17 +5855,6 @@
       ]
     },
     {
-      "name": "Encounter the Unknown",
-      "rarity": "rare",
-      "printing": {
-        "set": "trk",
-        "number": "148"
-      },
-      "missing": [
-        "modal choice"
-      ]
-    },
-    {
       "name": "Erica Ortegas, Plucky Pilot",
       "rarity": "uncommon",
       "printing": {
@@ -5344,17 +6043,6 @@
       ]
     },
     {
-      "name": "Reckless Impulse",
-      "rarity": "common",
-      "printing": {
-        "set": "trk",
-        "number": "168"
-      },
-      "missing": [
-        "exile"
-      ]
-    },
-    {
       "name": "Sarcophagus, Ship of the Dead",
       "rarity": "uncommon",
       "printing": {
@@ -5365,18 +6053,6 @@
         "triggered ability",
         "condition (if/unless/as long as)",
         "counters"
-      ]
-    },
-    {
-      "name": "Silicate Surveyor",
-      "rarity": "common",
-      "printing": {
-        "set": "trk",
-        "number": "172"
-      },
-      "missing": [
-        "triggered ability",
-        "exile"
       ]
     },
     {
@@ -5431,17 +6107,6 @@
       ]
     },
     {
-      "name": "Transporter Malfunction",
-      "rarity": "uncommon",
-      "printing": {
-        "set": "trk",
-        "number": "178"
-      },
-      "missing": [
-        "other rules text"
-      ]
-    },
-    {
       "name": "Will Riker, First in the Field",
       "rarity": "rare",
       "printing": {
@@ -5477,17 +6142,6 @@
         "condition (if/unless/as long as)",
         "exile",
         "sacrifice"
-      ]
-    },
-    {
-      "name": "Adversary by Algorithm",
-      "rarity": "uncommon",
-      "printing": {
-        "set": "trk",
-        "number": "182"
-      },
-      "missing": [
-        "other rules text"
       ]
     },
     {
@@ -5642,18 +6296,6 @@
       },
       "missing": [
         "modal choice"
-      ]
-    },
-    {
-      "name": "Final Frontier",
-      "rarity": "common",
-      "printing": {
-        "set": "trk",
-        "number": "198"
-      },
-      "missing": [
-        "library manipulation",
-        "other rules text"
       ]
     },
     {
@@ -5881,17 +6523,6 @@
       },
       "missing": [
         "modal choice"
-      ]
-    },
-    {
-      "name": "U.S.S. Discovery, at Black Alert",
-      "rarity": "rare",
-      "printing": {
-        "set": "trk",
-        "number": "221"
-      },
-      "missing": [
-        "triggered ability"
       ]
     },
     {

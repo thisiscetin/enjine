@@ -56,7 +56,10 @@ module Enjine
     TargetChosen = define(:target_chosen, :player, :object, :target)
     XAnnounced = define(:x_announced, :player, :object, :value)
     ManaPaid = define(:mana_paid, :player, :mana, :object)
-    SpellCast = define(:spell_cast, :player, :object, :card, :targets)
+    # `during_resolution`: cast while another spell or ability resolves (CR 608.2g), ignoring timing.
+    SpellCast = define(:spell_cast, :player, :object, :card, :targets, :during_resolution) do
+      def initialize(player:, object:, card:, targets:, during_resolution: false) = super
+    end
     AbilityActivated = define(:ability_activated, :player, :object, :card, :source, :ability, :targets)
     CastCancelled = define(:cast_cancelled, :player, :object, :card)
     Resolved = define(:resolved, :object, :card, :kind)

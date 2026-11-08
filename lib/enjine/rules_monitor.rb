@@ -78,22 +78,27 @@ module Enjine
     end
 
     def zone_changed!(event)
-      if event.reason == "play_land"
-        @lands_this_turn[event.owner] += 1
-        finding("305.2", "#{event.owner} played #{@lands_this_turn[event.owner]} lands this turn") if @lands_this_turn[event.owner] > 1
-        active = state.players[state.active].name
-        finding("305.1", "#{event.owner} played a land on #{active}'s turn") if event.owner != active
-      end
+      land_played!(event) if event.reason == "play_land"
       return unless event.reason == "resolve" && event.to == "graveyard" && defn(event.card).permanent?
 
       finding("608.3", "permanent spell #{event.card} went to the graveyard on resolution")
+    end
+
+    # CR 305.1-305.2: whoever plays the land controls it (an exiled card of an opponent's may be played).
+    def land_played!(event)
+      land = state.objects[event.new_id]
+      player = land ? state.players[land.controller].name : event.owner
+      @lands_this_turn[player] += 1
+      finding("305.2", "#{player} played #{@lands_this_turn[player]} lands this turn") if @lands_this_turn[player] > 1
+      active = state.players[state.active].name
+      finding("305.1", "#{player} played a land on #{active}'s turn") if player != active
     end
 
     # CR 307.1 / 301.1 etc.: sorcery-speed spells only in your main phase with an empty stack.
     def spell_cast!(event)
       card = defn(event.card)
       @stats["cast:#{event.card}"] += 1
-      return if card.instant_speed?
+      return if card.instant_speed? || event.during_resolution # CR 608.2g: timing doesn't apply
 
       caster = event.player
       # Triggered abilities put on the stack later in the same decision (e.g. "whenever you cast") don't count.

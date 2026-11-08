@@ -229,6 +229,9 @@ These rules cut across every mechanic. All numbers were checked in the
 | 601.2h | Pay costs in any order (costs with no random element and no library-to-public-zone movement first); no partial payment | M2 |
 | 601.2i | The spell becomes cast; cast triggers; priority returns to the caster | M2 |
 | 601.3 | Permission to cast (from hand by default; "may cast from X" effects) | M2 |
+| 601.3 (impl.) | Implemented: `play_from` (own card or a permanent's static, graveyard/exile/library top, once each turn, enters-with rider), `play_permission` effect (impulse draw, durations), cast/play_land options with `via`, cancel returns to the origin zone | M2 |
+| 608.2g (impl.) | Implemented: `cast_free` (cast during resolution without paying the mana cost, no priority in between) and `discover` (701.57) | M2 |
+| 702.196 (impl.) | Implemented: `beam_me_up` ability, `grants_beam_me_up` static, `cant_be_beamed_up` flag; exiled when it leaves the stack | M2 |
 | 602 | Activating activated abilities; {T}/{Q} plus summoning sickness (602.5a); "activate only once each turn"/as a sorcery/as an instant (602.5b–e) | M2 |
 | 603 | Triggered abilities: trigger events, APNAP ordering (603.3b), intervening "if" (603.4), zone-change triggers (603.6), delayed triggers (603.7), look-back (603.10), state triggers, reflexive triggers | M2 |
 | 604 | Static abilities; characteristic-defining abilities (604.3) | M3 |

@@ -115,6 +115,8 @@ module Enjine
 
       def cost_choice_candidates
         ctx = casting
+        return beam_choices(ctx) if ctx["kind"] == "spell" # beam me up (Engine::Permissions)
+
         cost = casting_ability.costs[next_cost_choice(ctx, casting_ability)]
         cost.choice_candidates(self, object(ctx["source"]))
       end
@@ -123,6 +125,8 @@ module Enjine
       # activation untaps it again (ctx "tapped"). The creature's power is kept for effects that use it.
       def choose_cost!(id)
         ctx = casting
+        return choose_beam_creature!(id) if ctx["kind"] == "spell" # beam me up (Engine::Permissions)
+
         creature = object(id)
         tap!(creature)
         ctx["tapped"] << id

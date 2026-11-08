@@ -45,7 +45,13 @@ module Enjine
       }
       view["hand"] = player.hand.map { object_view(engine, it) } if sees_hand
       view["library"] = player.library.map { object_view(engine, it) } if sees_library
+      view["library_top"] = object_view(engine, player.library.first) if sees_hand && looks_at_top?(engine, player)
       view
+    end
+
+    # CR 401.5: "you may look at the top card of your library any time" shows it to that player only.
+    def looks_at_top?(engine, player)
+      !player.library.empty? && engine.may_look_at_top?(engine.state.players.index(player))
     end
 
     def object_view(engine, id)

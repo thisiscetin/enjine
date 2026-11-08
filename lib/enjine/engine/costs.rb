@@ -47,7 +47,7 @@ module Enjine
       def base_cost(ctx)
         obj = object(ctx["object"])
         case ctx["kind"]
-        when "spell" then chars(obj).mana_cost
+        when "spell" then ctx["method"] ? alternative_base_cost(ctx) : chars(obj).mana_cost # CR 118.9 (Permissions)
         when "ability" then stack_ability(obj).mana_cost
         end
       end

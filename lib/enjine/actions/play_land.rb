@@ -4,9 +4,12 @@ module Enjine
   module Actions
     # CR 305.1-305.2, 116.2a: playing a land is a special action — own main phase,
     # empty stack, while holding priority, one land per turn.
+    # A land outside the hand (the top of the library, exile) can be played when an effect allows it;
+    # `via` names the permission (CR 305.1: "from the zone it was in").
     class PlayLand
       def self.doc
-        '`{type: "play_land", object: id}` — special action: your main phase, empty stack, one land per turn (CR 305.1, 305.2).'
+        '`{type: "play_land", object: id}` — special action: your main phase, empty stack, one land per turn ' \
+          "(CR 305.1, 305.2). With `via`: a land from another zone that an effect lets you play."
       end
 
       LANDS_PER_TURN = 1
@@ -16,10 +19,11 @@ module Enjine
 
         engine.player(index).hand.filter_map do |id|
           { type: "play_land", object: id } if engine.chars(id).land?
-        end
+        end + engine.permission_land_options(index)
       end
 
       def self.perform(engine, index, option)
+        engine.use_play_method!(engine.play_method(index, option[:object], option[:via])) if option[:via]
         engine.player(index).lands_played += 1
         if engine.entering_choice(option[:object])
           engine.state.frames << { "type" => "play_land", "object" => option[:object], "player" => index }

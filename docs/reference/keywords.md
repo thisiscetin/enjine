@@ -30,6 +30,20 @@ Rules: CR 508.1c
 }
 ```
 
+## cant_be_beamed_up
+
+This creature can't be returned to its owner's hand to pay a beam me up cost.
+
+Rules: CR 702.196b
+
+```json
+{
+  "keywords": [
+    "cant_be_beamed_up"
+  ]
+}
+```
+
 ## cant_be_blocked
 
 Restriction: this creature can't be blocked.

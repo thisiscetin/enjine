@@ -107,6 +107,7 @@ module Enjine
 
       # CR 514.2: damage wears off and "until end of turn" effects end.
       def cleanup_turn!
+        expire_permissions! # Engine::Permissions
         state.battlefield.each do |id|
           object(id).damage = 0
           object(id).deathtouched = false

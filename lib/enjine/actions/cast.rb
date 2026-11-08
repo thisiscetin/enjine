@@ -3,17 +3,21 @@
 module Enjine
   module Actions
     # CR 601: cast a spell from hand. Instants and flash cards at any priority; others at sorcery speed.
+    # A card in another zone can be cast when a rule or effect allows it (CR 601.3): `via` names how.
     class Cast
       def self.doc
         '`{type: "cast", object: id}` — start casting a card from your hand (CR 601.2). ' \
-          "Offered only when timing allows, targets exist and enough mana is available."
+          '`{type: "cast", object: id, via: method}` casts a card from another zone (graveyard, exile, the top ' \
+          "of your library) by the permission or alternative cost `via` names, e.g. beam me up (CR 601.3, " \
+          "702.196). Offered only when timing allows, targets exist and enough mana is available."
       end
 
       def self.options(engine, index)
-        engine.player(index).hand.filter_map { |id| { type: "cast", object: id } if engine.castable?(index, id) }
+        engine.player(index).hand.filter_map { |id| { type: "cast", object: id } if engine.castable?(index, id) } +
+          engine.permission_cast_options(index)
       end
 
-      def self.perform(engine, index, option) = engine.begin_cast!(index, option[:object])
+      def self.perform(engine, index, option) = engine.begin_cast!(index, option[:object], via: option[:via])
     end
     register("cast", Cast)
 

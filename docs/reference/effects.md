@@ -88,6 +88,32 @@ Rules: CR 701.3a, CR 701.3b, CR 701.3c, CR 301.5c
 }
 ```
 
+## cast_free
+
+The controller may cast referenced cards without paying their mana costs while this resolves. `to` names the cards ({"result": n}), or a player for the cards in their hand (default: your hand). Only cards matching `for`/`not_types` with mana value up to `max_mana_value` (optional amount) that could be cast now (legal targets). `count`: 1 (default) or "any" (any number, one at a time). X is 0 (CR 107.3b).
+
+Rules: CR 608.2g, CR 118.9, CR 601.2a, CR 107.3b, CR 118.6a
+
+| Parameter | Description |
+| --- | --- |
+| `to` | selector |
+| `for` | card spec |
+| `not_types` | list of card types |
+| `max_mana_value` | amount |
+| `count` | 1 or "any" |
+
+```json
+{
+  "cast_free": {
+    "to": {
+      "result": 0
+    },
+    "max_mana_value": 3,
+    "count": "any"
+  }
+}
+```
+
 ## counter
 
 Counter each referenced spell: it leaves the stack for its owner's graveyard without resolving.
@@ -234,6 +260,24 @@ Rules: CR 701.9a, CR 701.9b
 }
 ```
 
+## discover
+
+Discover `amount`: exile cards from the top of your library until you exile a nonland card with mana value `amount` or less. You may cast it without paying its mana cost; if you don't, it goes into your hand. The other exiled cards go on the bottom of your library in a random order.
+
+Rules: CR 701.57a, CR 701.57b, CR 701.57c, CR 608.2g, CR 118.9
+
+| Parameter | Description |
+| --- | --- |
+| `amount` | amount |
+
+```json
+{
+  "discover": {
+    "amount": 5
+  }
+}
+```
+
 ## draw
 
 Each referenced player draws `amount` cards (default: you).
@@ -266,6 +310,47 @@ Rules: CR 406.1, CR 701.13a
 ```json
 {
   "exile": {
+    "to": {
+      "target": 0
+    }
+  }
+}
+```
+
+## exile_top
+
+Each referenced player exiles the top `amount` cards of their library (default: you). The exiled cards are this effect's result.
+
+Rules: CR 406.1, CR 701.13a, CR 400.7j
+
+| Parameter | Description |
+| --- | --- |
+| `amount` | amount |
+| `to` | selector |
+
+```json
+{
+  "exile_top": {
+    "amount": 2
+  }
+}
+```
+
+## exile_until
+
+Each referenced player exiles cards from the top of their library until they exile a card matching `until` (or the library is empty). All exiled cards are the result.
+
+Rules: CR 406.1, CR 701.13a, CR 400.7j
+
+| Parameter | Description |
+| --- | --- |
+| `until` | nonland |
+| `to` | selector |
+
+```json
+{
+  "exile_until": {
+    "until": "nonland",
     "to": {
       "target": 0
     }
@@ -385,6 +470,32 @@ Rules: CR 701.17a
   "mill": {
     "amount": 2,
     "to": "each_opponent"
+  }
+}
+```
+
+## play_permission
+
+The controller may play (`play: "play"`, default) or cast (`"cast"`) each referenced exiled card matching `for`/`not_types`, paying its costs and following timing rules, for `duration`: end_of_turn (default), end_of_your_next_turn or while_exiled. With `choose: "one_per_owner"` only one chosen card per owner.
+
+Rules: CR 611.2a, CR 601.3, CR 305.1, CR 400.7, CR 514.2
+
+| Parameter | Description |
+| --- | --- |
+| `to` | selector (usually {"result": n}) |
+| `duration` | end_of_turn | end_of_your_next_turn | while_exiled |
+| `play` | play | cast |
+| `for` | card spec |
+| `not_types` | list of card types |
+| `choose` | one_per_owner |
+
+```json
+{
+  "play_permission": {
+    "to": {
+      "result": 0
+    },
+    "duration": "end_of_your_next_turn"
   }
 }
 ```

@@ -144,14 +144,23 @@ module Enjine
 
       # ---- starting ----------------------------------------------------------------
 
-      # CR 601.2a: the card moves to the stack.
-      def begin_cast!(index, hand_id)
-        hand = player(index).hand
-        origin = { "id" => hand_id, "index" => hand.index(hand_id) }
-        obj = move!(hand_id, :stack, controller: index, reason: "cast")
-        defn = definition(obj)
-        start_casting!(index, obj.id, "spell", origin: origin, cost: defn.mana_cost)
+      # CR 601.2a: the card moves from where it is to the stack. `via` names how a card outside the
+      # hand is cast (see Engine::Permissions); "free" casts it without paying its mana cost during
+      # the resolution of a spell or ability (CR 608.2g, 118.9), after which nobody gets priority.
+      def begin_cast!(index, card_id, via: nil)
+        card = object(card_id)
+        method = via && play_method(index, card_id, via)
+        origin = { "id" => card_id, "zone" => card.zone.to_s,
+                   "index" => state.zone_list(card.zone, card.owner).index(card_id) }
+        obj = move!(card_id, :stack, controller: index, reason: "cast")
+        extra = method ? { "method" => method } : {}
+        extra["no_priority"] = true if via == "free"
+        cost = method ? method_cost(obj, method) : definition(obj).mana_cost
+        start_casting!(index, obj.id, "spell", origin: origin, cost: cost, extra: extra)
       end
+
+      # The spell ability of a card (nil for a permanent spell other than an Aura).
+      def spell_ability_of(obj) = definition(obj).spell_ability
 
       # CR 602.2a: the ability is created on the stack.
       def begin_activation!(index, source_id, ability_ref)
@@ -169,11 +178,11 @@ module Enjine
 
       # `x` stays nil until announced (CR 601.2b); `remaining` stays nil until the total cost is
       # determined and locked in after targets are chosen (CR 601.2f).
-      def start_casting!(index, object_id, kind, cost:, origin: nil, source: nil, ability: nil)
+      def start_casting!(index, object_id, kind, cost:, origin: nil, source: nil, ability: nil, extra: {})
         state.frames << { "type" => "cast", "player" => index, "object" => object_id, "kind" => kind,
                           "origin" => origin, "source" => source, "ability" => ability, "targets" => [], "modes" => [],
                           "x" => cost&.x_symbols&.positive? ? nil : 0, "remaining" => nil,
-                          "pool" => player(index).mana_pool.transform_keys(&:to_s), "tapped" => [] }
+                          "pool" => player(index).mana_pool.transform_keys(&:to_s), "tapped" => [] }.merge(extra)
         ask!(nil) # advance! now steps the cast frame
       end
 
@@ -208,7 +217,8 @@ module Enjine
           return :wait
         end
         lock_total_cost!(ctx) unless ctx["remaining"]
-        if (cost = next_cost_choice(ctx, ability)) then ask_cost_choice!(ctx, ability.costs[cost])
+        if beam_choice_pending?(ctx) then ask_beam_choice!(ctx) # CR 702.196a (Engine::Permissions)
+        elsif (cost = next_cost_choice(ctx, ability)) then ask_cost_choice!(ctx, ability.costs[cost])
         elsif ctx["remaining"].values.sum.positive?
           ask!("kind" => "pay_cost", "player" => ctx["player"], "remaining" => remaining_text)
           :wait
@@ -295,8 +305,12 @@ module Enjine
           emit Events::AbilityActivated.new(player: name(index), object: obj.id, card: obj.card, source: ctx["source"],
                                             ability: ctx["ability"], targets: obj.targets)
         else
-          emit Events::SpellCast.new(player: name(index), object: obj.id, card: obj.card, targets: obj.targets)
+          finish_cast_method!(obj, ctx) # Engine::Permissions
+          emit Events::SpellCast.new(player: name(index), object: obj.id, card: obj.card, targets: obj.targets,
+                                     during_resolution: ctx["no_priority"] == true)
         end
+        return if ctx["no_priority"] # CR 608.2g: no priority; the resolving spell or ability continues
+
         action_taken!(index) # CR 117.3c (the frame is popped by advance!)
       end
 
@@ -324,19 +338,12 @@ module Enjine
         obj = object(ctx["object"])
         state.stack.delete(obj.id)
         state.objects.delete(obj.id)
-        restore_to_hand!(obj, ctx["origin"]) if ctx["kind"] == "spell"
+        restore_to_origin!(obj, ctx["origin"]) if ctx["kind"] == "spell"
         emit Events::CastCancelled.new(player: name(index), object: obj.id, card: obj.card)
         state.frames.pop
-        give_priority!(index)
-      end
+        return ask!(nil) if ctx["no_priority"] # cast during resolution: the resolution goes on (CR 608.2g)
 
-      def restore_to_hand!(obj, origin)
-        state.objects[origin["id"]] = GameObject.new(
-          id: origin["id"], card: obj.card, owner: obj.owner, controller: obj.owner, zone: :hand, tapped: false,
-          controlled_since: nil, kind: "card", counters: {}, damage: 0, source: nil, ability: nil, targets: nil,
-          loyalty_turn: nil, deathtouched: false, modes: nil, memory: {}, attached_to: nil
-        )
-        player(obj.owner).hand.insert(origin["index"], origin["id"])
+        give_priority!(index)
       end
     end
     include Casting

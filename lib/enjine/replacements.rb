@@ -24,6 +24,7 @@ module Enjine
     module_function
 
     def apply(engine, proposal)
+      engine.cast_replacements!(proposal) if proposal.kind == "zone_change" # beam me up, cast riders (Permissions)
       entering!(engine, proposal) if proposal.kind == "zone_change" && proposal.data["to"] == :battlefield
       putting_counters!(engine, proposal) if proposal.kind == "counters"
       Mechanics::Counters.replace!(engine, proposal)

@@ -39,6 +39,24 @@ Rules: CR 602.1, CR 602.2, CR 602.5d
 }
 ```
 
+## beam_me_up
+
+You may cast this instant or sorcery card from your graveyard for `cost` plus returning a creature you control to its owner's hand, instead of its mana cost. If you do, it's exiled whenever it would leave the stack. Offered as a cast option with `via: "beam:<ref>"`.
+
+Rules: CR 702.196a, CR 702.196b, CR 118.9, CR 601.2b, CR 601.2f, CR 601.2h
+
+| Parameter | Description |
+| --- | --- |
+| `cost` | mana cost string, e.g. "{3}{W}" |
+
+```json
+{
+  "beam_me_up": {
+    "cost": "{3}{W}"
+  }
+}
+```
+
 ## chapter
 
 A Saga's chapter ability: triggers when lore counters put on it bring their number from below `chapter` to at least `chapter`. Its targets are chosen as it's put on the stack. A Saga's final chapter number is its greatest `chapter`.
@@ -256,6 +274,26 @@ Rules: CR 702.6a, CR 301.5b, CR 301.5c, CR 701.3a
 }
 ```
 
+## grants_beam_me_up
+
+While this permanent is on the battlefield, during your main phase each instant and sorcery card in your graveyard has beam me up with its mana cost as the beam me up cost; this permanent can't be the creature returned to cast a spell this way. Offered as a cast option with `via: "beam_granted:<permanent>:<ref>"`.
+
+Rules: CR 702.196a, CR 702.196b, CR 604.1, CR 611.3a
+
+```json
+"grants_beam_me_up"
+```
+
+## look_at_top
+
+While this permanent is on the battlefield, its controller sees the top card of their library (the `library_top` of their view).
+
+Rules: CR 401.5, CR 604.1
+
+```json
+"look_at_top"
+```
+
 ## loyalty
 
 A loyalty ability. Its cost adds (positive) or removes (negative) loyalty counters and is paid on activation. Sorcery speed, and only one loyalty ability per planeswalker per turn.
@@ -307,6 +345,31 @@ Rules: CR 605.1a, CR 605.3a, CR 605.3b, CR 106.4
       "tap"
     ],
     "produce": "{C}"
+  }
+}
+```
+
+## play_from
+
+With `cards: "self"` (default): its owner may cast this card from `zone` (the ability functions there). With a card spec: while this permanent is on the battlefield, its controller may play their own matching cards from `zone`. `play`: "cast" (spells only, default) or "play" (lands too). `once_each_turn`: once during each of your turns. `enters_with`: a permanent spell cast this way enters with these counters. Timing and costs are the usual ones.
+
+Rules: CR 601.3, CR 113.6e, CR 113.6f, CR 305.1, CR 401.5, CR 122.1, CR 614.12
+
+| Parameter | Description |
+| --- | --- |
+| `zone` | graveyard | exile | library_top |
+| `cards` | "self" or a card spec |
+| `play` | cast | play |
+| `once_each_turn` | boolean |
+| `enters_with` | {counter name: n} |
+
+```json
+{
+  "play_from": {
+    "zone": "graveyard",
+    "enters_with": {
+      "finality": 1
+    }
   }
 }
 ```

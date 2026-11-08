@@ -46,7 +46,7 @@ class Scenario
     @players << spec
   end
 
-  %i[hand library graveyard].each do |zone|
+  %i[hand library graveyard exile].each do |zone|
     define_method(zone) do |*cards, count: 1|
       cards.each { |c| count.times { @current.zones[zone] << { card: c } } }
     end
@@ -69,6 +69,7 @@ class Scenario
     next_id = 1
     objects = []
     battlefield = []
+    exile = []
     players = @players.each_with_index.map do |spec, owner|
       zones = %i[library hand graveyard].to_h do |zone|
         ids = spec.zones[zone].map do |entry|
@@ -79,11 +80,12 @@ class Scenario
         end
         [zone.to_s, ids]
       end
-      spec.zones[:battlefield].each do |entry|
-        id = "#{CardDefinition_slug(entry[:card])}##{next_id}"
-        next_id += 1
-        objects << object_h(id, entry, owner, :battlefield)
-        battlefield << id
+      { battlefield: battlefield, exile: exile }.each do |zone, list| # shared zones: owned by this player
+        spec.zones[zone].each do |entry|
+          list << "#{CardDefinition_slug(entry[:card])}##{next_id}"
+          next_id += 1
+          objects << object_h(list.last, entry, owner, zone)
+        end
       end
       player_h(spec, zones)
     end
@@ -96,7 +98,7 @@ class Scenario
       "turn" => @turn, "active" => active, "step" => @step.to_s, "step_state" => "active",
       "priority" => pending["kind"] == "priority" ? pending["player"] : nil, "passes" => 0,
       "next_id" => next_id, "starting_player" => 0, "pending" => pending, "result" => nil,
-      "players" => players, "objects" => objects, "battlefield" => battlefield, "stack" => [], "exile" => []
+      "players" => players, "objects" => objects, "battlefield" => battlefield, "stack" => [], "exile" => exile
     }
   end
 

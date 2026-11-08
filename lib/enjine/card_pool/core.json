@@ -2630,5 +2630,475 @@
         }
       }
     ]
+  },
+  {
+    "name": "Cinderbound Recruit",
+    "mana_cost": "{B}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "human",
+      "warrior"
+    ],
+    "keywords": [
+      "cant_block"
+    ],
+    "power": 2,
+    "toughness": 1,
+    "abilities": [
+      {
+        "play_from": {
+          "zone": "graveyard",
+          "enters_with": {
+            "finality": 1
+          }
+        }
+      }
+    ]
+  },
+  {
+    "name": "Banished Duelist",
+    "mana_cost": "{2}{B}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "human"
+    ],
+    "power": 4,
+    "toughness": 2,
+    "abilities": [
+      {
+        "play_from": {
+          "zone": "exile"
+        }
+      }
+    ]
+  },
+  {
+    "name": "Salvage Matrix",
+    "mana_cost": "{2}{B}",
+    "types": [
+      "artifact",
+      "creature"
+    ],
+    "subtypes": [
+      "construct"
+    ],
+    "power": 3,
+    "toughness": 3,
+    "abilities": [
+      {
+        "play_from": {
+          "zone": "graveyard",
+          "cards": {
+            "types": [
+              "artifact",
+              "creature"
+            ]
+          },
+          "once_each_turn": true,
+          "enters_with": {
+            "finality": 1
+          }
+        }
+      }
+    ]
+  },
+  {
+    "name": "Tidewatch Navigator",
+    "mana_cost": "{2}{U}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "human"
+    ],
+    "power": 2,
+    "toughness": 3,
+    "abilities": [
+      "look_at_top",
+      {
+        "play_from": {
+          "zone": "library_top",
+          "cards": {
+            "types": [
+              "artifact"
+            ]
+          },
+          "once_each_turn": true
+        }
+      }
+    ]
+  },
+  {
+    "name": "Frontier Ranger",
+    "mana_cost": "{1}{G}{G}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "human",
+      "scout"
+    ],
+    "power": 2,
+    "toughness": 3,
+    "abilities": [
+      "look_at_top",
+      {
+        "play_from": {
+          "zone": "library_top",
+          "cards": {
+            "types": [
+              "land"
+            ]
+          },
+          "play": "play"
+        }
+      }
+    ]
+  },
+  {
+    "name": "Phaser Volley",
+    "mana_cost": "{1}{R}",
+    "types": [
+      "sorcery"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "targets": [
+            "any_target"
+          ],
+          "effects": [
+            {
+              "deal_damage": {
+                "amount": 2,
+                "to": {
+                  "target": 0
+                }
+              }
+            }
+          ]
+        }
+      },
+      {
+        "beam_me_up": {
+          "cost": "{2}{R}"
+        }
+      }
+    ]
+  },
+  {
+    "name": "Relay Insight",
+    "mana_cost": "{U}",
+    "types": [
+      "sorcery"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "effects": [
+            {
+              "draw": {
+                "amount": 1
+              }
+            }
+          ]
+        }
+      },
+      {
+        "beam_me_up": {
+          "cost": "{1}{U}"
+        }
+      }
+    ]
+  },
+  {
+    "name": "Transit Chief",
+    "mana_cost": "{1}{U}{U}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "human"
+    ],
+    "keywords": [
+      "cant_be_beamed_up"
+    ],
+    "power": 2,
+    "toughness": 3,
+    "abilities": [
+      "grants_beam_me_up"
+    ]
+  },
+  {
+    "name": "Hasty Insight",
+    "mana_cost": "{1}{R}",
+    "types": [
+      "sorcery"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "effects": [
+            {
+              "exile_top": {
+                "amount": 2
+              }
+            },
+            {
+              "play_permission": {
+                "to": {
+                  "result": 0
+                },
+                "duration": "end_of_your_next_turn"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Ore Seeker",
+    "mana_cost": "{3}{R}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "elemental"
+    ],
+    "keywords": [
+      "reach"
+    ],
+    "power": 3,
+    "toughness": 3,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "enters": {}
+          },
+          "effects": [
+            {
+              "exile_top": {
+                "amount": 1
+              }
+            },
+            {
+              "play_permission": {
+                "to": {
+                  "result": 0
+                },
+                "duration": "end_of_your_next_turn"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Prospect Charge",
+    "mana_cost": "{R}",
+    "types": [
+      "instant"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "effects": [
+            {
+              "exile_until": {
+                "until": "nonland"
+              }
+            },
+            {
+              "play_permission": {
+                "to": {
+                  "result": 0
+                },
+                "not_types": [
+                  "land"
+                ]
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Border Warden",
+    "mana_cost": "{3}{U}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "human",
+      "pilot"
+    ],
+    "power": 1,
+    "toughness": 5,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "enters": {}
+          },
+          "effects": [
+            {
+              "exile_top": {
+                "amount": 3,
+                "to": "each_opponent"
+              }
+            },
+            {
+              "play_permission": {
+                "to": {
+                  "result": 0
+                },
+                "for": {
+                  "types": [
+                    "land"
+                  ]
+                },
+                "choose": "one_per_owner",
+                "duration": "while_exiled"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Echo Banquet",
+    "mana_cost": "{2}",
+    "types": [
+      "artifact"
+    ],
+    "abilities": [
+      {
+        "activated": {
+          "cost": [
+            {
+              "mana": "{3}"
+            },
+            "tap"
+          ],
+          "effects": [
+            {
+              "exile_top": {
+                "amount": 3
+              }
+            },
+            {
+              "cast_free": {
+                "to": {
+                  "result": 0
+                },
+                "max_mana_value": 2,
+                "count": "any"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Abyssal Steward",
+    "mana_cost": "{4}{U}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "elemental"
+    ],
+    "power": 4,
+    "toughness": 4,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "attacks": {}
+          },
+          "targets": [
+            "opponent"
+          ],
+          "effects": [
+            {
+              "exile_until": {
+                "until": "nonland",
+                "to": {
+                  "target": 0
+                }
+              }
+            },
+            {
+              "cast_free": {
+                "to": {
+                  "result": 0
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Probe Vessel",
+    "mana_cost": "{3}{G}{G}",
+    "types": [
+      "artifact",
+      "creature"
+    ],
+    "subtypes": [
+      "construct"
+    ],
+    "power": 4,
+    "toughness": 4,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "enters": {}
+          },
+          "effects": [
+            {
+              "discover": {
+                "amount": 3
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Bold Gambit",
+    "mana_cost": "{R}{R}",
+    "types": [
+      "instant"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "effects": [
+            {
+              "cast_free": {
+                "not_types": [
+                  "creature"
+                ]
+              }
+            }
+          ]
+        }
+      }
+    ]
   }
 ]

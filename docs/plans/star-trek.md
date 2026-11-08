@@ -106,6 +106,8 @@ same rule differently, both are given. Code comments and spec names use the
 | Face a dilemma | 700.17 | not in this version | trigger `faces_dilemma {"controller"}` | trigger done |
 | Assimilate | 701.72a-b, 205.1b | not in this version | effect `assimilate`; filter `graveyard_card` | done |
 | Strange new worlds | 207.2c (ability word: no rules meaning) | not listed | amount `{"distinct_names": selector}` | count done |
+| Beam me up | 702.196a-b, 118.9, 601.2b, 601.2f-h | not in this version | ability `beam_me_up {"cost"}`, static `grants_beam_me_up`, flag `cant_be_beamed_up`; cast option `via: "beam:<ref>"`; the creature is a `choose_cost` decision, returned as the spell becomes cast | done |
+| Casting from other zones | 601.3, 113.6e-f, 305.1, 401.5, 608.2g, 701.57 | same numbers | ability `play_from`, `look_at_top`; effects `exile_top`, `exile_until`, `play_permission`, `cast_free`, `discover`; permissions are `state.effects` of kind `permission` | done |
 
 How they work:
 
@@ -150,6 +152,17 @@ Class-F Shuttlecraft, Suurok-Class Science Vessel, U.S.S. Cerritos, U.S.S. Excel
 (station); Year of Hell (Saga); Elim Garak, Obsidian Order Operative, Melkotian
 Adjudicator, Seven of Nine (dilemma); Death Is Irrelevant (assimilate, translation);
 Excalbian Gamemaster (strange new worlds, translation).
+Energize, Open Communications, Transporter Malfunction, Adversary by Algorithm, Federation
+Resupply, Final Frontier, Scotty (beam me up, translations); Storied Veteran, Overflow
+Submatrix, Zefram Cochrane (casting from the graveyard / library top); Reckless Impulse,
+Silicate Surveyor, Encounter the Unknown, Ensign Pavel Chekov (impulse draw); U.S.S.
+Discovery (discover); Andromedan Automatons, Oberth-Class Starship, Primary Unimatrix
+Adjunct, Shields Up! (translations).
+Waiting on other capabilities: Captain Benjamin Sisko and The Caretaker (dilemmas faced this
+turn, token colors, ward), Captain Pike (characteristic-defining P/T), Kirk and Exploratory
+Mission (total power, counters-on-self amounts), U.S.S. Enterprise-D (charge counters trigger),
+Khan (choose and sacrifice), Brazen Bluff (a "may" decided by another player), Boarding Action
+(token colors).
 
 ## Pipeline
 
