@@ -17,6 +17,10 @@ require "enjine"
 
 module SetConverter
   SUPPORTED_KEYWORDS = Enjine.registry.names(:keyword).to_set.freeze
+  # Evergreen keywords a keyword line may list, whether or not the engine supports them yet.
+  KEYWORD_WORDS = ["flying", "reach", "vigilance", "trample", "menace", "lifelink", "deathtouch", "first strike",
+                   "double strike", "defender", "indestructible", "hexproof", "haste", "flash"].freeze
+  KEYWORD_LINE = /\A(#{KEYWORD_WORDS.join("|")})\z/
   SUPERTYPES = %w[Legendary Basic Snow World].freeze
   UNSUPPORTED_SUPERTYPES = %w[Legendary Snow World].freeze
   NUMBER = { "a" => 1, "an" => 1, "one" => 1, "two" => 2, "three" => 3, "four" => 4, "five" => 5 }.freeze
@@ -106,7 +110,7 @@ module SetConverter
   def keyword_line(line)
     parts = line.split(/,\s*/).map(&:downcase)
     if parts.all? do
-      SUPPORTED_KEYWORDS.include?(it) || it.match?(/\A(flying|reach|vigilance|trample|menace|lifelink|deathtouch|first strike|double strike|defender|indestructible|hexproof|haste|flash)\z/)
+      SUPPORTED_KEYWORDS.include?(it) || it.match?(KEYWORD_LINE)
     end
       parts
     end

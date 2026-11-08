@@ -99,6 +99,49 @@ RSpec.describe Enjine::CLI do
     end
   end
 
+  describe "collections" do
+    let(:sets) { ["--sets-dir", DeckBuilderHelpers::SET_FIXTURES] }
+    let(:binder) { ["--collection", DeckBuilderHelpers::BINDER] }
+
+    it "prints random decks built only from the collection" do
+      code, out = run(sets + binder + %w[--random-deck colors=WU seed=3])
+      expect(code).to eq(0)
+      doc = JSON.parse(out)
+      expect(doc["description"]).to start_with("random deck: collection=binder.json colors=WU seed=3")
+      expect(Enjine::Player.new(name: "p", deck: doc)).to be_ready
+      owned = Enjine::Collection.load(DeckBuilderHelpers::BINDER, sets_dir: DeckBuilderHelpers::SET_FIXTURES)
+      expect(doc["main"].map { it["card"] }).to all(satisfy { owned.include?(it) || %w[Plains Island].include?(it) })
+      expect(JSON.parse(run(sets + binder + %w[--random-deck colors=WU seed=3 basics=owned])[1])["description"])
+        .to include("basics=owned")
+    end
+
+    it "plays games with random decks from the collection, and reports problems" do
+      code, out = run(sets + binder + %w[--deck1 random:colors=R --deck2 random:colors=WU --p1 random --p2 random --seed 2 --quiet])
+      expect(code).to eq(0)
+      expect(out).to include("GAME OVER")
+      expect(run(sets + binder + %w[--random-deck colors=B seed=1])[1]).to start_with("error: cannot build a 60-card B deck")
+      expect(run(sets + binder + %w[--random-deck sets=fxa])[1]).to eq("error: pass either sets: or collection:, not both\n")
+      expect(run(sets + %w[--collection nope.json --random-deck])).to eq([1, "error: collection file not found: nope.json\n"])
+      expect(run(sets + %w[--collection nope.json --p1 random --p2 random --deck1 random])[1])
+        .to eq("error: collection file not found: nope.json\n")
+    end
+
+    it "prints the resolution report as JSON, exit code 1 when some cards are unknown" do
+      code, out = run(sets + ["--collection-report", DeckBuilderHelpers::BINDER])
+      expect(code).to eq(1)
+      report = JSON.parse(out)
+      expect(report.keys).to eq(%w[resolved unsupported unknown])
+      expect(report["unsupported"].map { it["name"] }).to eq(["Prismatic Tidecaller", "Skyveil Seraph"])
+      Dir.mktmpdir do |dir|
+        clean = File.join(dir, "clean.json")
+        File.write(clean, JSON.generate("format" => 1, "cards" => [{ "name" => "Dawnward Squire", "count" => 4 }]))
+        expect(run(sets + ["--collection-report", clean])[0]).to eq(0)
+        File.write(clean, "[1]")
+        expect(run(sets + ["--collection-report", clean])).to eq([1, "{\"error\":\"cards[0]: expected an object, got 1\"}\n"])
+      end
+    end
+  end
+
   it "says when there is nothing to undo" do
     _, out = run(%w[--seed 4], "u\nq\n")
     expect(out).to include("Nothing to undo")

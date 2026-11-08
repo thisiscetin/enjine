@@ -1,7 +1,8 @@
 # Random deck builder
 
 `Enjine::DeckBuilder` builds random, legal 60-card decks from one or more card
-sets, in the colors you ask for. It doesn't look for synergy. It gives every deck
+sets, or from a [collection](#building-from-your-collection) of cards you own, in
+the colors you ask for. It doesn't look for synergy. It gives every deck
 the shape constructed decks share: about 24 lands, a creature count in a typical
 range, a curve that leans on cheap cards, and mostly 4-ofs. Those are ranges, not
 fixed numbers, and now and then a deck lands outside them on purpose.
@@ -12,6 +13,7 @@ require "enjine/deck_builder"   # opt-in; also loads enjine/sets
 deck = Enjine::DeckBuilder.build(sets: %w[trk], colors: %w[W U], seed: 7)
 deck = Enjine::DeckBuilder.build(sets: %w[trk abc], colors: 2, seed: 7)  # two random colors
 deck = Enjine::DeckBuilder.build(colors: :any, seed: 7)                  # every set, 1-3 random colors
+deck = Enjine::DeckBuilder.build(collection: "mine.json", colors: 2, seed: 7)  # only cards you own
 
 player = Enjine::Player.new(name: "alice", deck: deck)
 player.ready?   # => true
@@ -73,6 +75,8 @@ Every method also takes `dir:`. `DeckBuilder.build` takes `sets_dir:`.
 | `size:` | `60` | Deck size, at least 60. Every count in the profile scales with it. |
 | `profile:` | `{}` | Overrides for `DEFAULT_PROFILE`, merged key by key. |
 | `sets_dir:` | `Sets.dir` | Where to find sets. |
+| `collection:` | none | A `Collection`, a collection document (Hash) or the path of a JSON file. Only owned cards are used, at most the copies owned. Can't be combined with `sets:`; with `cards:`, the extra cards are what entries may resolve against. See [Building from your collection](#building-from-your-collection). |
+| `basics:` | `:unlimited` | With `collection:`, `:unlimited` adds as many basic lands as the deck needs, owned or not; `:owned` uses only the basics the collection lists. |
 
 Random colors are drawn uniformly from the color combinations the pool can fill:
 each color needs at least one card, and there must be enough cards in total. If no
@@ -141,10 +145,13 @@ bundle exec exe/enjine --random-deck "sets=trk colors=2 seed=7"           # quot
 bundle exec exe/enjine --random-deck sets=standard,colors=any,seed=3      # comma-separated works too
 bundle exec exe/enjine --sets-dir path/to/sets --list-sets                # codes, names, Standard legality
 bundle exec exe/enjine --deck1 random:sets=trk,colors=WU --deck2 random --p2 random   # play with them
+bundle exec exe/enjine --collection mine.json --random-deck colors=2 seed=3   # only cards you own
+bundle exec exe/enjine --collection-report mine.json                      # what the collection resolved to
 ```
 
 Spec keys are `sets` (codes, `all`, or `standard` for the sets that are
-Standard-legal today), `colors` (letters, a count, or `any`), `seed` and `size`.
+Standard-legal today), `colors` (letters, a count, or `any`), `seed`, `size`, and,
+with `--collection`, `basics` (`unlimited` or `owned`).
 Without `seed`, `--random-deck` uses `--seed`, and `--deck1`/`--deck2` use the game
 seed plus the seat index. The game intro prints each deck's recipe. Saved games
 that use random decks can't be resumed with `--load` yet, because `--load` only
@@ -159,3 +166,124 @@ decks, the weaker color makes up at least 36% of the colored symbols (median
 47%). Set it to `0` for unbalanced splashes, or to `100` for strict balance.
 Cards outside the chosen colors are never used, and neither are lands that make
 off-color mana.
+
+## Building from your collection
+
+A collection is the cards you own, from any number of sets, with how many copies
+of each. Pass it as `collection:` and the builder treats it as the whole card
+pool: it uses only cards in the collection and never more copies than you own,
+and the four-copy rule still applies, so a card's limit is the smaller of its
+owned count and 4. Colors, the profile and the seed work as usual.
+
+```ruby
+require "enjine/deck_builder"   # also loads enjine/collection
+
+mine = Enjine::Collection.load("mine.json")              # or a Hash, or a bare Array of entries
+deck = Enjine::DeckBuilder.build(collection: mine, colors: %w[W U], seed: 7)
+deck = Enjine::DeckBuilder.build(collection: "mine.json", colors: 2, seed: 7, basics: :owned)
+```
+
+### The collection format
+
+```json
+{ "format": 1, "cards": [
+  { "name": "Lightning Bolt", "count": 3 },
+  { "name": "Some Card", "set": "trk", "count": 2 },
+  { "set": "trk", "number": "12", "count": 1 },
+  { "name": "Other Card", "set_name": "Star Trek", "count": 4 } ] }
+```
+
+`format` is optional and must be `1` when present. Ruby callers can use symbol
+keys. Each entry names a card in one of these ways:
+
+| Keys | Meaning |
+| --- | --- |
+| `name` | The card's name. Names are unique across Magic, so a name alone is enough. Matching ignores case, accents, apostrophes and punctuation (`CardDefinition.slug`), so `"ilsa wall keeper"` finds `Ilsa, Wall Keeper`. |
+| `set` + `number` | A printing: the set code and the collector number, as in the set file's `printing`. A number may be written as a JSON number. If you also give `name`, it must match the card at that number. |
+| `set` or `set_name` | Restricts a `name` to one set, by code (`"trk"`) or by the set's name (`"Star Trek"`, matched like card names). If both are given they must agree. |
+
+`count` defaults to 1 and must be a positive integer. Entries for the same card
+add up, however they name it, so `{ "set": "trk", "number": "12", "count": 2 }`
+and `{ "name": "<the card at trk 12>", "count": 2 }` together mean 4 copies.
+
+Entries are resolved against the set files in `sets_dir:` (default `Sets.dir`)
+and the extra card data blocks passed as `cards:` (for example
+`Enjine::CardPool::Core.cards`). A `name` without a set may match several sets;
+the card's definition then comes from the set whose code sorts first (and from
+`cards:` only if no set has it). Because of that rule, the entry order
+never changes the result: the same collection and seed always give the same deck.
+
+A document that isn't a collection at all (missing file, invalid JSON, no `cards`
+array, a bad `count`, an entry with neither `name` nor `set` + `number`) raises
+`Enjine::Collection::InvalidCollection`.
+
+### The resolution report
+
+Cards the engine can't play yet, and cards that can't be found, are reported, not
+silently dropped. `Collection#report` has three lists (string keys, so it is also
+the JSON that `--collection-report` prints):
+
+```json
+{ "resolved":    [ { "id": "lantern_warden", "name": "Lantern Warden", "set": "fxa", "count": 5 } ],
+  "unsupported": [ { "name": "Skyveil Seraph", "set": "fxa", "reason": "needs flying", "count": 2 } ],
+  "unknown":     [ { "name": "Dawnward Squire", "set": "zzz", "count": 1, "reason": "unknown set \"zzz\"" } ] }
+```
+
+- `resolved`: one row per distinct playable card, with the total copies owned.
+  `set` is where the definition came from (missing for `cards:`).
+- `unsupported`: the entry names a card that a set lists in its `unsupported`
+  section, with what the engine still lacks. The builder never uses these.
+- `unknown`: the original entry plus a `reason`: no such card, unknown set or set
+  name, no card at that collector number, or a name that doesn't match the number.
+
+Other `Collection` methods:
+
+| Method | Returns |
+| --- | --- |
+| `entries` | `Collection::Entry` values (`definition`, `count`, `id`, `name`), one per playable card, sorted by id |
+| `definitions` | the owned playable `CardDefinition`s, sorted by id |
+| `count(card)` | copies owned, by card id or name (0 if none). Basic lands count only if listed. |
+| `include?(card)` | whether at least one copy is owned |
+| `size` | total playable copies |
+| `source` | the file path the collection was loaded from, or `nil` |
+| `to_h` | the collection document, normalized (string keys, explicit counts); `Collection.load(c.to_h)` rebuilds it |
+
+### Basic lands
+
+Most players have more basic lands than they ever list, so by default
+(`basics: :unlimited`) the builder adds as many basics as the deck needs, whether
+or not the collection lists them. It uses a set's own basic lands when the
+collection includes them, and the built-in ones otherwise.
+
+With `basics: :owned`, only the listed basics are used, never more than owned.
+If a color needs more basics than you own, the shortfall goes to the deck's other
+colors that have spare basics. If the owned basics still can't cover the lands,
+the builder raises `NotEnoughCards` (`details` include `basics_needed` and
+`basics_owned`).
+
+### When the collection is too small
+
+The builder works through the same steps as for sets (more copies, up to what you
+own; shifting creatures and other spells; more lands), then raises
+`Enjine::DeckBuilder::NotEnoughCards`. With a collection, `details` also has
+`collection` (the file name, or the card count) and `colors_without_cards`. A
+collection deck must have at least one owned card of every deck color: asking for
+`WG` when you own no green cards raises instead of quietly building a mono-white
+deck. Random colors (`colors: 2`, `:any`) are only drawn from combinations the
+collection can fill.
+
+### Command line
+
+```sh
+bundle exec exe/enjine --collection mine.json --random-deck colors=2 seed=3
+bundle exec exe/enjine --collection mine.json --random-deck colors=WU basics=owned
+bundle exec exe/enjine --collection mine.json --deck1 random:colors=R --deck2 random --p2 random
+bundle exec exe/enjine --collection-report mine.json
+```
+
+`--collection` applies to `--random-deck` and to every `--deck1`/`--deck2
+random:...` seat, and can't be combined with a `sets=` key. `--collection-report`
+prints the resolution report as JSON and exits with code 1 if any entry is
+unknown (unsupported cards alone don't fail it), or prints `{"error": ...}` for a
+malformed file. Both honor `--sets-dir`. The deck's `description` records the
+recipe as `collection=mine.json colors=WU seed=3`.
