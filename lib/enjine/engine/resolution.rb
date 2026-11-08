@@ -11,6 +11,14 @@ module Enjine
                           "locals" => {} }
       end
 
+      # Records a player's answer for the effect that is asking (see Effects::ChoiceEffect).
+      def effect_answer!(option)
+        frame = state.frames.reverse_each.find { it["type"] == "resolve" }
+        locals = frame["locals"][frame["pc"].to_s]
+        (locals["answers"] ||= []) << option.transform_keys(&:to_s)
+        ask!(nil)
+      end
+
       def resolving_ability(obj)
         obj.ability? ? stack_ability(obj) : definition(obj).spell_ability
       end

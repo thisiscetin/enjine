@@ -7,6 +7,7 @@ require_relative "enjine/mana"
 require_relative "enjine/primitive"
 require_relative "enjine/mechanics"
 require_relative "enjine/mechanics/selector"
+require_relative "enjine/mechanics/effects/effects"
 Dir[File.join(__dir__, "enjine/mechanics/**/*.rb")].each { |f| require f }
 require_relative "enjine/characteristics"
 require "json"

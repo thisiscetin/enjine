@@ -32,6 +32,10 @@ Declare one blocker: `{type: "block", object: id, attacker: id}`, `{type: "done"
 
 Cleanup step: discard one card, `{type: "discard", object: id}`, until the hand has 7 cards. `count` is how many remain (CR 514.1).
 
+## effect_choice
+
+A choice made while an effect resolves (scry, surveil, discard...): submit one of the `choices` exactly as listed; `prompt` describes it.
+
 ## legend_rule
 
 Keep one of your legendary permanents named `name`: `{type: "keep", object: id}`; the others go to the graveyard (CR 704.5j).

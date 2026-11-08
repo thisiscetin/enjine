@@ -42,6 +42,7 @@ module Enjine
     # Resolving the top object of the stack, one effect at a time (CR 608).
     class Resolve < Base
       def self.step(engine, frame) = engine.step_resolution!(frame)
+      def self.decisions = %w[effect_choice]
 
       def self.validate(frame, data, errors)
         errors << "frames: resolving object #{frame["object"]} is not on the stack" unless data["stack"].include?(frame["object"])

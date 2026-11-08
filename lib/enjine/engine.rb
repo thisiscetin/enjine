@@ -322,6 +322,13 @@ module Enjine
       emit Events::Tapped.new(object: object.id)
     end
 
+    def untap!(object)
+      return unless object.tapped
+
+      object.tapped = false
+      emit Events::Untapped.new(object: object.id)
+    end
+
     def untap_all!(index)
       state.battlefield.each do |id|
         obj = object(id)

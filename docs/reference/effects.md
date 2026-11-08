@@ -120,6 +120,26 @@ Rules: CR 701.8a
 }
 ```
 
+## discard
+
+Each referenced player discards `amount` cards of their choice (default: you).
+
+Rules: CR 701.9a, CR 701.9b
+
+| Parameter | Description |
+| --- | --- |
+| `amount` | integer |
+| `to` | selector |
+
+```json
+{
+  "discard": {
+    "amount": 1,
+    "to": "each_opponent"
+  }
+}
+```
+
 ## draw
 
 Each referenced player draws `amount` cards (default: you).
@@ -135,6 +155,26 @@ Rules: CR 121.1, CR 121.2
 {
   "draw": {
     "amount": 2
+  }
+}
+```
+
+## exile
+
+Exile each referenced permanent.
+
+Rules: CR 406.1, CR 701.13a
+
+| Parameter | Description |
+| --- | --- |
+| `to` | selector |
+
+```json
+{
+  "exile": {
+    "to": {
+      "target": 0
+    }
   }
 }
 ```
@@ -178,6 +218,26 @@ Rules: CR 119.3
 }
 ```
 
+## mill
+
+Each referenced player puts the top `amount` cards of their library into their graveyard (default: you).
+
+Rules: CR 701.17a
+
+| Parameter | Description |
+| --- | --- |
+| `amount` | integer |
+| `to` | selector |
+
+```json
+{
+  "mill": {
+    "amount": 2,
+    "to": "each_opponent"
+  }
+}
+```
+
 ## pump
 
 Each referenced creature gets +power/+toughness until end of turn. The set of affected creatures is locked in when the effect starts.
@@ -198,6 +258,100 @@ Rules: CR 611.2a, CR 611.2c, CR 613.4c, CR 514.2
     "to": {
       "target": 0
     }
+  }
+}
+```
+
+## return_to_hand
+
+Return each referenced permanent to its owner's hand.
+
+Rules: CR 400.6
+
+| Parameter | Description |
+| --- | --- |
+| `to` | selector |
+
+```json
+{
+  "return_to_hand": {
+    "to": {
+      "target": 0
+    }
+  }
+}
+```
+
+## scry
+
+Look at the top `amount` cards of your library; put any number on the bottom and the rest on top in any order.
+
+Rules: CR 701.22a
+
+| Parameter | Description |
+| --- | --- |
+| `amount` | integer |
+
+```json
+{
+  "scry": {
+    "amount": 2
+  }
+}
+```
+
+## surveil
+
+Look at the top `amount` cards of your library; put any number into your graveyard and the rest on top in any order.
+
+Rules: CR 701.25a
+
+| Parameter | Description |
+| --- | --- |
+| `amount` | integer |
+
+```json
+{
+  "surveil": {
+    "amount": 2
+  }
+}
+```
+
+## tap
+
+Tap each referenced permanent.
+
+Rules: CR 701.26a
+
+| Parameter | Description |
+| --- | --- |
+| `to` | selector |
+
+```json
+{
+  "tap": {
+    "to": {
+      "target": 0
+    }
+  }
+}
+```
+
+## untap
+
+Untap each referenced permanent.
+
+Rules: CR 701.26b
+
+| Parameter | Description |
+| --- | --- |
+| `to` | selector |
+
+```json
+{
+  "untap": {
+    "to": "self"
   }
 }
 ```
