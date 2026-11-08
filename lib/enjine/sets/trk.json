@@ -61,6 +61,51 @@
     },
     {
       "card": {
+        "name": "Vexing Drone",
+        "mana_cost": "{1}{W}",
+        "types": [
+          "artifact",
+          "creature"
+        ],
+        "subtypes": [
+          "borg"
+        ],
+        "power": 2,
+        "toughness": 2,
+        "abilities": [
+          {
+            "triggered": {
+              "when": {
+                "enters": {}
+              },
+              "targets": [
+                {
+                  "creature": {
+                    "controller": "opponent"
+                  }
+                }
+              ],
+              "effects": [
+                {
+                  "tap": {
+                    "to": {
+                      "target": 0
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "rarity": "common",
+      "printing": {
+        "set": "trk",
+        "number": "45"
+      }
+    },
+    {
+      "card": {
         "name": "Federation Probe",
         "mana_cost": "{U}",
         "types": [
@@ -117,6 +162,51 @@
       "printing": {
         "set": "trk",
         "number": "59"
+      }
+    },
+    {
+      "card": {
+        "name": "Interstellar Effigy",
+        "mana_cost": "{4}{U}",
+        "types": [
+          "artifact",
+          "creature"
+        ],
+        "subtypes": [
+          "construct"
+        ],
+        "power": 4,
+        "toughness": 3,
+        "abilities": [
+          {
+            "triggered": {
+              "when": {
+                "enters": {}
+              },
+              "targets": [
+                {
+                  "creature": {
+                    "controller": "opponent"
+                  }
+                }
+              ],
+              "effects": [
+                {
+                  "return_to_hand": {
+                    "to": {
+                      "target": 0
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "rarity": "common",
+      "printing": {
+        "set": "trk",
+        "number": "66"
       }
     },
     {
@@ -317,6 +407,61 @@
       "printing": {
         "set": "trk",
         "number": "208"
+      }
+    },
+    {
+      "card": {
+        "name": "Syndicate Liquidators",
+        "mana_cost": "{4}{G}",
+        "types": [
+          "creature"
+        ],
+        "subtypes": [
+          "orion",
+          "pirate"
+        ],
+        "keywords": [
+          "trample"
+        ],
+        "power": 4,
+        "toughness": 4,
+        "abilities": [
+          {
+            "triggered": {
+              "when": {
+                "enters": {
+                  "subject": {
+                    "each": "land",
+                    "controller": "you"
+                  }
+                }
+              },
+              "targets": [
+                {
+                  "creature": {
+                    "controller": "you"
+                  }
+                }
+              ],
+              "effects": [
+                {
+                  "add_counters": {
+                    "counter": "+1/+1",
+                    "amount": 2,
+                    "to": {
+                      "target": 0
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "rarity": "uncommon",
+      "printing": {
+        "set": "trk",
+        "number": "218"
       }
     },
     {
@@ -1785,18 +1930,6 @@
       ]
     },
     {
-      "name": "Vexing Drone",
-      "rarity": "common",
-      "printing": {
-        "set": "trk",
-        "number": "45"
-      },
-      "missing": [
-        "triggered ability",
-        "tap/untap effect"
-      ]
-    },
-    {
       "name": "Anthropological Mission",
       "rarity": "uncommon",
       "printing": {
@@ -1928,7 +2061,6 @@
         "number": "56"
       },
       "missing": [
-        "return to hand",
         "other rules text"
       ]
     },
@@ -2037,18 +2169,6 @@
       },
       "missing": [
         "other rules text"
-      ]
-    },
-    {
-      "name": "Interstellar Effigy",
-      "rarity": "common",
-      "printing": {
-        "set": "trk",
-        "number": "66"
-      },
-      "missing": [
-        "triggered ability",
-        "return to hand"
       ]
     },
     {
@@ -3865,18 +3985,6 @@
         "exile",
         "counters",
         "graveyard casting"
-      ]
-    },
-    {
-      "name": "Syndicate Liquidators",
-      "rarity": "uncommon",
-      "printing": {
-        "set": "trk",
-        "number": "218"
-      },
-      "missing": [
-        "triggered ability",
-        "counters"
       ]
     },
     {

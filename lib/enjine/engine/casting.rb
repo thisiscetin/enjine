@@ -31,23 +31,23 @@ module Enjine
           return false
         end
 
-        ability_targetable?(ability, index, nil) && affordable?(index, ability.mana_cost, needs_tap?(ability) ? id : nil)
+        ability_targetable?(ability, index, nil, id) && affordable?(index, ability.mana_cost, needs_tap?(ability) ? id : nil)
       end
 
       # Whether the ability can get legal targets: for modal abilities, enough modes must (CR 700.2).
-      def ability_targetable?(ability, index, exclude)
+      def ability_targetable?(ability, index, exclude, source = nil)
         return true if ability.nil?
-        return targets_available?(ability.targets, index, exclude) unless ability.modal?
+        return targets_available?(ability.targets, index, exclude, source) unless ability.modal?
 
-        available_modes(ability, index, exclude).size >= ability.choose
+        available_modes(ability, index, exclude, source).size >= ability.choose
       end
 
-      def available_modes(ability, index, exclude)
-        ability.modes.each_index.select { targets_available?(ability.modes[it].targets, index, exclude) }
+      def available_modes(ability, index, exclude, source = nil)
+        ability.modes.each_index.select { targets_available?(ability.modes[it].targets, index, exclude, source) }
       end
 
-      def targets_available?(specs, index, exclude)
-        specs.all? { |spec| spec.candidates(self, index).any? { it != exclude && targetable?(it, index) } }
+      def targets_available?(specs, index, exclude, source = nil)
+        specs.all? { |spec| spec.candidates_for(self, index, source).any? { it != exclude && targetable?(it, index) } }
       end
 
       # CR 702.11b: hexproof permanents can't be targeted by their controller's opponents.
@@ -220,7 +220,7 @@ module Enjine
       # CR 601.2b: modes still choosable (distinct, with legal targets).
       def mode_options
         ctx = casting
-        available_modes(casting_ability, ctx["player"], ctx["object"]) - ctx["modes"]
+        available_modes(casting_ability, ctx["player"], ctx["object"], ctx["source"]) - ctx["modes"]
       end
 
       def choose_mode!(index)
@@ -232,7 +232,7 @@ module Enjine
       def target_candidates
         ctx = casting
         spec = casting_targets[ctx["targets"].size]
-        spec.candidates(self, ctx["player"]).reject { it == ctx["object"] || !targetable?(it, ctx["player"]) }
+        spec.candidates_for(self, ctx["player"], ctx["source"]).reject { it == ctx["object"] || !targetable?(it, ctx["player"]) }
       end
 
       def choose_target!(ref)

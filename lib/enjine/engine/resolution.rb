@@ -78,7 +78,7 @@ module Enjine
       # Targets that are still legal; illegal ones become nil and are ignored (CR 608.2b).
       def legal_targets(obj, specs)
         (obj.targets || []).each_with_index.map do |ref, i|
-          ref if specs[i]&.match?(self, ref, obj.controller) && targetable?(ref, obj.controller)
+          ref if specs[i]&.match_for?(self, ref, obj.controller, obj.source) && targetable?(ref, obj.controller)
         end
       end
 

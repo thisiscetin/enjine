@@ -216,7 +216,21 @@ module SetConverter
 
   TARGETS = { "any target" => "any_target", "target creature" => "creature", "target player" => "player",
               "target opponent" => "opponent", "target spell" => "spell", "target planeswalker" => "planeswalker",
-              "target permanent" => "permanent", "target creature or planeswalker" => "creature_or_planeswalker" }.freeze
+              "target permanent" => "permanent", "target creature or planeswalker" => "creature_or_planeswalker",
+              "target creature you control" => { "creature" => { "controller" => "you" } },
+              "another target creature you control" => { "creature" => { "controller" => "you", "other" => true } },
+              "another target creature" => { "creature" => { "other" => true } },
+              "target creature an opponent controls" => { "creature" => { "controller" => "opponent" } },
+              "target creature you don't control" => { "creature" => { "controller" => "opponent" } },
+              "target nonland permanent" => { "permanent" => { "not" => ["land"] } },
+              "target nonland permanent an opponent controls" => { "permanent" => { "not" => ["land"], "controller" => "opponent" } },
+              "target artifact or creature" => { "permanent" => { "any_of" => %w[artifact creature] } },
+              "target artifact" => "artifact", "target attacking creature" => { "creature" => { "attacking" => true } },
+              "target attacking or blocking creature" => "creature",
+              "target tapped creature" => { "creature" => { "tapped" => true } } }.freeze
+
+  # Longest phrases first so "target creature you control" wins over "target creature".
+  TARGET_PHRASES = TARGETS.keys.sort_by { -it.size }.map { Regexp.escape(it) }.join("|")
 
   # Translates a line of plain sentences; nil when any sentence isn't understood.
   def sentence_effects(line, target_offset)
@@ -265,20 +279,20 @@ module SetConverter
     when /\AYou gain (\d+) life\z/ then { "gain_life" => { "amount" => Integer(::Regexp.last_match(1)) } }
     when /\AEach opponent loses (\d+) life\z/ then { "lose_life" => { "amount" => Integer(::Regexp.last_match(1)),
                                                                       "to" => "each_opponent" } }
-    when %r{\A(target creature) gets \+(\d+)/\+(\d+) until end of turn\z}i
+    when %r{\A(#{TARGET_PHRASES}) gets \+(\d+)/\+(\d+) until end of turn\z}io
       to = target_ref(::Regexp.last_match(1).downcase, targets, offset)
       { "pump" => { "power" => Integer(::Regexp.last_match(2)), "toughness" => Integer(::Regexp.last_match(3)), "to" => to } }
     when %r{\ACreatures you control get \+(\d+)/\+(\d+) until end of turn\z}
       { "pump" => { "power" => Integer(::Regexp.last_match(1)), "toughness" => Integer(::Regexp.last_match(2)),
                     "to" => { "each" => "creature", "controller" => "you" } } }
-    when /\ADestroy (target creature|target permanent|target planeswalker)\z/
+    when /\ADestroy (#{TARGET_PHRASES})\z/o
       { "destroy" => { "to" => target_ref(::Regexp.last_match(1), targets, offset) } }
     when /\ACounter (target spell)\z/ then { "counter" => { "to" => target_ref(::Regexp.last_match(1), targets, offset) } }
-    when /\AExile (target creature|target permanent|target planeswalker|target creature or planeswalker)\z/
+    when /\AExile (#{TARGET_PHRASES})\z/o
       { "exile" => { "to" => target_ref(::Regexp.last_match(1), targets, offset) } }
-    when /\AReturn (target creature|target permanent) to its owner's hand\z/
+    when /\AReturn (#{TARGET_PHRASES}) to its owner's hand\z/o
       { "return_to_hand" => { "to" => target_ref(::Regexp.last_match(1), targets, offset) } }
-    when /\ATap (target creature|target permanent)\z/ then { "tap" => { "to" => target_ref(::Regexp.last_match(1), targets, offset) } }
+    when /\ATap (#{TARGET_PHRASES})\z/o then { "tap" => { "to" => target_ref(::Regexp.last_match(1), targets, offset) } }
     when /\AUntap CARDNAME\z/ then { "untap" => { "to" => "self" } }
     when /\A(Scry|Surveil) (\d+)\z/ then { ::Regexp.last_match(1).downcase => { "amount" => Integer(::Regexp.last_match(2)) } }
     when /\AMill (a|one|two|three|\d+) cards?\z/ then { "mill" => { "amount" => number(::Regexp.last_match(1)) } }
@@ -301,7 +315,7 @@ module SetConverter
     when /\ACARDNAME deals (\d+) damage to each opponent\z/
       { "deal_damage" => { "amount" => Integer(::Regexp.last_match(1)), "to" => "each_opponent" } }
     when /\AYou lose (\d+) life\z/ then { "lose_life" => { "amount" => Integer(::Regexp.last_match(1)), "to" => "you" } }
-    when %r{\APut (a|one|two|three|\d+) \+1/\+1 counters? on (target creature)\z}
+    when %r{\APut (a|one|two|three|\d+) \+1/\+1 counters? on (#{TARGET_PHRASES})\z}o
       { "add_counters" => { "counter" => "+1/+1", "amount" => number(::Regexp.last_match(1)),
                             "to" => target_ref(::Regexp.last_match(2), targets, offset) } }
     end

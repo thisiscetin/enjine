@@ -114,7 +114,7 @@ module Enjine
       def place_trigger!(trigger)
         state.pending_triggers.delete(trigger)
         ability = catalog.fetch(trigger["card"]).ability(trigger["ability"])
-        unless ability_targetable?(ability, trigger["controller"], nil)
+        unless ability_targetable?(ability, trigger["controller"], nil, trigger["source"])
           emit Events::TriggerRemoved.new(player: name(trigger["controller"]), source: trigger["source"],
                                           card: trigger["card"], reason: "no legal targets")
           return
