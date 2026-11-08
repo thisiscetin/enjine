@@ -2630,5 +2630,832 @@
         }
       }
     ]
+  },
+  {
+    "name": "Ledger Savant",
+    "mana_cost": "{2}{U}{U}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "human",
+      "wizard"
+    ],
+    "power": 2,
+    "toughness": 3,
+    "abilities": [
+      {
+        "draw_replacement": {
+          "amount": 2
+        }
+      }
+    ]
+  },
+  {
+    "name": "Field Medic Tovan",
+    "mana_cost": "{2}{W}{W}",
+    "types": [
+      "creature"
+    ],
+    "supertypes": [
+      "legendary"
+    ],
+    "subtypes": [
+      "human",
+      "cleric"
+    ],
+    "power": 2,
+    "toughness": 2,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "enters": {}
+          },
+          "targets": [
+            {
+              "creature": {
+                "controller": "you",
+                "other": true
+              }
+            }
+          ],
+          "effects": [
+            {
+              "add_counters": {
+                "counter": "+1/+1",
+                "amount": 1,
+                "to": {
+                  "target": 0
+                }
+              }
+            }
+          ]
+        }
+      },
+      {
+        "destroy_replacement": {
+          "affects": {
+            "each": {
+              "creature": {
+                "counters": "+1/+1"
+              }
+            },
+            "controller": "you",
+            "other": true
+          },
+          "remove_counters": "+1/+1",
+          "remove_damage": true
+        }
+      }
+    ]
+  },
+  {
+    "name": "Mirage Foundry",
+    "mana_cost": "{2}{G}{G}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "human",
+      "artificer"
+    ],
+    "power": 3,
+    "toughness": 3,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "enters": {}
+          },
+          "effects": [
+            {
+              "create_token": {
+                "token": "Treasure"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "token_replacement": {
+          "token": {
+            "name": "Phantasm",
+            "types": [
+              "artifact",
+              "creature"
+            ],
+            "subtypes": [
+              "illusion"
+            ],
+            "power": 2,
+            "toughness": 2
+          }
+        }
+      }
+    ]
+  },
+  {
+    "name": "Swift Current Shrine",
+    "mana_cost": "{1}{G}",
+    "types": [
+      "enchantment"
+    ],
+    "abilities": [
+      {
+        "enters_untapped": {
+          "affects": {
+            "each": "land",
+            "controller": "you"
+          }
+        }
+      },
+      {
+        "triggered": {
+          "when": {
+            "enters": {}
+          },
+          "effects": [
+            {
+              "search_library": {
+                "for": {
+                  "supertypes": [
+                    "basic"
+                  ],
+                  "types": [
+                    "land"
+                  ]
+                },
+                "put": "battlefield",
+                "tapped": true
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Vanguard Marshal",
+    "mana_cost": "{1}{R}{W}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "human",
+      "soldier"
+    ],
+    "power": 3,
+    "toughness": 3,
+    "keywords": [
+      "flash"
+    ],
+    "abilities": [
+      {
+        "enters_attacking": {
+          "affects": {
+            "each": "creature",
+            "controller": "you"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "name": "Surge of Plenty",
+    "mana_cost": "{1}{G}",
+    "types": [
+      "instant"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "targets": [
+            {
+              "creature": {
+                "controller": "you"
+              }
+            }
+          ],
+          "effects": [
+            {
+              "counter_bonus": {
+                "amount": 1
+              }
+            },
+            {
+              "add_counters": {
+                "counter": "+1/+1",
+                "amount": 1,
+                "to": {
+                  "target": 0
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Doom Brand",
+    "mana_cost": "{X}{R}",
+    "types": [
+      "instant"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "targets": [
+            "creature"
+          ],
+          "effects": [
+            {
+              "deal_damage": {
+                "amount": "x",
+                "to": {
+                  "target": 0
+                }
+              }
+            },
+            {
+              "exile_if_dies": {
+                "to": {
+                  "target": 0
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Last Stand Ward",
+    "mana_cost": "{1}{W}",
+    "types": [
+      "instant"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "effects": [
+            {
+              "grant": {
+                "keywords": [
+                  "indestructible"
+                ],
+                "to": {
+                  "each": "creature",
+                  "controller": "you"
+                }
+              }
+            },
+            {
+              "player_rule": {
+                "rule": "hexproof"
+              }
+            },
+            {
+              "player_rule": {
+                "rule": "prevent_all_damage"
+              }
+            },
+            "exile_this_spell"
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Boundless Study",
+    "mana_cost": "{3}{U}",
+    "types": [
+      "sorcery"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "effects": [
+            {
+              "draw": {
+                "amount": 3
+              }
+            },
+            {
+              "player_rule": {
+                "rule": "no_max_hand_size",
+                "duration": "until_your_next_turn"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Truce Banner",
+    "mana_cost": "{1}{W}",
+    "types": [
+      "instant"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "effects": [
+            {
+              "player_rule": {
+                "rule": "cant_attack",
+                "to": "each_opponent"
+              }
+            },
+            {
+              "draw": {
+                "amount": 1
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Undying Regent",
+    "mana_cost": "{3}{B}{B}",
+    "types": [
+      "creature"
+    ],
+    "supertypes": [
+      "legendary"
+    ],
+    "subtypes": [
+      "vampire",
+      "noble"
+    ],
+    "power": 3,
+    "toughness": 5,
+    "abilities": [
+      {
+        "player_rule": {
+          "rule": "cant_lose_for_life"
+        }
+      },
+      {
+        "triggered": {
+          "when": {
+            "step_begins": {
+              "step": "end"
+            }
+          },
+          "effects": [
+            {
+              "lose_life": {
+                "amount": 2,
+                "to": "you"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Hoarding Broker",
+    "mana_cost": "{2}{R}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "goblin",
+      "rogue"
+    ],
+    "power": 1,
+    "toughness": 2,
+    "abilities": [
+      {
+        "player_rule": {
+          "rule": "cant_sacrifice",
+          "filter": {
+            "permanent": {
+              "token": true,
+              "subtypes": [
+                "treasure"
+              ]
+            }
+          }
+        }
+      },
+      {
+        "triggered": {
+          "when": {
+            "step_begins": {
+              "step": "upkeep",
+              "whose": "each"
+            }
+          },
+          "effects": [
+            {
+              "create_token": {
+                "token": "Treasure"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Final Wager",
+    "mana_cost": "{3}{B}{B}",
+    "types": [
+      "sorcery"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "effects": [
+            {
+              "win_game": {
+                "if": {
+                  "life": "each_opponent",
+                  "at_most": 5
+                }
+              }
+            },
+            {
+              "lose_game": {
+                "if": {
+                  "life": "you",
+                  "at_most": 5
+                }
+              }
+            },
+            {
+              "draw": {
+                "amount": 1
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Temporal Sloop",
+    "mana_cost": "{3}{U}{U}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "construct"
+    ],
+    "power": 3,
+    "toughness": 3,
+    "keywords": [
+      "flying"
+    ],
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "deals_damage": {
+              "combat": true,
+              "to": "player"
+            }
+          },
+          "effects": [
+            {
+              "draw": {
+                "amount": 1
+              }
+            },
+            {
+              "extra_turn": {
+                "if": {
+                  "began_extra_turn": false
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Timid Mastiff",
+    "mana_cost": "{2}{W}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "dog"
+    ],
+    "power": 4,
+    "toughness": 3,
+    "keywords": [
+      "cant_attack_alone"
+    ]
+  },
+  {
+    "name": "Stalking Brute",
+    "mana_cost": "{4}{G}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "lizard",
+      "warrior"
+    ],
+    "power": 4,
+    "toughness": 4,
+    "abilities": [
+      {
+        "cant_be_blocked_by": {
+          "filter": {
+            "creature": {
+              "power": {
+                "at_most": 2
+              }
+            }
+          }
+        }
+      }
+    ]
+  },
+  {
+    "name": "Void Drifter",
+    "mana_cost": "{4}{G}{G}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "horror"
+    ],
+    "power": 5,
+    "toughness": 5,
+    "abilities": [
+      {
+        "cant_be_blocked_by": {
+          "filter": {
+            "creature": {
+              "types": [
+                "artifact"
+              ]
+            }
+          }
+        }
+      },
+      {
+        "cant_be_targeted_by": {
+          "abilities_from": {
+            "types": [
+              "artifact"
+            ]
+          }
+        }
+      }
+    ]
+  },
+  {
+    "name": "Duel at Dawn",
+    "mana_cost": "{1}{G}",
+    "types": [
+      "sorcery"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "targets": [
+            {
+              "creature": {
+                "controller": "you"
+              }
+            },
+            {
+              "creature": {
+                "controller": "opponent"
+              }
+            }
+          ],
+          "effects": [
+            {
+              "fight": {
+                "to": {
+                  "target": 0
+                },
+                "with": {
+                  "target": 1
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Pack Strike",
+    "mana_cost": "{G}",
+    "types": [
+      "instant"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "targets": [
+            {
+              "creature": {
+                "controller": "you"
+              }
+            },
+            {
+              "creature": {
+                "controller": "opponent"
+              }
+            }
+          ],
+          "effects": [
+            {
+              "bite": {
+                "from": {
+                  "target": 0
+                },
+                "to": {
+                  "target": 1
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Mend Flesh",
+    "mana_cost": "{W}",
+    "types": [
+      "instant"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "targets": [
+            "creature"
+          ],
+          "effects": [
+            {
+              "remove_damage": {
+                "to": {
+                  "target": 0
+                }
+              }
+            },
+            {
+              "remove_counters": {
+                "counter": "-1/-1",
+                "amount": 1,
+                "to": {
+                  "target": 0
+                }
+              }
+            },
+            {
+              "remove_all_counters": {
+                "counter": "stun",
+                "to": {
+                  "target": 0
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Usurp Command",
+    "mana_cost": "{3}{U}{U}",
+    "types": [
+      "sorcery"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "targets": [
+            {
+              "permanent": {
+                "controller": "opponent",
+                "not": [
+                  "land"
+                ]
+              }
+            }
+          ],
+          "effects": [
+            {
+              "gain_control": {
+                "to": {
+                  "target": 0
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Borrowed Blade",
+    "mana_cost": "{2}{R}",
+    "types": [
+      "sorcery"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "targets": [
+            "creature"
+          ],
+          "effects": [
+            {
+              "gain_control": {
+                "to": {
+                  "target": 0
+                },
+                "duration": "end_of_turn"
+              }
+            },
+            {
+              "untap": {
+                "to": {
+                  "target": 0
+                }
+              }
+            },
+            {
+              "grant": {
+                "keywords": [
+                  "haste"
+                ],
+                "to": {
+                  "target": 0
+                }
+              }
+            },
+            {
+              "add_subtypes": {
+                "subtypes": [
+                  "warrior"
+                ],
+                "to": {
+                  "target": 0
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Gift of Burden",
+    "mana_cost": "{1}{U}",
+    "types": [
+      "sorcery"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "targets": [
+            "opponent",
+            {
+              "permanent": {
+                "controller": "you",
+                "not": [
+                  "land"
+                ]
+              }
+            }
+          ],
+          "effects": [
+            {
+              "gain_control": {
+                "to": {
+                  "target": 1
+                },
+                "gains": {
+                  "target": 0
+                }
+              }
+            },
+            {
+              "draw": {
+                "amount": 2
+              }
+            }
+          ]
+        }
+      }
+    ]
   }
 ]

@@ -95,7 +95,8 @@ module Enjine
 
     # Token definitions this card's effects can create; catalogs register them with the card.
     def token_definitions
-      @all_effects.filter_map { it.definition if it.is_a?(Mechanics::Effects::CreateToken) }.uniq(&:id)
+      (@all_effects.filter_map { it.definition if it.is_a?(Mechanics::Effects::CreateToken) } +
+        @abilities.filter_map { it.token_definition if it.respond_to?(:token_definition) }).compact.uniq(&:id)
     end
 
     # Every effect of every ability, including effects nested in other effects ("may", delayed triggers).

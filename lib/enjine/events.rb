@@ -86,6 +86,7 @@ module Enjine
     # A card in a hidden zone is shown to every player (CR 701.20a); it doesn't leave its zone (701.20b).
     CardRevealed = define(:card_revealed, :player, :object, :card)
     ControlChanged = define(:control_changed, :object, :controller)
+    ExtraTurnAdded = define(:extra_turn_added, :player) # CR 500.7
     DilemmaFaced = define(:dilemma_faced, :player, :object, :modes) # CR 700.17 (2026-11-06)
     # Combat declarations once final (CR 508.3d "whenever [a player] attacks", 509.3c "becomes blocked").
     AttacksDeclared = define(:attacks_declared, :player, :attackers)

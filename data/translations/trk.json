@@ -23,6 +23,14 @@
         { "pump": { "power": 2, "toughness": 0, "to": { "each": "creature", "controller": "you" } } } ] } }
     ]
   },
+  "Cold-Blooded Crew": {
+    "abilities": [
+      { "triggered": { "when": { "enters": {} }, "targets": ["creature"],
+                       "effects": [{ "add_counters": { "counter": "+1/+1", "amount": 2, "to": { "target": 0 } } }] } },
+      { "cant_be_blocked_by": { "filter": { "creature": { "power": { "at_most": 2 } } } } },
+      { "cycling": { "cost": "{2}", "for": { "supertypes": ["basic"], "types": ["land"] } } }
+    ]
+  },
   "Command Subadjunct": {
     "abilities": [
       { "static": { "affects": { "each": { "creature": { "any_of": ["artifact"] } }, "controller": "you" },
@@ -35,6 +43,28 @@
         { "targets": ["creature"],
           "effects": [{ "add_counters": { "counter": "+1/+1", "amount": 1, "to": { "target": 0 } } }] },
         { "effects": [{ "add_mana": { "amount": 2, "color": "any_one" } }] } ] } }
+    ]
+  },
+  "Deep Space Scan": {
+    "abilities": [
+      { "spell": { "effects": [
+        { "draw": { "amount": { "distinct_names": { "each": "land", "controller": "you" } } } },
+        { "player_rule": { "rule": "no_max_hand_size", "duration": "until_your_next_turn" } } ] } }
+    ]
+  },
+  "Dr. Joseph M'Benga": {
+    "abilities": [
+      { "static": { "affects": { "each": { "creature": { "counters": true } }, "controller": "you", "other": true },
+                    "keywords": ["hexproof"] } },
+      { "double_counters": { "affects": { "each": "creature", "controller": "you" } } }
+    ]
+  },
+  "Dr. McCoy, Surly Surgeon": {
+    "abilities": [
+      { "triggered": { "when": { "enters": {} }, "targets": [{ "creature": { "controller": "you", "other": true } }],
+                       "effects": [{ "add_counters": { "counter": "+1/+1", "amount": 1, "to": { "target": 0 } } }] } },
+      { "destroy_replacement": { "affects": { "each": { "creature": { "counters": "+1/+1" } }, "controller": "you", "other": true },
+                                 "remove_counters": "+1/+1", "remove_damage": true } }
     ]
   },
   "Federation Field Medic": {
@@ -50,6 +80,76 @@
                               "at_least": 1 } } } ] } ] } }
     ]
   },
+  "Georgiou, Terran Emperor": {
+    "abilities": [
+      { "player_rule": { "rule": "cant_lose_for_life" } },
+      { "triggered": { "when": { "step_begins": { "step": "end" } }, "effects": [
+        { "lose_life": { "amount": 3, "to": "you" } },
+        { "draw": { "amount": 1 } },
+        { "create_token": { "amount": 10, "if": { "life": "you", "at_most": 0 },
+                            "token": { "name": "Officer", "types": ["creature"], "subtypes": ["officer"], "power": 1, "toughness": 1 } } } ] } }
+    ]
+  },
+  "H.M.S. Bounty, Unlikely Timeship": {
+    "keywords": ["station"],
+    "abilities": [
+      { "triggered": { "when": { "enters": {} }, "effects": [
+        { "search_library": { "for": { "subtypes": ["whale"] }, "reveal": true } } ] } },
+      { "station_symbol": { "at": 8, "power": 3, "toughness": 4, "keywords": ["flying"], "abilities": [
+        { "triggered": { "when": { "deals_damage": { "combat": true, "to": "player" } }, "effects": [
+          { "draw": { "amount": 1 } },
+          { "extra_turn": { "if": { "all": [
+            { "controls": { "each": { "permanent": { "subtypes": ["whale"] } }, "controller": "you" }, "at_least": 1 },
+            { "began_extra_turn": false } ] } } } ] } } ] } }
+    ]
+  },
+  "Holo-Engineer": {
+    "abilities": [
+      { "triggered": { "when": { "enters": {} }, "effects": [{ "create_token": { "token": { "name": "Illusion", "types": ["artifact", "creature"], "subtypes": ["illusion"], "power": 3, "toughness": 3 } } }] } },
+      { "token_replacement": { "token": { "name": "Illusion", "types": ["artifact", "creature"], "subtypes": ["illusion"], "power": 3, "toughness": 3 } } }
+    ]
+  },
+  "Mr. Spock, Science Officer": {
+    "abilities": [
+      { "draw_replacement": { "amount": 2 } }
+    ]
+  },
+  "Pet Sehlat": {
+    "keywords": ["cant_attack_alone"]
+  },
+  "Phlox, Unorthodox Doctor": {
+    "keywords": ["trample"],
+    "abilities": [
+      { "triggered": { "when": { "deals_damage": { "subject": { "each": { "creature": { "counters": true } }, "controller": "you" },
+                                                   "combat": true, "to": "player" } },
+                       "effects": [{ "draw": { "amount": 1 } }] } }
+    ]
+  },
+  "Quark, Humble Proprietor": {
+    "abilities": [
+      { "player_rule": { "rule": "cant_sacrifice", "filter": { "permanent": { "token": true, "subtypes": ["treasure"] } } } },
+      { "triggered": { "when": { "step_begins": { "step": "upkeep", "whose": "each" } },
+                       "effects": [{ "create_token": { "token": "Treasure" } }] } }
+    ]
+  },
+  "Saru, Unthreatened": {
+    "keywords": ["flash"],
+    "abilities": [
+      { "triggered": { "when": { "enters": {} }, "targets": [{ "creature": { "controller": "you", "other": true } }],
+                       "effects": [{ "grant": { "keywords": ["hexproof"], "to": { "target": 0 } } }] } }
+    ]
+  },
+  "Saurian Explorer": {
+    "abilities": [
+      { "triggered": { "when": { "enters": { "subject": { "each": "land", "controller": "you" } } },
+                       "effects": [{ "pump": { "power": 2, "toughness": 2, "to": "self" } }] } },
+      { "activated": { "cost": [{ "mana": "{6}" }], "timing": "sorcery", "effects": [
+        { "create_token": { "tapped": true, "token": { "name": "New Planet", "types": ["land"], "subtypes": ["planet"], "abilities": [
+          { "mana": { "cost": ["tap"], "produce": "{W}" } }, { "mana": { "cost": ["tap"], "produce": "{U}" } },
+          { "mana": { "cost": ["tap"], "produce": "{B}" } }, { "mana": { "cost": ["tap"], "produce": "{R}" } },
+          { "mana": { "cost": ["tap"], "produce": "{G}" } } ] } } } ] } }
+    ]
+  },
   "Set Phasers to . . .": {
     "abilities": [
       { "spell": { "choose": 1, "modes": [
@@ -60,6 +160,30 @@
           { "deal_damage": { "amount": 3, "to": { "target": 0 } } } ] } ] } }
     ]
   },
+  "Species 8472": {
+    "abilities": [
+      { "triggered": { "when": { "enters": {} }, "effects": [{ "gain_life": { "amount": { "distinct_names": { "each": "land", "controller": "you" } } } }] } },
+      { "cant_be_blocked_by": { "filter": { "creature": { "types": ["artifact"] } } } },
+      { "cant_be_targeted_by": { "abilities_from": { "types": ["artifact"] } } }
+    ]
+  },
+  "Stable Wormhole": {
+    "abilities": [
+      { "triggered": { "when": { "player_attacks": {} }, "effects": [
+        { "create_token": { "tapped": true, "token": { "name": "New Planet", "types": ["land"], "subtypes": ["planet"], "abilities": [
+          { "mana": { "cost": ["tap"], "produce": "{W}" } }, { "mana": { "cost": ["tap"], "produce": "{U}" } },
+          { "mana": { "cost": ["tap"], "produce": "{B}" } }, { "mana": { "cost": ["tap"], "produce": "{R}" } },
+          { "mana": { "cost": ["tap"], "produce": "{G}" } } ] } } } ] } }
+    ]
+  },
+  "Tea, Earl Grey, Hot": {
+    "abilities": [
+      { "triggered": { "when": { "enters": {} }, "effects": [{ "draw": { "amount": 1 } }] } },
+      { "activated": { "cost": [{ "mana": "{2}" }, "tap", "sacrifice"], "choose": 1, "modes": [
+        { "targets": ["opponent"], "effects": [{ "deal_damage": { "amount": 2, "to": { "target": 0 } } }] },
+        { "effects": [{ "gain_life": { "amount": 3 } }] } ] } }
+    ]
+  },
   "Test of Conviction": {
     "abilities": [
       { "spell": { "choose": 1, "modes": [
@@ -68,6 +192,25 @@
         { "targets": ["opponent"], "effects": [
           { "draw": { "amount": 1, "to": { "target": 0 } } },
           { "draw": { "amount": 2 } } ] } ] } }
+    ]
+  },
+  "Warp Core": {
+    "abilities": [
+      { "triggered": { "when": { "enters": {} }, "effects": [
+        { "search_library": { "for": { "supertypes": ["basic"], "types": ["land"] }, "reveal": true } } ] } },
+      { "activated": { "cost": [{ "mana": "{1}" }, "tap"], "timing": "sorcery",
+                       "targets": [{ "permanent": { "subtypes": ["spacecraft"] } }],
+                       "effects": [{ "add_counters": { "counter": "charge", "amount": 2, "to": { "target": 0 } } }] } }
+    ]
+  },
+  "Warp Speed": {
+    "abilities": [
+      { "enters_untapped": { "affects": { "each": "land", "controller": "you" } } },
+      { "triggered": { "when": { "enters": {} }, "effects": [
+        { "search_library": { "for": { "any_of": [{ "supertypes": ["basic"], "types": ["land"] }, { "subtypes": ["planet"] }] },
+                              "reveal": true } } ] } },
+      { "activated": { "cost": [{ "mana": "{7}{U}{U}" }, "sacrifice"], "cost_reduction": { "amount": { "distinct_names": { "each": "land", "controller": "you" } } },
+                       "effects": [{ "draw": { "amount": 2 } }] } }
     ]
   },
   "Death Is Irrelevant": {

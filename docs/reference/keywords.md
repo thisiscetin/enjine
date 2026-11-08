@@ -30,6 +30,20 @@ Rules: CR 508.1c
 }
 ```
 
+## cant_attack_alone
+
+Restriction: this creature can't attack unless another creature attacks too. It is offered as an attacker only while another creature attacks or could still be declared, and declaring attackers can't finish while it attacks alone.
+
+Rules: CR 506.5, CR 508.1c
+
+```json
+{
+  "keywords": [
+    "cant attack alone"
+  ]
+}
+```
+
 ## cant_be_blocked
 
 Restriction: this creature can't be blocked.

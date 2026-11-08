@@ -188,6 +188,72 @@
     },
     {
       "card": {
+        "name": "Dr. McCoy, Surly Surgeon",
+        "mana_cost": "{2}{W}{W}",
+        "types": [
+          "creature"
+        ],
+        "supertypes": [
+          "legendary"
+        ],
+        "subtypes": [
+          "human",
+          "doctor"
+        ],
+        "power": 2,
+        "toughness": 2,
+        "abilities": [
+          {
+            "triggered": {
+              "when": {
+                "enters": {}
+              },
+              "targets": [
+                {
+                  "creature": {
+                    "controller": "you",
+                    "other": true
+                  }
+                }
+              ],
+              "effects": [
+                {
+                  "add_counters": {
+                    "counter": "+1/+1",
+                    "amount": 1,
+                    "to": {
+                      "target": 0
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "destroy_replacement": {
+              "affects": {
+                "each": {
+                  "creature": {
+                    "counters": "+1/+1"
+                  }
+                },
+                "controller": "you",
+                "other": true
+              },
+              "remove_counters": "+1/+1",
+              "remove_damage": true
+            }
+          }
+        ]
+      },
+      "rarity": "uncommon",
+      "printing": {
+        "set": "trk",
+        "number": "14"
+      }
+    },
+    {
+      "card": {
         "name": "Emergency Medical Hologram",
         "mana_cost": "{W}",
         "types": [
@@ -450,6 +516,28 @@
       "printing": {
         "set": "trk",
         "number": "19"
+      }
+    },
+    {
+      "card": {
+        "name": "Pet Sehlat",
+        "mana_cost": "{2}{W}",
+        "types": [
+          "creature"
+        ],
+        "subtypes": [
+          "bear"
+        ],
+        "keywords": [
+          "cant_attack_alone"
+        ],
+        "power": 4,
+        "toughness": 3
+      },
+      "rarity": "common",
+      "printing": {
+        "set": "trk",
+        "number": "28"
       }
     },
     {
@@ -766,6 +854,44 @@
     },
     {
       "card": {
+        "name": "Deep Space Scan",
+        "mana_cost": "{4}{U}{U}",
+        "types": [
+          "sorcery"
+        ],
+        "abilities": [
+          {
+            "spell": {
+              "effects": [
+                {
+                  "draw": {
+                    "amount": {
+                      "distinct_names": {
+                        "each": "land",
+                        "controller": "you"
+                      }
+                    }
+                  }
+                },
+                {
+                  "player_rule": {
+                    "rule": "no_max_hand_size",
+                    "duration": "until_your_next_turn"
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "rarity": "rare",
+      "printing": {
+        "set": "trk",
+        "number": "53"
+      }
+    },
+    {
+      "card": {
         "name": "Enterprise NX-01",
         "mana_cost": "{3}{U}",
         "types": [
@@ -894,6 +1020,103 @@
     },
     {
       "card": {
+        "name": "H.M.S. Bounty, Unlikely Timeship",
+        "mana_cost": "{4}{U}",
+        "types": [
+          "artifact"
+        ],
+        "supertypes": [
+          "legendary"
+        ],
+        "subtypes": [
+          "spacecraft"
+        ],
+        "keywords": [
+          "station"
+        ],
+        "abilities": [
+          {
+            "triggered": {
+              "when": {
+                "enters": {}
+              },
+              "effects": [
+                {
+                  "search_library": {
+                    "for": {
+                      "subtypes": [
+                        "whale"
+                      ]
+                    },
+                    "reveal": true
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "station_symbol": {
+              "at": 8,
+              "power": 3,
+              "toughness": 4,
+              "keywords": [
+                "flying"
+              ],
+              "abilities": [
+                {
+                  "triggered": {
+                    "when": {
+                      "deals_damage": {
+                        "combat": true,
+                        "to": "player"
+                      }
+                    },
+                    "effects": [
+                      {
+                        "draw": {
+                          "amount": 1
+                        }
+                      },
+                      {
+                        "extra_turn": {
+                          "if": {
+                            "all": [
+                              {
+                                "controls": {
+                                  "each": {
+                                    "permanent": {
+                                      "subtypes": [
+                                        "whale"
+                                      ]
+                                    }
+                                  },
+                                  "controller": "you"
+                                },
+                                "at_least": 1
+                              },
+                              {
+                                "began_extra_turn": false
+                              }
+                            ]
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "rarity": "rare",
+      "printing": {
+        "set": "trk",
+        "number": "63"
+      }
+    },
+    {
+      "card": {
         "name": "Interstellar Effigy",
         "mana_cost": "{4}{U}",
         "types": [
@@ -977,6 +1200,37 @@
       "printing": {
         "set": "trk",
         "number": "73"
+      }
+    },
+    {
+      "card": {
+        "name": "Mr. Spock, Science Officer",
+        "mana_cost": "{2}{U}{U}",
+        "types": [
+          "creature"
+        ],
+        "supertypes": [
+          "legendary"
+        ],
+        "subtypes": [
+          "vulcan",
+          "human",
+          "scientist"
+        ],
+        "power": 2,
+        "toughness": 4,
+        "abilities": [
+          {
+            "draw_replacement": {
+              "amount": 2
+            }
+          }
+        ]
+      },
+      "rarity": "mythic",
+      "printing": {
+        "set": "trk",
+        "number": "74"
       }
     },
     {
@@ -1395,6 +1649,79 @@
       "printing": {
         "set": "trk",
         "number": "107"
+      }
+    },
+    {
+      "card": {
+        "name": "Georgiou, Terran Emperor",
+        "mana_cost": "{4}{B}{B}",
+        "types": [
+          "creature"
+        ],
+        "supertypes": [
+          "legendary"
+        ],
+        "subtypes": [
+          "human",
+          "rogue",
+          "noble"
+        ],
+        "power": 4,
+        "toughness": 6,
+        "abilities": [
+          {
+            "player_rule": {
+              "rule": "cant_lose_for_life"
+            }
+          },
+          {
+            "triggered": {
+              "when": {
+                "step_begins": {
+                  "step": "end"
+                }
+              },
+              "effects": [
+                {
+                  "lose_life": {
+                    "amount": 3,
+                    "to": "you"
+                  }
+                },
+                {
+                  "draw": {
+                    "amount": 1
+                  }
+                },
+                {
+                  "create_token": {
+                    "amount": 10,
+                    "if": {
+                      "life": "you",
+                      "at_most": 0
+                    },
+                    "token": {
+                      "name": "Officer",
+                      "types": [
+                        "creature"
+                      ],
+                      "subtypes": [
+                        "officer"
+                      ],
+                      "power": 1,
+                      "toughness": 1
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "rarity": "mythic",
+      "printing": {
+        "set": "trk",
+        "number": "110"
       }
     },
     {
@@ -1916,6 +2243,61 @@
     },
     {
       "card": {
+        "name": "Quark, Humble Proprietor",
+        "mana_cost": "{2}{R}",
+        "types": [
+          "creature"
+        ],
+        "supertypes": [
+          "legendary"
+        ],
+        "subtypes": [
+          "ferengi",
+          "rogue"
+        ],
+        "power": 1,
+        "toughness": 2,
+        "abilities": [
+          {
+            "player_rule": {
+              "rule": "cant_sacrifice",
+              "filter": {
+                "permanent": {
+                  "token": true,
+                  "subtypes": [
+                    "treasure"
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "triggered": {
+              "when": {
+                "step_begins": {
+                  "step": "upkeep",
+                  "whose": "each"
+                }
+              },
+              "effects": [
+                {
+                  "create_token": {
+                    "token": "Treasure"
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "rarity": "mythic",
+      "printing": {
+        "set": "trk",
+        "number": "166"
+      }
+    },
+    {
+      "card": {
         "name": "Red Alert!",
         "mana_cost": "{2}{R}",
         "types": [
@@ -2057,6 +2439,73 @@
     },
     {
       "card": {
+        "name": "Cold-Blooded Crew",
+        "mana_cost": "{4}{G}{G}",
+        "types": [
+          "creature"
+        ],
+        "subtypes": [
+          "gorn",
+          "warrior"
+        ],
+        "power": 4,
+        "toughness": 4,
+        "abilities": [
+          {
+            "triggered": {
+              "when": {
+                "enters": {}
+              },
+              "targets": [
+                "creature"
+              ],
+              "effects": [
+                {
+                  "add_counters": {
+                    "counter": "+1/+1",
+                    "amount": 2,
+                    "to": {
+                      "target": 0
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "cant_be_blocked_by": {
+              "filter": {
+                "creature": {
+                  "power": {
+                    "at_most": 2
+                  }
+                }
+              }
+            }
+          },
+          {
+            "cycling": {
+              "cost": "{2}",
+              "for": {
+                "supertypes": [
+                  "basic"
+                ],
+                "types": [
+                  "land"
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "rarity": "common",
+      "printing": {
+        "set": "trk",
+        "number": "189"
+      }
+    },
+    {
+      "card": {
         "name": "Culber and Stamets, Star-Crossed",
         "mana_cost": "{3}{G}",
         "types": [
@@ -2173,6 +2622,118 @@
       "printing": {
         "set": "trk",
         "number": "195"
+      }
+    },
+    {
+      "card": {
+        "name": "Dr. Joseph M'Benga",
+        "mana_cost": "{2}{G}{G}",
+        "types": [
+          "creature"
+        ],
+        "supertypes": [
+          "legendary"
+        ],
+        "subtypes": [
+          "human",
+          "doctor"
+        ],
+        "power": 3,
+        "toughness": 3,
+        "abilities": [
+          {
+            "static": {
+              "affects": {
+                "each": {
+                  "creature": {
+                    "counters": true
+                  }
+                },
+                "controller": "you",
+                "other": true
+              },
+              "keywords": [
+                "hexproof"
+              ]
+            }
+          },
+          {
+            "double_counters": {
+              "affects": {
+                "each": "creature",
+                "controller": "you"
+              }
+            }
+          }
+        ]
+      },
+      "rarity": "mythic",
+      "printing": {
+        "set": "trk",
+        "number": "196"
+      }
+    },
+    {
+      "card": {
+        "name": "Holo-Engineer",
+        "mana_cost": "{2}{G}{G}",
+        "types": [
+          "creature"
+        ],
+        "subtypes": [
+          "human",
+          "artificer"
+        ],
+        "power": 3,
+        "toughness": 3,
+        "abilities": [
+          {
+            "triggered": {
+              "when": {
+                "enters": {}
+              },
+              "effects": [
+                {
+                  "create_token": {
+                    "token": {
+                      "name": "Illusion",
+                      "types": [
+                        "artifact",
+                        "creature"
+                      ],
+                      "subtypes": [
+                        "illusion"
+                      ],
+                      "power": 3,
+                      "toughness": 3
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "token_replacement": {
+              "token": {
+                "name": "Illusion",
+                "types": [
+                  "artifact",
+                  "creature"
+                ],
+                "subtypes": [
+                  "illusion"
+                ],
+                "power": 3,
+                "toughness": 3
+              }
+            }
+          }
+        ]
+      },
+      "rarity": "rare",
+      "printing": {
+        "set": "trk",
+        "number": "201"
       }
     },
     {
@@ -2301,6 +2862,314 @@
     },
     {
       "card": {
+        "name": "Saru, Unthreatened",
+        "mana_cost": "{2}{G}",
+        "types": [
+          "creature"
+        ],
+        "supertypes": [
+          "legendary"
+        ],
+        "subtypes": [
+          "kelpien",
+          "officer"
+        ],
+        "keywords": [
+          "flash"
+        ],
+        "power": 3,
+        "toughness": 2,
+        "abilities": [
+          {
+            "triggered": {
+              "when": {
+                "enters": {}
+              },
+              "targets": [
+                {
+                  "creature": {
+                    "controller": "you",
+                    "other": true
+                  }
+                }
+              ],
+              "effects": [
+                {
+                  "grant": {
+                    "keywords": [
+                      "hexproof"
+                    ],
+                    "to": {
+                      "target": 0
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "rarity": "uncommon",
+      "printing": {
+        "set": "trk",
+        "number": "212"
+      }
+    },
+    {
+      "card": {
+        "name": "Saurian Explorer",
+        "mana_cost": "{3}{G}",
+        "types": [
+          "creature"
+        ],
+        "subtypes": [
+          "dinosaur",
+          "scout"
+        ],
+        "power": 4,
+        "toughness": 3,
+        "abilities": [
+          {
+            "triggered": {
+              "when": {
+                "enters": {
+                  "subject": {
+                    "each": "land",
+                    "controller": "you"
+                  }
+                }
+              },
+              "effects": [
+                {
+                  "pump": {
+                    "power": 2,
+                    "toughness": 2,
+                    "to": "self"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "activated": {
+              "cost": [
+                {
+                  "mana": "{6}"
+                }
+              ],
+              "timing": "sorcery",
+              "effects": [
+                {
+                  "create_token": {
+                    "tapped": true,
+                    "token": {
+                      "name": "New Planet",
+                      "types": [
+                        "land"
+                      ],
+                      "subtypes": [
+                        "planet"
+                      ],
+                      "abilities": [
+                        {
+                          "mana": {
+                            "cost": [
+                              "tap"
+                            ],
+                            "produce": "{W}"
+                          }
+                        },
+                        {
+                          "mana": {
+                            "cost": [
+                              "tap"
+                            ],
+                            "produce": "{U}"
+                          }
+                        },
+                        {
+                          "mana": {
+                            "cost": [
+                              "tap"
+                            ],
+                            "produce": "{B}"
+                          }
+                        },
+                        {
+                          "mana": {
+                            "cost": [
+                              "tap"
+                            ],
+                            "produce": "{R}"
+                          }
+                        },
+                        {
+                          "mana": {
+                            "cost": [
+                              "tap"
+                            ],
+                            "produce": "{G}"
+                          }
+                        }
+                      ]
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "rarity": "common",
+      "printing": {
+        "set": "trk",
+        "number": "213"
+      }
+    },
+    {
+      "card": {
+        "name": "Species 8472",
+        "mana_cost": "{4}{G}{G}",
+        "types": [
+          "creature"
+        ],
+        "subtypes": [
+          "insect",
+          "beast"
+        ],
+        "power": 7,
+        "toughness": 5,
+        "abilities": [
+          {
+            "triggered": {
+              "when": {
+                "enters": {}
+              },
+              "effects": [
+                {
+                  "gain_life": {
+                    "amount": {
+                      "distinct_names": {
+                        "each": "land",
+                        "controller": "you"
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "cant_be_blocked_by": {
+              "filter": {
+                "creature": {
+                  "types": [
+                    "artifact"
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "cant_be_targeted_by": {
+              "abilities_from": {
+                "types": [
+                  "artifact"
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "rarity": "uncommon",
+      "printing": {
+        "set": "trk",
+        "number": "214"
+      }
+    },
+    {
+      "card": {
+        "name": "Stable Wormhole",
+        "mana_cost": "{2}{G}",
+        "types": [
+          "enchantment"
+        ],
+        "abilities": [
+          {
+            "triggered": {
+              "when": {
+                "player_attacks": {}
+              },
+              "effects": [
+                {
+                  "create_token": {
+                    "tapped": true,
+                    "token": {
+                      "name": "New Planet",
+                      "types": [
+                        "land"
+                      ],
+                      "subtypes": [
+                        "planet"
+                      ],
+                      "abilities": [
+                        {
+                          "mana": {
+                            "cost": [
+                              "tap"
+                            ],
+                            "produce": "{W}"
+                          }
+                        },
+                        {
+                          "mana": {
+                            "cost": [
+                              "tap"
+                            ],
+                            "produce": "{U}"
+                          }
+                        },
+                        {
+                          "mana": {
+                            "cost": [
+                              "tap"
+                            ],
+                            "produce": "{B}"
+                          }
+                        },
+                        {
+                          "mana": {
+                            "cost": [
+                              "tap"
+                            ],
+                            "produce": "{R}"
+                          }
+                        },
+                        {
+                          "mana": {
+                            "cost": [
+                              "tap"
+                            ],
+                            "produce": "{G}"
+                          }
+                        }
+                      ]
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "rarity": "rare",
+      "printing": {
+        "set": "trk",
+        "number": "215"
+      }
+    },
+    {
+      "card": {
         "name": "Syndicate Liquidators",
         "mana_cost": "{4}{G}",
         "types": [
@@ -2352,6 +3221,86 @@
       "printing": {
         "set": "trk",
         "number": "218"
+      }
+    },
+    {
+      "card": {
+        "name": "Warp Speed",
+        "mana_cost": "{2}{G}",
+        "types": [
+          "enchantment"
+        ],
+        "abilities": [
+          {
+            "enters_untapped": {
+              "affects": {
+                "each": "land",
+                "controller": "you"
+              }
+            }
+          },
+          {
+            "triggered": {
+              "when": {
+                "enters": {}
+              },
+              "effects": [
+                {
+                  "search_library": {
+                    "for": {
+                      "any_of": [
+                        {
+                          "supertypes": [
+                            "basic"
+                          ],
+                          "types": [
+                            "land"
+                          ]
+                        },
+                        {
+                          "subtypes": [
+                            "planet"
+                          ]
+                        }
+                      ]
+                    },
+                    "reveal": true
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "activated": {
+              "cost": [
+                {
+                  "mana": "{7}{U}{U}"
+                },
+                "sacrifice"
+              ],
+              "cost_reduction": {
+                "amount": {
+                  "distinct_names": {
+                    "each": "land",
+                    "controller": "you"
+                  }
+                }
+              },
+              "effects": [
+                {
+                  "draw": {
+                    "amount": 2
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "rarity": "uncommon",
+      "printing": {
+        "set": "trk",
+        "number": "223"
       }
     },
     {
@@ -2457,6 +3406,59 @@
       "printing": {
         "set": "trk",
         "number": "225"
+      }
+    },
+    {
+      "card": {
+        "name": "Phlox, Unorthodox Doctor",
+        "mana_cost": "{2}{G}{W}",
+        "types": [
+          "creature"
+        ],
+        "supertypes": [
+          "legendary"
+        ],
+        "subtypes": [
+          "denobulan",
+          "doctor"
+        ],
+        "keywords": [
+          "trample"
+        ],
+        "power": 3,
+        "toughness": 4,
+        "abilities": [
+          {
+            "triggered": {
+              "when": {
+                "deals_damage": {
+                  "subject": {
+                    "each": {
+                      "creature": {
+                        "counters": true
+                      }
+                    },
+                    "controller": "you"
+                  },
+                  "combat": true,
+                  "to": "player"
+                }
+              },
+              "effects": [
+                {
+                  "draw": {
+                    "amount": 1
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "rarity": "uncommon",
+      "printing": {
+        "set": "trk",
+        "number": "250"
       }
     },
     {
@@ -2712,6 +3714,77 @@
     },
     {
       "card": {
+        "name": "Tea, Earl Grey, Hot",
+        "mana_cost": "{2}",
+        "types": [
+          "artifact"
+        ],
+        "subtypes": [
+          "food"
+        ],
+        "abilities": [
+          {
+            "triggered": {
+              "when": {
+                "enters": {}
+              },
+              "effects": [
+                {
+                  "draw": {
+                    "amount": 1
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "activated": {
+              "cost": [
+                {
+                  "mana": "{2}"
+                },
+                "tap",
+                "sacrifice"
+              ],
+              "choose": 1,
+              "modes": [
+                {
+                  "targets": [
+                    "opponent"
+                  ],
+                  "effects": [
+                    {
+                      "deal_damage": {
+                        "amount": 2,
+                        "to": {
+                          "target": 0
+                        }
+                      }
+                    }
+                  ]
+                },
+                {
+                  "effects": [
+                    {
+                      "gain_life": {
+                        "amount": 3
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "rarity": "common",
+      "printing": {
+        "set": "trk",
+        "number": "269"
+      }
+    },
+    {
+      "card": {
         "name": "Tricorder",
         "mana_cost": "{1}",
         "types": [
@@ -2890,6 +3963,75 @@
       "printing": {
         "set": "trk",
         "number": "272"
+      }
+    },
+    {
+      "card": {
+        "name": "Warp Core",
+        "mana_cost": "{2}",
+        "types": [
+          "artifact"
+        ],
+        "abilities": [
+          {
+            "triggered": {
+              "when": {
+                "enters": {}
+              },
+              "effects": [
+                {
+                  "search_library": {
+                    "for": {
+                      "supertypes": [
+                        "basic"
+                      ],
+                      "types": [
+                        "land"
+                      ]
+                    },
+                    "reveal": true
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "activated": {
+              "cost": [
+                {
+                  "mana": "{1}"
+                },
+                "tap"
+              ],
+              "timing": "sorcery",
+              "targets": [
+                {
+                  "permanent": {
+                    "subtypes": [
+                      "spacecraft"
+                    ]
+                  }
+                }
+              ],
+              "effects": [
+                {
+                  "add_counters": {
+                    "counter": "charge",
+                    "amount": 2,
+                    "to": {
+                      "target": 0
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "rarity": "common",
+      "printing": {
+        "set": "trk",
+        "number": "274"
       }
     },
     {
@@ -3836,18 +4978,6 @@
       ]
     },
     {
-      "name": "Dr. McCoy, Surly Surgeon",
-      "rarity": "uncommon",
-      "printing": {
-        "set": "trk",
-        "number": "14"
-      },
-      "missing": [
-        "condition (if/unless/as long as)",
-        "counters"
-      ]
-    },
-    {
       "name": "Federation Resupply",
       "rarity": "rare",
       "printing": {
@@ -3958,17 +5088,6 @@
         "condition (if/unless/as long as)",
         "static ability",
         "counters"
-      ]
-    },
-    {
-      "name": "Pet Sehlat",
-      "rarity": "common",
-      "printing": {
-        "set": "trk",
-        "number": "28"
-      },
-      "missing": [
-        "static ability"
       ]
     },
     {
@@ -4190,17 +5309,6 @@
       ]
     },
     {
-      "name": "Deep Space Scan",
-      "rarity": "rare",
-      "printing": {
-        "set": "trk",
-        "number": "53"
-      },
-      "missing": [
-        "variable amount"
-      ]
-    },
-    {
       "name": "Dominion Saboteur",
       "rarity": "uncommon",
       "printing": {
@@ -4285,19 +5393,6 @@
       "missing": [
         "other rules text",
         "condition (if/unless/as long as)"
-      ]
-    },
-    {
-      "name": "H.M.S. Bounty, Unlikely Timeship",
-      "rarity": "rare",
-      "printing": {
-        "set": "trk",
-        "number": "63"
-      },
-      "missing": [
-        "triggered ability",
-        "condition (if/unless/as long as)",
-        "library manipulation"
       ]
     },
     {
@@ -4399,17 +5494,6 @@
         "triggered ability",
         "condition (if/unless/as long as)",
         "static ability"
-      ]
-    },
-    {
-      "name": "Mr. Spock, Science Officer",
-      "rarity": "mythic",
-      "printing": {
-        "set": "trk",
-        "number": "74"
-      },
-      "missing": [
-        "condition (if/unless/as long as)"
       ]
     },
     {
@@ -4740,20 +5824,6 @@
       "missing": [
         "sacrifice",
         "counters"
-      ]
-    },
-    {
-      "name": "Georgiou, Terran Emperor",
-      "rarity": "mythic",
-      "printing": {
-        "set": "trk",
-        "number": "110"
-      },
-      "missing": [
-        "other rules text",
-        "triggered ability",
-        "condition (if/unless/as long as)",
-        "tokens"
       ]
     },
     {
@@ -5320,18 +6390,6 @@
       ]
     },
     {
-      "name": "Quark, Humble Proprietor",
-      "rarity": "mythic",
-      "printing": {
-        "set": "trk",
-        "number": "166"
-      },
-      "missing": [
-        "sacrifice",
-        "static ability"
-      ]
-    },
-    {
       "name": "Ravenous Cosmozoan",
       "rarity": "uncommon",
       "printing": {
@@ -5566,17 +6624,6 @@
       ]
     },
     {
-      "name": "Cold-Blooded Crew",
-      "rarity": "common",
-      "printing": {
-        "set": "trk",
-        "number": "189"
-      },
-      "missing": [
-        "static ability"
-      ]
-    },
-    {
       "name": "Common Goal",
       "rarity": "common",
       "printing": {
@@ -5619,18 +6666,6 @@
       },
       "missing": [
         "modal choice"
-      ]
-    },
-    {
-      "name": "Dr. Joseph M'Benga",
-      "rarity": "mythic",
-      "printing": {
-        "set": "trk",
-        "number": "196"
-      },
-      "missing": [
-        "condition (if/unless/as long as)",
-        "counters"
       ]
     },
     {
@@ -5680,17 +6715,6 @@
         "library manipulation",
         "variable amount",
         "sacrifice"
-      ]
-    },
-    {
-      "name": "Holo-Engineer",
-      "rarity": "rare",
-      "printing": {
-        "set": "trk",
-        "number": "201"
-      },
-      "missing": [
-        "condition (if/unless/as long as)"
       ]
     },
     {
@@ -5782,54 +6806,6 @@
       ]
     },
     {
-      "name": "Saru, Unthreatened",
-      "rarity": "uncommon",
-      "printing": {
-        "set": "trk",
-        "number": "212"
-      },
-      "missing": [
-        "triggered ability"
-      ]
-    },
-    {
-      "name": "Saurian Explorer",
-      "rarity": "common",
-      "printing": {
-        "set": "trk",
-        "number": "213"
-      },
-      "missing": [
-        "triggered ability",
-        "tokens"
-      ]
-    },
-    {
-      "name": "Species 8472",
-      "rarity": "uncommon",
-      "printing": {
-        "set": "trk",
-        "number": "214"
-      },
-      "missing": [
-        "triggered ability",
-        "variable amount",
-        "static ability"
-      ]
-    },
-    {
-      "name": "Stable Wormhole",
-      "rarity": "rare",
-      "printing": {
-        "set": "trk",
-        "number": "215"
-      },
-      "missing": [
-        "triggered ability",
-        "tokens"
-      ]
-    },
-    {
       "name": "Support Mission",
       "rarity": "uncommon",
       "printing": {
@@ -5903,22 +6879,6 @@
       },
       "missing": [
         "triggered ability"
-      ]
-    },
-    {
-      "name": "Warp Speed",
-      "rarity": "uncommon",
-      "printing": {
-        "set": "trk",
-        "number": "223"
-      },
-      "missing": [
-        "other rules text",
-        "triggered ability",
-        "library manipulation",
-        "variable amount",
-        "sacrifice",
-        "static ability"
       ]
     },
     {
@@ -6225,18 +7185,6 @@
       ]
     },
     {
-      "name": "Phlox, Unorthodox Doctor",
-      "rarity": "uncommon",
-      "printing": {
-        "set": "trk",
-        "number": "250"
-      },
-      "missing": [
-        "triggered ability",
-        "counters"
-      ]
-    },
-    {
       "name": "Sarek, Federation Ambassador",
       "rarity": "rare",
       "printing": {
@@ -6407,17 +7355,6 @@
       ]
     },
     {
-      "name": "Tea, Earl Grey, Hot",
-      "rarity": "common",
-      "printing": {
-        "set": "trk",
-        "number": "269"
-      },
-      "missing": [
-        "modal choice"
-      ]
-    },
-    {
       "name": "U.S.S. Enterprise-D, Galaxy-Class",
       "rarity": "rare",
       "printing": {
@@ -6427,19 +7364,6 @@
       "missing": [
         "triggered ability",
         "exile"
-      ]
-    },
-    {
-      "name": "Warp Core",
-      "rarity": "common",
-      "printing": {
-        "set": "trk",
-        "number": "274"
-      },
-      "missing": [
-        "triggered ability",
-        "library manipulation",
-        "counters"
       ]
     },
     {

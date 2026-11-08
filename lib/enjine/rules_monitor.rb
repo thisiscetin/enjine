@@ -226,11 +226,30 @@ module Enjine
     end
 
     # CR 514.1: after cleanup the active player has at most seven cards (checked at the next turn's priority).
+    # The player whose turn ended is the one active before (an extra turn may follow its own, CR 500.7).
     def check_hand_size!
-      return unless @entry.events.any?(Events::TurnBegan)
+      previous_name = @active_name
+      @active_name = state.players[state.active].name if state.active
+      return unless previous_name && @entry.events.any?(Events::TurnBegan)
 
-      previous = state.players[state.opponent(state.active)]
+      previous = state.players.find { it.name == previous_name }
+      return if no_max_hand_size?(previous_name)
+
       finding("514.1", "#{previous.name} ended their turn with #{previous.hand.size} cards") if previous.hand.size > 7
+    end
+
+    # CR 402.2: an effect or a permanent's ability may give a player no maximum hand size.
+    def no_max_hand_size?(name)
+      ref = "player:#{name}"
+      return true if state.effects.any? { it["rule"] == "no_max_hand_size" && it["affected"].include?(ref) }
+
+      index = state.players.index { it.name == name }
+      state.battlefield.any? do |id|
+        obj = state.objects[id]
+        defn(obj.card).abilities.any? do |ability|
+          ability.kind == :player_rule && ability.rule == "no_max_hand_size" && ability.applies_to?(index, obj.controller)
+        end
+      end
     end
   end
 end

@@ -50,7 +50,8 @@ module Enjine
     attr_accessor :seed, :rng, :decklists, :players, :objects, :battlefield, :stack, :exile, :turn, :active,
                   :step, :step_state, :priority, :passes, :next_id, :starting_player, :pending, :result,
                   :attackers, :blockers, :effects, :frames, :attacks_declared,
-                  :pending_triggers, :repeat_cleanup, :combat_damage_pass, :delayed_triggers
+                  :pending_triggers, :repeat_cleanup, :combat_damage_pass, :delayed_triggers,
+                  :extra_turns
 
     def self.initial(names:, decklists:, seed:)
       state = new
@@ -68,6 +69,7 @@ module Enjine
       state.frames = []
       state.pending_triggers = []
       state.delayed_triggers = []
+      state.extra_turns = { "queue" => [], "begun" => [] } # CR 500.7
       state.repeat_cleanup = false
       state.combat_damage_pass = nil
       state.attacks_declared = 0
@@ -101,7 +103,7 @@ module Enjine
         "battlefield" => battlefield.dup, "stack" => stack.dup, "exile" => exile.dup,
         "attackers" => attackers.dup, "blockers" => blockers.dup, "effects" => effects.map { deep_dup(it) },
         "frames" => deep_dup(frames), "pending_triggers" => deep_dup(pending_triggers),
-        "delayed_triggers" => deep_dup(delayed_triggers),
+        "delayed_triggers" => deep_dup(delayed_triggers), "extra_turns" => deep_dup(extra_turns),
         "repeat_cleanup" => repeat_cleanup, "combat_damage_pass" => combat_damage_pass,
         "attacks_declared" => attacks_declared }
     end

@@ -49,11 +49,14 @@ module Enjine
       end
 
       def targets_available?(specs, index, exclude, source = nil)
-        specs.all? { |spec| spec.candidates_for(self, index, source).any? { it != exclude && targetable?(it, index) } }
+        specs.all? { |spec| spec.candidates_for(self, index, source).any? { it != exclude && targetable?(it, index, source) } }
       end
 
-      # CR 702.11b: hexproof permanents can't be targeted by their controller's opponents.
-      def targetable?(ref, index)
+      # CR 702.11b: hexproof permanents can't be targeted by their controller's opponents. `source`: the
+      # permanent whose ability targets (nil for a spell); see Engine::Rules#targeting_forbidden?.
+      def targetable?(ref, index, source = nil)
+        return false if targeting_forbidden?(ref, index, source) # CR 702.11c, 115.4
+
         obj = state.objects[ref]
         return true unless obj && obj.zone == :battlefield && obj.controller != index
 
@@ -235,7 +238,8 @@ module Enjine
       def target_candidates
         ctx = casting
         spec = casting_targets[ctx["targets"].size]
-        spec.candidates_for(self, ctx["player"], ctx["source"]).reject { it == ctx["object"] || !targetable?(it, ctx["player"]) }
+        spec.candidates_for(self, ctx["player"], ctx["source"])
+            .reject { it == ctx["object"] || !targetable?(it, ctx["player"], ctx["source"]) }
       end
 
       def choose_target!(ref)

@@ -39,6 +39,52 @@ Rules: CR 602.1, CR 602.2, CR 602.5d
 }
 ```
 
+## cant_be_blocked_by
+
+This creature can't be blocked by creatures matching `filter` (checked as blockers are declared, with their current characteristics).
+
+Rules: CR 509.1b, CR 509.1a
+
+| Parameter | Description |
+| --- | --- |
+| `filter` | a creature filter, e.g. {"creature": {"power": {"at_most": 2}}} |
+
+```json
+{
+  "cant_be_blocked_by": {
+    "filter": {
+      "creature": {
+        "power": {
+          "at_most": 2
+        }
+      }
+    }
+  }
+}
+```
+
+## cant_be_targeted_by
+
+This permanent can't be the target of abilities its controller's opponents control whose source matches `abilities_from` (a card spec, e.g. {"types": ["artifact"]}).
+
+Rules: CR 115.4, CR 113.7, CR 702.11d
+
+| Parameter | Description |
+| --- | --- |
+| `abilities_from` | card spec of the ability's source |
+
+```json
+{
+  "cant_be_targeted_by": {
+    "abilities_from": {
+      "types": [
+        "artifact"
+      ]
+    }
+  }
+}
+```
+
 ## chapter
 
 A Saga's chapter ability: triggers when lore counters put on it bring their number from below `chapter` to at least `chapter`. Its targets are chosen as it's put on the stack. A Saga's final chapter number is its greatest `chapter`.
@@ -142,6 +188,36 @@ Rules: CR 702.29a, CR 702.29b, CR 702.29e, CR 702.29f, CR 113.6m, CR 602.2a
 }
 ```
 
+## destroy_replacement
+
+If a permanent matching `affects` would be destroyed (by an effect, lethal damage or deathtouch), instead: all its `remove_counters` counters are removed (if given) and, with `remove_damage: true`, all damage marked on it is removed. Sacrificing isn't destroying, and 0 toughness isn't either.
+
+Rules: CR 614.1a, CR 614.8, CR 701.8a, CR 701.21a, CR 704.5f, CR 704.5g, CR 704.5h
+
+| Parameter | Description |
+| --- | --- |
+| `affects` | {"each": filter, "controller": ..., "other": bool} |
+| `remove_counters` | counter name |
+| `remove_damage` | boolean |
+
+```json
+{
+  "destroy_replacement": {
+    "affects": {
+      "each": {
+        "creature": {
+          "counters": "+1/+1"
+        }
+      },
+      "controller": "you",
+      "other": true
+    },
+    "remove_counters": "+1/+1",
+    "remove_damage": true
+  }
+}
+```
+
 ## double_counters
 
 While this permanent is on the battlefield, if its controller would put one or more counters (only `counter`, if given) on a permanent matching `affects` ({"each": filter, "controller": you|opponent|any}, relative to this permanent's controller), the number put is doubled. This includes counters a permanent enters with.
@@ -164,6 +240,24 @@ Rules: CR 614.1a, CR 122.6, CR 122.6a, CR 616.1
 }
 ```
 
+## draw_replacement
+
+While this permanent is on the battlefield, each time its controller would draw a card, they draw `amount` cards instead (even with an empty library). The draws it makes aren't replaced by it again, but another such effect applies to each of them.
+
+Rules: CR 614.11, CR 614.11a, CR 614.5, CR 121.2, CR 616.1
+
+| Parameter | Description |
+| --- | --- |
+| `amount` | integer >= 2 |
+
+```json
+{
+  "draw_replacement": {
+    "amount": 2
+  }
+}
+```
+
 ## enchant
 
 The Aura's enchant ability: a target filter for what its spell targets and what the Aura may be attached to, e.g. "creature" or {"permanent": {"any_of": ["artifact", "creature"]}}. Only Auras have it.
@@ -177,6 +271,27 @@ Rules: CR 702.5a, CR 115.1b, CR 303.4a
 ```json
 {
   "enchant": "creature"
+}
+```
+
+## enters_attacking
+
+While this permanent's controller controls an attacking creature, permanents matching `affects` enter the battlefield tapped and attacking (the defending player). They never "attacked", so attack triggers don't see them.
+
+Rules: CR 614.1c, CR 508.4, CR 506.4
+
+| Parameter | Description |
+| --- | --- |
+| `affects` | {"each": filter, "controller": you|opponent|any} |
+
+```json
+{
+  "enters_attacking": {
+    "affects": {
+      "each": "creature",
+      "controller": "you"
+    }
+  }
 }
 ```
 
@@ -204,6 +319,27 @@ Rules: CR 614.12, CR 119.4
 {
   "enters_tapped_unless_pay_life": {
     "life": 2
+  }
+}
+```
+
+## enters_untapped
+
+Permanents matching `affects` enter the battlefield untapped, even if another effect or their own ability would have them enter tapped.
+
+Rules: CR 614.1c, CR 614.12, CR 616.1
+
+| Parameter | Description |
+| --- | --- |
+| `affects` | {"each": filter, "controller": you|opponent|any} |
+
+```json
+{
+  "enters_untapped": {
+    "affects": {
+      "each": "land",
+      "controller": "you"
+    }
   }
 }
 ```
@@ -311,6 +447,34 @@ Rules: CR 605.1a, CR 605.3a, CR 605.3b, CR 106.4
 }
 ```
 
+## player_rule
+
+While this permanent is on the battlefield, `rule` applies to the players in `affects` (you | opponents | each; default you). Rules: hexproof, cant_attack, no_max_hand_size, prevent_all_damage, cant_lose_for_life, cant_sacrifice. `cant_sacrifice` takes a `filter` of the permanents that can't be sacrificed.
+
+Rules: CR 702.11c, CR 115.4, CR 508.1c, CR 402.2, CR 514.1, CR 615.1, CR 615.1a, CR 704.5a, CR 104.3b, CR 701.21a, CR 614.17b, CR 604.1, CR 611.3a
+
+| Parameter | Description |
+| --- | --- |
+| `rule` | hexproof | cant_attack | no_max_hand_size | prevent_all_damage | cant_lose_for_life | cant_sacrifice |
+| `affects` | you | opponents | each |
+| `filter` | permanent filter (cant_sacrifice only) |
+
+```json
+{
+  "player_rule": {
+    "rule": "cant_sacrifice",
+    "filter": {
+      "permanent": {
+        "token": true,
+        "subtypes": [
+          "treasure"
+        ]
+      }
+    }
+  }
+}
+```
+
 ## spell
 
 The spell ability of an instant or sorcery: its targets are chosen while casting and its effects happen in order when it resolves. If every target is illegal on resolution, it doesn't resolve.
@@ -392,6 +556,35 @@ Rules: CR 722.2a, CR 722.2b, CR 722.2c, CR 613.1d, CR 613.4b
     "keywords": [
       "flying"
     ]
+  }
+}
+```
+
+## token_replacement
+
+If tokens would be created under this permanent's controller's control, that many `token` tokens are created instead (tapped or attacking if the originals would be). `token` is a predefined token name or inline card data.
+
+Rules: CR 614.1a, CR 614.16, CR 111.1, CR 616.1
+
+| Parameter | Description |
+| --- | --- |
+| `token` | "Treasure" | "Clue" | "Food" | {card data} |
+
+```json
+{
+  "token_replacement": {
+    "token": {
+      "name": "Illusion",
+      "types": [
+        "artifact",
+        "creature"
+      ],
+      "subtypes": [
+        "illusion"
+      ],
+      "power": 3,
+      "toughness": 3
+    }
   }
 }
 ```

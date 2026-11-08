@@ -48,6 +48,30 @@ Rules: CR 106.1a, CR 106.4, CR 608.2d, CR 605.1a
 }
 ```
 
+## add_subtypes
+
+Each referenced permanent gets the `subtypes` in addition to its other types until end of turn (layer 4).
+
+Rules: CR 613.1d, CR 205.1b, CR 611.2a, CR 611.2c
+
+| Parameter | Description |
+| --- | --- |
+| `subtypes` | list of lowercase subtypes |
+| `to` | selector |
+
+```json
+{
+  "add_subtypes": {
+    "subtypes": [
+      "warrior"
+    ],
+    "to": {
+      "target": 0
+    }
+  }
+}
+```
+
 ## assimilate
 
 Assimilate each referenced permanent or permanent card: you gain control of it (or put it onto the battlefield under your control) with a +1/+1 counter, and it becomes a Borg artifact creature while it stays on the battlefield.
@@ -88,6 +112,30 @@ Rules: CR 701.3a, CR 701.3b, CR 701.3c, CR 301.5c
 }
 ```
 
+## bite
+
+Each creature referenced by `from` deals damage equal to its power to each creature, planeswalker or player referenced by `to` (one damage event per source; not combat damage, and nothing is dealt back).
+
+Rules: CR 120.3, CR 120.4, CR 608.2b
+
+| Parameter | Description |
+| --- | --- |
+| `from` | selector (the creatures dealing damage) |
+| `to` | selector |
+
+```json
+{
+  "bite": {
+    "from": {
+      "target": 0
+    },
+    "to": {
+      "target": 1
+    }
+  }
+}
+```
+
 ## counter
 
 Counter each referenced spell: it leaves the stack for its owner's graveyard without resolving.
@@ -104,6 +152,24 @@ Rules: CR 701.6a
     "to": {
       "target": 0
     }
+  }
+}
+```
+
+## counter_bonus
+
+Until end of turn, whenever one or more counters would be put on a permanent the controller controls (including counters it enters with), that many plus `amount` of each of those kinds are put on it instead.
+
+Rules: CR 614.1a, CR 614.16, CR 611.2a, CR 122.6, CR 616.1
+
+| Parameter | Description |
+| --- | --- |
+| `amount` | integer (default 1) |
+
+```json
+{
+  "counter_bonus": {
+    "amount": 1
   }
 }
 ```
@@ -273,6 +339,103 @@ Rules: CR 406.1, CR 701.13a
 }
 ```
 
+## exile_if_dies
+
+Until end of turn, if a referenced permanent would be put into a graveyard from the battlefield, it is exiled instead.
+
+Rules: CR 614.1a, CR 700.4, CR 611.2a, CR 611.2c
+
+| Parameter | Description |
+| --- | --- |
+| `to` | selector |
+
+```json
+{
+  "exile_if_dies": {
+    "to": {
+      "target": 0
+    }
+  }
+}
+```
+
+## exile_this_spell
+
+The resolving spell is exiled instead of being put into its owner's graveyard as it finishes resolving.
+
+Rules: CR 608.2n, CR 406.1
+
+```json
+"exile_this_spell"
+```
+
+## extra_turn
+
+Each referenced player (default you) takes an extra turn after this one. Extra turns are taken most recently created first.
+
+Rules: CR 500.7
+
+| Parameter | Description |
+| --- | --- |
+| `to` | selector |
+
+```json
+{
+  "extra_turn": {
+    "if": {
+      "began_extra_turn": false
+    }
+  }
+}
+```
+
+## fight
+
+The creature referenced by `to` fights the one referenced by `with`: each deals damage equal to its power to the other at the same time (not combat damage). If either is gone, no longer a creature or an illegal target, neither deals damage.
+
+Rules: CR 701.14a, CR 701.14b, CR 701.14c, CR 701.14d
+
+| Parameter | Description |
+| --- | --- |
+| `to` | selector (one creature) |
+| `with` | selector (one creature) |
+
+```json
+{
+  "fight": {
+    "to": {
+      "target": 0
+    },
+    "with": {
+      "target": 1
+    }
+  }
+}
+```
+
+## gain_control
+
+The player referenced by `gains` (default you) gains control of each referenced permanent: indefinitely (`duration: "permanent"`, default) or until end of turn. A permanent that changes control leaves combat and is newly under its controller's control (it can't attack or {T} without haste).
+
+Rules: CR 613.1b, CR 108.4, CR 506.4, CR 302.6, CR 514.2
+
+| Parameter | Description |
+| --- | --- |
+| `to` | selector (permanents) |
+| `gains` | selector (a player; default "you") |
+| `duration` | permanent | end_of_turn |
+
+```json
+{
+  "gain_control": {
+    "to": {
+      "target": 0
+    },
+    "duration": "end_of_turn"
+  }
+}
+```
+
 ## gain_life
 
 Each referenced player gains `amount` life (default: you).
@@ -314,6 +477,20 @@ Rules: CR 611.2a, CR 611.2c, CR 613.1f, CR 514.2
     }
   }
 }
+```
+
+## lose_game
+
+Each referenced player (default you) loses the game.
+
+Rules: CR 104.3e, CR 104.4a
+
+| Parameter | Description |
+| --- | --- |
+| `to` | selector |
+
+```json
+"lose_game"
 ```
 
 ## lose_life
@@ -389,6 +566,27 @@ Rules: CR 701.17a
 }
 ```
 
+## player_rule
+
+Each referenced player (default you) gets `rule` for the `duration`: end_of_turn (default) or until_your_next_turn (until the controller's next turn begins). Rules: hexproof, cant_attack, no_max_hand_size, prevent_all_damage, cant_lose_for_life.
+
+Rules: CR 702.11c, CR 115.4, CR 508.1c, CR 402.2, CR 514.1, CR 615.1, CR 615.1a, CR 704.5a, CR 104.3b, CR 701.21a, CR 614.17b, CR 611.2a, CR 514.2
+
+| Parameter | Description |
+| --- | --- |
+| `rule` | hexproof | cant_attack | no_max_hand_size | prevent_all_damage | cant_lose_for_life |
+| `to` | selector |
+| `duration` | end_of_turn | until_your_next_turn |
+
+```json
+{
+  "player_rule": {
+    "rule": "no_max_hand_size",
+    "duration": "until_your_next_turn"
+  }
+}
+```
+
 ## pump
 
 Each referenced creature gets +power/+toughness until end of turn. The set of affected creatures is locked in when the effect starts.
@@ -406,6 +604,72 @@ Rules: CR 611.2a, CR 611.2c, CR 613.4c, CR 514.2
   "pump": {
     "power": 3,
     "toughness": 3,
+    "to": {
+      "target": 0
+    }
+  }
+}
+```
+
+## remove_all_counters
+
+Remove every counter named `counter` (every counter, if no `counter` is given) from each referenced permanent.
+
+Rules: CR 122.8
+
+| Parameter | Description |
+| --- | --- |
+| `counter` | optional counter name |
+| `to` | selector |
+
+```json
+{
+  "remove_all_counters": {
+    "counter": "+1/+1",
+    "to": {
+      "target": 0
+    }
+  }
+}
+```
+
+## remove_counters
+
+Remove up to `amount` counters named `counter` from each referenced permanent.
+
+Rules: CR 122.8
+
+| Parameter | Description |
+| --- | --- |
+| `counter` | counter name |
+| `amount` | amount |
+| `to` | selector |
+
+```json
+{
+  "remove_counters": {
+    "counter": "+1/+1",
+    "amount": 2,
+    "to": {
+      "target": 0
+    }
+  }
+}
+```
+
+## remove_damage
+
+Remove all damage marked on each referenced permanent.
+
+Rules: CR 120.6, CR 514.2
+
+| Parameter | Description |
+| --- | --- |
+| `to` | selector |
+
+```json
+{
+  "remove_damage": {
     "to": {
       "target": 0
     }
@@ -577,4 +841,18 @@ Rules: CR 701.26b
     "to": "self"
   }
 }
+```
+
+## win_game
+
+Each referenced player (default you) wins the game: every opponent loses it.
+
+Rules: CR 104.2a, CR 104.2b, CR 104.3f
+
+| Parameter | Description |
+| --- | --- |
+| `to` | selector |
+
+```json
+"win_game"
 ```

@@ -5,7 +5,7 @@ module Enjine
   # through replacement effects, then executed, so "enters tapped", "if it would die,
   # exile it instead" and damage prevention can modify them before they occur.
   #
-  # kind: "zone_change" | "damage" | "life" | "draw" | "counters" | "untap"
+  # kind: "zone_change" | "damage" | "life" | "draw" | "counters" | "untap" | "create_token"
   # data: plain Hash describing the change; a replacement that stops the change entirely
   #       ("instead remove a stun counter") sets data["cancelled"] = true
   # applied: ids of replacement effects already applied (each applies once, CR 614.5)
@@ -18,16 +18,94 @@ module Enjine
   # CR 306.5b, 616.1a), entering replacements of permanents already on the battlefield (extra
   # counters on permanents entering under their controller's control, CR 614.1c, 614.12), and the
   # effects of counters on the affected permanent (stun and shield counters, CR 122.1c-d).
-  # When two or more effects could be ordered differently, the affected player will choose the
-  # order (CR 616.1) through a frame (see Enjine::Frames).
+  #
+  # CR 616.1 lets the affected player (or the affected object's controller) choose the order when
+  # several effects apply. The engine applies them in the order that player would always choose:
+  # effects that let a permanent stay ("instead remove all +1/+1 counters", a shield counter) before
+  # effects that send it elsewhere ("exile it instead"), "+1 counter" bonuses before doubling, and
+  # "enters untapped" after every "enters tapped". No pair implemented so far has two orders that
+  # each benefit that player, so no decision is asked; a frame will when one does.
   module Replacements
     module_function
 
     def apply(engine, proposal)
-      entering!(engine, proposal) if proposal.kind == "zone_change" && proposal.data["to"] == :battlefield
-      putting_counters!(engine, proposal) if proposal.kind == "counters"
-      Mechanics::Counters.replace!(engine, proposal)
+      case proposal.kind
+      when "zone_change" then zone_change!(engine, proposal)
+      when "counters" then putting_counters!(engine, proposal)
+      when "draw" then drawing!(engine, proposal)
+      when "damage" then preventing!(engine, proposal)
+      when "create_token" then creating_token!(engine, proposal)
+      end
+      Mechanics::Counters.replace!(engine, proposal) unless proposal.data["cancelled"]
+      dying!(engine, proposal) if proposal.kind == "zone_change" && !proposal.data["cancelled"]
       proposal
+    end
+
+    def zone_change!(engine, proposal)
+      return entering!(engine, proposal) if proposal.data["to"] == :battlefield
+
+      destroying!(engine, proposal)
+    end
+
+    # The first applicable ability of a battlefield permanent controlled by `player` that responds to
+    # `hook` and hasn't modified this event yet (CR 614.5). It is marked as applied.
+    def next_controlled(engine, proposal, hook, player)
+      found = battlefield_abilities(engine, hook).find do |source, _|
+        source.controller == player && !proposal.applied.include?("#{source.id}:#{hook}")
+      end
+      proposal.applied << "#{found[0].id}:#{hook}" if found
+      found
+    end
+
+    # "If you would draw a card, draw two cards instead" (CR 614.11). Only one applies to this event;
+    # the others apply to each of the draws it becomes (Engine#draw!).
+    def drawing!(engine, proposal)
+      _, ability = next_controlled(engine, proposal, :replace_draw, proposal.data["player"])
+      proposal.data["count"] = ability.amount if ability
+    end
+
+    # "If one or more tokens would be created under your control, that many [tokens] are created
+    # instead" (CR 614.1a, 111.1).
+    def creating_token!(engine, proposal)
+      _, ability = next_controlled(engine, proposal, :token_definition, proposal.data["player"])
+      proposal.data["token"] = ability.token_definition.id if ability
+    end
+
+    # CR 615.1: "prevent all damage that would be dealt to you this turn".
+    def preventing!(engine, proposal)
+      proposal.data["amount"] = 0 if engine.damage_prevented?(proposal.data["target"])
+    end
+
+    # CR 701.8a, 704.5g-h: destroying a permanent, by an effect or for lethal damage / deathtouch.
+    DESTROY_REASONS = %w[destroy sba_lethal_damage sba_deathtouch].freeze
+
+    # "If [a permanent] would be destroyed, instead ..." (CR 614.8-style destruction replacements).
+    def destroying!(engine, proposal)
+      return unless DESTROY_REASONS.include?(proposal.data["reason"])
+
+      obj = engine.object(proposal.data["object"]) # destroyed: on the battlefield (CR 701.8a)
+      battlefield_abilities(engine, :replace_destroy).each do |source, ability|
+        next if proposal.applied.include?("#{source.id}:replace_destroy") || !ability.replaces?(engine, obj, source)
+
+        proposal.applied << "#{source.id}:replace_destroy"
+        proposal.data["cancelled"] = true
+        return ability.replace_destroy(engine, obj)
+      end
+    end
+
+    # "If it would die this turn, exile it instead" (CR 614.1a, 700.4).
+    def dying!(engine, proposal)
+      data = proposal.data
+      return unless data["to"] == :graveyard && engine.state.battlefield.include?(data["object"])
+      return unless engine.state.effects.any? { it["kind"] == "exile_if_dies" && it["affected"].include?(data["object"]) }
+
+      data["to"] = :exile
+    end
+
+    # Bonus counters from "until end of turn, ... that many plus one of each of those kinds" effects of
+    # the permanent's controller (CR 614.1a).
+    def counter_bonus(engine, controller)
+      engine.state.effects.sum { it["kind"] == "counter_bonus" && it["controller"] == controller ? it["amount"] : 0 }
     end
 
     # [[source permanent, ability]] for abilities of permanents on the battlefield that respond to `hook`.
@@ -43,6 +121,7 @@ module Enjine
       obj = engine.object(proposal.data["object"])
       facts = Mechanics::Filters::Facts.new(chars: engine.chars(obj), counters: obj.counters,
                                             token: engine.catalog.fetch(obj.card).token?)
+      proposal.data["amount"] += counter_bonus(engine, obj.controller) # "that many plus one" first (CR 616.1)
       battlefield_abilities(engine, :doubles?).each do |source, ability|
         next unless ability.doubles?(source, proposal.data["player"], obj.controller, proposal.data["counter"], facts)
 
@@ -75,6 +154,8 @@ module Enjine
         ability.modify_other_entering(enters) if source.id != obj.id && ability.affects_entering?(source, controller, facts)
       end
       # Counters it enters with are put on it by its controller (CR 122.6, 122.6a).
+      bonus = counter_bonus(engine, controller)
+      enters["counters"].transform_values! { it + bonus } if bonus.positive?
       battlefield_abilities(engine, :doubles?).each do |source, ability|
         enters["counters"].each_key do |kind|
           enters["counters"][kind] *= 2 if ability.doubles?(source, controller, controller, kind, facts)
@@ -83,6 +164,21 @@ module Enjine
       engine.chars(obj).subtypes.each do |sub| # e.g. a Saga enters with a lore counter (CR 715.3a, 2026-11-06)
         mod = Enjine.registry.fetch(:subtype, sub)
         mod.entering(engine.definition(obj), proposal.data["enters"]) if mod.respond_to?(:entering)
+      end
+      entering_status!(engine, obj, controller, facts, enters)
+    end
+
+    # "Lands you control enter untapped" overrides every "enters tapped" (applied last, CR 616.1), and
+    # "would enter while you control an attacking creature: instead it enters tapped and attacking".
+    def entering_status!(engine, obj, controller, facts, enters)
+      battlefield_abilities(engine, :enters_attacking?).each do |source, ability|
+        next unless source.id != obj.id && ability.enters_attacking?(engine, source, controller, facts)
+
+        enters["tapped"] = true
+        enters["attacking"] = true
+      end
+      battlefield_abilities(engine, :enters_untapped?).each do |source, ability|
+        enters["tapped"] = false if ability.enters_untapped?(source, controller, facts)
       end
     end
   end

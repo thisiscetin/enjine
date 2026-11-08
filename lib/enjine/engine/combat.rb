@@ -16,8 +16,10 @@ module Enjine
       end
 
       # CR 508.1a: untapped creatures you've controlled continuously since your turn began (or with haste).
-      # CR 508.1c: restrictions (defender, "can't attack") are obeyed.
+      # CR 508.1c: restrictions (defender, "can't attack", a player who can't attack) are obeyed.
       def eligible_attackers
+        return [] if player_rule?(state.active, "cant_attack")
+
         state.battlefield.select do |id|
           obj = object(id)
           current = chars(obj)
@@ -28,7 +30,7 @@ module Enjine
 
       # CR 508.1d: creatures that attack each combat if able and could still be declared. The
       # declaration may end only once every such requirement is obeyed (no attack has a cost yet).
-      def unmet_attack_requirements = eligible_attackers.select { chars(it).keyword?(:attacks_each_combat) }
+      def unmet_attack_requirements = attack_candidates.select { chars(it).keyword?(:attacks_each_combat) }
 
       # CR 506.3, 508.1b: the defending player or a planeswalker they control.
       def attack_targets
@@ -37,11 +39,38 @@ module Enjine
           state.battlefield.select { |id| object(id).controller == defender && chars(id).planeswalker? }
       end
 
+      # Creatures that may be declared next. CR 506.5, 508.1c: one that can't attack alone is offered
+      # only while another creature attacks or could still be declared.
+      def attack_candidates
+        eligible = eligible_attackers
+        eligible.select { |id| !attacks_alone_restricted?(id) || !attackers.empty? || eligible.size > 1 }
+      end
+
+      def attacks_alone_restricted?(id) = chars(id).keyword?(:cant_attack_alone)
+
+      # CR 508.1c: the declaration is illegal while a creature that can't attack alone attacks alone.
+      def attack_declaration_legal? = !(attackers.size == 1 && attacks_alone_restricted?(attackers.keys.first))
+
       def declare_attacker!(id, target)
         attackers[id] = { "target" => target, "blocked" => false }
         state.attacks_declared += 1
         emit Events::AttackerDeclared.new(object: id, target: target)
-        eligible_attackers.empty? ? finish_attackers! : nil
+        eligible_attackers.empty? && attack_declaration_legal? ? finish_attackers! : nil
+      end
+
+      # Undo one attack while the declaration isn't legal yet (CR 508.1c). The declaration it was part of
+      # never happened, so "whenever this attacks" abilities it triggered go too.
+      def withdraw_attacker!(id)
+        attackers.delete(id)
+        state.attacks_declared -= 1
+        state.pending_triggers.reject! { it["event"]["type"] == "attacker_declared" && it["event"]["object"] == id }
+      end
+
+      # CR 508.4: a creature put onto the battlefield attacking attacks the defending player. (Choosing one
+      # of their planeswalkers instead isn't offered yet.) It was never declared, so it never "attacked".
+      # Only called while its controller controls an attacking creature (see Abilities::EntersAttacking).
+      def enter_attacking!(obj)
+        attackers[obj.id] = { "target" => Mechanics::Filters.player_ref(self, state.opponent(obj.controller)), "blocked" => false }
       end
 
       # CR 508.1f: attacking creatures become tapped. CR 508.3d: "whenever you attack" triggers
@@ -84,9 +113,11 @@ module Enjine
         turn_based_actions_done!
       end
 
-      # CR 509.1b restrictions: "can't be blocked", flying (702.9b) / reach (702.17b).
+      # CR 509.1b restrictions: "can't be blocked", "can't be blocked by [quality] creatures", flying
+      # (702.9b) / reach (702.17b).
       def can_block?(blocker, attacker)
         return false if chars(attacker).keyword?(:cant_be_blocked)
+        return false if chars(attacker).abilities.any? { it.ability.kind == :cant_be_blocked_by && it.ability.forbids?(self, blocker) }
         return true unless chars(attacker).keyword?(:flying)
 
         chars(blocker).keyword?(:flying) || chars(blocker).keyword?(:reach)

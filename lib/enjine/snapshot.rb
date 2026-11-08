@@ -23,6 +23,7 @@ module Enjine
       validate_combat(data, errors) if errors.empty?
       validate_turn(data, errors) if errors.empty?
       validate_delayed_triggers(data, catalog, errors) if errors.empty?
+      validate_extra_turns(data, errors)
       errors
     end
 
@@ -50,6 +51,7 @@ module Enjine
       state.frames = deep_copy(data.fetch("frames", []))
       state.pending_triggers = deep_copy(data.fetch("pending_triggers", []))
       state.delayed_triggers = deep_copy(data.fetch("delayed_triggers", []))
+      state.extra_turns = deep_copy(data.fetch("extra_turns", { "queue" => [], "begun" => [] }))
       state.repeat_cleanup = data.fetch("repeat_cleanup", false)
       state.combat_damage_pass = data["combat_damage_pass"]
       state.attacks_declared = data.fetch("attacks_declared", 0)
@@ -237,6 +239,14 @@ module Enjine
 
         errors << "#{path}: #{entry["card"].inspect} has no delayed ability #{entry["ability"].inspect}"
       end
+    end
+
+    # CR 500.7: extra turns still to be taken (the last one first) and the players who began one.
+    def validate_extra_turns(data, errors)
+      extra = data.fetch("extra_turns", { "queue" => [], "begun" => [] })
+      ok = extra.is_a?(Hash) && extra.keys.sort == %w[begun queue] &&
+           extra.values.all? { |list| list.is_a?(Array) && list.all? { [0, 1].include?(it) } }
+      errors << "extra_turns: must be {\"queue\": [player index...], \"begun\": [player index...]}" unless ok
     end
 
     def validate_zone_membership(data, objects, errors)

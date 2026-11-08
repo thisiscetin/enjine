@@ -108,6 +108,7 @@ module Enjine
         elsif data.key?("was_cast") then WasCast.new(data["was_cast"] != false)
         elsif data.key?("targets") then Targets.build(data, errors, path)
         elsif data.key?("attacked") then Attacked.new(data["attacked"] != false)
+        elsif data.key?("began_extra_turn") then BeganExtraTurn.new(data["began_extra_turn"] != false) # CR 500.7
         else Compare.build(data, errors, path, targets_count)
         end
       end
