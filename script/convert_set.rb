@@ -235,6 +235,19 @@ module SetConverter
 
   def number(word) = NUMBER[word] || Integer(word, exception: false)
 
+  def creature_token(match)
+    amount, tapped, power, toughness, subtypes, artifact, keywords = match.captures
+    keywords = keywords.to_s.split(/, (?:and )?| and /).map(&:strip).reject(&:empty?)
+    return nil unless (keywords - SUPPORTED_KEYWORDS.to_a).empty?
+
+    token = { "name" => subtypes, "types" => [artifact ? "artifact" : nil, "creature"].compact,
+              "subtypes" => subtypes.split.map(&:downcase), "power" => Integer(power), "toughness" => Integer(toughness) }
+    token["keywords"] = keywords unless keywords.empty?
+    effect = { "token" => token, "amount" => number(amount) }
+    effect["tapped"] = true if tapped
+    { "create_token" => effect }
+  end
+
   def sentence_effect(sentence, targets, offset)
     case sentence
     when /\A(?:CARDNAME|This spell) deals (\d+) damage to (.+)\z/
@@ -253,6 +266,11 @@ module SetConverter
     when /\ADestroy (target creature|target permanent|target planeswalker)\z/
       { "destroy" => { "to" => target_ref(::Regexp.last_match(1), targets, offset) } }
     when /\ACounter (target spell)\z/ then { "counter" => { "to" => target_ref(::Regexp.last_match(1), targets, offset) } }
+    when /\ACreate (a|an|one|two|three|\d+) (tapped )?(Treasure|Clue|Food) tokens?\z/
+      { "create_token" => { "token" => ::Regexp.last_match(3), "amount" => number(::Regexp.last_match(1)),
+                            "tapped" => !::Regexp.last_match(2).nil? }.reject { |k, v| k == "tapped" && !v } }
+    when %r{\ACreate (a|an|one|two|three|\d+) (tapped )?(\d+)/(\d+) (?:(?:white|blue|black|red|green|colorless)(?: and \w+)? )?([A-Z][\w ]*?) (artifact )?creature tokens?(?: with ([a-z, ]+))?\z}
+      creature_token(::Regexp.last_match)
     when %r{\APut (a|one|two|three|\d+) \+1/\+1 counters? on CARDNAME\z}
       { "add_counters" => { "counter" => "+1/+1", "amount" => number(::Regexp.last_match(1)), "to" => "self" } }
     when /\ACARDNAME deals (\d+) damage to each opponent\z/

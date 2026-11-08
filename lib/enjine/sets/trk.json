@@ -12,6 +12,54 @@
   "cards": [
     {
       "card": {
+        "name": "Assembly Specialist",
+        "mana_cost": "{1}{W}",
+        "types": [
+          "artifact",
+          "creature"
+        ],
+        "subtypes": [
+          "borg"
+        ],
+        "power": 1,
+        "toughness": 1,
+        "abilities": [
+          {
+            "triggered": {
+              "when": {
+                "enters": {}
+              },
+              "effects": [
+                {
+                  "create_token": {
+                    "token": {
+                      "name": "Borg",
+                      "types": [
+                        "artifact",
+                        "creature"
+                      ],
+                      "subtypes": [
+                        "borg"
+                      ],
+                      "power": 1,
+                      "toughness": 1
+                    },
+                    "amount": 1
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "rarity": "uncommon",
+      "printing": {
+        "set": "trk",
+        "number": "4"
+      }
+    },
+    {
+      "card": {
         "name": "Emergency Medical Hologram",
         "mana_cost": "{W}",
         "types": [
@@ -57,6 +105,153 @@
       "printing": {
         "set": "trk",
         "number": "15"
+      }
+    },
+    {
+      "card": {
+        "name": "Cha'DIch Investigator",
+        "mana_cost": "{4}{B}",
+        "types": [
+          "creature"
+        ],
+        "subtypes": [
+          "klingon",
+          "warrior"
+        ],
+        "power": 4,
+        "toughness": 4,
+        "abilities": [
+          {
+            "triggered": {
+              "when": {
+                "enters": {}
+              },
+              "effects": [
+                {
+                  "create_token": {
+                    "token": {
+                      "name": "Klingon Warrior",
+                      "types": [
+                        "creature"
+                      ],
+                      "subtypes": [
+                        "klingon",
+                        "warrior"
+                      ],
+                      "power": 2,
+                      "toughness": 1,
+                      "keywords": [
+                        "haste"
+                      ]
+                    },
+                    "amount": 1
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "rarity": "common",
+      "printing": {
+        "set": "trk",
+        "number": "97"
+      }
+    },
+    {
+      "card": {
+        "name": "Tenacious Drone",
+        "mana_cost": "{1}{B}",
+        "types": [
+          "artifact",
+          "creature"
+        ],
+        "subtypes": [
+          "borg"
+        ],
+        "power": 2,
+        "toughness": 1,
+        "abilities": [
+          {
+            "triggered": {
+              "when": {
+                "dies": {}
+              },
+              "effects": [
+                {
+                  "create_token": {
+                    "token": {
+                      "name": "Borg",
+                      "types": [
+                        "artifact",
+                        "creature"
+                      ],
+                      "subtypes": [
+                        "borg"
+                      ],
+                      "power": 1,
+                      "toughness": 1
+                    },
+                    "amount": 1
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "rarity": "common",
+      "printing": {
+        "set": "trk",
+        "number": "133"
+      }
+    },
+    {
+      "card": {
+        "name": "Savvy Profiteer",
+        "mana_cost": "{1}{R}",
+        "types": [
+          "creature"
+        ],
+        "subtypes": [
+          "ferengi",
+          "rogue"
+        ],
+        "power": 2,
+        "toughness": 1,
+        "abilities": [
+          {
+            "mana": {
+              "cost": [
+                "tap"
+              ],
+              "produce": "{R}"
+            }
+          },
+          {
+            "activated": {
+              "cost": [
+                {
+                  "mana": "{3}"
+                },
+                "tap"
+              ],
+              "effects": [
+                {
+                  "create_token": {
+                    "token": "Treasure",
+                    "amount": 1
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "rarity": "common",
+      "printing": {
+        "set": "trk",
+        "number": "171"
       }
     },
     {
@@ -322,18 +517,6 @@
         "condition (if/unless/as long as)",
         "tokens",
         "static ability"
-      ]
-    },
-    {
-      "name": "Assembly Specialist",
-      "rarity": "uncommon",
-      "printing": {
-        "set": "trk",
-        "number": "4"
-      },
-      "missing": [
-        "triggered ability",
-        "tokens"
       ]
     },
     {
@@ -1473,18 +1656,6 @@
       ]
     },
     {
-      "name": "Cha'DIch Investigator",
-      "rarity": "common",
-      "printing": {
-        "set": "trk",
-        "number": "97"
-      },
-      "missing": [
-        "triggered ability",
-        "tokens"
-      ]
-    },
-    {
       "name": "Collation Trimatrix",
       "rarity": "rare",
       "printing": {
@@ -1914,18 +2085,6 @@
       ]
     },
     {
-      "name": "Tenacious Drone",
-      "rarity": "common",
-      "printing": {
-        "set": "trk",
-        "number": "133"
-      },
-      "missing": [
-        "triggered ability",
-        "tokens"
-      ]
-    },
-    {
       "name": "Test of Loyalty",
       "rarity": "uncommon",
       "printing": {
@@ -1972,9 +2131,7 @@
         "number": "137"
       },
       "missing": [
-        "variable amount",
-        "triggered ability",
-        "tokens"
+        "variable amount"
       ]
     },
     {
@@ -1999,7 +2156,6 @@
         "number": "139"
       },
       "missing": [
-        "tokens",
         "other rules text"
       ]
     },
@@ -2342,9 +2498,7 @@
       },
       "missing": [
         "sacrifice",
-        "static ability",
-        "triggered ability",
-        "tokens"
+        "static ability"
       ]
     },
     {
@@ -2396,17 +2550,6 @@
         "counters",
         "station",
         "other rules text"
-      ]
-    },
-    {
-      "name": "Savvy Profiteer",
-      "rarity": "common",
-      "printing": {
-        "set": "trk",
-        "number": "171"
-      },
-      "missing": [
-        "tokens"
       ]
     },
     {
@@ -2542,7 +2685,6 @@
         "number": "182"
       },
       "missing": [
-        "tokens",
         "other rules text"
       ]
     },
@@ -2770,8 +2912,6 @@
         "number": "201"
       },
       "missing": [
-        "triggered ability",
-        "tokens",
         "condition (if/unless/as long as)"
       ]
     },
@@ -3580,7 +3720,6 @@
         "number": "267"
       },
       "missing": [
-        "triggered ability",
         "tokens",
         "copy"
       ]

@@ -529,7 +529,6 @@
       },
       "missing": [
         "triggered ability",
-        "tokens",
         "counters"
       ]
     },
@@ -1939,8 +1938,7 @@
         "number": "139"
       },
       "missing": [
-        "triggered ability",
-        "tokens"
+        "triggered ability"
       ]
     },
     {
@@ -2152,8 +2150,7 @@
         "number": "156"
       },
       "missing": [
-        "triggered ability",
-        "tokens"
+        "invalid: mana_cost: unsupported mana symbol {R/W}"
       ]
     },
     {
@@ -2456,8 +2453,6 @@
         "number": "180"
       },
       "missing": [
-        "triggered ability",
-        "tokens",
         "other rules text"
       ]
     },
