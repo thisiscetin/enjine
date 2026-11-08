@@ -44,9 +44,9 @@ module Enjine
       end
     end
 
-    # CR 508.8: without attackers, declare blockers and combat damage are skipped.
+    # CR 508.8: if no creatures were declared as attackers, declare blockers and combat damage are skipped.
     class CombatStepAfterAttackers < Step
-      def skip?(engine) = engine.attackers.empty?
+      def skip?(engine) = engine.state.attacks_declared.zero?
     end
 
     # CR 508.1: the active player declares attackers (a turn-based action).

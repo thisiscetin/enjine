@@ -53,6 +53,18 @@ module Enjine
         freeze
       end
 
+      def to_s
+        case kind
+        when :target then "target ##{value + 1}"
+        when :self then "itself"
+        when :you then "you"
+        when :each_opponent then "each opponent"
+        when :each then "each #{value.primitive_name.tr("_",
+                                                        " ")}#{{ "you" => " you control",
+                                                                 "opponent" => " an opponent controls" }[controller]}"
+        end
+      end
+
       # Resolves to a list of references (object ids / "player:<name>") at resolution time.
       def resolve(engine, ctx)
         case kind
@@ -60,7 +72,7 @@ module Enjine
         when :self then engine.state.battlefield.include?(ctx.source) ? [ctx.source] : []
         when :you then [Filters.player_ref(engine, ctx.controller)]
         when :each_opponent
-          engine.state.players.each_index.reject { _1 == ctx.controller }.map { Filters.player_ref(engine, _1) }
+          engine.state.players.each_index.reject { it == ctx.controller }.map { Filters.player_ref(engine, it) }
         when :each then each(engine, ctx)
         end
       end

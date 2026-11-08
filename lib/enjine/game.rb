@@ -132,7 +132,7 @@ module Enjine
     def history_for(viewer) = @history.map { it.for_viewer(viewer_key(viewer)) }
 
     # Ids of every decision submitted so far: with the seed this replays the game.
-    def decision_log = @history.reject { it.option.nil? }.map { it.option.transform_keys(&:to_s) }
+    def decision_log = @history.reject { it.option.nil? || it.kind == "concede" }.map { it.option.transform_keys(&:to_s) }
 
     def subscribe(&block)
       @subscribers << block

@@ -7,7 +7,7 @@ RSpec.describe Enjine::Setup do
   it "compiles a shared frozen catalog and decklists" do
     setup = described_class.new(alice, bob)
     expect(setup).to be_frozen
-    expect(setup.catalog.ids).to contain_exactly("plains", "island", "swamp", "mountain", "forest", "wastes")
+    expect(setup.catalog.ids).to match_array(Enjine::CardPool::Core.cards.map { Enjine::CardDefinition.slug(it["name"]) })
     expect(setup.decklists.map(&:size)).to eq([60, 60])
     expect(setup.names).to eq(%w[alice bob])
   end

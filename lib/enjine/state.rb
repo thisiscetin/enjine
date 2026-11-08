@@ -45,7 +45,7 @@ module Enjine
 
     attr_accessor :seed, :rng, :decklists, :players, :objects, :battlefield, :stack, :exile, :turn, :active,
                   :step, :step_state, :priority, :passes, :next_id, :starting_player, :pending, :result,
-                  :attackers, :blockers, :effects, :casting, :combat_damage
+                  :attackers, :blockers, :effects, :casting, :combat_damage, :attacks_declared
 
     def self.initial(names:, decklists:, seed:)
       state = new
@@ -62,6 +62,7 @@ module Enjine
       state.effects = []
       state.casting = nil
       state.combat_damage = nil
+      state.attacks_declared = 0
       state.turn = 0
       state.passes = 0
       state.next_id = 1
@@ -90,14 +91,15 @@ module Enjine
         "starting_player" => starting_player, "pending" => pending&.dup, "result" => result&.dup,
         "players" => players.map(&:to_h), "objects" => objects.values.map(&:to_h),
         "battlefield" => battlefield.dup, "stack" => stack.dup, "exile" => exile.dup,
-        "attackers" => attackers.dup, "blockers" => blockers.dup, "effects" => effects.map { deep_dup(_1) },
-        "casting" => casting && deep_dup(casting), "combat_damage" => combat_damage && deep_dup(combat_damage) }
+        "attackers" => attackers.dup, "blockers" => blockers.dup, "effects" => effects.map { deep_dup(it) },
+        "casting" => casting && deep_dup(casting), "combat_damage" => combat_damage && deep_dup(combat_damage),
+        "attacks_declared" => attacks_declared }
     end
 
     def deep_dup(value)
       case value
       when Hash then value.to_h { |k, v| [k, deep_dup(v)] }
-      when Array then value.map { deep_dup(_1) }
+      when Array then value.map { deep_dup(it) }
       else value
       end
     end

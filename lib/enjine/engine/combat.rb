@@ -33,6 +33,7 @@ module Enjine
 
       def declare_attacker!(id, target)
         attackers[id] = { "target" => target, "blocked" => false }
+        state.attacks_declared += 1
         emit Events::AttackerDeclared.new(object: id, target: target)
         eligible_attackers.empty? ? finish_attackers! : nil
       end
@@ -129,6 +130,7 @@ module Enjine
 
       # CR 511.3: creatures stop being attacking/blocking at the end of combat.
       def end_combat!
+        state.attacks_declared = 0
         attackers.clear
         state.blockers.clear
       end

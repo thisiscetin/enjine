@@ -23,8 +23,8 @@ module Enjine
         def self.zone = :battlefield
 
         def self.candidates(engine, controller)
-          players = engine.state.players.each_index.select { players?(engine, _1, controller) }
-                          .map { Filters.player_ref(engine, _1) }
+          players = engine.state.players.each_index.select { players?(engine, it, controller) }
+                          .map { Filters.player_ref(engine, it) }
           objects = engine.state.public_send(zone).select { |id| match_object?(engine, engine.object(id), controller) }
           players + objects
         end

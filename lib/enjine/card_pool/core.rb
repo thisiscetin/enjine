@@ -10,8 +10,24 @@ module Enjine
     module Core
       PATH = File.join(__dir__, "core.json")
 
+      DECKS = File.join(__dir__, "decks")
+
       def self.cards = JSON.parse(File.read(PATH)).freeze
       def self.catalog = Catalog.from_definitions(cards)
+
+      # Names of the bundled sample decks.
+      def self.deck_names = Dir[File.join(DECKS, "*.json")].map { File.basename(it, ".json") }.sort
+
+      # A sample deck as a deck document: its decklist plus the card definitions it uses.
+      def self.deck(name)
+        path = File.join(DECKS, "#{name}.json")
+        raise ArgumentError, "unknown sample deck #{name.inspect} (have: #{deck_names.join(", ")})" unless File.exist?(path)
+
+        doc = JSON.parse(File.read(path))
+        used = doc["main"].map { CardDefinition.slug(it["card"]) }
+        { "cards" => cards.select { used.include?(CardDefinition.slug(it["name"])) }, "main" => doc["main"],
+          "description" => doc["description"] }
+      end
     end
 
     # Builds random but legal decks from a card pool (a tooling helper, not game logic).

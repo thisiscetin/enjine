@@ -24,7 +24,7 @@ module Enjine
         "exile" => state.exile.map { object_view(engine, it) },
         "pending" => pending_view(engine, viewer),
         "result" => state.result&.dup,
-        "effects" => state.effects.map { _1.except("controller").merge("controller" => engine.name(_1["controller"])) }
+        "effects" => state.effects.map { it.except("controller").merge("controller" => engine.name(it["controller"])) }
       }
     end
 

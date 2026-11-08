@@ -37,9 +37,7 @@ module Enjine
     def register(klass)
       bucket = @entries.fetch(klass.category)
       name = klass.primitive_name
-      if bucket.key?(name) && bucket[name] != klass
-        raise ArgumentError, "#{klass.category} primitive #{name.inspect} already registered"
-      end
+      raise ArgumentError, "#{klass.category} primitive #{name.inspect} already registered" if bucket.key?(name) && bucket[name] != klass
 
       bucket[name] = klass
     end

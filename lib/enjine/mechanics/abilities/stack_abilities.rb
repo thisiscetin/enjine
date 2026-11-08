@@ -36,6 +36,8 @@ module Enjine
 
         def mana_ability? = false
         def loyalty_cost = nil
+        def effects_text = effects.join("; ")
+        def to_s = "#{costs.join(", ")}: #{effects_text}"
         def sorcery_speed? = false
         def allowed_types = nil
 
@@ -88,7 +90,7 @@ module Enjine
           timing = Mechanics.fetch_param(params, :timing) || "instant"
           errors << "#{path}.timing: must be \"instant\" or \"sorcery\"" unless %w[instant sorcery].include?(timing)
           costs = parse_costs(params, errors, path)
-          errors << "#{path}.cost: must be a non-empty list" if costs.empty? && errors.none? { _1.start_with?("#{path}.cost") }
+          errors << "#{path}.cost: must be a non-empty list" if costs.empty? && errors.none? { it.start_with?("#{path}.cost") }
           targets = parse_targets(params, errors, path)
           new(targets: targets, effects: parse_effects(params, errors, path, targets.size), costs: costs,
               sorcery: timing == "sorcery")
@@ -133,7 +135,7 @@ module Enjine
         def sorcery_speed? = true
         def allowed_types = [:planeswalker]
 
-        def to_s = "#{"+" if @loyalty.positive?}#{@loyalty}"
+        def to_s = "#{"+" if @loyalty.positive?}#{@loyalty}: #{effects_text}"
       end
     end
   end

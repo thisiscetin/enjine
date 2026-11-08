@@ -8,58 +8,56 @@ Rules reference: Comprehensive Rules effective **2026-09-25**.
 ```
 lib/enjine.rb                     # entry point; requires everything except card pools
 lib/enjine/
-  version.rb
+  version.rb                      # VERSION, RULES_VERSION (pinned CR date)
   errors.rb                       # Error hierarchy
   rng.rb                          # PCG32, integer state -> JSON-exportable, deterministic
-  mana.rb                         # ManaCost parsing, colors, mana symbols
+  mana.rb                         # mana costs, symbols, pools
 
   # ---- static world: cards & decks (no game state) ----
   primitive.rb                    # Primitive base class + Registry (every mechanic registers here)
+  mechanics.rb                    # helpers to build primitives from data entries
   card_definition.rb              # immutable, validated blueprint built from a data Hash
   catalog.rb                      # id -> CardDefinition, conflict detection
-  deck.rb                         # decklist + its card definitions, validation, edit ops
-  player.rb                       # name + deck, ready?, DeckLocked while seated
-  setup.rb                        # frozen, compiled once from 2 players -> new_game(seed:)
+  deck.rb  player.rb  setup.rb    # decklists, players, compiled pairings
 
-  mechanics/                      # ONE FILE PER MECHANIC, all registered primitives
-    types/land.rb                 #   card types (composition modules)
-    supertypes/basic.rb
-    subtypes/basic_land_types.rb  #   Plains/Island/... intrinsic mana abilities (CR 305.6)
-    abilities/mana_ability.rb     #   activated mana abilities (CR 605)
-    costs/tap.rb                  #   {T}
+  mechanics/                      # ONE PLACE PER MECHANIC, all registered primitives
+    types/        base.rb land.rb cast_types.rb (creature artifact enchantment planeswalker instant sorcery)
+    supertypes/   basic.rb
+    subtypes/     basic_land_types.rb (intrinsic mana abilities, CR 305.6)
+    keywords/     basic.rb (flash, haste)
+    abilities/    mana_ability.rb stack_abilities.rb (spell, activated, loyalty)
+    costs/        tap.rb mana.rb
+    effects/      effects.rb (deal_damage pump add_counters gain_life lose_life draw destroy counter)
+    filters/      filters.rb (target filters: any_target creature player ...)
+    selector.rb                   # who an effect applies to: target / self / you / each ...
 
   # ---- dynamic world: a running game ----
   game.rb                         # public facade: pending_decision / submit / apply / export / views
   state.rb                        # State, PlayerState, GameObject (plain mutable structs)
-  engine.rb                       # the state machine: advance!, zone moves, SBAs, turn flow
-  steps.rb                        # 12 step objects (untap .. cleanup) with turn-based actions
+  engine.rb                       # the state machine: advance!, turn flow, priority, zones, SBAs
+  engine/
+    casting.rb                    # CR 601/602: announce, targets, manual payment, cancel/rewind
+    resolution.rb                 # CR 608: resolve top of stack, fizzle
+    combat.rb                     # CR 506-511: attackers, blockers, damage assignment
+    damage.rb                     # damage, life, counters, permanent SBAs
+    characteristics.rb            # CR 613 layer pipeline for P/T, continuous effects, cleanup
+  steps.rb                        # 12 step objects with turn-based actions
   events.rb                       # typed, serializable events + per-viewer redaction
-  decisions/                      # one class per decision kind (pending decision types)
-    priority.rb  play_or_draw.rb  mulligan.rb  bottom.rb  discard.rb
-  actions/                        # options offered at priority (extensible list)
-    pass.rb  play_land.rb  activate_mana_ability.rb
+  decisions/                      # one class per decision kind
+    priority play_or_draw mulligan bottom discard casting(choose_target, pay_cost) combat(...)
+  actions/                        # options offered at priority
+    pass play_land activate_mana_ability cast(cast, activate)
   snapshot.rb                     # export/import + full consistency validation (also the fuzz invariant)
-  view.rb                         # view_for(player | :observer)
-  history.rb                      # decision log + events, per-viewer filtering
+  view.rb  history.rb             # per-viewer views and histories
 
   # ---- tooling (no game logic) ----
   docs.rb                         # generates docs/reference/*.md + SUPPORTED.md from the Registry
-  agents/random.rb                # picks uniformly among legal options (fuzzing / CLI seat)
-  fuzz.rb                         # plays N random games, checks invariants + export/import roundtrip
-  cli.rb                          # text UI
-  card_pool/core.rb               # OPT-IN: require "enjine/card_pool/core"
-  card_pool/core.json
-  card_pool/deck_builder.rb
-exe/enjine                        # CLI executable
-spec/
-  unit/                           # one primitive / class in isolation
-  integration/                    # scenario-builder board positions -> options -> outcome
-  e2e/                            # full 60-card games from Setup, scripted + fuzzed
-  support/scenario.rb             # scenario DSL -> snapshot hash -> Game.import
-  docs_spec.rb                    # fails if generated docs drift
-docs/
-  DESIGN.md  ARCHITECTURE.md  SUPPORTED.md (generated)
-  reference/*.md (generated)  guides/*.md
+  agents/random.rb  fuzz.rb       # random legal player, invariant-checking fuzzer
+  cli.rb  cli/text.rb             # interactive hot-seat CLI + text renderer, --validate
+  card_pool/core.rb core.json decks/*.json   # OPT-IN sample cards and decks
+exe/enjine
+spec/ unit/ integration/ e2e/ support/scenario.rb
+docs/ DESIGN.md ARCHITECTURE.md MECHANICS_COVERAGE.md SUPPORTED.md(root) reference/ guides/
 ```
 
 ## Key design decisions

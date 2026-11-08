@@ -19,7 +19,7 @@ module Enjine
       return hash if hash.is_a?(Deck)
       raise InvalidDeck.new(["deck must be an object"]) unless hash.is_a?(Hash)
 
-      doc = hash.transform_keys(&:to_s)
+      doc = hash.transform_keys(&:to_s).except("name", "description")
       cards = doc.fetch("cards", [])
       main = doc.fetch("main", [])
       raise InvalidDeck.new(["cards: must be a list"]) unless cards.is_a?(Array)

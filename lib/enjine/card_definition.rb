@@ -63,7 +63,7 @@ module Enjine
     def keyword?(keyword) = @keywords.include?(keyword.to_sym)
     def creature? = type?(:creature)
     def planeswalker? = type?(:planeswalker)
-    def spell_ability = @abilities.find { _1.kind == :spell }
+    def spell_ability = @abilities.find { it.kind == :spell }
 
     # Whether this card can be cast at instant speed (CR 304.1, 702.8a).
     def instant_speed? = @type_modules.any?(&:instant_speed?) || keyword?(:flash)
@@ -92,7 +92,7 @@ module Enjine
       errors << "loyalty: only planeswalkers have loyalty" if !planeswalker? && @loyalty
       @abilities.each_with_index do |ability, i|
         allowed = ability.allowed_types
-        next if allowed.nil? || allowed.any? { type?(_1) }
+        next if allowed.nil? || allowed.any? { type?(it) }
 
         errors << "abilities[#{i}]: #{ability.class.primitive_name} abilities need a #{allowed.join("/")} card"
       end

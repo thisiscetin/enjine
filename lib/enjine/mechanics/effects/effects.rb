@@ -38,11 +38,17 @@ module Enjine
 
         def refs(engine, ctx) = to ? to.resolve(engine, ctx) : []
 
-        def objects(engine, ctx)
-          refs(engine, ctx).select { engine.state.objects.key?(_1) && engine.state.battlefield.include?(_1) }
+        def to_s
+          words = self.class.primitive_name.tr("_", " ")
+          words += " #{amount}" if amount
+          "#{words} → #{to}"
         end
 
-        def players(engine, ctx) = refs(engine, ctx).filter_map { Filters.player_index(engine, _1) }
+        def objects(engine, ctx)
+          refs(engine, ctx).select { engine.state.objects.key?(it) && engine.state.battlefield.include?(it) }
+        end
+
+        def players(engine, ctx) = refs(engine, ctx).filter_map { Filters.player_index(engine, it) }
       end
 
       # Deal N damage (CR 120).
@@ -56,7 +62,7 @@ module Enjine
                   example: { "deal_damage" => { "amount" => 3, "to" => { "target" => 0 } } }
 
         def apply(engine, ctx)
-          refs(engine, ctx).each { engine.deal_damage!(ctx.source || ctx.object, _1, amount) }
+          refs(engine, ctx).each { engine.deal_damage!(ctx.source || ctx.object, it, amount) }
         end
       end
 
@@ -81,8 +87,10 @@ module Enjine
           errors << "#{path}.counter: must be one of #{COUNTER_KINDS.join(", ")}"
         end
 
+        def to_s = "#{amount} #{counter} counter(s) → #{to}"
+
         def apply(engine, ctx)
-          objects(engine, ctx).each { engine.add_counters!(engine.object(_1), counter, amount) }
+          objects(engine, ctx).each { engine.add_counters!(engine.object(it), counter, amount) }
         end
       end
 
@@ -105,8 +113,10 @@ module Enjine
           @toughness = Mechanics.integer_param(params, :toughness, errors, path, default: 0)
         end
 
+        def to_s = "#{format("%+d", power)}/#{format("%+d", toughness)} until end of turn → #{to}"
+
         def apply(engine, ctx)
-          affected = objects(engine, ctx).select { engine.definition(engine.object(_1)).type?(:creature) }
+          affected = objects(engine, ctx).select { engine.definition(engine.object(it)).type?(:creature) }
           engine.add_continuous_effect!("pump", ctx, affected, "power" => power, "toughness" => toughness)
         end
       end
@@ -117,7 +127,7 @@ module Enjine
                                        rules: %w[119.3], params: { "amount" => "integer", "to" => "selector" },
                                        example: { "gain_life" => { "amount" => 3 } }
         def self.default_to = "you"
-        def apply(engine, ctx) = players(engine, ctx).each { engine.change_life!(_1, amount) }
+        def apply(engine, ctx) = players(engine, ctx).each { engine.change_life!(it, amount) }
       end
 
       # Lose life (CR 119.3).
@@ -125,7 +135,7 @@ module Enjine
         primitive :effect, :lose_life, description: "Each referenced player loses `amount` life.",
                                        rules: %w[119.3], params: { "amount" => "integer", "to" => "selector" },
                                        example: { "lose_life" => { "amount" => 2, "to" => "each_opponent" } }
-        def apply(engine, ctx) = players(engine, ctx).each { engine.change_life!(_1, -amount) }
+        def apply(engine, ctx) = players(engine, ctx).each { engine.change_life!(it, -amount) }
       end
 
       # Draw cards (CR 121).
@@ -143,7 +153,7 @@ module Enjine
                                      rules: %w[701.8a], params: { "to" => "selector" },
                                      example: { "destroy" => { "to" => { "target" => 0 } } }
         def self.keys = %w[to]
-        def apply(engine, ctx) = objects(engine, ctx).each { engine.move!(_1, :graveyard, reason: "destroy") }
+        def apply(engine, ctx) = objects(engine, ctx).each { engine.move!(it, :graveyard, reason: "destroy") }
       end
 
       # Counter a spell (CR 701.6).

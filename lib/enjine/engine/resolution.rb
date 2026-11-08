@@ -16,7 +16,7 @@ module Enjine
           obj.ability? ? remove_stack_object!(id) : move!(id, :graveyard, reason: "fizzled")
         else
           ctx = Mechanics::EffectContext.new(obj.controller, obj.ability? ? obj.source : id, id, targets)
-          ability&.effects&.each { _1.apply(self, ctx) } # CR 608.2c: in order
+          ability&.effects&.each { it.apply(self, ctx) } # CR 608.2c: in order
           emit Events::Resolved.new(object: id, card: obj.card, kind: obj.kind)
           finish_resolution!(obj)
         end

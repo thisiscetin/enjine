@@ -27,7 +27,7 @@ RSpec.describe Enjine::Catalog do
   it "merges catalogs and can be frozen" do
     a = described_class.from_definitions([forest])
     b = Enjine::CardPool::Core.catalog
-    expect(a.merge(b).size).to eq(6)
+    expect(a.merge(b).size).to eq(Enjine::CardPool::Core.cards.size)
     a.freeze
     expect { a.add(Enjine::CardPool::Core.cards.last.merge("name" => "Other")) }.to raise_error(FrozenError)
   end

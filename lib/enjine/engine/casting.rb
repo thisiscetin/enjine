@@ -5,7 +5,7 @@ module Enjine
     # Casting spells (CR 601) and activating abilities (CR 602), one atomic decision
     # at a time: announce -> choose targets -> pay mana (tapping sources manually)
     # -> cast. Until every cost is paid the whole process can be cancelled and is
-    # rewound (CR 734, "Handling Illegal Actions"). The in-progress context lives in
+    # rewound (CR 733, "Handling Illegal Actions"). The in-progress context lives in
     # state.casting so a game can be exported mid-cast.
     module Casting
       # ---- what can be started ---------------------------------------------------
@@ -24,17 +24,18 @@ module Enjine
         ability = definition(obj).abilities[ability_index]
         return false unless %i[activated loyalty].include?(ability.kind)
         return false if ability.sorcery_speed? && !sorcery_timing?(index)
-        return false unless ability.costs.reject(&:mana?).all? { _1.payable?(self, obj) }
+        return false unless ability.costs.reject(&:mana?).all? { it.payable?(self, obj) }
 
-        if ability.kind == :loyalty
+        if (ability.kind == :loyalty) && (obj.loyalty_turn == state.turn || (loyalty(obj) + ability.loyalty_cost).negative?)
           # CR 606.3: once per turn. CR 118.3: a cost can't remove more counters than there are.
-          return false if obj.loyalty_turn == state.turn || (loyalty(obj) + ability.loyalty_cost).negative?
+          return false
         end
+
         targets_available?(ability.targets, index, nil) && affordable?(index, ability.mana_cost, needs_tap?(ability) ? id : nil)
       end
 
       def targets_available?(specs, index, exclude)
-        specs.all? { |spec| spec.candidates(self, index).any? { _1 != exclude } }
+        specs.all? { |spec| spec.candidates(self, index).any? { it != exclude } }
       end
 
       # A legality bound, not a solver: mana in pool plus untapped mana sources must
@@ -60,7 +61,7 @@ module Enjine
         end
       end
 
-      def needs_tap?(ability) = ability.costs.any? { _1.is_a?(Mechanics::Costs::Tap) }
+      def needs_tap?(ability) = ability.costs.any?(Mechanics::Costs::Tap)
 
       # ---- starting ----------------------------------------------------------------
 
@@ -117,7 +118,7 @@ module Enjine
       def remaining_text
         rem = state.casting["remaining"]
         cost = Mana::Cost.new(generic: rem["generic"], colored: rem.except("generic").transform_keys(&:to_sym)
-                                                                  .reject { |_, n| n.zero? })
+                                                                   .reject { |_, n| n.zero? })
         cost.to_s
       end
 
@@ -125,7 +126,7 @@ module Enjine
       def target_candidates
         ctx = state.casting
         spec = casting_ability.targets[ctx["targets"].size]
-        spec.candidates(self, ctx["player"]).reject { _1 == ctx["object"] }
+        spec.candidates(self, ctx["player"]).reject { it == ctx["object"] }
       end
 
       def choose_target!(ref)
@@ -190,7 +191,7 @@ module Enjine
       def pay_ability_costs!(ctx)
         source = object(ctx["source"])
         ability = definition(source).abilities[ctx["ability"]]
-        ability.costs.reject(&:mana?).each { _1.pay!(self, source) }
+        ability.costs.reject(&:mana?).each { it.pay!(self, source) }
         return unless ability.kind == :loyalty
 
         source.loyalty_turn = state.turn

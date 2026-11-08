@@ -52,9 +52,11 @@ class Scenario
     end
   end
 
-  def battlefield(*cards, count: 1, tapped: false, controlled_since: nil)
+  def battlefield(*cards, count: 1, tapped: false, controlled_since: nil, counters: {}, damage: 0, loyalty: nil)
     cards.each do |c|
-      count.times { @current.zones[:battlefield] << { card: c, tapped: tapped, controlled_since: controlled_since } }
+      entry = { card: c, tapped: tapped, controlled_since: controlled_since, damage: damage,
+                counters: counters.transform_keys(&:to_s).merge(loyalty ? { "loyalty" => loyalty } : {}) }
+      count.times { @current.zones[:battlefield] << entry }
     end
   end
 
@@ -106,7 +108,16 @@ class Scenario
 
   def object_h(id, entry, owner, zone)
     { "id" => id, "card" => id.split("#").first, "owner" => owner, "controller" => owner, "zone" => zone.to_s,
-      "tapped" => entry.fetch(:tapped, false), "controlled_since" => zone == :battlefield ? entry[:controlled_since] || 0 : nil }
+      "tapped" => entry.fetch(:tapped, false), "controlled_since" => zone == :battlefield ? entry[:controlled_since] || 0 : nil,
+      "kind" => "card", "counters" => default_counters(id, entry, zone), "damage" => entry.fetch(:damage, 0), "source" => nil,
+      "ability" => nil, "targets" => nil, "loyalty_turn" => nil }
+  end
+
+  # Planeswalkers placed on the battlefield start with their printed loyalty unless given one.
+  def default_counters(id, entry, zone)
+    counters = entry.fetch(:counters, {})
+    loyalty = @catalog.fetch(id.split("#").first).loyalty
+    zone == :battlefield && loyalty && !counters.key?("loyalty") ? counters.merge("loyalty" => loyalty) : counters
   end
 
   def player_h(spec, zones)
@@ -121,6 +132,16 @@ end
 # Helpers available in every example.
 module ScenarioHelpers
   def core_catalog = Enjine::CardPool::Core.catalog
+
+  # A catalog of the core pool plus extra card data blocks defined in the spec.
+  def catalog_with(*cards) = Enjine::Catalog.from_definitions(Enjine::CardPool::Core.cards + cards)
+
+  def obj_id(game, card, zone: :battlefield, player: nil)
+    ids = zone == :battlefield ? game.state.battlefield : game.state.players[game.names.index(player)].public_send(zone)
+    ids.find { game.state.object(it).card == Enjine::CardDefinition.slug(card) } or raise "no #{card} in #{zone}"
+  end
+
+  def view_of(game, id) = (game.view_for(:observer)["battlefield"] + game.view_for(:observer)["stack"]).find { it["id"] == id }
 
   def build_game(catalog = core_catalog, &)
     builder = Scenario.new(catalog)
@@ -137,6 +158,21 @@ module ScenarioHelpers
   end
 
   def option_types(game) = game.legal_options.map { it[:type] }
+
+  # Passes priority (and declares no attackers/blockers) until `step` of `turn` is reached.
+  def skip_to(game, step, turn: game.turn, limit: 500)
+    limit.times do
+      return game if game.step == step && game.turn == turn && game.pending_decision&.kind == "priority"
+
+      types = option_types(game)
+      game.submit(if types.include?("pass")
+                    { type: "pass" }
+                  else
+                    { type: types.include?("done") ? "done" : types.first }
+                  end)
+    end
+    raise "never reached #{step} of turn #{turn}"
+  end
 
   def pass_both(game, times = 1)
     (times * 2).times { game.submit(type: "pass") }

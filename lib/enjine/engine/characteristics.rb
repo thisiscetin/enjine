@@ -42,11 +42,11 @@ module Enjine
 
       # CR 514.2: damage wears off and "until end of turn" effects end.
       def cleanup_turn!
-        state.battlefield.each { object(_1).damage = 0 }
-        ending = state.effects.count { _1["duration"] == "end_of_turn" }
+        state.battlefield.each { object(it).damage = 0 }
+        ending = state.effects.count { it["duration"] == "end_of_turn" }
         return if ending.zero?
 
-        state.effects.reject! { _1["duration"] == "end_of_turn" }
+        state.effects.reject! { it["duration"] == "end_of_turn" }
         emit Events::EffectsEnded.new(count: ending)
       end
     end

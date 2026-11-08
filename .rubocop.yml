@@ -21,15 +21,11 @@ Style/MultilineBlockChain:
   Enabled: false
 
 Layout/LineLength:
-  Max: 130
+  Max: 140
 
 # A rules engine has a few long, linear methods that mirror the rules text.
 Metrics/MethodLength:
   Max: 40
-Metrics/AbcSize:
-  Max: 55
-Metrics/CyclomaticComplexity:
-  Max: 18
 Metrics/PerceivedComplexity:
   Max: 18
 Metrics/ClassLength:
@@ -57,4 +53,24 @@ RSpec/NestedGroups:
 RSpec/SpecFilePathFormat:
   Enabled: false
 RSpec/InstanceVariable:
+  Enabled: false
+
+# The CLI text renderer is a lookup table of event/option phrasings.
+Metrics/AbcSize:
+  Max: 55
+  Exclude:
+    - "lib/enjine/cli/text.rb"
+    - "lib/enjine/snapshot.rb"
+Metrics/CyclomaticComplexity:
+  Max: 18
+  Exclude:
+    - "lib/enjine/cli/text.rb"
+    - "lib/enjine/cli.rb"
+Naming/PredicateMethod:
+  Enabled: false
+Naming/MethodParameterName:
+  AllowedNames: [ev, id, to, n, in]
+Style/ItBlockParameter:
+  Enabled: false
+Style/FormatStringToken:
   Enabled: false

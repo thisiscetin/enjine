@@ -48,6 +48,7 @@ module Enjine
       state.effects = deep_copy(data.fetch("effects", []))
       state.casting = deep_copy(data["casting"])
       state.combat_damage = deep_copy(data["combat_damage"])
+      state.attacks_declared = data.fetch("attacks_declared", 0)
       %w[turn active step_state priority passes next_id starting_player].each do |k|
         state.public_send("#{k}=", data[k])
       end
@@ -65,7 +66,7 @@ module Enjine
                      targets: deep_copy(hash["targets"]), loyalty_turn: hash["loyalty_turn"])
     end
 
-    def deep_copy(value) = Marshal.load(Marshal.dump(value)) # rubocop:disable Security/MarshalLoad
+    def deep_copy(value) = Marshal.load(Marshal.dump(value))
 
     def build_player(hash)
       PlayerState.new(**PLAYER_KEYS.to_h { |k| [k.to_sym, hash[k]] }).tap do |pl|
@@ -79,9 +80,7 @@ module Enjine
     def validate_header(data, errors)
       errors << "rng: must be a non-negative integer" unless non_negative?(data["rng"])
       errors << "next_id: must be a positive integer" unless data["next_id"].is_a?(Integer) && data["next_id"].positive?
-      unless data["decklists"].is_a?(Array) && data["decklists"].all?(Array)
-        errors << "decklists: must be a list of card id lists"
-      end
+      errors << "decklists: must be a list of card id lists" unless data["decklists"].is_a?(Array) && data["decklists"].all?(Array)
       %w[battlefield stack exile].each { |z| errors << "#{z}: must be a list" unless data[z].is_a?(Array) }
     end
 
@@ -156,7 +155,9 @@ module Enjine
       errors << "#{path}.damage: must be a non-negative integer" unless non_negative?(obj.fetch("damage", 0))
       return if zone == "battlefield"
 
-      errors << "#{path}: only permanents have counters or damage" if counters.values.any?(&:positive?) || obj["damage"].to_i.positive?
+      return unless counters.values.any?(&:positive?) || obj["damage"].to_i.positive?
+
+      errors << "#{path}: only permanents have counters or damage"
     end
 
     def validate_combat(data, errors)
@@ -201,9 +202,7 @@ module Enjine
     end
 
     def validate_turn(data, errors)
-      unless State::STEP_STATES.include?(data["step_state"])
-        errors << "step_state: must be one of #{State::STEP_STATES.join(", ")}"
-      end
+      errors << "step_state: must be one of #{State::STEP_STATES.join(", ")}" unless State::STEP_STATES.include?(data["step_state"])
       step = data["step"]
       errors << "step: unknown step #{step.inspect}" unless step.nil? || Steps::BY_NAME.key?(step.to_sym)
       if step
