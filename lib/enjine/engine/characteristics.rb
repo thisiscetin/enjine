@@ -59,11 +59,13 @@ module Enjine
       # One object's characteristics after layers 6 and 7c (nil when unchanged). Each layer applies
       # in timestamp order (CR 613.7); static abilities come before resolved effects.
       def layered(obj, statics, effects)
-        base = definition(obj).printed_characteristics
-        keywords = base.keywords.dup
-        delta = [obj.counters.fetch("+1/+1", 0) - obj.counters.fetch("-1/-1", 0)] * 2
+        defn = definition(obj)
+        base = defn.printed_characteristics
+        keywords = base.keywords | Mechanics::Counters.keywords(obj.counters) # CR 122.1b (layer 6)
+        delta = Mechanics::Counters.power_toughness(obj.counters) # CR 122.1a (layer 7c)
+        facts = Mechanics::Filters::Facts.new(chars: base, counters: obj.counters, token: defn.token?)
         statics.each do |source, ability|
-          next unless ability.affects?(obj, source, base.types)
+          next unless ability.affects?(obj, source, facts)
 
           keywords |= ability.keywords
           delta = [delta[0] + ability.power, delta[1] + ability.toughness]

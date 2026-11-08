@@ -16,6 +16,10 @@ module Enjine
         engine.names.index(ref.delete_prefix(PLAYER_PREFIX))
       end
 
+      # What is known about an object without computing its current characteristics: its printed
+      # (or last known) characteristics, its counters and whether it is a token.
+      Facts = Data.define(:chars, :counters, :token)
+
       # Base filter: subclasses define players? and match_object?.
       class Filter < Primitive
         def self.players?(_engine, _index, _controller) = false
@@ -38,14 +42,9 @@ module Enjine
           obj.zone == zone && match_object?(engine, obj, controller)
         end
 
-        RESTRICTIONS = %w[controller other not any_of attacking blocking tapped].freeze
-
-        # A bare filter is the class itself; parameters wrap it in a Restricted filter, e.g.
-        # {"creature": {"controller": "you"}}, {"creature": {"other": true}},
-        # {"permanent": {"not": ["land"]}}, {"permanent": {"any_of": ["artifact", "creature"]}},
-        # {"creature": {"attacking": true}}.
+        # A bare filter is the class itself; parameters wrap it in a Restricted filter (see Restricted).
         def self.build(params, errors, path, **)
-          Mechanics.check_keys(params, RESTRICTIONS, errors, path)
+          Mechanics.check_keys(params, Restricted::KEYS, errors, path)
           return self if params.empty?
 
           Restricted.build(self, params.transform_keys(&:to_s), errors, path)
@@ -56,45 +55,87 @@ module Enjine
 
         def self.type?(engine, object, type) = object.kind == "card" && engine.chars(object).type?(type)
 
-        # For trigger subjects: whether an object with these card types matches.
+        # Whether an object with these card types matches.
         def self.matches_types?(types) = respond_to?(:card_types) ? types.intersect?(card_types) : true
+
+        # For the layer pass, entering replacements and trigger subjects that left the battlefield:
+        # a match on characteristics and counters only (Facts), never on current power/toughness.
+        def self.matches_facts?(facts) = matches_types?(facts.chars.types)
+        def self.live_keys = []
       end
 
-      # A filter narrowed by restrictions (see Filter.build).
+      # A filter narrowed by restrictions (CR 115.1, 109.2), e.g.
+      #   {"creature": {"controller": "you"}}            {"creature": {"other": true}}
+      #   {"permanent": {"not": ["land"]}}               {"permanent": {"any_of": ["artifact", "creature"]}}
+      #   {"creature": {"attacking": true}}              {"creature": {"power": {"at_least": 4}}}
+      #   {"permanent": {"mana_value": {"at_most": 3}}}  {"creature": {"subtypes": ["human"]}}
+      #   {"creature": {"supertypes": ["legendary"]}}    {"creature": {"not_supertypes": ["legendary"]}}
+      #   {"creature": {"token": false}}                 {"permanent": {"counters": true}} / {"counters": "+1/+1"}
+      #   {"creature": {"modified": true}}               {"spell": {"not": ["creature"]}}
       class Restricted
         TYPES = %w[artifact creature enchantment land planeswalker instant sorcery].freeze
+        BOOLEANS = %w[other attacking blocking tapped token modified].freeze
+        RANGES = %w[power toughness mana_value].freeze
+        TYPE_LISTS = %w[not any_of types].freeze
+        NAME_LISTS = %w[subtypes not_subtypes supertypes not_supertypes].freeze
+        KEYS = (%w[controller counters] + BOOLEANS + RANGES + TYPE_LISTS + NAME_LISTS).freeze
+        # Keys that need current characteristics or combat/tapped status: not usable in the layer pass.
+        LIVE = %w[power toughness attacking blocking tapped].freeze
 
         attr_reader :base
 
         def self.build(base, params, errors, path)
           controller = params["controller"]
           errors << "#{path}.controller: must be you or opponent" if controller && !%w[you opponent].include?(controller)
-          %w[not any_of].each do |key|
+          validate_lists(params, errors, path)
+          BOOLEANS.each do |key|
+            errors << "#{path}.#{key}: must be true or false" unless params[key].nil? || [true, false].include?(params[key])
+          end
+          RANGES.each { |key| validate_range(params[key], errors, "#{path}.#{key}") if params.key?(key) }
+          counters = params["counters"]
+          unless counters.nil? || [true, false].include?(counters) || Counters.valid?(counters)
+            errors << "#{path}.counters: must be true, false or a counter name"
+          end
+          new(base, params)
+        end
+
+        def self.validate_lists(params, errors, path)
+          TYPE_LISTS.each do |key|
             list = params[key]
             next if list.nil? || (list.is_a?(Array) && (list - TYPES).empty?)
 
             errors << "#{path}.#{key}: must be a list of card types (#{TYPES.join(", ")})"
           end
-          %w[other attacking blocking tapped].each do |key|
-            errors << "#{path}.#{key}: must be true or false" unless params[key].nil? || [true, false].include?(params[key])
+          NAME_LISTS.each do |key|
+            list = params[key]
+            next if list.nil?
+
+            supertypes = key.end_with?("supertypes")
+            ok = list.is_a?(Array) && !list.empty? &&
+                 list.all? { supertypes ? Enjine.registry.fetch(:supertype, it) : CardDefinition::SUBTYPE_FORMAT.match?(it.to_s) }
+            errors << "#{path}.#{key}: must be a non-empty list of #{supertypes ? "supertypes" : "lowercase subtypes"}" unless ok
           end
-          new(base, params)
+        end
+
+        # {"at_least": n} and/or {"at_most": n}.
+        def self.validate_range(range, errors, path)
+          ok = range.is_a?(Hash) && !range.empty? && (range.keys - %w[at_least at_most]).empty? &&
+               range.values.all?(Integer)
+          errors << "#{path}: must be {\"at_least\": n} and/or {\"at_most\": n}" unless ok
         end
 
         def initialize(base, params)
           @base = base
           @controller = params["controller"]
           @other = params["other"] == true
-          @not = Array(params["not"]).map(&:to_sym)
-          @any_of = Array(params["any_of"]).map(&:to_sym)
-          @attacking = params["attacking"]
-          @blocking = params["blocking"]
-          @tapped = params["tapped"]
           @params = params
+          @lists = (TYPE_LISTS + NAME_LISTS).to_h { [it, Array(params[it]).map(&:to_sym)] }
+          @ranges = RANGES.to_h { [it, params[it]] }.compact
           freeze
         end
 
         def primitive_name = base.primitive_name
+        def live_keys = LIVE.select { @params.key?(it) }
 
         def candidates(engine, controller) = candidates_for(engine, controller, nil)
 
@@ -108,22 +149,41 @@ module Enjine
           base.match?(engine, ref, controller) && allowed?(engine, ref, controller, source)
         end
 
-        # For trigger subjects: card types only.
+        # Card types only.
         def matches_types?(types)
-          base.matches_types?(types) && !types.intersect?(@not) && (@any_of.empty? || types.intersect?(@any_of))
+          base.matches_types?(types) && !types.intersect?(@lists["not"]) &&
+            (@lists["any_of"].empty? || types.intersect?(@lists["any_of"])) && (@lists["types"] - types).empty?
         end
+
+        def matches_facts?(facts) = base.matches_facts?(facts) && characteristics_ok?(facts)
 
         def to_s
           words = []
           words << "another" if @other
-          words << "attacking" if @attacking
-          words << "non#{@not.join("/non")}" unless @not.empty?
-          words << (@any_of.empty? ? base.primitive_name.tr("_", " ") : @any_of.join(" or "))
+          words << "attacking" if @params["attacking"]
+          words << (@params["token"] ? "token" : "nontoken") unless @params["token"].nil?
+          words << "modified" if @params["modified"]
+          words.concat(@lists["supertypes"]).concat(@lists["not_supertypes"].map { "non#{it}" })
+          words << "non#{@lists["not"].join("/non")}" unless @lists["not"].empty?
+          words.concat(@lists["types"] + @lists["subtypes"]).concat(@lists["not_subtypes"].map { "non-#{it}" })
+          words << (@lists["any_of"].empty? ? base.primitive_name.tr("_", " ") : @lists["any_of"].join(" or "))
           words << { "you" => "you control", "opponent" => "an opponent controls" }[@controller]
+          words.concat(@ranges.map { |key, range| "with #{key.tr("_", " ")} #{range_words(range)}" })
+          words << counter_words
           words.compact.join(" ")
         end
 
         private
+
+        def range_words(range) = range.map { |k, n| k == "at_least" ? "#{n} or greater" : "#{n} or less" }.join(" and ")
+
+        def counter_words
+          case @params["counters"]
+          when true then "with a counter on it"
+          when false then "with no counters on it"
+          when String then "with a #{@params["counters"]} counter on it"
+          end
+        end
 
         def allowed?(engine, ref, controller, source)
           return false if @other && ref == source
@@ -137,14 +197,59 @@ module Enjine
         end
 
         def object_allowed?(engine, ref)
-          types = engine.chars(ref).types
-          return false if types.intersect?(@not)
-          return false unless @any_of.empty? || types.intersect?(@any_of)
-          return false if !@attacking.nil? && engine.attackers.key?(ref) != @attacking
-          return false if !@blocking.nil? && engine.state.blockers.key?(ref) != @blocking
-          return false if !@tapped.nil? && engine.object(ref).tapped != @tapped
+          obj = engine.object(ref)
+          current = engine.chars(ref)
+          facts = Facts.new(chars: current, counters: obj.counters, token: engine.catalog.fetch(obj.card).token?)
+          return false unless characteristics_ok?(facts) && status_ok?(engine, obj)
+          return false if @params["modified"] == true && !modified?(engine, obj)
 
-          true
+          @ranges.all? { |key, range| in_range?(stat(engine, obj, current, key), range) }
+        end
+
+        # Types, subtypes, supertypes, token-ness, counters and printed mana value (CR 109.3, 122, 202.3).
+        def characteristics_ok?(facts)
+          c = facts.chars
+          return false unless matches_types?(c.types) && (@lists["subtypes"].empty? || c.subtypes.intersect?(@lists["subtypes"]))
+          return false if c.subtypes.intersect?(@lists["not_subtypes"]) || c.supertypes.intersect?(@lists["not_supertypes"])
+          return false unless (@lists["supertypes"] - c.supertypes).empty?
+          return false if !@params["token"].nil? && facts.token != @params["token"]
+          return false if @params["modified"] == false && Counters.any?(facts.counters)
+
+          counters_ok?(facts.counters)
+        end
+
+        def counters_ok?(counters)
+          case (wanted = @params["counters"])
+          when nil then true
+          when true, false then Counters.any?(counters) == wanted
+          else counters.fetch(wanted, 0).positive?
+          end
+        end
+
+        def status_ok?(engine, obj)
+          return false if !@params["attacking"].nil? && engine.attackers.key?(obj.id) != @params["attacking"]
+          return false if !@params["blocking"].nil? && engine.state.blockers.key?(obj.id) != @params["blocking"]
+
+          @params["tapped"].nil? || obj.tapped == @params["tapped"]
+        end
+
+        # CR 700.9: a permanent is modified if it has counters, is equipped, or is enchanted by an Aura
+        # its controller controls. Attachments plug in through Engine#modifying_attachment? (CR 301.5, 303.4).
+        def modified?(engine, obj)
+          Counters.any?(obj.counters) || (engine.respond_to?(:modifying_attachment?) && engine.modifying_attachment?(obj))
+        end
+
+        # Current power/toughness (CR 208.3) and mana value (CR 202.3; 0 without a mana cost, 202.3a).
+        def stat(engine, obj, current, key)
+          case key
+          when "power" then engine.power(obj)
+          when "toughness" then engine.toughness(obj)
+          else current.mana_cost&.mana_value.to_i
+          end
+        end
+
+        def in_range?(value, range)
+          (range["at_least"].nil? || value >= range["at_least"]) && (range["at_most"].nil? || value <= range["at_most"])
         end
       end
 
@@ -219,6 +324,45 @@ module Enjine
         primitive :filter, :spell, description: "A spell on the stack.", rules: %w[112.1 115.1], example: "spell"
         def self.zone = :stack
         def self.match_object?(_engine, object, _controller) = object.kind == "card"
+      end
+
+      # Matches what any of its filters matches: "a land, or a creature with power 6 or more" is
+      # [{"land": {}}, {"creature": {"power": {"at_least": 6}}}] (a union of restricted filters, CR 115.1).
+      class OneOf < Filter
+        primitive :filter, :one_of,
+                  description: "Anything at least one of the listed filters matches (each may have restrictions).",
+                  rules: %w[115.1 109.2],
+                  params: { "(list)" => "two or more filters" },
+                  example: { "one_of" => [{ "permanent" => { "any_of" => %w[artifact enchantment] } },
+                                          { "creature" => { "power" => { "at_least" => 4 } } }] }
+
+        def self.scalar_params? = true
+
+        def self.build(params, errors, path, **)
+          unless params.is_a?(Array) && params.size >= 2
+            errors << "#{path}: must be a list of at least two filters"
+            return self
+          end
+          new(params.each_with_index.filter_map { |f, i| Mechanics.build_entry(:filter, f, errors, "#{path}[#{i}]") })
+        end
+
+        attr_reader :filters
+
+        def initialize(filters)
+          super()
+          @filters = filters.freeze
+          freeze
+        end
+
+        def primitive_name = "one_of"
+        def live_keys = filters.flat_map(&:live_keys).uniq
+        def to_s = filters.map { it.is_a?(Class) ? it.primitive_name.tr("_", " ") : it.to_s }.join(" or ")
+        def candidates(engine, controller) = candidates_for(engine, controller, nil)
+        def candidates_for(engine, controller, source) = filters.flat_map { it.candidates_for(engine, controller, source) }.uniq
+        def match?(engine, ref, controller) = match_for?(engine, ref, controller, nil)
+        def match_for?(engine, ref, controller, source) = filters.any? { it.match_for?(engine, ref, controller, source) }
+        def matches_types?(types) = filters.any? { it.matches_types?(types) }
+        def matches_facts?(facts) = filters.any? { it.matches_facts?(facts) }
       end
     end
   end

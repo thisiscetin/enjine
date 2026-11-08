@@ -1,0 +1,10 @@
+{
+  "Make Your Move": {
+    "abilities": [
+      { "spell": {
+        "targets": [{ "one_of": [{ "permanent": { "any_of": ["artifact", "enchantment"] } },
+                                 { "creature": { "power": { "at_least": 4 } } }] }],
+        "effects": [{ "destroy": { "to": { "target": 0 } } }] } }
+    ]
+  }
+}

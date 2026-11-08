@@ -5,8 +5,6 @@ module Enjine
     # One-shot and continuous effects (CR 609-611). Each effect is built from data
     # and applied at resolution with an EffectContext.
     module Effects
-      COUNTER_KINDS = %w[+1/+1 -1/-1 loyalty].freeze
-
       # Base effect: parses the common "to" selector, an "amount" (fixed or computed, see
       # Mechanics::Amount) and an optional "if" condition checked on resolution (CR 608.2c).
       class Effect < Primitive
@@ -101,10 +99,12 @@ module Enjine
       # Put counters on permanents (CR 122).
       class AddCounters < Effect
         primitive :effect, :add_counters,
-                  description: "Put `amount` counters of kind `counter` (+1/+1, -1/-1, loyalty) on each referenced " \
-                               "permanent.",
+                  description: "Put `amount` counters named `counter` on each referenced permanent. Any counter " \
+                               "name works (+1/+1, -1/-1, loyalty, stun, shield, oil, a keyword, ...); see " \
+                               "docs/reference/counters.md for the ones with rules.",
                   rules: %w[122.1 122.6 613.4c],
-                  params: { "counter" => COUNTER_KINDS.join(" | "), "amount" => "integer", "to" => "selector" },
+                  params: { "counter" => "counter name (+X/+Y, -X/-Y or a lowercase word)", "amount" => "integer",
+                            "to" => "selector" },
                   example: { "add_counters" => { "counter" => "+1/+1", "amount" => 1,
                                                  "to" => { "each" => "creature", "controller" => "you" } } }
 
@@ -113,17 +113,16 @@ module Enjine
         def self.keys = %w[counter amount to if]
 
         def setup(params, errors, path)
-          @counter = Mechanics.fetch_param(params, :counter)
-          return if COUNTER_KINDS.include?(@counter)
-
-          errors << "#{path}.counter: must be one of #{COUNTER_KINDS.join(", ")}"
+          @counter = Counters.normalize(Mechanics.fetch_param(params, :counter))
+          message = Counters.error(@counter)
+          errors << "#{path}.counter: #{message}" if message
         end
 
         def to_s = "#{amount} #{counter} counter(s) → #{to}"
 
         def apply(engine, ctx)
           n = amount_for(engine, ctx)
-          objects(engine, ctx).each { engine.add_counters!(engine.object(it), counter, n) }
+          objects(engine, ctx).each { engine.add_counters!(engine.object(it), counter, n, by_player: ctx.controller) }
         end
       end
 

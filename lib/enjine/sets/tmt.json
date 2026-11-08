@@ -12,6 +12,56 @@
   "cards": [
     {
       "card": {
+        "name": "Make Your Move",
+        "mana_cost": "{2}{W}",
+        "types": [
+          "instant"
+        ],
+        "abilities": [
+          {
+            "spell": {
+              "targets": [
+                {
+                  "one_of": [
+                    {
+                      "permanent": {
+                        "any_of": [
+                          "artifact",
+                          "enchantment"
+                        ]
+                      }
+                    },
+                    {
+                      "creature": {
+                        "power": {
+                          "at_least": 4
+                        }
+                      }
+                    }
+                  ]
+                }
+              ],
+              "effects": [
+                {
+                  "destroy": {
+                    "to": {
+                      "target": 0
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "rarity": "common",
+      "printing": {
+        "set": "tmt",
+        "number": "20"
+      }
+    },
+    {
+      "card": {
         "name": "Buzz Bots",
         "mana_cost": "{1}{U}",
         "types": [
@@ -49,6 +99,44 @@
       "printing": {
         "set": "tmt",
         "number": "32"
+      }
+    },
+    {
+      "card": {
+        "name": "Negate",
+        "mana_cost": "{1}{U}",
+        "types": [
+          "instant"
+        ],
+        "abilities": [
+          {
+            "spell": {
+              "targets": [
+                {
+                  "spell": {
+                    "not": [
+                      "creature"
+                    ]
+                  }
+                }
+              ],
+              "effects": [
+                {
+                  "counter": {
+                    "to": {
+                      "target": 0
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "rarity": "common",
+      "printing": {
+        "set": "tmt",
+        "number": "47"
       }
     },
     {
@@ -105,6 +193,44 @@
       "printing": {
         "set": "tmt",
         "number": "57"
+      }
+    },
+    {
+      "card": {
+        "name": "Death in the Family",
+        "mana_cost": "{1}{B}",
+        "types": [
+          "instant"
+        ],
+        "abilities": [
+          {
+            "spell": {
+              "targets": [
+                {
+                  "creature": {
+                    "mana_value": {
+                      "at_most": 3
+                    }
+                  }
+                }
+              ],
+              "effects": [
+                {
+                  "exile": {
+                    "to": {
+                      "target": 0
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "rarity": "uncommon",
+      "printing": {
+        "set": "tmt",
+        "number": "61"
       }
     },
     {
@@ -197,7 +323,13 @@
           {
             "static": {
               "affects": {
-                "each": "creature",
+                "each": {
+                  "creature": {
+                    "types": [
+                      "artifact"
+                    ]
+                  }
+                },
                 "controller": "you",
                 "other": true
               },
@@ -787,17 +919,6 @@
       ]
     },
     {
-      "name": "Make Your Move",
-      "rarity": "common",
-      "printing": {
-        "set": "tmt",
-        "number": "20"
-      },
-      "missing": [
-        "other rules text"
-      ]
-    },
-    {
       "name": "Mighty Mutanimals",
       "rarity": "uncommon",
       "printing": {
@@ -1118,17 +1239,6 @@
       ]
     },
     {
-      "name": "Negate",
-      "rarity": "common",
-      "printing": {
-        "set": "tmt",
-        "number": "47"
-      },
-      "missing": [
-        "other rules text"
-      ]
-    },
-    {
       "name": "Ooze Spill",
       "rarity": "uncommon",
       "printing": {
@@ -1276,17 +1386,6 @@
       ]
     },
     {
-      "name": "Death in the Family",
-      "rarity": "uncommon",
-      "printing": {
-        "set": "tmt",
-        "number": "61"
-      },
-      "missing": [
-        "exile"
-      ]
-    },
-    {
       "name": "Dream Beavers",
       "rarity": "uncommon",
       "printing": {
@@ -1363,7 +1462,6 @@
         "layout: class",
         "triggered ability",
         "other rules text",
-        "static ability",
         "graveyard casting"
       ]
     },
@@ -2745,8 +2843,6 @@
         "number": "182"
       },
       "missing": [
-        "triggered ability",
-        "counters",
         "other rules text"
       ]
     },

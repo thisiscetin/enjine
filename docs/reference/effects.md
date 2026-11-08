@@ -4,13 +4,13 @@
 
 ## add_counters
 
-Put `amount` counters of kind `counter` (+1/+1, -1/-1, loyalty) on each referenced permanent.
+Put `amount` counters named `counter` on each referenced permanent. Any counter name works (+1/+1, -1/-1, loyalty, stun, shield, oil, a keyword, ...); see docs/reference/counters.md for the ones with rules.
 
 Rules: CR 122.1, CR 122.6, CR 613.4c
 
 | Parameter | Description |
 | --- | --- |
-| `counter` | +1/+1 | -1/-1 | loyalty |
+| `counter` | counter name (+X/+Y, -X/-Y or a lowercase word) |
 | `amount` | integer |
 | `to` | selector |
 

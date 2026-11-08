@@ -11,5 +11,38 @@
       { "static": { "affects": { "each": { "creature": { "any_of": ["artifact"] } }, "controller": "you" },
                     "keywords": ["vigilance"] } }
     ]
+  },
+  "Federation Field Medic": {
+    "keywords": ["vigilance"],
+    "abilities": [
+      { "triggered": { "when": { "enters": {} }, "choose": 1, "modes": [
+        { "targets": ["creature"], "effects": [
+          { "add_counters": { "counter": "+1/+1", "amount": 1, "to": { "target": 0 } } },
+          { "grant": { "keywords": ["vigilance"], "to": { "target": 0 } } } ] },
+        { "effects": [
+          { "draw": { "amount": 1,
+                      "if": { "controls": { "each": { "permanent": { "counters": true } }, "controller": "you" },
+                              "at_least": 1 } } } ] } ] } }
+    ]
+  },
+  "Set Phasers to . . .": {
+    "abilities": [
+      { "spell": { "choose": 1, "modes": [
+        { "targets": ["creature"], "effects": [
+          { "tap": { "to": { "target": 0 } } },
+          { "add_counters": { "counter": "stun", "amount": 1, "to": { "target": 0 } } } ] },
+        { "targets": [{ "creature": { "attacking": true } }], "effects": [
+          { "deal_damage": { "amount": 3, "to": { "target": 0 } } } ] } ] } }
+    ]
+  },
+  "Test of Conviction": {
+    "abilities": [
+      { "spell": { "choose": 1, "modes": [
+        { "effects": [
+          { "add_counters": { "counter": "+1/+1", "amount": 1, "to": { "each": "creature", "controller": "you" } } } ] },
+        { "targets": ["opponent"], "effects": [
+          { "draw": { "amount": 1, "to": { "target": 0 } } },
+          { "draw": { "amount": 2 } } ] } ] } }
+    ]
   }
 }

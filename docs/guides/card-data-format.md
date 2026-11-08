@@ -165,10 +165,26 @@ once-per-turn are automatic.
 ### 4.4 Target filters
 
 `any_target` (creature, player or planeswalker), `creature`, `planeswalker`,
-`creature_or_planeswalker`, `permanent`, `player`, `opponent`, `spell`. See
-`docs/reference/filters.md`. Qualified targets ("target creature *you control*",
-"target *nonland* permanent", "target creature with flying") are not supported
-yet, so the card is unsupported.
+`creature_or_planeswalker`, `permanent`, `player`, `opponent`, `spell`, `one_of`. See
+`docs/reference/filters.md`. A filter takes restrictions as parameters:
+
+| Oracle words | Data |
+| --- | --- |
+| "you control" / "an opponent controls" | `{ "creature": { "controller": "you" } }` |
+| "another" | `{ "creature": { "other": true } }` |
+| "nonland", "artifact or creature" | `{ "permanent": { "not": ["land"] } }`, `{ "permanent": { "any_of": ["artifact", "creature"] } }` |
+| "artifact creature" | `{ "creature": { "types": ["artifact"] } }` |
+| "with power 4 or greater", "with mana value 3 or less" | `{ "creature": { "power": { "at_least": 4 } } }`, `{ "permanent": { "mana_value": { "at_most": 3 } } }` (also `toughness`) |
+| "Human", "non-Doctor" | `{ "creature": { "subtypes": ["human"] } }`, `{ "creature": { "not_subtypes": ["doctor"] } }` |
+| "legendary", "nonlegendary" | `{ "creature": { "supertypes": ["legendary"] } }`, `{ "creature": { "not_supertypes": ["legendary"] } }` |
+| "token", "nontoken" | `{ "creature": { "token": true } }`, `{ "creature": { "token": false } }` |
+| "with a counter on it", "with a +1/+1 counter on it" | `{ "creature": { "counters": true } }`, `{ "creature": { "counters": "+1/+1" } }` |
+| "modified" (CR 700.9) | `{ "creature": { "modified": true } }` |
+| "attacking", "tapped" | `{ "creature": { "attacking": true } }`, `{ "creature": { "tapped": true } }` |
+| "land, or creature with power 6 or greater" | `{ "one_of": [{ "permanent": { "any_of": ["land"] } }, { "creature": { "power": { "at_least": 6 } } }] }` |
+| "noncreature spell" | `{ "spell": { "not": ["creature"] } }` |
+
+"Target creature with flying" (keyword restrictions) is not supported yet.
 
 ### 4.5 Who an effect applies to: the `to` selector
 
@@ -216,7 +232,7 @@ See `docs/reference/effects.md` for the generated list. Currently:
 | --- | --- | --- |
 | `deal_damage` | "deals N damage to …" | `{ "deal_damage": { "amount": N, "to": … } }` |
 | `pump` | "gets +X/+Y until end of turn" | `{ "pump": { "power": X, "toughness": Y, "to": … } }` |
-| `add_counters` | "put N +1/+1 counters on …" | `{ "add_counters": { "counter": "+1/+1", "amount": N, "to": … } }` (`+1/+1`, `-1/-1`, `loyalty`) |
+| `add_counters` | "put N +1/+1 counters on …" | `{ "add_counters": { "counter": "+1/+1", "amount": N, "to": … } }` (any counter name: `+1/+1`, `stun`, `shield`, `oil`, a keyword; see `docs/reference/counters.md`) |
 | `gain_life` | "you gain N life" | `{ "gain_life": { "amount": N } }` (`to` defaults to `"you"`) |
 | `lose_life` | "each opponent loses N life" | `{ "lose_life": { "amount": N, "to": "each_opponent" } }` |
 | `draw` | "draw N cards" | `{ "draw": { "amount": N } }` (`to` defaults to `"you"`) |
