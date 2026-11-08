@@ -60,4 +60,41 @@ RSpec.describe Enjine::RulesMonitor do
     stub_const("Enjine::Actions::PlayLand::LANDS_PER_TURN", 3)
     expect(rules(play)).to include("305.2")
   end
+
+  context "with static abilities on the board (CR 604.2, 613.4c, 702.12b, 702.3b)" do
+    let(:cards) do
+      [{ "name" => "Banner of Ranks", "mana_cost" => "{2}", "types" => ["artifact"],
+         "abilities" => [{ "static" => { "affects" => { "each" => "creature", "controller" => "you" },
+                                         "pump" => { "power" => 1, "toughness" => 1 },
+                                         "keywords" => %w[indestructible attacks_despite_defender] } }] },
+       { "name" => "Wall of Ranks", "mana_cost" => "{1}", "types" => ["creature"], "keywords" => ["defender"], "power" => 1,
+         "toughness" => 1 }]
+    end
+    let(:game) do
+      build_game(catalog_with(*cards)) do
+        turn 3, active: "alice", step: :precombat_main
+        player("alice") { battlefield "Banner of Ranks", "Wall of Ranks" }
+        player("bob") { library "Forest", count: 3 }
+      end
+    end
+
+    def checked(game)
+      monitor = described_class.new(game)
+      monitor.check!(Enjine::HistoryEntry.new(seq: 0, turn: 3, step: "x", player: nil, kind: nil, option: nil, events: []))
+    end
+
+    it "expects static pumps and lets indestructible creatures keep lethal damage" do
+      game.state.object(obj_id(game, "Wall of Ranks")).damage = 3
+      expect(checked(game)).to eq([])
+      monitor = described_class.new(game)
+      event = Enjine::Events::AttackerDeclared.new(object: obj_id(game, "Wall of Ranks"), target: "player:bob")
+      expect(monitor.check!(Enjine::HistoryEntry.new(seq: 1, turn: 3, step: "x", player: nil, kind: nil, option: nil,
+                                                     events: [event]))).to eq([])
+    end
+
+    it "reports a static pump the engine forgot" do
+      allow_any_instance_of(Enjine::Engine).to receive(:static_sources).and_return([]) # rubocop:disable RSpec/AnyInstance
+      expect(checked(game).map(&:rule)).to eq(["613.4c"])
+    end
+  end
 end

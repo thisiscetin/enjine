@@ -189,7 +189,11 @@ module Enjine
 
       def cost_of(id) = @game.catalog.fetch(@game.state.object(id).card).mana_cost.to_s
 
-      def ability_text(id, ref) = @game.catalog.fetch(@game.state.object(id).card).ability(ref).to_s
+      # A granted ability ("granted:<card>:<ref>") lives in the granting card's data.
+      def ability_text(id, ref)
+        card, inner = ref.start_with?("granted:") ? ref.delete_prefix("granted:").split(":", 2) : [@game.state.object(id).card, ref]
+        @game.catalog.fetch(card).ability(inner).to_s
+      end
 
       def targets(list) = list.nil? || list.empty? ? "" : " targeting #{list.map { name_of(it) }.join(", ")}"
     end

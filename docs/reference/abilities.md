@@ -455,15 +455,18 @@ Rules: CR 113.3a, CR 601.2c, CR 608.2b, CR 608.2c
 
 ## static
 
-While its source is on the battlefield, every matching permanent gets `pump` and/or the `keywords`. `affects` is {"each": filter, "controller": you|opponent|any, "other": true} (relative to the source's controller), or "attached": the permanent the source is attached to ("equipped/enchanted creature").
+While its source is on the battlefield (and its `if` condition holds), every permanent it `affects` gets `pump` (fixed or computed amounts, layer 7c), the `keywords` and granted `abilities` (layer 6, triggered or mana abilities), and with `creature_types` has exactly those creature types (layer 4). `affects` is {"each": filter, "controller": you|opponent|any, "other": true} (relative to the source's controller), "self", or "attached" ("equipped/enchanted creature").
 
-Rules: CR 604.1, CR 611.3a, CR 613.1f, CR 613.4c, CR 301.5f, CR 303.4m
+Rules: CR 604.1, CR 604.2, CR 611.3a, CR 613.1d, CR 613.1f, CR 613.4c, CR 205.1a, CR 301.5f, CR 303.4m
 
 | Parameter | Description |
 | --- | --- |
-| `affects` | {"each": filter, "controller": ..., "other": bool} or "attached" |
-| `pump` | {"power": n, "toughness": n} |
+| `affects` | {"each": filter, "controller": ..., "other": bool}, "self" or "attached" |
+| `if` | condition ("as long as ...", "during your turn") |
+| `pump` | {"power": amount, "toughness": amount} ("gets +1/+1 for each ...") |
 | `keywords` | list of keywords |
+| `creature_types` | list of creature types (replaces the others) |
+| `abilities` | list of triggered or mana abilities the affected permanents have |
 
 ```json
 {
@@ -518,6 +521,8 @@ Rules: CR 603.2, CR 603.3, CR 603.3b, CR 603.3d
 | `when` | a trigger condition, e.g. {"enters": {}} |
 | `targets` | list of target filters |
 | `effects` | list of effects |
+| `if` | condition: an intervening "if", checked when it triggers and on resolution (CR 603.4) |
+| `while` | condition checked only when it triggers ("whenever you attack while ...", CR 603.2) |
 
 ```json
 {

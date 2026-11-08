@@ -343,33 +343,43 @@ module Enjine
                                "next time a player would receive priority (in APNAP order), with targets chosen then.",
                   rules: %w[603.2 603.3 603.3b 603.3d],
                   params: { "when" => "a trigger condition, e.g. {\"enters\": {}}", "targets" => "list of target filters",
-                            "effects" => "list of effects" },
+                            "effects" => "list of effects",
+                            "if" => "condition: an intervening \"if\", checked when it triggers and on resolution (CR 603.4)",
+                            "while" => "condition checked only when it triggers (\"whenever you attack while ...\", CR 603.2)" },
                   example: { "triggered" => { "when" => { "enters" => {} }, "effects" => [{ "draw" => { "amount" => 1 } }] } }
 
-        attr_reader :trigger, :condition
+        attr_reader :trigger, :condition, :while_condition
 
         def self.build(params, errors, path, **)
-          Mechanics.check_keys(params, %w[when if] + BODY_KEYS, errors, path)
+          Mechanics.check_keys(params, %w[when if while] + BODY_KEYS, errors, path)
           raw = Mechanics.fetch_param(params, :when)
           trigger = raw.nil? ? ((errors << "#{path}.when: required") && nil) : Mechanics.build_entry(:trigger, raw, errors, "#{path}.when")
           raw_if = Mechanics.fetch_param(params, :if)
           condition = raw_if && Condition.build(raw_if, errors, "#{path}.if")
-          new(**parse_body(params, errors, path), trigger: trigger, condition: condition)
+          raw_while = Mechanics.fetch_param(params, :while)
+          during = raw_while && Condition.build(raw_while, errors, "#{path}.while")
+          new(**parse_body(params, errors, path), trigger: trigger, condition: condition, while_condition: during)
         end
 
-        def initialize(trigger:, condition: nil, **)
+        def initialize(trigger:, condition: nil, while_condition: nil, **)
           @trigger = trigger
           @condition = condition
+          @while_condition = while_condition
           super(**)
         end
 
         # CR 603.4: an intervening "if" must be true when the trigger event happens and on resolution.
+        # A "while" condition is part of the trigger event (CR 603.2): only checked as it triggers, which is
+        # when no resolving `object` is given.
         def condition_met?(engine, controller, source, object = nil)
-          condition.nil? || condition.true?(engine, EffectContext.new(controller, source, object, []))
+          ctx = EffectContext.new(controller, source, object, [])
+          return false if object.nil? && while_condition && !while_condition.true?(engine, ctx)
+
+          condition.nil? || condition.true?(engine, ctx)
         end
 
         def kind = :triggered
-        def to_s = "#{trigger}, #{"if #{condition}, " if condition}#{effects_text}"
+        def to_s = "#{trigger}#{" while #{while_condition}" if while_condition}, #{"if #{condition}, " if condition}#{effects_text}"
       end
 
       # A planeswalker loyalty ability "+N: ..." / "-N: ..." (CR 606).

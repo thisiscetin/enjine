@@ -152,7 +152,24 @@ module Enjine
       active_turn = state.turn
       sick = obj.controlled_since.nil? || obj.controlled_since >= active_turn
       finding("302.6", "summoning-sick #{event.object} attacked") if sick && !keyword?(obj, :haste)
-      finding("702.3b", "#{event.object} has defender but attacked") if keyword?(obj, :defender)
+      return unless keyword?(obj,
+                             :defender) && !keyword?(obj, :attacks_despite_defender) && !static_keyword?(obj, :attacks_despite_defender)
+
+      finding("702.3b", "#{event.object} has defender but attacked")
+    end
+
+    # A keyword from an applying static ability of a permanent (CR 604.2), matched on printed types.
+    def static_keyword?(obj, keyword)
+      engine = @game.instance_variable_get(:@engine)
+      card = defn(obj.card)
+      facts = Mechanics::Filters::Facts.new(chars: card.printed_characteristics, counters: obj.counters, token: card.token?)
+      state.battlefield.any? do |id|
+        source = state.objects[id]
+        defn(source.card).abilities.any? do |ability|
+          ability.kind == :static && ability.keywords.include?(keyword) && ability.affects?(obj, source, facts) &&
+            ability.active?(engine, source)
+        end
+      end
     end
 
     # CR 702.9b: a creature with flying can be blocked only by creatures with flying or reach.
@@ -174,19 +191,51 @@ module Enjine
       check_hand_size!
     end
 
-    # CR 613.4c, recomputed independently: printed + counters + active pump effects.
+    # CR 613.4, recomputed independently: printed (or a 7b setting effect) + counters + active pump effects
+    # + static ability bonuses. Characteristic-defining power/toughness (7a) is left to the engine's specs.
     def check_power_toughness!
       view = @game.view_for(:observer)["battlefield"].to_h { [it["id"], it] }
+      statics = static_pumps
       state.battlefield.each do |id|
         obj = state.objects[id]
         card = defn(obj.card)
-        next unless card.creature?
+        next unless card.creature? && !card.defined_pt?
 
         net = obj.counters.fetch("+1/+1", 0) - obj.counters.fetch("-1/-1", 0)
-        pumps = state.effects.select { it["kind"] == "pump" && it["affected"].include?(id) } + attached_grants(id)
-        expected = [card.power + net + pumps.sum { it["power"] }, card.toughness + net + pumps.sum { it["toughness"] }]
+        pumps = state.effects.select { it["kind"] == "pump" && it["affected"].include?(id) } + attached_grants(id) +
+                static_bonuses(obj, card, statics)
+        base = base_power_toughness(id, card)
+        expected = [base[0] + net + pumps.sum { it["power"] }, base[1] + net + pumps.sum { it["toughness"] }]
         actual = view.fetch(id).values_at("power", "toughness")
         finding("613.4c", "#{id} is #{actual.join("/")}, expected #{expected.join("/")}") if actual != expected
+      end
+    end
+
+    # CR 613.4b: the latest setting effect, else as printed.
+    def base_power_toughness(id, card)
+      setting = state.effects.select { it["kind"] == "base_power_toughness" && it["affected"].include?(id) }.last
+      setting ? setting.values_at("power", "toughness") : [card.power, card.toughness]
+    end
+
+    # Static abilities printed on permanents that give a bonus to more than the attached permanent and
+    # apply now: [[source object, ability, [power, toughness]], ...]. Conditions and amounts are the
+    # primitives' own; which creatures get the bonus is decided here from printed types and raw counters.
+    def static_pumps
+      engine = @game.instance_variable_get(:@engine)
+      state.battlefield.flat_map do |id|
+        source = state.objects[id]
+        defn(source.card).abilities.filter_map do |ability|
+          next unless ability.kind == :static && ability.pump? && !ability.attached? && ability.active?(engine, source)
+
+          [source, ability, ability.bonus(engine, source)]
+        end
+      end
+    end
+
+    def static_bonuses(obj, card, statics)
+      facts = Mechanics::Filters::Facts.new(chars: card.printed_characteristics, counters: obj.counters, token: card.token?)
+      statics.filter_map do |source, ability, (power, toughness)|
+        { "power" => power, "toughness" => toughness } if ability.affects?(obj, source, facts)
       end
     end
 
@@ -223,12 +272,16 @@ module Enjine
     def check_sba!
       view = @game.view_for(:observer)["battlefield"]
       view.each do |perm|
-        if perm.key?("toughness") && (perm["toughness"] <= 0 || (perm["damage"].positive? && perm["damage"] >= perm["toughness"]))
+        lethal = perm.key?("toughness") && perm["damage"].positive? && perm["damage"] >= perm["toughness"] &&
+                 !indestructible?(state.objects[perm["id"]]) # CR 702.12b: lethal damage doesn't destroy it
+        if perm.key?("toughness") && (perm["toughness"] <= 0 || lethal)
           finding("704.5g", "#{perm["id"]} survived with #{perm["damage"]} damage and toughness #{perm["toughness"]}")
         end
         finding("704.5i", "#{perm["id"]} survived with 0 loyalty") if perm.key?("loyalty") && perm["loyalty"] <= 0
       end
     end
+
+    def indestructible?(obj) = keyword?(obj, :indestructible) || static_keyword?(obj, :indestructible)
 
     # CR 514.1: after cleanup the active player has at most seven cards (checked at the next turn's priority).
     def check_hand_size!

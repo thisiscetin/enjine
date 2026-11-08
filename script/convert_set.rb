@@ -74,6 +74,7 @@ module SetConverter
     %w[power toughness loyalty].each do |stat|
       next unless source[stat]
       next if stat != "loyalty" && station_card?(source) # a station card's P/T box belongs to a station symbol (CR 722.2b-c)
+      next if translation&.key?(stat) # e.g. "*" defined by a characteristic-defining ability (CR 604.3)
 
       Integer(source[stat], exception: false) ? data[stat] = Integer(source[stat]) : missing << "variable #{stat}"
     end
@@ -608,17 +609,21 @@ module SetConverter
 
   CREATURE_TOKEN = %r{
     \ACreate\ (a|an|one|two|three|\d+)\ (tapped\ )?(\d+)/(\d+)
-    \ (?:(?:white|blue|black|red|green|colorless)(?:\ and\ \w+)?\ )?
+    \ (?:(white|blue|black|red|green|colorless)(?:\ and\ (white|blue|black|red|green))?\ )?
     ([A-Z][\w\ ]*?)\ (artifact\ )?creature\ tokens?(?:\ with\ ([a-z,\ ]+))?\z
   }x
+  COLOR_WORDS = { "white" => "W", "blue" => "U", "black" => "B", "red" => "R", "green" => "G" }.freeze
 
+  # A token's colors are those its creating effect gives it (CR 111.3, 202.2e).
   def creature_token(match)
-    amount, tapped, power, toughness, subtypes, artifact, keywords = match.captures
+    amount, tapped, power, toughness, color, second, subtypes, artifact, keywords = match.captures
     keywords = keywords.to_s.split(/, (?:and )?| and /).map(&:strip).reject(&:empty?)
     return nil unless (keywords - SUPPORTED_KEYWORDS.to_a).empty?
 
     token = { "name" => subtypes, "types" => [artifact ? "artifact" : nil, "creature"].compact,
               "subtypes" => subtypes.split.map(&:downcase), "power" => Integer(power), "toughness" => Integer(toughness) }
+    colors = [color, second].filter_map { COLOR_WORDS[it] }
+    token["colors"] = colors unless colors.empty?
     token["keywords"] = keywords unless keywords.empty?
     effect = { "token" => token, "amount" => number(amount) }
     effect["tapped"] = true if tapped

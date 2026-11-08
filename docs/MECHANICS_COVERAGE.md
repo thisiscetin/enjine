@@ -634,3 +634,10 @@ replacement/prevention (614–616), "dies" and leaves-the-battlefield triggers
 - 704.5 letters a–aa, 116.2 a–m, 613.1/613.4/613.7, 616.1a–f, 601.2a–i, 605.1a, 703.4a–q and 733.1 were read in full or near-full.
 - Descriptions of the section 1–6 rules marked n/a or M1 are paraphrases. Check the rule text before implementing; this document is a checklist, not a substitute.
 - Not verified: subrule-level wording changes between 2026-09-25 and 2026-11-06, and the exact date of the mana-ability (605.1a) change. It is present in the 2026-09-25 text, and this document doesn't claim when it was introduced.
+
+## Implementation notes: amounts, history, statics and layers
+
+- **613 layers.** The layer pass runs in three stages over the whole battlefield (layers 1–4, 5–6, 7), so a later layer sees earlier results: 7a characteristic-defining power/toughness (604.3, card data `"power": <amount>`), 7b setting effects (`set_base_power_toughness`, 613.4b), 7c counters, static bonuses (fixed or computed) and pumps. Layer 4 sets creature types (205.1a: `creature_types` statics, `set_creature_types` until end of turn). Layer 6 adds keywords and granted triggered/mana abilities (613.1f; refs `granted:<card>:<ref>`). Statics may be conditional (`if`, 604.2) and `affects: "self"`. 613.8 is enforced at build time: statics and characteristic-defining amounts can't read power, toughness or combat status.
+- **"This turn" history.** Per-player turn and game logs (spells cast, permanents that entered/died/returned to hand, life gained/lost, dilemmas faced) and per-object "attacked" and "resolved N times" counts, recorded from events in one hook (a cancelled cast never counts, 601.2i).
+- **608.2h last known information.** A source that leaves the battlefield is remembered by its abilities (power, toughness, counters, controller); "its controller" of a destroyed target uses the controller it last had.
+- **202.2 / 204 colors.** Cards have colors from their mana cost or an explicit `colors` list (color indicator, token colors, 111.3); filters take `colors`.

@@ -2632,6 +2632,572 @@
     ]
   },
   {
+    "name": "Tidepool Warden",
+    "mana_cost": "{1}{U}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "merfolk",
+      "scout"
+    ],
+    "power": 2,
+    "toughness": 2,
+    "abilities": [
+      {
+        "static": {
+          "affects": "self",
+          "if": {
+            "your_turn": true
+          },
+          "keywords": [
+            "flying"
+          ]
+        }
+      },
+      {
+        "triggered": {
+          "when": {
+            "player_attacks": {}
+          },
+          "while": {
+            "amount": {
+              "power": {
+                "each": "creature",
+                "controller": "you"
+              }
+            },
+            "at_least": 5
+          },
+          "effects": [
+            {
+              "gain_life": {
+                "amount": 1
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Hoardling",
+    "mana_cost": "{2}{B}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "rat"
+    ],
+    "power": 1,
+    "toughness": 1,
+    "abilities": [
+      {
+        "static": {
+          "affects": "self",
+          "pump": {
+            "power": {
+              "count": {
+                "each": "artifact",
+                "controller": "you"
+              }
+            },
+            "toughness": 0
+          }
+        }
+      }
+    ]
+  },
+  {
+    "name": "Withering Hex",
+    "mana_cost": "{1}{B}",
+    "types": [
+      "enchantment"
+    ],
+    "subtypes": [
+      "aura"
+    ],
+    "abilities": [
+      {
+        "enchant": "creature"
+      },
+      {
+        "static": {
+          "affects": "attached",
+          "pump": {
+            "power": -2,
+            "toughness": 0
+          },
+          "keywords": [
+            "cant_block",
+            "doesnt_untap"
+          ],
+          "creature_types": [
+            "salamander"
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Kinship Rite",
+    "mana_cost": "{G}",
+    "types": [
+      "instant"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "targets": [
+            {
+              "creature": {
+                "controller": "you"
+              }
+            }
+          ],
+          "effects": [
+            {
+              "add_counters": {
+                "counter": "+1/+1",
+                "amount": 1,
+                "to": {
+                  "target": 0
+                }
+              }
+            },
+            {
+              "pump": {
+                "power": {
+                  "distinct_types": {
+                    "each": "creature",
+                    "controller": "you"
+                  }
+                },
+                "toughness": {
+                  "distinct_types": {
+                    "each": "creature",
+                    "controller": "you"
+                  }
+                },
+                "to": {
+                  "target": 0
+                }
+              }
+            },
+            {
+              "set_creature_types": {
+                "types": [
+                  "elf"
+                ],
+                "to": {
+                  "target": 0
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Grove Speaker",
+    "mana_cost": "{2}{G}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "elf",
+      "druid"
+    ],
+    "power": 2,
+    "toughness": 2,
+    "abilities": [
+      {
+        "static": {
+          "affects": {
+            "each": "creature",
+            "controller": "you"
+          },
+          "abilities": [
+            {
+              "mana": {
+                "cost": [
+                  "tap"
+                ],
+                "produce": "{G}"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Signal Relay",
+    "mana_cost": "{2}{U}",
+    "types": [
+      "artifact",
+      "creature"
+    ],
+    "subtypes": [
+      "construct"
+    ],
+    "power": 1,
+    "toughness": 3,
+    "abilities": [
+      {
+        "static": {
+          "affects": {
+            "each": {
+              "creature": {
+                "types": [
+                  "artifact"
+                ]
+              }
+            },
+            "controller": "you"
+          },
+          "abilities": [
+            {
+              "triggered": {
+                "when": {
+                  "deals_damage": {
+                    "combat": true,
+                    "to": "player"
+                  }
+                },
+                "effects": [
+                  {
+                    "draw": {
+                      "amount": 1
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Swarm Sentinel",
+    "mana_cost": "{1}{B}",
+    "types": [
+      "artifact",
+      "creature"
+    ],
+    "subtypes": [
+      "construct"
+    ],
+    "power": {
+      "count": {
+        "each": {
+          "creature": {
+            "types": [
+              "artifact"
+            ]
+          }
+        },
+        "controller": "you"
+      }
+    },
+    "toughness": 2
+  },
+  {
+    "name": "Ascendant Husk",
+    "mana_cost": "{2}",
+    "types": [
+      "artifact",
+      "creature"
+    ],
+    "subtypes": [
+      "golem"
+    ],
+    "power": 0,
+    "toughness": 3,
+    "abilities": [
+      {
+        "activated": {
+          "cost": [
+            {
+              "mana": "{3}"
+            }
+          ],
+          "timing": "sorcery",
+          "effects": [
+            {
+              "set_base_power_toughness": {
+                "power": 4,
+                "toughness": 4,
+                "duration": "indefinite",
+                "to": "self"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Wall of Gears",
+    "mana_cost": "{1}{U}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "wall"
+    ],
+    "keywords": [
+      "defender"
+    ],
+    "power": 3,
+    "toughness": 3,
+    "abilities": [
+      {
+        "static": {
+          "affects": "self",
+          "keywords": [
+            "attacks_despite_defender"
+          ],
+          "if": {
+            "amount": {
+              "spells_cast_this_turn": {
+                "by": "you",
+                "matching": {
+                  "spell": {
+                    "not": [
+                      "creature"
+                    ]
+                  }
+                }
+              }
+            },
+            "at_least": 1
+          }
+        }
+      }
+    ]
+  },
+  {
+    "name": "Toll of Ruin",
+    "mana_cost": "{1}{B}",
+    "types": [
+      "instant"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "targets": [
+            "creature"
+          ],
+          "effects": [
+            {
+              "destroy": {
+                "to": {
+                  "target": 0
+                }
+              }
+            },
+            {
+              "create_token": {
+                "token": {
+                  "name": "Spirit",
+                  "colors": [
+                    "B"
+                  ],
+                  "types": [
+                    "creature"
+                  ],
+                  "subtypes": [
+                    "spirit"
+                  ],
+                  "power": 1,
+                  "toughness": 1
+                },
+                "to": {
+                  "controller_of": {
+                    "target": 0
+                  }
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Debt Collector",
+    "mana_cost": "{3}{B}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "human",
+      "rogue"
+    ],
+    "power": 2,
+    "toughness": 3,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "step_begins": {
+              "step": "end",
+              "whose": "each"
+            }
+          },
+          "effects": [
+            {
+              "lose_life": {
+                "amount": {
+                  "divide": [
+                    {
+                      "life_lost_this_turn": "each_opponent"
+                    },
+                    2
+                  ]
+                },
+                "to": "each_opponent"
+              }
+            },
+            {
+              "gain_life": {
+                "amount": {
+                  "this_way": 0
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Echo Shaman",
+    "mana_cost": "{1}{R}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "goblin",
+      "shaman"
+    ],
+    "power": 2,
+    "toughness": 1,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "enters": {
+              "subject": {
+                "each": "land",
+                "controller": "you"
+              }
+            }
+          },
+          "effects": [
+            {
+              "deal_damage": {
+                "amount": 1,
+                "to": "each_opponent"
+              }
+            },
+            {
+              "add_counters": {
+                "counter": "+1/+1",
+                "amount": 1,
+                "to": "self",
+                "if": {
+                  "nth_resolution": 2
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Grave Tally",
+    "mana_cost": "{1}{R}",
+    "types": [
+      "sorcery"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "targets": [
+            "creature"
+          ],
+          "effects": [
+            {
+              "deal_damage": {
+                "amount": {
+                  "plus": [
+                    2,
+                    {
+                      "times": [
+                        {
+                          "died_this_turn": {
+                            "each": "creature"
+                          }
+                        },
+                        2
+                      ]
+                    }
+                  ]
+                },
+                "to": {
+                  "target": 0
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Charge Battery",
+    "mana_cost": "{2}",
+    "types": [
+      "artifact"
+    ],
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "step_begins": {
+              "step": "precombat_main"
+            }
+          },
+          "effects": [
+            {
+              "add_counters": {
+                "counter": "charge",
+                "amount": 1,
+                "to": "self"
+              }
+            },
+            {
+              "add_mana": {
+                "produce": "{C}",
+                "amount": {
+                  "counters": {
+                    "of": "self",
+                    "kind": "charge"
+                  }
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
     "name": "Thornmarsh Hybrid",
     "mana_cost": "{1}{B/G}{B/G}",
     "types": [
