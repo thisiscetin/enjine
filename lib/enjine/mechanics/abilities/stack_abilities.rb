@@ -168,22 +168,30 @@ module Enjine
                             "effects" => "list of effects" },
                   example: { "triggered" => { "when" => { "enters" => {} }, "effects" => [{ "draw" => { "amount" => 1 } }] } }
 
-        attr_reader :trigger
+        attr_reader :trigger, :condition
 
         def self.build(params, errors, path, **)
-          Mechanics.check_keys(params, %w[when] + BODY_KEYS, errors, path)
+          Mechanics.check_keys(params, %w[when if] + BODY_KEYS, errors, path)
           raw = Mechanics.fetch_param(params, :when)
           trigger = raw.nil? ? ((errors << "#{path}.when: required") && nil) : Mechanics.build_entry(:trigger, raw, errors, "#{path}.when")
-          new(**parse_body(params, errors, path), trigger: trigger)
+          raw_if = Mechanics.fetch_param(params, :if)
+          condition = raw_if && Condition.build(raw_if, errors, "#{path}.if")
+          new(**parse_body(params, errors, path), trigger: trigger, condition: condition)
         end
 
-        def initialize(trigger:, **)
+        def initialize(trigger:, condition: nil, **)
           @trigger = trigger
+          @condition = condition
           super(**)
         end
 
+        # CR 603.4: an intervening "if" must be true when the trigger event happens and on resolution.
+        def condition_met?(engine, controller, source)
+          condition.nil? || condition.true?(engine, EffectContext.new(controller, source, nil, []))
+        end
+
         def kind = :triggered
-        def to_s = "#{trigger}, #{effects_text}"
+        def to_s = "#{trigger}, #{"if #{condition}, " if condition}#{effects_text}"
       end
 
       # A planeswalker loyalty ability "+N: ..." / "-N: ..." (CR 606).

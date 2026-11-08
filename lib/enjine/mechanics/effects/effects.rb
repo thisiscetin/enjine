@@ -7,11 +7,12 @@ module Enjine
     module Effects
       COUNTER_KINDS = %w[+1/+1 -1/-1 loyalty].freeze
 
-      # Base effect: parses the common "to" selector and an integer "amount".
+      # Base effect: parses the common "to" selector, an "amount" (fixed or computed, see
+      # Mechanics::Amount) and an optional "if" condition checked on resolution (CR 608.2c).
       class Effect < Primitive
-        attr_reader :to, :amount
+        attr_reader :to, :condition
 
-        def self.keys = %w[amount to]
+        def self.keys = %w[amount to if]
         def self.default_to = nil
 
         def self.build(params, errors, path, targets_count: 0, **)
@@ -23,23 +24,37 @@ module Enjine
                else
                  Selector.build(raw_to, errors, "#{path}.to", targets_count: targets_count)
                end
-          new(to: to, params: params, errors: errors, path: path)
+          new(to: to, params: params, errors: errors, path: path, targets_count: targets_count)
         end
 
-        def initialize(to:, params:, errors:, path:)
+        def initialize(to:, params:, errors:, path:, targets_count: 0)
           super()
           @to = to
-          @amount = Mechanics.integer_param(params, :amount, errors, path, min: 0) if self.class.keys.include?("amount")
+          if self.class.keys.include?("amount")
+            raw = Mechanics.fetch_param(params, :amount)
+            @amount = if raw.nil?
+                        (errors << "#{path}.amount: required") && Amount::Fixed.new(0)
+                      else
+                        Amount.build(raw, errors,
+                                     "#{path}.amount", targets_count: targets_count)
+                      end
+          end
+          raw_if = Mechanics.fetch_param(params, :if)
+          @condition = raw_if && Condition.build(raw_if, errors, "#{path}.if", targets_count: targets_count)
           setup(params, errors, path)
           freeze
         end
+
+        # The fixed amount (for display), or the amount computed for this resolution.
+        def amount = @amount.is_a?(Amount::Fixed) ? @amount.n : @amount
+        def amount_for(engine, ctx) = @amount.value(engine, ctx)
 
         def setup(_params, _errors, _path) = nil
 
         # Runs the effect during resolution. Effects that need a player's choice override this,
         # keep their progress in `locals` (plain JSON data) and return :wait after asking.
         def run(engine, ctx, _locals)
-          apply(engine, ctx)
+          apply(engine, ctx) if condition.nil? || condition.true?(engine, ctx)
           :done
         end
 
@@ -69,7 +84,8 @@ module Enjine
                   example: { "deal_damage" => { "amount" => 3, "to" => { "target" => 0 } } }
 
         def apply(engine, ctx)
-          refs(engine, ctx).each { engine.deal_damage!(ctx.source || ctx.object, it, amount) }
+          n = amount_for(engine, ctx)
+          refs(engine, ctx).each { engine.deal_damage!(ctx.source || ctx.object, it, n) }
         end
       end
 
@@ -85,7 +101,7 @@ module Enjine
 
         attr_reader :counter
 
-        def self.keys = %w[counter amount to]
+        def self.keys = %w[counter amount to if]
 
         def setup(params, errors, path)
           @counter = Mechanics.fetch_param(params, :counter)
@@ -97,7 +113,8 @@ module Enjine
         def to_s = "#{amount} #{counter} counter(s) → #{to}"
 
         def apply(engine, ctx)
-          objects(engine, ctx).each { engine.add_counters!(engine.object(it), counter, amount) }
+          n = amount_for(engine, ctx)
+          objects(engine, ctx).each { engine.add_counters!(engine.object(it), counter, n) }
         end
       end
 
@@ -113,7 +130,7 @@ module Enjine
 
         attr_reader :power, :toughness
 
-        def self.keys = %w[power toughness to]
+        def self.keys = %w[power toughness to if]
 
         def setup(params, errors, path)
           @power = Mechanics.integer_param(params, :power, errors, path, default: 0)
@@ -134,7 +151,7 @@ module Enjine
                                        rules: %w[119.3], params: { "amount" => "integer", "to" => "selector" },
                                        example: { "gain_life" => { "amount" => 3 } }
         def self.default_to = "you"
-        def apply(engine, ctx) = players(engine, ctx).each { engine.change_life!(it, amount) }
+        def apply(engine, ctx) = players(engine, ctx).each { engine.change_life!(it, amount_for(engine, ctx)) }
       end
 
       # Lose life (CR 119.3).
@@ -142,7 +159,7 @@ module Enjine
         primitive :effect, :lose_life, description: "Each referenced player loses `amount` life.",
                                        rules: %w[119.3], params: { "amount" => "integer", "to" => "selector" },
                                        example: { "lose_life" => { "amount" => 2, "to" => "each_opponent" } }
-        def apply(engine, ctx) = players(engine, ctx).each { engine.change_life!(it, -amount) }
+        def apply(engine, ctx) = players(engine, ctx).each { engine.change_life!(it, -amount_for(engine, ctx)) }
       end
 
       # Draw cards (CR 121).
@@ -151,7 +168,7 @@ module Enjine
                                   rules: %w[121.1 121.2], params: { "amount" => "integer", "to" => "selector" },
                                   example: { "draw" => { "amount" => 2 } }
         def self.default_to = "you"
-        def apply(engine, ctx) = players(engine, ctx).each { |i| amount.times { engine.draw!(i) } }
+        def apply(engine, ctx) = players(engine, ctx).each { |i| amount_for(engine, ctx).times { engine.draw!(i) } }
       end
 
       # Destroy permanents (CR 701.8).
@@ -159,7 +176,7 @@ module Enjine
         primitive :effect, :destroy, description: "Destroy each referenced permanent (it goes to its owner's graveyard).",
                                      rules: %w[701.8a], params: { "to" => "selector" },
                                      example: { "destroy" => { "to" => { "target" => 0 } } }
-        def self.keys = %w[to]
+        def self.keys = %w[to if]
 
         # CR 702.12b: indestructible permanents aren't destroyed.
         def apply(engine, ctx)
@@ -175,7 +192,7 @@ module Enjine
                                                   "owner's graveyard without resolving.",
                                      rules: %w[701.6a], params: { "to" => "selector" },
                                      example: { "counter" => { "to" => { "target" => 0 } } }
-        def self.keys = %w[to]
+        def self.keys = %w[to if]
 
         def apply(engine, ctx)
           refs(engine, ctx).each do |id|

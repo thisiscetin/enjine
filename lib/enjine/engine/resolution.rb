@@ -52,12 +52,19 @@ module Enjine
         specs = ability&.targets_for(obj.modes || []) || []
         targets = legal_targets(obj, specs)
         frame["pc"] = 0
-        frame["fizzled"] = !specs.empty? && targets.none?
+        frame["fizzled"] = (!specs.empty? && targets.none?) || !intervening_if_holds?(obj, ability)
         frame["ctx"] = { "controller" => obj.controller, "source" => obj.ability? ? obj.source : obj.id,
                          "object" => obj.id, "targets" => targets }
       end
 
       # The context for one effect; a modal ability's effects see only their mode's targets.
+      # CR 603.4: a triggered ability whose intervening "if" is false on resolution does nothing.
+      def intervening_if_holds?(obj, ability)
+        return true unless obj.ability? && ability.respond_to?(:condition_met?)
+
+        ability.condition_met?(self, obj.controller, obj.source)
+      end
+
       def effect_context(data, offset = 0, count = nil)
         targets = count ? data["targets"][offset, count] || [] : data["targets"]
         Mechanics::EffectContext.new(data["controller"], data["source"], data["object"], targets)

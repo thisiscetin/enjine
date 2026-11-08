@@ -19,10 +19,10 @@ module Enjine
 
         attr_reader :definition, :tapped
 
-        def self.keys = %w[token amount tapped to]
+        def self.keys = %w[token amount tapped to if]
         def self.default_to = "you"
 
-        def initialize(to:, params:, errors:, path:)
+        def initialize(to:, params:, errors:, path:, targets_count: 0)
           params = params.transform_keys(&:to_s)
           params["amount"] = 1 unless params.key?("amount")
           super
@@ -44,7 +44,8 @@ module Enjine
         def apply(engine, ctx)
           return unless definition
 
-          players(engine, ctx).each { |index| amount.times { engine.create_token!(definition, index, tapped: tapped) } }
+          n = amount_for(engine, ctx)
+          players(engine, ctx).each { |index| n.times { engine.create_token!(definition, index, tapped: tapped) } }
         end
 
         def to_s = "create #{amount} #{definition&.name} token#{"s" if amount != 1}#{" tapped" if tapped} → #{to}"

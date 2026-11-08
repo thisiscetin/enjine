@@ -5,7 +5,7 @@ module Enjine
     module Effects
       # Moves each referenced permanent to a zone.
       class ZoneEffect < Effect
-        def self.keys = %w[to]
+        def self.keys = %w[to if]
         def self.zone = raise(NotImplementedError)
         def self.reason = name.split("::").last.downcase
 
@@ -34,7 +34,7 @@ module Enjine
       class TapEffect < Effect
         primitive :effect, :tap, description: "Tap each referenced permanent.", rules: %w[701.26a],
                                  params: { "to" => "selector" }, example: { "tap" => { "to" => { "target" => 0 } } }
-        def self.keys = %w[to]
+        def self.keys = %w[to if]
         def apply(engine, ctx) = objects(engine, ctx).each { engine.tap!(engine.object(it)) unless engine.object(it).tapped }
       end
 
@@ -42,7 +42,7 @@ module Enjine
       class UntapEffect < Effect
         primitive :effect, :untap, description: "Untap each referenced permanent.", rules: %w[701.26b],
                                    params: { "to" => "selector" }, example: { "untap" => { "to" => "self" } }
-        def self.keys = %w[to]
+        def self.keys = %w[to if]
         def apply(engine, ctx) = objects(engine, ctx).each { engine.untap!(engine.object(it)) }
       end
 
@@ -56,7 +56,7 @@ module Enjine
 
         def apply(engine, ctx)
           players(engine, ctx).each do |index|
-            engine.player(index).library.first(amount).each { engine.move!(it, :graveyard, reason: "mill") }
+            engine.player(index).library.first(amount_for(engine, ctx)).each { engine.move!(it, :graveyard, reason: "mill") }
           end
         end
       end
@@ -81,7 +81,7 @@ module Enjine
 
         def run(engine, ctx, locals)
           index = ctx.controller
-          seen = (locals["seen"] ||= engine.player(index).library.first(amount))
+          seen = (locals["seen"] ||= engine.player(index).library.first(amount_for(engine, ctx)))
           decided = answers(locals).reject { it["type"] == "order" }
           if decided.size < seen.size
             card = seen[decided.size]
@@ -138,7 +138,7 @@ module Enjine
         def self.default_to = "you"
 
         def run(engine, ctx, locals)
-          queue = (locals["players"] ||= players(engine, ctx).flat_map { |i| [i] * amount })
+          queue = (locals["players"] ||= players(engine, ctx).flat_map { |i| [i] * amount_for(engine, ctx) })
           chosen = answers(locals)
           apply_answers(engine, locals, chosen)
           while chosen.size < queue.size
