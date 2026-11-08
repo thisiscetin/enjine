@@ -28,7 +28,7 @@ module Enjine
       # keeps the cached layer pass. Replacing the whole state (import, fork, rollback) is
       # detected separately by identity.
       LAYER_EVENTS = [Events::ZoneChanged, Events::CountersChanged, Events::EffectStarted,
-                      Events::EffectsEnded].freeze
+                      Events::EffectsEnded, Events::ControlChanged].freeze
 
       def touch! = @epoch = @epoch.to_i + 1
 
@@ -59,7 +59,8 @@ module Enjine
       # One object's characteristics after layers 6 and 7c (nil when unchanged). Each layer applies
       # in timestamp order (CR 613.7); static abilities come before resolved effects.
       def layered(obj, statics, effects)
-        base = definition(obj).printed_characteristics
+        printed = definition(obj).printed_characteristics
+        base = own_layers(obj, printed, effects) # layers 4 and 7b from the object's own state (see Engine::SetMechanics)
         keywords = base.keywords.dup
         delta = [obj.counters.fetch("+1/+1", 0) - obj.counters.fetch("-1/-1", 0)] * 2
         statics.each do |source, ability|
@@ -74,7 +75,7 @@ module Enjine
           keywords |= effect["keywords"].map(&:to_sym) if effect["kind"] == "grant"
           delta = [delta[0] + effect["power"], delta[1] + effect["toughness"]] if effect["kind"] == "pump"
         end
-        return nil if delta == [0, 0] && keywords == base.keywords
+        return nil if base.equal?(printed) && delta == [0, 0] && keywords == base.keywords
 
         base.with(power: base.power && (base.power + delta[0]), toughness: base.toughness && (base.toughness + delta[1]),
                   keywords: keywords.freeze)
@@ -85,7 +86,7 @@ module Enjine
       def static_sources
         state.battlefield.flat_map do |id|
           obj = object(id)
-          definition(obj).ability_instances.filter_map { [obj, it.ability] if it.ability.kind == :static }
+          own_ability_instances(obj).filter_map { [obj, it.ability] if it.ability.kind == :static }
         end
       end
 

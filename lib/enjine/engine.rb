@@ -257,8 +257,15 @@ module Enjine
       data = { "object" => id, "to" => to, "position" => position, "reason" => reason, "controller" => controller }
       data["enters"] = { "tapped" => false, "counters" => {} } if to == :battlefield
       data = propose("zone_change", data).data
-      data["enters"].merge!(enters) if enters && data["enters"]
+      merge_enters!(data["enters"], enters) if enters && data["enters"]
       execute_zone_change!(data)
+    end
+
+    # Counters from the caller ("with a +1/+1 counter", CR 701.72b) add to the ones replacements gave it.
+    def merge_enters!(status, extra)
+      extra.each do |key, value|
+        status[key] = key == "counters" ? status.fetch(key, {}).merge(value) { |_, a, b| a + b } : value
+      end
     end
 
     # An "as this enters" choice the controller must make before `id` enters (CR 614.12).

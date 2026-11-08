@@ -10,7 +10,7 @@ Rules: CR 122.1, CR 122.6, CR 613.4c
 
 | Parameter | Description |
 | --- | --- |
-| `counter` | +1/+1 | -1/-1 | loyalty |
+| `counter` | +1/+1 | -1/-1 | loyalty | charge | lore |
 | `amount` | integer |
 | `to` | selector |
 
@@ -22,6 +22,26 @@ Rules: CR 122.1, CR 122.6, CR 613.4c
     "to": {
       "each": "creature",
       "controller": "you"
+    }
+  }
+}
+```
+
+## assimilate
+
+Assimilate each referenced permanent or permanent card: you gain control of it (or put it onto the battlefield under your control) with a +1/+1 counter, and it becomes a Borg artifact creature while it stays on the battlefield.
+
+Rules: CR 701.72a, CR 701.72b, CR 205.1b, CR 613.1b, CR 613.1d
+
+| Parameter | Description |
+| --- | --- |
+| `to` | selector (permanents, or a target card in a graveyard) |
+
+```json
+{
+  "assimilate": {
+    "to": {
+      "target": 0
     }
   }
 }

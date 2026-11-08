@@ -38,6 +38,34 @@ Rules: CR 602.1, CR 602.2, CR 602.5d
 }
 ```
 
+## chapter
+
+A Saga's chapter ability: triggers when lore counters put on it bring their number from below `chapter` to at least `chapter`. Its targets are chosen as it's put on the stack. A Saga's final chapter number is its greatest `chapter`.
+
+Rules: CR 715.2, CR 715.2b, CR 715.2c, CR 715.2d, CR 122.6
+
+| Parameter | Description |
+| --- | --- |
+| `chapter` | integer >= 1 (the chapter symbol's number) |
+| `targets` | list of target filters |
+| `effects` | list of effects |
+| `modes` | optional modes, as for a spell |
+
+```json
+{
+  "chapter": {
+    "chapter": 2,
+    "effects": [
+      {
+        "gain_life": {
+          "amount": 3
+        }
+      }
+    ]
+  }
+}
+```
+
 ## enters_tapped
 
 This permanent enters the battlefield tapped (a self-replacement effect).
@@ -175,6 +203,33 @@ Rules: CR 604.1, CR 611.3a, CR 613.1f, CR 613.4c
       "power": 1,
       "toughness": 1
     }
+  }
+}
+```
+
+## station_symbol
+
+While this permanent has at least `at` charge counters it has `keywords` and `abilities`; with `power`/`toughness` it is also a creature with that base power and toughness (layers 4 and 7b).
+
+Rules: CR 722.2a, CR 722.2b, CR 722.2c, CR 613.1d, CR 613.4b
+
+| Parameter | Description |
+| --- | --- |
+| `at` | integer >= 1 (the N of {N+}) |
+| `power` | integer |
+| `toughness` | integer |
+| `keywords` | list of keywords |
+| `abilities` | list of abilities |
+
+```json
+{
+  "station_symbol": {
+    "at": 6,
+    "power": 3,
+    "toughness": 4,
+    "keywords": [
+      "flying"
+    ]
   }
 }
 ```

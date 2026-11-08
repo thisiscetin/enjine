@@ -5,7 +5,7 @@ module Enjine
     # One-shot and continuous effects (CR 609-611). Each effect is built from data
     # and applied at resolution with an EffectContext.
     module Effects
-      COUNTER_KINDS = %w[+1/+1 -1/-1 loyalty].freeze
+      COUNTER_KINDS = %w[+1/+1 -1/-1 loyalty charge lore].freeze # charge: Station (CR 702.184a); lore: Sagas (CR 715.3)
 
       # Base effect: parses the common "to" selector, an "amount" (fixed or computed, see
       # Mechanics::Amount) and an optional "if" condition checked on resolution (CR 608.2c).

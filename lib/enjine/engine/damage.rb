@@ -86,6 +86,7 @@ module Enjine
           reason = if defn.creature? then creature_sba(obj)
                    elsif defn.planeswalker? && loyalty(obj) <= 0 then "sba_loyalty"
                    end
+          reason ||= "sacrifice" if saga_complete?(obj) # CR 704.5s (2026-11-06): its controller sacrifices it
           (doomed ||= []) << [id, reason] if reason
         end
         return ceased unless doomed

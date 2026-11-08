@@ -73,6 +73,8 @@ module Enjine
     TriggerRemoved = define(:trigger_removed, :player, :source, :card, :reason)
     TokenCeased = define(:token_ceased, :object, :card, :zone)
     LibraryReordered = define(:library_reordered, :player, :top, :bottom)
+    ControlChanged = define(:control_changed, :object, :controller)
+    DilemmaFaced = define(:dilemma_faced, :player, :object, :modes) # CR 700.17 (2026-11-06)
 
     # A card moved between zones; old_id stops existing and new_id is born (CR 400.7).
     ZoneChanged = define(:zone_changed, :card, :old_id, :new_id, :owner, :from, :to, :reason) do

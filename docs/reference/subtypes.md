@@ -70,6 +70,37 @@ Rules: CR 305.6, CR 205.3i
 }
 ```
 
+## saga
+
+Enchantment type. A Saga enters with a lore counter; as its controller's precombat main phase begins, they put another lore counter on it. Each lore counter added can trigger its chapter abilities. Once its lore counters reach its final chapter number and no chapter ability of it is waiting to resolve, its controller sacrifices it.
+
+Rules: CR 715.3a, CR 715.3c, CR 505.4, CR 715.4, CR 704.5s
+
+```json
+{
+  "types": [
+    "enchantment"
+  ],
+  "subtypes": [
+    "saga"
+  ],
+  "abilities": [
+    {
+      "chapter": {
+        "chapter": 1,
+        "effects": [
+          {
+            "draw": {
+              "amount": 1
+            }
+          }
+        ]
+      }
+    }
+  ]
+}
+```
+
 ## swamp
 
 Basic land type. A land with this subtype has "{T}: Add {B}."

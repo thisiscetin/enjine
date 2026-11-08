@@ -61,7 +61,7 @@ module Enjine
     def permanent_view(engine, obj, defn, view)
       view["controller"] = engine.name(obj.controller)
       view["tapped"] = obj.tapped
-      if defn.creature?
+      if engine.chars(obj).creature? # e.g. a Spacecraft with enough charge counters (CR 722.2b)
         power, toughness = engine.power_toughness(obj)
         view.merge!("power" => power, "toughness" => toughness, "damage" => obj.damage,
                     "summoning_sick" => engine.summoning_sick_for_tap?(obj))

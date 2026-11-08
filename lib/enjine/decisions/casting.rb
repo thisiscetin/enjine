@@ -40,6 +40,24 @@ module Enjine
     end
     register("choose_target", ChooseTarget)
 
+    # CR 601.2h / 602.2b: a cost that needs a choice, e.g. which other creature to tap (CR 702.184a).
+    # The chosen part is paid at once; cancelling rewinds it.
+    class ChooseCost < Base
+      def self.doc
+        'While activating: `{type: "cost", object: id}` picks the permanent a cost uses (e.g. the creature ' \
+          'to tap for station); `{type: "cancel"}` rewinds the activation. `cost` describes the cost.'
+      end
+
+      def self.options(engine, _pending)
+        engine.cost_choice_candidates.map { { type: "cost", object: it } } + [CANCEL]
+      end
+
+      def self.submit(engine, _pending, option)
+        option[:type] == "cancel" ? engine.cancel_casting! : engine.choose_cost!(option[:object])
+      end
+    end
+    register("choose_cost", ChooseCost)
+
     # CR 601.2g-h: pay the mana cost one mana at a time. Mana abilities may be activated
     # now; mana in the pool is spent one symbol per decision.
     class PayCost < Base

@@ -77,14 +77,20 @@ module Enjine
     # Characteristics as printed: the starting point of the layer system (CR 613).
     attr_reader :printed_characteristics
 
-    def ability(ref) = @ability_instances.find { it.ref == ref }&.ability
+    # Any ability of the card by reference, including the ones a station symbol grants only
+    # while it applies (CR 722.2a).
+    def ability(ref) = (@ability_instances.find { it.ref == ref } || @nested_instances.find { it.ref == ref })&.ability
+
+    # Abilities the ability at `ref` grants while it applies (a station symbol's, CR 722.2).
+    def nested_instances(ref) = @nested_by_ref.fetch(ref, EMPTY)
+    EMPTY = [].freeze
 
     def permanent? = @permanent
     def token? = @token
 
     # Token definitions this card's effects can create; catalogs register them with the card.
     def token_definitions
-      @abilities.flat_map do |ability|
+      (@abilities + @nested_instances.map(&:ability)).flat_map do |ability|
         effects = ability.respond_to?(:modes) && ability.modal? ? ability.modes.flat_map(&:effects) : ability.try_effects
         effects.filter_map { it.definition if it.is_a?(Mechanics::Effects::CreateToken) }
       end.uniq(&:id)
@@ -129,7 +135,7 @@ module Enjine
       @castable = !@land && !@mana_cost.nil?
       @deck_limit_exempt = @supertypes.any? { Enjine.registry.fetch(:supertype, it).deck_limit_exempt? }
       @spell_ability = @abilities.find { it.kind == :spell }
-      @triggered = @abilities.any? { it.kind == :triggered }
+      @triggered = (@abilities + @nested_instances.map(&:ability)).any? { it.kind == :triggered }
     end
 
     def validate_type_specific(errors)
@@ -215,8 +221,28 @@ module Enjine
         abilities = rule.respond_to?(:intrinsic_abilities) ? rule.intrinsic_abilities : []
         abilities.each_with_index.map { |a, i| AbilityInstance.new(ref: "intrinsic:#{sub}#{":#{i}" if i.positive?}", ability: a) }
       end
-      @ability_instances = (explicit + intrinsic).freeze
+      @ability_instances = (explicit + intrinsic + keyword_abilities).freeze
+      read_nested_abilities(explicit)
       @ability_instances.map(&:ability).freeze
+    end
+
+    # Keyword abilities that stand for an ability ("Station" is an activated ability, CR 702.184a).
+    def keyword_abilities
+      @keywords.flat_map do |kw|
+        rule = Enjine.registry.fetch(:keyword, kw)
+        abilities = rule.respond_to?(:intrinsic_abilities) ? rule.intrinsic_abilities : []
+        abilities.map { AbilityInstance.new(ref: "keyword:#{kw}", ability: it) }
+      end
+    end
+
+    # Abilities nested in another ability (a station symbol's, CR 722.2), referenced as
+    # "<parent ref>:<j>". They're part of the object's characteristics only while the parent applies.
+    def read_nested_abilities(explicit)
+      @nested_by_ref = explicit.to_h do |inst|
+        nested = inst.ability.respond_to?(:nested_abilities) ? inst.ability.nested_abilities : EMPTY
+        [inst.ref, nested.each_with_index.map { |a, j| AbilityInstance.new(ref: "#{inst.ref}:#{j}", ability: a) }.freeze]
+      end.freeze
+      @nested_instances = @nested_by_ref.values.flatten.freeze
     end
 
     def normalize(card)

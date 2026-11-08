@@ -31,6 +31,7 @@ Rules version: Comprehensive Rules effective 2026-09-25.
 | [`island`](docs/reference/subtypes.md#island) | 305.6, 205.3i | Basic land type. A land with this subtype has "{T}: Add {U}." |
 | [`mountain`](docs/reference/subtypes.md#mountain) | 305.6, 205.3i | Basic land type. A land with this subtype has "{T}: Add {R}." |
 | [`plains`](docs/reference/subtypes.md#plains) | 305.6, 205.3i | Basic land type. A land with this subtype has "{T}: Add {W}." |
+| [`saga`](docs/reference/subtypes.md#saga) | 715.3a, 715.3c, 505.4, 715.4, 704.5s | Enchantment type. A Saga enters with a lore counter; as its controller's precombat main phase begins, they put another lore counter on it. Each lore counter added can trigger its chapter abilities. Once its lore counters reach its final chapter number and no chapter ability of it is waiting to resolve, its controller sacrifices it. |
 | [`swamp`](docs/reference/subtypes.md#swamp) | 305.6, 205.3i | Basic land type. A land with this subtype has "{T}: Add {B}." |
 
 ## Keyword abilities
@@ -49,6 +50,7 @@ Rules version: Comprehensive Rules effective 2026-09-25.
 | [`lifelink`](docs/reference/keywords.md#lifelink) | 702.15b | Damage dealt by this source also causes its controller to gain that much life. |
 | [`menace`](docs/reference/keywords.md#menace) | 702.111b | Can't be blocked except by two or more creatures. |
 | [`reach`](docs/reference/keywords.md#reach) | 702.17b | Can block creatures with flying. |
+| [`station`](docs/reference/keywords.md#station) | 702.184a, 722.4 | An activated ability: tap another untapped creature you control to put charge counters equal to its power on this permanent. Sorcery speed. Pair with `station_symbol` abilities for what the counters unlock. |
 | [`trample`](docs/reference/keywords.md#trample) | 702.19b, 702.19e | Excess combat damage beyond lethal damage to its blockers can be assigned to the player or planeswalker it's attacking. |
 | [`vigilance`](docs/reference/keywords.md#vigilance) | 702.20b | Attacking doesn't cause this creature to tap. |
 
@@ -57,12 +59,14 @@ Rules version: Comprehensive Rules effective 2026-09-25.
 | Name | Rules | Description |
 | --- | --- | --- |
 | [`activated`](docs/reference/abilities.md#activated) | 602.1, 602.2, 602.5d | An activated ability: announce it, choose targets, pay its costs, then it goes on the stack. `timing: "sorcery"` restricts it to sorcery speed. |
+| [`chapter`](docs/reference/abilities.md#chapter) | 715.2, 715.2b, 715.2c, 715.2d, 122.6 | A Saga's chapter ability: triggers when lore counters put on it bring their number from below `chapter` to at least `chapter`. Its targets are chosen as it's put on the stack. A Saga's final chapter number is its greatest `chapter`. |
 | [`enters_tapped`](docs/reference/abilities.md#enters_tapped) | 614.1c, 614.12 | This permanent enters the battlefield tapped (a self-replacement effect). |
 | [`enters_tapped_unless_pay_life`](docs/reference/abilities.md#enters_tapped_unless_pay_life) | 614.12, 119.4 | As this permanent enters, its controller may pay `life` life; if they don't, it enters tapped. You can't pay more life than you have. |
 | [`loyalty`](docs/reference/abilities.md#loyalty) | 606.3, 606.4, 606.5, 602.2b | A loyalty ability. Its cost adds (positive) or removes (negative) loyalty counters and is paid on activation. Sorcery speed, and only one loyalty ability per planeswalker per turn. |
 | [`mana`](docs/reference/abilities.md#mana) | 605.1a, 605.3a, 605.3b, 106.4 | An activated mana ability: pay the cost, add the mana to your mana pool immediately. It does not use the stack and can be activated whenever you have priority. |
 | [`spell`](docs/reference/abilities.md#spell) | 113.3a, 601.2c, 608.2b, 608.2c | The spell ability of an instant or sorcery: its targets are chosen while casting and its effects happen in order when it resolves. If every target is illegal on resolution, it doesn't resolve. |
 | [`static`](docs/reference/abilities.md#static) | 604.1, 611.3a, 613.1f, 613.4c | While its source is on the battlefield, every matching permanent gets `pump` and/or the `keywords`. `affects` is {"each": filter, "controller": you|opponent|any, "other": true} (relative to the source's controller). |
+| [`station_symbol`](docs/reference/abilities.md#station_symbol) | 722.2a, 722.2b, 722.2c, 613.1d, 613.4b | While this permanent has at least `at` charge counters it has `keywords` and `abilities`; with `power`/`toughness` it is also a creature with that base power and toughness (layers 4 and 7b). |
 | [`triggered`](docs/reference/abilities.md#triggered) | 603.2, 603.3, 603.3b, 603.3d | A triggered ability: when its trigger condition happens, it is put on the stack the next time a player would receive priority (in APNAP order), with targets chosen then. |
 
 ## Trigger conditions
@@ -73,6 +77,7 @@ Rules version: Comprehensive Rules effective 2026-09-25.
 | [`cast`](docs/reference/triggers.md#cast) | 603.2, 601.2i | A player casts a spell. `controller`: you (default) | opponent | any; `spell`: optional filter on the spell's card types (e.g. "creature", "noncreature"). |
 | [`dies`](docs/reference/triggers.md#dies) | 603.6c, 603.10a, 700.4 | The subject is put into a graveyard from the battlefield. Looks back in time (CR 603.10a). |
 | [`enters`](docs/reference/triggers.md#enters) | 603.6a, 603.2 | The subject enters the battlefield. |
+| [`faces_dilemma`](docs/reference/triggers.md#faces_dilemma) | 700.17, 700.2, 601.2b, 603.3c | A player faces a dilemma: they chose one or more modes for a spell or ability (cast, activated, or a triggered ability put on the stack). `controller`: you (default) | opponent | any. CR 700.17 of the 2026-11-06 rules. |
 | [`step_begins`](docs/reference/triggers.md#step_begins) | 603.6b, 503.1a, 513.1a | A step begins. `whose`: "your" (default), "each" or "opponent". |
 
 ## Costs
@@ -82,12 +87,14 @@ Rules version: Comprehensive Rules effective 2026-09-25.
 | [`mana`](docs/reference/costs.md#mana) | 601.2g, 601.2h, 602.2b | Pay mana as part of an activation. Paid during the activation by spending mana from your pool, tapping sources one at a time. |
 | [`sacrifice`](docs/reference/costs.md#sacrifice) | 701.21a, 602.2b, 118.3 | Sacrifice the permanent the ability belongs to (it goes to its owner's graveyard). |
 | [`tap`](docs/reference/costs.md#tap) | 107.5, 602.5a | {T} — tap the permanent the ability belongs to. Requires it to be untapped. |
+| [`tap_another_creature`](docs/reference/costs.md#tap_another_creature) | 702.184a, 601.2h, 602.2b, 302.6 | Tap another untapped creature you control, chosen while activating. A creature that came under your control this turn can be tapped this way. |
 
 ## Effects
 
 | Name | Rules | Description |
 | --- | --- | --- |
 | [`add_counters`](docs/reference/effects.md#add_counters) | 122.1, 122.6, 613.4c | Put `amount` counters of kind `counter` (+1/+1, -1/-1, loyalty) on each referenced permanent. |
+| [`assimilate`](docs/reference/effects.md#assimilate) | 701.72a, 701.72b, 205.1b, 613.1b, 613.1d | Assimilate each referenced permanent or permanent card: you gain control of it (or put it onto the battlefield under your control) with a +1/+1 counter, and it becomes a Borg artifact creature while it stays on the battlefield. |
 | [`counter`](docs/reference/effects.md#counter) | 701.6a | Counter each referenced spell: it leaves the stack for its owner's graveyard without resolving. |
 | [`create_token`](docs/reference/effects.md#create_token) | 111.1, 111.10, 701.7a, 704.5d | Create `amount` tokens under the referenced player's control (default: you). `token` is a predefined token name (Treasure, Clue, Food) or an inline card definition. `tapped: true` creates them tapped. |
 | [`deal_damage`](docs/reference/effects.md#deal_damage) | 120.3a, 120.3c, 120.3e, 120.6 | Deal `amount` damage to each referenced creature, planeswalker or player. Damage to a player causes life loss; to a planeswalker removes loyalty counters; to a creature is marked until cleanup. |
@@ -114,6 +121,7 @@ Rules version: Comprehensive Rules effective 2026-09-25.
 | [`artifact`](docs/reference/filters.md#artifact) | 115.1 | An artifact on the battlefield. |
 | [`creature`](docs/reference/filters.md#creature) | 115.1 | A creature on the battlefield. |
 | [`creature_or_planeswalker`](docs/reference/filters.md#creature_or_planeswalker) | 115.1 | A creature or planeswalker on the battlefield. |
+| [`graveyard_card`](docs/reference/filters.md#graveyard_card) | 404.1, 115.1 | A card in a graveyard (any player's, in seat order; restrict with `controller` for its owner and `any_of`/`not` for its card types). |
 | [`land`](docs/reference/filters.md#land) | 115.1 | A land on the battlefield. |
 | [`opponent`](docs/reference/filters.md#opponent) | 102.2 | An opponent of the ability's controller. |
 | [`permanent`](docs/reference/filters.md#permanent) | 110.1 | Any permanent on the battlefield. |

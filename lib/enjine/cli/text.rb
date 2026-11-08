@@ -98,6 +98,7 @@ module Enjine
         when "activate_mana" then "Tap #{name_of(opt[:object])} for mana (#{ability_text(opt[:object], opt[:ability])})"
         when "pay_mana" then "Pay {#{opt[:mana]}} from mana pool"
         when "target" then "Target #{name_of(opt[:target])}"
+        when "cost" then "Use #{name_of(opt[:object])} to pay the cost"
         when "cancel" then "Cancel (rewind this cast/activation)"
         when "attack" then "Attack #{name_of(opt[:target])} with #{name_of(opt[:object])}"
         when "block" then "Block #{name_of(opt[:attacker])} with #{name_of(opt[:object])}"

@@ -109,6 +109,56 @@
     },
     {
       "card": {
+        "name": "Dream Beavers",
+        "mana_cost": "{B}",
+        "types": [
+          "creature"
+        ],
+        "subtypes": [
+          "beaver",
+          "nightmare"
+        ],
+        "keywords": [
+          "flying"
+        ],
+        "power": 1,
+        "toughness": 1,
+        "abilities": [
+          {
+            "triggered": {
+              "when": {
+                "enters": {}
+              },
+              "effects": [
+                {
+                  "lose_life": {
+                    "amount": 1,
+                    "to": "each_opponent"
+                  }
+                },
+                {
+                  "gain_life": {
+                    "amount": 1
+                  }
+                },
+                {
+                  "scry": {
+                    "amount": 1
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "rarity": "uncommon",
+      "printing": {
+        "set": "tmt",
+        "number": "62"
+      }
+    },
+    {
+      "card": {
         "name": "Squirrelanoids",
         "mana_cost": "{B}",
         "types": [
@@ -197,7 +247,13 @@
           {
             "static": {
               "affects": {
-                "each": "creature",
+                "each": {
+                  "creature": {
+                    "any_of": [
+                      "artifact"
+                    ]
+                  }
+                },
                 "controller": "you",
                 "other": true
               },
@@ -576,8 +632,6 @@
         "number": "3"
       },
       "missing": [
-        "triggered ability",
-        "library manipulation",
         "static ability"
       ]
     },
@@ -659,8 +713,6 @@
         "number": "10"
       },
       "missing": [
-        "triggered ability",
-        "tokens",
         "other rules text"
       ]
     },
@@ -806,7 +858,6 @@
       },
       "missing": [
         "triggered ability",
-        "tokens",
         "counters"
       ]
     },
@@ -1268,7 +1319,6 @@
         "number": "60"
       },
       "missing": [
-        "layout: saga",
         "tokens",
         "exile",
         "copy",
@@ -1284,18 +1334,6 @@
       },
       "missing": [
         "exile"
-      ]
-    },
-    {
-      "name": "Dream Beavers",
-      "rarity": "uncommon",
-      "printing": {
-        "set": "tmt",
-        "number": "62"
-      },
-      "missing": [
-        "triggered ability",
-        "library manipulation"
       ]
     },
     {
@@ -1852,8 +1890,7 @@
         "number": "108"
       },
       "missing": [
-        "triggered ability",
-        "tokens"
+        "triggered ability"
       ]
     },
     {
@@ -2215,8 +2252,7 @@
         "number": "139"
       },
       "missing": [
-        "triggered ability",
-        "tokens"
+        "triggered ability"
       ]
     },
     {
@@ -2401,7 +2437,6 @@
         "number": "154"
       },
       "missing": [
-        "layout: saga",
         "other rules text",
         "triggered ability",
         "library manipulation",
@@ -2428,8 +2463,7 @@
         "number": "156"
       },
       "missing": [
-        "triggered ability",
-        "tokens"
+        "invalid: mana_cost: unsupported mana symbol {R/W}"
       ]
     },
     {
@@ -2516,7 +2550,6 @@
       },
       "missing": [
         "triggered ability",
-        "tokens",
         "condition (if/unless/as long as)",
         "counters",
         "sacrifice"
@@ -2720,8 +2753,6 @@
         "number": "180"
       },
       "missing": [
-        "triggered ability",
-        "tokens",
         "other rules text"
       ]
     },

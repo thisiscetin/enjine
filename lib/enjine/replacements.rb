@@ -36,6 +36,10 @@ module Enjine
         mod = Enjine.registry.fetch(:type, type)
         mod.entering(engine.definition(obj), proposal.data["enters"]) if mod.respond_to?(:entering)
       end
+      engine.chars(obj).subtypes.each do |sub| # e.g. a Saga enters with a lore counter (CR 715.3a, 2026-11-06)
+        mod = Enjine.registry.fetch(:subtype, sub)
+        mod.entering(engine.definition(obj), proposal.data["enters"]) if mod.respond_to?(:entering)
+      end
     end
   end
 end

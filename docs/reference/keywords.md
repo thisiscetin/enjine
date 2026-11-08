@@ -170,6 +170,20 @@ Rules: CR 702.17b
 }
 ```
 
+## station
+
+An activated ability: tap another untapped creature you control to put charge counters equal to its power on this permanent. Sorcery speed. Pair with `station_symbol` abilities for what the counters unlock.
+
+Rules: CR 702.184a, CR 722.4
+
+```json
+{
+  "keywords": [
+    "station"
+  ]
+}
+```
+
 ## trample
 
 Excess combat damage beyond lethal damage to its blockers can be assigned to the player or planeswalker it's attacking.

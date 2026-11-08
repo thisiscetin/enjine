@@ -44,6 +44,15 @@ module Enjine
       end
     end
 
+    # CR 505.4 / 715.3c (2026-11-06): as the precombat main phase begins, the active player puts a
+    # lore counter on each Saga they control with one or more chapter abilities.
+    class PrecombatMain < Step
+      def begin(engine)
+        engine.add_lore_counters!(engine.state.active)
+        engine.turn_based_actions_done!
+      end
+    end
+
     # CR 508.8: if no creatures were declared as attackers, declare blockers and combat damage are skipped.
     class CombatStepAfterAttackers < Step
       def skip?(engine) = engine.state.attacks_declared.zero?
@@ -87,7 +96,7 @@ module Enjine
       Untap.new(:untap, :beginning),
       Step.new(:upkeep, :beginning),
       Draw.new(:draw, :beginning),
-      Step.new(:precombat_main, :precombat_main),
+      PrecombatMain.new(:precombat_main, :precombat_main),
       Step.new(:beginning_of_combat, :combat),
       DeclareAttackers.new(:declare_attackers, :combat),
       DeclareBlockers.new(:declare_blockers, :combat),

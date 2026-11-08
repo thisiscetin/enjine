@@ -74,6 +74,7 @@ module Enjine
 
         def setup(_params, _errors, _path) = nil
         def leaves_battlefield? = false
+        def event?(event) = event.is_a?(event_class)
       end
 
       # "When ~ enters" / "Whenever a creature you control enters" (landfall: lands you control).
