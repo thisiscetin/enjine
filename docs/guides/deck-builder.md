@@ -38,9 +38,14 @@ until you ask for it.
 { "format": 1, "code": "trk", "name": "...", "released_at": "2026-11-13",
   "standard_legal_until": "2029-01-19", "standard_legal_until_estimated": true,
   "cards": [ { "card": { ...a card data block in CardDefinition#to_h form... },
-               "rarity": "common", "scryfall_id": "...", "collector_number": "12" } ],
+               "rarity": "common", "printing": { "set": "trk", "number": "12" } } ],
   "unsupported": [ { "name": "...", "missing": ["flying"] } ] }
 ```
+
+`printing` identifies the printing without depending on any card database: the
+set code and the collector number printed on the card. The number is a string,
+because collector numbers can contain letters or symbols (`"12a"`, `"★"`).
+`Sets::Entry#id` returns `"trk:12"`.
 
 Only `cards` are playable. Names in `unsupported` are never used. If an entry in
 `cards` fails validation, for example because the engine changed, the loader moves

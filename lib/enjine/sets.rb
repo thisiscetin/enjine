@@ -33,8 +33,12 @@ module Enjine
       end
     end
 
-    # One playable card of a set.
-    Entry = Data.define(:definition, :rarity, :scryfall_id, :collector_number)
+    # One playable card of a set. `printing` is vendor-neutral: the set code and the collector
+    # number printed on the card ({"set" => "trk", "number" => "12a"}; numbers are strings).
+    Entry = Data.define(:definition, :rarity, :printing) do
+      # "trk:12": set code and collector number.
+      def id = printing && "#{printing["set"]}:#{printing["number"]}"
+    end
 
     # The set file is missing or malformed.
     class InvalidSet < Error; end
@@ -94,8 +98,8 @@ module Enjine
 
       def entry(raw, unsupported)
         data = raw.is_a?(Hash) ? raw["card"] : nil
-        Entry.new(definition: CardDefinition.from_h(data), rarity: raw["rarity"], scryfall_id: raw["scryfall_id"],
-                  collector_number: raw["collector_number"])
+        printing = raw["printing"].is_a?(Hash) ? raw["printing"].slice("set", "number").transform_values(&:to_s).freeze : nil
+        Entry.new(definition: CardDefinition.from_h(data), rarity: raw["rarity"], printing: printing)
       rescue InvalidCardDefinition => e
         unsupported << { "name" => data.is_a?(Hash) ? data["name"] : nil, "missing" => e.errors }
         nil

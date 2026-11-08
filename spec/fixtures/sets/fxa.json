@@ -21,8 +21,10 @@
         "toughness": 2
       },
       "rarity": "common",
-      "scryfall_id": "00000000-0000-4000-8000-000000319000",
-      "collector_number": "1"
+      "printing": {
+        "set": "fxa",
+        "number": "1"
+      }
     },
     {
       "card": {
@@ -39,8 +41,10 @@
         "toughness": 2
       },
       "rarity": "common",
-      "scryfall_id": "00000000-0000-4000-8000-000000319001",
-      "collector_number": "2"
+      "printing": {
+        "set": "fxa",
+        "number": "2"
+      }
     },
     {
       "card": {
@@ -77,8 +81,10 @@
         ]
       },
       "rarity": "uncommon",
-      "scryfall_id": "00000000-0000-4000-8000-000000319002",
-      "collector_number": "3"
+      "printing": {
+        "set": "fxa",
+        "number": "3"
+      }
     },
     {
       "card": {
@@ -95,8 +101,10 @@
         "toughness": 4
       },
       "rarity": "rare",
-      "scryfall_id": "00000000-0000-4000-8000-000000319003",
-      "collector_number": "4"
+      "printing": {
+        "set": "fxa",
+        "number": "4"
+      }
     },
     {
       "card": {
@@ -112,8 +120,10 @@
         "toughness": 5
       },
       "rarity": "common",
-      "scryfall_id": "00000000-0000-4000-8000-000000319004",
-      "collector_number": "5"
+      "printing": {
+        "set": "fxa",
+        "number": "5"
+      }
     },
     {
       "card": {
@@ -137,8 +147,10 @@
         ]
       },
       "rarity": "common",
-      "scryfall_id": "00000000-0000-4000-8000-000000319005",
-      "collector_number": "6"
+      "printing": {
+        "set": "fxa",
+        "number": "6"
+      }
     },
     {
       "card": {
@@ -184,8 +196,10 @@
         ]
       },
       "rarity": "mythic",
-      "scryfall_id": "00000000-0000-4000-8000-000000319006",
-      "collector_number": "7"
+      "printing": {
+        "set": "fxa",
+        "number": "7"
+      }
     },
     {
       "card": {
@@ -205,8 +219,10 @@
         "toughness": 1
       },
       "rarity": "rare",
-      "scryfall_id": "00000000-0000-4000-8000-000000319007",
-      "collector_number": "8"
+      "printing": {
+        "set": "fxa",
+        "number": "8"
+      }
     },
     {
       "card": {
@@ -242,8 +258,10 @@
         ]
       },
       "rarity": "common",
-      "scryfall_id": "00000000-0000-4000-8000-000000319008",
-      "collector_number": "9"
+      "printing": {
+        "set": "fxa",
+        "number": "9"
+      }
     },
     {
       "card": {
@@ -259,8 +277,10 @@
         "toughness": 3
       },
       "rarity": "common",
-      "scryfall_id": "00000000-0000-4000-8000-000000319009",
-      "collector_number": "10"
+      "printing": {
+        "set": "fxa",
+        "number": "10"
+      }
     },
     {
       "card": {
@@ -279,8 +299,10 @@
         "toughness": 3
       },
       "rarity": "uncommon",
-      "scryfall_id": "00000000-0000-4000-8000-000000319010",
-      "collector_number": "11"
+      "printing": {
+        "set": "fxa",
+        "number": "11"
+      }
     },
     {
       "card": {
@@ -296,8 +318,10 @@
         "toughness": 6
       },
       "rarity": "rare",
-      "scryfall_id": "00000000-0000-4000-8000-000000319011",
-      "collector_number": "12"
+      "printing": {
+        "set": "fxa",
+        "number": "12"
+      }
     },
     {
       "card": {
@@ -326,8 +350,10 @@
         ]
       },
       "rarity": "common",
-      "scryfall_id": "00000000-0000-4000-8000-000000319012",
-      "collector_number": "13"
+      "printing": {
+        "set": "fxa",
+        "number": "13"
+      }
     },
     {
       "card": {
@@ -351,8 +377,10 @@
         ]
       },
       "rarity": "common",
-      "scryfall_id": "00000000-0000-4000-8000-000000319013",
-      "collector_number": "14"
+      "printing": {
+        "set": "fxa",
+        "number": "14"
+      }
     },
     {
       "card": {
@@ -371,8 +399,10 @@
         "toughness": 1
       },
       "rarity": "uncommon",
-      "scryfall_id": "00000000-0000-4000-8000-000000319014",
-      "collector_number": "15"
+      "printing": {
+        "set": "fxa",
+        "number": "15"
+      }
     },
     {
       "card": {
@@ -389,8 +419,10 @@
         "toughness": 1
       },
       "rarity": "rare",
-      "scryfall_id": "00000000-0000-4000-8000-000000319015",
-      "collector_number": "16"
+      "printing": {
+        "set": "fxa",
+        "number": "16"
+      }
     },
     {
       "card": {
@@ -406,8 +438,10 @@
         "toughness": 2
       },
       "rarity": "common",
-      "scryfall_id": "00000000-0000-4000-8000-000000319016",
-      "collector_number": "17"
+      "printing": {
+        "set": "fxa",
+        "number": "17"
+      }
     },
     {
       "card": {
@@ -423,8 +457,10 @@
         "toughness": 3
       },
       "rarity": "common",
-      "scryfall_id": "00000000-0000-4000-8000-000000319017",
-      "collector_number": "18"
+      "printing": {
+        "set": "fxa",
+        "number": "18"
+      }
     },
     {
       "card": {
@@ -441,8 +477,10 @@
         "toughness": 5
       },
       "rarity": "uncommon",
-      "scryfall_id": "00000000-0000-4000-8000-000000319018",
-      "collector_number": "19"
+      "printing": {
+        "set": "fxa",
+        "number": "19"
+      }
     },
     {
       "card": {
@@ -472,8 +510,10 @@
         ]
       },
       "rarity": "rare",
-      "scryfall_id": "00000000-0000-4000-8000-000000319019",
-      "collector_number": "20"
+      "printing": {
+        "set": "fxa",
+        "number": "20"
+      }
     },
     {
       "card": {
@@ -502,8 +542,10 @@
         ]
       },
       "rarity": "common",
-      "scryfall_id": "00000000-0000-4000-8000-000000319020",
-      "collector_number": "21"
+      "printing": {
+        "set": "fxa",
+        "number": "21"
+      }
     },
     {
       "card": {
@@ -522,8 +564,10 @@
         "toughness": 1
       },
       "rarity": "common",
-      "scryfall_id": "00000000-0000-4000-8000-000000319021",
-      "collector_number": "22"
+      "printing": {
+        "set": "fxa",
+        "number": "22"
+      }
     },
     {
       "card": {
@@ -560,8 +604,10 @@
         ]
       },
       "rarity": "uncommon",
-      "scryfall_id": "00000000-0000-4000-8000-000000319022",
-      "collector_number": "23"
+      "printing": {
+        "set": "fxa",
+        "number": "23"
+      }
     },
     {
       "card": {
@@ -580,8 +626,10 @@
         "toughness": 1
       },
       "rarity": "rare",
-      "scryfall_id": "00000000-0000-4000-8000-000000319023",
-      "collector_number": "24"
+      "printing": {
+        "set": "fxa",
+        "number": "24"
+      }
     },
     {
       "card": {
@@ -597,8 +645,10 @@
         "toughness": 3
       },
       "rarity": "common",
-      "scryfall_id": "00000000-0000-4000-8000-000000319024",
-      "collector_number": "25"
+      "printing": {
+        "set": "fxa",
+        "number": "25"
+      }
     },
     {
       "card": {
@@ -614,8 +664,10 @@
         "toughness": 4
       },
       "rarity": "common",
-      "scryfall_id": "00000000-0000-4000-8000-000000319025",
-      "collector_number": "26"
+      "printing": {
+        "set": "fxa",
+        "number": "26"
+      }
     },
     {
       "card": {
@@ -645,8 +697,10 @@
         ]
       },
       "rarity": "uncommon",
-      "scryfall_id": "00000000-0000-4000-8000-000000319026",
-      "collector_number": "27"
+      "printing": {
+        "set": "fxa",
+        "number": "27"
+      }
     },
     {
       "card": {
@@ -673,8 +727,10 @@
         ]
       },
       "rarity": "rare",
-      "scryfall_id": "00000000-0000-4000-8000-000000319027",
-      "collector_number": "28"
+      "printing": {
+        "set": "fxa",
+        "number": "28"
+      }
     },
     {
       "card": {
@@ -690,8 +746,10 @@
         "toughness": 2
       },
       "rarity": "common",
-      "scryfall_id": "00000000-0000-4000-8000-000000319028",
-      "collector_number": "29"
+      "printing": {
+        "set": "fxa",
+        "number": "29"
+      }
     },
     {
       "card": {
@@ -707,8 +765,10 @@
         "toughness": 3
       },
       "rarity": "common",
-      "scryfall_id": "00000000-0000-4000-8000-000000319029",
-      "collector_number": "30"
+      "printing": {
+        "set": "fxa",
+        "number": "30"
+      }
     },
     {
       "card": {
@@ -724,8 +784,10 @@
         "toughness": 3
       },
       "rarity": "uncommon",
-      "scryfall_id": "00000000-0000-4000-8000-000000319030",
-      "collector_number": "31"
+      "printing": {
+        "set": "fxa",
+        "number": "31"
+      }
     },
     {
       "card": {
@@ -741,8 +803,10 @@
         "toughness": 5
       },
       "rarity": "rare",
-      "scryfall_id": "00000000-0000-4000-8000-000000319031",
-      "collector_number": "32"
+      "printing": {
+        "set": "fxa",
+        "number": "32"
+      }
     },
     {
       "card": {
@@ -758,8 +822,10 @@
         "toughness": 7
       },
       "rarity": "common",
-      "scryfall_id": "00000000-0000-4000-8000-000000319032",
-      "collector_number": "33"
+      "printing": {
+        "set": "fxa",
+        "number": "33"
+      }
     },
     {
       "card": {
@@ -790,8 +856,10 @@
         ]
       },
       "rarity": "common",
-      "scryfall_id": "00000000-0000-4000-8000-000000319033",
-      "collector_number": "34"
+      "printing": {
+        "set": "fxa",
+        "number": "34"
+      }
     },
     {
       "card": {
@@ -828,8 +896,10 @@
         ]
       },
       "rarity": "uncommon",
-      "scryfall_id": "00000000-0000-4000-8000-000000319034",
-      "collector_number": "35"
+      "printing": {
+        "set": "fxa",
+        "number": "35"
+      }
     },
     {
       "card": {
@@ -846,8 +916,10 @@
         "toughness": 3
       },
       "rarity": "rare",
-      "scryfall_id": "00000000-0000-4000-8000-000000319035",
-      "collector_number": "36"
+      "printing": {
+        "set": "fxa",
+        "number": "36"
+      }
     },
     {
       "card": {
@@ -868,8 +940,10 @@
         ]
       },
       "rarity": "common",
-      "scryfall_id": "00000000-0000-4000-8000-000000319036",
-      "collector_number": "37"
+      "printing": {
+        "set": "fxa",
+        "number": "37"
+      }
     },
     {
       "card": {
@@ -899,8 +973,10 @@
         ]
       },
       "rarity": "common",
-      "scryfall_id": "00000000-0000-4000-8000-000000319037",
-      "collector_number": "38"
+      "printing": {
+        "set": "fxa",
+        "number": "38"
+      }
     },
     {
       "card": {
@@ -920,8 +996,10 @@
         "toughness": 3
       },
       "rarity": "uncommon",
-      "scryfall_id": "00000000-0000-4000-8000-000000319038",
-      "collector_number": "39"
+      "printing": {
+        "set": "fxa",
+        "number": "39"
+      }
     },
     {
       "card": {
@@ -941,8 +1019,10 @@
         "toughness": 2
       },
       "rarity": "rare",
-      "scryfall_id": "00000000-0000-4000-8000-000000319039",
-      "collector_number": "40"
+      "printing": {
+        "set": "fxa",
+        "number": "40"
+      }
     },
     {
       "card": {
@@ -958,8 +1038,10 @@
         ]
       },
       "rarity": "common",
-      "scryfall_id": "00000000-0000-4000-8000-000000319040",
-      "collector_number": "41"
+      "printing": {
+        "set": "fxa",
+        "number": "41"
+      }
     },
     {
       "card": {
@@ -975,8 +1057,10 @@
         ]
       },
       "rarity": "common",
-      "scryfall_id": "00000000-0000-4000-8000-000000319041",
-      "collector_number": "42"
+      "printing": {
+        "set": "fxa",
+        "number": "42"
+      }
     },
     {
       "card": {
@@ -992,8 +1076,10 @@
         ]
       },
       "rarity": "common",
-      "scryfall_id": "00000000-0000-4000-8000-000000319042",
-      "collector_number": "43"
+      "printing": {
+        "set": "fxa",
+        "number": "43"
+      }
     },
     {
       "card": {
@@ -1009,8 +1095,10 @@
         ]
       },
       "rarity": "common",
-      "scryfall_id": "00000000-0000-4000-8000-000000319043",
-      "collector_number": "44"
+      "printing": {
+        "set": "fxa",
+        "number": "44"
+      }
     },
     {
       "card": {
@@ -1026,8 +1114,10 @@
         ]
       },
       "rarity": "common",
-      "scryfall_id": "00000000-0000-4000-8000-000000319044",
-      "collector_number": "45"
+      "printing": {
+        "set": "fxa",
+        "number": "45"
+      }
     },
     {
       "card": {
@@ -1055,8 +1145,10 @@
         ]
       },
       "rarity": "common",
-      "scryfall_id": "00000000-0000-4000-8000-000000319045",
-      "collector_number": "46"
+      "printing": {
+        "set": "fxa",
+        "number": "46"
+      }
     },
     {
       "card": {
@@ -1070,8 +1162,10 @@
         ]
       },
       "rarity": "uncommon",
-      "scryfall_id": "00000000-0000-4000-8000-000000319046",
-      "collector_number": "47"
+      "printing": {
+        "set": "fxa",
+        "number": "47"
+      }
     },
     {
       "card": {
@@ -1091,8 +1185,10 @@
         ]
       },
       "rarity": "rare",
-      "scryfall_id": "00000000-0000-4000-8000-000000319047",
-      "collector_number": "48"
+      "printing": {
+        "set": "fxa",
+        "number": "48"
+      }
     }
   ],
   "unsupported": [

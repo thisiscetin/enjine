@@ -16,7 +16,7 @@ RSpec.describe Enjine::Sets do
                                    standard_legal_until: Date.new(2027, 7, 30), standard_legal_until_estimated: false)
     expect(set.size).to eq(48)
     expect(set.cards).to all(be_a(Enjine::CardDefinition))
-    expect(set.entries.first).to have_attributes(rarity: "common", collector_number: "1")
+    expect(set.entries.first).to have_attributes(rarity: "common", printing: { "set" => "fxa", "number" => "1" }, id: "fxa:1")
     expect(set.unsupported.map { it["name"] }).to eq(["Skyveil Seraph", "Echoing Grudge"])
     expect(described_class.load(set)).to be(set)
   end
@@ -54,6 +54,7 @@ RSpec.describe Enjine::Sets do
                                                       "subtypes" => ["forest"] } }])
       set = described_class.load("tst", dir: tmp)
       expect(set.cards.map(&:name)).to eq(["Forest"])
+      expect(set.entries.first).to have_attributes(printing: nil, id: nil)
       expect(set.unsupported.map { it["name"] }).to eq(["Bad Angel", nil])
       expect(set.unsupported.first["missing"]).to include(/unknown keyword "flying"/)
       expect(set).to have_attributes(code: "tst", released_at: nil, standard_legal_until: nil)
