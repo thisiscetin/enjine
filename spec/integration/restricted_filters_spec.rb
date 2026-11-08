@@ -7,9 +7,10 @@ RSpec.describe "Target filters with restrictions (CR 115.1, 109.2)" do
   end
 
   let(:herald) do
+    another = { "creature" => { "other" => true, "controller" => "you" } }
+    counter = { "add_counters" => { "counter" => "+1/+1", "amount" => 1, "to" => { "target" => 0 } } }
     { "name" => "Rally Herald", "mana_cost" => "{1}", "types" => ["creature"], "power" => 1, "toughness" => 1,
-      "abilities" => [{ "triggered" => { "when" => { "enters" => {} }, "targets" => [{ "creature" => { "other" => true, "controller" => "you" } }],
-                                         "effects" => [{ "add_counters" => { "counter" => "+1/+1", "amount" => 1, "to" => { "target" => 0 } } }] } }] }
+      "abilities" => [{ "triggered" => { "when" => { "enters" => {} }, "targets" => [another], "effects" => [counter] } }] }
   end
   let(:catalog) do
     catalog_with(instant("Own Tap", { "creature" => { "controller" => "you" } }),

@@ -13,7 +13,7 @@ module Enjine
 
       # Records a player's answer for the effect that is asking (see Effects::ChoiceEffect).
       def effect_answer!(option)
-        frame = state.frames.reverse_each.find { it["type"] == "resolve" }
+        frame = state.frames.rfind { it["type"] == "resolve" }
         locals = frame["locals"][frame["pc"].to_s]
         (locals["answers"] ||= []) << option.transform_keys(&:to_s)
         ask!(nil)
