@@ -111,6 +111,29 @@ bundle exec exe/enjine --validate cards.json   # JSON report, exit code 1 if any
 The [card data format guide](docs/guides/card-data-format.md) is written so you
 can hand it to an agent that converts a card database into Enjine format.
 
+## Where things are
+
+```
+lib/enjine.rb               entry point (loads everything except the opt-in card pool)
+lib/enjine/
+  game.rb                   public API: pending_decision, submit, apply, views, history, export/import
+  setup.rb player.rb deck.rb  players, decks and the compiled two-player Setup
+  card_definition.rb        card data block -> validated, immutable definition
+  engine.rb engine/         the rules state machine: turns, priority, casting, stack, combat, damage, layers
+  steps.rb                  the 12 steps of a turn and their turn-based actions
+  decisions/ actions/       every kind of question a player is asked / every action at priority
+  mechanics/                one primitive per mechanic: types, keywords, abilities, costs, effects, filters
+  state.rb snapshot.rb      plain-data game state, export/import and its consistency checks
+  events.rb view.rb history.rb  typed events, per-player views and histories
+  cli.rb cli/               the interactive terminal client
+  card_pool/                OPT-IN sample cards (core.json) and sample decks (decks/*.json)
+  agents/ fuzz.rb docs.rb   random player, invariant-checking fuzzer, docs generator
+exe/enjine                  CLI executable
+spec/unit spec/integration spec/e2e   the three test levels; spec/support/scenario.rb is the board DSL
+docs/                       design, architecture, guides, generated reference, CR coverage checklist
+SUPPORTED.md                generated list of everything the engine supports
+```
+
 ## Documentation
 
 | Document | What it covers |
@@ -138,9 +161,15 @@ Every mechanic is tested at three levels:
 - **Integration:** scenario boards built with a small DSL, then legal options, then a decision, then the resulting state and events.
 - **End-to-end:** full 60-card games, scripted and fuzzed, with export/import round-trips.
 
-Contributions are welcome. Start with
-[adding a mechanic](docs/guides/adding-a-mechanic.md) and pick a ★ item from the
-coverage checklist.
+## Contributing
+
+Contributions are welcome. Read [CONTRIBUTING.md](CONTRIBUTING.md), then
+[adding a mechanic](docs/guides/adding-a-mechanic.md), and pick a ★ item that's
+in current Standard from the [coverage checklist](docs/MECHANICS_COVERAGE.md).
+Bugs and rules questions go to
+[GitHub issues](https://github.com/thisiscetin/enjine/issues). When something
+behaves differently from the Comprehensive Rules, include the seed and the
+decision log (or a saved snapshot).
 
 ## License
 
