@@ -172,6 +172,236 @@
     },
     {
       "card": {
+        "name": "Dimension X",
+        "types": [
+          "land"
+        ],
+        "abilities": [
+          "enters_tapped",
+          {
+            "triggered": {
+              "when": {
+                "enters": {}
+              },
+              "effects": [
+                {
+                  "gain_life": {
+                    "amount": 1
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "mana": {
+              "cost": [
+                "tap"
+              ],
+              "produce": "{R}"
+            }
+          },
+          {
+            "mana": {
+              "cost": [
+                "tap"
+              ],
+              "produce": "{W}"
+            }
+          }
+        ]
+      },
+      "rarity": "common",
+      "printing": {
+        "set": "tmt",
+        "number": "183"
+      }
+    },
+    {
+      "card": {
+        "name": "Foot Headquarters",
+        "types": [
+          "land"
+        ],
+        "abilities": [
+          "enters_tapped",
+          {
+            "triggered": {
+              "when": {
+                "enters": {}
+              },
+              "effects": [
+                {
+                  "gain_life": {
+                    "amount": 1
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "mana": {
+              "cost": [
+                "tap"
+              ],
+              "produce": "{W}"
+            }
+          },
+          {
+            "mana": {
+              "cost": [
+                "tap"
+              ],
+              "produce": "{B}"
+            }
+          }
+        ]
+      },
+      "rarity": "common",
+      "printing": {
+        "set": "tmt",
+        "number": "185"
+      }
+    },
+    {
+      "card": {
+        "name": "Illegitimate Business",
+        "types": [
+          "land"
+        ],
+        "abilities": [
+          "enters_tapped",
+          {
+            "triggered": {
+              "when": {
+                "enters": {}
+              },
+              "effects": [
+                {
+                  "gain_life": {
+                    "amount": 1
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "mana": {
+              "cost": [
+                "tap"
+              ],
+              "produce": "{B}"
+            }
+          },
+          {
+            "mana": {
+              "cost": [
+                "tap"
+              ],
+              "produce": "{G}"
+            }
+          }
+        ]
+      },
+      "rarity": "common",
+      "printing": {
+        "set": "tmt",
+        "number": "186"
+      }
+    },
+    {
+      "card": {
+        "name": "Mutant Town",
+        "types": [
+          "land"
+        ],
+        "abilities": [
+          "enters_tapped",
+          {
+            "triggered": {
+              "when": {
+                "enters": {}
+              },
+              "effects": [
+                {
+                  "gain_life": {
+                    "amount": 1
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "mana": {
+              "cost": [
+                "tap"
+              ],
+              "produce": "{G}"
+            }
+          },
+          {
+            "mana": {
+              "cost": [
+                "tap"
+              ],
+              "produce": "{U}"
+            }
+          }
+        ]
+      },
+      "rarity": "common",
+      "printing": {
+        "set": "tmt",
+        "number": "187"
+      }
+    },
+    {
+      "card": {
+        "name": "TCRI Building",
+        "types": [
+          "land"
+        ],
+        "abilities": [
+          "enters_tapped",
+          {
+            "triggered": {
+              "when": {
+                "enters": {}
+              },
+              "effects": [
+                {
+                  "gain_life": {
+                    "amount": 1
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "mana": {
+              "cost": [
+                "tap"
+              ],
+              "produce": "{U}"
+            }
+          },
+          {
+            "mana": {
+              "cost": [
+                "tap"
+              ],
+              "produce": "{R}"
+            }
+          }
+        ]
+      },
+      "rarity": "common",
+      "printing": {
+        "set": "tmt",
+        "number": "189"
+      }
+    },
+    {
+      "card": {
         "name": "Plains",
         "types": [
           "land"
@@ -529,6 +759,7 @@
       },
       "missing": [
         "triggered ability",
+        "tokens",
         "counters"
       ]
     },
@@ -1121,7 +1352,6 @@
       },
       "missing": [
         "triggered ability",
-        "library manipulation",
         "exile",
         "graveyard casting"
       ]
@@ -1938,7 +2168,8 @@
         "number": "139"
       },
       "missing": [
-        "triggered ability"
+        "triggered ability",
+        "tokens"
       ]
     },
     {
@@ -2150,7 +2381,8 @@
         "number": "156"
       },
       "missing": [
-        "invalid: mana_cost: unsupported mana symbol {R/W}"
+        "triggered ability",
+        "tokens"
       ]
     },
     {
@@ -2453,6 +2685,8 @@
         "number": "180"
       },
       "missing": [
+        "triggered ability",
+        "tokens",
         "other rules text"
       ]
     },
@@ -2485,17 +2719,6 @@
       ]
     },
     {
-      "name": "Dimension X",
-      "rarity": "common",
-      "printing": {
-        "set": "tmt",
-        "number": "183"
-      },
-      "missing": [
-        "other rules text"
-      ]
-    },
-    {
       "name": "Escape Tunnel",
       "rarity": "common",
       "printing": {
@@ -2509,39 +2732,6 @@
       ]
     },
     {
-      "name": "Foot Headquarters",
-      "rarity": "common",
-      "printing": {
-        "set": "tmt",
-        "number": "185"
-      },
-      "missing": [
-        "other rules text"
-      ]
-    },
-    {
-      "name": "Illegitimate Business",
-      "rarity": "common",
-      "printing": {
-        "set": "tmt",
-        "number": "186"
-      },
-      "missing": [
-        "other rules text"
-      ]
-    },
-    {
-      "name": "Mutant Town",
-      "rarity": "common",
-      "printing": {
-        "set": "tmt",
-        "number": "187"
-      },
-      "missing": [
-        "other rules text"
-      ]
-    },
-    {
       "name": "Northampton Farm",
       "rarity": "rare",
       "printing": {
@@ -2552,17 +2742,6 @@
         "exile",
         "sacrifice",
         "return to hand"
-      ]
-    },
-    {
-      "name": "TCRI Building",
-      "rarity": "common",
-      "printing": {
-        "set": "tmt",
-        "number": "189"
-      },
-      "missing": [
-        "other rules text"
       ]
     },
     {

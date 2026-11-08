@@ -12,54 +12,6 @@
   "cards": [
     {
       "card": {
-        "name": "Assembly Specialist",
-        "mana_cost": "{1}{W}",
-        "types": [
-          "artifact",
-          "creature"
-        ],
-        "subtypes": [
-          "borg"
-        ],
-        "power": 1,
-        "toughness": 1,
-        "abilities": [
-          {
-            "triggered": {
-              "when": {
-                "enters": {}
-              },
-              "effects": [
-                {
-                  "create_token": {
-                    "token": {
-                      "name": "Borg",
-                      "types": [
-                        "artifact",
-                        "creature"
-                      ],
-                      "subtypes": [
-                        "borg"
-                      ],
-                      "power": 1,
-                      "toughness": 1
-                    },
-                    "amount": 1
-                  }
-                }
-              ]
-            }
-          }
-        ]
-      },
-      "rarity": "uncommon",
-      "printing": {
-        "set": "trk",
-        "number": "4"
-      }
-    },
-    {
-      "card": {
         "name": "Emergency Medical Hologram",
         "mana_cost": "{W}",
         "types": [
@@ -109,17 +61,77 @@
     },
     {
       "card": {
-        "name": "Cha'DIch Investigator",
-        "mana_cost": "{4}{B}",
+        "name": "Federation Probe",
+        "mana_cost": "{U}",
+        "types": [
+          "artifact",
+          "creature"
+        ],
+        "subtypes": [
+          "construct"
+        ],
+        "keywords": [
+          "flying"
+        ],
+        "power": 1,
+        "toughness": 1,
+        "abilities": [
+          {
+            "triggered": {
+              "when": {
+                "enters": {}
+              },
+              "choose": 1,
+              "modes": [
+                {
+                  "targets": [
+                    "creature"
+                  ],
+                  "effects": [
+                    {
+                      "pump": {
+                        "power": 1,
+                        "toughness": 1,
+                        "to": {
+                          "target": 0
+                        }
+                      }
+                    }
+                  ]
+                },
+                {
+                  "effects": [
+                    {
+                      "surveil": {
+                        "amount": 1
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "rarity": "common",
+      "printing": {
+        "set": "trk",
+        "number": "59"
+      }
+    },
+    {
+      "card": {
+        "name": "Fugitive Listener",
+        "mana_cost": "{2}{B}",
         "types": [
           "creature"
         ],
         "subtypes": [
-          "klingon",
-          "warrior"
+          "el_aurian",
+          "scout"
         ],
-        "power": 4,
-        "toughness": 4,
+        "power": 3,
+        "toughness": 1,
         "abilities": [
           {
             "triggered": {
@@ -128,23 +140,9 @@
               },
               "effects": [
                 {
-                  "create_token": {
-                    "token": {
-                      "name": "Klingon Warrior",
-                      "types": [
-                        "creature"
-                      ],
-                      "subtypes": [
-                        "klingon",
-                        "warrior"
-                      ],
-                      "power": 2,
-                      "toughness": 1,
-                      "keywords": [
-                        "haste"
-                      ]
-                    },
-                    "amount": 1
+                  "discard": {
+                    "amount": 1,
+                    "to": "each_opponent"
                   }
                 }
               ]
@@ -155,43 +153,32 @@
       "rarity": "common",
       "printing": {
         "set": "trk",
-        "number": "97"
+        "number": "107"
       }
     },
     {
       "card": {
-        "name": "Tenacious Drone",
-        "mana_cost": "{1}{B}",
+        "name": "He's Dead, Jim",
+        "mana_cost": "{3}{B}",
         "types": [
-          "artifact",
-          "creature"
+          "instant"
         ],
-        "subtypes": [
-          "borg"
-        ],
-        "power": 2,
-        "toughness": 1,
         "abilities": [
           {
-            "triggered": {
-              "when": {
-                "dies": {}
-              },
+            "spell": {
+              "targets": [
+                "creature"
+              ],
               "effects": [
                 {
-                  "create_token": {
-                    "token": {
-                      "name": "Borg",
-                      "types": [
-                        "artifact",
-                        "creature"
-                      ],
-                      "subtypes": [
-                        "borg"
-                      ],
-                      "power": 1,
-                      "toughness": 1
-                    },
+                  "destroy": {
+                    "to": {
+                      "target": 0
+                    }
+                  }
+                },
+                {
+                  "surveil": {
                     "amount": 1
                   }
                 }
@@ -203,7 +190,7 @@
       "rarity": "common",
       "printing": {
         "set": "trk",
-        "number": "133"
+        "number": "114"
       }
     },
     {
@@ -252,6 +239,59 @@
       "printing": {
         "set": "trk",
         "number": "171"
+      }
+    },
+    {
+      "card": {
+        "name": "Tal Shiar Analyst",
+        "mana_cost": "{2}{R}",
+        "types": [
+          "creature"
+        ],
+        "subtypes": [
+          "romulan",
+          "scientist"
+        ],
+        "power": 3,
+        "toughness": 2,
+        "abilities": [
+          {
+            "activated": {
+              "cost": [
+                "tap"
+              ],
+              "effects": [
+                {
+                  "deal_damage": {
+                    "amount": 1,
+                    "to": "each_opponent"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "triggered": {
+              "when": {
+                "cast": {
+                  "spell": "noncreature"
+                }
+              },
+              "effects": [
+                {
+                  "untap": {
+                    "to": "self"
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "rarity": "common",
+      "printing": {
+        "set": "trk",
+        "number": "174"
       }
     },
     {
@@ -382,6 +422,496 @@
       "printing": {
         "set": "trk",
         "number": "225"
+      }
+    },
+    {
+      "card": {
+        "name": "Andoria",
+        "types": [
+          "land"
+        ],
+        "subtypes": [
+          "planet"
+        ],
+        "abilities": [
+          "enters_tapped",
+          {
+            "triggered": {
+              "when": {
+                "enters": {}
+              },
+              "effects": [
+                {
+                  "gain_life": {
+                    "amount": 1
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "mana": {
+              "cost": [
+                "tap"
+              ],
+              "produce": "{U}"
+            }
+          },
+          {
+            "mana": {
+              "cost": [
+                "tap"
+              ],
+              "produce": "{R}"
+            }
+          }
+        ]
+      },
+      "rarity": "common",
+      "printing": {
+        "set": "trk",
+        "number": "275"
+      }
+    },
+    {
+      "card": {
+        "name": "Bajor",
+        "types": [
+          "land"
+        ],
+        "subtypes": [
+          "planet"
+        ],
+        "abilities": [
+          "enters_tapped",
+          {
+            "triggered": {
+              "when": {
+                "enters": {}
+              },
+              "effects": [
+                {
+                  "gain_life": {
+                    "amount": 1
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "mana": {
+              "cost": [
+                "tap"
+              ],
+              "produce": "{R}"
+            }
+          },
+          {
+            "mana": {
+              "cost": [
+                "tap"
+              ],
+              "produce": "{W}"
+            }
+          }
+        ]
+      },
+      "rarity": "common",
+      "printing": {
+        "set": "trk",
+        "number": "277"
+      }
+    },
+    {
+      "card": {
+        "name": "Cardassia Prime",
+        "types": [
+          "land"
+        ],
+        "subtypes": [
+          "planet"
+        ],
+        "abilities": [
+          "enters_tapped",
+          {
+            "triggered": {
+              "when": {
+                "enters": {}
+              },
+              "effects": [
+                {
+                  "gain_life": {
+                    "amount": 1
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "mana": {
+              "cost": [
+                "tap"
+              ],
+              "produce": "{W}"
+            }
+          },
+          {
+            "mana": {
+              "cost": [
+                "tap"
+              ],
+              "produce": "{B}"
+            }
+          }
+        ]
+      },
+      "rarity": "common",
+      "printing": {
+        "set": "trk",
+        "number": "280"
+      }
+    },
+    {
+      "card": {
+        "name": "Earth, Sector 001",
+        "types": [
+          "land"
+        ],
+        "subtypes": [
+          "planet"
+        ],
+        "abilities": [
+          "enters_tapped",
+          {
+            "triggered": {
+              "when": {
+                "enters": {}
+              },
+              "effects": [
+                {
+                  "gain_life": {
+                    "amount": 1
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "mana": {
+              "cost": [
+                "tap"
+              ],
+              "produce": "{G}"
+            }
+          },
+          {
+            "mana": {
+              "cost": [
+                "tap"
+              ],
+              "produce": "{U}"
+            }
+          }
+        ]
+      },
+      "rarity": "common",
+      "printing": {
+        "set": "trk",
+        "number": "281"
+      }
+    },
+    {
+      "card": {
+        "name": "Ferenginar",
+        "types": [
+          "land"
+        ],
+        "subtypes": [
+          "planet"
+        ],
+        "abilities": [
+          "enters_tapped",
+          {
+            "triggered": {
+              "when": {
+                "enters": {}
+              },
+              "effects": [
+                {
+                  "gain_life": {
+                    "amount": 1
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "mana": {
+              "cost": [
+                "tap"
+              ],
+              "produce": "{B}"
+            }
+          },
+          {
+            "mana": {
+              "cost": [
+                "tap"
+              ],
+              "produce": "{G}"
+            }
+          }
+        ]
+      },
+      "rarity": "common",
+      "printing": {
+        "set": "trk",
+        "number": "283"
+      }
+    },
+    {
+      "card": {
+        "name": "Orion",
+        "types": [
+          "land"
+        ],
+        "subtypes": [
+          "planet"
+        ],
+        "abilities": [
+          "enters_tapped",
+          {
+            "triggered": {
+              "when": {
+                "enters": {}
+              },
+              "effects": [
+                {
+                  "gain_life": {
+                    "amount": 1
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "mana": {
+              "cost": [
+                "tap"
+              ],
+              "produce": "{R}"
+            }
+          },
+          {
+            "mana": {
+              "cost": [
+                "tap"
+              ],
+              "produce": "{G}"
+            }
+          }
+        ]
+      },
+      "rarity": "common",
+      "printing": {
+        "set": "trk",
+        "number": "288"
+      }
+    },
+    {
+      "card": {
+        "name": "Qo'noS",
+        "types": [
+          "land"
+        ],
+        "subtypes": [
+          "planet"
+        ],
+        "abilities": [
+          "enters_tapped",
+          {
+            "triggered": {
+              "when": {
+                "enters": {}
+              },
+              "effects": [
+                {
+                  "gain_life": {
+                    "amount": 1
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "mana": {
+              "cost": [
+                "tap"
+              ],
+              "produce": "{B}"
+            }
+          },
+          {
+            "mana": {
+              "cost": [
+                "tap"
+              ],
+              "produce": "{R}"
+            }
+          }
+        ]
+      },
+      "rarity": "common",
+      "printing": {
+        "set": "trk",
+        "number": "291"
+      }
+    },
+    {
+      "card": {
+        "name": "Risa",
+        "types": [
+          "land"
+        ],
+        "subtypes": [
+          "planet"
+        ],
+        "abilities": [
+          "enters_tapped",
+          {
+            "triggered": {
+              "when": {
+                "enters": {}
+              },
+              "effects": [
+                {
+                  "gain_life": {
+                    "amount": 1
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "mana": {
+              "cost": [
+                "tap"
+              ],
+              "produce": "{G}"
+            }
+          },
+          {
+            "mana": {
+              "cost": [
+                "tap"
+              ],
+              "produce": "{W}"
+            }
+          }
+        ]
+      },
+      "rarity": "common",
+      "printing": {
+        "set": "trk",
+        "number": "293"
+      }
+    },
+    {
+      "card": {
+        "name": "Romulus",
+        "types": [
+          "land"
+        ],
+        "subtypes": [
+          "planet"
+        ],
+        "abilities": [
+          "enters_tapped",
+          {
+            "triggered": {
+              "when": {
+                "enters": {}
+              },
+              "effects": [
+                {
+                  "gain_life": {
+                    "amount": 1
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "mana": {
+              "cost": [
+                "tap"
+              ],
+              "produce": "{U}"
+            }
+          },
+          {
+            "mana": {
+              "cost": [
+                "tap"
+              ],
+              "produce": "{B}"
+            }
+          }
+        ]
+      },
+      "rarity": "common",
+      "printing": {
+        "set": "trk",
+        "number": "294"
+      }
+    },
+    {
+      "card": {
+        "name": "Vulcan",
+        "types": [
+          "land"
+        ],
+        "subtypes": [
+          "planet"
+        ],
+        "abilities": [
+          "enters_tapped",
+          {
+            "triggered": {
+              "when": {
+                "enters": {}
+              },
+              "effects": [
+                {
+                  "gain_life": {
+                    "amount": 1
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "mana": {
+              "cost": [
+                "tap"
+              ],
+              "produce": "{W}"
+            }
+          },
+          {
+            "mana": {
+              "cost": [
+                "tap"
+              ],
+              "produce": "{U}"
+            }
+          }
+        ]
+      },
+      "rarity": "common",
+      "printing": {
+        "set": "trk",
+        "number": "305"
       }
     },
     {
@@ -517,6 +1047,18 @@
         "condition (if/unless/as long as)",
         "tokens",
         "static ability"
+      ]
+    },
+    {
+      "name": "Assembly Specialist",
+      "rarity": "uncommon",
+      "printing": {
+        "set": "trk",
+        "number": "4"
+      },
+      "missing": [
+        "triggered ability",
+        "tokens"
       ]
     },
     {
@@ -1180,17 +1722,6 @@
       ]
     },
     {
-      "name": "Federation Probe",
-      "rarity": "common",
-      "printing": {
-        "set": "trk",
-        "number": "59"
-      },
-      "missing": [
-        "modal choice"
-      ]
-    },
-    {
       "name": "Guidance Failure",
       "rarity": "common",
       "printing": {
@@ -1586,7 +2117,6 @@
         "number": "91"
       },
       "missing": [
-        "triggered ability",
         "discard"
       ]
     },
@@ -1653,6 +2183,18 @@
         "sacrifice",
         "copy",
         "graveyard casting"
+      ]
+    },
+    {
+      "name": "Cha'DIch Investigator",
+      "rarity": "common",
+      "printing": {
+        "set": "trk",
+        "number": "97"
+      },
+      "missing": [
+        "triggered ability",
+        "tokens"
       ]
     },
     {
@@ -1764,18 +2306,6 @@
       ]
     },
     {
-      "name": "Fugitive Listener",
-      "rarity": "common",
-      "printing": {
-        "set": "trk",
-        "number": "107"
-      },
-      "missing": [
-        "triggered ability",
-        "discard"
-      ]
-    },
-    {
       "name": "Gabriel Lorca, Mirror Menace",
       "rarity": "uncommon",
       "printing": {
@@ -1848,17 +2378,6 @@
       "missing": [
         "triggered ability",
         "variable amount"
-      ]
-    },
-    {
-      "name": "He's Dead, Jim",
-      "rarity": "common",
-      "printing": {
-        "set": "trk",
-        "number": "114"
-      },
-      "missing": [
-        "library manipulation"
       ]
     },
     {
@@ -2004,7 +2523,6 @@
         "number": "126"
       },
       "missing": [
-        "modal choice",
         "other rules text"
       ]
     },
@@ -2085,6 +2603,18 @@
       ]
     },
     {
+      "name": "Tenacious Drone",
+      "rarity": "common",
+      "printing": {
+        "set": "trk",
+        "number": "133"
+      },
+      "missing": [
+        "triggered ability",
+        "tokens"
+      ]
+    },
+    {
       "name": "Test of Loyalty",
       "rarity": "uncommon",
       "printing": {
@@ -2131,7 +2661,9 @@
         "number": "137"
       },
       "missing": [
-        "variable amount"
+        "variable amount",
+        "triggered ability",
+        "tokens"
       ]
     },
     {
@@ -2156,6 +2688,7 @@
         "number": "139"
       },
       "missing": [
+        "tokens",
         "other rules text"
       ]
     },
@@ -2576,18 +3109,6 @@
       ]
     },
     {
-      "name": "Tal Shiar Analyst",
-      "rarity": "common",
-      "printing": {
-        "set": "trk",
-        "number": "174"
-      },
-      "missing": [
-        "other rules text",
-        "triggered ability"
-      ]
-    },
-    {
       "name": "Targ Wrangler",
       "rarity": "uncommon",
       "printing": {
@@ -2685,6 +3206,7 @@
         "number": "182"
       },
       "missing": [
+        "tokens",
         "other rules text"
       ]
     },
@@ -2912,6 +3434,8 @@
         "number": "201"
       },
       "missing": [
+        "triggered ability",
+        "tokens",
         "condition (if/unless/as long as)"
       ]
     },
@@ -3322,8 +3846,7 @@
         "number": "236"
       },
       "missing": [
-        "tap/untap effect",
-        "library manipulation"
+        "tap/untap effect"
       ]
     },
     {
@@ -3567,8 +4090,7 @@
         "number": "255"
       },
       "missing": [
-        "triggered ability",
-        "library manipulation"
+        "triggered ability"
       ]
     },
     {
@@ -3656,8 +4178,6 @@
         "number": "262"
       },
       "missing": [
-        "triggered ability",
-        "library manipulation",
         "graveyard casting"
       ]
     },
@@ -3818,17 +4338,6 @@
       ]
     },
     {
-      "name": "Andoria",
-      "rarity": "common",
-      "printing": {
-        "set": "trk",
-        "number": "275"
-      },
-      "missing": [
-        "other rules text"
-      ]
-    },
-    {
       "name": "Artificial Anomaly",
       "rarity": "uncommon",
       "printing": {
@@ -3838,17 +4347,6 @@
       "missing": [
         "tokens",
         "sacrifice"
-      ]
-    },
-    {
-      "name": "Bajor",
-      "rarity": "common",
-      "printing": {
-        "set": "trk",
-        "number": "277"
-      },
-      "missing": [
-        "other rules text"
       ]
     },
     {
@@ -3874,28 +4372,6 @@
       ]
     },
     {
-      "name": "Cardassia Prime",
-      "rarity": "common",
-      "printing": {
-        "set": "trk",
-        "number": "280"
-      },
-      "missing": [
-        "other rules text"
-      ]
-    },
-    {
-      "name": "Earth, Sector 001",
-      "rarity": "common",
-      "printing": {
-        "set": "trk",
-        "number": "281"
-      },
-      "missing": [
-        "other rules text"
-      ]
-    },
-    {
       "name": "Federation Outpost",
       "rarity": "rare",
       "printing": {
@@ -3905,17 +4381,6 @@
       "missing": [
         "condition (if/unless/as long as)",
         "modal choice"
-      ]
-    },
-    {
-      "name": "Ferenginar",
-      "rarity": "common",
-      "printing": {
-        "set": "trk",
-        "number": "283"
-      },
-      "missing": [
-        "other rules text"
       ]
     },
     {
@@ -3965,17 +4430,6 @@
       ]
     },
     {
-      "name": "Orion",
-      "rarity": "common",
-      "printing": {
-        "set": "trk",
-        "number": "288"
-      },
-      "missing": [
-        "other rules text"
-      ]
-    },
-    {
       "name": "Overgrown Tomb",
       "rarity": "rare",
       "printing": {
@@ -3999,17 +4453,6 @@
       ]
     },
     {
-      "name": "Qo'noS",
-      "rarity": "common",
-      "printing": {
-        "set": "trk",
-        "number": "291"
-      },
-      "missing": [
-        "other rules text"
-      ]
-    },
-    {
       "name": "Quark's Bar",
       "rarity": "rare",
       "printing": {
@@ -4019,28 +4462,6 @@
       "missing": [
         "condition (if/unless/as long as)",
         "modal choice"
-      ]
-    },
-    {
-      "name": "Risa",
-      "rarity": "common",
-      "printing": {
-        "set": "trk",
-        "number": "293"
-      },
-      "missing": [
-        "other rules text"
-      ]
-    },
-    {
-      "name": "Romulus",
-      "rarity": "common",
-      "printing": {
-        "set": "trk",
-        "number": "294"
-      },
-      "missing": [
-        "other rules text"
       ]
     },
     {
@@ -4157,17 +4578,6 @@
       "missing": [
         "condition (if/unless/as long as)",
         "modal choice"
-      ]
-    },
-    {
-      "name": "Vulcan",
-      "rarity": "common",
-      "printing": {
-        "set": "trk",
-        "number": "305"
-      },
-      "missing": [
-        "other rules text"
       ]
     },
     {

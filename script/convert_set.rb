@@ -80,7 +80,7 @@ module SetConverter
   def translate_text(source, data, missing)
     text = source["oracle_text"].to_s.gsub(/\s*\([^)]*\)/, "") # reminder text is not rules
     text = text.gsub(source["name"], "CARDNAME")
-    text = text.gsub(/\bthis (creature|artifact|enchantment|land|planeswalker|permanent|Vehicle|Spacecraft)\b/, "CARDNAME")
+    text = text.gsub(/\b[Tt]his (creature|artifact|enchantment|land|planeswalker|permanent|Vehicle|Spacecraft)\b/, "CARDNAME")
     keywords = []
     abilities = []
     spell_effects = []
@@ -272,6 +272,23 @@ module SetConverter
     when /\ADestroy (target creature|target permanent|target planeswalker)\z/
       { "destroy" => { "to" => target_ref(::Regexp.last_match(1), targets, offset) } }
     when /\ACounter (target spell)\z/ then { "counter" => { "to" => target_ref(::Regexp.last_match(1), targets, offset) } }
+    when /\AExile (target creature|target permanent|target planeswalker|target creature or planeswalker)\z/
+      { "exile" => { "to" => target_ref(::Regexp.last_match(1), targets, offset) } }
+    when /\AReturn (target creature|target permanent) to its owner's hand\z/
+      { "return_to_hand" => { "to" => target_ref(::Regexp.last_match(1), targets, offset) } }
+    when /\ATap (target creature|target permanent)\z/ then { "tap" => { "to" => target_ref(::Regexp.last_match(1), targets, offset) } }
+    when /\AUntap CARDNAME\z/ then { "untap" => { "to" => "self" } }
+    when /\A(Scry|Surveil) (\d+)\z/ then { ::Regexp.last_match(1).downcase => { "amount" => Integer(::Regexp.last_match(2)) } }
+    when /\AMill (a|one|two|three|\d+) cards?\z/ then { "mill" => { "amount" => number(::Regexp.last_match(1)) } }
+    when /\AEach opponent mills (a|one|two|three|\d+) cards?\z/
+      { "mill" => { "amount" => number(::Regexp.last_match(1)), "to" => "each_opponent" } }
+    when /\A(Target player|Target opponent) mills (a|one|two|three|\d+) cards?\z/
+      { "mill" => { "amount" => number(::Regexp.last_match(2)), "to" => target_ref(::Regexp.last_match(1).downcase, targets, offset) } }
+    when /\AEach opponent discards (a|one|two|\d+) cards?\z/
+      { "discard" => { "amount" => number(::Regexp.last_match(1)), "to" => "each_opponent" } }
+    when /\A(Target player|Target opponent) discards (a|one|two|\d+) cards?\z/
+      { "discard" => { "amount" => number(::Regexp.last_match(2)), "to" => target_ref(::Regexp.last_match(1).downcase, targets, offset) } }
+    when /\ADiscard (a|one|two|\d+) cards?\z/ then { "discard" => { "amount" => number(::Regexp.last_match(1)) } }
     when /\ACreate (a|an|one|two|three|\d+) (tapped )?(Treasure|Clue|Food) tokens?\z/
       { "create_token" => { "token" => ::Regexp.last_match(3), "amount" => number(::Regexp.last_match(1)),
                             "tapped" => !::Regexp.last_match(2).nil? }.reject { |k, v| k == "tapped" && !v } }
