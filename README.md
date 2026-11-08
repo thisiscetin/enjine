@@ -40,7 +40,9 @@ decks built from it finish with zero rules findings. See the
 | Star Trek | `trk` | 5 / 311 | in progress |
 
 Other Standard sets follow newest first: Reality Fracture, The Hobbit, Marvel
-Super Heroes, and so on back to Wilds of Eldraine. Card data lives in
+Super Heroes, and so on back to Foundations. Sets that leave Standard at the next
+rotation aren't imported. Each set file records the date it stops being Standard
+(`standard_legal_until`), and `sets=standard` only uses sets legal on that day. Card data lives in
 `lib/enjine/sets/<code>.json`. It ships with the gem, isn't loaded by default, and
 the [deck builder](docs/guides/deck-builder.md) reads it (`--random-deck sets=trk`).
 

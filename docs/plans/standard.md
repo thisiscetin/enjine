@@ -1,6 +1,6 @@
 # Program: every Standard set imported, implemented and verified
 
-**Goal.** For each Standard-legal set, newest first:
+**Goal.** For each Standard-legal set that stays legal past the next rotation, newest first:
 1. Import every card into `lib/enjine/sets/<code>.json` (`script/convert_set.rb`).
 2. Implement every mechanic the set needs, until `unsupported` is empty.
 3. Play observed sample games with random decks built from the set
@@ -48,16 +48,20 @@ the set files.
 | 12 | Tarkir: Dragonstorm | 2025-04-11 | 2028 (est.) | not started |
 | 13 | Aetherdrift | 2025-02-14 | 2028 (est.) | not started |
 | 14 | Foundations | 2024-11-15 | 2029 (est.) | not started |
-| 15 | Duskmourn: House of Horror | 2024-09-27 | 2027-02-05 | not started |
-| 16 | Bloomburrow | 2024-08-02 | 2027-02-05 | not started |
-| 17 | Outlaws of Thunder Junction | 2024-04-19 | 2027-02-05 | not started |
-| 18 | Murders at Karlov Manor | 2024-02-09 | 2027-02-05 | not started |
-| 19 | The Lost Caverns of Ixalan | 2023-11-17 | 2027-02-05 | not started |
-| 20 | Wilds of Eldraine | 2023-09-08 | 2027-02-05 | not started |
 
-Sets 15–20 leave Standard less than three months from now. They stay in the
-queue, but if time is short, do them last or skip them; the Standard-first
-priority applies.
+**Out of scope:** sets that are no longer Standard-legal, or that rotate out at the
+next announced rotation, are not imported. On 2027-02-05 Wilds of Eldraine, The
+Lost Caverns of Ixalan, Murders at Karlov Manor, Outlaws of Thunder Junction,
+Bloomburrow and Duskmourn leave Standard, so they're skipped (the maintainer
+decided this on 2026-11-08). When a new set releases, add it at the top. When a
+rotation is announced, drop the rotating sets from this table and stop shipping
+their set files.
+
+**Every set file records when it stops being Standard:** `standard_legal_until`
+(ISO date, the first day the set is no longer legal) and
+`standard_legal_until_estimated` (true until Wizards announces the exact date).
+`Sets.standard_legal(on: date)` and the deck builder's `sets=standard` use those
+fields, so a set drops out of generated decks automatically on that date.
 
 ## How the work compounds
 
