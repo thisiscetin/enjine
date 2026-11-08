@@ -5,7 +5,8 @@ module Enjine
     # The context an effect runs in.
     # `results` lists, per earlier effect of the same effect list, the objects that effect
     # moved or created (CR 400.7j: "the card exiled this way"); see Selector {"result": n}.
-    EffectContext = Struct.new(:controller, :source, :object, :targets, :results)
+    # `amounts`: per earlier effect, how much it changed ("the life lost this way"); see Amount {"this_way": n}.
+    EffectContext = Struct.new(:controller, :source, :object, :targets, :results, :amounts)
 
     # Data form of "who/what does this effect apply to":
     #   {"target": 0}                               the first chosen target
@@ -15,6 +16,8 @@ module Enjine
     #   "attached"                                  what the source is attached to ("enchanted creature", CR 303.4m)
     #   {"each": "creature", "controller": "you"}  every matching object (you | opponent | any)
     #   {"result": 0}                               what effect 0 of this list moved or created (CR 400.7j)
+    #   {"controller_of": {"target": 0}}            the player who controls the first target ("its controller");
+    #                                               one that has left the battlefield as it last existed (CR 608.2h)
     class Selector
       CONTROLLERS = %w[you opponent any].freeze
 
@@ -26,6 +29,7 @@ module Enjine
         when Hash
           data = data.transform_keys(&:to_s)
           return build_result(data, errors, path, results_count) if data.key?("result")
+          return build_controller_of(data, errors, path, targets_count, results_count) if data.key?("controller_of")
 
           build_hash(data, errors, path, targets_count)
         else
@@ -42,6 +46,13 @@ module Enjine
           errors << "#{path}.result: must refer to one of the #{results_count} earlier effects"
         end
         new(:result, index)
+      end
+
+      def self.build_controller_of(data, errors, path, targets_count, results_count)
+        Mechanics.check_keys(data, %w[controller_of], errors, path)
+        inner = build(data["controller_of"], errors, "#{path}.controller_of", targets_count: targets_count,
+                                                                              results_count: results_count)
+        new(:controller_of, inner)
       end
 
       def self.build_hash(data, errors, path, targets_count)
@@ -75,6 +86,7 @@ module Enjine
         case kind
         when :target then "target ##{value + 1}"
         when :result then "the object(s) from effect ##{value + 1}"
+        when :controller_of then "the controller of #{value}"
         when :self then "itself"
         when :attached then "the attached permanent"
         when :you then "you"
@@ -96,10 +108,24 @@ module Enjine
         when :each_opponent
           engine.state.players.each_index.reject { it == ctx.controller }.map { Filters.player_ref(engine, it) }
         when :each then each(engine, ctx)
+        when :controller_of then controllers(engine, ctx)
         end
       end
 
       private
+
+      def controllers(engine, ctx)
+        Array(value&.resolve(engine, ctx)).filter_map do |ref|
+          obj = engine.state.objects[ref]
+          controller = if obj && %i[battlefield
+                                    stack].include?(obj.zone)
+                         obj.controller
+                       else
+                         engine.resolving_last_known(ref)&.fetch("controller")
+                       end
+          controller && Filters.player_ref(engine, controller)
+        end.uniq
+      end
 
       # CR 301.5f / 303.4m: "equipped/enchanted creature" is whatever the source is attached to now.
       def attached(engine, ctx)

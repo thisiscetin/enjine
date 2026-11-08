@@ -81,6 +81,8 @@ module Enjine
         pl.hand = pl.hand.dup
         pl.graveyard = pl.graveyard.dup
         pl.mana_pool = Mana::TYPES.to_h { |t| [t, hash["mana_pool"].fetch(t.to_s, 0)] }
+        pl.turn_log = deep_copy(hash.fetch("turn_log", {}))
+        pl.game_log = deep_copy(hash.fetch("game_log", {}))
       end
     end
 
@@ -109,8 +111,16 @@ module Enjine
           errors << "#{path}.mana_pool: must map W/U/B/R/G/C to non-negative integers"
         end
       end
+      validate_logs(players, errors)
       names = players.map { it.is_a?(Hash) ? it["name"] : nil }
       errors << "players: names must be distinct non-empty strings" unless names.all?(String) && names.uniq.size == 2
+    end
+
+    # What happened this turn and this game (Engine::TurnHistory); absent in older snapshots.
+    def validate_logs(players, errors)
+      players.each_with_index.select { |pl, _| pl.is_a?(Hash) }.each do |pl, i|
+        %w[turn_log game_log].each { |k| errors << "players[#{i}].#{k}: must be an object" unless pl.fetch(k, {}).is_a?(Hash) }
+      end
     end
 
     def validate_objects(data, catalog, errors)

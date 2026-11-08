@@ -94,7 +94,8 @@ module Enjine
         return unless inst.ability.condition_met?(self, source["controller"], source["id"]) # CR 603.4
 
         memory = state.objects[source["id"]]&.memory&.[]("cast") ? { "source_cast" => true } : {}
-        queue_pending_trigger!(source.merge("ability" => inst.ref), event, memory)
+        card, ref = granted_origin(inst.ref) # a granted ability lives in the granting card's data (CR 613.1f)
+        queue_pending_trigger!(source.merge("ability" => ref || inst.ref, "card" => card || source["card"]), event, memory)
       end
 
       # `memory` travels to the ability on the stack (its source's last known status, a delayed

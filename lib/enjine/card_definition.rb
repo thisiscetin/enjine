@@ -9,11 +9,11 @@ module Enjine
   # Enjine.registry. Anything unknown is reported (with its path) in a single
   # InvalidCardDefinition error.
   class CardDefinition
-    KEYS = %w[name mana_cost types supertypes subtypes keywords power toughness loyalty abilities rules_text].freeze
+    KEYS = %w[name mana_cost colors types supertypes subtypes keywords power toughness loyalty abilities rules_text].freeze
     SUBTYPE_FORMAT = /\A[a-z][a-z0-9_]*\z/
 
     attr_reader :id, :name, :mana_cost, :types, :supertypes, :subtypes, :keywords, :power, :toughness, :loyalty,
-                :abilities, :rules_text, :type_modules, :source
+                :abilities, :rules_text, :type_modules, :source, :colors, :power_amount, :toughness_amount
 
     # Canonical id derived from a card name: "Jace, the Mind Sculptor" -> "jace_the_mind_sculptor".
     def self.slug(name)
@@ -53,8 +53,9 @@ module Enjine
       @subtypes = read_subtypes(card, errors)
       @mana_cost = card.key?("mana_cost") ? Mana.parse_cost(card["mana_cost"], errors) : nil
       @keywords, keyword_modules = read_names(card, "keywords", :keyword, errors)
-      @power = read_stat(card, "power", errors)
-      @toughness = read_stat(card, "toughness", errors)
+      @colors = read_colors(card, errors)
+      @power, @power_amount = read_pt(card, "power", errors)
+      @toughness, @toughness_amount = read_pt(card, "toughness", errors)
       @loyalty = read_stat(card, "loyalty", errors)
       @rules_text = card["rules_text"]
       errors << "rules_text: must be a string" unless @rules_text.nil? || @rules_text.is_a?(String)
@@ -91,6 +92,9 @@ module Enjine
     EMPTY = [].freeze
 
     def permanent? = @permanent
+
+    # CR 604.3: power and/or toughness defined by a characteristic-defining ability ("*" printed).
+    def defined_pt? = !(@power_amount.nil? && @toughness_amount.nil?)
     def token? = @token
 
     # Token definitions this card's effects can create; catalogs register them with the card.
@@ -227,6 +231,31 @@ module Enjine
       end.uniq.freeze
     end
 
+    # CR 202.2: a card's colors come from its mana cost, unless it has a color indicator (CR 204) or is a
+    # token whose creating effect gives its colors (CR 111.4): `"colors": ["G"]` (`[]` for colorless).
+    def read_colors(card, errors)
+      return (@mana_cost.is_a?(Mana::Cost) ? Mana::COLORS.select { @mana_cost.colored.key?(it) } : []).freeze unless card.key?("colors")
+
+      list = card["colors"]
+      ok = list.is_a?(Array) && list.all? { Mana::COLORS.include?(it.to_s.upcase.to_sym) }
+      errors << "colors: must be a list of W, U, B, R, G" unless ok
+      ok ? Mana::COLORS.select { |c| list.map { it.to_s.upcase }.include?(c.to_s) }.freeze : [].freeze
+    end
+
+    # Power/toughness: an integer, or an amount for a characteristic-defining ability ("*", CR 604.3,
+    # 208.2a), e.g. {"count": {"each": {"creature": {"types": ["artifact"]}}, "controller": "you"}}.
+    # Returns [printed value, amount]; the defined value is computed in layer 7a (CR 613.4a).
+    def read_pt(card, key, errors)
+      value = card[key]
+      return [read_stat(card, key, errors), nil] unless value.is_a?(Hash)
+
+      amount = Mechanics::Amount.build(value, errors, key, targets_count: 0)
+      unless Mechanics::Amount.layer_safe?(amount)
+        errors << "#{key}: a characteristic-defining amount can't read power or toughness (CR 613.8)"
+      end
+      [0, amount]
+    end
+
     def read_stat(card, key, errors)
       return nil unless card.key?(key)
 
@@ -278,17 +307,20 @@ module Enjine
     def normalize(card)
       out = { "name" => @name }
       out["mana_cost"] = @mana_cost.to_s if @mana_cost
+      out["colors"] = @colors.map(&:to_s) if card.key?("colors")
       out["types"] = @types.map(&:to_s)
       out["supertypes"] = @supertypes.map(&:to_s) unless @supertypes.empty?
       out["subtypes"] = @subtypes.map(&:to_s) unless @subtypes.empty?
       out["keywords"] = @keywords.map(&:to_s) unless @keywords.empty?
-      out["power"] = @power unless @power.nil?
-      out["toughness"] = @toughness unless @toughness.nil?
+      %w[power toughness].each { |key| out[key] = normalized_stat(card, key) unless instance_variable_get("@#{key}").nil? }
       out["loyalty"] = @loyalty unless @loyalty.nil?
       out["abilities"] = deep_stringify(card["abilities"]) if card["abilities"].is_a?(Array) && !card["abilities"].empty?
       out["rules_text"] = @rules_text if @rules_text
       deep_freeze(out)
     end
+
+    # An integer, or the amount of a characteristic-defining ability as given.
+    def normalized_stat(card, key) = card[key].is_a?(Hash) ? deep_stringify(card[key]) : instance_variable_get("@#{key}")
 
     def deep_stringify(value)
       case value

@@ -10,10 +10,10 @@ module Enjine
 
   # An object's characteristics after continuous effects (CR 109.3, 613).
   # Rules code asks these questions via Engine#chars, never the printed CardDefinition.
-  Characteristics = Data.define(:name, :mana_cost, :types, :supertypes, :subtypes, :keywords, :abilities,
+  Characteristics = Data.define(:name, :mana_cost, :colors, :types, :supertypes, :subtypes, :keywords, :abilities,
                                 :power, :toughness, :loyalty) do
     def self.printed(defn)
-      new(name: defn.name, mana_cost: defn.mana_cost, types: defn.types, supertypes: defn.supertypes,
+      new(name: defn.name, mana_cost: defn.mana_cost, colors: defn.colors, types: defn.types, supertypes: defn.supertypes,
           subtypes: defn.subtypes, keywords: defn.keywords, abilities: defn.ability_instances,
           power: defn.power, toughness: defn.toughness, loyalty: defn.loyalty)
     end

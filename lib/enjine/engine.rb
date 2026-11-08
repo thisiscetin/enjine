@@ -20,7 +20,8 @@ module Enjine
     end
 
     def emit(event)
-      touch! if Characteristics::LAYER_EVENTS.include?(event.class)
+      touch! if volatile_layers? || Characteristics::LAYER_EVENTS.include?(event.class)
+      record_history!(event) # before triggers look at it (see Engine::TurnHistory)
       @emit.call(event)
       watch_triggers!(event) unless event.is_a?(Events::AbilityTriggered)
     end
@@ -300,6 +301,7 @@ module Enjine
       to = data["to"]
       old = object(id)
       lki = old.zone == :battlefield ? last_known_info(old) : nil # before it leaves (CR 603.10a)
+      remember_last_known!(id, lki) if lki # CR 608.2h (see Engine::TurnHistory)
       state.zone_list(old.zone, old.owner).delete(id)
       state.objects.delete(id)
       fresh = create_object(old.card, old.owner, to)
@@ -378,11 +380,11 @@ module Enjine
       emit Events::Untapped.new(object: object.id)
     end
 
-    # CR 502.3: the active player's permanents untap.
+    # CR 502.3: the active player's permanents untap, except those effects keep from untapping.
     def untap_all!(index)
       state.battlefield.each do |id|
         obj = object(id)
-        untap!(obj) if obj.controller == index
+        untap!(obj) if obj.controller == index && !chars(obj).keyword?(:doesnt_untap)
       end
     end
 

@@ -16,7 +16,7 @@ module Enjine
                                "`color: \"any\"`: each mana's color chosen separately, \"in any combination of " \
                                "colors\").",
                   rules: %w[106.1a 106.4 608.2d 605.1a],
-                  params: { "produce" => "mana symbols, e.g. \"{R}{R}\"", "amount" => "amount (with color; default 1)",
+                  params: { "produce" => "mana symbols, e.g. \"{R}{R}\"", "amount" => "amount (default 1; with produce: how many times)",
                             "color" => CHOICES.join(" | ") },
                   example: { "add_mana" => { "amount" => 2, "color" => "any_one" } }
 
@@ -27,7 +27,6 @@ module Enjine
 
         def initialize(to:, params:, errors:, path:, targets_count: 0, results_count: 0)
           params = params.transform_keys(&:to_s)
-          errors << "#{path}.amount: only with color" if params.key?("amount") && params.key?("produce")
           params["amount"] = 1 unless params.key?("amount")
           super
         end
@@ -44,7 +43,7 @@ module Enjine
           return :done unless condition.nil? || condition.true?(engine, ctx)
 
           index = ctx.controller
-          return add(engine, index, @produce, ctx) unless @color
+          return add(engine, index, @produce * amount_for(engine, ctx), ctx) unless @color # "an amount of {G} equal to"
 
           n = (locals["n"] ||= amount_for(engine, ctx))
           picks = answers(locals)

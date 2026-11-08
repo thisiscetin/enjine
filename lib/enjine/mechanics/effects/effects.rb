@@ -36,12 +36,13 @@ module Enjine
             @amount = if raw.nil?
                         (errors << "#{path}.amount: required") && Amount::Fixed.new(0)
                       else
-                        Amount.build(raw, errors,
-                                     "#{path}.amount", targets_count: targets_count)
+                        Amount.build(raw, errors, "#{path}.amount", targets_count: targets_count,
+                                                                    results_count: results_count)
                       end
           end
           raw_if = Mechanics.fetch_param(params, :if)
-          @condition = raw_if && Condition.build(raw_if, errors, "#{path}.if", targets_count: targets_count)
+          @condition = raw_if && Condition.build(raw_if, errors, "#{path}.if", targets_count: targets_count,
+                                                                               results_count: results_count)
           setup(params, errors, path)
           freeze
         end
@@ -132,24 +133,37 @@ module Enjine
                   description: "Each referenced creature gets +power/+toughness until end of turn. The set of " \
                                "affected creatures is locked in when the effect starts.",
                   rules: %w[611.2a 611.2c 613.4c 514.2],
-                  params: { "power" => "integer (may be negative)", "toughness" => "integer (may be negative)",
-                            "to" => "selector" },
+                  params: { "power" => "amount (may be negative, e.g. {\"times\": [\"x\", -1]} for -X)",
+                            "toughness" => "amount (may be negative)", "to" => "selector" },
                   example: { "pump" => { "power" => 3, "toughness" => 3, "to" => { "target" => 0 } } }
-
-        attr_reader :power, :toughness
 
         def self.keys = %w[power toughness to if]
 
-        def setup(params, errors, path)
-          @power = Mechanics.integer_param(params, :power, errors, path, default: 0)
-          @toughness = Mechanics.integer_param(params, :toughness, errors, path, default: 0)
+        # A signed amount: an integer, or a computed Amount ("+X/+X, where X is ...", CR 608.2h).
+        def self.signed(params, key, errors, path, **context)
+          raw = Mechanics.fetch_param(params, key)
+          raw.nil? ? Amount::Fixed.new(0) : Amount.build(raw, errors, "#{path}.#{key}", min: -1_000_000, **context)
         end
 
-        def to_s = "#{format("%+d", power)}/#{format("%+d", toughness)} until end of turn → #{to}"
+        def self.signed_text(amount) = amount.is_a?(Amount::Fixed) ? format("%+d", amount.n) : "+(#{amount})"
 
+        def setup(params, errors, path)
+          context = { targets_count: @targets_count, results_count: @results_count }
+          @power = Pump.signed(params, :power, errors, path, **context)
+          @toughness = Pump.signed(params, :toughness, errors, path, **context)
+        end
+
+        # The fixed bonus (for display); computed bonuses are Amounts.
+        def power = @power.is_a?(Amount::Fixed) ? @power.n : @power
+        def toughness = @toughness.is_a?(Amount::Fixed) ? @toughness.n : @toughness
+
+        def to_s = "#{Pump.signed_text(@power)}/#{Pump.signed_text(@toughness)} until end of turn → #{to}"
+
+        # The amounts are computed once, as the effect starts (CR 608.2h, 611.2c).
         def apply(engine, ctx)
           affected = objects(engine, ctx).select { engine.chars(it).creature? }
-          engine.add_continuous_effect!("pump", ctx, affected, "power" => power, "toughness" => toughness)
+          engine.add_continuous_effect!("pump", ctx, affected, "power" => @power.value(engine, ctx),
+                                                               "toughness" => @toughness.value(engine, ctx))
         end
       end
 
@@ -159,15 +173,23 @@ module Enjine
                                        rules: %w[119.3], params: { "amount" => "integer", "to" => "selector" },
                                        example: { "gain_life" => { "amount" => 3 } }
         def self.default_to = "you"
-        def apply(engine, ctx) = players(engine, ctx).each { engine.change_life!(it, amount_for(engine, ctx)) }
+        def apply(engine, ctx) = players(engine, ctx).each { LoseLife.change!(engine, it, amount_for(engine, ctx)) }
       end
 
       # Lose life (CR 119.3).
       class LoseLife < Effect
-        primitive :effect, :lose_life, description: "Each referenced player loses `amount` life.",
+        primitive :effect, :lose_life, description: "Each referenced player loses `amount` life. The life lost is " \
+                                                    "recorded for {\"this_way\": n}.",
                                        rules: %w[119.3], params: { "amount" => "integer", "to" => "selector" },
                                        example: { "lose_life" => { "amount" => 2, "to" => "each_opponent" } }
-        def apply(engine, ctx) = players(engine, ctx).each { engine.change_life!(it, -amount_for(engine, ctx)) }
+        def apply(engine, ctx) = players(engine, ctx).each { LoseLife.change!(engine, it, -amount_for(engine, ctx)) }
+
+        # Changes a life total and records how much it changed ("the life lost this way", CR 608.2c).
+        def self.change!(engine, index, delta)
+          before = engine.player(index).life
+          engine.change_life!(index, delta)
+          engine.record_amount!((engine.player(index).life - before).abs)
+        end
       end
 
       # Draw cards (CR 121).

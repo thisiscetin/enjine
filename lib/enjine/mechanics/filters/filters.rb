@@ -78,7 +78,7 @@ module Enjine
         RANGES = %w[power toughness mana_value].freeze
         TYPE_LISTS = %w[not any_of types].freeze
         NAME_LISTS = %w[subtypes not_subtypes supertypes not_supertypes].freeze
-        KEYS = (%w[controller counters] + BOOLEANS + RANGES + TYPE_LISTS + NAME_LISTS).freeze
+        KEYS = (%w[controller counters colors] + BOOLEANS + RANGES + TYPE_LISTS + NAME_LISTS).freeze
         # Keys that need current characteristics or combat/tapped status: not usable in the layer pass.
         LIVE = %w[power toughness attacking blocking tapped].freeze
 
@@ -95,6 +95,10 @@ module Enjine
           counters = params["counters"]
           unless counters.nil? || [true, false].include?(counters) || Counters.valid?(counters)
             errors << "#{path}.counters: must be true, false or a counter name"
+          end
+          colors = params["colors"]
+          unless colors.nil? || (colors.is_a?(Array) && !colors.empty? && colors.all? { Mana::COLORS.include?(it.to_s.to_sym) })
+            errors << "#{path}.colors: must be a non-empty list of W, U, B, R, G (any of them)"
           end
           new(base, params)
         end
@@ -212,6 +216,7 @@ module Enjine
           return false unless matches_types?(c.types) && (@lists["subtypes"].empty? || c.subtypes.intersect?(@lists["subtypes"]))
           return false if c.subtypes.intersect?(@lists["not_subtypes"]) || c.supertypes.intersect?(@lists["not_supertypes"])
           return false unless (@lists["supertypes"] - c.supertypes).empty?
+          return false if @params["colors"] && !c.colors.intersect?(@params["colors"].map(&:to_sym)) # CR 105.2
           return false if !@params["token"].nil? && facts.token != @params["token"]
           return false if @params["modified"] == false && Counters.any?(facts.counters)
 

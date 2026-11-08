@@ -21,7 +21,8 @@ module Enjine
         state.battlefield.select do |id|
           obj = object(id)
           current = chars(obj)
-          obj.controller == state.active && !obj.tapped && current.creature? && !current.keyword?(:defender) &&
+          obj.controller == state.active && !obj.tapped && current.creature? &&
+            (!current.keyword?(:defender) || current.keyword?(:attacks_despite_defender)) &&
             !current.keyword?(:cant_attack) && !attackers.key?(id) && !summoning_sick_for_tap?(obj)
         end
       end

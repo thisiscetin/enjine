@@ -21,7 +21,8 @@ module Enjine
 
   # Per-player game state.
   PlayerState = Struct.new(:name, :life, :poison, :library, :hand, :graveyard, :mana_pool, :lands_played,
-                           :drew_from_empty, :lost, :mulligans, :kept, :mulligan_choice) do
+                           :drew_from_empty, :lost, :mulligans, :kept, :mulligan_choice,
+                           :turn_log, :game_log) do # what happened this turn / this game (see Engine::History)
     def zone(name)
       case name
       when :library then library
@@ -34,7 +35,8 @@ module Enjine
       { "name" => name, "life" => life, "poison" => poison, "library" => library.dup, "hand" => hand.dup,
         "graveyard" => graveyard.dup, "mana_pool" => mana_pool.transform_keys(&:to_s),
         "lands_played" => lands_played, "drew_from_empty" => drew_from_empty, "lost" => lost,
-        "mulligans" => mulligans, "kept" => kept, "mulligan_choice" => mulligan_choice }
+        "mulligans" => mulligans, "kept" => kept, "mulligan_choice" => mulligan_choice,
+        "turn_log" => Marshal.load(Marshal.dump(turn_log || {})), "game_log" => Marshal.load(Marshal.dump(game_log || {})) }
     end
   end
 
@@ -81,7 +83,7 @@ module Enjine
     def self.new_player(name)
       PlayerState.new(name: name, life: STARTING_LIFE, poison: 0, library: [], hand: [], graveyard: [],
                       mana_pool: Mana.empty_pool, lands_played: 0, drew_from_empty: false, lost: nil,
-                      mulligans: 0, kept: false, mulligan_choice: nil)
+                      mulligans: 0, kept: false, mulligan_choice: nil, turn_log: {}, game_log: {})
     end
 
     def zone_list(zone, owner)

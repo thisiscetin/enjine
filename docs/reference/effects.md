@@ -36,7 +36,7 @@ Rules: CR 106.1a, CR 106.4, CR 608.2d, CR 605.1a
 | Parameter | Description |
 | --- | --- |
 | `produce` | mana symbols, e.g. "{R}{R}" |
-| `amount` | amount (with color; default 1) |
+| `amount` | amount (default 1; with produce: how many times) |
 | `color` | any_one | any |
 
 ```json
@@ -318,7 +318,7 @@ Rules: CR 611.2a, CR 611.2c, CR 613.1f, CR 514.2
 
 ## lose_life
 
-Each referenced player loses `amount` life.
+Each referenced player loses `amount` life. The life lost is recorded for {"this_way": n}.
 
 Rules: CR 119.3
 
@@ -397,8 +397,8 @@ Rules: CR 611.2a, CR 611.2c, CR 613.4c, CR 514.2
 
 | Parameter | Description |
 | --- | --- |
-| `power` | integer (may be negative) |
-| `toughness` | integer (may be negative) |
+| `power` | amount (may be negative, e.g. {"times": ["x", -1]} for -X) |
+| `toughness` | amount (may be negative) |
 | `to` | selector |
 
 ```json
@@ -519,6 +519,54 @@ Rules: CR 701.23a, CR 701.23b, CR 701.23d, CR 701.23e, CR 701.20a, CR 701.24a, C
       ]
     },
     "reveal": true
+  }
+}
+```
+
+## set_base_power_toughness
+
+Each referenced creature's base power and toughness become `power`/`toughness` (layer 7b; counters and pumps still apply), until end of turn or, with `duration: "indefinite"`, for as long as it stays on the battlefield.
+
+Rules: CR 613.4b, CR 611.2a, CR 611.2b, CR 611.2c
+
+| Parameter | Description |
+| --- | --- |
+| `power` | integer |
+| `toughness` | integer |
+| `duration` | end_of_turn | indefinite |
+| `to` | selector |
+
+```json
+{
+  "set_base_power_toughness": {
+    "power": 7,
+    "toughness": 9,
+    "duration": "indefinite",
+    "to": "self"
+  }
+}
+```
+
+## set_creature_types
+
+Until end of turn, each referenced creature's creature types are exactly `types` (its other subtypes, such as artifact types, stay). The affected set is locked in.
+
+Rules: CR 205.1a, CR 613.1d, CR 611.2c, CR 514.2
+
+| Parameter | Description |
+| --- | --- |
+| `types` | list of creature types |
+| `to` | selector |
+
+```json
+{
+  "set_creature_types": {
+    "types": [
+      "doctor"
+    ],
+    "to": {
+      "target": 0
+    }
   }
 }
 ```

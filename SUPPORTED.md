@@ -40,12 +40,14 @@ Rules version: Comprehensive Rules effective 2026-09-25.
 
 | Name | Rules | Description |
 | --- | --- | --- |
+| [`attacks_despite_defender`](docs/reference/keywords.md#attacks_despite_defender) | 702.3b, 508.1c | This creature can attack as though it didn't have defender. |
 | [`attacks_each_combat`](docs/reference/keywords.md#attacks_each_combat) | 508.1d | Requirement: this creature attacks each combat if able. Declaring attackers can't finish while it could still attack. |
 | [`cant_attack`](docs/reference/keywords.md#cant_attack) | 508.1c | Restriction: this creature can't attack. |
 | [`cant_be_blocked`](docs/reference/keywords.md#cant_be_blocked) | 509.1b | Restriction: this creature can't be blocked. |
 | [`cant_block`](docs/reference/keywords.md#cant_block) | 509.1b | Restriction: this creature can't block. |
 | [`deathtouch`](docs/reference/keywords.md#deathtouch) | 702.2b, 702.2c, 704.5h | Any damage it deals to a creature is enough to destroy it; 1 damage counts as lethal when assigning combat damage. |
 | [`defender`](docs/reference/keywords.md#defender) | 702.3b | Can't attack. |
+| [`doesnt_untap`](docs/reference/keywords.md#doesnt_untap) | 502.3 | This permanent doesn't untap during its controller's untap step. |
 | [`double_strike`](docs/reference/keywords.md#double_strike) | 702.4b, 510.4 | Deals combat damage in both the first-strike and the regular combat damage step. |
 | [`first_strike`](docs/reference/keywords.md#first_strike) | 702.7b, 510.4 | Deals combat damage in a first combat damage step, before creatures without first strike. |
 | [`flash`](docs/reference/keywords.md#flash) | 702.8a | You may cast this spell any time you could cast an instant. |
@@ -79,7 +81,7 @@ Rules version: Comprehensive Rules effective 2026-09-25.
 | [`loyalty`](docs/reference/abilities.md#loyalty) | 606.3, 606.4, 606.5, 602.2b | A loyalty ability. Its cost adds (positive) or removes (negative) loyalty counters and is paid on activation. Sorcery speed, and only one loyalty ability per planeswalker per turn. |
 | [`mana`](docs/reference/abilities.md#mana) | 605.1a, 605.3a, 605.3b, 106.4 | An activated mana ability: pay the cost, add the mana to your mana pool immediately. It does not use the stack and can be activated whenever you have priority. |
 | [`spell`](docs/reference/abilities.md#spell) | 113.3a, 601.2c, 608.2b, 608.2c | The spell ability of an instant or sorcery: its targets are chosen while casting and its effects happen in order when it resolves. If every target is illegal on resolution, it doesn't resolve. |
-| [`static`](docs/reference/abilities.md#static) | 604.1, 611.3a, 613.1f, 613.4c, 301.5f, 303.4m | While its source is on the battlefield, every matching permanent gets `pump` and/or the `keywords`. `affects` is {"each": filter, "controller": you|opponent|any, "other": true} (relative to the source's controller), or "attached": the permanent the source is attached to ("equipped/enchanted creature"). |
+| [`static`](docs/reference/abilities.md#static) | 604.1, 604.2, 611.3a, 613.1d, 613.1f, 613.4c, 205.1a, 301.5f, 303.4m | While its source is on the battlefield (and its `if` condition holds), every permanent it `affects` gets `pump` (fixed or computed amounts, layer 7c), the `keywords` and granted `abilities` (layer 6, triggered or mana abilities), and with `creature_types` has exactly those creature types (layer 4). `affects` is {"each": filter, "controller": you|opponent|any, "other": true} (relative to the source's controller), "self", or "attached" ("equipped/enchanted creature"). |
 | [`station_symbol`](docs/reference/abilities.md#station_symbol) | 722.2a, 722.2b, 722.2c, 613.1d, 613.4b | While this permanent has at least `at` charge counters it has `keywords` and `abilities`; with `power`/`toughness` it is also a creature with that base power and toughness (layers 4 and 7b). |
 | [`triggered`](docs/reference/abilities.md#triggered) | 603.2, 603.3, 603.3b, 603.3d | A triggered ability: when its trigger condition happens, it is put on the stack the next time a player would receive priority (in APNAP order), with targets chosen then. |
 
@@ -129,7 +131,7 @@ Rules version: Comprehensive Rules effective 2026-09-25.
 | [`exile`](docs/reference/effects.md#exile) | 406.1, 701.13a | Exile each referenced permanent. |
 | [`gain_life`](docs/reference/effects.md#gain_life) | 119.3 | Each referenced player gains `amount` life (default: you). |
 | [`grant`](docs/reference/effects.md#grant) | 611.2a, 611.2c, 613.1f, 514.2 | Each referenced permanent gains the `keywords` until end of turn. |
-| [`lose_life`](docs/reference/effects.md#lose_life) | 119.3 | Each referenced player loses `amount` life. |
+| [`lose_life`](docs/reference/effects.md#lose_life) | 119.3 | Each referenced player loses `amount` life. The life lost is recorded for {"this_way": n}. |
 | [`may`](docs/reference/effects.md#may) | 118.12, 118.3, 608.2d | An optional effect. The controller chooses yes or no as it resolves; yes is offered only if every effect in `effects` can be done fully. On yes, `effects` then `then` ("if you do") happen; on no, `otherwise` ("if you don't"). Nested effects may name the results of earlier effects of the enclosing list. |
 | [`mill`](docs/reference/effects.md#mill) | 701.17a | Each referenced player puts the top `amount` cards of their library into their graveyard (default: you). |
 | [`pump`](docs/reference/effects.md#pump) | 611.2a, 611.2c, 613.4c, 514.2 | Each referenced creature gets +power/+toughness until end of turn. The set of affected creatures is locked in when the effect starts. |
@@ -138,6 +140,8 @@ Rules version: Comprehensive Rules effective 2026-09-25.
 | [`sacrifice`](docs/reference/effects.md#sacrifice) | 701.21a | The controller sacrifices each referenced permanent they control (it goes to its owner's graveyard; it isn't destroyed, so indestructible doesn't stop it). |
 | [`scry`](docs/reference/effects.md#scry) | 701.22a | Look at the top `amount` cards of your library; put any number on the bottom and the rest on top in any order. |
 | [`search_library`](docs/reference/effects.md#search_library) | 701.23a, 701.23b, 701.23d, 701.23e, 701.20a, 701.24a, 701.24b | Search your library for up to `count` cards matching `for`, then put them into your hand (or onto the battlefield, tapped if `tapped`) and shuffle. With a stated quality you may find fewer (or none); a search for just "a card" must find one if it can. `reveal` shows the found cards to every player. |
+| [`set_base_power_toughness`](docs/reference/effects.md#set_base_power_toughness) | 613.4b, 611.2a, 611.2b, 611.2c | Each referenced creature's base power and toughness become `power`/`toughness` (layer 7b; counters and pumps still apply), until end of turn or, with `duration: "indefinite"`, for as long as it stays on the battlefield. |
+| [`set_creature_types`](docs/reference/effects.md#set_creature_types) | 205.1a, 613.1d, 611.2c, 514.2 | Until end of turn, each referenced creature's creature types are exactly `types` (its other subtypes, such as artifact types, stay). The affected set is locked in. |
 | [`surveil`](docs/reference/effects.md#surveil) | 701.25a | Look at the top `amount` cards of your library; put any number into your graveyard and the rest on top in any order. |
 | [`tap`](docs/reference/effects.md#tap) | 701.26a | Tap each referenced permanent. |
 | [`untap`](docs/reference/effects.md#untap) | 701.26b | Untap each referenced permanent. |

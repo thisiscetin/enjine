@@ -26,8 +26,8 @@ RSpec.describe "Validation of X costs, mana effects and cost changes (CR 107.3, 
       .to include("abilities[0].spell.effects[0].add_mana: needs exactly one of produce, color")
     expect(errors_for(spell({ "add_mana" => { "color" => "plaid" } })))
       .to include("abilities[0].spell.effects[0].add_mana.color: must be one of any_one, any")
-    expect(errors_for(spell({ "add_mana" => { "produce" => "{R}", "amount" => 2 } })))
-      .to include("abilities[0].spell.effects[0].add_mana.amount: only with color")
+    expect(errors_for(spell({ "add_mana" => { "produce" => "{G}", "amount" => { "counters" => { "of" => "you" } } } })))
+      .to eq([]) # "an amount of {G} equal to ..."
     expect(errors_for(spell({ "add_mana" => { "produce" => "{Q}" } })))
       .to include("abilities[0].spell.effects[0].add_mana.produce: unsupported produced mana {Q}")
   end

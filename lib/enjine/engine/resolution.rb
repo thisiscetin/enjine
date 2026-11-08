@@ -64,11 +64,21 @@ module Enjine
       # ("the card exiled this way"). Kept per effect in the frame, so a waiting effect accumulates.
       def recording_results(frame)
         @recorded = []
+        @recorded_amount = 0
         yield
       ensure
         (frame["ctx"]["results"] ||= {})[frame["pc"].to_s] = (frame["ctx"]["results"][frame["pc"].to_s] || []) + @recorded
-        @recorded = nil
+        record_amounts!(frame) if @recorded_amount.positive?
+        @recorded = @recorded_amount = nil
       end
+
+      # "The life lost this way" (CR 608.2c): how much an effect changed, per effect (see {"this_way": n}).
+      def record_amounts!(frame)
+        amounts = (frame["ctx"]["amounts"] ||= {})
+        amounts[frame["pc"].to_s] = amounts.fetch(frame["pc"].to_s, 0) + @recorded_amount
+      end
+
+      def record_amount!(amount) = @recorded_amount &&= @recorded_amount + amount
 
       # Called by zone changes and token creation while an effect runs.
       def record_result!(id) = @recorded&.push(id)
@@ -87,7 +97,8 @@ module Enjine
         targets = count ? data["targets"][offset, count] || [] : data["targets"]
         own = data["results"] || {}
         results = data["linked"] || Array.new([own.size - base, 0].max) { own[(base + it).to_s] || [] }
-        Mechanics::EffectContext.new(data["controller"], data["source"], data["object"], targets, results)
+        amounts = Array.new(results.size) { data.fetch("amounts", {})[(base + it).to_s] || 0 }
+        Mechanics::EffectContext.new(data["controller"], data["source"], data["object"], targets, results, amounts)
       end
 
       def finish_fizzle!(_frame, obj)
