@@ -235,28 +235,42 @@ module Enjine
     end
 
     # Moves an object to a zone as a new object (CR 400.7). Returns the new object.
+    # Proposes a state change, lets replacement effects modify it (CR 614), and returns
+    # the final proposal for the caller to execute.
+    def propose(kind, data) = Replacements.apply(self, Proposal.new(kind, data, []))
+
     def move!(id, to, reason:, position: :top, controller: nil)
+      data = { "object" => id, "to" => to, "position" => position, "reason" => reason, "controller" => controller }
+      data["enters"] = { "tapped" => false, "counters" => {} } if to == :battlefield
+      execute_zone_change!(propose("zone_change", data).data)
+    end
+
+    def execute_zone_change!(data)
+      id = data["object"]
+      to = data["to"]
       old = object(id)
       state.zone_list(old.zone, old.owner).delete(id)
       state.objects.delete(id)
       fresh = create_object(old.card, old.owner, to)
       leave_combat!(id) if old.zone == :battlefield
       if to == :battlefield
-        fresh.controller = controller || old.owner
+        fresh.controller = data["controller"] || old.owner
         fresh.controlled_since = state.turn
-        loyalty = definition(fresh).loyalty
-        fresh.counters["loyalty"] = loyalty if loyalty # CR 306.5b
+        fresh.tapped = data["enters"]["tapped"]
+        fresh.counters.merge!(data["enters"]["counters"])
       elsif to == :stack
-        fresh.controller = controller || old.owner
+        fresh.controller = data["controller"] || old.owner
       end
       list = state.zone_list(to, old.owner)
-      position == :bottom ? list.push(fresh.id) : list.unshift(fresh.id)
+      data["position"] == :bottom ? list.push(fresh.id) : list.unshift(fresh.id)
       emit Events::ZoneChanged.new(card: old.card, old_id: id, new_id: fresh.id, owner: name(old.owner),
-                                   from: old.zone.to_s, to: to.to_s, reason: reason)
+                                   from: old.zone.to_s, to: to.to_s, reason: data["reason"])
       fresh
     end
 
     def draw!(index)
+      return unless propose("draw", { "player" => index }).data["player"]
+
       pl = player(index)
       if pl.library.empty?
         pl.drew_from_empty = true # CR 704.5b, checked as a state-based action

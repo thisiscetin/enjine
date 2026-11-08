@@ -8,7 +8,7 @@ RSpec.describe "Guardrails" do
       "lib/enjine/engine/characteristics.rb" => "the layer system starts from printed values",
       "lib/enjine/engine/casting.rb" => "spells in hand/stack (printed) and stack abilities (CR 113.7a)",
       "lib/enjine/engine/resolution.rb" => "spell abilities and permanence of the printed spell",
-      "lib/enjine/engine.rb" => "loyalty a permanent enters with (CR 306.5b)",
+      "lib/enjine/replacements.rb" => "entering status from printed card types",
       "lib/enjine/view.rb" => "printed name, cost and rules text"
     }
   end
@@ -18,7 +18,7 @@ RSpec.describe "Guardrails" do
       rel = file.delete_prefix("#{Enjine::Docs::ROOT}/")
       next if allowed.key?(rel) || rel.start_with?("lib/enjine/cli")
 
-      rel if File.read(file).match?(/\bdefinition\(/)
+      rel if File.read(file).lines.any? { it.match?(/\bdefinition\(/) && !it.match?(/def definition\(/) }
     end
     expect(offenders).to be_empty, "use engine.chars(obj) instead of definition(obj) in: #{offenders.join(", ")}"
   end

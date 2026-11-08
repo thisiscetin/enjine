@@ -48,6 +48,11 @@ module Enjine
         def self.validate(card, errors)
           errors << "loyalty: planeswalkers need an integer loyalty (CR 306.5b)" unless card["loyalty"].is_a?(Integer)
         end
+
+        # CR 306.5b: a planeswalker enters with loyalty counters equal to its printed loyalty.
+        def self.entering(definition, enters)
+          enters["counters"]["loyalty"] = definition.loyalty if definition.loyalty
+        end
       end
 
       # Instant (CR 304). Cast any time you have priority.

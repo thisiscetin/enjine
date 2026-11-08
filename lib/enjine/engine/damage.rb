@@ -8,6 +8,9 @@ module Enjine
       def deal_damage!(source, ref, amount)
         return unless amount.positive?
 
+        amount = propose("damage", { "source" => source, "target" => ref, "amount" => amount }).data["amount"]
+        return unless amount.positive? # prevention (CR 615) will reduce it here
+
         index = Mechanics::Filters.player_index(self, ref)
         if index
           emit Events::DamageDealt.new(source: source, target: ref, amount: amount)
@@ -26,6 +29,9 @@ module Enjine
       def change_life!(index, delta)
         return if delta.zero?
 
+        delta = propose("life", { "player" => index, "delta" => delta }).data["delta"]
+        return if delta.zero?
+
         pl = player(index)
         before = pl.life
         pl.life += delta
@@ -33,6 +39,9 @@ module Enjine
       end
 
       def add_counters!(object, kind, amount)
+        return unless amount.positive?
+
+        amount = propose("counters", { "object" => object.id, "counter" => kind, "amount" => amount }).data["amount"]
         return unless amount.positive?
 
         before = object.counters.fetch(kind, 0)
