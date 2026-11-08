@@ -12,6 +12,110 @@
   "cards": [
     {
       "card": {
+        "name": "Grounded for Life",
+        "mana_cost": "{4}{W}",
+        "types": [
+          "instant"
+        ],
+        "abilities": [
+          {
+            "spell": {
+              "targets": [
+                "creature"
+              ],
+              "effects": [
+                {
+                  "destroy": {
+                    "to": {
+                      "target": 0
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "cost_reduction": {
+              "amount": 3,
+              "if": {
+                "targets": {
+                  "creature": {
+                    "tapped": true
+                  }
+                }
+              }
+            }
+          }
+        ]
+      },
+      "rarity": "common",
+      "printing": {
+        "set": "tmt",
+        "number": "7"
+      }
+    },
+    {
+      "card": {
+        "name": "Jennika, Bad Apple Big Sister",
+        "mana_cost": "{4}{W}",
+        "types": [
+          "creature"
+        ],
+        "supertypes": [
+          "legendary"
+        ],
+        "subtypes": [
+          "mutant",
+          "ninja",
+          "turtle"
+        ],
+        "power": 3,
+        "toughness": 3,
+        "abilities": [
+          {
+            "triggered": {
+              "when": {
+                "enters": {}
+              },
+              "effects": [
+                {
+                  "create_token": {
+                    "token": {
+                      "name": "Mutant",
+                      "types": [
+                        "creature"
+                      ],
+                      "subtypes": [
+                        "mutant"
+                      ],
+                      "power": 2,
+                      "toughness": 2
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "cycling": {
+              "cost": "{2}",
+              "for": {
+                "subtypes": [
+                  "plains"
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "rarity": "common",
+      "printing": {
+        "set": "tmt",
+        "number": "10"
+      }
+    },
+    {
+      "card": {
         "name": "Make Your Move",
         "mana_cost": "{2}{W}",
         "types": [
@@ -141,6 +245,64 @@
     },
     {
       "card": {
+        "name": "Stockman, Mad Fly-entist",
+        "mana_cost": "{4}{U}",
+        "types": [
+          "creature"
+        ],
+        "supertypes": [
+          "legendary"
+        ],
+        "subtypes": [
+          "insect",
+          "mutant",
+          "scientist"
+        ],
+        "keywords": [
+          "flying"
+        ],
+        "power": 3,
+        "toughness": 4,
+        "abilities": [
+          {
+            "triggered": {
+              "when": {
+                "enters": {}
+              },
+              "effects": [
+                {
+                  "draw": {
+                    "amount": 1
+                  }
+                },
+                {
+                  "discard": {
+                    "amount": 1
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "cycling": {
+              "cost": "{2}",
+              "for": {
+                "subtypes": [
+                  "island"
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "rarity": "common",
+      "printing": {
+        "set": "tmt",
+        "number": "54"
+      }
+    },
+    {
+      "card": {
         "name": "Anchovy & Banana Pizza",
         "mana_cost": "{2}{B}{B}",
         "types": [
@@ -231,6 +393,56 @@
       "printing": {
         "set": "tmt",
         "number": "61"
+      }
+    },
+    {
+      "card": {
+        "name": "Dream Beavers",
+        "mana_cost": "{B}",
+        "types": [
+          "creature"
+        ],
+        "subtypes": [
+          "beaver",
+          "nightmare"
+        ],
+        "keywords": [
+          "flying"
+        ],
+        "power": 1,
+        "toughness": 1,
+        "abilities": [
+          {
+            "triggered": {
+              "when": {
+                "enters": {}
+              },
+              "effects": [
+                {
+                  "lose_life": {
+                    "amount": 1,
+                    "to": "each_opponent"
+                  }
+                },
+                {
+                  "gain_life": {
+                    "amount": 1
+                  }
+                },
+                {
+                  "scry": {
+                    "amount": 1
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "rarity": "uncommon",
+      "printing": {
+        "set": "tmt",
+        "number": "62"
       }
     },
     {
@@ -414,6 +626,71 @@
       "printing": {
         "set": "tmt",
         "number": "129"
+      }
+    },
+    {
+      "card": {
+        "name": "Transdimensional Bovine",
+        "mana_cost": "{2}{G}",
+        "types": [
+          "creature"
+        ],
+        "subtypes": [
+          "ox",
+          "avatar"
+        ],
+        "keywords": [
+          "flying"
+        ],
+        "power": 0,
+        "toughness": 4,
+        "abilities": [
+          {
+            "mana": {
+              "cost": [
+                "tap"
+              ],
+              "produce": "{W}{W}"
+            }
+          },
+          {
+            "mana": {
+              "cost": [
+                "tap"
+              ],
+              "produce": "{U}{U}"
+            }
+          },
+          {
+            "mana": {
+              "cost": [
+                "tap"
+              ],
+              "produce": "{B}{B}"
+            }
+          },
+          {
+            "mana": {
+              "cost": [
+                "tap"
+              ],
+              "produce": "{R}{R}"
+            }
+          },
+          {
+            "mana": {
+              "cost": [
+                "tap"
+              ],
+              "produce": "{G}{G}"
+            }
+          }
+        ]
+      },
+      "rarity": "rare",
+      "printing": {
+        "set": "tmt",
+        "number": "134"
       }
     },
     {
@@ -927,18 +1204,6 @@
       ]
     },
     {
-      "name": "Grounded for Life",
-      "rarity": "common",
-      "printing": {
-        "set": "tmt",
-        "number": "7"
-      },
-      "missing": [
-        "condition (if/unless/as long as)",
-        "static ability"
-      ]
-    },
-    {
       "name": "Hamato Guardian Stance",
       "rarity": "common",
       "printing": {
@@ -955,17 +1220,6 @@
       "printing": {
         "set": "tmt",
         "number": "9"
-      },
-      "missing": [
-        "other rules text"
-      ]
-    },
-    {
-      "name": "Jennika, Bad Apple Big Sister",
-      "rarity": "common",
-      "printing": {
-        "set": "tmt",
-        "number": "10"
       },
       "missing": [
         "other rules text"
@@ -1136,8 +1390,7 @@
       "missing": [
         "triggered ability",
         "tokens",
-        "variable amount",
-        "counters"
+        "variable amount"
       ]
     },
     {
@@ -1362,7 +1615,6 @@
         "number": "43"
       },
       "missing": [
-        "other rules text",
         "triggered ability",
         "condition (if/unless/as long as)",
         "variable amount"
@@ -1477,19 +1729,6 @@
       ]
     },
     {
-      "name": "Stockman, Mad Fly-entist",
-      "rarity": "common",
-      "printing": {
-        "set": "tmt",
-        "number": "54"
-      },
-      "missing": [
-        "triggered ability",
-        "discard",
-        "other rules text"
-      ]
-    },
-    {
       "name": "Turtles in Time",
       "rarity": "mythic",
       "printing": {
@@ -1533,8 +1772,7 @@
         "number": "59"
       },
       "missing": [
-        "static ability",
-        "other rules text"
+        "static ability"
       ]
     },
     {
@@ -1545,23 +1783,10 @@
         "number": "60"
       },
       "missing": [
-        "layout: saga",
         "tokens",
         "exile",
         "copy",
         "graveyard casting"
-      ]
-    },
-    {
-      "name": "Dream Beavers",
-      "rarity": "uncommon",
-      "printing": {
-        "set": "tmt",
-        "number": "62"
-      },
-      "missing": [
-        "triggered ability",
-        "library manipulation"
       ]
     },
     {
@@ -1885,10 +2110,9 @@
       },
       "missing": [
         "layout: class",
-        "triggered ability",
-        "condition (if/unless/as long as)",
-        "discard",
         "other rules text",
+        "triggered ability",
+        "discard",
         "library manipulation"
       ]
     },
@@ -2134,8 +2358,7 @@
       },
       "missing": [
         "triggered ability",
-        "static ability",
-        "other rules text"
+        "static ability"
       ]
     },
     {
@@ -2353,8 +2576,7 @@
         "number": "131"
       },
       "missing": [
-        "static ability",
-        "other rules text"
+        "static ability"
       ]
     },
     {
@@ -2379,17 +2601,6 @@
       },
       "missing": [
         "variable amount"
-      ]
-    },
-    {
-      "name": "Transdimensional Bovine",
-      "rarity": "rare",
-      "printing": {
-        "set": "tmt",
-        "number": "134"
-      },
-      "missing": [
-        "other rules text"
       ]
     },
     {
@@ -2634,8 +2845,6 @@
         "number": "154"
       },
       "missing": [
-        "layout: saga",
-        "other rules text",
         "triggered ability",
         "library manipulation",
         "graveyard casting",

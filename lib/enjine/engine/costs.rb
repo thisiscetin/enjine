@@ -94,6 +94,14 @@ module Enjine
         emit Events::XAnnounced.new(player: name(ctx["player"]), object: ctx["object"], value: value)
         ask!(nil)
       end
+
+      # What is still to pay of the locked-in total cost, as mana symbols.
+      def remaining_text
+        rem = casting["remaining"]
+        cost = Mana::Cost.new(generic: rem["generic"], colored: rem.except("generic").transform_keys(&:to_sym)
+                                                                   .reject { |_, n| n.zero? })
+        cost.to_s
+      end
     end
     include Costs
   end

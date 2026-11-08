@@ -59,6 +59,58 @@
     },
     {
       "card": {
+        "name": "Command Decision",
+        "mana_cost": "{1}{W}",
+        "types": [
+          "sorcery"
+        ],
+        "abilities": [
+          {
+            "spell": {
+              "choose": 1,
+              "modes": [
+                {
+                  "targets": [
+                    {
+                      "creature": {
+                        "power": {
+                          "at_least": 4
+                        }
+                      }
+                    }
+                  ],
+                  "effects": [
+                    {
+                      "destroy": {
+                        "to": {
+                          "target": 0
+                        }
+                      }
+                    }
+                  ]
+                },
+                {
+                  "effects": [
+                    {
+                      "draw": {
+                        "amount": 1
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "rarity": "common",
+      "printing": {
+        "set": "trk",
+        "number": "8"
+      }
+    },
+    {
+      "card": {
         "name": "Command Subadjunct",
         "mana_cost": "{W}",
         "types": [
@@ -94,6 +146,44 @@
       "printing": {
         "set": "trk",
         "number": "9"
+      }
+    },
+    {
+      "card": {
+        "name": "Deanna Troi, Psychic Counsel",
+        "mana_cost": "{1}{W}",
+        "types": [
+          "creature"
+        ],
+        "supertypes": [
+          "legendary"
+        ],
+        "subtypes": [
+          "betazoid",
+          "human",
+          "advisor"
+        ],
+        "power": 2,
+        "toughness": 2,
+        "abilities": [
+          {
+            "enters_with_counters": {
+              "counters": {
+                "+1/+1": 1
+              },
+              "affects": {
+                "each": "creature",
+                "controller": "you",
+                "other": true
+              }
+            }
+          }
+        ]
+      },
+      "rarity": "rare",
+      "printing": {
+        "set": "trk",
+        "number": "11"
       }
     },
     {
@@ -143,6 +233,404 @@
       "printing": {
         "set": "trk",
         "number": "15"
+      }
+    },
+    {
+      "card": {
+        "name": "Excalbian Gamemaster",
+        "mana_cost": "{5}{W}",
+        "types": [
+          "creature"
+        ],
+        "subtypes": [
+          "excalbian"
+        ],
+        "power": 6,
+        "toughness": 6,
+        "abilities": [
+          {
+            "triggered": {
+              "when": {
+                "enters": {}
+              },
+              "effects": [
+                {
+                  "create_token": {
+                    "token": {
+                      "name": "Officer",
+                      "types": [
+                        "creature"
+                      ],
+                      "subtypes": [
+                        "officer"
+                      ],
+                      "power": 1,
+                      "toughness": 1
+                    },
+                    "amount": {
+                      "distinct_names": {
+                        "each": "land",
+                        "controller": "you"
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "triggered": {
+              "when": {
+                "dies": {
+                  "subject": {
+                    "each": "creature",
+                    "controller": "you"
+                  }
+                }
+              },
+              "targets": [
+                {
+                  "creature": {
+                    "controller": "you"
+                  }
+                }
+              ],
+              "effects": [
+                {
+                  "add_counters": {
+                    "counter": "+1/+1",
+                    "amount": 1,
+                    "to": {
+                      "target": 0
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "rarity": "mythic",
+      "printing": {
+        "set": "trk",
+        "number": "16"
+      }
+    },
+    {
+      "card": {
+        "name": "Federation Field Medic",
+        "mana_cost": "{3}{W}",
+        "types": [
+          "creature"
+        ],
+        "subtypes": [
+          "human",
+          "doctor"
+        ],
+        "keywords": [
+          "vigilance"
+        ],
+        "power": 3,
+        "toughness": 2,
+        "abilities": [
+          {
+            "triggered": {
+              "when": {
+                "enters": {}
+              },
+              "choose": 1,
+              "modes": [
+                {
+                  "targets": [
+                    "creature"
+                  ],
+                  "effects": [
+                    {
+                      "add_counters": {
+                        "counter": "+1/+1",
+                        "amount": 1,
+                        "to": {
+                          "target": 0
+                        }
+                      }
+                    },
+                    {
+                      "grant": {
+                        "keywords": [
+                          "vigilance"
+                        ],
+                        "to": {
+                          "target": 0
+                        }
+                      }
+                    }
+                  ]
+                },
+                {
+                  "effects": [
+                    {
+                      "draw": {
+                        "amount": 1,
+                        "if": {
+                          "controls": {
+                            "each": {
+                              "permanent": {
+                                "counters": true
+                              }
+                            },
+                            "controller": "you"
+                          },
+                          "at_least": 1
+                        }
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "rarity": "common",
+      "printing": {
+        "set": "trk",
+        "number": "17"
+      }
+    },
+    {
+      "card": {
+        "name": "Free Borg Revolutionaries",
+        "mana_cost": "{3}{W}{W}",
+        "types": [
+          "artifact",
+          "creature"
+        ],
+        "subtypes": [
+          "borg",
+          "rebel"
+        ],
+        "power": 4,
+        "toughness": 5,
+        "abilities": [
+          {
+            "triggered": {
+              "when": {
+                "enters": {}
+              },
+              "effects": [
+                {
+                  "pump": {
+                    "power": 1,
+                    "toughness": 1,
+                    "to": {
+                      "each": "creature",
+                      "controller": "you"
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "cycling": {
+              "cost": "{2}",
+              "for": {
+                "supertypes": [
+                  "basic"
+                ],
+                "types": [
+                  "land"
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "rarity": "common",
+      "printing": {
+        "set": "trk",
+        "number": "19"
+      }
+    },
+    {
+      "card": {
+        "name": "Set Phasers to . . .",
+        "mana_cost": "{W}",
+        "types": [
+          "instant"
+        ],
+        "abilities": [
+          {
+            "spell": {
+              "choose": 1,
+              "modes": [
+                {
+                  "targets": [
+                    "creature"
+                  ],
+                  "effects": [
+                    {
+                      "tap": {
+                        "to": {
+                          "target": 0
+                        }
+                      }
+                    },
+                    {
+                      "add_counters": {
+                        "counter": "stun",
+                        "amount": 1,
+                        "to": {
+                          "target": 0
+                        }
+                      }
+                    }
+                  ]
+                },
+                {
+                  "targets": [
+                    {
+                      "creature": {
+                        "attacking": true
+                      }
+                    }
+                  ],
+                  "effects": [
+                    {
+                      "deal_damage": {
+                        "amount": 3,
+                        "to": {
+                          "target": 0
+                        }
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "rarity": "common",
+      "printing": {
+        "set": "trk",
+        "number": "34"
+      }
+    },
+    {
+      "card": {
+        "name": "Test of Conviction",
+        "mana_cost": "{1}{W}",
+        "types": [
+          "sorcery"
+        ],
+        "abilities": [
+          {
+            "spell": {
+              "choose": 1,
+              "modes": [
+                {
+                  "effects": [
+                    {
+                      "add_counters": {
+                        "counter": "+1/+1",
+                        "amount": 1,
+                        "to": {
+                          "each": "creature",
+                          "controller": "you"
+                        }
+                      }
+                    }
+                  ]
+                },
+                {
+                  "targets": [
+                    "opponent"
+                  ],
+                  "effects": [
+                    {
+                      "draw": {
+                        "amount": 1,
+                        "to": {
+                          "target": 0
+                        }
+                      }
+                    },
+                    {
+                      "draw": {
+                        "amount": 2
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "rarity": "uncommon",
+      "printing": {
+        "set": "trk",
+        "number": "39"
+      }
+    },
+    {
+      "card": {
+        "name": "U.S.S. Excelsior, Cutting Edge",
+        "mana_cost": "{3}{W}",
+        "types": [
+          "artifact"
+        ],
+        "supertypes": [
+          "legendary"
+        ],
+        "subtypes": [
+          "spacecraft"
+        ],
+        "keywords": [
+          "station"
+        ],
+        "abilities": [
+          {
+            "triggered": {
+              "when": {
+                "enters": {}
+              },
+              "targets": [
+                {
+                  "creature": {
+                    "tapped": true,
+                    "controller": "opponent"
+                  }
+                }
+              ],
+              "effects": [
+                {
+                  "destroy": {
+                    "to": {
+                      "target": 0
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "station_symbol": {
+              "at": 8,
+              "keywords": [
+                "flying"
+              ],
+              "power": 4,
+              "toughness": 4
+            }
+          }
+        ]
+      },
+      "rarity": "uncommon",
+      "printing": {
+        "set": "trk",
+        "number": "44"
       }
     },
     {
@@ -232,6 +720,116 @@
       "printing": {
         "set": "trk",
         "number": "50"
+      }
+    },
+    {
+      "card": {
+        "name": "Data, New Life",
+        "mana_cost": "{1}{U}",
+        "types": [
+          "artifact",
+          "creature"
+        ],
+        "supertypes": [
+          "legendary"
+        ],
+        "subtypes": [
+          "android",
+          "scientist"
+        ],
+        "power": 0,
+        "toughness": 1,
+        "abilities": [
+          {
+            "triggered": {
+              "when": {
+                "draws": {}
+              },
+              "effects": [
+                {
+                  "add_counters": {
+                    "counter": "+1/+1",
+                    "amount": 1,
+                    "to": "self"
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "rarity": "uncommon",
+      "printing": {
+        "set": "trk",
+        "number": "52"
+      }
+    },
+    {
+      "card": {
+        "name": "Enterprise NX-01",
+        "mana_cost": "{3}{U}",
+        "types": [
+          "artifact"
+        ],
+        "supertypes": [
+          "legendary"
+        ],
+        "subtypes": [
+          "spacecraft"
+        ],
+        "keywords": [
+          "station"
+        ],
+        "abilities": [
+          {
+            "triggered": {
+              "when": {
+                "enters": {}
+              },
+              "targets": [
+                {
+                  "creature": {
+                    "controller": "opponent"
+                  }
+                }
+              ],
+              "effects": [
+                {
+                  "tap": {
+                    "to": {
+                      "target": 0
+                    }
+                  }
+                },
+                {
+                  "add_counters": {
+                    "counter": "stun",
+                    "amount": 1,
+                    "to": {
+                      "target": 0
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "station_symbol": {
+              "at": 6,
+              "keywords": [
+                "flying",
+                "vigilance"
+              ],
+              "power": 4,
+              "toughness": 3
+            }
+          }
+        ]
+      },
+      "rarity": "uncommon",
+      "printing": {
+        "set": "trk",
+        "number": "58"
       }
     },
     {
@@ -341,6 +939,94 @@
     },
     {
       "card": {
+        "name": "Melkotian Adjudicator",
+        "mana_cost": "{2}{U}",
+        "types": [
+          "creature"
+        ],
+        "subtypes": [
+          "melkotian",
+          "advisor"
+        ],
+        "keywords": [
+          "flying",
+          "vigilance"
+        ],
+        "power": 2,
+        "toughness": 1,
+        "abilities": [
+          {
+            "triggered": {
+              "when": {
+                "faces_dilemma": {}
+              },
+              "effects": [
+                {
+                  "add_counters": {
+                    "counter": "+1/+1",
+                    "amount": 1,
+                    "to": "self"
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "rarity": "common",
+      "printing": {
+        "set": "trk",
+        "number": "73"
+      }
+    },
+    {
+      "card": {
+        "name": "Suurok-Class Science Vessel",
+        "mana_cost": "{2}{U}",
+        "types": [
+          "artifact"
+        ],
+        "subtypes": [
+          "spacecraft"
+        ],
+        "keywords": [
+          "station"
+        ],
+        "abilities": [
+          {
+            "triggered": {
+              "when": {
+                "enters": {}
+              },
+              "effects": [
+                {
+                  "draw": {
+                    "amount": 1
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "station_symbol": {
+              "at": 5,
+              "keywords": [
+                "flying"
+              ],
+              "power": 3,
+              "toughness": 2
+            }
+          }
+        ]
+      },
+      "rarity": "common",
+      "printing": {
+        "set": "trk",
+        "number": "83"
+      }
+    },
+    {
+      "card": {
         "name": "Test of Priorities",
         "mana_cost": "{1}{U}",
         "types": [
@@ -415,6 +1101,267 @@
     },
     {
       "card": {
+        "name": "Assault Drone",
+        "mana_cost": "{3}{B}",
+        "types": [
+          "artifact",
+          "creature"
+        ],
+        "subtypes": [
+          "borg"
+        ],
+        "power": 2,
+        "toughness": 4,
+        "abilities": [
+          {
+            "static": {
+              "affects": {
+                "each": {
+                  "creature": {
+                    "types": [
+                      "artifact"
+                    ]
+                  }
+                },
+                "controller": "you"
+              },
+              "pump": {
+                "power": 1,
+                "toughness": 0
+              }
+            }
+          }
+        ]
+      },
+      "rarity": "common",
+      "printing": {
+        "set": "trk",
+        "number": "92"
+      }
+    },
+    {
+      "card": {
+        "name": "Bat'leth",
+        "mana_cost": "{2}{B}",
+        "types": [
+          "artifact"
+        ],
+        "subtypes": [
+          "equipment"
+        ],
+        "abilities": [
+          {
+            "triggered": {
+              "when": {
+                "enters": {}
+              },
+              "targets": [
+                {
+                  "creature": {
+                    "controller": "opponent"
+                  }
+                }
+              ],
+              "effects": [
+                {
+                  "pump": {
+                    "power": -2,
+                    "toughness": -2,
+                    "to": {
+                      "target": 0
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "static": {
+              "affects": "attached",
+              "pump": {
+                "power": 2,
+                "toughness": 0
+              }
+            }
+          },
+          {
+            "equip": {
+              "cost": [
+                {
+                  "mana": "{2}"
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "rarity": "uncommon",
+      "printing": {
+        "set": "trk",
+        "number": "94"
+      }
+    },
+    {
+      "card": {
+        "name": "Cha'DIch Investigator",
+        "mana_cost": "{4}{B}",
+        "types": [
+          "creature"
+        ],
+        "subtypes": [
+          "klingon",
+          "warrior"
+        ],
+        "power": 4,
+        "toughness": 4,
+        "abilities": [
+          {
+            "triggered": {
+              "when": {
+                "enters": {}
+              },
+              "effects": [
+                {
+                  "create_token": {
+                    "token": {
+                      "name": "Klingon Warrior",
+                      "types": [
+                        "creature"
+                      ],
+                      "subtypes": [
+                        "klingon",
+                        "warrior"
+                      ],
+                      "power": 2,
+                      "toughness": 1,
+                      "keywords": [
+                        "haste"
+                      ]
+                    },
+                    "amount": 1
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "rarity": "common",
+      "printing": {
+        "set": "trk",
+        "number": "97"
+      }
+    },
+    {
+      "card": {
+        "name": "Death Is Irrelevant",
+        "mana_cost": "{6}{B}{B}",
+        "types": [
+          "enchantment"
+        ],
+        "abilities": [
+          {
+            "static": {
+              "affects": {
+                "each": {
+                  "creature": {
+                    "any_of": [
+                      "artifact"
+                    ]
+                  }
+                },
+                "controller": "you"
+              },
+              "keywords": [
+                "indestructible"
+              ]
+            }
+          },
+          {
+            "triggered": {
+              "when": {
+                "step_begins": {
+                  "step": "end"
+                }
+              },
+              "targets": [
+                {
+                  "graveyard_card": {
+                    "any_of": [
+                      "creature"
+                    ]
+                  }
+                }
+              ],
+              "effects": [
+                {
+                  "assimilate": {
+                    "to": {
+                      "target": 0
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "rarity": "mythic",
+      "printing": {
+        "set": "trk",
+        "number": "102"
+      }
+    },
+    {
+      "card": {
+        "name": "Elim Garak, Simple Tailor",
+        "mana_cost": "{2}{B}",
+        "types": [
+          "creature"
+        ],
+        "supertypes": [
+          "legendary"
+        ],
+        "subtypes": [
+          "cardassian",
+          "rogue"
+        ],
+        "keywords": [
+          "menace"
+        ],
+        "power": 3,
+        "toughness": 3,
+        "abilities": [
+          {
+            "triggered": {
+              "when": {
+                "faces_dilemma": {}
+              },
+              "effects": [
+                {
+                  "lose_life": {
+                    "amount": 2,
+                    "to": "each_opponent"
+                  }
+                },
+                {
+                  "gain_life": {
+                    "amount": 2
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "rarity": "rare",
+      "printing": {
+        "set": "trk",
+        "number": "106"
+      }
+    },
+    {
+      "card": {
         "name": "Fugitive Listener",
         "mana_cost": "{2}{B}",
         "types": [
@@ -485,6 +1432,382 @@
       "printing": {
         "set": "trk",
         "number": "114"
+      }
+    },
+    {
+      "card": {
+        "name": "Obsidian Order Operative",
+        "mana_cost": "{3}{B}",
+        "types": [
+          "creature"
+        ],
+        "subtypes": [
+          "cardassian",
+          "officer",
+          "spy"
+        ],
+        "power": 2,
+        "toughness": 5,
+        "abilities": [
+          {
+            "triggered": {
+              "when": {
+                "faces_dilemma": {}
+              },
+              "effects": [
+                {
+                  "lose_life": {
+                    "amount": 1,
+                    "to": "each_opponent"
+                  }
+                },
+                {
+                  "gain_life": {
+                    "amount": 1
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "rarity": "common",
+      "printing": {
+        "set": "trk",
+        "number": "120"
+      }
+    },
+    {
+      "card": {
+        "name": "Rogue Artificial Intelligence",
+        "mana_cost": "{4}{B}{B}",
+        "types": [
+          "artifact",
+          "creature"
+        ],
+        "subtypes": [
+          "construct"
+        ],
+        "power": 6,
+        "toughness": 5,
+        "abilities": [
+          {
+            "triggered": {
+              "when": {
+                "enters": {}
+              },
+              "choose": 1,
+              "modes": [
+                {
+                  "effects": [
+                    {
+                      "gain_life": {
+                        "amount": 3
+                      }
+                    }
+                  ]
+                },
+                {
+                  "effects": [
+                    {
+                      "surveil": {
+                        "amount": 2
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "cycling": {
+              "cost": "{2}",
+              "for": {
+                "supertypes": [
+                  "basic"
+                ],
+                "types": [
+                  "land"
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "rarity": "common",
+      "printing": {
+        "set": "trk",
+        "number": "126"
+      }
+    },
+    {
+      "card": {
+        "name": "Tenacious Drone",
+        "mana_cost": "{1}{B}",
+        "types": [
+          "artifact",
+          "creature"
+        ],
+        "subtypes": [
+          "borg"
+        ],
+        "power": 2,
+        "toughness": 1,
+        "abilities": [
+          {
+            "triggered": {
+              "when": {
+                "dies": {}
+              },
+              "effects": [
+                {
+                  "create_token": {
+                    "token": {
+                      "name": "Borg",
+                      "types": [
+                        "artifact",
+                        "creature"
+                      ],
+                      "subtypes": [
+                        "borg"
+                      ],
+                      "power": 1,
+                      "toughness": 1
+                    },
+                    "amount": 1
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "rarity": "common",
+      "printing": {
+        "set": "trk",
+        "number": "133"
+      }
+    },
+    {
+      "card": {
+        "name": "Captain's Tutelage",
+        "mana_cost": "{1}{R}",
+        "types": [
+          "enchantment"
+        ],
+        "subtypes": [
+          "aura"
+        ],
+        "keywords": [
+          "flash"
+        ],
+        "abilities": [
+          {
+            "enchant": "creature"
+          },
+          {
+            "triggered": {
+              "when": {
+                "enters": {}
+              },
+              "effects": [
+                {
+                  "grant": {
+                    "keywords": [
+                      "first_strike"
+                    ],
+                    "to": "attached"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "static": {
+              "affects": "attached",
+              "pump": {
+                "power": 2,
+                "toughness": 0
+              }
+            }
+          }
+        ]
+      },
+      "rarity": "common",
+      "printing": {
+        "set": "trk",
+        "number": "144"
+      }
+    },
+    {
+      "card": {
+        "name": "D-7 Battle Cruiser",
+        "mana_cost": "{1}{R}",
+        "types": [
+          "artifact"
+        ],
+        "subtypes": [
+          "spacecraft"
+        ],
+        "keywords": [
+          "station"
+        ],
+        "abilities": [
+          {
+            "station_symbol": {
+              "at": 3,
+              "abilities": [
+                {
+                  "triggered": {
+                    "when": {
+                      "step_begins": {
+                        "step": "beginning_of_combat"
+                      }
+                    },
+                    "effects": [
+                      {
+                        "create_token": {
+                          "token": {
+                            "name": "Klingon Warrior",
+                            "types": [
+                              "creature"
+                            ],
+                            "subtypes": [
+                              "klingon",
+                              "warrior"
+                            ],
+                            "power": 2,
+                            "toughness": 1,
+                            "keywords": [
+                              "haste"
+                            ]
+                          },
+                          "amount": 1
+                        }
+                      },
+                      {
+                        "delayed_trigger": {
+                          "when": {
+                            "step_begins": {
+                              "step": "end",
+                              "whose": "each"
+                            }
+                          },
+                          "effects": [
+                            {
+                              "sacrifice": {
+                                "to": {
+                                  "result": 0
+                                }
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "station_symbol": {
+              "at": 8,
+              "keywords": [
+                "flying"
+              ],
+              "power": 3,
+              "toughness": 3
+            }
+          }
+        ]
+      },
+      "rarity": "rare",
+      "printing": {
+        "set": "trk",
+        "number": "145"
+      }
+    },
+    {
+      "card": {
+        "name": "Horta",
+        "mana_cost": "{4}{R}{R}",
+        "types": [
+          "creature"
+        ],
+        "subtypes": [
+          "elemental"
+        ],
+        "keywords": [
+          "trample"
+        ],
+        "power": 7,
+        "toughness": 6,
+        "abilities": [
+          {
+            "cycling": {
+              "cost": "{2}",
+              "for": {
+                "supertypes": [
+                  "basic"
+                ],
+                "types": [
+                  "land"
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "rarity": "common",
+      "printing": {
+        "set": "trk",
+        "number": "152"
+      }
+    },
+    {
+      "card": {
+        "name": "Munitions Enthusiast",
+        "mana_cost": "{1}{R}",
+        "types": [
+          "creature"
+        ],
+        "subtypes": [
+          "klingon",
+          "warrior"
+        ],
+        "keywords": [
+          "trample"
+        ],
+        "power": 3,
+        "toughness": 2,
+        "abilities": [
+          {
+            "triggered": {
+              "when": {
+                "dies": {}
+              },
+              "targets": [
+                "any_target"
+              ],
+              "effects": [
+                {
+                  "deal_damage": {
+                    "amount": 1,
+                    "to": {
+                      "target": 0
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "rarity": "uncommon",
+      "printing": {
+        "set": "trk",
+        "number": "158"
       }
     },
     {
@@ -593,6 +1916,46 @@
     },
     {
       "card": {
+        "name": "Red Alert!",
+        "mana_cost": "{2}{R}",
+        "types": [
+          "instant"
+        ],
+        "abilities": [
+          {
+            "spell": {
+              "effects": [
+                {
+                  "pump": {
+                    "power": 2,
+                    "toughness": 0,
+                    "to": {
+                      "each": "creature",
+                      "controller": "you"
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "cost_reduction": {
+              "amount": 2,
+              "if": {
+                "attacked": true
+              }
+            }
+          }
+        ]
+      },
+      "rarity": "uncommon",
+      "printing": {
+        "set": "trk",
+        "number": "169"
+      }
+    },
+    {
+      "card": {
         "name": "Savvy Profiteer",
         "mana_cost": "{1}{R}",
         "types": [
@@ -694,6 +2057,169 @@
     },
     {
       "card": {
+        "name": "Culber and Stamets, Star-Crossed",
+        "mana_cost": "{3}{G}",
+        "types": [
+          "creature"
+        ],
+        "supertypes": [
+          "legendary"
+        ],
+        "subtypes": [
+          "human",
+          "doctor",
+          "artificer"
+        ],
+        "power": 3,
+        "toughness": 4,
+        "abilities": [
+          {
+            "triggered": {
+              "when": {
+                "enters": {}
+              },
+              "choose": 1,
+              "modes": [
+                {
+                  "targets": [
+                    "creature"
+                  ],
+                  "effects": [
+                    {
+                      "add_counters": {
+                        "counter": "+1/+1",
+                        "amount": 1,
+                        "to": {
+                          "target": 0
+                        }
+                      }
+                    }
+                  ]
+                },
+                {
+                  "effects": [
+                    {
+                      "add_mana": {
+                        "amount": 2,
+                        "color": "any_one"
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "rarity": "uncommon",
+      "printing": {
+        "set": "trk",
+        "number": "191"
+      }
+    },
+    {
+      "card": {
+        "name": "Dominion Supervisor",
+        "mana_cost": "{2}{G}",
+        "types": [
+          "creature"
+        ],
+        "subtypes": [
+          "vorta",
+          "doctor"
+        ],
+        "power": 3,
+        "toughness": 1,
+        "abilities": [
+          {
+            "triggered": {
+              "when": {
+                "enters": {}
+              },
+              "targets": [
+                "creature"
+              ],
+              "effects": [
+                {
+                  "add_counters": {
+                    "counter": "+1/+1",
+                    "amount": 1,
+                    "to": {
+                      "target": 0
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "static": {
+              "affects": {
+                "each": {
+                  "creature": {
+                    "counters": true
+                  }
+                },
+                "controller": "you"
+              },
+              "keywords": [
+                "trample"
+              ]
+            }
+          }
+        ]
+      },
+      "rarity": "common",
+      "printing": {
+        "set": "trk",
+        "number": "195"
+      }
+    },
+    {
+      "card": {
+        "name": "Moopsy",
+        "mana_cost": "{G}",
+        "types": [
+          "creature"
+        ],
+        "subtypes": [
+          "beast"
+        ],
+        "keywords": [
+          "deathtouch"
+        ],
+        "power": 1,
+        "toughness": 1,
+        "abilities": [
+          {
+            "activated": {
+              "cost": [
+                {
+                  "mana": "{2}"
+                }
+              ],
+              "effects": [
+                {
+                  "grant": {
+                    "keywords": [
+                      "reach"
+                    ],
+                    "to": "self"
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "rarity": "common",
+      "printing": {
+        "set": "trk",
+        "number": "207"
+      }
+    },
+    {
+      "card": {
         "name": "Mugato",
         "mana_cost": "{3}{G}{G}",
         "types": [
@@ -715,6 +2241,62 @@
       "printing": {
         "set": "trk",
         "number": "208"
+      }
+    },
+    {
+      "card": {
+        "name": "Neelix, Moral Support",
+        "mana_cost": "{1}{G}",
+        "types": [
+          "creature"
+        ],
+        "supertypes": [
+          "legendary"
+        ],
+        "subtypes": [
+          "talaxian",
+          "advisor"
+        ],
+        "power": 1,
+        "toughness": 1,
+        "abilities": [
+          {
+            "triggered": {
+              "when": {
+                "enters": {}
+              },
+              "effects": [
+                {
+                  "create_token": {
+                    "token": "Food",
+                    "amount": 1
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "triggered": {
+              "when": {
+                "gains_life": {}
+              },
+              "effects": [
+                {
+                  "add_counters": {
+                    "counter": "+1/+1",
+                    "amount": 1,
+                    "to": "self"
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "rarity": "uncommon",
+      "printing": {
+        "set": "trk",
+        "number": "209"
       }
     },
     {
@@ -879,6 +2461,207 @@
     },
     {
       "card": {
+        "name": "Seven of Nine",
+        "mana_cost": "{2}{U}{B}",
+        "types": [
+          "artifact",
+          "creature"
+        ],
+        "supertypes": [
+          "legendary"
+        ],
+        "subtypes": [
+          "human",
+          "scientist"
+        ],
+        "power": 2,
+        "toughness": 4,
+        "abilities": [
+          {
+            "triggered": {
+              "when": {
+                "faces_dilemma": {}
+              },
+              "effects": [
+                {
+                  "draw": {
+                    "amount": 1
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "rarity": "uncommon",
+      "printing": {
+        "set": "trk",
+        "number": "252"
+      }
+    },
+    {
+      "card": {
+        "name": "Year of Hell",
+        "mana_cost": "{1}{U}{R}",
+        "types": [
+          "enchantment"
+        ],
+        "subtypes": [
+          "saga"
+        ],
+        "abilities": [
+          {
+            "chapter": {
+              "chapter": 1,
+              "effects": [
+                {
+                  "draw": {
+                    "amount": 1,
+                    "to": {
+                      "each": "player"
+                    }
+                  }
+                },
+                {
+                  "deal_damage": {
+                    "amount": 2,
+                    "to": {
+                      "each": "player"
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "chapter": {
+              "chapter": 2,
+              "effects": [
+                {
+                  "draw": {
+                    "amount": 1,
+                    "to": {
+                      "each": "player"
+                    }
+                  }
+                },
+                {
+                  "deal_damage": {
+                    "amount": 2,
+                    "to": {
+                      "each": "player"
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "chapter": {
+              "chapter": 3,
+              "effects": [
+                {
+                  "draw": {
+                    "amount": 1,
+                    "to": {
+                      "each": "player"
+                    }
+                  }
+                },
+                {
+                  "deal_damage": {
+                    "amount": 2,
+                    "to": {
+                      "each": "player"
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "rarity": "rare",
+      "printing": {
+        "set": "trk",
+        "number": "257"
+      }
+    },
+    {
+      "card": {
+        "name": "Class-F Shuttlecraft",
+        "mana_cost": "{3}",
+        "types": [
+          "artifact"
+        ],
+        "subtypes": [
+          "spacecraft"
+        ],
+        "keywords": [
+          "station"
+        ],
+        "abilities": [
+          {
+            "mana": {
+              "cost": [
+                "tap"
+              ],
+              "produce": "{W}"
+            }
+          },
+          {
+            "mana": {
+              "cost": [
+                "tap"
+              ],
+              "produce": "{U}"
+            }
+          },
+          {
+            "mana": {
+              "cost": [
+                "tap"
+              ],
+              "produce": "{B}"
+            }
+          },
+          {
+            "mana": {
+              "cost": [
+                "tap"
+              ],
+              "produce": "{R}"
+            }
+          },
+          {
+            "mana": {
+              "cost": [
+                "tap"
+              ],
+              "produce": "{G}"
+            }
+          },
+          {
+            "station_symbol": {
+              "at": 6,
+              "keywords": [
+                "flying",
+                "vigilance"
+              ],
+              "power": 2,
+              "toughness": 4
+            }
+          }
+        ]
+      },
+      "rarity": "common",
+      "printing": {
+        "set": "trk",
+        "number": "259"
+      }
+    },
+    {
+      "card": {
         "name": "Crystalline Entity",
         "mana_cost": "{8}",
         "types": [
@@ -925,6 +2708,188 @@
       "printing": {
         "set": "trk",
         "number": "261"
+      }
+    },
+    {
+      "card": {
+        "name": "Tricorder",
+        "mana_cost": "{1}",
+        "types": [
+          "artifact"
+        ],
+        "subtypes": [
+          "equipment"
+        ],
+        "abilities": [
+          {
+            "static": {
+              "affects": "attached",
+              "pump": {
+                "power": 1,
+                "toughness": 1
+              }
+            }
+          },
+          {
+            "triggered": {
+              "when": {
+                "attacks": {
+                  "subject": "attached"
+                }
+              },
+              "effects": [
+                {
+                  "surveil": {
+                    "amount": 1
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "equip": {
+              "cost": [
+                {
+                  "mana": "{1}"
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "rarity": "common",
+      "printing": {
+        "set": "trk",
+        "number": "270"
+      }
+    },
+    {
+      "card": {
+        "name": "Type-2 Phaser",
+        "mana_cost": "{2}",
+        "types": [
+          "artifact"
+        ],
+        "subtypes": [
+          "equipment"
+        ],
+        "abilities": [
+          {
+            "triggered": {
+              "when": {
+                "enters": {}
+              },
+              "targets": [
+                {
+                  "creature": {
+                    "controller": "opponent"
+                  }
+                }
+              ],
+              "effects": [
+                {
+                  "tap": {
+                    "to": {
+                      "target": 0
+                    }
+                  }
+                },
+                {
+                  "add_counters": {
+                    "counter": "stun",
+                    "amount": 1,
+                    "to": {
+                      "target": 0
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "static": {
+              "affects": "attached",
+              "pump": {
+                "power": 3,
+                "toughness": 0
+              }
+            }
+          },
+          {
+            "equip": {
+              "cost": [
+                {
+                  "mana": "{3}"
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "rarity": "uncommon",
+      "printing": {
+        "set": "trk",
+        "number": "271"
+      }
+    },
+    {
+      "card": {
+        "name": "U.S.S. Cerritos, Following Up",
+        "mana_cost": "{5}",
+        "types": [
+          "artifact"
+        ],
+        "supertypes": [
+          "legendary"
+        ],
+        "subtypes": [
+          "spacecraft"
+        ],
+        "keywords": [
+          "station"
+        ],
+        "abilities": [
+          {
+            "triggered": {
+              "when": {
+                "enters": {}
+              },
+              "effects": [
+                {
+                  "create_token": {
+                    "token": {
+                      "name": "Officer",
+                      "types": [
+                        "creature"
+                      ],
+                      "subtypes": [
+                        "officer"
+                      ],
+                      "power": 1,
+                      "toughness": 1
+                    },
+                    "amount": 2
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "station_symbol": {
+              "at": 6,
+              "keywords": [
+                "flying"
+              ],
+              "power": 4,
+              "toughness": 4
+            }
+          }
+        ]
+      },
+      "rarity": "uncommon",
+      "printing": {
+        "set": "trk",
+        "number": "272"
       }
     },
     {
@@ -1833,17 +3798,6 @@
       ]
     },
     {
-      "name": "Command Decision",
-      "rarity": "common",
-      "printing": {
-        "set": "trk",
-        "number": "8"
-      },
-      "missing": [
-        "modal choice"
-      ]
-    },
-    {
       "name": "Conquest Mission",
       "rarity": "uncommon",
       "printing": {
@@ -1854,17 +3808,6 @@
         "triggered ability",
         "condition (if/unless/as long as)",
         "tokens",
-        "counters"
-      ]
-    },
-    {
-      "name": "Deanna Troi, Psychic Counsel",
-      "rarity": "rare",
-      "printing": {
-        "set": "trk",
-        "number": "11"
-      },
-      "missing": [
         "counters"
       ]
     },
@@ -1900,34 +3843,8 @@
         "number": "14"
       },
       "missing": [
-        "triggered ability",
-        "counters",
-        "condition (if/unless/as long as)"
-      ]
-    },
-    {
-      "name": "Excalbian Gamemaster",
-      "rarity": "mythic",
-      "printing": {
-        "set": "trk",
-        "number": "16"
-      },
-      "missing": [
-        "triggered ability",
-        "tokens",
-        "variable amount",
+        "condition (if/unless/as long as)",
         "counters"
-      ]
-    },
-    {
-      "name": "Federation Field Medic",
-      "rarity": "common",
-      "printing": {
-        "set": "trk",
-        "number": "17"
-      },
-      "missing": [
-        "modal choice"
       ]
     },
     {
@@ -1939,17 +3856,6 @@
       },
       "missing": [
         "library manipulation",
-        "other rules text"
-      ]
-    },
-    {
-      "name": "Free Borg Revolutionaries",
-      "rarity": "common",
-      "printing": {
-        "set": "trk",
-        "number": "19"
-      },
-      "missing": [
         "other rules text"
       ]
     },
@@ -1999,7 +3905,6 @@
         "number": "23"
       },
       "missing": [
-        "layout: saga",
         "exile",
         "other rules text"
       ]
@@ -2038,9 +3943,7 @@
       },
       "missing": [
         "triggered ability",
-        "library manipulation",
-        "station",
-        "other rules text"
+        "library manipulation"
       ]
     },
     {
@@ -2127,17 +4030,6 @@
       ]
     },
     {
-      "name": "Set Phasers to . . .",
-      "rarity": "common",
-      "printing": {
-        "set": "trk",
-        "number": "34"
-      },
-      "missing": [
-        "modal choice"
-      ]
-    },
-    {
       "name": "Shields Up!",
       "rarity": "common",
       "printing": {
@@ -2188,17 +4080,6 @@
       ]
     },
     {
-      "name": "Test of Conviction",
-      "rarity": "uncommon",
-      "printing": {
-        "set": "trk",
-        "number": "39"
-      },
-      "missing": [
-        "modal choice"
-      ]
-    },
-    {
       "name": "There's Coffee in that Nebula",
       "rarity": "uncommon",
       "printing": {
@@ -2218,7 +4099,6 @@
         "number": "41"
       },
       "missing": [
-        "static ability",
         "triggered ability",
         "tokens",
         "copy"
@@ -2244,22 +4124,6 @@
         "number": "43"
       },
       "missing": [
-        "other rules text",
-        "triggered ability",
-        "tokens",
-        "station"
-      ]
-    },
-    {
-      "name": "U.S.S. Excelsior, Cutting Edge",
-      "rarity": "uncommon",
-      "printing": {
-        "set": "trk",
-        "number": "44"
-      },
-      "missing": [
-        "triggered ability",
-        "station",
         "other rules text"
       ]
     },
@@ -2311,9 +4175,7 @@
       },
       "missing": [
         "variable amount",
-        "static ability",
-        "tokens",
-        "discard"
+        "static ability"
       ]
     },
     {
@@ -2325,18 +4187,6 @@
       },
       "missing": [
         "modal choice"
-      ]
-    },
-    {
-      "name": "Data, New Life",
-      "rarity": "uncommon",
-      "printing": {
-        "set": "trk",
-        "number": "52"
-      },
-      "missing": [
-        "triggered ability",
-        "counters"
       ]
     },
     {
@@ -2401,21 +4251,6 @@
       ]
     },
     {
-      "name": "Enterprise NX-01",
-      "rarity": "uncommon",
-      "printing": {
-        "set": "trk",
-        "number": "58"
-      },
-      "missing": [
-        "triggered ability",
-        "tap/untap effect",
-        "counters",
-        "station",
-        "other rules text"
-      ]
-    },
-    {
       "name": "Guidance Failure",
       "rarity": "common",
       "printing": {
@@ -2423,8 +4258,6 @@
         "number": "60"
       },
       "missing": [
-        "condition (if/unless/as long as)",
-        "static ability",
         "other rules text"
       ]
     },
@@ -2463,10 +4296,8 @@
       },
       "missing": [
         "triggered ability",
-        "library manipulation",
-        "station",
-        "other rules text",
-        "condition (if/unless/as long as)"
+        "condition (if/unless/as long as)",
+        "library manipulation"
       ]
     },
     {
@@ -2503,8 +4334,7 @@
       "missing": [
         "triggered ability",
         "condition (if/unless/as long as)",
-        "library manipulation",
-        "counters"
+        "library manipulation"
       ]
     },
     {
@@ -2566,22 +4396,9 @@
         "number": "72"
       },
       "missing": [
-        "equipment/aura",
         "triggered ability",
         "condition (if/unless/as long as)",
         "static ability"
-      ]
-    },
-    {
-      "name": "Melkotian Adjudicator",
-      "rarity": "common",
-      "printing": {
-        "set": "trk",
-        "number": "73"
-      },
-      "missing": [
-        "triggered ability",
-        "counters"
       ]
     },
     {
@@ -2629,9 +4446,7 @@
       "missing": [
         "condition (if/unless/as long as)",
         "triggered ability",
-        "counters",
-        "station",
-        "other rules text"
+        "counters"
       ]
     },
     {
@@ -2693,18 +4508,6 @@
       ]
     },
     {
-      "name": "Suurok-Class Science Vessel",
-      "rarity": "common",
-      "printing": {
-        "set": "trk",
-        "number": "83"
-      },
-      "missing": [
-        "station",
-        "other rules text"
-      ]
-    },
-    {
       "name": "Suus Mahna Practitioner",
       "rarity": "common",
       "printing": {
@@ -2725,8 +4528,6 @@
         "number": "86"
       },
       "missing": [
-        "layout: saga",
-        "discard",
         "graveyard casting",
         "other rules text"
       ]
@@ -2792,17 +4593,6 @@
       ]
     },
     {
-      "name": "Assault Drone",
-      "rarity": "common",
-      "printing": {
-        "set": "trk",
-        "number": "92"
-      },
-      "missing": [
-        "static ability"
-      ]
-    },
-    {
       "name": "Automated Warfare System",
       "rarity": "common",
       "printing": {
@@ -2813,19 +4603,6 @@
         "triggered ability",
         "condition (if/unless/as long as)",
         "sacrifice"
-      ]
-    },
-    {
-      "name": "Bat'leth",
-      "rarity": "uncommon",
-      "printing": {
-        "set": "trk",
-        "number": "94"
-      },
-      "missing": [
-        "triggered ability",
-        "other rules text",
-        "equipment/aura"
       ]
     },
     {
@@ -2854,18 +4631,6 @@
         "sacrifice",
         "copy",
         "graveyard casting"
-      ]
-    },
-    {
-      "name": "Cha'DIch Investigator",
-      "rarity": "common",
-      "printing": {
-        "set": "trk",
-        "number": "97"
-      },
-      "missing": [
-        "triggered ability",
-        "tokens"
       ]
     },
     {
@@ -2914,18 +4679,6 @@
       ]
     },
     {
-      "name": "Death Is Irrelevant",
-      "rarity": "mythic",
-      "printing": {
-        "set": "trk",
-        "number": "102"
-      },
-      "missing": [
-        "static ability",
-        "triggered ability"
-      ]
-    },
-    {
       "name": "The Destruction of Praxis",
       "rarity": "rare",
       "printing": {
@@ -2946,7 +4699,6 @@
         "number": "104"
       },
       "missing": [
-        "equipment/aura",
         "static ability",
         "triggered ability",
         "condition (if/unless/as long as)",
@@ -2963,17 +4715,6 @@
       "missing": [
         "sacrifice",
         "condition (if/unless/as long as)"
-      ]
-    },
-    {
-      "name": "Elim Garak, Simple Tailor",
-      "rarity": "rare",
-      "printing": {
-        "set": "trk",
-        "number": "106"
-      },
-      "missing": [
-        "triggered ability"
       ]
     },
     {
@@ -3083,7 +4824,6 @@
         "number": "117"
       },
       "missing": [
-        "layout: saga",
         "sacrifice",
         "other rules text",
         "condition (if/unless/as long as)",
@@ -3114,17 +4854,6 @@
         "condition (if/unless/as long as)",
         "sacrifice",
         "exile"
-      ]
-    },
-    {
-      "name": "Obsidian Order Operative",
-      "rarity": "common",
-      "printing": {
-        "set": "trk",
-        "number": "120"
-      },
-      "missing": [
-        "triggered ability"
       ]
     },
     {
@@ -3187,17 +4916,6 @@
       ]
     },
     {
-      "name": "Rogue Artificial Intelligence",
-      "rarity": "common",
-      "printing": {
-        "set": "trk",
-        "number": "126"
-      },
-      "missing": [
-        "other rules text"
-      ]
-    },
-    {
       "name": "Salt Vampire",
       "rarity": "rare",
       "printing": {
@@ -3231,7 +4949,6 @@
         "number": "129"
       },
       "missing": [
-        "static ability",
         "condition (if/unless/as long as)",
         "counters",
         "graveyard casting"
@@ -3274,18 +4991,6 @@
       ]
     },
     {
-      "name": "Tenacious Drone",
-      "rarity": "common",
-      "printing": {
-        "set": "trk",
-        "number": "133"
-      },
-      "missing": [
-        "triggered ability",
-        "tokens"
-      ]
-    },
-    {
       "name": "Test of Loyalty",
       "rarity": "uncommon",
       "printing": {
@@ -3306,9 +5011,7 @@
       "missing": [
         "triggered ability",
         "counters",
-        "graveyard casting",
-        "station",
-        "other rules text"
+        "graveyard casting"
       ]
     },
     {
@@ -3332,9 +5035,7 @@
         "number": "137"
       },
       "missing": [
-        "variable amount",
-        "triggered ability",
-        "tokens"
+        "variable amount"
       ]
     },
     {
@@ -3359,7 +5060,6 @@
         "number": "139"
       },
       "missing": [
-        "tokens",
         "other rules text"
       ]
     },
@@ -3415,34 +5115,6 @@
         "triggered ability",
         "condition (if/unless/as long as)",
         "counters"
-      ]
-    },
-    {
-      "name": "Captain's Tutelage",
-      "rarity": "common",
-      "printing": {
-        "set": "trk",
-        "number": "144"
-      },
-      "missing": [
-        "equipment/aura",
-        "triggered ability",
-        "other rules text"
-      ]
-    },
-    {
-      "name": "D-7 Battle Cruiser",
-      "rarity": "rare",
-      "printing": {
-        "set": "trk",
-        "number": "145"
-      },
-      "missing": [
-        "station",
-        "triggered ability",
-        "tokens",
-        "sacrifice",
-        "other rules text"
       ]
     },
     {
@@ -3522,17 +5194,6 @@
       ]
     },
     {
-      "name": "Horta",
-      "rarity": "common",
-      "printing": {
-        "set": "trk",
-        "number": "152"
-      },
-      "missing": [
-        "other rules text"
-      ]
-    },
-    {
       "name": "Infinite Diversity",
       "rarity": "mythic",
       "printing": {
@@ -3594,17 +5255,6 @@
       ]
     },
     {
-      "name": "Munitions Enthusiast",
-      "rarity": "uncommon",
-      "printing": {
-        "set": "trk",
-        "number": "158"
-      },
-      "missing": [
-        "triggered ability"
-      ]
-    },
-    {
       "name": "The Naked Time",
       "rarity": "uncommon",
       "printing": {
@@ -3612,7 +5262,6 @@
         "number": "159"
       },
       "missing": [
-        "layout: saga",
         "library manipulation",
         "triggered ability",
         "counters",
@@ -3706,18 +5355,6 @@
       ]
     },
     {
-      "name": "Red Alert!",
-      "rarity": "uncommon",
-      "printing": {
-        "set": "trk",
-        "number": "169"
-      },
-      "missing": [
-        "condition (if/unless/as long as)",
-        "static ability"
-      ]
-    },
-    {
       "name": "Sarcophagus, Ship of the Dead",
       "rarity": "uncommon",
       "printing": {
@@ -3727,9 +5364,7 @@
       "missing": [
         "triggered ability",
         "condition (if/unless/as long as)",
-        "counters",
-        "station",
-        "other rules text"
+        "counters"
       ]
     },
     {
@@ -3838,7 +5473,6 @@
         "number": "181"
       },
       "missing": [
-        "layout: saga",
         "triggered ability",
         "condition (if/unless/as long as)",
         "exile",
@@ -3853,7 +5487,6 @@
         "number": "182"
       },
       "missing": [
-        "tokens",
         "other rules text"
       ]
     },
@@ -3865,7 +5498,6 @@
         "number": "183"
       },
       "missing": [
-        "layout: saga",
         "other rules text",
         "graveyard casting"
       ]
@@ -3941,8 +5573,7 @@
         "number": "189"
       },
       "missing": [
-        "static ability",
-        "other rules text"
+        "static ability"
       ]
     },
     {
@@ -3954,17 +5585,6 @@
       },
       "missing": [
         "variable amount"
-      ]
-    },
-    {
-      "name": "Culber and Stamets, Star-Crossed",
-      "rarity": "uncommon",
-      "printing": {
-        "set": "trk",
-        "number": "191"
-      },
-      "missing": [
-        "modal choice"
       ]
     },
     {
@@ -4002,17 +5622,6 @@
       ]
     },
     {
-      "name": "Dominion Supervisor",
-      "rarity": "common",
-      "printing": {
-        "set": "trk",
-        "number": "195"
-      },
-      "missing": [
-        "counters"
-      ]
-    },
-    {
       "name": "Dr. Joseph M'Benga",
       "rarity": "mythic",
       "printing": {
@@ -4020,8 +5629,8 @@
         "number": "196"
       },
       "missing": [
-        "counters",
-        "condition (if/unless/as long as)"
+        "condition (if/unless/as long as)",
+        "counters"
       ]
     },
     {
@@ -4081,8 +5690,6 @@
         "number": "201"
       },
       "missing": [
-        "triggered ability",
-        "tokens",
         "condition (if/unless/as long as)"
       ]
     },
@@ -4146,30 +5753,6 @@
       "missing": [
         "triggered ability",
         "tokens"
-      ]
-    },
-    {
-      "name": "Moopsy",
-      "rarity": "common",
-      "printing": {
-        "set": "trk",
-        "number": "207"
-      },
-      "missing": [
-        "invalid: abilities[0].activated.effects[0].grant.to: required"
-      ]
-    },
-    {
-      "name": "Neelix, Moral Support",
-      "rarity": "uncommon",
-      "printing": {
-        "set": "trk",
-        "number": "209"
-      },
-      "missing": [
-        "triggered ability",
-        "tokens",
-        "counters"
       ]
     },
     {
@@ -4268,7 +5851,6 @@
       },
       "missing": [
         "triggered ability",
-        "library manipulation",
         "exile",
         "counters",
         "graveyard casting"
@@ -4309,9 +5891,7 @@
         "number": "221"
       },
       "missing": [
-        "triggered ability",
-        "station",
-        "other rules text"
+        "triggered ability"
       ]
     },
     {
@@ -4322,9 +5902,7 @@
         "number": "222"
       },
       "missing": [
-        "triggered ability",
-        "station",
-        "other rules text"
+        "triggered ability"
       ]
     },
     {
@@ -4351,7 +5929,6 @@
         "number": "226"
       },
       "missing": [
-        "layout: saga",
         "exile",
         "condition (if/unless/as long as)"
       ]
@@ -4368,8 +5945,7 @@
         "triggered ability",
         "condition (if/unless/as long as)",
         "exile",
-        "static ability",
-        "station"
+        "static ability"
       ]
     },
     {
@@ -4380,7 +5956,6 @@
         "number": "228"
       },
       "missing": [
-        "layout: saga",
         "tokens",
         "static ability",
         "other rules text",
@@ -4396,9 +5971,8 @@
         "number": "229"
       },
       "missing": [
-        "triggered ability",
-        "tokens",
-        "static ability"
+        "invalid: mana_cost: unsupported mana symbol {R/G}",
+        "invalid: mana_cost: unsupported mana symbol {R/G}"
       ]
     },
     {
@@ -4492,8 +6066,6 @@
         "number": "237"
       },
       "missing": [
-        "triggered ability",
-        "counters",
         "condition (if/unless/as long as)",
         "sacrifice"
       ]
@@ -4534,7 +6106,6 @@
         "number": "240"
       },
       "missing": [
-        "static ability",
         "triggered ability"
       ]
     },
@@ -4546,7 +6117,6 @@
         "number": "241"
       },
       "missing": [
-        "layout: saga",
         "graveyard casting",
         "triggered ability",
         "tokens",
@@ -4575,8 +6145,7 @@
       "missing": [
         "triggered ability",
         "exile",
-        "static ability",
-        "sacrifice"
+        "static ability"
       ]
     },
     {
@@ -4599,7 +6168,6 @@
         "number": "245"
       },
       "missing": [
-        "static ability",
         "discard"
       ]
     },
@@ -4611,7 +6179,8 @@
         "number": "246"
       },
       "missing": [
-        "modal choice"
+        "invalid: mana_cost: unsupported mana symbol {U/B}",
+        "invalid: mana_cost: unsupported mana symbol {U/B}"
       ]
     },
     {
@@ -4622,8 +6191,6 @@
         "number": "247"
       },
       "missing": [
-        "triggered ability",
-        "tokens",
         "sacrifice",
         "library manipulation"
       ]
@@ -4683,17 +6250,6 @@
       ]
     },
     {
-      "name": "Seven of Nine",
-      "rarity": "uncommon",
-      "printing": {
-        "set": "trk",
-        "number": "252"
-      },
-      "missing": [
-        "triggered ability"
-      ]
-    },
-    {
       "name": "Spock, Always Your Friend",
       "rarity": "uncommon",
       "printing": {
@@ -4742,18 +6298,6 @@
       ]
     },
     {
-      "name": "Year of Hell",
-      "rarity": "rare",
-      "printing": {
-        "set": "trk",
-        "number": "257"
-      },
-      "missing": [
-        "layout: saga",
-        "other rules text"
-      ]
-    },
-    {
       "name": "Zero, Incorporeal Sensate",
       "rarity": "uncommon",
       "printing": {
@@ -4768,18 +6312,6 @@
       ]
     },
     {
-      "name": "Class-F Shuttlecraft",
-      "rarity": "common",
-      "printing": {
-        "set": "trk",
-        "number": "259"
-      },
-      "missing": [
-        "station",
-        "other rules text"
-      ]
-    },
-    {
       "name": "Combadge",
       "rarity": "uncommon",
       "printing": {
@@ -4789,8 +6321,7 @@
       "missing": [
         "triggered ability",
         "copy",
-        "static ability",
-        "equipment/aura"
+        "static ability"
       ]
     },
     {
@@ -4813,9 +6344,7 @@
       },
       "missing": [
         "triggered ability",
-        "exile",
-        "station",
-        "static ability"
+        "exile"
       ]
     },
     {
@@ -4826,7 +6355,6 @@
         "number": "264"
       },
       "missing": [
-        "other rules text",
         "variable amount",
         "sacrifice",
         "counters"
@@ -4890,49 +6418,6 @@
       ]
     },
     {
-      "name": "Tricorder",
-      "rarity": "common",
-      "printing": {
-        "set": "trk",
-        "number": "270"
-      },
-      "missing": [
-        "other rules text",
-        "triggered ability",
-        "library manipulation",
-        "equipment/aura"
-      ]
-    },
-    {
-      "name": "Type-2 Phaser",
-      "rarity": "uncommon",
-      "printing": {
-        "set": "trk",
-        "number": "271"
-      },
-      "missing": [
-        "triggered ability",
-        "tap/untap effect",
-        "counters",
-        "other rules text",
-        "equipment/aura"
-      ]
-    },
-    {
-      "name": "U.S.S. Cerritos, Following Up",
-      "rarity": "uncommon",
-      "printing": {
-        "set": "trk",
-        "number": "272"
-      },
-      "missing": [
-        "triggered ability",
-        "tokens",
-        "station",
-        "other rules text"
-      ]
-    },
-    {
       "name": "U.S.S. Enterprise-D, Galaxy-Class",
       "rarity": "rare",
       "printing": {
@@ -4941,9 +6426,7 @@
       },
       "missing": [
         "triggered ability",
-        "exile",
-        "station",
-        "other rules text"
+        "exile"
       ]
     },
     {

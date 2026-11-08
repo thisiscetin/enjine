@@ -218,13 +218,6 @@ module Enjine
         end
       end
 
-      def remaining_text
-        rem = casting["remaining"]
-        cost = Mana::Cost.new(generic: rem["generic"], colored: rem.except("generic").transform_keys(&:to_sym)
-                                                                   .reject { |_, n| n.zero? })
-        cost.to_s
-      end
-
       def casting_targets = casting_ability&.targets_for(casting["modes"]) || []
 
       # CR 601.2b: modes still choosable (distinct, with legal targets).

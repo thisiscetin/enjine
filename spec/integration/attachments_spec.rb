@@ -111,7 +111,9 @@ RSpec.describe "Auras and Equipment (CR 301.5, 303.4, 701.3, 702.5, 702.6, 704.5
       game = board(alice: ["Brasswork Cudgel", "Emberbond Charm", "Withering Grasp", "Grizzly Bears", "Glory Seeker"],
                    bob: ["Hill Giant"])
       e = engine(game)
-      bears, seeker, giant = obj_id(game, "Grizzly Bears"), obj_id(game, "Glory Seeker"), obj_id(game, "Hill Giant")
+      bears = obj_id(game, "Grizzly Bears")
+      seeker = obj_id(game, "Glory Seeker")
+      giant = obj_id(game, "Hill Giant")
       modified = Enjine::Mechanics.build_entry(:filter, { "creature" => { "modified" => true } }, [], "f")
       expect(modified.candidates(e, 0)).to eq([])
       e.object(obj_id(game, "Brasswork Cudgel")).attached_to = bears

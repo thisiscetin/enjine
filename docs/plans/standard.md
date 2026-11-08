@@ -34,12 +34,12 @@ the set files.
 
 | # | Set | Released | Leaves Standard | Status |
 | ---: | --- | --- | --- | --- |
-| 1 | Star Trek | 2026-11-13 | 2029 (est.) | in progress: 39/311 cards |
+| 1 | Star Trek | 2026-11-13 | 2029 (est.) | in progress: 79/311 cards |
 | 2 | Reality Fracture | 2026-10-02 | 2029 (est.) | not started |
 | 3 | The Hobbit | 2026-08-14 | 2029 (est.) | not started |
 | 4 | Marvel Super Heroes | 2026-06-26 | 2029 (est.) | not started |
 | 5 | Secrets of Strixhaven | 2026-04-24 | 2029 (est.) | not started |
-| 6 | Teenage Mutant Ninja Turtles | 2026-03-06 | 2029 (est.) | imported: 15/195 cards |
+| 6 | Teenage Mutant Ninja Turtles | 2026-03-06 | 2029 (est.) | imported: 26/195 cards |
 | 7 | Lorwyn Eclipsed | 2026-01-23 | 2029 (est.) | not started |
 | 8 | Avatar: The Last Airbender | 2025-11-21 | 2028 (est.) | not started |
 | 9 | Spider-Man | 2025-09-26 | 2028 (est.) | not started |

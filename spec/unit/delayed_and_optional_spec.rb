@@ -42,7 +42,8 @@ RSpec.describe "Delayed triggers, optional effects and results: card data valida
                        { "return_to_battlefield" => { "to" => { "result" => 0 }, "under" => "anyone" } }]))
       .to eq(["#{base}[1].return_to_battlefield.under: must be one of owner, you"])
     expect(errors_for([{ "draw" => { "amount" => 1, "if" => { "cast_by" => "you" } } }]))
-      .to eq(["#{base}[0].draw.if: unknown condition (use controls, life, hand_size, your_turn, was_cast, targets, attacked, not, all, any)"])
+      .to eq(["#{base}[0].draw.if: unknown condition " \
+              "(use controls, life, hand_size, your_turn, was_cast, targets, attacked, not, all, any)"])
   end
 
   it "addresses delayed abilities by path and registers tokens nested in them" do
