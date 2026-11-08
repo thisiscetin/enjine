@@ -50,34 +50,34 @@ module Enjine
         return modified if statics.empty? && effects.empty? && state.battlefield.none? { !object(it).counters.empty? }
 
         state.battlefield.each do |id|
-          obj = object(id)
-          base = definition(obj).printed_characteristics
-          keywords = base.keywords.dup
-          delta_p = delta_t = obj.counters.fetch("+1/+1", 0) - obj.counters.fetch("-1/-1", 0)
-          # Layer 6 then 7c, each in timestamp order (CR 613.7); statics come before resolved effects.
-          statics.each do |source, ability|
-            next unless ability.affects?(obj, source, base.types)
-
-            keywords |= ability.keywords
-            delta_p += ability.power
-            delta_t += ability.toughness
-          end
-          effects.each do |effect|
-            next unless effect["affected"].include?(id)
-
-            case effect["kind"]
-            when "pump"
-              delta_p += effect["power"]
-              delta_t += effect["toughness"]
-            when "grant" then keywords |= effect["keywords"].map(&:to_sym)
-            end
-          end
-          next if delta_p.zero? && delta_t.zero? && keywords == base.keywords
-
-          modified[id] = base.with(power: base.power && (base.power + delta_p), toughness: base.toughness && (base.toughness + delta_t),
-                                   keywords: keywords.freeze)
+          result = layered(object(id), statics, effects)
+          modified[id] = result if result
         end
         modified
+      end
+
+      # One object's characteristics after layers 6 and 7c (nil when unchanged). Each layer applies
+      # in timestamp order (CR 613.7); static abilities come before resolved effects.
+      def layered(obj, statics, effects)
+        base = definition(obj).printed_characteristics
+        keywords = base.keywords.dup
+        delta = [obj.counters.fetch("+1/+1", 0) - obj.counters.fetch("-1/-1", 0)] * 2
+        statics.each do |source, ability|
+          next unless ability.affects?(obj, source, base.types)
+
+          keywords |= ability.keywords
+          delta = [delta[0] + ability.power, delta[1] + ability.toughness]
+        end
+        effects.each do |effect|
+          next unless effect["affected"].include?(obj.id)
+
+          keywords |= effect["keywords"].map(&:to_sym) if effect["kind"] == "grant"
+          delta = [delta[0] + effect["power"], delta[1] + effect["toughness"]] if effect["kind"] == "pump"
+        end
+        return nil if delta == [0, 0] && keywords == base.keywords
+
+        base.with(power: base.power && (base.power + delta[0]), toughness: base.toughness && (base.toughness + delta[1]),
+                  keywords: keywords.freeze)
       end
 
       # [[source object, StaticAbility], ...] for permanents on the battlefield (printed abilities:
