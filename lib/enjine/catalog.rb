@@ -22,6 +22,8 @@ module Enjine
       raise CatalogConflict, "two different definitions for #{defn.name.inspect} (#{defn.id})" if existing && existing != defn
 
       @definitions[defn.id] ||= defn
+      defn.token_definitions.each { add(it) unless @definitions.key?(it.id) }
+      defn
     end
 
     def merge(other)

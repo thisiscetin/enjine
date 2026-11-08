@@ -87,6 +87,7 @@ Rules version: Comprehensive Rules effective 2026-09-25.
 | --- | --- | --- |
 | [`add_counters`](docs/reference/effects.md#add_counters) | 122.1, 122.6, 613.4c | Put `amount` counters of kind `counter` (+1/+1, -1/-1, loyalty) on each referenced permanent. |
 | [`counter`](docs/reference/effects.md#counter) | 701.6a | Counter each referenced spell: it leaves the stack for its owner's graveyard without resolving. |
+| [`create_token`](docs/reference/effects.md#create_token) | 111.1, 111.10, 701.7a, 704.5d | Create `amount` tokens under the referenced player's control (default: you). `token` is a predefined token name (Treasure, Clue, Food) or an inline card definition. `tapped: true` creates them tapped. |
 | [`deal_damage`](docs/reference/effects.md#deal_damage) | 120.3a, 120.3c, 120.3e, 120.6 | Deal `amount` damage to each referenced creature, planeswalker or player. Damage to a player causes life loss; to a planeswalker removes loyalty counters; to a creature is marked until cleanup. |
 | [`destroy`](docs/reference/effects.md#destroy) | 701.8a | Destroy each referenced permanent (it goes to its owner's graveyard). |
 | [`draw`](docs/reference/effects.md#draw) | 121.1, 121.2 | Each referenced player draws `amount` cards (default: you). |

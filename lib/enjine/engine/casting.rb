@@ -65,18 +65,40 @@ module Enjine
       def affordable?(index, cost, excluded_source)
         return true if cost.nil? || cost.mana_value.zero?
 
-        available = player(index).mana_pool.dup
+        units = mana_units(index, excluded_source)
+        return false if units.size < cost.mana_value
+
+        symbols = cost.colored.flat_map { |color, n| [color] * n }
+        match_colored(symbols, units)
+      end
+
+      # Every unit of mana the player could make: pool mana (one fixed type each) and one unit per
+      # untapped source, with the set of types it could produce (a Treasure: any color).
+      def mana_units(index, excluded_source)
+        units = player(index).mana_pool.flat_map { |type, n| Array.new(n) { [type] } }
+        by_source = Hash.new { |h, k| h[k] = [] }
         all_mana_sources(index).each do |id, ref|
-          next if id == excluded_source
-
-          chars(id).ability(ref).produce.each { available[it] += 1 }
+          by_source[id].concat(chars(id).ability(ref).produce) unless id == excluded_source
         end
-        cost.colored.each do |color, n|
-          return false if available[color] < n
+        units + by_source.values.map(&:uniq)
+      end
 
-          available[color] -= n
+      # Bipartite matching (augmenting paths): can every colored symbol get its own unit?
+      def match_colored(symbols, units)
+        owner = Array.new(units.size)
+        symbols.each_index.all? { |s| augment(s, symbols, units, owner, Array.new(units.size, false)) }
+      end
+
+      def augment(symbol, symbols, units, owner, seen)
+        units.each_index.any? do |u|
+          next false if seen[u] || !units[u].include?(symbols[symbol])
+
+          seen[u] = true
+          next false unless owner[u].nil? || augment(owner[u], symbols, units, owner, seen)
+
+          owner[u] = symbol
+          true
         end
-        available.values.sum >= cost.generic
       end
 
       def mana_sources(index, excluded_source)

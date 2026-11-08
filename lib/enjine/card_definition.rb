@@ -20,6 +20,17 @@ module Enjine
       name.to_s.unicode_normalize(:nfkd).gsub(/\p{Mn}/, "").downcase.delete("'’").gsub(/[^a-z0-9]+/, "_").gsub(/\A_+|_+\z/, "")
     end
 
+    # A token definition (CR 111.1). Its id is derived from its data so two different tokens
+    # with the same name ("Soldier" 1/1 and "Soldier" 2/2) never collide in a catalog.
+    def self.token(data)
+      card = data.transform_keys(&:to_s)
+      digest = Digest::SHA256.hexdigest(JSON.generate(card))[0, 8]
+      errors = []
+      new(card, errors, token_id: "#{slug(card["name"])}_token_#{digest}").tap do
+        raise InvalidCardDefinition.new(errors, name: card["name"]) unless errors.empty?
+      end
+    end
+
     def self.from_h(hash)
       return hash if hash.is_a?(CardDefinition)
 
@@ -32,10 +43,11 @@ module Enjine
       end
     end
 
-    def initialize(card, errors)
+    def initialize(card, errors, token_id: nil)
       (card.keys - KEYS).each { |k| errors << "#{k}: unknown field (allowed: #{KEYS.join(", ")})" }
       @name = read_name(card, errors)
-      @id = self.class.slug(@name)
+      @id = token_id || self.class.slug(@name)
+      @token = !token_id.nil?
       @types, @type_modules = read_names(card, "types", :type, errors, required: true)
       @supertypes, = read_names(card, "supertypes", :supertype, errors)
       @subtypes = read_subtypes(card, errors)
@@ -68,6 +80,16 @@ module Enjine
     def ability(ref) = @ability_instances.find { it.ref == ref }&.ability
 
     def permanent? = @permanent
+    def token? = @token
+
+    # Token definitions this card's effects can create; catalogs register them with the card.
+    def token_definitions
+      @abilities.flat_map do |ability|
+        effects = ability.respond_to?(:modes) && ability.modal? ? ability.modes.flat_map(&:effects) : ability.try_effects
+        effects.filter_map { it.definition if it.is_a?(Mechanics::Effects::CreateToken) }
+      end.uniq(&:id)
+    end
+
     def triggered? = @triggered
     def land? = @land
     def creature? = @creature

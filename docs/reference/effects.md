@@ -47,6 +47,37 @@ Rules: CR 701.6a
 }
 ```
 
+## create_token
+
+Create `amount` tokens under the referenced player's control (default: you). `token` is a predefined token name (Treasure, Clue, Food) or an inline card definition. `tapped: true` creates them tapped.
+
+Rules: CR 111.1, CR 111.10, CR 701.7a, CR 704.5d
+
+| Parameter | Description |
+| --- | --- |
+| `token` | "Treasure" | "Clue" | "Food" | {card data} |
+| `amount` | integer (default 1) |
+| `tapped` | boolean |
+| `to` | selector (default "you") |
+
+```json
+{
+  "create_token": {
+    "token": {
+      "name": "Soldier",
+      "types": [
+        "creature"
+      ],
+      "subtypes": [
+        "soldier"
+      ],
+      "power": 1,
+      "toughness": 1
+    }
+  }
+}
+```
+
 ## deal_damage
 
 Deal `amount` damage to each referenced creature, planeswalker or player. Damage to a player causes life loss; to a planeswalker removes loyalty counters; to a creature is marked until cleanup.

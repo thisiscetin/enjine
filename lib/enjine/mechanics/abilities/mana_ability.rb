@@ -37,6 +37,7 @@ module Enjine
         end
 
         def mana_ability? = true
+        def try_effects = []
         def kind = :mana
         def allowed_types = nil
 

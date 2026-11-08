@@ -66,6 +66,7 @@ module Enjine
         end
 
         def modal? = !modes.empty?
+        def try_effects = effects
 
         # Targets in order for the chosen modes (or the ability's own targets).
         def targets_for(chosen) = modal? ? chosen.sort.flat_map { modes[it].targets } : targets

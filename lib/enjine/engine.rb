@@ -290,6 +290,17 @@ module Enjine
       end
     end
 
+    # CR 111.1: a token enters the battlefield under its creator's control.
+    def create_token!(definition, controller, tapped: false)
+      obj = create_object(definition.id, controller, :battlefield)
+      obj.controlled_since = state.turn
+      obj.tapped = tapped
+      state.battlefield.unshift(obj.id)
+      emit Events::ZoneChanged.new(card: definition.id, old_id: nil, new_id: obj.id, owner: name(controller),
+                                   from: "none", to: "battlefield", reason: "create_token")
+      obj
+    end
+
     def draw!(index)
       return unless propose("draw", { "player" => index }).data["player"]
 

@@ -856,5 +856,97 @@
       "indestructible"
     ],
     "rules_text": "Indestructible"
+  },
+  {
+    "name": "Lucky Prospector",
+    "mana_cost": "{1}{R}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "goblin"
+    ],
+    "power": 2,
+    "toughness": 1,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "enters": {}
+          },
+          "effects": [
+            {
+              "create_token": {
+                "token": "Treasure"
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "When this creature enters, create a Treasure token."
+  },
+  {
+    "name": "Call the Watch",
+    "mana_cost": "{2}{W}",
+    "types": [
+      "sorcery"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "effects": [
+            {
+              "create_token": {
+                "token": {
+                  "name": "Watch Soldier",
+                  "types": [
+                    "creature"
+                  ],
+                  "subtypes": [
+                    "human",
+                    "soldier"
+                  ],
+                  "power": 1,
+                  "toughness": 1
+                },
+                "amount": 2
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "Create two 1/1 Human Soldier creature tokens."
+  },
+  {
+    "name": "Curious Sleuth",
+    "mana_cost": "{1}{U}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "human",
+      "detective"
+    ],
+    "power": 1,
+    "toughness": 2,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "enters": {}
+          },
+          "effects": [
+            {
+              "create_token": {
+                "token": "Clue"
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "When this creature enters, create a Clue token."
   }
 ]

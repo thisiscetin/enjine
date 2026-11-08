@@ -21,6 +21,7 @@ module Enjine
         def mana_ability? = false
         def allowed_types = nil
         def to_s = "enters tapped"
+        def try_effects = []
 
         # Called by the replacement pass for the entering object.
         def modify_entering(enters) = enters["tapped"] = true

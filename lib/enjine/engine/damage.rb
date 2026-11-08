@@ -78,6 +78,7 @@ module Enjine
       # CR 704.5f, 704.5g, 704.5i. All applicable actions happen simultaneously (CR 704.3).
       # Returns true when anything happened, so the check repeats.
       def check_permanent_state_based_actions!
+        ceased = remove_tokens_outside_battlefield! # CR 704.5d
         doomed = nil
         state.battlefield.each do |id|
           obj = object(id)
@@ -87,10 +88,21 @@ module Enjine
                    end
           (doomed ||= []) << [id, reason] if reason
         end
-        return false unless doomed
+        return ceased unless doomed
 
         doomed.each { |id, reason| move!(id, :graveyard, reason: reason) }
         true
+      end
+
+      # CR 704.5d / 111.7: a token in a zone other than the battlefield ceases to exist.
+      def remove_tokens_outside_battlefield!
+        gone = state.objects.values.select { it.zone != :battlefield && it.zone != :stack && catalog.fetch(it.card).token? }
+        gone.each do |obj|
+          state.zone_list(obj.zone, obj.owner).delete(obj.id)
+          state.objects.delete(obj.id)
+          emit Events::TokenCeased.new(object: obj.id, card: obj.card, zone: obj.zone.to_s)
+        end
+        !gone.empty?
       end
 
       # CR 704.5j: the legend rule needs a choice, so it runs as a frame before priority.
