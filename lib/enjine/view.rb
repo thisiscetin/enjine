@@ -75,7 +75,7 @@ module Enjine
     end
 
     def ability_view(engine, obj, defn)
-      ability = defn.abilities[obj.ability]
+      ability = defn.ability(obj.ability)
       { "id" => obj.id, "card" => obj.card, "name" => "#{defn.name} ability", "kind" => "ability",
         "ability" => obj.ability, "loyalty_cost" => ability.loyalty_cost, "source" => obj.source,
         "controller" => engine.name(obj.controller), "targets" => obj.targets || [] }.compact

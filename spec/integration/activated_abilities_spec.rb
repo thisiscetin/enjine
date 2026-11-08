@@ -23,7 +23,7 @@ RSpec.describe "Activated abilities (CR 602) and summoning sickness (CR 302.6)" 
   it "taps as a cost, targets, then resolves from the stack" do
     game = board(controlled_since: 1)
     pyro, goblin = game.state.battlefield
-    game.submit(type: "activate", object: pyro, ability: 0)
+    game.submit(type: "activate", object: pyro, ability: "printed:0")
     expect(game.legal_options).to eq([{ type: "target", target: "player:alice" }, { type: "target", target: "player:bob" },
                                       { type: "target", target: pyro }, { type: "target", target: goblin },
                                       { type: "cancel" }])
@@ -38,7 +38,7 @@ RSpec.describe "Activated abilities (CR 602) and summoning sickness (CR 302.6)" 
   it "cancelling an activation leaves the source untapped" do
     game = board(controlled_since: 1)
     pyro = game.state.battlefield.first
-    game.submit(type: "activate", object: pyro, ability: 0)
+    game.submit(type: "activate", object: pyro, ability: "printed:0")
     game.submit(type: "cancel")
     expect(game.state.object(pyro).tapped).to be(false)
     expect(game.state.stack).to be_empty
@@ -58,9 +58,9 @@ RSpec.describe "Activated abilities (CR 602) and summoning sickness (CR 302.6)" 
       player("bob") { library "Forest", count: 5 }
     end
     forge_id, mountain = game.state.battlefield
-    game.submit(type: "activate", object: forge_id, ability: 0)
-    expect(game.legal_options).to eq([{ type: "activate_mana", object: mountain, ability: 0 }, { type: "cancel" }])
-    game.submit(type: "activate_mana", object: mountain, ability: 0)
+    game.submit(type: "activate", object: forge_id, ability: "printed:0")
+    expect(game.legal_options).to eq([{ type: "activate_mana", object: mountain, ability: mana_ref(game, mountain) }, { type: "cancel" }])
+    game.submit(type: "activate_mana", object: mountain, ability: mana_ref(game, mountain))
     game.submit(type: "pay_mana", mana: "R")
     pass_both(game)
     expect(game.view_for(:observer)["players"][1]["life"]).to eq(18)

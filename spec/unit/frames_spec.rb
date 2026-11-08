@@ -16,7 +16,7 @@ RSpec.describe Enjine::Frames do
   def cast_bolt(game)
     game.submit(type: "cast", object: ids_in(game, "alice", :hand).first)
     game.submit(type: "target", target: "player:bob")
-    game.submit(type: "activate_mana", object: game.state.battlefield.first, ability: 0)
+    game.submit(type: "activate_mana", object: game.state.battlefield.first, ability: mana_ref(game, game.state.battlefield.first))
     game.submit(type: "pay_mana", mana: "R")
   end
 

@@ -117,7 +117,7 @@ RSpec.describe "Combat (CR 506-511)" do
     g.submit(type: "pass")
     g.submit(type: "cast", object: ids_in(g, "bob", :hand).first)
     g.submit(type: "target", target: attacker)
-    g.submit(type: "activate_mana", object: g.state.battlefield[1], ability: 0)
+    g.submit(type: "activate_mana", object: g.state.battlefield[1], ability: mana_ref(g, g.state.battlefield[1]))
     g.submit(type: "pay_mana", mana: "R")
     pass_both(g)
     expect(g.state.battlefield).not_to include(attacker)

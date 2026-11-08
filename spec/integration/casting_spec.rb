@@ -25,7 +25,7 @@ RSpec.describe "Casting spells and the stack (CR 601, 608)" do
 
   def tap_and_pay(game, *lands)
     lands.each do |land|
-      game.submit(type: "activate_mana", object: land, ability: 0)
+      game.submit(type: "activate_mana", object: land, ability: mana_ref(game, land))
       game.submit(game.legal_options.find { it[:type] == "pay_mana" })
     end
   end
@@ -43,14 +43,14 @@ RSpec.describe "Casting spells and the stack (CR 601, 608)" do
     expect(entry.events.first).to have_attributes(from: "hand", to: "stack", reason: "cast")
     expect(game.pending_decision).to have_attributes(kind: "pay_cost", details: { "remaining" => "{1}{G}" })
     expect(game.legal_options).to eq(
-      game.state.battlefield.first(4).map { { type: "activate_mana", object: it, ability: 0 } } + [{ type: "cancel" }]
+      game.state.battlefield.first(4).map { { type: "activate_mana", object: it, ability: mana_ref(game, it) } } + [{ type: "cancel" }]
     )
 
-    game.submit(type: "activate_mana", object: forests[0], ability: 0)
+    game.submit(type: "activate_mana", object: forests[0], ability: mana_ref(game, forests[0]))
     expect(game.legal_options.first).to eq(type: "pay_mana", mana: "G")
     game.submit(type: "pay_mana", mana: "G")
     expect(game.pending_decision.details).to eq("remaining" => "{1}")
-    game.submit(type: "activate_mana", object: mountains[0], ability: 0)
+    game.submit(type: "activate_mana", object: mountains[0], ability: mana_ref(game, mountains[0]))
     entry = game.submit(type: "pay_mana", mana: "R")
 
     expect(entry.events.map(&:type)).to eq(%w[mana_paid spell_cast])
@@ -66,18 +66,18 @@ RSpec.describe "Casting spells and the stack (CR 601, 608)" do
 
   it "pays generic costs with any color and colored costs only with that color" do
     game.submit(type: "cast", object: bears_card)
-    game.submit(type: "activate_mana", object: mountains[0], ability: 0)
+    game.submit(type: "activate_mana", object: mountains[0], ability: mana_ref(game, mountains[0]))
     game.submit(type: "pay_mana", mana: "R") # pays the generic part
     expect(game.pending_decision.details).to eq("remaining" => "{G}")
-    game.submit(type: "activate_mana", object: mountains[1], ability: 0)
+    game.submit(type: "activate_mana", object: mountains[1], ability: mana_ref(game, mountains[1]))
     expect(game.legal_options).not_to include(a_hash_including(type: "pay_mana"))
   end
 
   it "rewinds everything on cancel: card back in hand at the same place, lands untapped, pool restored (CR 733)" do
-    game.submit(type: "activate_mana", object: mountains[1], ability: 0) # mana in pool before casting stays
+    game.submit(type: "activate_mana", object: mountains[1], ability: mana_ref(game, mountains[1])) # mana in pool before casting stays
     before_hand = ids_in(game, "alice", :hand).dup
     game.submit(type: "cast", object: bears_card)
-    game.submit(type: "activate_mana", object: forests[0], ability: 0)
+    game.submit(type: "activate_mana", object: forests[0], ability: mana_ref(game, forests[0]))
     game.submit(type: "pay_mana", mana: "G")
     entry = game.submit(type: "cancel")
 

@@ -42,7 +42,7 @@ Casting Lightning Bolt with a Mountain on the battlefield:
 ```ruby
 game.submit(type: "cast", object: "lightning_bolt#12")                # priority -> card moves to the stack
 game.submit(type: "target", target: "player:bob")                     # choose_target
-game.submit(type: "activate_mana", object: "mountain#3", ability: 0)  # pay_cost: tap a source
+game.submit(type: "activate_mana", object: "mountain#3", ability: "intrinsic:mountain")  # pay_cost: tap a source
 game.submit(type: "pay_mana", mana: "R")                              # pay_cost: spend {R} -> cast
 ```
 

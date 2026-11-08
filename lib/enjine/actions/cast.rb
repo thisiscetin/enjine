@@ -20,7 +20,7 @@ module Enjine
     # CR 602 / 606: activate a non-mana activated or loyalty ability of a permanent you control.
     class Activate
       def self.doc
-        '`{type: "activate", object: id, ability: index}` — start activating an ability (CR 602.2), ' \
+        '`{type: "activate", object: id, ability: ref}` — start activating an ability (CR 602.2), ' \
           "including planeswalker loyalty abilities (CR 606)."
       end
 
@@ -30,8 +30,8 @@ module Enjine
           obj = engine.object(id)
           next unless obj.controller == index
 
-          engine.definition(obj).activated_ability_indices.each do |i|
-            out << { type: "activate", object: id, ability: i } if engine.activatable?(index, id, i)
+          engine.chars(obj).activated_abilities.each do |inst|
+            out << { type: "activate", object: id, ability: inst.ref } if engine.activatable?(index, id, inst.ref)
           end
         end
         out

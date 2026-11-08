@@ -51,6 +51,7 @@ module Enjine
       precompute_predicates
       validate_type_specific(errors)
       @source = normalize(card)
+      @printed_characteristics = Characteristics.printed(self) if errors.empty?
       freeze
     end
 
@@ -59,7 +60,12 @@ module Enjine
     def keyword?(keyword) = @keywords.include?(keyword.to_sym)
 
     # Predicates below are computed once at construction: they sit on the engine's hot path.
-    attr_reader :mana_ability_indices, :activated_ability_indices, :spell_ability
+    attr_reader :spell_ability, :ability_instances
+
+    # Characteristics as printed: the starting point of the layer system (CR 613).
+    attr_reader :printed_characteristics
+
+    def ability(ref) = @ability_instances.find { it.ref == ref }&.ability
 
     def permanent? = @permanent
     def land? = @land
@@ -73,7 +79,7 @@ module Enjine
     # Lands are played, not cast; a card without a mana cost can't be cast normally (CR 202.1b).
     def castable? = @castable
 
-    def mana_abilities = @mana_ability_indices.map { @abilities[it] }
+    def mana_abilities = @ability_instances.map(&:ability).select(&:mana_ability?)
 
     def type_line
       left = (@supertypes + @types).map { |t| t.to_s.capitalize }.join(" ")
@@ -100,8 +106,6 @@ module Enjine
       @castable = !@land && !@mana_cost.nil?
       @deck_limit_exempt = @supertypes.any? { Enjine.registry.fetch(:supertype, it).deck_limit_exempt? }
       @spell_ability = @abilities.find { it.kind == :spell }
-      @mana_ability_indices = @abilities.each_index.select { @abilities[it].mana_ability? }.freeze
-      @activated_ability_indices = @abilities.each_index.select { %i[activated loyalty].include?(@abilities[it].kind) }.freeze
     end
 
     def validate_type_specific(errors)
@@ -179,13 +183,16 @@ module Enjine
       end
 
       explicit = list.each_with_index.filter_map do |entry, i|
-        Mechanics.build_entry(:ability, entry, errors, "abilities[#{i}]")
+        ability = Mechanics.build_entry(:ability, entry, errors, "abilities[#{i}]")
+        AbilityInstance.new(ref: "printed:#{i}", ability: ability) if ability
       end
       intrinsic = @subtypes.flat_map do |sub|
         rule = Enjine.registry.fetch(:subtype, sub)
-        rule.respond_to?(:intrinsic_abilities) ? rule.intrinsic_abilities : []
+        abilities = rule.respond_to?(:intrinsic_abilities) ? rule.intrinsic_abilities : []
+        abilities.each_with_index.map { |a, i| AbilityInstance.new(ref: "intrinsic:#{sub}#{":#{i}" if i.positive?}", ability: a) }
       end
-      (explicit + intrinsic).freeze
+      @ability_instances = (explicit + intrinsic).freeze
+      @ability_instances.map(&:ability).freeze
     end
 
     def normalize(card)

@@ -19,7 +19,11 @@ module Enjine
       @emit = emit
     end
 
-    def emit(event) = @emit.call(event)
+    def emit(event)
+      touch! if Characteristics::LAYER_EVENTS.include?(event.class)
+      @emit.call(event)
+    end
+
     def name(index) = state.players[index].name
     def names = state.players.map(&:name)
     def player(index) = state.players[index]
@@ -284,8 +288,8 @@ module Enjine
     # CR 302.6: a creature's {T} abilities need it under continuous control since
     # the start of its controller's most recent turn.
     def summoning_sick_for_tap?(object)
-      defn = definition(object)
-      return false if !defn.type?(:creature) || defn.keyword?(:haste)
+      current = chars(object)
+      return false if !current.creature? || current.keyword?(:haste)
 
       most_recent_turn = state.active == object.controller ? state.turn : state.turn - 1
       object.controlled_since.nil? || object.controlled_since >= most_recent_turn

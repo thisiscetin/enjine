@@ -12,7 +12,7 @@ module Enjine
       end
 
       def resolving_ability(obj)
-        obj.ability? ? definition(obj).abilities[obj.ability] : definition(obj).spell_ability
+        obj.ability? ? stack_ability(obj) : definition(obj).spell_ability
       end
 
       def step_resolution!(frame)

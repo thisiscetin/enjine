@@ -73,7 +73,7 @@ RSpec.describe "Regressions found by the design reviews" do
       expect(copy.pending_decision).to eq(game.pending_decision)
       [game, copy].each do |g|
         g.submit(type: "target", target: "player:bob")
-        g.submit(type: "activate_mana", object: g.state.battlefield.first, ability: 0)
+        g.submit(type: "activate_mana", object: g.state.battlefield.first, ability: mana_ref(g, g.state.battlefield.first))
         g.submit(type: "pay_mana", mana: "R")
         pass_both(g)
       end

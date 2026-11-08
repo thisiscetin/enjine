@@ -6,7 +6,7 @@ module Enjine
     # It resolves immediately (CR 605.3b). Mana is always tapped manually, one source at a time.
     class ActivateManaAbility
       def self.doc
-        '`{type: "activate_mana", object: id, ability: index}` — activate a mana ability; it resolves immediately (CR 605.3).'
+        '`{type: "activate_mana", object: id, ability: ref}` — activate a mana ability; it resolves immediately (CR 605.3).'
       end
 
       def self.options(engine, index)

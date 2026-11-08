@@ -9,22 +9,60 @@ module Enjine
     # 7d switching. Stages without implemented mechanics are explicit no-ops, so new
     # mechanics slot into their layer without touching callers.
     module Characteristics
-      def power(object) = power_toughness(object)[0]
-      def toughness(object) = power_toughness(object)[1]
+      # The object's current characteristics. Off the battlefield: as printed. On the
+      # battlefield: the result of a whole-board layer pass, cached until state changes.
+      def chars(object)
+        object = self.object(object) if object.is_a?(String)
+        base = definition(object).printed_characteristics
+        return base unless object.zone == :battlefield
+
+        board_characteristics.fetch(object.id, base)
+      end
+
+      def power(object) = chars(object).power.to_i
+      def toughness(object) = chars(object).toughness.to_i
+      def power_toughness(object) = chars(object).then { [it.power.to_i, it.toughness.to_i] }
       def loyalty(object) = object.counters.fetch("loyalty", 0)
 
-      def power_toughness(object)
-        defn = definition(object)
-        pt = [defn.power.to_i, defn.toughness.to_i] # printed values (7a CDAs: none yet)
-        # 7b: setting effects — none yet.
-        state.effects.each do |effect| # 7c: modifying effects, in timestamp order
-          next unless effect["kind"] == "pump" && effect["affected"].include?(object.id)
+      # Events after which characteristics may differ; any other event (taps, mana, priority)
+      # keeps the cached layer pass. Replacing the whole state (import, fork, rollback) is
+      # detected separately by identity.
+      LAYER_EVENTS = [Events::ZoneChanged, Events::CountersChanged, Events::EffectStarted,
+                      Events::EffectsEnded].freeze
 
-          pt = [pt[0] + effect["power"], pt[1] + effect["toughness"]]
+      def touch! = @epoch = @epoch.to_i + 1
+
+      def board_characteristics
+        return @board if @board && @board_epoch == @epoch && @board_state.equal?(state)
+
+        @board_epoch = @epoch
+        @board_state = state
+        @board = apply_layers
+      end
+
+      # CR 613.1. Layers 1-6 have no effects yet; layer 7 applies setting (7b, none yet),
+      # then modifying effects and counters (7c, CR 613.4c), then switching (7d, none yet).
+      # Only modified objects get an entry; the rest use their printed characteristics.
+      def apply_layers
+        modified = {}
+        effects = state.effects
+        state.battlefield.each do |id|
+          obj = object(id)
+          next if effects.empty? && obj.counters.empty?
+
+          delta_p = delta_t = obj.counters.fetch("+1/+1", 0) - obj.counters.fetch("-1/-1", 0)
+          effects.each do |effect|
+            next unless effect["kind"] == "pump" && effect["affected"].include?(id)
+
+            delta_p += effect["power"]
+            delta_t += effect["toughness"]
+          end
+          next if delta_p.zero? && delta_t.zero?
+
+          base = definition(obj).printed_characteristics
+          modified[id] = base.with(power: base.power.to_i + delta_p, toughness: base.toughness.to_i + delta_t)
         end
-        net = object.counters.fetch("+1/+1", 0) - object.counters.fetch("-1/-1", 0) # 7c: counters (CR 613.4c)
-        # 7d: switching effects — none yet.
-        [pt[0] + net, pt[1] + net]
+        modified
       end
 
       # Starts a continuous effect from a resolving spell or ability (CR 611.2).

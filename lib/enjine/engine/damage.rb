@@ -17,7 +17,7 @@ module Enjine
         return unless state.battlefield.include?(ref)
 
         obj = object(ref)
-        defn = definition(obj)
+        defn = chars(obj)
         emit Events::DamageDealt.new(source: source, target: ref, amount: amount)
         obj.damage += amount if defn.creature? # CR 120.3e
         remove_counters!(obj, "loyalty", amount) if defn.planeswalker? # CR 120.3c
@@ -55,7 +55,7 @@ module Enjine
         doomed = nil
         state.battlefield.each do |id|
           obj = object(id)
-          defn = definition(obj)
+          defn = chars(obj)
           reason = if defn.creature? then creature_sba(obj)
                    elsif defn.planeswalker? && loyalty(obj) <= 0 then "sba_loyalty"
                    end

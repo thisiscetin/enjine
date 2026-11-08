@@ -187,7 +187,7 @@ module Enjine
 
       def cost_of(id) = @game.catalog.fetch(@game.state.object(id).card).mana_cost.to_s
 
-      def ability_text(id, index) = @game.catalog.fetch(@game.state.object(id).card).abilities[index].to_s
+      def ability_text(id, ref) = @game.catalog.fetch(@game.state.object(id).card).ability(ref).to_s
 
       def targets(list) = list.nil? || list.empty? ? "" : " targeting #{list.map { name_of(it) }.join(", ")}"
     end

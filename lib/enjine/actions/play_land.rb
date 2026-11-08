@@ -15,7 +15,7 @@ module Enjine
         return [] unless engine.sorcery_timing?(index) && engine.player(index).lands_played < LANDS_PER_TURN
 
         engine.player(index).hand.filter_map do |id|
-          { type: "play_land", object: id } if engine.definition(engine.object(id)).land?
+          { type: "play_land", object: id } if engine.chars(id).land?
         end
       end
 

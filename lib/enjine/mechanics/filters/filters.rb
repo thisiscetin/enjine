@@ -43,7 +43,7 @@ module Enjine
           self
         end
 
-        def self.type?(engine, object, type) = object.kind == "card" && engine.definition(object).type?(type)
+        def self.type?(engine, object, type) = object.kind == "card" && engine.chars(object).type?(type)
       end
 
       # A creature on the battlefield.

@@ -30,13 +30,13 @@ RSpec.describe "Planeswalkers (CR 306, 606) — Vessa, Rally Captain" do
   def loyalty = view_of(game, vessa)["loyalty"]
 
   it "offers each loyalty ability at sorcery speed" do
-    expect(game.legal_options).to include({ type: "activate", object: vessa, ability: 0 },
-                                          { type: "activate", object: vessa, ability: 1 },
-                                          { type: "activate", object: vessa, ability: 2 })
+    expect(game.legal_options).to include({ type: "activate", object: vessa, ability: "printed:0" },
+                                          { type: "activate", object: vessa, ability: "printed:1" },
+                                          { type: "activate", object: vessa, ability: "printed:2" })
   end
 
   it "+1: loyalty goes up on activation; creatures get +1/+1 only when the ability resolves" do
-    entry = game.submit(type: "activate", object: vessa, ability: 0)
+    entry = game.submit(type: "activate", object: vessa, ability: "printed:0")
 
     # CR 602.2b / 606.4: the loyalty cost is paid while activating...
     expect(loyalty).to eq(4)
@@ -56,13 +56,13 @@ RSpec.describe "Planeswalkers (CR 306, 606) — Vessa, Rally Captain" do
   end
 
   it "allows only one loyalty ability per planeswalker per turn (CR 606.3)" do
-    game.submit(type: "activate", object: vessa, ability: 0)
+    game.submit(type: "activate", object: vessa, ability: "printed:0")
     pass_both(game)
     expect(game.legal_options).not_to include(a_hash_including(type: "activate", object: vessa))
   end
 
   it "is not available while the stack is not empty or on the opponent's turn (sorcery speed)" do
-    game.submit(type: "activate", object: vessa, ability: 0)
+    game.submit(type: "activate", object: vessa, ability: "printed:0")
     expect(game.legal_options).not_to include(a_hash_including(type: "activate"))
     pass_both(game)
     skip_to(game, :upkeep, turn: 4)
@@ -71,7 +71,7 @@ RSpec.describe "Planeswalkers (CR 306, 606) — Vessa, Rally Captain" do
   end
 
   it "+1/+1 until end of turn wears off in the cleanup step (CR 514.2)" do
-    game.submit(type: "activate", object: vessa, ability: 0)
+    game.submit(type: "activate", object: vessa, ability: "printed:0")
     pass_both(game)
     expect(game.view_for(:observer)["effects"].size).to eq(1)
     skip_to(game, :end)
@@ -93,12 +93,12 @@ RSpec.describe "Planeswalkers (CR 306, 606) — Vessa, Rally Captain" do
       player("bob") { library "Forest", count: 5 }
     end
     walker = obj_id(g, "Vessa, Rally Captain")
-    g.submit(type: "activate", object: walker, ability: 0)
+    g.submit(type: "activate", object: walker, ability: "printed:0")
     pass_both(g)
     bears = ids_in(g, "alice", :hand).first
     g.submit(type: "cast", object: bears)
     g.state.battlefield.select { g.state.object(it).card == "forest" }.each do |forest|
-      g.submit(type: "activate_mana", object: forest, ability: 0)
+      g.submit(type: "activate_mana", object: forest, ability: mana_ref(g, forest))
     end
     2.times { g.submit(g.legal_options.find { it[:type] == "pay_mana" }) }
     pass_both(g)
@@ -107,7 +107,7 @@ RSpec.describe "Planeswalkers (CR 306, 606) — Vessa, Rally Captain" do
   end
 
   it "−2: puts a +1/+1 counter on each creature you control; counters last beyond the turn" do
-    game.submit(type: "activate", object: vessa, ability: 1)
+    game.submit(type: "activate", object: vessa, ability: "printed:1")
     expect(loyalty).to eq(1)
     pass_both(game)
     expect(view_of(game, alice_bears)["counters"]).to eq("+1/+1" => 1)
@@ -119,10 +119,10 @@ RSpec.describe "Planeswalkers (CR 306, 606) — Vessa, Rally Captain" do
   end
 
   it "stacks counters and until-end-of-turn bonuses in layer 7c (CR 613.4c)" do
-    game.submit(type: "activate", object: vessa, ability: 1)
+    game.submit(type: "activate", object: vessa, ability: "printed:1")
     pass_both(game)
     skip_to(game, :precombat_main, turn: 5)
-    game.submit(type: "activate", object: vessa, ability: 0)
+    game.submit(type: "activate", object: vessa, ability: "printed:0")
     pass_both(game)
     expect(pt(alice_bears)).to eq([4, 4]) # 2/2 + counter + pump
     expect(loyalty).to eq(2)
@@ -131,10 +131,10 @@ RSpec.describe "Planeswalkers (CR 306, 606) — Vessa, Rally Captain" do
   it "−3 needs a target, and can't be activated with too little loyalty" do
     weak = board(loyalty: 2)
     walker = obj_id(weak, "Vessa, Rally Captain")
-    expect(weak.legal_options).to include(a_hash_including(object: walker, ability: 1))
-    expect(weak.legal_options).not_to include(a_hash_including(object: walker, ability: 2))
+    expect(weak.legal_options).to include(a_hash_including(object: walker, ability: "printed:1"))
+    expect(weak.legal_options).not_to include(a_hash_including(object: walker, ability: "printed:2"))
 
-    game.submit(type: "activate", object: vessa, ability: 2)
+    game.submit(type: "activate", object: vessa, ability: "printed:2")
     expect(game.pending_decision.kind).to eq("choose_target")
     expect(game.legal_options.map { it[:target] }).to eq([alice_bears, giant, bob_bears, nil])
     entry = game.submit(type: "target", target: bob_bears)
@@ -150,14 +150,14 @@ RSpec.describe "Planeswalkers (CR 306, 606) — Vessa, Rally Captain" do
     g = board(loyalty: 2, bob_hand: ["Lightning Bolt"])
     walker = obj_id(g, "Vessa, Rally Captain")
     bears = g.state.battlefield[1]
-    g.submit(type: "activate", object: walker, ability: 0)
+    g.submit(type: "activate", object: walker, ability: "printed:0")
     expect(view_of(g, walker)["loyalty"]).to eq(3)
     g.submit(type: "pass")
 
     bolt = ids_in(g, "bob", :hand).first
     g.submit(type: "cast", object: bolt)
     g.submit(type: "target", target: walker)
-    g.submit(type: "activate_mana", object: obj_id(g, "Mountain"), ability: 0)
+    g.submit(type: "activate_mana", object: obj_id(g, "Mountain"), ability: "intrinsic:mountain")
     g.submit(type: "pay_mana", mana: "R")
     expect(g.view_for(:observer)["stack"].map { it["name"] }).to eq(["Lightning Bolt", "Vessa, Rally Captain ability"])
 

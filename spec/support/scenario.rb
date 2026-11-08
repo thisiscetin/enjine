@@ -141,6 +141,9 @@ module ScenarioHelpers
     ids.find { game.state.object(it).card == Enjine::CardDefinition.slug(card) } or raise "no #{card} in #{zone}"
   end
 
+  # The reference of the first mana ability of a permanent, e.g. "intrinsic:forest".
+  def mana_ref(game, id) = game.catalog.fetch(game.state.object(id).card).ability_instances.find { it.ability.mana_ability? }.ref
+
   def view_of(game, id) = (game.view_for(:observer)["battlefield"] + game.view_for(:observer)["stack"]).find { it["id"] == id }
 
   def build_game(catalog = core_catalog, &)

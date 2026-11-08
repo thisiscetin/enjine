@@ -64,7 +64,7 @@ RSpec.describe "Priority and turn structure (CR 117, 500)" do
       end
     end
     g2.submit(type: "pass")
-    g2.submit(type: "activate_mana", object: g2.state.battlefield.last, ability: 0)
+    g2.submit(type: "activate_mana", object: g2.state.battlefield.last, ability: mana_ref(g2, g2.state.battlefield.last))
     expect(g2.pending_decision.player).to eq("bob")
     g2.submit(type: "pass")
     expect(g2.pending_decision.player).to eq("alice")

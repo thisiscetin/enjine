@@ -26,7 +26,7 @@ module Enjine
     class PayCost < Base
       def self.doc
         'While casting/activating: `{type: "pay_mana", mana: "R"}` spends one mana from the pool, ' \
-          '`{type: "activate_mana", object: id, ability: i}` taps a source, `{type: "cancel"}` rewinds. ' \
+          '`{type: "activate_mana", object: id, ability: ref}` taps a source, `{type: "cancel"}` rewinds. ' \
           "`remaining` shows what is left to pay."
       end
 

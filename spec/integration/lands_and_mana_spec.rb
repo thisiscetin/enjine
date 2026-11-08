@@ -26,7 +26,7 @@ RSpec.describe "Playing lands and mana abilities (CR 305, 605, 106)" do
                                        { type: "pass" },
                                        { type: "play_land", object: ids_in(game, "alice", :hand)[0] },
                                        { type: "play_land", object: ids_in(game, "alice", :hand)[1] },
-                                       { type: "activate_mana", object: mountain, ability: 0 }
+                                       { type: "activate_mana", object: mountain, ability: mana_ref(game, mountain) }
                                      ])
   end
 
@@ -56,7 +56,7 @@ RSpec.describe "Playing lands and mana abilities (CR 305, 605, 106)" do
   end
 
   it "adds mana immediately and taps the source; a tapped source has no mana option (CR 605.3)" do
-    entry = game.submit(type: "activate_mana", object: mountain, ability: 0)
+    entry = game.submit(type: "activate_mana", object: mountain, ability: mana_ref(game, mountain))
     expect(entry.events.map(&:type)).to eq(%w[tapped mana_added])
     expect(game.view_for("alice")["players"][0]["mana_pool"]).to eq("R" => 1)
     expect(game.legal_options).not_to include(a_hash_including(type: "activate_mana"))
@@ -64,12 +64,12 @@ RSpec.describe "Playing lands and mana abilities (CR 305, 605, 106)" do
 
   it "lets the non-active player tap mana while holding priority" do
     game.submit(type: "pass")
-    game.submit(type: "activate_mana", object: plains, ability: 0)
+    game.submit(type: "activate_mana", object: plains, ability: mana_ref(game, plains))
     expect(game.view_for("bob")["players"][1]["mana_pool"]).to eq("W" => 1)
   end
 
   it "empties mana pools at the end of each step (CR 500.4)" do
-    game.submit(type: "activate_mana", object: mountain, ability: 0)
+    game.submit(type: "activate_mana", object: mountain, ability: mana_ref(game, mountain))
     entry = nil
     2.times { entry = game.submit(type: "pass") }
     expect(entry.events.grep(Enjine::Events::ManaEmptied).map(&:to_h)).to eq(
@@ -79,9 +79,9 @@ RSpec.describe "Playing lands and mana abilities (CR 305, 605, 106)" do
   end
 
   it "untaps only the active player's permanents in the untap step (CR 502.3)" do
-    game.submit(type: "activate_mana", object: mountain, ability: 0)
+    game.submit(type: "activate_mana", object: mountain, ability: mana_ref(game, mountain))
     game.submit(type: "pass")
-    game.submit(type: "activate_mana", object: plains, ability: 0)
+    game.submit(type: "activate_mana", object: plains, ability: mana_ref(game, plains))
     pass_both(game, 7) # through alice's turn into bob's upkeep
     expect(game.view_for(:observer)["active"]).to eq("bob")
     expect(game.state.object(plains).tapped).to be(false)
@@ -94,7 +94,7 @@ RSpec.describe "Playing lands and mana abilities (CR 305, 605, 106)" do
       player("alice") { battlefield "Wastes" }
       player("bob")
     end
-    g.submit(type: "activate_mana", object: g.state.battlefield.first, ability: 0)
+    g.submit(type: "activate_mana", object: g.state.battlefield.first, ability: mana_ref(g, g.state.battlefield.first))
     expect(g.state.players[0].mana_pool[:C]).to eq(1)
   end
 end

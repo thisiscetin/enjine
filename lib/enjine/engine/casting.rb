@@ -19,10 +19,10 @@ module Enjine
         targets_available?(defn.spell_ability&.targets || [], index, id) && affordable?(index, defn.mana_cost, nil)
       end
 
-      def activatable?(index, id, ability_index)
+      def activatable?(index, id, ability_ref)
         obj = object(id)
-        ability = definition(obj).abilities[ability_index]
-        return false unless %i[activated loyalty].include?(ability.kind)
+        ability = chars(obj).ability(ability_ref)
+        return false unless ability && %i[activated loyalty].include?(ability.kind)
         return false if ability.sorcery_speed? && !sorcery_timing?(index)
         return false unless ability.costs.reject(&:mana?).all? { it.payable?(self, obj) }
 
@@ -68,19 +68,22 @@ module Enjine
           obj = object(id)
           next unless obj.controller == index
 
-          defn = definition(obj)
-          defn.mana_ability_indices.each { |i| out << [id, i] if defn.abilities[i].activatable?(self, obj) }
+          chars(obj).mana_abilities.each { |inst| out << [id, inst.ref] if inst.ability.activatable?(self, obj) }
         end
         out
       end
 
       # CR 605.3: pay the ability's costs and add its mana immediately. Shared by priority and payment.
-      def activate_mana_ability!(index, id, ability_index)
+      def activate_mana_ability!(index, id, ability_ref)
         obj = object(id)
-        ability = definition(obj).abilities.fetch(ability_index)
+        ability = chars(obj).ability(ability_ref) or raise ArgumentError, "#{id} has no ability #{ability_ref}"
         ability.costs.each { |cost| cost.pay!(self, obj) }
         add_mana!(index, ability.produce, id)
       end
+
+      # The ability an ability object on the stack represents. It keeps existing even if its
+      # source has left the battlefield (CR 113.7a), so it's looked up on the source's card.
+      def stack_ability(obj) = definition(obj).ability(obj.ability)
 
       def needs_tap?(ability) = ability.costs.any?(Mechanics::Costs::Tap)
 
@@ -96,15 +99,15 @@ module Enjine
       end
 
       # CR 602.2a: the ability is created on the stack.
-      def begin_activation!(index, source_id, ability_index)
+      def begin_activation!(index, source_id, ability_ref)
         source = object(source_id)
-        ability = definition(source).abilities[ability_index]
+        ability = chars(source).ability(ability_ref)
         obj = create_object(source.card, index, :stack)
         obj.kind = "ability"
         obj.source = source_id
-        obj.ability = ability_index
+        obj.ability = ability_ref
         state.stack.unshift(obj.id)
-        start_casting!(index, obj.id, "ability", source: source_id, ability: ability_index, cost: ability.mana_cost)
+        start_casting!(index, obj.id, "ability", source: source_id, ability: ability_ref, cost: ability.mana_cost)
       end
 
       def start_casting!(index, object_id, kind, cost:, origin: nil, source: nil, ability: nil)
@@ -126,7 +129,7 @@ module Enjine
       def casting_ability
         ctx = casting
         obj = object(ctx["object"])
-        ctx["kind"] == "spell" ? definition(obj).spell_ability : definition(obj).abilities[ctx["ability"]]
+        ctx["kind"] == "spell" ? definition(obj).spell_ability : stack_ability(obj)
       end
 
       # ---- the in-progress steps --------------------------------------------------
@@ -218,7 +221,7 @@ module Enjine
 
       def pay_ability_costs!(ctx)
         source = object(ctx["source"])
-        ability = definition(source).abilities[ctx["ability"]]
+        ability = chars(source).ability(ctx["ability"])
         ability.costs.reject(&:mana?).each { it.pay!(self, source) }
         return unless ability.kind == :loyalty
 

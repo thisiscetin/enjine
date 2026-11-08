@@ -19,7 +19,7 @@ module Enjine
       def eligible_attackers
         state.battlefield.select do |id|
           obj = object(id)
-          obj.controller == state.active && !obj.tapped && definition(obj).creature? &&
+          obj.controller == state.active && !obj.tapped && chars(obj).creature? &&
             !attackers.key?(id) && !summoning_sick_for_tap?(obj)
         end
       end
@@ -28,7 +28,7 @@ module Enjine
       def attack_targets
         defender = defending_player
         [Mechanics::Filters.player_ref(self, defender)] +
-          state.battlefield.select { |id| object(id).controller == defender && definition(object(id)).planeswalker? }
+          state.battlefield.select { |id| object(id).controller == defender && chars(id).planeswalker? }
       end
 
       def declare_attacker!(id, target)
@@ -55,7 +55,7 @@ module Enjine
       def eligible_blockers
         state.battlefield.select do |id|
           obj = object(id)
-          obj.controller == defending_player && !obj.tapped && definition(obj).creature? && !state.blockers.key?(id)
+          obj.controller == defending_player && !obj.tapped && chars(obj).creature? && !state.blockers.key?(id)
         end
       end
 

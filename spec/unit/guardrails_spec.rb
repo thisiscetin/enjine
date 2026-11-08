@@ -1,0 +1,25 @@
+# frozen_string_literal: true
+
+# Rules code must ask Engine#chars (current characteristics, CR 613) instead of the
+# printed CardDefinition, or layer effects will silently be ignored (review finding F2).
+RSpec.describe "Guardrails" do
+  let(:allowed) do
+    {
+      "lib/enjine/engine/characteristics.rb" => "the layer system starts from printed values",
+      "lib/enjine/engine/casting.rb" => "spells in hand/stack (printed) and stack abilities (CR 113.7a)",
+      "lib/enjine/engine/resolution.rb" => "spell abilities and permanence of the printed spell",
+      "lib/enjine/engine.rb" => "loyalty a permanent enters with (CR 306.5b)",
+      "lib/enjine/view.rb" => "printed name, cost and rules text"
+    }
+  end
+
+  it "keeps direct definition() reads out of rules code" do
+    offenders = Dir[File.join(Enjine::Docs::ROOT, "lib/**/*.rb")].filter_map do |file|
+      rel = file.delete_prefix("#{Enjine::Docs::ROOT}/")
+      next if allowed.key?(rel) || rel.start_with?("lib/enjine/cli")
+
+      rel if File.read(file).match?(/\bdefinition\(/)
+    end
+    expect(offenders).to be_empty, "use engine.chars(obj) instead of definition(obj) in: #{offenders.join(", ")}"
+  end
+end

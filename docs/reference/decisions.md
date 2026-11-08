@@ -34,7 +34,7 @@ Keep the hand (`{type: "keep"}`) or take a London mulligan (`{type: "mulligan"}`
 
 ## pay_cost
 
-While casting/activating: `{type: "pay_mana", mana: "R"}` spends one mana from the pool, `{type: "activate_mana", object: id, ability: i}` taps a source, `{type: "cancel"}` rewinds. `remaining` shows what is left to pay.
+While casting/activating: `{type: "pay_mana", mana: "R"}` spends one mana from the pool, `{type: "activate_mana", object: id, ability: ref}` taps a source, `{type: "cancel"}` rewinds. `remaining` shows what is left to pay.
 
 ## play_or_draw
 
@@ -46,8 +46,8 @@ The player holding priority takes an action or passes. Options come from the pri
 
 ## Priority actions
 
-- `activate` — `{type: "activate", object: id, ability: index}` — start activating an ability (CR 602.2), including planeswalker loyalty abilities (CR 606).
-- `activate_mana` — `{type: "activate_mana", object: id, ability: index}` — activate a mana ability; it resolves immediately (CR 605.3).
+- `activate` — `{type: "activate", object: id, ability: ref}` — start activating an ability (CR 602.2), including planeswalker loyalty abilities (CR 606).
+- `activate_mana` — `{type: "activate_mana", object: id, ability: ref}` — activate a mana ability; it resolves immediately (CR 605.3).
 - `cast` — `{type: "cast", object: id}` — start casting a card from your hand (CR 601.2). Offered only when timing allows, targets exist and enough mana is available.
 - `pass` — `{type: "pass"}` — pass priority. When all players pass in succession with an empty stack, the step ends (CR 117.4).
 - `play_land` — `{type: "play_land", object: id}` — special action: your main phase, empty stack, one land per turn (CR 305.1, 305.2).

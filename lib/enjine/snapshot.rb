@@ -145,7 +145,7 @@ module Enjine
       errors << "#{path}.kind: must be \"card\" or \"ability\"" unless %w[card ability].include?(kind)
       if kind == "ability"
         errors << "#{path}: abilities can only exist on the stack" unless zone == "stack"
-        errors << "#{path}.ability: must be an ability index" unless obj["ability"].is_a?(Integer)
+        errors << "#{path}.ability: must be an ability reference" unless obj["ability"].is_a?(String)
       end
       counters = obj.fetch("counters", {})
       unless counters.is_a?(Hash) && counters.all? { |k, v| Mechanics::Effects::COUNTER_KINDS.include?(k) && non_negative?(v) }

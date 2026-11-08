@@ -123,7 +123,7 @@ module Enjine
         def to_s = "#{format("%+d", power)}/#{format("%+d", toughness)} until end of turn → #{to}"
 
         def apply(engine, ctx)
-          affected = objects(engine, ctx).select { engine.definition(engine.object(it)).type?(:creature) }
+          affected = objects(engine, ctx).select { engine.chars(it).creature? }
           engine.add_continuous_effect!("pump", ctx, affected, "power" => power, "toughness" => toughness)
         end
       end
