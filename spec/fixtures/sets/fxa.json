@@ -1,0 +1,1208 @@
+{
+  "format": 1,
+  "code": "fxa",
+  "name": "Ashfall Reaches",
+  "released_at": "2025-06-13",
+  "standard_legal_until": "2027-07-30",
+  "standard_legal_until_estimated": false,
+  "cards": [
+    {
+      "card": {
+        "name": "Dawnward Squire",
+        "mana_cost": "{W}",
+        "types": [
+          "creature"
+        ],
+        "subtypes": [
+          "human",
+          "soldier"
+        ],
+        "power": 1,
+        "toughness": 2
+      },
+      "rarity": "common",
+      "printing": {
+        "set": "fxa",
+        "number": "1"
+      }
+    },
+    {
+      "card": {
+        "name": "Lantern Warden",
+        "mana_cost": "{1}{W}",
+        "types": [
+          "creature"
+        ],
+        "subtypes": [
+          "human",
+          "cleric"
+        ],
+        "power": 2,
+        "toughness": 2
+      },
+      "rarity": "common",
+      "printing": {
+        "set": "fxa",
+        "number": "2"
+      }
+    },
+    {
+      "card": {
+        "name": "Bastion Lancer",
+        "mana_cost": "{2}{W}",
+        "types": [
+          "creature"
+        ],
+        "subtypes": [
+          "human",
+          "knight"
+        ],
+        "power": 2,
+        "toughness": 3,
+        "abilities": [
+          {
+            "activated": {
+              "cost": [
+                {
+                  "mana": "{1}{W}"
+                }
+              ],
+              "effects": [
+                {
+                  "pump": {
+                    "power": 1,
+                    "toughness": 1,
+                    "to": "self"
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "rarity": "uncommon",
+      "printing": {
+        "set": "fxa",
+        "number": "3"
+      }
+    },
+    {
+      "card": {
+        "name": "Sunmantle Knight",
+        "mana_cost": "{3}{W}",
+        "types": [
+          "creature"
+        ],
+        "subtypes": [
+          "human",
+          "knight"
+        ],
+        "power": 3,
+        "toughness": 4
+      },
+      "rarity": "rare",
+      "printing": {
+        "set": "fxa",
+        "number": "4"
+      }
+    },
+    {
+      "card": {
+        "name": "Choir of Spires",
+        "mana_cost": "{4}{W}{W}",
+        "types": [
+          "creature"
+        ],
+        "subtypes": [
+          "angel"
+        ],
+        "power": 5,
+        "toughness": 5
+      },
+      "rarity": "common",
+      "printing": {
+        "set": "fxa",
+        "number": "5"
+      }
+    },
+    {
+      "card": {
+        "name": "Mending Rite",
+        "mana_cost": "{1}{W}",
+        "types": [
+          "instant"
+        ],
+        "abilities": [
+          {
+            "spell": {
+              "effects": [
+                {
+                  "gain_life": {
+                    "amount": 4
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "rarity": "common",
+      "printing": {
+        "set": "fxa",
+        "number": "6"
+      }
+    },
+    {
+      "card": {
+        "name": "Ilsa, Wall Keeper",
+        "mana_cost": "{2}{W}{W}",
+        "types": [
+          "planeswalker"
+        ],
+        "subtypes": [
+          "ilsa"
+        ],
+        "loyalty": 4,
+        "abilities": [
+          {
+            "loyalty": {
+              "cost": 1,
+              "effects": [
+                {
+                  "gain_life": {
+                    "amount": 2
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "loyalty": {
+              "cost": -2,
+              "effects": [
+                {
+                  "add_counters": {
+                    "counter": "+1/+1",
+                    "amount": 1,
+                    "to": {
+                      "each": "creature",
+                      "controller": "you"
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "rarity": "mythic",
+      "printing": {
+        "set": "fxa",
+        "number": "7"
+      }
+    },
+    {
+      "card": {
+        "name": "Tidecaller Adept",
+        "mana_cost": "{U}",
+        "types": [
+          "creature"
+        ],
+        "subtypes": [
+          "merfolk",
+          "wizard"
+        ],
+        "keywords": [
+          "flash"
+        ],
+        "power": 1,
+        "toughness": 1
+      },
+      "rarity": "rare",
+      "printing": {
+        "set": "fxa",
+        "number": "8"
+      }
+    },
+    {
+      "card": {
+        "name": "Mistglass Seer",
+        "mana_cost": "{1}{U}",
+        "types": [
+          "creature"
+        ],
+        "subtypes": [
+          "human",
+          "wizard"
+        ],
+        "power": 1,
+        "toughness": 3,
+        "abilities": [
+          {
+            "activated": {
+              "cost": [
+                "tap",
+                {
+                  "mana": "{2}{U}"
+                }
+              ],
+              "effects": [
+                {
+                  "draw": {
+                    "amount": 1
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "rarity": "common",
+      "printing": {
+        "set": "fxa",
+        "number": "9"
+      }
+    },
+    {
+      "card": {
+        "name": "Reefwatch Drake",
+        "mana_cost": "{2}{U}",
+        "types": [
+          "creature"
+        ],
+        "subtypes": [
+          "drake"
+        ],
+        "power": 2,
+        "toughness": 3
+      },
+      "rarity": "common",
+      "printing": {
+        "set": "fxa",
+        "number": "10"
+      }
+    },
+    {
+      "card": {
+        "name": "Abyssal Courier",
+        "mana_cost": "{3}{U}",
+        "types": [
+          "creature"
+        ],
+        "subtypes": [
+          "merfolk"
+        ],
+        "keywords": [
+          "flash"
+        ],
+        "power": 3,
+        "toughness": 3
+      },
+      "rarity": "uncommon",
+      "printing": {
+        "set": "fxa",
+        "number": "11"
+      }
+    },
+    {
+      "card": {
+        "name": "Stormcrown Leviathan",
+        "mana_cost": "{5}{U}{U}",
+        "types": [
+          "creature"
+        ],
+        "subtypes": [
+          "leviathan"
+        ],
+        "power": 6,
+        "toughness": 6
+      },
+      "rarity": "rare",
+      "printing": {
+        "set": "fxa",
+        "number": "12"
+      }
+    },
+    {
+      "card": {
+        "name": "Quell the Tide",
+        "mana_cost": "{1}{U}{U}",
+        "types": [
+          "instant"
+        ],
+        "abilities": [
+          {
+            "spell": {
+              "effects": [
+                {
+                  "counter": {
+                    "to": {
+                      "target": 0
+                    }
+                  }
+                }
+              ],
+              "targets": [
+                "spell"
+              ]
+            }
+          }
+        ]
+      },
+      "rarity": "common",
+      "printing": {
+        "set": "fxa",
+        "number": "13"
+      }
+    },
+    {
+      "card": {
+        "name": "Glimpse Beyond",
+        "mana_cost": "{2}{U}",
+        "types": [
+          "sorcery"
+        ],
+        "abilities": [
+          {
+            "spell": {
+              "effects": [
+                {
+                  "draw": {
+                    "amount": 2
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "rarity": "common",
+      "printing": {
+        "set": "fxa",
+        "number": "14"
+      }
+    },
+    {
+      "card": {
+        "name": "Gravemoss Rat",
+        "mana_cost": "{B}",
+        "types": [
+          "creature"
+        ],
+        "subtypes": [
+          "rat"
+        ],
+        "keywords": [
+          "haste"
+        ],
+        "power": 1,
+        "toughness": 1
+      },
+      "rarity": "uncommon",
+      "printing": {
+        "set": "fxa",
+        "number": "15"
+      }
+    },
+    {
+      "card": {
+        "name": "Hollow Acolyte",
+        "mana_cost": "{1}{B}",
+        "types": [
+          "creature"
+        ],
+        "subtypes": [
+          "human",
+          "cleric"
+        ],
+        "power": 2,
+        "toughness": 1
+      },
+      "rarity": "rare",
+      "printing": {
+        "set": "fxa",
+        "number": "16"
+      }
+    },
+    {
+      "card": {
+        "name": "Duskfang Stalker",
+        "mana_cost": "{2}{B}",
+        "types": [
+          "creature"
+        ],
+        "subtypes": [
+          "vampire"
+        ],
+        "power": 3,
+        "toughness": 2
+      },
+      "rarity": "common",
+      "printing": {
+        "set": "fxa",
+        "number": "17"
+      }
+    },
+    {
+      "card": {
+        "name": "Cryptbound Brute",
+        "mana_cost": "{3}{B}",
+        "types": [
+          "creature"
+        ],
+        "subtypes": [
+          "zombie"
+        ],
+        "power": 4,
+        "toughness": 3
+      },
+      "rarity": "common",
+      "printing": {
+        "set": "fxa",
+        "number": "18"
+      }
+    },
+    {
+      "card": {
+        "name": "Ossuary Titan",
+        "mana_cost": "{4}{B}{B}",
+        "types": [
+          "creature"
+        ],
+        "subtypes": [
+          "zombie",
+          "giant"
+        ],
+        "power": 6,
+        "toughness": 5
+      },
+      "rarity": "uncommon",
+      "printing": {
+        "set": "fxa",
+        "number": "19"
+      }
+    },
+    {
+      "card": {
+        "name": "Siphon Breath",
+        "mana_cost": "{1}{B}",
+        "types": [
+          "instant"
+        ],
+        "abilities": [
+          {
+            "spell": {
+              "effects": [
+                {
+                  "lose_life": {
+                    "amount": 2,
+                    "to": "each_opponent"
+                  }
+                },
+                {
+                  "gain_life": {
+                    "amount": 2
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "rarity": "rare",
+      "printing": {
+        "set": "fxa",
+        "number": "20"
+      }
+    },
+    {
+      "card": {
+        "name": "Final Rattle",
+        "mana_cost": "{2}{B}{B}",
+        "types": [
+          "sorcery"
+        ],
+        "abilities": [
+          {
+            "spell": {
+              "effects": [
+                {
+                  "destroy": {
+                    "to": {
+                      "target": 0
+                    }
+                  }
+                }
+              ],
+              "targets": [
+                "creature"
+              ]
+            }
+          }
+        ]
+      },
+      "rarity": "common",
+      "printing": {
+        "set": "fxa",
+        "number": "21"
+      }
+    },
+    {
+      "card": {
+        "name": "Cinder Whelp",
+        "mana_cost": "{R}",
+        "types": [
+          "creature"
+        ],
+        "subtypes": [
+          "dragon"
+        ],
+        "keywords": [
+          "haste"
+        ],
+        "power": 1,
+        "toughness": 1
+      },
+      "rarity": "common",
+      "printing": {
+        "set": "fxa",
+        "number": "22"
+      }
+    },
+    {
+      "card": {
+        "name": "Emberfist Brawler",
+        "mana_cost": "{1}{R}",
+        "types": [
+          "creature"
+        ],
+        "subtypes": [
+          "human",
+          "warrior"
+        ],
+        "power": 2,
+        "toughness": 2,
+        "abilities": [
+          {
+            "activated": {
+              "cost": [
+                {
+                  "mana": "{R}"
+                }
+              ],
+              "effects": [
+                {
+                  "pump": {
+                    "power": 1,
+                    "toughness": 0,
+                    "to": "self"
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "rarity": "uncommon",
+      "printing": {
+        "set": "fxa",
+        "number": "23"
+      }
+    },
+    {
+      "card": {
+        "name": "Ashwing Raider",
+        "mana_cost": "{2}{R}",
+        "types": [
+          "creature"
+        ],
+        "subtypes": [
+          "goblin"
+        ],
+        "keywords": [
+          "haste"
+        ],
+        "power": 3,
+        "toughness": 1
+      },
+      "rarity": "rare",
+      "printing": {
+        "set": "fxa",
+        "number": "24"
+      }
+    },
+    {
+      "card": {
+        "name": "Slagforge Ogre",
+        "mana_cost": "{3}{R}",
+        "types": [
+          "creature"
+        ],
+        "subtypes": [
+          "ogre"
+        ],
+        "power": 4,
+        "toughness": 3
+      },
+      "rarity": "common",
+      "printing": {
+        "set": "fxa",
+        "number": "25"
+      }
+    },
+    {
+      "card": {
+        "name": "Magma Colossus",
+        "mana_cost": "{5}{R}",
+        "types": [
+          "creature"
+        ],
+        "subtypes": [
+          "elemental"
+        ],
+        "power": 6,
+        "toughness": 4
+      },
+      "rarity": "common",
+      "printing": {
+        "set": "fxa",
+        "number": "26"
+      }
+    },
+    {
+      "card": {
+        "name": "Searing Jolt",
+        "mana_cost": "{R}",
+        "types": [
+          "instant"
+        ],
+        "abilities": [
+          {
+            "spell": {
+              "effects": [
+                {
+                  "deal_damage": {
+                    "amount": 2,
+                    "to": {
+                      "target": 0
+                    }
+                  }
+                }
+              ],
+              "targets": [
+                "any_target"
+              ]
+            }
+          }
+        ]
+      },
+      "rarity": "uncommon",
+      "printing": {
+        "set": "fxa",
+        "number": "27"
+      }
+    },
+    {
+      "card": {
+        "name": "Rolling Cinders",
+        "mana_cost": "{3}{R}",
+        "types": [
+          "sorcery"
+        ],
+        "abilities": [
+          {
+            "spell": {
+              "effects": [
+                {
+                  "deal_damage": {
+                    "amount": 2,
+                    "to": {
+                      "each": "creature"
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "rarity": "rare",
+      "printing": {
+        "set": "fxa",
+        "number": "28"
+      }
+    },
+    {
+      "card": {
+        "name": "Thornpaw Cub",
+        "mana_cost": "{G}",
+        "types": [
+          "creature"
+        ],
+        "subtypes": [
+          "cat"
+        ],
+        "power": 1,
+        "toughness": 2
+      },
+      "rarity": "common",
+      "printing": {
+        "set": "fxa",
+        "number": "29"
+      }
+    },
+    {
+      "card": {
+        "name": "Mossback Grazer",
+        "mana_cost": "{1}{G}",
+        "types": [
+          "creature"
+        ],
+        "subtypes": [
+          "beast"
+        ],
+        "power": 2,
+        "toughness": 3
+      },
+      "rarity": "common",
+      "printing": {
+        "set": "fxa",
+        "number": "30"
+      }
+    },
+    {
+      "card": {
+        "name": "Briarhorn Elk",
+        "mana_cost": "{2}{G}",
+        "types": [
+          "creature"
+        ],
+        "subtypes": [
+          "elk"
+        ],
+        "power": 3,
+        "toughness": 3
+      },
+      "rarity": "uncommon",
+      "printing": {
+        "set": "fxa",
+        "number": "31"
+      }
+    },
+    {
+      "card": {
+        "name": "Rootwall Behemoth",
+        "mana_cost": "{4}{G}",
+        "types": [
+          "creature"
+        ],
+        "subtypes": [
+          "beast"
+        ],
+        "power": 5,
+        "toughness": 5
+      },
+      "rarity": "rare",
+      "printing": {
+        "set": "fxa",
+        "number": "32"
+      }
+    },
+    {
+      "card": {
+        "name": "Elderbark Ancient",
+        "mana_cost": "{5}{G}{G}",
+        "types": [
+          "creature"
+        ],
+        "subtypes": [
+          "treefolk"
+        ],
+        "power": 7,
+        "toughness": 7
+      },
+      "rarity": "common",
+      "printing": {
+        "set": "fxa",
+        "number": "33"
+      }
+    },
+    {
+      "card": {
+        "name": "Wild Surge",
+        "mana_cost": "{G}",
+        "types": [
+          "instant"
+        ],
+        "abilities": [
+          {
+            "spell": {
+              "effects": [
+                {
+                  "pump": {
+                    "power": 3,
+                    "toughness": 3,
+                    "to": {
+                      "target": 0
+                    }
+                  }
+                }
+              ],
+              "targets": [
+                "creature"
+              ]
+            }
+          }
+        ]
+      },
+      "rarity": "common",
+      "printing": {
+        "set": "fxa",
+        "number": "34"
+      }
+    },
+    {
+      "card": {
+        "name": "Verdant Blessing",
+        "mana_cost": "{1}{G}",
+        "types": [
+          "enchantment"
+        ],
+        "abilities": [
+          {
+            "activated": {
+              "cost": [
+                {
+                  "mana": "{2}{G}"
+                }
+              ],
+              "effects": [
+                {
+                  "add_counters": {
+                    "counter": "+1/+1",
+                    "amount": 1,
+                    "to": {
+                      "target": 0
+                    }
+                  }
+                }
+              ],
+              "targets": [
+                "creature"
+              ],
+              "timing": "sorcery"
+            }
+          }
+        ]
+      },
+      "rarity": "uncommon",
+      "printing": {
+        "set": "fxa",
+        "number": "35"
+      }
+    },
+    {
+      "card": {
+        "name": "Clockwork Sentry",
+        "mana_cost": "{3}",
+        "types": [
+          "artifact",
+          "creature"
+        ],
+        "subtypes": [
+          "construct"
+        ],
+        "power": 2,
+        "toughness": 3
+      },
+      "rarity": "rare",
+      "printing": {
+        "set": "fxa",
+        "number": "36"
+      }
+    },
+    {
+      "card": {
+        "name": "Copper Wayfinder",
+        "mana_cost": "{2}",
+        "types": [
+          "artifact"
+        ],
+        "abilities": [
+          {
+            "mana": {
+              "cost": [
+                "tap"
+              ],
+              "produce": "{C}"
+            }
+          }
+        ]
+      },
+      "rarity": "common",
+      "printing": {
+        "set": "fxa",
+        "number": "37"
+      }
+    },
+    {
+      "card": {
+        "name": "Rune Lens",
+        "mana_cost": "{1}",
+        "types": [
+          "artifact"
+        ],
+        "abilities": [
+          {
+            "activated": {
+              "cost": [
+                "tap",
+                {
+                  "mana": "{3}"
+                }
+              ],
+              "effects": [
+                {
+                  "draw": {
+                    "amount": 1
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "rarity": "common",
+      "printing": {
+        "set": "fxa",
+        "number": "38"
+      }
+    },
+    {
+      "card": {
+        "name": "Skyshore Paladin",
+        "mana_cost": "{1}{W}{U}",
+        "types": [
+          "creature"
+        ],
+        "subtypes": [
+          "human",
+          "knight"
+        ],
+        "keywords": [
+          "flash"
+        ],
+        "power": 3,
+        "toughness": 3
+      },
+      "rarity": "uncommon",
+      "printing": {
+        "set": "fxa",
+        "number": "39"
+      }
+    },
+    {
+      "card": {
+        "name": "Wildfire Marauder",
+        "mana_cost": "{1}{R}{G}",
+        "types": [
+          "creature"
+        ],
+        "subtypes": [
+          "centaur",
+          "warrior"
+        ],
+        "keywords": [
+          "haste"
+        ],
+        "power": 4,
+        "toughness": 2
+      },
+      "rarity": "rare",
+      "printing": {
+        "set": "fxa",
+        "number": "40"
+      }
+    },
+    {
+      "card": {
+        "name": "Plains",
+        "types": [
+          "land"
+        ],
+        "supertypes": [
+          "basic"
+        ],
+        "subtypes": [
+          "plains"
+        ]
+      },
+      "rarity": "common",
+      "printing": {
+        "set": "fxa",
+        "number": "41"
+      }
+    },
+    {
+      "card": {
+        "name": "Island",
+        "types": [
+          "land"
+        ],
+        "supertypes": [
+          "basic"
+        ],
+        "subtypes": [
+          "island"
+        ]
+      },
+      "rarity": "common",
+      "printing": {
+        "set": "fxa",
+        "number": "42"
+      }
+    },
+    {
+      "card": {
+        "name": "Swamp",
+        "types": [
+          "land"
+        ],
+        "supertypes": [
+          "basic"
+        ],
+        "subtypes": [
+          "swamp"
+        ]
+      },
+      "rarity": "common",
+      "printing": {
+        "set": "fxa",
+        "number": "43"
+      }
+    },
+    {
+      "card": {
+        "name": "Mountain",
+        "types": [
+          "land"
+        ],
+        "supertypes": [
+          "basic"
+        ],
+        "subtypes": [
+          "mountain"
+        ]
+      },
+      "rarity": "common",
+      "printing": {
+        "set": "fxa",
+        "number": "44"
+      }
+    },
+    {
+      "card": {
+        "name": "Forest",
+        "types": [
+          "land"
+        ],
+        "supertypes": [
+          "basic"
+        ],
+        "subtypes": [
+          "forest"
+        ]
+      },
+      "rarity": "common",
+      "printing": {
+        "set": "fxa",
+        "number": "45"
+      }
+    },
+    {
+      "card": {
+        "name": "Seagate Bastion",
+        "types": [
+          "land"
+        ],
+        "abilities": [
+          {
+            "mana": {
+              "cost": [
+                "tap"
+              ],
+              "produce": "{W}"
+            }
+          },
+          {
+            "mana": {
+              "cost": [
+                "tap"
+              ],
+              "produce": "{U}"
+            }
+          }
+        ]
+      },
+      "rarity": "common",
+      "printing": {
+        "set": "fxa",
+        "number": "46"
+      }
+    },
+    {
+      "card": {
+        "name": "Ember Thicket",
+        "types": [
+          "land"
+        ],
+        "subtypes": [
+          "mountain",
+          "forest"
+        ]
+      },
+      "rarity": "uncommon",
+      "printing": {
+        "set": "fxa",
+        "number": "47"
+      }
+    },
+    {
+      "card": {
+        "name": "Barren Monolith",
+        "types": [
+          "land"
+        ],
+        "abilities": [
+          {
+            "mana": {
+              "cost": [
+                "tap"
+              ],
+              "produce": "{C}"
+            }
+          }
+        ]
+      },
+      "rarity": "rare",
+      "printing": {
+        "set": "fxa",
+        "number": "48"
+      }
+    }
+  ],
+  "unsupported": [
+    {
+      "name": "Skyveil Seraph",
+      "missing": [
+        "flying"
+      ]
+    },
+    {
+      "name": "Echoing Grudge",
+      "missing": [
+        "triggered abilities"
+      ]
+    }
+  ]
+}

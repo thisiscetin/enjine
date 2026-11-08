@@ -1,0 +1,204 @@
+# frozen_string_literal: true
+
+require "tmpdir"
+
+RSpec.describe Enjine::DeckBuilder do
+  let(:fxa) { Enjine::Sets.load("fxa", dir: DeckBuilderHelpers::SET_FIXTURES) }
+
+  def card(name) = fxa.cards.find { it.name == name }
+  def defn(data) = Enjine::CardDefinition.from_h(data)
+
+  describe "colors" do
+    it "derives a card's colors from its mana cost symbols (CR 105.2, 202.2)" do
+      expect(described_class.colors_of(card("Skyshore Paladin"))).to eq(%i[W U])
+      expect(described_class.colors_of(card("Clockwork Sentry"))).to eq([])
+      expect(described_class.colors_of(card("Forest"))).to eq([])
+      expect(described_class.colors_of(defn(pool_card("Odd", "{C}{2}")))).to eq([])
+    end
+
+    it "also requires the colors of activation costs, and fits colorless cards anywhere" do
+      splash = pool_card("Splashy", "{1}{G}").merge(
+        "abilities" => [{ "activated" => { "cost" => [{ "mana" => "{R}" }], "effects" => [{ "draw" => { "amount" => 1 } }] } }]
+      )
+      expect(described_class.required_colors(defn(splash))).to eq(%i[R G])
+      expect(described_class.fits?(defn(splash), %i[G])).to be(false)
+      expect(described_class.fits?(defn(splash), %i[R G])).to be(true)
+      expect(described_class.fits?(card("Clockwork Sentry"), %i[B])).to be(true)
+      expect(described_class.fits?(card("Skyshore Paladin"), %i[W])).to be(false)
+    end
+
+    it "reads the colors a land produces, intrinsic basic land types included" do
+      expect(described_class.produced_colors(card("Ember Thicket"))).to eq(%i[R G])
+      expect(described_class.produced_colors(card("Seagate Bastion"))).to eq(%i[W U])
+      expect(described_class.produced_colors(card("Barren Monolith"))).to eq([])
+    end
+
+    it "normalizes color lists" do
+      expect(described_class.parse_colors("uw")).to eq(%i[W U])
+      expect(described_class.parse_colors(%w[G B])).to eq(%i[B G])
+      expect(described_class.parse_colors("W,U")).to eq(%i[W U])
+      expect { described_class.parse_colors("WX") }.to raise_error(ArgumentError, /unknown color X/)
+      expect { described_class.parse_colors("") }.to raise_error(ArgumentError, /at least one color/)
+    end
+
+    it "picks random colors among the combinations the pool can fill" do
+      wu_only = big_pool.select { it["mana_cost"].match?(/[WU]/) }
+      picks = (1..20).map { described_class.new(cards: wu_only, colors: 1, seed: it).colors }
+      expect(picks.uniq.sort).to eq([%i[U], %i[W]])
+      expect(described_class.new(cards: wu_only, colors: "2", seed: 1).colors).to eq(%i[W U])
+      counts = (1..60).map { described_class.new(cards: big_pool, colors: :any, seed: it).colors.size }
+      expect(counts.uniq.sort).to eq([1, 2, 3])
+      expect(counts.count(2)).to be > counts.count(3)
+      expect { described_class.new(cards: big_pool, colors: 6, seed: 1) }.to raise_error(ArgumentError, /1 to 5 colors/)
+    end
+
+    it "falls back to the closest combination when none can be filled, so the error explains what's missing" do
+      white = big_pool.select { it["mana_cost"].include?("W") }
+      builder = described_class.new(cards: white, colors: 3, seed: 1)
+      expect(builder.colors).to include(:W)
+      expect(Enjine::Player.new(name: "p", deck: builder.build)).to be_ready
+    end
+  end
+
+  describe "profile" do
+    let(:decks) { (1..150).map { deck_stats(described_class.build(cards: big_pool, colors: %w[W U], seed: it)) } }
+
+    it "draws land and creature counts from the ranges, with occasional outliers" do
+      lands = decks.map { it[:lands] }
+      creatures = decks.map { it[:creatures] }
+      expect(lands).to all(be_between(20, 27))
+      expect(creatures).to all(be_between(10, 28))
+      expect(lands.count { (22..26).cover?(it) }).to be >= 120
+      expect(lands.count { !(22..26).cover?(it) }).to be_positive
+      expect(lands.sum.fdiv(lands.size)).to be_within(1).of(24)
+      expect(creatures.count { (14..24).cover?(it) }).to be >= 120
+      expect(decks).to all(satisfy { it[:lands] + it[:creatures] + it[:others] == 60 })
+    end
+
+    it "weights the curve toward 1-3 mana value and mostly plays 4-ofs" do
+      spells = decks.flat_map { it[:counts] }.reject { |d, _| d.land? }
+      by_mv = spells.group_by { |d, _| d.mana_cost.mana_value.clamp(1, 6) }.transform_values { |pairs| pairs.sum { |_, n| n } }
+      expect(by_mv.values_at(1, 2, 3).sum).to be > 3 * by_mv.values_at(5, 6).sum
+      expect(by_mv[2]).to be > by_mv[5]
+      copies = spells.map { it[1] }.tally
+      expect(copies[4]).to be > copies[2]
+      expect(copies[4]).to be > copies[1]
+      expect(copies.keys).to all(be_between(1, 4))
+    end
+
+    it "accepts overrides and scales counts with the deck size" do
+      fixed = { lands: { range: 30..30, center: 30 }, creatures: { range: 20..20 }, outlier_chance: 0 }
+      stats = deck_stats(described_class.build(cards: big_pool, colors: "R", seed: 3, profile: fixed))
+      expect(stats.values_at(:lands, :creatures, :others)).to eq([30, 20, 10])
+      big = deck_stats(described_class.build(cards: big_pool, colors: "R", seed: 3, size: 90, profile: fixed))
+      expect(big.values_at(:lands, :creatures, :others)).to eq([45, 30, 15])
+      flat = described_class.build(cards: big_pool, colors: "G", seed: 3, profile: { "curve" => { 1 => 0, 2 => 0 } })
+      expect(Enjine::Player.new(name: "p", deck: flat)).to be_ready
+      zero = { curve: (1..6).to_h { [it, 0] } }
+      expect(Enjine::Player.new(name: "p", deck: described_class.build(cards: big_pool, colors: "G", seed: 3, profile: zero)))
+        .to be_ready
+    end
+
+    it "rejects bad arguments" do
+      expect { described_class.build(cards: big_pool, seed: 1, profile: { mana: 1 }) }
+        .to raise_error(ArgumentError, /unknown profile keys: mana/)
+      expect { described_class.build(cards: big_pool, seed: 1, size: 40) }.to raise_error(ArgumentError, /at least 60/)
+      expect { described_class.build(cards: big_pool, seed: 1, profile: { copies: { 4 => 0, 3 => 0, 2 => 0, 1 => 0 } }) }
+        .to raise_error(ArgumentError, /positive weight/)
+      Dir.mktmpdir do |empty|
+        expect { described_class.build(seed: 1, sets_dir: empty) }.to raise_error(ArgumentError, /no card sets found/)
+      end
+    end
+  end
+
+  describe "determinism" do
+    it "builds the same deck from the same inputs and seed, regardless of input order" do
+      one = build_deck(sets: %w[fxa fxb], colors: %w[W U], seed: 7)
+      expect(build_deck(sets: %w[fxb fxa], colors: "UW", seed: 7)).to eq(one)
+      expect(build_deck(sets: [fxa, "fxb"], colors: %w[W U], seed: 7)).to eq(one)
+      expect(described_class.build(cards: big_pool.reverse, colors: 2, seed: 9))
+        .to eq(described_class.build(cards: big_pool, colors: 2, seed: 9))
+      expect(one["description"]).to include("sets=fxa,fxb", "colors=WU", "seed=7")
+    end
+
+    it "builds different decks from different seeds" do
+      decks = (1..6).map { build_deck(sets: %w[fxa fxb], colors: %w[W U], seed: it)["main"] }
+      expect(decks.uniq.size).to be >= 5
+    end
+  end
+
+  describe "deck construction" do
+    it "respects the four-copy rule; only basic lands exceed it" do
+      40.times do |seed|
+        doc = build_deck(sets: %w[fxa], colors: 1, seed: seed)
+        deck_stats(doc)[:counts].each do |d, n|
+          expect(n).to be <= 4 unless d.supertype?(:basic)
+        end
+        expect(Enjine::Deck.from_h(doc)).to be_valid
+      end
+    end
+
+    it "splits basics by colored mana symbols, with at least one of each color that has symbols" do
+      pool = (1..12).map { pool_card("White #{it}", "{W}{W}") } + [pool_card("Lone Blue", "{U}")]
+      counts = deck_stats(described_class.build(cards: pool, colors: "WU", seed: 2))[:counts].to_h { |d, n| [d.name, n] }
+      expect(counts["Island"]).to be_between(1, 3)
+      expect(counts["Plains"]).to be > 20
+      colorless = (1..12).map { pool_card("Golem #{it}", "{3}") }
+      split = deck_stats(described_class.build(cards: colorless, colors: "BR", seed: 2))[:counts]
+      low, high = split.select { |d, _| d.land? }.map { it[1] }.minmax
+      expect(high - low).to be <= 1
+    end
+
+    it "uses a set's own basic lands when it has them, built-in ones otherwise" do
+      only_b = build_deck(sets: %w[fxb], colors: "W", seed: 1)
+      expect(only_b["cards"]).to include(described_class::BASIC_LANDS[:W])
+      expect(build_deck(sets: %w[fxa], colors: "W", seed: 1)["cards"]).to include(card("Plains").to_h)
+    end
+
+    it "only adds nonbasic lands whose mana is within the deck's colors" do
+      seen = []
+      30.times do |seed|
+        doc = build_deck(sets: %w[fxa fxb], colors: %w[W U], seed: seed)
+        deck_stats(doc)[:counts].map(&:first).each do |d|
+          next unless d.land? && !d.supertype?(:basic)
+
+          seen << d.name
+          expect(described_class.produced_colors(d) - %i[W U]).to be_empty
+        end
+      end
+      expect(seen.uniq).to include("Seagate Bastion")
+      expect(seen).not_to include("Murkwater Cove", "Cindermarsh", "Ember Thicket")
+    end
+  end
+
+  describe "scarcity" do
+    it "fills with more copies, then moves slots between creatures and other spells" do
+      creatures_only = (1..9).map { pool_card("Soldier #{it}", "{#{it % 3}}{W}") }
+      stats = deck_stats(described_class.build(cards: creatures_only, colors: "W", seed: 4))
+      expect(stats[:others]).to eq(0)
+      expect(stats[:creatures]).to eq(60 - stats[:lands])
+      expect(stats[:counts].count { |d, _| !d.land? }).to eq(9)
+      spells_only = (1..9).map { pool_card("Charm #{it}", "{#{it % 3}}{W}", type: "sorcery") } +
+                    [pool_card("Lone Soldier", "{W}")]
+      stats = deck_stats(described_class.build(cards: spells_only, colors: "W", seed: 4))
+      expect(stats[:creatures]).to eq(4)
+      expect(stats[:lands] + stats[:others] + 4).to eq(60)
+    end
+
+    it "plays more lands, up to the outlier maximum, before giving up" do
+      pool = (1..8).map { pool_card("Knight #{it}", "{1}{W}") } # 32 cards: 28 lands needed, 27 allowed
+      expect { described_class.build(cards: pool, colors: "W", seed: 1) }
+        .to raise_error(described_class::NotEnoughCards, /8 creature and 0 other.*at most 32 copies.*1 short.*27 lands/) do |e|
+          expect(e.details).to include(colors: "W", size: 60, lands: 27, missing: 1, creatures_available: 8, max_spell_copies: 32)
+        end
+      stats = deck_stats(described_class.build(cards: pool + [pool_card("Squire", "{W}")], colors: "W", seed: 1))
+      expect(stats[:lands]).to be_between(24, 27)
+      expect(stats[:creatures]).to eq(60 - stats[:lands])
+    end
+
+    it "explains what's missing for a set and colors that can't make a deck" do
+      expect { build_deck(sets: %w[fxa], colors: %w[W], seed: 1, profile: { lands: { range: 15..15, center: 15, outliers: 15..15 } }) }
+        .to raise_error(described_class::NotEnoughCards, /60-card W deck from fxa/)
+    end
+  end
+end

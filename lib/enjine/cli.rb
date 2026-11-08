@@ -2,6 +2,7 @@
 
 require "optparse"
 require "enjine/card_pool/core"
+require "enjine/deck_builder"
 require_relative "cli/text"
 
 module Enjine
@@ -26,15 +27,20 @@ module Enjine
       @input = input
       @out = output
       @options = { seed: Random.new_seed % (2**31), p1: "human", p2: "human", deck1: "gruul_beats",
-                   deck2: "azorius_walkers", quiet: false, max_decisions: 100_000, observer: false, names: %w[alice bob] }
+                   deck2: "azorius_walkers", quiet: false, max_decisions: 100_000, observer: false, names: %w[alice bob],
+                   sets_dir: Sets.dir }
       parser.parse!(argv)
+      # `--random-deck sets=a,b colors=WU seed=7` works unquoted: the key=value words after it belong to the spec.
+      @options[:random_deck] = [@options[:random_deck], *argv.grep(/=/)].compact.join(" ") if @options.key?(:random_deck)
     end
 
     def run
       return list_decks if @options[:list_decks]
       return validate(@options[:validate]) if @options[:validate]
+      return list_sets if @options[:list_sets]
+      return random_deck(@options[:random_deck]) if @options.key?(:random_deck)
 
-      @game = @options[:load] ? load_game : new_game
+      @game = start_game or return 1
       @text = Text.new(@game)
       @seats = @game.names.zip([@options[:p1], @options[:p2]]).to_h do |name, kind|
         [name, kind == "human" ? :human : Agents::Random.new(seed: @options[:seed] + name.sum)]
@@ -53,8 +59,13 @@ module Enjine
         o.on("--seed N", Integer, "Seed for shuffling and the die roll") { @options[:seed] = it }
         o.on("--p1 SEAT", SEATS, "Seat 1: human (default) or random") { @options[:p1] = it }
         o.on("--p2 SEAT", SEATS, "Seat 2: human (default) or random") { @options[:p2] = it }
-        o.on("--deck1 NAME", "Sample deck for seat 1 (default gruul_beats)") { @options[:deck1] = it }
-        o.on("--deck2 NAME", "Sample deck for seat 2 (default azorius_walkers)") { @options[:deck2] = it }
+        o.on("--deck1 NAME", "Sample deck for seat 1 (default gruul_beats), or random:SPEC") { @options[:deck1] = it }
+        o.on("--deck2 NAME", "Sample deck for seat 2 (default azorius_walkers), or random:SPEC") { @options[:deck2] = it }
+        o.on("--random-deck [SPEC]", "Print a random deck as JSON, e.g. \"sets=trk,abc colors=WU seed=7\"") do
+          @options[:random_deck] = it
+        end
+        o.on("--sets-dir DIR", "Directory of card set files (default: #{Sets::DEFAULT_DIR})") { @options[:sets_dir] = it }
+        o.on("--list-sets", "List the card sets in the sets directory") { @options[:list_sets] = true }
         o.on("--names A,B", Array, "Player names (default alice,bob)") { @options[:names] = it }
         o.on("--list-decks", "List the sample decks") { @options[:list_decks] = true }
         o.on("--validate FILE", "Validate a JSON array of card data blocks; prints a JSON report") { @options[:validate] = it }
@@ -88,11 +99,81 @@ module Enjine
       0
     end
 
+    def list_sets
+      today = Date.today
+      Sets.all(dir: @options[:sets_dir]).each do |set|
+        legal = set.standard_legal?(today) ? "standard" : "-"
+        say "#{set.code.ljust(6)} #{set.name} (#{set.released_at}) · #{set.size} playable, " \
+            "#{set.unsupported.size} unsupported · #{legal}"
+      end
+      0
+    end
+
+    # Prints a random deck document; exit code 1 with a message if it can't be built.
+    def random_deck(spec)
+      say JSON.pretty_generate(build_random_deck(spec, @options[:seed]))
+      0
+    rescue Error, ArgumentError => e
+      say "error: #{e.message}"
+      1
+    end
+
+    # SPEC: whitespace- or comma-separated key=value pairs; a bare word continues the previous
+    # value, so "sets=trk,abc,colors=WU" works. Keys: sets (codes, "all" or "standard"), colors
+    # (letters like WU, a count 1-5, or any), seed, size.
+    def build_random_deck(spec, default_seed)
+      args = parse_spec(spec.to_s)
+      sets = args.delete("sets")
+      DeckBuilder.build(sets: resolve_sets(sets), colors: args.delete("colors") || :any,
+                        seed: Integer(args.delete("seed") || default_seed), size: Integer(args.delete("size") || 60),
+                        sets_dir: @options[:sets_dir]).tap do
+        raise ArgumentError, "unknown random deck option(s): #{args.keys.join(", ")}" unless args.empty?
+      end
+    end
+
+    def parse_spec(spec)
+      key = nil
+      spec.split(/[\s,;]+/).reject(&:empty?).each_with_object({}) do |word, out|
+        if word.include?("=")
+          key, value = word.split("=", 2)
+          out[key] = value
+        elsif key
+          out[key] = "#{out[key]},#{word}"
+        else
+          raise ArgumentError, "random deck spec: expected key=value, got #{word.inspect}"
+        end
+      end
+    end
+
+    def resolve_sets(value)
+      case value
+      when nil, "all" then nil
+      when "standard" then Sets.standard_legal(dir: @options[:sets_dir]).map(&:code)
+      else value.split(",")
+      end
+    end
+
+    def start_game
+      @options[:load] ? load_game : new_game
+    rescue DeckBuilder::NotEnoughCards, Sets::InvalidSet, ArgumentError => e
+      say "error: #{e.message}"
+      nil
+    end
+
     def new_game
-      decks = [@options[:deck1], @options[:deck2]].map { CardPool::Core.deck(it) }
+      decks = [@options[:deck1], @options[:deck2]].each_with_index.map { |name, i| deck_for(name, i) }
       players = @options[:names].zip(decks).map { |name, deck| Player.new(name: name, deck: deck) }
       @setup = Setup.new(*players)
       @setup.new_game(seed: @options[:seed])
+    end
+
+    # A sample deck by name, or "random[:SPEC]" for a generated one (seed defaults to game seed + seat).
+    def deck_for(name, seat)
+      return CardPool::Core.deck(name) unless name.start_with?("random")
+
+      deck = build_random_deck(name.delete_prefix("random").delete_prefix(":"), @options[:seed] + seat)
+      @options[:"deck#{seat + 1}"] = deck["description"]
+      deck
     end
 
     def load_game
