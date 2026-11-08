@@ -128,7 +128,7 @@ module Enjine
       card = defn(obj.card)
       active_turn = state.turn
       sick = obj.controlled_since.nil? || obj.controlled_since >= active_turn
-      finding("302.6", "summoning-sick #{event.object} attacked") if sick && !card.keyword?(:haste)
+      finding("302.6", "summoning-sick #{event.object} attacked") if sick && !keyword?(obj, :haste)
       finding("702.3b", "#{event.object} has defender but attacked") if card.keyword?(:defender)
     end
 
@@ -136,8 +136,8 @@ module Enjine
     def blocker_declared!(event)
       blocker = state.objects[event.object]
       attacker = state.objects[event.attacker]
-      return unless blocker && attacker && defn(attacker.card).keyword?(:flying)
-      return if defn(blocker.card).keyword?(:flying) || defn(blocker.card).keyword?(:reach)
+      return unless blocker && attacker && keyword?(attacker, :flying)
+      return if keyword?(blocker, :flying) || keyword?(blocker, :reach)
 
       finding("702.9b", "#{event.object} without flying or reach blocked flying #{event.attacker}")
     end
@@ -160,10 +160,30 @@ module Enjine
         next unless card.creature?
 
         net = obj.counters.fetch("+1/+1", 0) - obj.counters.fetch("-1/-1", 0)
-        pumps = state.effects.select { it["kind"] == "pump" && it["affected"].include?(id) }
+        pumps = state.effects.select { it["kind"] == "pump" && it["affected"].include?(id) } + attached_grants(id)
         expected = [card.power + net + pumps.sum { it["power"] }, card.toughness + net + pumps.sum { it["toughness"] }]
         actual = view.fetch(id).values_at("power", "toughness")
         finding("613.4c", "#{id} is #{actual.join("/")}, expected #{expected.join("/")}") if actual != expected
+      end
+    end
+
+    # Printed keyword, or granted by an Aura/Equipment attached to it (CR 301.5f, 303.4m).
+    def keyword?(obj, keyword)
+      defn(obj.card).keyword?(keyword) || attached_grants(obj.id).any? { it["keywords"].include?(keyword.to_s) }
+    end
+
+    # "Equipped/enchanted creature gets/has ..." of every permanent attached to `id`, read from
+    # the raw card data: [{"power" => n, "toughness" => n, "keywords" => [...]}].
+    def attached_grants(id)
+      state.battlefield.filter_map { state.objects[it] if state.objects[it].attached_to == id }.flat_map do |att|
+        Array(defn(att.card).to_h["abilities"]).filter_map do |entry|
+          static = entry["static"]
+          next unless static.is_a?(Hash) && static["affects"] == "attached"
+
+          pump = static.fetch("pump", {})
+          { "power" => pump.fetch("power", 0), "toughness" => pump.fetch("toughness", 0),
+            "keywords" => Array(static["keywords"]).map { it.downcase.tr(" -", "__") } }
+        end
       end
     end
 

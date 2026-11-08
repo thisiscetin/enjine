@@ -131,7 +131,7 @@ module Enjine
       @instant_speed = @type_modules.any?(&:instant_speed?) || @keywords.include?(:flash)
       @castable = !@land && !@mana_cost.nil?
       @deck_limit_exempt = @supertypes.any? { Enjine.registry.fetch(:supertype, it).deck_limit_exempt? }
-      @spell_ability = @abilities.find { it.kind == :spell }
+      @spell_ability = @abilities.find { it.kind == :spell } || aura_spell_ability
       @triggered = @abilities.any? { it.kind == :triggered }
       @all_effects = nested(@abilities.flat_map do |ability|
         ability.respond_to?(:modes) && ability.modal? ? ability.modes.flat_map(&:effects) : ability.try_effects
@@ -150,6 +150,24 @@ module Enjine
 
         errors << "abilities[#{i}]: #{ability.class.primitive_name} abilities need a #{allowed.join("/")} card"
       end
+      validate_definition_hooks(errors)
+    end
+
+    # Rules that depend on the whole card, e.g. "an Aura has an enchant ability" (CR 303.4a).
+    def validate_definition_hooks(errors)
+      @subtypes.each do |sub|
+        rule = Enjine.registry.fetch(:subtype, sub)
+        rule.validate_definition(self, errors) if rule.respond_to?(:validate_definition)
+      end
+      @abilities.each_with_index do |ability, i|
+        ability.validate_definition(self, errors, "abilities[#{i}]") if ability.respond_to?(:validate_definition)
+      end
+    end
+
+    # CR 115.1b / 303.4a: an Aura spell targets what its enchant ability allows.
+    def aura_spell_ability
+      enchant = @subtypes.include?(:aura) && @abilities.find { it.kind == :enchant }
+      Mechanics::Abilities::AuraSpell.for(enchant) if enchant
     end
 
     def read_name(card, errors)

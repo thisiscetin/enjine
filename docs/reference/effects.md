@@ -48,6 +48,26 @@ Rules: CR 106.1a, CR 106.4, CR 608.2d, CR 605.1a
 }
 ```
 
+## attach
+
+Attach this Aura or Equipment (the ability's source) to the referenced permanent. Nothing happens if it can't legally be attached to it, if it's already attached to it, or if the source has left the battlefield.
+
+Rules: CR 701.3a, CR 701.3b, CR 701.3c, CR 301.5c
+
+| Parameter | Description |
+| --- | --- |
+| `to` | selector (a single target) |
+
+```json
+{
+  "attach": {
+    "to": {
+      "target": 0
+    }
+  }
+}
+```
+
 ## counter
 
 Counter each referenced spell: it leaves the stack for its owner's graveyard without resolving.

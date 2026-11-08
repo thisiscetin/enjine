@@ -258,6 +258,126 @@
     },
     {
       "card": {
+        "name": "Hard-Won Jitte",
+        "mana_cost": "{1}{R}",
+        "types": [
+          "artifact"
+        ],
+        "subtypes": [
+          "equipment"
+        ],
+        "abilities": [
+          {
+            "static": {
+              "affects": "attached",
+              "keywords": [
+                "double_strike"
+              ]
+            }
+          },
+          {
+            "equip": {
+              "cost": [
+                {
+                  "mana": "{2}"
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "rarity": "uncommon",
+      "printing": {
+        "set": "tmt",
+        "number": "91"
+      }
+    },
+    {
+      "card": {
+        "name": "Frog Butler",
+        "mana_cost": "{1}{G}",
+        "types": [
+          "creature"
+        ],
+        "subtypes": [
+          "frog",
+          "spirit"
+        ],
+        "keywords": [
+          "deathtouch"
+        ],
+        "power": 1,
+        "toughness": 1,
+        "abilities": [
+          {
+            "mana": {
+              "cost": [
+                "tap"
+              ],
+              "produce": "{W}"
+            }
+          },
+          {
+            "mana": {
+              "cost": [
+                "tap"
+              ],
+              "produce": "{U}"
+            }
+          },
+          {
+            "mana": {
+              "cost": [
+                "tap"
+              ],
+              "produce": "{B}"
+            }
+          },
+          {
+            "mana": {
+              "cost": [
+                "tap"
+              ],
+              "produce": "{R}"
+            }
+          },
+          {
+            "mana": {
+              "cost": [
+                "tap"
+              ],
+              "produce": "{G}"
+            }
+          },
+          {
+            "activated": {
+              "cost": [
+                {
+                  "mana": "{2}"
+                }
+              ],
+              "effects": [
+                {
+                  "grant": {
+                    "keywords": [
+                      "reach"
+                    ],
+                    "to": "self"
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "rarity": "common",
+      "printing": {
+        "set": "tmt",
+        "number": "114"
+      }
+    },
+    {
+      "card": {
         "name": "Primordial Pachyderm",
         "mana_cost": "{3}{G}",
         "types": [
@@ -347,6 +467,65 @@
       "printing": {
         "set": "tmt",
         "number": "175"
+      }
+    },
+    {
+      "card": {
+        "name": "Skateboard",
+        "mana_cost": "{1}",
+        "types": [
+          "artifact"
+        ],
+        "subtypes": [
+          "equipment"
+        ],
+        "abilities": [
+          {
+            "triggered": {
+              "when": {
+                "enters": {}
+              },
+              "targets": [
+                "permanent"
+              ],
+              "effects": [
+                {
+                  "tap": {
+                    "to": {
+                      "target": 0
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "static": {
+              "affects": "attached",
+              "pump": {
+                "power": 1,
+                "toughness": 0
+              },
+              "keywords": [
+                "haste"
+              ]
+            }
+          },
+          {
+            "equip": {
+              "cost": [
+                {
+                  "mana": "{1}"
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "rarity": "uncommon",
+      "printing": {
+        "set": "tmt",
+        "number": "178"
       }
     },
     {
@@ -951,8 +1130,7 @@
         "number": "23"
       },
       "missing": [
-        "triggered ability",
-        "equipment/aura"
+        "triggered ability"
       ]
     },
     {
@@ -1014,7 +1192,6 @@
         "number": "28"
       },
       "missing": [
-        "equipment/aura",
         "static ability",
         "tokens",
         "exile",
@@ -1054,9 +1231,7 @@
       },
       "missing": [
         "triggered ability",
-        "return to hand",
-        "other rules text",
-        "equipment/aura"
+        "return to hand"
       ]
     },
     {
@@ -1282,7 +1457,6 @@
         "number": "51"
       },
       "missing": [
-        "equipment/aura",
         "static ability"
       ]
     },
@@ -1563,7 +1737,6 @@
         "number": "75"
       },
       "missing": [
-        "other rules text",
         "triggered ability",
         "sacrifice",
         "equipment/aura"
@@ -1739,18 +1912,6 @@
       ]
     },
     {
-      "name": "Hard-Won Jitte",
-      "rarity": "uncommon",
-      "printing": {
-        "set": "tmt",
-        "number": "91"
-      },
-      "missing": [
-        "other rules text",
-        "equipment/aura"
-      ]
-    },
-    {
       "name": "Improvised Arsenal",
       "rarity": "rare",
       "printing": {
@@ -1760,8 +1921,7 @@
       "missing": [
         "variable amount",
         "tokens",
-        "copy",
-        "equipment/aura"
+        "copy"
       ]
     },
     {
@@ -2012,17 +2172,6 @@
       ]
     },
     {
-      "name": "Frog Butler",
-      "rarity": "common",
-      "printing": {
-        "set": "tmt",
-        "number": "114"
-      },
-      "missing": [
-        "invalid: abilities[5].activated.effects[0].grant.to: required"
-      ]
-    },
-    {
       "name": "Groundchuck & Dirtbag",
       "rarity": "rare",
       "printing": {
@@ -2175,9 +2324,7 @@
         "number": "127"
       },
       "missing": [
-        "triggered ability",
-        "other rules text",
-        "equipment/aura"
+        "triggered ability"
       ]
     },
     {
@@ -2777,20 +2924,6 @@
         "variable amount",
         "counters",
         "exile"
-      ]
-    },
-    {
-      "name": "Skateboard",
-      "rarity": "uncommon",
-      "printing": {
-        "set": "tmt",
-        "number": "178"
-      },
-      "missing": [
-        "triggered ability",
-        "tap/untap effect",
-        "other rules text",
-        "equipment/aura"
       ]
     },
     {

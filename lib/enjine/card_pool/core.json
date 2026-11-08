@@ -1836,5 +1836,157 @@
       }
     ],
     "rules_text": "{4}, {T}: Draw a card. This ability costs {1} less to activate for each land you control."
+  },
+  {
+    "name": "Brasswork Cudgel",
+    "mana_cost": "{1}",
+    "types": [
+      "artifact"
+    ],
+    "subtypes": [
+      "equipment"
+    ],
+    "abilities": [
+      {
+        "static": {
+          "affects": "attached",
+          "pump": {
+            "power": 1,
+            "toughness": 1
+          },
+          "keywords": [
+            "vigilance"
+          ]
+        }
+      },
+      {
+        "equip": {
+          "cost": [
+            {
+              "mana": "{2}"
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "Equipped creature gets +1/+1 and has vigilance.\nEquip {2}"
+  },
+  {
+    "name": "Scout's Lens",
+    "mana_cost": "{1}",
+    "types": [
+      "artifact"
+    ],
+    "subtypes": [
+      "equipment"
+    ],
+    "abilities": [
+      {
+        "static": {
+          "affects": "attached",
+          "pump": {
+            "power": 0,
+            "toughness": 1
+          }
+        }
+      },
+      {
+        "triggered": {
+          "when": {
+            "attacks": {
+              "subject": "attached"
+            }
+          },
+          "effects": [
+            {
+              "scry": {
+                "amount": 1
+              }
+            }
+          ]
+        }
+      },
+      {
+        "equip": {
+          "cost": [
+            {
+              "mana": "{1}"
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "Equipped creature gets +0/+1.\nWhenever equipped creature attacks, scry 1.\nEquip {1}"
+  },
+  {
+    "name": "Emberbond Charm",
+    "mana_cost": "{R}",
+    "types": [
+      "enchantment"
+    ],
+    "subtypes": [
+      "aura"
+    ],
+    "abilities": [
+      {
+        "enchant": "creature"
+      },
+      {
+        "triggered": {
+          "when": {
+            "enters": {}
+          },
+          "effects": [
+            {
+              "grant": {
+                "keywords": [
+                  "trample"
+                ],
+                "to": "attached"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "static": {
+          "affects": "attached",
+          "pump": {
+            "power": 2,
+            "toughness": 0
+          }
+        }
+      }
+    ],
+    "rules_text": "Enchant creature\nWhen this Aura enters, enchanted creature gains trample until end of turn.\nEnchanted creature gets +2/+0."
+  },
+  {
+    "name": "Withering Grasp",
+    "mana_cost": "{1}{B}",
+    "types": [
+      "enchantment"
+    ],
+    "subtypes": [
+      "aura"
+    ],
+    "abilities": [
+      {
+        "enchant": {
+          "creature": {
+            "controller": "opponent"
+          }
+        }
+      },
+      {
+        "static": {
+          "affects": "attached",
+          "pump": {
+            "power": -1,
+            "toughness": -1
+          }
+        }
+      }
+    ],
+    "rules_text": "Enchant creature an opponent controls\nEnchanted creature gets -1/-1."
   }
 ]

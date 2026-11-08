@@ -12,6 +12,7 @@ module Enjine
     #   "self"                                      the source permanent
     #   "you"                                       the controller
     #   "each_opponent"                             every opponent
+    #   "attached"                                  what the source is attached to ("enchanted creature", CR 303.4m)
     #   {"each": "creature", "controller": "you"}  every matching object (you | opponent | any)
     #   {"result": 0}                               what effect 0 of this list moved or created (CR 400.7j)
     class Selector
@@ -21,14 +22,14 @@ module Enjine
 
       def self.build(data, errors, path, targets_count:, results_count: 0)
         case data
-        when "self", "you", "each_opponent" then new(data.to_sym)
+        when "self", "you", "each_opponent", "attached" then new(data.to_sym)
         when Hash
           data = data.transform_keys(&:to_s)
           return build_result(data, errors, path, results_count) if data.key?("result")
 
           build_hash(data, errors, path, targets_count)
         else
-          errors << "#{path}: must be {\"target\": n}, \"self\", \"you\", \"each_opponent\" or {\"each\": filter}"
+          errors << "#{path}: must be {\"target\": n}, \"self\", \"you\", \"each_opponent\", \"attached\" or {\"each\": filter}"
           nil
         end
       end
@@ -75,6 +76,7 @@ module Enjine
         when :target then "target ##{value + 1}"
         when :result then "the object(s) from effect ##{value + 1}"
         when :self then "itself"
+        when :attached then "the attached permanent"
         when :you then "you"
         when :each_opponent then "each opponent"
         when :each then "each #{value.primitive_name.tr("_",
@@ -89,6 +91,7 @@ module Enjine
         when :target then [ctx.targets[value]].compact
         when :result then Array(ctx.results&.[](value))
         when :self then engine.state.battlefield.include?(ctx.source) ? [ctx.source] : []
+        when :attached then attached(engine, ctx)
         when :you then [Filters.player_ref(engine, ctx.controller)]
         when :each_opponent
           engine.state.players.each_index.reject { it == ctx.controller }.map { Filters.player_ref(engine, it) }
@@ -97,6 +100,12 @@ module Enjine
       end
 
       private
+
+      # CR 301.5f / 303.4m: "equipped/enchanted creature" is whatever the source is attached to now.
+      def attached(engine, ctx)
+        to = engine.state.objects[ctx.source]&.attached_to
+        to && engine.state.battlefield.include?(to) ? [to] : []
+      end
 
       def each(engine, ctx)
         value.candidates(engine, ctx.controller).select do |ref|

@@ -69,7 +69,8 @@ module Enjine
                      damage: hash.fetch("damage", 0), source: hash["source"], ability: hash["ability"],
                      targets: deep_copy(hash["targets"]), loyalty_turn: hash["loyalty_turn"],
                      deathtouched: hash.fetch("deathtouched", false), modes: hash["modes"]&.dup,
-                     memory: deep_copy(hash.fetch("memory", {})), x: hash["x"], mana_spent: hash["mana_spent"]&.dup)
+                     memory: deep_copy(hash.fetch("memory", {})), x: hash["x"], mana_spent: hash["mana_spent"]&.dup,
+                     attached_to: hash["attached_to"])
     end
 
     def deep_copy(value) = Marshal.load(Marshal.dump(value))
@@ -161,6 +162,7 @@ module Enjine
       errors << "#{path}.damage: must be a non-negative integer" unless non_negative?(obj.fetch("damage", 0))
       errors << "#{path}.memory: must be an object" unless obj.fetch("memory", {}).is_a?(Hash)
       validate_cast_info(obj, path, errors)
+      validate_attachment(obj, path, zone, errors)
       return if zone == "battlefield"
 
       return unless counters.values.any?(&:positive?) || obj["damage"].to_i.positive?
@@ -175,6 +177,16 @@ module Enjine
       return if spent.nil? || (spent.is_a?(Array) && spent.all? { Mana::TYPES.map(&:to_s).include?(it) })
 
       errors << "#{path}.mana_spent: must be a list of mana types"
+    end
+
+    # CR 701.3: only a permanent is attached, never to itself. The object it names may already
+    # be gone: state-based actions (704.5m/n) clean that up before the next priority.
+    def validate_attachment(obj, path, zone, errors)
+      to = obj["attached_to"]
+      return if to.nil?
+
+      errors << "#{path}.attached_to: must be another object's id" unless to.is_a?(String) && to != obj["id"]
+      errors << "#{path}: only permanents on the battlefield can be attached" unless zone == "battlefield"
     end
 
     def validate_combat(data, errors)

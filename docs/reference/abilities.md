@@ -109,6 +109,22 @@ Rules: CR 614.1a, CR 122.6, CR 122.6a, CR 616.1
 }
 ```
 
+## enchant
+
+The Aura's enchant ability: a target filter for what its spell targets and what the Aura may be attached to, e.g. "creature" or {"permanent": {"any_of": ["artifact", "creature"]}}. Only Auras have it.
+
+Rules: CR 702.5a, CR 115.1b, CR 303.4a
+
+| Parameter | Description |
+| --- | --- |
+| `(value)` | a target filter for a permanent |
+
+```json
+{
+  "enchant": "creature"
+}
+```
+
 ## enters_tapped
 
 This permanent enters the battlefield tapped (a self-replacement effect).
@@ -159,6 +175,28 @@ Rules: CR 614.1c, CR 614.12, CR 122.6, CR 122.6a
       "controller": "you",
       "other": true
     }
+  }
+}
+```
+
+## equip
+
+Equip: pay `cost` to attach this Equipment to target creature you control (not itself). Sorcery speed. Only Equipment have it.
+
+Rules: CR 702.6a, CR 301.5b, CR 301.5c, CR 701.3a
+
+| Parameter | Description |
+| --- | --- |
+| `cost` | list of costs, e.g. [{"mana": "{2}"}] |
+
+```json
+{
+  "equip": {
+    "cost": [
+      {
+        "mana": "{2}"
+      }
+    ]
   }
 }
 ```
@@ -251,13 +289,13 @@ Rules: CR 113.3a, CR 601.2c, CR 608.2b, CR 608.2c
 
 ## static
 
-While its source is on the battlefield, every matching permanent gets `pump` and/or the `keywords`. `affects` is {"each": filter, "controller": you|opponent|any, "other": true} (relative to the source's controller).
+While its source is on the battlefield, every matching permanent gets `pump` and/or the `keywords`. `affects` is {"each": filter, "controller": you|opponent|any, "other": true} (relative to the source's controller), or "attached": the permanent the source is attached to ("equipped/enchanted creature").
 
-Rules: CR 604.1, CR 611.3a, CR 613.1f, CR 613.4c
+Rules: CR 604.1, CR 611.3a, CR 613.1f, CR 613.4c, CR 301.5f, CR 303.4m
 
 | Parameter | Description |
 | --- | --- |
-| `affects` | {"each": filter, "controller": ..., "other": bool} |
+| `affects` | {"each": filter, "controller": ..., "other": bool} or "attached" |
 | `pump` | {"power": n, "toughness": n} |
 | `keywords` | list of keywords |
 

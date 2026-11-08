@@ -28,7 +28,7 @@ module Enjine
       # keeps the cached layer pass. Replacing the whole state (import, fork, rollback) is
       # detected separately by identity.
       LAYER_EVENTS = [Events::ZoneChanged, Events::CountersChanged, Events::EffectStarted,
-                      Events::EffectsEnded].freeze
+                      Events::EffectsEnded, Events::Attached, Events::Unattached].freeze
 
       def touch! = @epoch = @epoch.to_i + 1
 

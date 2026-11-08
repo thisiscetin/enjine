@@ -8,14 +8,15 @@ module Enjine
     # `source` is a Hash with "id", "card", "controller" (for a permanent that just left
     # the battlefield it describes the object as it last existed, CR 603.10a).
     module Triggers
-      # Who a trigger is about: "self" (default) or {"each": filter, "controller": ..., "other": true}.
+      # Who a trigger is about: "self" (default), "attached" (the creature the source equips or
+      # enchants, CR 301.5f / 303.4m) or {"each": filter, "controller": ..., "other": true}.
       class Subject
         def self.build(data, errors, path)
           data = "self" if data.nil?
-          return new(:self) if data == "self"
+          return new(data.to_sym) if %w[self attached].include?(data)
 
           unless data.is_a?(Hash) && data["each"]
-            errors << "#{path}: must be \"self\" or {\"each\": filter, \"controller\": you|opponent|any, \"other\": bool}"
+            errors << "#{path}: must be \"self\", \"attached\" or {\"each\": filter, \"controller\": you|opponent|any, \"other\": bool}"
             return nil
           end
           Mechanics.check_keys(data, %w[each controller other], errors, path)
@@ -36,6 +37,7 @@ module Enjine
         # Does the object `object_id` (controlled by `object_controller`, of card `card`) count?
         def match?(engine, object_id, object_controller, card, source)
           return object_id == source["id"] if @kind == :self
+          return object_id == engine.state.objects[source["id"]]&.attached_to if @kind == :attached
           return false if @other && object_id == source["id"]
           return false unless controller_ok?(object_controller, source["controller"])
 
@@ -54,6 +56,7 @@ module Enjine
 
         def to_s
           return "this" if @kind == :self
+          return "the attached creature" if @kind == :attached
 
           "#{"another " if @other}#{@filter.primitive_name.tr("_",
                                                               " ")}#{{ "you" => " you control",

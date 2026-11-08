@@ -234,9 +234,9 @@ module Enjine
         end
 
         # CR 700.9: a permanent is modified if it has counters, is equipped, or is enchanted by an Aura
-        # its controller controls. Attachments plug in through Engine#modifying_attachment? (CR 301.5, 303.4).
+        # its controller controls (Engine#modifying_attachment?, CR 301.5, 303.4).
         def modified?(engine, obj)
-          Counters.any?(obj.counters) || (engine.respond_to?(:modifying_attachment?) && engine.modifying_attachment?(obj))
+          Counters.any?(obj.counters) || engine.modifying_attachment?(obj)
         end
 
         # Current power/toughness (CR 208.3) and mana value (CR 202.3; 0 without a mana cost, 202.3a).
