@@ -62,5 +62,12 @@ module Enjine
       def self.decisions = %w[order_triggers]
     end
     register("put_triggers", PutTriggers)
+
+    # The legend rule's choice (CR 704.5j).
+    class LegendRule < Base
+      def self.step(engine, frame) = engine.step_legend_rule!(frame)
+      def self.decisions = %w[legend_rule]
+    end
+    register("legend_rule", LegendRule)
   end
 end

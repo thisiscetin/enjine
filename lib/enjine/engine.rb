@@ -204,6 +204,7 @@ module Enjine
     def give_priority!(index)
       check_state_based_actions!
       return if state.over?
+      return if legend_rule_first!(index)
       return if put_triggers_first!(index)
 
       state.priority = index

@@ -18,7 +18,7 @@ require "enjine"
 module SetConverter
   SUPPORTED_KEYWORDS = Enjine.registry.names(:keyword).to_set.freeze
   SUPERTYPES = %w[Legendary Basic Snow World].freeze
-  UNSUPPORTED_SUPERTYPES = %w[Legendary Snow World].freeze
+  UNSUPPORTED_SUPERTYPES = %w[Snow World].freeze
   NUMBER = { "a" => 1, "an" => 1, "one" => 1, "two" => 2, "three" => 3, "four" => 4, "five" => 5 }.freeze
 
   # Keyword abilities recognised on a keyword-only line (supported or not; unsupported

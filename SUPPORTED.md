@@ -21,6 +21,7 @@ Rules version: Comprehensive Rules effective 2026-09-25.
 | Name | Rules | Description |
 | --- | --- | --- |
 | [`basic`](docs/reference/supertypes.md#basic) | 205.4c, 100.2a | Basic cards are exempt from the four-copies deck construction limit. |
+| [`legendary`](docs/reference/supertypes.md#legendary) | 205.4d, 704.5j | If a player controls two or more legendary permanents with the same name, they choose one and put the rest into their owners' graveyards (the legend rule). |
 
 ## Subtypes with rules
 

@@ -282,7 +282,6 @@
         "number": "5"
       },
       "missing": [
-        "supertype: legendary",
         "triggered ability",
         "condition (if/unless/as long as)"
       ]
@@ -295,7 +294,6 @@
         "number": "6"
       },
       "missing": [
-        "supertype: legendary",
         "triggered ability",
         "tokens",
         "variable amount",
@@ -310,7 +308,6 @@
         "number": "7"
       },
       "missing": [
-        "supertype: legendary",
         "static ability",
         "triggered ability",
         "tokens",
@@ -363,7 +360,6 @@
         "number": "11"
       },
       "missing": [
-        "supertype: legendary",
         "counters"
       ]
     },
@@ -386,7 +382,6 @@
         "number": "13"
       },
       "missing": [
-        "supertype: legendary",
         "condition (if/unless/as long as)",
         "triggered ability",
         "counters"
@@ -400,7 +395,6 @@
         "number": "14"
       },
       "missing": [
-        "supertype: legendary",
         "triggered ability",
         "counters",
         "condition (if/unless/as long as)"
@@ -477,7 +471,6 @@
         "number": "21"
       },
       "missing": [
-        "supertype: legendary",
         "triggered ability",
         "static ability",
         "counters"
@@ -517,7 +510,6 @@
         "number": "24"
       },
       "missing": [
-        "supertype: legendary",
         "triggered ability",
         "return to hand",
         "condition (if/unless/as long as)"
@@ -582,7 +574,6 @@
         "number": "29"
       },
       "missing": [
-        "supertype: legendary",
         "other rules text"
       ]
     },
@@ -616,7 +607,6 @@
         "number": "32"
       },
       "missing": [
-        "supertype: legendary",
         "triggered ability",
         "library manipulation",
         "counters"
@@ -630,7 +620,6 @@
         "number": "33"
       },
       "missing": [
-        "supertype: legendary",
         "triggered ability",
         "variable amount"
       ]
@@ -681,7 +670,6 @@
         "number": "37"
       },
       "missing": [
-        "supertype: legendary",
         "keyword: first strike",
         "triggered ability",
         "condition (if/unless/as long as)"
@@ -747,7 +735,6 @@
         "number": "42"
       },
       "missing": [
-        "supertype: legendary",
         "triggered ability",
         "static ability"
       ]
@@ -760,7 +747,6 @@
         "number": "43"
       },
       "missing": [
-        "supertype: legendary",
         "other rules text",
         "triggered ability",
         "tokens",
@@ -775,7 +761,6 @@
         "number": "44"
       },
       "missing": [
-        "supertype: legendary",
         "triggered ability",
         "station",
         "other rules text"
@@ -815,7 +800,6 @@
         "number": "47"
       },
       "missing": [
-        "supertype: legendary",
         "other rules text",
         "triggered ability",
         "condition (if/unless/as long as)",
@@ -881,7 +865,6 @@
         "number": "52"
       },
       "missing": [
-        "supertype: legendary",
         "triggered ability",
         "counters"
       ]
@@ -945,7 +928,6 @@
         "number": "57"
       },
       "missing": [
-        "supertype: legendary",
         "triggered ability",
         "condition (if/unless/as long as)",
         "variable amount",
@@ -960,7 +942,6 @@
         "number": "58"
       },
       "missing": [
-        "supertype: legendary",
         "triggered ability",
         "tap/untap effect",
         "counters",
@@ -1003,7 +984,6 @@
         "number": "61"
       },
       "missing": [
-        "supertype: legendary",
         "triggered ability",
         "tokens",
         "equipment/aura",
@@ -1030,7 +1010,6 @@
         "number": "63"
       },
       "missing": [
-        "supertype: legendary",
         "triggered ability",
         "library manipulation",
         "station",
@@ -1046,7 +1025,6 @@
         "number": "64"
       },
       "missing": [
-        "supertype: legendary",
         "triggered ability",
         "variable amount",
         "library manipulation"
@@ -1083,7 +1061,6 @@
         "number": "67"
       },
       "missing": [
-        "supertype: legendary",
         "triggered ability",
         "condition (if/unless/as long as)",
         "library manipulation",
@@ -1113,7 +1090,6 @@
         "number": "69"
       },
       "missing": [
-        "supertype: legendary",
         "triggered ability",
         "counters",
         "other rules text"
@@ -1127,7 +1103,6 @@
         "number": "70"
       },
       "missing": [
-        "supertype: legendary",
         "condition (if/unless/as long as)",
         "counters"
       ]
@@ -1179,7 +1154,6 @@
         "number": "74"
       },
       "missing": [
-        "supertype: legendary",
         "condition (if/unless/as long as)"
       ]
     },
@@ -1191,7 +1165,6 @@
         "number": "75"
       },
       "missing": [
-        "supertype: legendary",
         "other rules text",
         "triggered ability",
         "variable amount"
@@ -1244,7 +1217,6 @@
         "number": "79"
       },
       "missing": [
-        "supertype: legendary",
         "variable amount",
         "static ability"
       ]
@@ -1257,7 +1229,6 @@
         "number": "80"
       },
       "missing": [
-        "supertype: legendary",
         "triggered ability",
         "condition (if/unless/as long as)",
         "discard"
@@ -1282,7 +1253,6 @@
         "number": "82"
       },
       "missing": [
-        "supertype: legendary",
         "triggered ability",
         "modal choice",
         "other rules text",
@@ -1351,7 +1321,6 @@
         "number": "87"
       },
       "missing": [
-        "supertype: legendary",
         "triggered ability",
         "modal choice",
         "other rules text"
@@ -1379,7 +1348,6 @@
         "number": "89"
       },
       "missing": [
-        "supertype: legendary",
         "triggered ability",
         "modal choice",
         "condition (if/unless/as long as)",
@@ -1396,7 +1364,6 @@
         "number": "90"
       },
       "missing": [
-        "supertype: legendary",
         "library manipulation",
         "other rules text",
         "counters"
@@ -1410,7 +1377,6 @@
         "number": "91"
       },
       "missing": [
-        "supertype: legendary",
         "triggered ability",
         "discard"
       ]
@@ -1523,7 +1489,6 @@
         "number": "100"
       },
       "missing": [
-        "supertype: legendary",
         "triggered ability",
         "modal choice",
         "exile",
@@ -1604,7 +1569,6 @@
         "number": "106"
       },
       "missing": [
-        "supertype: legendary",
         "triggered ability"
       ]
     },
@@ -1628,7 +1592,6 @@
         "number": "108"
       },
       "missing": [
-        "supertype: legendary",
         "triggered ability",
         "condition (if/unless/as long as)",
         "graveyard casting"
@@ -1642,7 +1605,6 @@
         "number": "109"
       },
       "missing": [
-        "supertype: legendary",
         "sacrifice",
         "counters"
       ]
@@ -1655,7 +1617,6 @@
         "number": "110"
       },
       "missing": [
-        "supertype: legendary",
         "other rules text",
         "triggered ability",
         "condition (if/unless/as long as)",
@@ -1681,7 +1642,6 @@
         "number": "112"
       },
       "missing": [
-        "supertype: legendary",
         "variable amount",
         "triggered ability",
         "tokens"
@@ -1695,7 +1655,6 @@
         "number": "113"
       },
       "missing": [
-        "supertype: legendary",
         "triggered ability",
         "variable amount"
       ]
@@ -1759,7 +1718,6 @@
         "number": "118"
       },
       "missing": [
-        "supertype: legendary",
         "other rules text",
         "triggered ability"
       ]
@@ -1772,7 +1730,6 @@
         "number": "119"
       },
       "missing": [
-        "supertype: legendary",
         "triggered ability",
         "condition (if/unless/as long as)",
         "sacrifice",
@@ -1886,7 +1843,6 @@
         "number": "128"
       },
       "missing": [
-        "supertype: legendary",
         "triggered ability",
         "exile",
         "tokens"
@@ -1980,7 +1936,6 @@
         "number": "135"
       },
       "missing": [
-        "supertype: legendary",
         "triggered ability",
         "counters",
         "graveyard casting",
@@ -2022,7 +1977,6 @@
         "number": "138"
       },
       "missing": [
-        "supertype: legendary",
         "keyword: first strike",
         "triggered ability",
         "condition (if/unless/as long as)",
@@ -2074,7 +2028,6 @@
         "number": "142"
       },
       "missing": [
-        "supertype: legendary",
         "triggered ability",
         "condition (if/unless/as long as)",
         "modal choice",
@@ -2091,7 +2044,6 @@
         "number": "143"
       },
       "missing": [
-        "supertype: legendary",
         "triggered ability",
         "condition (if/unless/as long as)",
         "counters"
@@ -2173,7 +2125,6 @@
         "number": "149"
       },
       "missing": [
-        "supertype: legendary",
         "triggered ability",
         "condition (if/unless/as long as)",
         "return to hand"
@@ -2249,7 +2200,6 @@
         "number": "155"
       },
       "missing": [
-        "supertype: legendary",
         "triggered ability"
       ]
     },
@@ -2261,7 +2211,6 @@
         "number": "156"
       },
       "missing": [
-        "supertype: legendary",
         "triggered ability",
         "static ability"
       ]
@@ -2274,7 +2223,6 @@
         "number": "157"
       },
       "missing": [
-        "supertype: legendary",
         "other rules text",
         "condition (if/unless/as long as)"
       ]
@@ -2373,7 +2321,6 @@
         "number": "165"
       },
       "missing": [
-        "supertype: legendary",
         "triggered ability",
         "condition (if/unless/as long as)",
         "tokens",
@@ -2389,7 +2336,6 @@
         "number": "166"
       },
       "missing": [
-        "supertype: legendary",
         "sacrifice",
         "static ability",
         "triggered ability",
@@ -2439,7 +2385,6 @@
         "number": "170"
       },
       "missing": [
-        "supertype: legendary",
         "static ability",
         "triggered ability",
         "condition (if/unless/as long as)",
@@ -2515,7 +2460,6 @@
         "number": "176"
       },
       "missing": [
-        "supertype: legendary",
         "triggered ability",
         "exile",
         "tokens",
@@ -2557,7 +2501,6 @@
         "number": "179"
       },
       "missing": [
-        "supertype: legendary",
         "triggered ability",
         "sacrifice"
       ]
@@ -2570,7 +2513,6 @@
         "number": "180"
       },
       "missing": [
-        "supertype: legendary",
         "triggered ability",
         "variable amount"
       ]
@@ -2646,7 +2588,6 @@
         "number": "186"
       },
       "missing": [
-        "supertype: legendary",
         "triggered ability",
         "tokens",
         "variable amount"
@@ -2660,7 +2601,6 @@
         "number": "187"
       },
       "missing": [
-        "supertype: legendary",
         "other rules text",
         "triggered ability"
       ]
@@ -2673,7 +2613,6 @@
         "number": "188"
       },
       "missing": [
-        "supertype: legendary",
         "variable power",
         "variable toughness",
         "variable amount",
@@ -2712,7 +2651,6 @@
         "number": "191"
       },
       "missing": [
-        "supertype: legendary",
         "triggered ability",
         "modal choice",
         "counters",
@@ -2741,7 +2679,6 @@
         "number": "193"
       },
       "missing": [
-        "supertype: legendary",
         "triggered ability",
         "tokens"
       ]
@@ -2779,7 +2716,6 @@
         "number": "196"
       },
       "missing": [
-        "supertype: legendary",
         "counters",
         "condition (if/unless/as long as)"
       ]
@@ -2792,7 +2728,6 @@
         "number": "197"
       },
       "missing": [
-        "supertype: legendary",
         "triggered ability",
         "modal choice",
         "graveyard casting",
@@ -2831,7 +2766,6 @@
         "number": "200"
       },
       "missing": [
-        "supertype: legendary",
         "triggered ability",
         "library manipulation",
         "variable amount",
@@ -2883,7 +2817,6 @@
         "number": "204"
       },
       "missing": [
-        "supertype: legendary",
         "triggered ability",
         "variable amount",
         "counters",
@@ -2898,7 +2831,6 @@
         "number": "205"
       },
       "missing": [
-        "supertype: legendary",
         "triggered ability",
         "condition (if/unless/as long as)"
       ]
@@ -2934,7 +2866,6 @@
         "number": "209"
       },
       "missing": [
-        "supertype: legendary",
         "triggered ability",
         "tokens",
         "counters"
@@ -2961,7 +2892,6 @@
         "number": "211"
       },
       "missing": [
-        "supertype: legendary",
         "static ability",
         "triggered ability",
         "tokens"
@@ -2975,7 +2905,6 @@
         "number": "212"
       },
       "missing": [
-        "supertype: legendary",
         "triggered ability"
       ]
     },
@@ -3037,7 +2966,6 @@
         "number": "217"
       },
       "missing": [
-        "supertype: legendary",
         "triggered ability",
         "library manipulation",
         "exile",
@@ -3094,7 +3022,6 @@
         "number": "221"
       },
       "missing": [
-        "supertype: legendary",
         "triggered ability",
         "station",
         "other rules text"
@@ -3108,7 +3035,6 @@
         "number": "222"
       },
       "missing": [
-        "supertype: legendary",
         "triggered ability",
         "station",
         "other rules text"
@@ -3194,7 +3120,6 @@
         "number": "229"
       },
       "missing": [
-        "supertype: legendary",
         "triggered ability",
         "tokens",
         "static ability"
@@ -3208,7 +3133,6 @@
         "number": "230"
       },
       "missing": [
-        "supertype: legendary",
         "triggered ability",
         "modal choice",
         "tap/untap effect",
@@ -3224,7 +3148,6 @@
         "number": "231"
       },
       "missing": [
-        "supertype: legendary",
         "triggered ability",
         "sacrifice"
       ]
@@ -3237,7 +3160,6 @@
         "number": "232"
       },
       "missing": [
-        "supertype: legendary",
         "triggered ability",
         "graveyard casting"
       ]
@@ -3250,7 +3172,6 @@
         "number": "233"
       },
       "missing": [
-        "supertype: legendary",
         "triggered ability",
         "condition (if/unless/as long as)",
         "counters"
@@ -3264,7 +3185,6 @@
         "number": "234"
       },
       "missing": [
-        "supertype: legendary",
         "triggered ability",
         "counters"
       ]
@@ -3277,7 +3197,6 @@
         "number": "235"
       },
       "missing": [
-        "supertype: legendary",
         "triggered ability",
         "tokens"
       ]
@@ -3290,7 +3209,6 @@
         "number": "236"
       },
       "missing": [
-        "supertype: legendary",
         "tap/untap effect",
         "library manipulation"
       ]
@@ -3303,7 +3221,6 @@
         "number": "237"
       },
       "missing": [
-        "supertype: legendary",
         "triggered ability",
         "counters",
         "condition (if/unless/as long as)",
@@ -3318,7 +3235,6 @@
         "number": "238"
       },
       "missing": [
-        "supertype: legendary",
         "triggered ability",
         "condition (if/unless/as long as)",
         "tokens",
@@ -3334,7 +3250,6 @@
         "number": "239"
       },
       "missing": [
-        "supertype: legendary",
         "static ability",
         "triggered ability",
         "discard"
@@ -3375,7 +3290,6 @@
         "number": "242"
       },
       "missing": [
-        "supertype: legendary",
         "condition (if/unless/as long as)",
         "triggered ability"
       ]
@@ -3388,7 +3302,6 @@
         "number": "243"
       },
       "missing": [
-        "supertype: legendary",
         "triggered ability",
         "exile",
         "static ability",
@@ -3415,7 +3328,6 @@
         "number": "245"
       },
       "missing": [
-        "supertype: legendary",
         "static ability",
         "discard"
       ]
@@ -3428,7 +3340,6 @@
         "number": "246"
       },
       "missing": [
-        "supertype: legendary",
         "triggered ability",
         "modal choice",
         "static ability",
@@ -3443,7 +3354,6 @@
         "number": "247"
       },
       "missing": [
-        "supertype: legendary",
         "triggered ability",
         "tokens",
         "sacrifice",
@@ -3473,7 +3383,6 @@
         "number": "249"
       },
       "missing": [
-        "supertype: legendary",
         "triggered ability",
         "condition (if/unless/as long as)",
         "library manipulation",
@@ -3488,7 +3397,6 @@
         "number": "250"
       },
       "missing": [
-        "supertype: legendary",
         "triggered ability",
         "counters"
       ]
@@ -3501,7 +3409,6 @@
         "number": "251"
       },
       "missing": [
-        "supertype: legendary",
         "triggered ability",
         "condition (if/unless/as long as)",
         "counters"
@@ -3515,7 +3422,6 @@
         "number": "252"
       },
       "missing": [
-        "supertype: legendary",
         "triggered ability"
       ]
     },
@@ -3527,7 +3433,6 @@
         "number": "253"
       },
       "missing": [
-        "supertype: legendary",
         "triggered ability",
         "library manipulation"
       ]
@@ -3540,7 +3445,6 @@
         "number": "254"
       },
       "missing": [
-        "supertype: legendary",
         "variable power",
         "variable amount"
       ]
@@ -3553,7 +3457,6 @@
         "number": "255"
       },
       "missing": [
-        "supertype: legendary",
         "triggered ability",
         "library manipulation"
       ]
@@ -3566,7 +3469,6 @@
         "number": "256"
       },
       "missing": [
-        "supertype: legendary",
         "triggered ability",
         "static ability",
         "counters"
@@ -3592,7 +3494,6 @@
         "number": "258"
       },
       "missing": [
-        "supertype: legendary",
         "triggered ability",
         "condition (if/unless/as long as)",
         "exile",
@@ -3658,7 +3559,6 @@
         "number": "263"
       },
       "missing": [
-        "supertype: legendary",
         "triggered ability",
         "exile",
         "station",
@@ -3687,7 +3587,6 @@
         "number": "265"
       },
       "missing": [
-        "supertype: legendary",
         "graveyard casting"
       ]
     },
@@ -3778,7 +3677,6 @@
         "number": "272"
       },
       "missing": [
-        "supertype: legendary",
         "triggered ability",
         "tokens",
         "station",
@@ -3793,7 +3691,6 @@
         "number": "273"
       },
       "missing": [
-        "supertype: legendary",
         "triggered ability",
         "exile",
         "station",
@@ -4082,7 +3979,6 @@
         "number": "297"
       },
       "missing": [
-        "supertype: legendary",
         "variable amount"
       ]
     },

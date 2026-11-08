@@ -28,6 +28,10 @@ Declare one blocker: `{type: "block", object: id, attacker: id}`, `{type: "done"
 
 Cleanup step: discard one card, `{type: "discard", object: id}`, until the hand has 7 cards. `count` is how many remain (CR 514.1).
 
+## legend_rule
+
+Keep one of your legendary permanents named `name`: `{type: "keep", object: id}`; the others go to the graveyard (CR 704.5j).
+
 ## mulligan
 
 Keep the hand (`{type: "keep"}`) or take a London mulligan (`{type: "mulligan"}`). Players declare in turn order; mulligans then happen simultaneously (CR 103.5).

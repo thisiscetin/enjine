@@ -93,6 +93,45 @@ module Enjine
         true
       end
 
+      # CR 704.5j: the legend rule needs a choice, so it runs as a frame before priority.
+      def legend_rule_first!(index)
+        return false if state.frames.any? { it["type"] == "legend_rule" }
+
+        conflict = legend_conflicts.first or return false
+        state.frames << { "type" => "legend_rule", "then" => index, "player" => conflict[0], "name" => conflict[1] }
+        ask!(nil)
+        true
+      end
+
+      # [[controller, card name, [ids]]] for every legend-rule violation.
+      def legend_conflicts
+        groups = state.battlefield.group_by do |id|
+          c = chars(id)
+          c.legendary? ? [object(id).controller, c.name] : nil
+        end
+        groups.filter_map { |key, ids| [key[0], key[1], ids] if key && ids.size > 1 }
+      end
+
+      def legend_candidates(frame)
+        legend_conflicts.find { |player, name, _| player == frame["player"] && name == frame["name"] }&.last || []
+      end
+
+      def step_legend_rule!(frame)
+        candidates = legend_candidates(frame)
+        if candidates.size > 1 && !frame["keep"]
+          ask!("kind" => "legend_rule", "player" => frame["player"], "name" => frame["name"])
+          return :wait
+        end
+        (candidates - [frame["keep"]]).each { move!(it, :graveyard, reason: "sba_legend_rule") }
+        give_priority!(frame["then"]) # state-based actions are checked again (CR 704.3)
+        :done
+      end
+
+      def keep_legend!(id)
+        state.frames.rfind { it["type"] == "legend_rule" }["keep"] = id
+        ask!(nil)
+      end
+
       def creature_sba(obj)
         toughness = toughness(obj)
         return "sba_toughness" if toughness <= 0 # CR 704.5f (indestructible doesn't help)

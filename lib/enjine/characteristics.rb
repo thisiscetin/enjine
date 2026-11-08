@@ -19,6 +19,7 @@ module Enjine
     end
 
     def type?(type) = types.include?(type)
+    def legendary? = supertypes.include?(:legendary)
     def creature? = types.include?(:creature)
     def planeswalker? = types.include?(:planeswalker)
     def land? = types.include?(:land)

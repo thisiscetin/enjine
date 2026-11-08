@@ -15,3 +15,17 @@ Rules: CR 205.4c, CR 100.2a
   ]
 }
 ```
+
+## legendary
+
+If a player controls two or more legendary permanents with the same name, they choose one and put the rest into their owners' graveyards (the legend rule).
+
+Rules: CR 205.4d, CR 704.5j
+
+```json
+{
+  "supertypes": [
+    "legendary"
+  ]
+}
+```
