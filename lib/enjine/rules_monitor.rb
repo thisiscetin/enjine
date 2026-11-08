@@ -267,12 +267,16 @@ module Enjine
     def check_sba!
       view = @game.view_for(:observer)["battlefield"]
       view.each do |perm|
-        if perm.key?("toughness") && (perm["toughness"] <= 0 || (perm["damage"].positive? && perm["damage"] >= perm["toughness"]))
+        lethal = perm.key?("toughness") && perm["damage"].positive? && perm["damage"] >= perm["toughness"] &&
+                 !indestructible?(state.objects[perm["id"]]) # CR 702.12b: lethal damage doesn't destroy it
+        if perm.key?("toughness") && (perm["toughness"] <= 0 || lethal)
           finding("704.5g", "#{perm["id"]} survived with #{perm["damage"]} damage and toughness #{perm["toughness"]}")
         end
         finding("704.5i", "#{perm["id"]} survived with 0 loyalty") if perm.key?("loyalty") && perm["loyalty"] <= 0
       end
     end
+
+    def indestructible?(obj) = keyword?(obj, :indestructible) || static_keyword?(obj, :indestructible)
 
     # CR 514.1: after cleanup the active player has at most seven cards (checked at the next turn's priority).
     def check_hand_size!

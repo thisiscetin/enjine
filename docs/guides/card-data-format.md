@@ -65,7 +65,8 @@ Rules for the agent:
 | `supertypes` | no | list | `basic` (exempt from the 4-copy rule). `legendary` and `snow`: not yet. |
 | `subtypes` | no | list | Lowercase, spaces become `_`: `["human", "wizard"]`. Free-form labels, except the basic land types `plains island swamp mountain forest`, which grant their mana ability automatically (CR 305.6) and are valid only on lands. |
 | `keywords` | no | list | Keyword abilities, lowercase: see `SUPPORTED.md` → *Keyword abilities*. |
-| `power`, `toughness` | creatures | integer | Required for creatures; not allowed on other types. `*` values are not supported yet. |
+| `power`, `toughness` | creatures | integer or amount | Required for creatures; not allowed on other types. A `*` defined by the card ("power is equal to the number of …", CR 604.3) is an amount, see 4.10. |
+| `colors` | no | list | `W U B R G`. Only for a color indicator or a token's colors (CR 202.2e, 111.3); otherwise colors come from the mana cost. |
 | `loyalty` | planeswalkers | integer | Starting loyalty. |
 | `abilities` | no | list | Section 4. |
 | `rules_text` | no | string | Informational only (shown in the CLI). Put the oracle text here. |
@@ -320,6 +321,36 @@ Rule numbers are from the 2026-11-06 Comprehensive Rules.
 - **Strange new worlds** is an ability word: drop it. "The number of differently
   named lands you control" is the amount
   `{ "distinct_names": { "each": "land", "controller": "you" } }`.
+
+### 4.10 Amounts, conditions, "this turn" and static abilities
+
+The full lists are in `lib/enjine/mechanics/values.rb` (`Amount`, `Condition`).
+
+| Oracle words | Data |
+| --- | --- |
+| "+X/+X, where X is its power" | `{ "pump": { "power": { "power": "self" }, "toughness": { "power": "self" }, "to": … } }` |
+| "-X/-X" | `{ "times": [<amount>, -1] }`; also `plus`, `divide` (rounds down, CR 107.1a) |
+| "the number of creature types among …" | `{ "distinct_types": <selector> }` |
+| "the number of counters on it" | `{ "counters": { "of": "self", "kind": "quest" } }` (no `kind`: every counter) |
+| "cards in your graveyard", "greatest power among …" | `{ "graveyard_size": "you" }`, `{ "greatest_power": <selector> }` |
+| "life you gained / that player lost this turn" | `{ "life_gained_this_turn": "you" }`, `{ "life_lost_this_turn": "each_opponent" }` |
+| "the life lost this way" | `{ "this_way": n }` (effect n of the same list) |
+| "if you draw three or more cards this way", "if you do" after a mandatory effect | `{ "amount": { "count": { "result": n } }, "at_least": 3 }` |
+| "while creatures you control have total power 8 or greater" | `"while": { "amount": { "power": { "each": "creature", "controller": "you" } }, "at_least": 8 }` on a trigger (checked only as it triggers) |
+| "if a creature died this turn", "if you've cast a noncreature spell this turn" | `{ "amount": { "died_this_turn": { "each": "creature" } }, "at_least": 1 }`, `{ "spells_cast_this_turn": { "by": "you", "matching": { "spell": { "not": ["creature"] } } } }` |
+| "if this is the second time this ability has resolved this turn" | `{ "nth_resolution": 2 }` |
+| "if it isn't a creature", "if it attacked this turn" | `{ "not": { "source": "creature" } }`, `{ "attacked_this_turn": true }` |
+| "its controller creates …" | `"to": { "controller_of": { "target": 0 } }` |
+| "Add an amount of {G} equal to …" | `{ "add_mana": { "produce": "{G}", "amount": <amount> } }` |
+
+Static abilities (`static`) take `"affects": "self"` and an `if` ("as long as …",
+"during your turn": `{ "your_turn": true }`); `pump` amounts may be computed ("gets
++1/+0 for each …"); `creature_types` sets the creature types ("is a Salamander");
+`abilities` grants triggered or mana abilities ("Creatures you control have '{T}: Add
+{G}{G}.'"). A `*` power or toughness is an amount in the card data (`"power": { "count":
+… }`, CR 604.3). "Becomes a Doctor until end of turn" is `set_creature_types`; "base
+power and toughness become 7/9" is `set_base_power_toughness` (`duration: "indefinite"`).
+A token's or color-indicator card's colors are `"colors": ["R"]`; filters take `"colors"`.
 
 ---
 

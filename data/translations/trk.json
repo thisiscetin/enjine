@@ -1,4 +1,15 @@
 {
+  "Academy Instructor": {
+    "abilities": [
+      {"static":{"affects":"self","pump":{"power":{"count":{"each":{"permanent":{"subtypes":["officer"],"token":true}},"controller":"you"}},"toughness":0}}},
+      {"triggered":{"when":{"cast":{"spell":"noncreature"}},"effects":[{"create_token":{"token":{"name":"Officer","colors":["R"],"types":["creature"],"subtypes":["officer"],"power":1,"toughness":1}}}]}}
+    ]
+  },
+  "Anthropological Mission": {
+    "abilities": [
+      {"triggered":{"when":{"cast":{"spell":"noncreature"}},"effects":[{"add_counters":{"counter":"quest","amount":1,"to":"self"}},{"draw":{"amount":1}},{"discard":{"amount":1,"if":{"amount":{"counters":{"of":"self","kind":"quest"}},"at_most":2}}}]}}
+    ]
+  },
   "Assembly Specialist": {
     "abilities": [
       { "triggered": { "when": { "enters": {} }, "effects": [
@@ -14,6 +25,23 @@
       { "equip": { "cost": [{ "mana": "{2}" }] } }
     ]
   },
+  "Cantankerous Captain": {
+    "abilities": [
+      {"triggered":{"when":{"step_begins":{"step":"beginning_of_combat"}},"targets":[{"creature":{"controller":"you"}}],"effects":[{"pump":{"power":1,"toughness":0,"to":{"target":0}}},{"grant":{"keywords":["menace"],"to":{"target":0},"if":{"amount":{"power":{"each":"creature","controller":"you"}},"at_least":8}}}]}}
+    ]
+  },
+  "Captain Jonathan Archer": {
+    "abilities": [
+      {"triggered":{"when":{"enters":{}},"effects":[{"create_token":{"token":{"name":"Porthos","colors":["G"],"supertypes":["legendary"],"types":["creature"],"subtypes":["dog"],"power":1,"toughness":1}}}]}},
+      {"activated":{"cost":[{"mana":"{G}"},"tap"],"timing":"sorcery","targets":[{"creature":{"controller":"you"}}],"effects":[{"pump":{"power":{"distinct_types":{"each":{"creature":{"not_subtypes":["borg"]}},"controller":"you"}},"toughness":{"distinct_types":{"each":{"creature":{"not_subtypes":["borg"]}},"controller":"you"}},"to":{"target":0}}}]}}
+    ]
+  },
+  "Captain Michael Burnham": {
+    "keywords": ["trample"],
+    "abilities": [
+      {"triggered":{"when":{"enters":{"subject":{"each":"land","controller":"you"}}},"effects":[{"deal_damage":{"amount":1,"to":"each_opponent"}},{"add_counters":{"counter":"+1/+1","amount":1,"to":"self","if":{"nth_resolution":2}}}]}}
+    ]
+  },
   "Cleveland Booker, Empath": {
     "abilities": [
       { "triggered": { "when": { "enters": { "subject": { "each": "land", "controller": "you" } } }, "effects": [
@@ -23,10 +51,25 @@
         { "pump": { "power": 2, "toughness": 0, "to": { "each": "creature", "controller": "you" } } } ] } }
     ]
   },
+  "Cloak and Phaser": {
+    "abilities": [
+      {"spell":{"effects":[{"create_token":{"token":{"name":"Romulan","colors":["B"],"types":["creature"],"subtypes":["romulan"],"power":2,"toughness":2},"amount":2}},{"draw":{"amount":2}},{"discard":{"amount":1}}]}},
+      {"cost_reduction":{"amount":{"distinct_names":{"each":"land","controller":"you"}}}}
+    ]
+  },
+  "Collective Drone": {
+    "power": {"count":{"each":{"creature":{"types":["artifact"]}},"controller":"you"}},
+    "toughness": 2
+  },
   "Command Subadjunct": {
     "abilities": [
       { "static": { "affects": { "each": { "creature": { "any_of": ["artifact"] } }, "controller": "you" },
                     "keywords": ["vigilance"] } }
+    ]
+  },
+  "Conquest Mission": {
+    "abilities": [
+      {"triggered":{"when":{"enters":{"subject":{"each":{"artifact":{"token":false}},"controller":"you"}}},"effects":[{"add_counters":{"counter":"quest","amount":1,"to":"self"}},{"create_token":{"token":{"name":"Borg","types":["artifact","creature"],"subtypes":["borg"],"power":1,"toughness":1},"if":{"amount":{"counters":{"of":"self","kind":"quest"}},"at_most":5}}},{"create_token":{"token":{"name":"Borg","types":["artifact","creature"],"subtypes":["borg"],"power":1,"toughness":1},"amount":2,"if":{"amount":{"counters":{"of":"self","kind":"quest"}},"at_least":6}}}]}}
     ]
   },
   "Culber and Stamets, Star-Crossed": {
@@ -35,6 +78,13 @@
         { "targets": ["creature"],
           "effects": [{ "add_counters": { "counter": "+1/+1", "amount": 1, "to": { "target": 0 } } }] },
         { "effects": [{ "add_mana": { "amount": 2, "color": "any_one" } }] } ] } }
+    ]
+  },
+  "De-evolve": {
+    "abilities": [
+      {"enchant":"creature"},
+      {"static":{"affects":"attached","pump":{"power":-4,"toughness":0},"keywords":["cant_block"],"creature_types":["salamander"]}},
+      {"triggered":{"when":{"step_begins":{"step":"upkeep","whose":"each"}},"if":{"amount":{"graveyard_size":"you"},"at_least":7},"effects":[{"exile":{"to":"attached"}}]}}
     ]
   },
   "Federation Field Medic": {
@@ -50,6 +100,113 @@
                               "at_least": 1 } } } ] } ] } }
     ]
   },
+  "Genesis Effect": {
+    "abilities": [
+      {"spell":{"targets":["creature",{"land":{"controller":"you"}}],"effects":[{"deal_damage":{"amount":6,"to":{"target":0}}},{"destroy":{"to":{"target":1}}},{"create_token":{"token":{"name":"New Planet","types":["land"],"subtypes":["planet"],"abilities":[{"mana":{"cost":["tap"],"produce":"{W}"}},{"mana":{"cost":["tap"],"produce":"{U}"}},{"mana":{"cost":["tap"],"produce":"{B}"}},{"mana":{"cost":["tap"],"produce":"{R}"}},{"mana":{"cost":["tap"],"produce":"{G}"}}]},"tapped":true}}]}}
+    ]
+  },
+  "Gul Dukat, Colonial Prefect": {
+    "keywords": ["menace"],
+    "abilities": [
+      {"triggered":{"when":{"step_begins":{"step":"end","whose":"each"}},"effects":[{"lose_life":{"amount":{"life_lost_this_turn":"each_opponent"},"to":"each_opponent"}},{"gain_life":{"amount":{"this_way":0}}}]}}
+    ]
+  },
+  "Hologram Janeway": {
+    "abilities": [
+      {"triggered":{"when":{"player_attacks":{}},"while":{"amount":{"power":{"each":"creature","controller":"you"}},"at_least":8},"targets":["creature"],"effects":[{"add_counters":{"counter":"+1/+1","amount":1,"to":{"target":0}}}]}}
+    ]
+  },
+  "I'm a Doctor, Not a . . .": {
+    "abilities": [
+      {"spell":{"targets":[{"creature":{"controller":"you"}}],"effects":[{"add_counters":{"counter":"+1/+1","amount":1,"to":{"target":0}}},{"untap":{"to":{"target":0}}},{"pump":{"power":1,"toughness":1,"to":{"target":0}}},{"set_creature_types":{"types":["doctor"],"to":{"target":0}}}]}}
+    ]
+  },
+  "Impossible Choice": {
+    "abilities": [
+      {"spell":{"choose":1,"modes":[{"targets":["creature"],"effects":[{"destroy":{"to":{"target":0}}},{"create_token":{"token":{"name":"Officer","colors":["R"],"types":["creature"],"subtypes":["officer"],"power":1,"toughness":1},"amount":2,"to":{"controller_of":{"target":0}}}}]},{"effects":[{"draw":{"amount":2}},{"lose_life":{"amount":2,"to":{"each":"player"}}}]}]}}
+    ]
+  },
+  "Jadzia Dax, Living Legacy": {
+    "abilities": [
+      {"triggered":{"when":{"step_begins":{"step":"precombat_main"}},"effects":[{"add_counters":{"counter":"+1/+1","amount":1,"to":"self"}},{"add_mana":{"produce":"{G}","amount":{"counters":{"of":"self"}}}}]}},
+      {"activated":{"cost":[{"mana":"{2}{G}"},"discard_self"],"targets":["creature"],"effects":[{"add_counters":{"counter":"+1/+1","amount":2,"to":{"target":0}}}]}}
+    ]
+  },
+  "Jake Sisko, War Correspondent": {
+    "abilities": [
+      {"triggered":{"when":{"enters":{"subject":{"each":"land","controller":"you"}}},"effects":[{"gain_life":{"amount":1}},{"create_token":{"token":"Clue","if":{"nth_resolution":2}}}]}}
+    ]
+  },
+  "La'An Noonien-Singh, Security": {
+    "abilities": [
+      {"triggered":{"when":{"player_attacks":{}},"while":{"amount":{"power":{"each":"creature","controller":"you"}},"at_least":8},"targets":["creature"],"effects":[{"grant":{"keywords":["cant_block"],"to":{"target":0}}}]}}
+    ]
+  },
+  "Locutus, the One Who Speaks": {
+    "abilities": [
+      {"static":{"affects":{"each":{"creature":{"types":["artifact"]}},"controller":"you"},"pump":{"power":1,"toughness":1}}},
+      {"activated":{"cost":[{"mana":"{W}{B}"},"discard_self"],"targets":["creature"],"effects":[{"deal_damage":{"amount":2,"to":{"target":0}}},{"gain_life":{"amount":2}}]}}
+    ]
+  },
+  "Make It So": {
+    "abilities": [
+      {"spell":{"choose":1,"modes":[{"targets":[{"permanent":{"controller":"you"}},"player"],"effects":[{"untap":{"to":{"target":0}}},{"draw":{"amount":2,"to":{"target":1}}}]},{"effects":[{"create_token":{"token":{"name":"Officer","colors":["R"],"types":["creature"],"subtypes":["officer"],"power":1,"toughness":1}}},{"draw":{"amount":2}}]}]}}
+    ]
+  },
+  "Pah-Wraith": {
+    "keywords": ["first_strike","haste"],
+    "abilities": [
+      {"triggered":{"when":{"attacks":{}},"effects":[{"pump":{"power":{"distinct_names":{"each":"land","controller":"you"}},"toughness":0,"to":{"each":"creature","controller":"you"}}}]}}
+    ]
+  },
+  "Picard, Leading by Example": {
+    "abilities": [
+      {"activated":{"cost":[{"mana":"{1}"},"tap"],"timing":"sorcery","targets":[{"creature":{"other":true}}],"effects":[{"pump":{"power":{"power":"self"},"toughness":{"power":"self"},"to":{"target":0}}}]}}
+    ]
+  },
+  "Planetary Bombardment": {
+    "abilities": [
+      {"spell":{"targets":["creature"],"effects":[{"deal_damage":{"amount":2,"to":{"target":0},"if":{"amount":{"died_this_turn":{"each":"creature"}},"at_most":0}}},{"deal_damage":{"amount":4,"to":{"target":0},"if":{"amount":{"died_this_turn":{"each":"creature"}},"at_least":1}}}]}}
+    ]
+  },
+  "Resistance Is Futile": {
+    "abilities": [
+      {"spell":{"choose":1,"modes":[{"targets":[{"creature":{"not":["artifact"]}}],"effects":[{"destroy":{"to":{"target":0}}}]},{"targets":[{"graveyard_card":{"controller":"you","types":["artifact","creature"],"mana_value":{"at_most":3}}}],"effects":[{"return_to_battlefield":{"to":{"target":0}}}]}]}}
+    ]
+  },
+  "Rok-Tahk, Budding Scientist": {
+    "abilities": [
+      {"static":{"affects":{"each":"creature","controller":"you"},"abilities":[{"mana":{"cost":["tap"],"produce":"{G}{G}"}}]}},
+      {"triggered":{"when":{"enters":{}},"effects":[{"create_token":{"token":{"name":"Murf","colors":["G"],"supertypes":["legendary"],"types":["creature"],"subtypes":["ooze","slug"],"keywords":["indestructible"],"power":0,"toughness":1}}}]}}
+    ]
+  },
+  "Romulan Bird-of-Prey": {
+    "keywords": ["station"],
+    "abilities": [
+      {"static":{"affects":"self","if":{"not":{"source":"creature"}},"keywords":["hexproof"]}},
+      {"triggered":{"when":{"cast":{"spell":"noncreature"}},"if":{"not":{"source":"creature"}},"effects":[{"add_counters":{"counter":"charge","amount":2,"to":"self"}}]}},
+      {"station_symbol":{"at":8,"power":4,"toughness":4,"keywords":["flying"]}}
+    ]
+  },
+  "Saavik, Stoic Student": {
+    "keywords": ["flash"],
+    "abilities": [
+      {"triggered":{"when":{"enters":{}},"targets":[{"one_of":[{"creature":{"attacking":true,"controller":"opponent"}},{"creature":{"blocking":true,"controller":"opponent"}}]}],"effects":[{"deal_damage":{"amount":{"distinct_types":{"each":{"creature":{"not_subtypes":["borg"]}},"controller":"you"}},"to":{"target":0}}}]}}
+    ]
+  },
+  "Sarcophagus, Ship of the Dead": {
+    "keywords": ["station"],
+    "abilities": [
+      {"static":{"affects":{"each":"creature","controller":"you","other":true},"pump":{"power":1,"toughness":0}}},
+      {"triggered":{"when":{"dies":{"subject":{"each":"creature"}}},"if":{"not":{"source":"creature"}},"effects":[{"add_counters":{"counter":"charge","amount":1,"to":"self"}}]}},
+      {"station_symbol":{"at":10,"power":4,"toughness":4,"keywords":["flying"]}}
+    ]
+  },
+  "Sarek, Federation Ambassador": {
+    "abilities": [
+      {"triggered":{"when":{"step_begins":{"step":"beginning_of_combat"}},"effects":[{"draw":{"amount":{"divide":[{"distinct_types":{"each":{"creature":{"not_subtypes":["borg"]}},"controller":"you"}},5]}}},{"add_counters":{"counter":"+1/+1","amount":2,"to":{"each":"creature","controller":"you"},"if":{"amount":{"count":{"result":0}},"at_least":3}}}]}}
+    ]
+  },
   "Set Phasers to . . .": {
     "abilities": [
       { "spell": { "choose": 1, "modes": [
@@ -58,6 +215,28 @@
           { "add_counters": { "counter": "stun", "amount": 1, "to": { "target": 0 } } } ] },
         { "targets": [{ "creature": { "attacking": true } }], "effects": [
           { "deal_damage": { "amount": 3, "to": { "target": 0 } } } ] } ] } }
+    ]
+  },
+  "Sickbay": {
+    "abilities": [
+      {"triggered":{"when":{"enters":{"subject":{"each":"creature","controller":"you"}}},"effects":[{"gain_life":{"amount":1}}]}},
+      {"triggered":{"when":{"step_begins":{"step":"beginning_of_combat"}},"targets":[{"creature":{"controller":"you"}}],"effects":[{"add_counters":{"counter":"+1/+1","amount":{"plus":[1,{"life_gained_this_turn":"you"}]},"to":{"target":0}}}]}}
+    ]
+  },
+  "Starfleet Spanner Jockey": {
+    "keywords": ["defender"],
+    "abilities": [
+      {"static":{"affects":"self","keywords":["attacks_despite_defender"],"if":{"amount":{"spells_cast_this_turn":{"by":"you","matching":{"spell":{"not":["creature"]}}}},"at_least":1}}}
+    ]
+  },
+  "Tactical Officer": {
+    "abilities": [
+      {"triggered":{"when":{"player_attacks":{}},"while":{"amount":{"power":{"each":"creature","controller":"you"}},"at_least":8},"effects":[{"add_counters":{"counter":"+1/+1","amount":1,"to":"self"}},{"untap":{"to":"self"}}]}}
+    ]
+  },
+  "Tal Shiar Operative": {
+    "abilities": [
+      {"triggered":{"when":{"attacks":{}},"choose":1,"modes":[{"targets":[{"creature":{"controller":"you"}}],"effects":[{"grant":{"keywords":["deathtouch"],"to":{"target":0}}}]},{"effects":[{"surveil":{"amount":1}}]}]}}
     ]
   },
   "Test of Conviction": {
@@ -105,6 +284,31 @@
     "abilities": [
       { "triggered": { "when": { "dies": {} }, "targets": ["any_target"], "effects": [
         { "deal_damage": { "amount": 1, "to": { "target": 0 } } } ] } }
+    ]
+  },
+  "Test of Identity": {
+    "abilities": [
+      {"spell":{"choose":1,"modes":[{"targets":[{"creature":{"subtypes":["klingon"]}}],"effects":[{"pump":{"power":1,"toughness":1,"to":{"target":0}}},{"grant":{"keywords":["double_strike"],"to":{"target":0}}}]},{"effects":[{"discard":{"amount":1}},{"draw":{"amount":2,"if":{"amount":{"count":{"result":0}},"at_least":1}}}]}]}}
+    ]
+  },
+  "The Destruction of Praxis": {
+    "abilities": [
+      {"spell":{"effects":[{"pump":{"power":{"times":[{"distinct_names":{"each":"land","controller":"you"}},-1]},"toughness":{"times":[{"distinct_names":{"each":"land","controller":"you"}},-1]},"to":{"each":"creature"}}},{"create_token":{"token":{"name":"Klingon Warrior","colors":["R"],"types":["creature"],"subtypes":["klingon","warrior"],"keywords":["haste"],"power":2,"toughness":1},"amount":2,"if":{"amount":{"distinct_names":{"each":"land","controller":"you"}},"at_least":6}}}]}}
+    ]
+  },
+  "The Traveler": {
+    "keywords": ["reach","vigilance"],
+    "power": {"distinct_names":{"each":"land","controller":"you"}},
+    "toughness": 3
+  },
+  "Una Chin-Riley, Number One": {
+    "abilities": [
+      {"triggered":{"when":{"player_attacks":{}},"while":{"amount":{"power":{"each":"creature","controller":"you"}},"at_least":8},"targets":[{"creature":{"attacking":true}}],"effects":[{"pump":{"power":2,"toughness":0,"to":{"target":0}}},{"grant":{"keywords":["first_strike"],"to":{"target":0}}}]}}
+    ]
+  },
+  "Vengeance Mission": {
+    "abilities": [
+      {"triggered":{"when":{"dies":{"subject":{"each":"creature"}}},"targets":["opponent"],"effects":[{"add_counters":{"counter":"quest","amount":1,"to":"self"}},{"lose_life":{"amount":1,"to":{"target":0},"if":{"amount":{"counters":{"of":"self","kind":"quest"}},"at_most":6}}},{"lose_life":{"amount":2,"to":{"target":0},"if":{"amount":{"counters":{"of":"self","kind":"quest"}},"at_least":7}}}]}}
     ]
   }
 }

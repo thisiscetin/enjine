@@ -135,21 +135,35 @@ Still to do:
 
 - Read ahead (702.155) and Saga creatures (715.1a) are untested; no trk card needs them.
 - 702.184c (effects that change what station counts).
-- "Dilemmas faced this turn" (Captain Benjamin Sisko, The Caretaker): needs a
-  per-player per-turn count in `PlayerState` (and the scenario helper).
+- Done: "dilemmas faced this turn" is the amount `{"dilemmas_this_turn": "you"}`
+  (`PlayerState#turn_log`, see `Engine::TurnHistory`).
 - Assimilate's linked "exiled with" ability (701.72c, 607) for Borg Cube.
-- Strange new worlds cost reductions, `pump` with computed amounts, and
-  characteristic-defining P/T (Captain Pike, The Traveler) belong to F8/F10.
-- `RulesMonitor` doesn't add static-ability pumps in its independent P/T check,
-  so the converter's static-line pattern stays case-sensitive for now (enabling
-  "Artifact creatures you control get +1/+0" makes the monitor report false
-  findings).
+- Done: strange new worlds cost reductions (`cost_reduction` with a `distinct_names`
+  amount), `pump` with computed amounts, and characteristic-defining P/T (card data
+  `"power": <amount>`, layer 7a).
+- Done: `RulesMonitor` adds static-ability pumps (fixed, computed, conditional) in its
+  independent P/T check, so the converter's static-line pattern matches
+  "Artifact creatures you control get +1/+1" case-insensitively.
 
 Converted with these mechanics (converter phrasings or `data/translations/trk.json`):
 Class-F Shuttlecraft, Suurok-Class Science Vessel, U.S.S. Cerritos, U.S.S. Excelsior
 (station); Year of Hell (Saga); Elim Garak, Obsidian Order Operative, Melkotian
 Adjudicator, Seven of Nine (dilemma); Death Is Irrelevant (assimilate, translation);
 Excalbian Gamemaster (strange new worlds, translation).
+
+Amounts, conditions, turn history, statics and layers (translations): Academy Instructor,
+Anthropological Mission, Cantankerous Captain, Captain Jonathan Archer, Captain Michael
+Burnham, Cloak and Phaser, Collective Drone, Conquest Mission, De-evolve, Genesis Effect,
+Gul Dukat, Hologram Janeway, I'm a Doctor, Impossible Choice, Jadzia Dax, Jake Sisko,
+La'An Noonien-Singh, Locutus, Make It So, Pah-Wraith, Picard, Planetary Bombardment,
+Resistance Is Futile, Rok-Tahk, Romulan Bird-of-Prey, Saavik, Sarcophagus, Sarek,
+Sickbay, Starfleet Spanner Jockey, Tactical Officer, Tal Shiar Operative, Test of
+Identity, The Destruction of Praxis, The Traveler, Una Chin-Riley, Vengeance Mission.
+Waiting on other capabilities: Miles O'Brien ("up to one" target), Seven of Nine
+(activation restriction; the 7b setting effect is done), Grand Nagus Zek (once-each-turn
+trigger), Shuttle Ace and Hemmer ("becomes tapped" trigger), Targ Wrangler (choose and
+sacrifice), Antagonist Incorporator and Hive Mind Coprocessor (a cost paid inside "may";
+granting the triggered ability is done).
 
 ## Pipeline
 
