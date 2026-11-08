@@ -321,6 +321,34 @@ Rule numbers are from the 2026-11-06 Comprehensive Rules.
   named lands you control" is the amount
   `{ "distinct_names": { "each": "land", "controller": "you" } }`.
 
+### 4.10 Casting and playing from other zones
+
+- **Beam me up** (CR 702.196): `{ "beam_me_up": { "cost": "{3}{W}" } }` on an instant
+  or sorcery. A permanent that gives the cards in its controller's graveyard beam me up
+  during their main phase, for each card's own mana cost, has the ability
+  `"grants_beam_me_up"`; that permanent can't be the creature returned for spells cast
+  its way. A creature that can never be returned for a beam me up cost has the keyword
+  `"cant_be_beamed_up"`.
+- **A card castable from its owner's graveyard or exile**:
+  `{ "play_from": { "zone": "graveyard" } }`; add `"enters_with": { "finality": 1 }`
+  when a permanent spell cast that way gets a finality counter.
+- **A permanent's permission** for its controller's own cards: give `cards` a card
+  spec. Casting an artifact spell from the top of the library once per turn (on your
+  own turns) is `{ "play_from": { "zone": "library_top", "cards": { "types":
+  ["artifact"] }, "once_each_turn": true } }`; playing lands from the top uses
+  `"cards": { "types": ["land"] }, "play": "play"`. Seeing the top card of your library
+  at all times (CR 401.5) is the ability `"look_at_top"`.
+- **Impulse draw**: `exile_top` (or `exile_until` with `"until": "nonland"`) followed by
+  `{ "play_permission": { "to": { "result": 0 }, "duration": "end_of_your_next_turn" } }`
+  (`end_of_turn` for the current turn only, `while_exiled` for as long as the cards stay
+  in exile). `not_types: ["land"]` keeps only the nonland card an exile-until found;
+  `"choose": "one_per_owner"` with `"for": { "types": ["land"] }` makes the controller
+  pick one matching card per owner among the exiled ones.
+- **Casting while resolving without paying mana costs** (CR 608.2g):
+  `{ "cast_free": { "to": { "result": 0 }, "max_mana_value": 3, "count": "any" } }`;
+  with no `to` it offers matching cards from your hand. **Discover N** (CR 701.57) is
+  `{ "discover": { "amount": 5 } }`.
+
 ---
 
 ## 5. Worked examples

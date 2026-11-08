@@ -32,7 +32,7 @@ RSpec.describe "Play permissions, beam me up, free casts: card data validation (
                                              "once_each_turn" => true } }, "look_at_top"])))
       .to eq(["you may cast this card from your graveyard; it enters with 1 finality counter(s)",
               "Once during each of your turns, you may play land cards from the top of your library",
-              "You may look at the top card of your library any time"])
+              "Its controller sees the top card of their library (CR 401.5)"])
     expect(errors_for(creature(["look_at_top", { "look_at_top" => { "x" => 1 } }])))
       .to eq(["abilities[1].look_at_top: unknown parameter \"x\""])
   end

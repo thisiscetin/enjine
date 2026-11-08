@@ -49,7 +49,7 @@ module Enjine
       view
     end
 
-    # CR 401.5: "you may look at the top card of your library any time" shows it to that player only.
+    # CR 401.5: an effect letting a player look at the top card of their library shows it to that player only.
     def looks_at_top?(engine, player)
       !player.library.empty? && engine.may_look_at_top?(engine.state.players.index(player))
     end

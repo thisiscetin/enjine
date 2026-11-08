@@ -2,8 +2,8 @@
 
 module Enjine
   class Engine
-    # Playing cards from zones other than the hand (CR 601.3, 116.2a, 305.1): "you may cast this card
-    # from your graveyard", impulse draw ("you may play those cards until the end of your next turn"),
+    # Playing cards from zones other than the hand (CR 601.3, 116.2a, 305.1): a card's own permission
+    # to be cast from the graveyard or exile, impulse draw (exiled cards playable for a while),
     # beam me up (CR 702.196) and casting during resolution without paying the mana cost (CR 608.2g,
     # 118.9).
     #
@@ -125,7 +125,7 @@ module Enjine
         end
       end
 
-      # The card's own "you may cast this card from your graveyard/exile" (CR 113.6e-f): its owner's.
+      # The card's own permission to be cast from its graveyard or exile (CR 113.6e-f): its owner's.
       def own_methods(index, obj)
         return [] unless obj.owner == index
 
@@ -176,7 +176,7 @@ module Enjine
         end
       end
 
-      # "Once during each of your turns": the permanent remembers the turn it was last used.
+      # A once-per-turn permission: the permanent remembers the turn it was last used.
       def once_used?(perm, ref) = perm.memory.fetch("play_from_turns", {})[ref] == state.turn
 
       def use_play_method!(method)
@@ -187,9 +187,8 @@ module Enjine
 
       # ---- permissions granted by effects -------------------------------------------------------
 
-      # "You may play those cards this turn / until the end of your next turn / for as long as they remain
-      # exiled" (CR 611.2): a continuous effect for the exiled objects (a card that leaves exile is a new
-      # object, CR 400.7, so the permission ends with it).
+      # Permission to play exiled cards for a duration (CR 611.2): a continuous effect for the exiled
+      # objects (a card that leaves exile is a new object, CR 400.7, so the permission ends with it).
       def grant_play_permission!(index, ids, duration:, play:)
         return if ids.empty?
 
@@ -198,8 +197,8 @@ module Enjine
         emit Events::EffectStarted.new(kind: "permission", affected: ids, details: { "duration" => duration, "play" => play })
       end
 
-      # CR 514.2: at cleanup, "until the end of your next turn" ends on its controller's next turn, and a
-      # permission whose cards all left exile is gone. ("This turn" ones end with the other
+      # CR 514.2: at cleanup, an end_of_your_next_turn permission ends on its controller's next turn, and a
+      # permission whose cards all left exile is gone. (end_of_turn ones end with the other
       # until-end-of-turn effects.)
       def expire_permissions!
         state.effects.reject! do |e|
@@ -286,7 +285,7 @@ module Enjine
 
       # ---- looking at the top card (CR 401.5) ------------------------------------------------
 
-      # "You may look at the top card of your library any time."
+      # A permanent letting its controller look at the top card of their library at any time.
       def may_look_at_top?(index)
         state.battlefield.any? do |id|
           obj = object(id)

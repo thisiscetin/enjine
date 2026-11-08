@@ -30,9 +30,9 @@ module Enjine
     end
 
     module Abilities
-      # "You may cast this card from your graveyard" (CR 113.6e-f, 601.3) and permanents' "you may play lands
-      # from the top of your library" / "once during each of your turns, you may cast an artifact spell from
-      # your graveyard" (CR 604.1). Offered as cast / play_land options with a `via`.
+      # A card's own permission to be cast from a zone other than the hand (CR 113.6e-f, 601.3), or a
+      # permanent's static permission for its controller's cards in a zone, possibly limited to once per
+      # turn (CR 604.1). Offered as cast / play_land options with a `via`.
       class PlayFrom < Primitive
         ZONES = %w[graveyard exile library_top].freeze
         PLAYS = %w[cast play].freeze
@@ -97,7 +97,7 @@ module Enjine
         end
       end
 
-      # "You may look at the top card of your library any time." (CR 401.5)
+      # Looking at the top card of your library at any time (CR 401.5).
       class LookAtTop < Primitive
         primitive :ability, :look_at_top,
                   description: "While this permanent is on the battlefield, its controller sees the top card of " \
@@ -115,7 +115,7 @@ module Enjine
         def mana_ability? = false
         def allowed_types = nil
         def try_effects = []
-        def to_s = "You may look at the top card of your library any time"
+        def to_s = "Its controller sees the top card of their library (CR 401.5)"
       end
     end
 
@@ -137,7 +137,7 @@ module Enjine
         end
       end
 
-      # "Exile cards from the top of your library until you exile a nonland card" (CR 701.13).
+      # Exiling cards from the top of a library one at a time until a nonland card is exiled (CR 701.13).
       class ExileUntil < Effect
         UNTIL = %w[nonland].freeze
 
@@ -168,10 +168,8 @@ module Enjine
         end
       end
 
-      # "You may play those cards this turn / until the end of your next turn / for as long as they remain
-      # exiled" (CR 611.2, 601.3): a permission for exiled cards (see Engine::Permissions). With `choose`,
-      # the controller first chooses one matching card per owner ("for each opponent, choose a land card
-      # that player owns exiled this way").
+      # Permission to play exiled cards for a duration (CR 611.2, 601.3; see Engine::Permissions). With
+      # `choose`, the controller first chooses one matching card per owner among them.
       class PlayPermission < ChoiceEffect
         DURATIONS = %w[end_of_turn end_of_your_next_turn while_exiled].freeze
 
@@ -235,7 +233,7 @@ module Enjine
         end
       end
 
-      # "You may cast [cards] without paying their mana costs" during resolution (CR 608.2g, 118.9, 601.2a):
+      # Optional casting without paying mana costs during resolution (CR 608.2g, 118.9, 601.2a):
       # the controller picks a card, casts it right away (a cast frame on top of the resolving one; nobody
       # gets priority), then the resolution goes on. `count: "any"` repeats until they stop.
       class CastFree < ChoiceEffect

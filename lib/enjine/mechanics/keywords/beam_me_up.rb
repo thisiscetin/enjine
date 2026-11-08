@@ -38,10 +38,9 @@ module Enjine
         def to_s = "Beam me up #{cost}"
       end
 
-      # "During your main phase, each card in your graveyard has beam me up. The beam me up cost is equal to
-      # that spell's mana cost." (CR 702.196a): a static ability of a permanent, for its controller's
-      # instant and sorcery cards with a mana cost. The permanent itself can't be beamed up to cast a spell
-      # this way (CR 702.196b).
+      # A static ability of a permanent giving beam me up (CR 702.196a), during its controller's main phase,
+      # to the instant and sorcery cards with a mana cost in their graveyard, each card's mana cost being its
+      # beam me up cost. The permanent itself can't be returned to cast a spell this way (CR 702.196b).
       class GrantsBeamMeUp < Primitive
         primitive :ability, :grants_beam_me_up,
                   description: "While this permanent is on the battlefield, during your main phase each instant and " \
