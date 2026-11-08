@@ -47,7 +47,10 @@ RSpec.describe Enjine::Frames do
         :wait
       end
     end.new
-    fake_ability = Struct.new(:targets, :effects).new([Enjine::Mechanics::Filters::AnyTarget], [pausing])
+    fake_ability = Struct.new(:targets, :effects) do
+      def targets_for(_chosen) = targets
+      def effect_plan(_chosen) = effects.map { [it, 0, targets.size] }
+    end.new([Enjine::Mechanics::Filters::AnyTarget], [pausing])
     allow(game.instance_variable_get(:@engine)).to receive(:resolving_ability).and_return(fake_ability)
     allow(Enjine::Frames::Resolve).to receive(:decisions).and_return(["priority"])
     pass_both(game)

@@ -21,11 +21,12 @@ module Enjine
         start_resolution!(frame, obj, ability) if frame["pc"].nil?
         return finish_fizzle!(frame, obj) if frame["fizzled"]
 
-        effects = ability&.effects || []
-        ctx = effect_context(frame["ctx"])
-        while frame["pc"] < effects.size
+        plan = ability ? ability.effect_plan(obj.modes || []) : []
+        while frame["pc"] < plan.size
+          effect, offset, count = plan[frame["pc"]]
+          ctx = effect_context(frame["ctx"], offset, count)
           locals = (frame["locals"][frame["pc"].to_s] ||= {})
-          return :wait if effects[frame["pc"]].run(self, ctx, locals) == :wait
+          return :wait if effect.run(self, ctx, locals) == :wait
 
           frame["pc"] += 1
         end
@@ -36,7 +37,7 @@ module Enjine
 
       # CR 608.2b: targets are checked once, as resolution begins.
       def start_resolution!(frame, obj, ability)
-        specs = ability&.targets || []
+        specs = ability&.targets_for(obj.modes || []) || []
         targets = legal_targets(obj, specs)
         frame["pc"] = 0
         frame["fizzled"] = !specs.empty? && targets.none?
@@ -44,8 +45,10 @@ module Enjine
                          "object" => obj.id, "targets" => targets }
       end
 
-      def effect_context(data)
-        Mechanics::EffectContext.new(data["controller"], data["source"], data["object"], data["targets"])
+      # The context for one effect; a modal ability's effects see only their mode's targets.
+      def effect_context(data, offset = 0, count = nil)
+        targets = count ? data["targets"][offset, count] || [] : data["targets"]
+        Mechanics::EffectContext.new(data["controller"], data["source"], data["object"], targets)
       end
 
       def finish_fizzle!(_frame, obj)

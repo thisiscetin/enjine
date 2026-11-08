@@ -12,6 +12,10 @@ Assign one point of combat damage of `attacker`: `{type: "assign", object: block
 
 Right after a mulligan, put one card from the new hand on the bottom of the library: `{type: "bottom", object: id}`, once per mulligan taken so far, before declaring again. Hidden from the opponent (CR 103.5).
 
+## choose_mode
+
+Choose a mode of a modal ("choose one") spell or ability: `{type: "mode", mode: index}` (0-based, in printed order); `{type: "cancel"}` rewinds a cast. `choose` modes in total.
+
 ## choose_target
 
 While casting/activating: `{type: "target", target: ref}` for the next target (ref is an object id or "player:<name>"), or `{type: "cancel"}` to rewind the whole cast.

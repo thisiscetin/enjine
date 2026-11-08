@@ -85,10 +85,16 @@ module SetConverter
     abilities = []
     spell_effects = []
     spell_targets = []
+    spell_modes = []
+    text = fold_modes(text)
     text.split("\n").map(&:strip).reject(&:empty?).each do |line|
       if (kw = keyword_line(line))
         unknown = kw - SUPPORTED_KEYWORDS.to_a
         unknown.empty? ? keywords.concat(kw) : missing.concat(unknown.map { "keyword: #{it}" })
+      elsif (modal = modal_line(line, data))
+        modal[:spell] ? spell_modes.replace(modal[:spell]) : abilities << modal[:ability]
+      elsif line.start_with?("CHOOSE")
+        missing << "modal choice"
       elsif (triggered = triggered_ability(line))
         abilities << triggered
       elsif line.match?(/\ACARDNAME enters tapped\.\z/)
@@ -107,6 +113,7 @@ module SetConverter
       end
     end
     data["keywords"] = keywords.uniq unless keywords.empty?
+    abilities.unshift({ "spell" => { "choose" => spell_modes.first, "modes" => spell_modes.drop(1) } }) unless spell_modes.empty?
     unless spell_effects.empty?
       abilities.unshift({ "spell" => { "targets" => spell_targets, "effects" => spell_effects }.reject do |_, v|
         v.empty?
@@ -150,6 +157,35 @@ module SetConverter
 
   # "{T}: Add {G}." / "{T}: Add {W} or {U}." / "{T}: Add one mana of any color." Choices between
   # kinds of mana become one mana ability per kind: the same decisions, no new rules.
+  # "Choose one —" followed by "• mode" lines becomes one line: "CHOOSE n|prefix|mode|mode".
+  CHOOSE_WORDS = { "one" => 1, "two" => 2 }.freeze
+
+  def fold_modes(text)
+    text.gsub(/^(.*?)[Cc]hoose (one|two) —((?:\n• .+)+)/) do
+      prefix = ::Regexp.last_match(1).strip
+      modes = ::Regexp.last_match(3).split("\n• ").map(&:strip).reject(&:empty?)
+      "CHOOSE #{CHOOSE_WORDS.fetch(::Regexp.last_match(2))}|#{prefix}|#{modes.join("|")}"
+    end
+  end
+
+  # A folded modal line: a spell's modes, or a triggered ability with modes ("When ~ enters, choose one —").
+  def modal_line(line, data)
+    return nil unless line.start_with?("CHOOSE ")
+
+    choose, prefix, *texts = line.delete_prefix("CHOOSE ").split("|")
+    modes = texts.map do |text|
+      effects, targets = sentence_effects(text.sub(/\A./, &:upcase), 0)
+      return nil unless effects
+
+      { "targets" => targets, "effects" => effects }.reject { |_, v| v.empty? }
+    end
+    if prefix.empty? && data["types"].intersect?(%w[instant sorcery])
+      { spell: [Integer(choose)] + modes }
+    elsif (trigger = TRIGGERS.find { |pattern, _| pattern.match?("#{prefix} X") }&.last)
+      { ability: { "triggered" => { "when" => trigger, "choose" => Integer(choose), "modes" => modes } } }
+    end
+  end
+
   def mana_ability(line)
     m = /\A\{T\}: Add (.+)\.\z/.match(line) or return nil
     produced = case m[1]

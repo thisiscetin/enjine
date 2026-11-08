@@ -31,7 +31,7 @@ module Enjine
     # Casting a spell or activating an ability (CR 601.2, 602.2).
     class Cast < Base
       def self.step(engine, _frame) = engine.continue_casting!
-      def self.decisions = %w[choose_target pay_cost]
+      def self.decisions = %w[choose_mode choose_target pay_cost]
 
       def self.validate(frame, data, errors)
         errors << "frames: cast object #{frame["object"]} is not on the stack" unless data["stack"].include?(frame["object"])

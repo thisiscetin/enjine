@@ -245,7 +245,7 @@ module Enjine
       state.objects[id] = GameObject.new(id: id, card: card, owner: owner, controller: owner, zone: zone,
                                          tapped: false, controlled_since: nil, kind: "card", counters: {},
                                          damage: 0, source: nil, ability: nil, targets: nil, loyalty_turn: nil,
-                                         deathtouched: false)
+                                         deathtouched: false, modes: nil)
     end
 
     # Moves an object to a zone as a new object (CR 400.7). Returns the new object.

@@ -385,8 +385,7 @@
         "number": "8"
       },
       "missing": [
-        "modal choice",
-        "other rules text"
+        "modal choice"
       ]
     },
     {
@@ -484,10 +483,7 @@
         "number": "17"
       },
       "missing": [
-        "triggered ability",
-        "modal choice",
-        "counters",
-        "condition (if/unless/as long as)"
+        "modal choice"
       ]
     },
     {
@@ -694,10 +690,7 @@
         "number": "34"
       },
       "missing": [
-        "modal choice",
-        "tap/untap effect",
-        "counters",
-        "other rules text"
+        "modal choice"
       ]
     },
     {
@@ -758,9 +751,7 @@
         "number": "39"
       },
       "missing": [
-        "modal choice",
-        "counters",
-        "other rules text"
+        "modal choice"
       ]
     },
     {
@@ -913,10 +904,7 @@
         "number": "51"
       },
       "missing": [
-        "modal choice",
-        "condition (if/unless/as long as)",
-        "tap/untap effect",
-        "counters"
+        "modal choice"
       ]
     },
     {
@@ -964,10 +952,7 @@
         "number": "55"
       },
       "missing": [
-        "triggered ability",
-        "modal choice",
-        "graveyard casting",
-        "library manipulation"
+        "modal choice"
       ]
     },
     {
@@ -1019,10 +1004,7 @@
         "number": "59"
       },
       "missing": [
-        "triggered ability",
-        "modal choice",
-        "other rules text",
-        "library manipulation"
+        "modal choice"
       ]
     },
     {
@@ -1177,9 +1159,7 @@
         "number": "71"
       },
       "missing": [
-        "modal choice",
-        "tap/untap effect",
-        "tokens"
+        "modal choice"
       ]
     },
     {
@@ -1266,9 +1246,7 @@
         "number": "78"
       },
       "missing": [
-        "modal choice",
-        "other rules text",
-        "condition (if/unless/as long as)"
+        "modal choice"
       ]
     },
     {
@@ -1315,11 +1293,7 @@
         "number": "82"
       },
       "missing": [
-        "triggered ability",
-        "modal choice",
-        "other rules text",
-        "tap/untap effect",
-        "counters"
+        "modal choice"
       ]
     },
     {
@@ -1355,10 +1329,7 @@
         "number": "85"
       },
       "missing": [
-        "modal choice",
-        "library manipulation",
-        "triggered ability",
-        "exile"
+        "modal choice"
       ]
     },
     {
@@ -1383,9 +1354,7 @@
         "number": "87"
       },
       "missing": [
-        "triggered ability",
-        "modal choice",
-        "other rules text"
+        "modal choice"
       ]
     },
     {
@@ -1410,12 +1379,7 @@
         "number": "89"
       },
       "missing": [
-        "triggered ability",
-        "modal choice",
-        "condition (if/unless/as long as)",
-        "return to hand",
-        "static ability",
-        "discard"
+        "modal choice"
       ]
     },
     {
@@ -1551,10 +1515,7 @@
         "number": "100"
       },
       "missing": [
-        "triggered ability",
-        "modal choice",
-        "exile",
-        "other rules text"
+        "modal choice"
       ]
     },
     {
@@ -1565,10 +1526,7 @@
         "number": "101"
       },
       "missing": [
-        "triggered ability",
-        "modal choice",
-        "other rules text",
-        "sacrifice"
+        "modal choice"
       ]
     },
     {
@@ -1753,8 +1711,7 @@
         "number": "116"
       },
       "missing": [
-        "modal choice",
-        "other rules text"
+        "modal choice"
       ]
     },
     {
@@ -1865,9 +1822,7 @@
         "number": "125"
       },
       "missing": [
-        "modal choice",
-        "other rules text",
-        "graveyard casting"
+        "modal choice"
       ]
     },
     {
@@ -1878,10 +1833,8 @@
         "number": "126"
       },
       "missing": [
-        "triggered ability",
         "modal choice",
-        "other rules text",
-        "library manipulation"
+        "other rules text"
       ]
     },
     {
@@ -1932,9 +1885,7 @@
         "number": "130"
       },
       "missing": [
-        "modal choice",
-        "graveyard casting",
-        "exile"
+        "modal choice"
       ]
     },
     {
@@ -1945,10 +1896,7 @@
         "number": "131"
       },
       "missing": [
-        "triggered ability",
-        "modal choice",
-        "other rules text",
-        "library manipulation"
+        "modal choice"
       ]
     },
     {
@@ -1985,9 +1933,7 @@
         "number": "134"
       },
       "missing": [
-        "modal choice",
-        "exile",
-        "graveyard casting"
+        "modal choice"
       ]
     },
     {
@@ -2174,9 +2120,7 @@
         "number": "148"
       },
       "missing": [
-        "modal choice",
-        "exile",
-        "other rules text"
+        "modal choice"
       ]
     },
     {
@@ -2337,8 +2281,7 @@
         "number": "161"
       },
       "missing": [
-        "modal choice",
-        "other rules text"
+        "modal choice"
       ]
     },
     {
@@ -2538,10 +2481,7 @@
         "number": "177"
       },
       "missing": [
-        "modal choice",
-        "other rules text",
-        "condition (if/unless/as long as)",
-        "discard"
+        "modal choice"
       ]
     },
     {
@@ -2713,10 +2653,7 @@
         "number": "191"
       },
       "missing": [
-        "triggered ability",
-        "modal choice",
-        "counters",
-        "other rules text"
+        "modal choice"
       ]
     },
     {
@@ -2727,10 +2664,7 @@
         "number": "192"
       },
       "missing": [
-        "modal choice",
-        "other rules text",
-        "triggered ability",
-        "sacrifice"
+        "modal choice"
       ]
     },
     {
@@ -2753,10 +2687,7 @@
         "number": "194"
       },
       "missing": [
-        "triggered ability",
-        "modal choice",
-        "exile",
-        "library manipulation"
+        "modal choice"
       ]
     },
     {
@@ -2790,10 +2721,7 @@
         "number": "197"
       },
       "missing": [
-        "triggered ability",
-        "modal choice",
-        "graveyard casting",
-        "counters"
+        "modal choice"
       ]
     },
     {
@@ -3071,9 +2999,7 @@
         "number": "220"
       },
       "missing": [
-        "modal choice",
-        "exile",
-        "other rules text"
+        "modal choice"
       ]
     },
     {
@@ -3184,11 +3110,7 @@
         "number": "230"
       },
       "missing": [
-        "triggered ability",
-        "modal choice",
-        "tap/untap effect",
-        "counters",
-        "other rules text"
+        "modal choice"
       ]
     },
     {
@@ -3391,10 +3313,7 @@
         "number": "246"
       },
       "missing": [
-        "triggered ability",
-        "modal choice",
-        "static ability",
-        "library manipulation"
+        "modal choice"
       ]
     },
     {
@@ -3686,9 +3605,7 @@
         "number": "269"
       },
       "missing": [
-        "modal choice",
-        "sacrifice",
-        "other rules text"
+        "modal choice"
       ]
     },
     {
@@ -3848,10 +3765,7 @@
       },
       "missing": [
         "condition (if/unless/as long as)",
-        "triggered ability",
-        "modal choice",
-        "other rules text",
-        "library manipulation"
+        "modal choice"
       ]
     },
     {
@@ -3908,10 +3822,7 @@
       },
       "missing": [
         "condition (if/unless/as long as)",
-        "triggered ability",
-        "modal choice",
-        "other rules text",
-        "library manipulation"
+        "modal choice"
       ]
     },
     {
@@ -3945,10 +3856,7 @@
       },
       "missing": [
         "condition (if/unless/as long as)",
-        "triggered ability",
-        "modal choice",
-        "other rules text",
-        "library manipulation"
+        "modal choice"
       ]
     },
     {
@@ -3971,10 +3879,7 @@
       },
       "missing": [
         "condition (if/unless/as long as)",
-        "triggered ability",
-        "modal choice",
-        "other rules text",
-        "library manipulation"
+        "modal choice"
       ]
     },
     {
@@ -4112,10 +4017,7 @@
       },
       "missing": [
         "condition (if/unless/as long as)",
-        "triggered ability",
-        "modal choice",
-        "graveyard casting",
-        "library manipulation"
+        "modal choice"
       ]
     },
     {

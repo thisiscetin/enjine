@@ -1203,9 +1203,7 @@
         "number": "76"
       },
       "missing": [
-        "modal choice",
-        "discard",
-        "other rules text"
+        "modal choice"
       ]
     },
     {
@@ -1422,9 +1420,7 @@
         "number": "95"
       },
       "missing": [
-        "modal choice",
-        "tokens",
-        "other rules text"
+        "modal choice"
       ]
     },
     {

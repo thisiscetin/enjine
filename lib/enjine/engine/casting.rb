@@ -16,7 +16,7 @@ module Enjine
         return false unless defn.castable?
         return false unless defn.instant_speed? || sorcery_timing?(index)
 
-        targets_available?(defn.spell_ability&.targets || [], index, id) && affordable?(index, defn.mana_cost, nil)
+        ability_targetable?(defn.spell_ability, index, id) && affordable?(index, defn.mana_cost, nil)
       end
 
       def activatable?(index, id, ability_ref)
@@ -31,7 +31,19 @@ module Enjine
           return false
         end
 
-        targets_available?(ability.targets, index, nil) && affordable?(index, ability.mana_cost, needs_tap?(ability) ? id : nil)
+        ability_targetable?(ability, index, nil) && affordable?(index, ability.mana_cost, needs_tap?(ability) ? id : nil)
+      end
+
+      # Whether the ability can get legal targets: for modal abilities, enough modes must (CR 700.2).
+      def ability_targetable?(ability, index, exclude)
+        return true if ability.nil?
+        return targets_available?(ability.targets, index, exclude) unless ability.modal?
+
+        available_modes(ability, index, exclude).size >= ability.choose
+      end
+
+      def available_modes(ability, index, exclude)
+        ability.modes.each_index.select { targets_available?(ability.modes[it].targets, index, exclude) }
       end
 
       def targets_available?(specs, index, exclude)
@@ -132,7 +144,7 @@ module Enjine
         remaining = { "generic" => cost&.generic.to_i }
         cost&.colored&.each { |color, n| remaining[color.to_s] = n }
         state.frames << { "type" => "cast", "player" => index, "object" => object_id, "kind" => kind,
-                          "origin" => origin, "source" => source, "ability" => ability, "targets" => [],
+                          "origin" => origin, "source" => source, "ability" => ability, "targets" => [], "modes" => [],
                           "remaining" => remaining, "pool" => player(index).mana_pool.transform_keys(&:to_s),
                           "tapped" => [] }
         ask!(nil) # advance! now steps the cast frame
@@ -155,7 +167,13 @@ module Enjine
       # Steps the cast frame: asks for the next target, then for payment, then finishes.
       def continue_casting!
         ctx = casting
-        specs = casting_ability&.targets || []
+        ability = casting_ability
+        if ability&.modal? && ctx["modes"].size < ability.choose
+          ask!("kind" => "choose_mode", "player" => ctx["player"], "choose" => ability.choose,
+               "chosen" => ctx["modes"].size)
+          return :wait
+        end
+        specs = casting_targets
         if ctx["targets"].size < specs.size
           ask!("kind" => "choose_target", "player" => ctx["player"], "index" => ctx["targets"].size)
           :wait
@@ -175,10 +193,23 @@ module Enjine
         cost.to_s
       end
 
+      def casting_targets = casting_ability&.targets_for(casting["modes"]) || []
+
+      # CR 601.2b: modes still choosable (distinct, with legal targets).
+      def mode_options
+        ctx = casting
+        available_modes(casting_ability, ctx["player"], ctx["object"]) - ctx["modes"]
+      end
+
+      def choose_mode!(index)
+        casting["modes"] << index
+        ask!(nil)
+      end
+
       # CR 601.2c: targets, in order; a spell or ability can't target itself (CR 115.5).
       def target_candidates
         ctx = casting
-        spec = casting_ability.targets[ctx["targets"].size]
+        spec = casting_targets[ctx["targets"].size]
         spec.candidates(self, ctx["player"]).reject { it == ctx["object"] || !targetable?(it, ctx["player"]) }
       end
 
@@ -227,6 +258,7 @@ module Enjine
         index = ctx["player"]
         obj = object(ctx["object"])
         obj.targets = ctx["targets"].dup
+        obj.modes = ctx["modes"].dup unless ctx["modes"].empty?
         if ctx["kind"] == "trigger"
           emit Events::TriggerPutOnStack.new(player: name(index), object: obj.id, source: ctx["source"], card: obj.card,
                                              ability: ctx["ability"], targets: obj.targets)
@@ -274,7 +306,7 @@ module Enjine
         state.objects[origin["id"]] = GameObject.new(
           id: origin["id"], card: obj.card, owner: obj.owner, controller: obj.owner, zone: :hand, tapped: false,
           controlled_since: nil, kind: "card", counters: {}, damage: 0, source: nil, ability: nil, targets: nil,
-          loyalty_turn: nil, deathtouched: false
+          loyalty_turn: nil, deathtouched: false, modes: nil
         )
         player(obj.owner).hand.insert(origin["index"], origin["id"])
       end

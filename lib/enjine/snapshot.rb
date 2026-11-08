@@ -66,7 +66,7 @@ module Enjine
                      kind: hash.fetch("kind", "card"), counters: deep_copy(hash.fetch("counters", {})),
                      damage: hash.fetch("damage", 0), source: hash["source"], ability: hash["ability"],
                      targets: deep_copy(hash["targets"]), loyalty_turn: hash["loyalty_turn"],
-                     deathtouched: hash.fetch("deathtouched", false))
+                     deathtouched: hash.fetch("deathtouched", false), modes: hash["modes"]&.dup)
     end
 
     def deep_copy(value) = Marshal.load(Marshal.dump(value))

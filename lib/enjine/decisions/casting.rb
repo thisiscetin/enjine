@@ -4,6 +4,24 @@ module Enjine
   module Decisions
     CANCEL = { type: "cancel" }.freeze
 
+    # CR 601.2b / 603.3c: choose a mode of a modal spell or ability, one per decision.
+    class ChooseMode < Base
+      def self.doc
+        'Choose a mode of a modal ("choose one") spell or ability: `{type: "mode", mode: index}` ' \
+          '(0-based, in printed order); `{type: "cancel"}` rewinds a cast. `choose` modes in total.'
+      end
+
+      def self.options(engine, _pending)
+        options = engine.mode_options.map { { type: "mode", mode: it } }
+        engine.casting["kind"] == "trigger" ? options : options + [CANCEL]
+      end
+
+      def self.submit(engine, _pending, option)
+        option[:type] == "cancel" ? engine.cancel_casting! : engine.choose_mode!(option[:mode])
+      end
+    end
+    register("choose_mode", ChooseMode)
+
     # CR 601.2c: choose the next target of the spell or ability being cast.
     class ChooseTarget < Base
       def self.doc
