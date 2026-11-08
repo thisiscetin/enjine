@@ -114,12 +114,21 @@ module Enjine
         return unless state.stack.include?(obj.id) # it may have left the stack during resolution
 
         if definition(obj).permanent?
-          enters = (enters_from_answer(obj.id, frame) || {}).merge("cast" => true)
+          enters = with_sunburst(obj, enters_from_answer(obj.id, frame) || {}).merge("cast" => true)
           pay_entering_life!(obj.controller, frame)
           move!(obj.id, :battlefield, controller: obj.controller, reason: "resolve", enters: enters) # CR 608.3
         else
           move!(obj.id, :graveyard, reason: "resolve") # CR 608.2n
         end
+      end
+
+      # CR 702.44a-b: a spell with sunburst enters with a counter for each color of mana spent on it.
+      def with_sunburst(obj, enters)
+        counters = Mechanics::Keywords::Sunburst.entering_counters(self, obj)
+        return enters if counters.empty?
+
+        enters ||= {}
+        enters.merge("counters" => enters.fetch("counters", {}).merge(counters) { |_, a, b| a + b })
       end
 
       # Abilities on the stack aren't cards; they simply cease to exist.

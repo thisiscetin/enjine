@@ -20,6 +20,10 @@ Choose a mode of a modal ("choose one") spell or ability: `{type: "mode", mode: 
 
 While casting/activating: `{type: "target", target: ref}` for the next target (ref is an object id or "player:<name>"), or `{type: "cancel"}` to rewind the whole cast.
 
+## choose_x
+
+While casting/activating a spell or ability with {X} in its cost: `{type: "x", value: n}` announces X (0 up to `max`, the most the available mana could pay for); `{type: "cancel"}` rewinds.
+
 ## declare_attackers
 
 Declare one attacker: `{type: "attack", object: id, target: ref}` (the defending player or one of their planeswalkers), or `{type: "done"}`.

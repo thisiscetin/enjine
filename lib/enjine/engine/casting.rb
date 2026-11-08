@@ -16,7 +16,7 @@ module Enjine
         return false unless defn.castable?
         return false unless defn.instant_speed? || sorcery_timing?(index)
 
-        ability_targetable?(defn.spell_ability, index, id) && affordable?(index, defn.mana_cost, nil)
+        ability_targetable?(defn.spell_ability, index, id) && affordable?(index, total_cost(index, defn.mana_cost, spell: obj), nil)
       end
 
       def activatable?(index, id, ability_ref)
@@ -31,7 +31,8 @@ module Enjine
           return false
         end
 
-        ability_targetable?(ability, index, nil, id) && affordable?(index, ability.mana_cost, needs_tap?(ability) ? id : nil)
+        cost = total_cost(index, ability.mana_cost, ability: ability, source: id)
+        ability_targetable?(ability, index, nil, id) && affordable?(index, cost, needs_tap?(ability) ? id : nil)
       end
 
       # Whether the ability can get legal targets: for modal abilities, enough modes must (CR 700.2).
@@ -74,13 +75,14 @@ module Enjine
 
       # Every unit of mana the player could make: pool mana (one fixed type each) and one unit per
       # untapped source, with the set of types it could produce (a Treasure: any color).
+      # A source that makes several mana ({C}{C}) gives that many units.
       def mana_units(index, excluded_source)
         units = player(index).mana_pool.flat_map { |type, n| Array.new(n) { [type] } }
         by_source = Hash.new { |h, k| h[k] = [] }
         all_mana_sources(index).each do |id, ref|
-          by_source[id].concat(chars(id).ability(ref).produce) unless id == excluded_source
+          by_source[id] << chars(id).ability(ref).produce unless id == excluded_source
         end
-        units + by_source.values.map(&:uniq)
+        units + by_source.values.flat_map { |options| Array.new(options.map(&:size).max) { options.flatten.uniq } }
       end
 
       # Bipartite matching (augmenting paths): can every colored symbol get its own unit?
@@ -162,13 +164,13 @@ module Enjine
         start_casting!(index, obj.id, "ability", source: source_id, ability: ability_ref, cost: ability.mana_cost)
       end
 
+      # `x` stays nil until announced (CR 601.2b); `remaining` stays nil until the total cost is
+      # determined and locked in after targets are chosen (CR 601.2f).
       def start_casting!(index, object_id, kind, cost:, origin: nil, source: nil, ability: nil)
-        remaining = { "generic" => cost&.generic.to_i }
-        cost&.colored&.each { |color, n| remaining[color.to_s] = n }
         state.frames << { "type" => "cast", "player" => index, "object" => object_id, "kind" => kind,
                           "origin" => origin, "source" => source, "ability" => ability, "targets" => [], "modes" => [],
-                          "remaining" => remaining, "pool" => player(index).mana_pool.transform_keys(&:to_s),
-                          "tapped" => [] }
+                          "x" => cost&.x_symbols&.positive? ? nil : 0, "remaining" => nil,
+                          "pool" => player(index).mana_pool.transform_keys(&:to_s), "tapped" => [] }
         ask!(nil) # advance! now steps the cast frame
       end
 
@@ -186,7 +188,7 @@ module Enjine
 
       # ---- the in-progress steps --------------------------------------------------
 
-      # Steps the cast frame: asks for the next target, then for payment, then finishes.
+      # Steps the cast frame: modes and X (601.2b), targets (601.2c), total cost (601.2f), payment.
       def continue_casting!
         ctx = casting
         ability = casting_ability
@@ -195,11 +197,15 @@ module Enjine
                "chosen" => ctx["modes"].size)
           return :wait
         end
+        return :wait if ask_x!(ctx)
+
         specs = casting_targets
         if ctx["targets"].size < specs.size
           ask!("kind" => "choose_target", "player" => ctx["player"], "index" => ctx["targets"].size)
-          :wait
-        elsif ctx["remaining"].values.sum.positive?
+          return :wait
+        end
+        lock_total_cost!(ctx) unless ctx["remaining"]
+        if ctx["remaining"].values.sum.positive?
           ask!("kind" => "pay_cost", "player" => ctx["player"], "remaining" => remaining_text)
           :wait
         else
@@ -256,6 +262,7 @@ module Enjine
         rem = ctx["remaining"]
         player(ctx["player"]).mana_pool[type.to_sym] -= 1
         rem.fetch(type, 0).positive? ? rem[type] -= 1 : rem["generic"] -= 1
+        (ctx["spent"] ||= []) << type # what was spent matters later (sunburst, CR 702.44a)
         emit Events::ManaPaid.new(player: name(ctx["player"]), mana: "{#{type}}", object: ctx["object"])
         ask!(nil)
       end
@@ -263,8 +270,7 @@ module Enjine
       # Mana sources usable during payment; a {T} ability's own source is excluded.
       def payment_sources
         ctx = casting
-        excluded = ctx["kind"] == "ability" && needs_tap?(casting_ability) ? ctx["source"] : nil
-        mana_sources(ctx["player"], excluded)
+        mana_sources(ctx["player"], payment_excluded_source(ctx))
       end
 
       def tap_for_payment!(id, ability_index)
@@ -281,6 +287,7 @@ module Enjine
         obj = object(ctx["object"])
         obj.targets = ctx["targets"].dup
         obj.modes = ctx["modes"].dup unless ctx["modes"].empty?
+        obj.mana_spent = ctx["spent"].dup if ctx["spent"]
         if ctx["kind"] == "trigger"
           emit Events::TriggerPutOnStack.new(player: name(index), object: obj.id, source: ctx["source"], card: obj.card,
                                              ability: ctx["ability"], targets: obj.targets)

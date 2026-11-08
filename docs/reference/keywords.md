@@ -170,6 +170,20 @@ Rules: CR 702.17b
 }
 ```
 
+## sunburst
+
+As this permanent enters from the stack as a resolving spell, it gets a +1/+1 counter (a creature) or a charge counter (otherwise) for each color of mana spent to cast it.
+
+Rules: CR 702.44a, CR 702.44b
+
+```json
+{
+  "keywords": [
+    "sunburst"
+  ]
+}
+```
+
 ## trample
 
 Excess combat damage beyond lethal damage to its blockers can be assigned to the player or planeswalker it's attacking.

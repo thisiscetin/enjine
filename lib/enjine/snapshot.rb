@@ -69,7 +69,7 @@ module Enjine
                      damage: hash.fetch("damage", 0), source: hash["source"], ability: hash["ability"],
                      targets: deep_copy(hash["targets"]), loyalty_turn: hash["loyalty_turn"],
                      deathtouched: hash.fetch("deathtouched", false), modes: hash["modes"]&.dup,
-                     memory: deep_copy(hash.fetch("memory", {})))
+                     memory: deep_copy(hash.fetch("memory", {})), x: hash["x"], mana_spent: hash["mana_spent"]&.dup)
     end
 
     def deep_copy(value) = Marshal.load(Marshal.dump(value))
@@ -160,11 +160,21 @@ module Enjine
       end
       errors << "#{path}.damage: must be a non-negative integer" unless non_negative?(obj.fetch("damage", 0))
       errors << "#{path}.memory: must be an object" unless obj.fetch("memory", {}).is_a?(Hash)
+      validate_cast_info(obj, path, errors)
       return if zone == "battlefield"
 
       return unless counters.values.any?(&:positive?) || obj["damage"].to_i.positive?
 
       errors << "#{path}: only permanents have counters or damage"
+    end
+
+    # The X announced for a spell or ability and the mana spent on it (CR 107.3a, 702.44a).
+    def validate_cast_info(obj, path, errors)
+      errors << "#{path}.x: must be a non-negative integer" unless obj["x"].nil? || non_negative?(obj["x"])
+      spent = obj["mana_spent"]
+      return if spent.nil? || (spent.is_a?(Array) && spent.all? { Mana::TYPES.map(&:to_s).include?(it) })
+
+      errors << "#{path}.mana_spent: must be a list of mana types"
     end
 
     def validate_combat(data, errors)

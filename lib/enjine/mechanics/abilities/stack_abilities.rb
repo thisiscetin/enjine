@@ -104,12 +104,14 @@ module Enjine
         # Total mana cost to pay during activation.
         def mana_cost
           generic = 0
+          x = 0
           colored = Hash.new(0)
           costs.select(&:mana?).each do |cost|
             generic += cost.mana_cost.generic
+            x += cost.mana_cost.x_symbols
             cost.mana_cost.colored.each { |c, n| colored[c] += n }
           end
-          Mana::Cost.new(generic: generic, colored: colored.to_h.freeze)
+          Mana::Cost.new(generic: generic, colored: colored.to_h.freeze, x_symbols: x)
         end
       end
 
@@ -139,22 +141,42 @@ module Enjine
                   description: "An activated ability: announce it, choose targets, pay its costs, then it goes on " \
                                "the stack. `timing: \"sorcery\"` restricts it to sorcery speed.",
                   rules: %w[602.1 602.2 602.5d],
-                  params: { "cost" => "list of costs (tap, {\"mana\": \"{1}\"})", "targets" => "list of target filters",
-                            "effects" => "list of effects", "timing" => "\"instant\" (default) or \"sorcery\"" },
+                  params: { "cost" => "list of costs (tap, {\"mana\": \"{1}\"}, {\"mana\": \"{X}\"})",
+                            "targets" => "list of target filters", "effects" => "list of effects",
+                            "timing" => "\"instant\" (default) or \"sorcery\"",
+                            "cost_reduction" => "{\"amount\": amount, \"if\": condition}: \"this ability costs {N} less " \
+                                                "to activate\" (CR 601.2f, 602.2b)" },
                   example: { "activated" => { "cost" => ["tap"], "targets" => ["any_target"],
                                               "effects" => [{ "deal_damage" => { "amount" => 1, "to" => { "target" => 0 } } }] } }
 
         def self.build(params, errors, path, **)
-          Mechanics.check_keys(params, %w[cost timing] + BODY_KEYS, errors, path)
+          Mechanics.check_keys(params, %w[cost timing cost_reduction] + BODY_KEYS, errors, path)
           timing = Mechanics.fetch_param(params, :timing) || "instant"
           errors << "#{path}.timing: must be \"instant\" or \"sorcery\"" unless %w[instant sorcery].include?(timing)
           costs = parse_costs(params, errors, path)
           errors << "#{path}.cost: must be a non-empty list" if costs.empty? && errors.none? { it.start_with?("#{path}.cost") }
-          new(**parse_body(params, errors, path), costs: costs, sorcery: timing == "sorcery")
+          raw = Mechanics.fetch_param(params, :cost_reduction)
+          reduction = raw && Reduction.build(raw, errors, "#{path}.cost_reduction")
+          body = parse_body(params, errors, path)
+          check_mana_ability(body, errors, path)
+          new(**body, costs: costs, sorcery: timing == "sorcery", cost_reduction: reduction)
         end
 
-        def initialize(sorcery:, **)
+        # CR 605.1a: an activated ability without targets that could add mana is a mana ability,
+        # which doesn't use the stack.
+        def self.check_mana_ability(body, errors, path)
+          plans = body[:modes].empty? ? [body] : body[:modes].map(&:to_h)
+          return unless plans.any? { it[:targets].empty? && it[:effects].any?(Effects::AddMana) }
+
+          errors << "#{path}: an activated ability without targets that adds mana is a mana ability (CR 605.1a); " \
+                    "use a \"mana\" ability"
+        end
+
+        attr_reader :cost_reduction
+
+        def initialize(sorcery:, cost_reduction: nil, **)
           @sorcery = sorcery
+          @cost_reduction = cost_reduction
           super(**)
         end
 

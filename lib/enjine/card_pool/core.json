@@ -1475,5 +1475,366 @@
       }
     ],
     "rules_text": "Arrives carrying one finality counter and one menace counter."
+  },
+  {
+    "name": "Ember Surge",
+    "mana_cost": "{1}{R}",
+    "types": [
+      "sorcery"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "effects": [
+            {
+              "add_mana": {
+                "produce": "{R}{R}{R}"
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "Add {R}{R}{R}."
+  },
+  {
+    "name": "Prism Calf",
+    "mana_cost": "{2}{G}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "ox"
+    ],
+    "power": 1,
+    "toughness": 3,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "enters": {}
+          },
+          "effects": [
+            {
+              "add_mana": {
+                "amount": 2,
+                "color": "any_one"
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "When this creature enters, add two mana of any one color."
+  },
+  {
+    "name": "Flare Torrent",
+    "mana_cost": "{X}{R}",
+    "types": [
+      "instant"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "targets": [
+            "any_target"
+          ],
+          "effects": [
+            {
+              "deal_damage": {
+                "amount": "x",
+                "to": {
+                  "target": 0
+                }
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "This spell deals X damage to any target."
+  },
+  {
+    "name": "Brood Caller",
+    "mana_cost": "{X}{G}{G}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "elf",
+      "druid"
+    ],
+    "power": 2,
+    "toughness": 2,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "enters": {}
+          },
+          "effects": [
+            {
+              "create_token": {
+                "token": {
+                  "name": "Sapling",
+                  "types": [
+                    "creature"
+                  ],
+                  "subtypes": [
+                    "plant"
+                  ],
+                  "power": 1,
+                  "toughness": 1
+                },
+                "amount": "x"
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "When this creature enters, create X 1/1 Plant creature tokens."
+  },
+  {
+    "name": "Spectrum Golem",
+    "mana_cost": "{4}",
+    "types": [
+      "artifact",
+      "creature"
+    ],
+    "subtypes": [
+      "golem"
+    ],
+    "keywords": [
+      "sunburst"
+    ],
+    "power": 0,
+    "toughness": 0,
+    "rules_text": "Sunburst"
+  },
+  {
+    "name": "Rally Signal",
+    "mana_cost": "{2}{W}",
+    "types": [
+      "instant"
+    ],
+    "abilities": [
+      {
+        "cost_reduction": {
+          "amount": 1,
+          "if": {
+            "attacked": true
+          }
+        }
+      },
+      {
+        "spell": {
+          "effects": [
+            {
+              "pump": {
+                "power": 1,
+                "toughness": 1,
+                "to": {
+                  "each": "creature",
+                  "controller": "you"
+                }
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "If a creature is attacking you, this spell costs {1} less to cast. Creatures you control get +1/+1 until end of turn."
+  },
+  {
+    "name": "Pinning Strike",
+    "mana_cost": "{3}{W}",
+    "types": [
+      "instant"
+    ],
+    "abilities": [
+      {
+        "cost_reduction": {
+          "amount": 2,
+          "if": {
+            "targets": {
+              "creature": {
+                "tapped": true
+              }
+            }
+          }
+        }
+      },
+      {
+        "spell": {
+          "targets": [
+            "creature"
+          ],
+          "effects": [
+            {
+              "destroy": {
+                "to": {
+                  "target": 0
+                }
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "This spell costs {2} less to cast if it targets a tapped creature. Destroy target creature."
+  },
+  {
+    "name": "Scrap Colossus",
+    "mana_cost": "{6}",
+    "types": [
+      "artifact",
+      "creature"
+    ],
+    "subtypes": [
+      "construct"
+    ],
+    "power": 4,
+    "toughness": 4,
+    "abilities": [
+      {
+        "cost_reduction": {
+          "amount": {
+            "count": {
+              "each": "artifact",
+              "controller": "you"
+            }
+          }
+        }
+      }
+    ],
+    "rules_text": "This spell costs {1} less to cast for each artifact you control."
+  },
+  {
+    "name": "Tidecaller Adept",
+    "mana_cost": "{1}{U}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "merfolk",
+      "wizard"
+    ],
+    "power": 1,
+    "toughness": 2,
+    "abilities": [
+      {
+        "cost_modifier": {
+          "spells": {
+            "not": [
+              "creature"
+            ]
+          },
+          "reduce": 1
+        }
+      }
+    ],
+    "rules_text": "Noncreature spells you cast cost {1} less to cast."
+  },
+  {
+    "name": "Toll Warden",
+    "mana_cost": "{1}{W}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "human",
+      "soldier"
+    ],
+    "power": 2,
+    "toughness": 2,
+    "abilities": [
+      {
+        "cost_modifier": {
+          "caster": "opponent",
+          "spells": {
+            "not": [
+              "creature"
+            ]
+          },
+          "increase": 1
+        }
+      }
+    ],
+    "rules_text": "Noncreature spells your opponents cast cost {1} more to cast."
+  },
+  {
+    "name": "Arc Lantern",
+    "mana_cost": "{2}",
+    "types": [
+      "artifact"
+    ],
+    "abilities": [
+      {
+        "activated": {
+          "cost": [
+            {
+              "mana": "{X}"
+            },
+            "tap"
+          ],
+          "targets": [
+            "creature"
+          ],
+          "effects": [
+            {
+              "deal_damage": {
+                "amount": "x",
+                "to": {
+                  "target": 0
+                }
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "{X}, {T}: This artifact deals X damage to target creature."
+  },
+  {
+    "name": "Survey Drone",
+    "mana_cost": "{1}{U}",
+    "types": [
+      "artifact",
+      "creature"
+    ],
+    "subtypes": [
+      "drone"
+    ],
+    "power": 1,
+    "toughness": 1,
+    "abilities": [
+      {
+        "activated": {
+          "cost": [
+            {
+              "mana": "{4}"
+            },
+            "tap"
+          ],
+          "effects": [
+            {
+              "draw": {
+                "amount": 1
+              }
+            }
+          ],
+          "cost_reduction": {
+            "amount": {
+              "count": {
+                "each": "land",
+                "controller": "you"
+              }
+            }
+          }
+        }
+      }
+    ],
+    "rules_text": "{4}, {T}: Draw a card. This ability costs {1} less to activate for each land you control."
   }
 ]

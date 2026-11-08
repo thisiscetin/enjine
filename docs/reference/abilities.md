@@ -10,10 +10,11 @@ Rules: CR 602.1, CR 602.2, CR 602.5d
 
 | Parameter | Description |
 | --- | --- |
-| `cost` | list of costs (tap, {"mana": "{1}"}) |
+| `cost` | list of costs (tap, {"mana": "{1}"}, {"mana": "{X}"}) |
 | `targets` | list of target filters |
 | `effects` | list of effects |
 | `timing` | "instant" (default) or "sorcery" |
+| `cost_reduction` | {"amount": amount, "if": condition}: "this ability costs {N} less to activate" (CR 601.2f, 602.2b) |
 
 ```json
 {
@@ -34,6 +35,54 @@ Rules: CR 602.1, CR 602.2, CR 602.5d
         }
       }
     ]
+  }
+}
+```
+
+## cost_modifier
+
+While on the battlefield: spells cast by `caster` (you, opponent or any; default you) whose card types match `spells` ({"any_of": [types], "not": [types]}, default all spells) cost `reduce` less or `increase` more generic mana.
+
+Rules: CR 601.2f, CR 118.7a, CR 604.1
+
+| Parameter | Description |
+| --- | --- |
+| `spells` | {"any_of": [types], "not": [types]} (optional) |
+| `caster` | you | opponent | any |
+| `reduce` | amount |
+| `increase` | amount |
+
+```json
+{
+  "cost_modifier": {
+    "spells": {
+      "not": [
+        "creature"
+      ]
+    },
+    "reduce": 1
+  }
+}
+```
+
+## cost_reduction
+
+This spell costs `amount` generic mana less to cast, if the optional `if` condition holds when its total cost is determined (after targets are chosen). `amount` may be computed, e.g. {"count": {"each": "artifact", "controller": "you"}} for affinity for artifacts (CR 702.41a). It can't reduce colored mana or go below {0}.
+
+Rules: CR 601.2f, CR 118.7a, CR 702.41a
+
+| Parameter | Description |
+| --- | --- |
+| `amount` | amount (integer or computed) |
+| `if` | condition (optional) |
+
+```json
+{
+  "cost_reduction": {
+    "amount": 1,
+    "if": {
+      "attacked": true
+    }
   }
 }
 ```
