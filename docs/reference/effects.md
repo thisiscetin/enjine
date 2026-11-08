@@ -29,7 +29,7 @@ Rules: CR 122.1, CR 122.6, CR 613.4c
 
 ## add_mana
 
-You add mana to your mana pool: the fixed mana in `produce`, or `amount` mana of a color you choose as it resolves (`color: "any_one"`: all of one color; `color: "any"`: each mana's color chosen separately, "in any combination of colors").
+You add mana to your mana pool: the fixed mana in `produce`, or `amount` mana of a color you choose as it resolves (`color: "any_one"`: all of one color; `color: "any"`: each mana's color chosen separately, "in any combination of colors"). `colors` limits the choice ("add {R} or {G}").
 
 Rules: CR 106.1a, CR 106.4, CR 608.2d, CR 605.1a
 
@@ -38,6 +38,7 @@ Rules: CR 106.1a, CR 106.4, CR 608.2d, CR 605.1a
 | `produce` | mana symbols, e.g. "{R}{R}" |
 | `amount` | amount (with color; default 1) |
 | `color` | any_one | any |
+| `colors` | list of colors to choose from (default all five) |
 
 ```json
 {
@@ -90,9 +91,9 @@ Rules: CR 701.3a, CR 701.3b, CR 701.3c, CR 301.5c
 
 ## counter
 
-Counter each referenced spell: it leaves the stack for its owner's graveyard without resolving.
+Counter each referenced spell or ability: a spell leaves the stack for its owner's graveyard without resolving, an ability ceases to exist. A spell that can't be countered stays.
 
-Rules: CR 701.6a
+Rules: CR 701.6a, CR 701.6b, CR 101.2
 
 | Parameter | Description |
 | --- | --- |
@@ -101,6 +102,28 @@ Rules: CR 701.6a
 ```json
 {
   "counter": {
+    "to": {
+      "target": 0
+    }
+  }
+}
+```
+
+## counter_unless_pays
+
+Counter each referenced spell or ability unless its controller pays `mana` as this resolves (they choose, and pay like any cost; mana abilities allowed).
+
+Rules: CR 701.6a, CR 118.12a, CR 605.3a
+
+| Parameter | Description |
+| --- | --- |
+| `mana` | mana cost string |
+| `to` | selector (usually {"target": 0}) |
+
+```json
+{
+  "counter_unless_pays": {
+    "mana": "{3}",
     "to": {
       "target": 0
     }
@@ -230,6 +253,24 @@ Rules: CR 701.9a, CR 701.9b
   "discard": {
     "amount": 1,
     "to": "each_opponent"
+  }
+}
+```
+
+## distribute_counters
+
+Put on each legal target the number of `counter` counters assigned to it as the spell or ability was cast (its `divide` amount, at least one per target).
+
+Rules: CR 601.2d, CR 608.2b, CR 122.1
+
+| Parameter | Description |
+| --- | --- |
+| `counter` | counter name |
+
+```json
+{
+  "distribute_counters": {
+    "counter": "+1/+1"
   }
 }
 ```
@@ -385,6 +426,34 @@ Rules: CR 701.17a
   "mill": {
     "amount": 2,
     "to": "each_opponent"
+  }
+}
+```
+
+## pay
+
+You may pay `mana` or `life` as it resolves. If you do, `then` happens; if you don't, `otherwise`. Paying mana works like paying a spell's cost (mana abilities may be activated); life can be paid only if you have that much (CR 119.4). For another player paying, see `counter_unless_pays`.
+
+Rules: CR 118.12, CR 118.12a, CR 118.3, CR 119.4, CR 605.3a
+
+| Parameter | Description |
+| --- | --- |
+| `mana` | mana cost string, e.g. "{1}" |
+| `life` | integer |
+| `then` | list of effects |
+| `otherwise` | list of effects |
+
+```json
+{
+  "pay": {
+    "mana": "{1}",
+    "then": [
+      {
+        "draw": {
+          "amount": 1
+        }
+      }
+    ]
   }
 }
 ```

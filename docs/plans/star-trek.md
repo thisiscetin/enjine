@@ -151,6 +151,40 @@ Class-F Shuttlecraft, Suurok-Class Science Vessel, U.S.S. Cerritos, U.S.S. Excel
 Adjudicator, Seven of Nine (dilemma); Death Is Irrelevant (assimilate, translation);
 Excalbian Gamemaster (strange new worlds, translation).
 
+## Costs, mana and targets
+
+Rule numbers from the pinned 2026-09-25 CR (`cr0925`).
+
+| Capability | Rules | Card data | Status |
+| --- | --- | --- | --- |
+| Hybrid mana `{R/G}` | 107.4e, 202.2d, 202.3f, 601.2h | mana costs; each symbol paid by either color | done (monocolored hybrid `{2/B}` and Phyrexian: todo) |
+| Cancelling a cast | 733.1, 605.3 | — | "cancel" only until something irreversible is paid (a Treasure's sacrifice); from then on only payments that keep the rest payable are offered |
+| Chosen costs | 601.2h, 602.2b, 701.21a | costs `sacrifice_permanent`, `tap_permanents`, `remove_counters` (paid entries in `GameObject#paid`, condition `sacrificed`) | done |
+| Graveyard costs | 113.6m | costs `exile_self_from_graveyard`, `bottom_self_from_graveyard` | done |
+| Kicker / additional costs | 702.33a/d/g, 601.2b, 601.2f | abilities `kicker`, `additional_cost`; condition `kicked`; spell `kicked_targets` | done |
+| Activation restrictions | 602.5b, 602.5d | `limit: "once_each_turn"`, `only_if`, `timing: "your_turn"` | done |
+| Target variants | 601.2c, 601.2d, 115.1d | target `{"filter", "optional", "distinct_from"}`; spell `divide` + effect `distribute_counters` | done |
+| Mode counts | 700.2 | `choose: {"min", "max"}`, `choose_if`, `unchosen` | done |
+| Paying while resolving | 118.12, 118.12a, 701.6a | effects `pay`, `counter_unless_pays`; a `pay` frame | done |
+| Countering abilities / can't be countered | 701.6a, 101.2 | filter `stack_ability`; keyword `cant_be_countered` | done |
+| Ward | 702.21a | ability `ward` | done |
+| Choice among listed colors | 106.4, 608.2d | `add_mana` `colors` | done |
+
+Converted with these: Armus, Skin of Evil; Astute Terraformer; Captain James T. Kirk; Cetacean Ops; Cleveland
+Booker, Empath; Collation Trimatrix; Consider the Prime Directive; Constable Odo; D'Vana Tendi, Optimistic
+Ensign; Dal R'El, Augment Orphan; DOT-7 Repair Squad; Eject the Warp Core; General Chang, Cold Warrior; Ghost of
+Illyria; Gowron, Eager for Battle; Highly Illogical; Humpback Whales; L'Rell, Fierce Visionary; Lieutenant
+Commander Data; Lore, Positronic Provocateur; Lt. Cmdr. Geordi La Forge; Organic Avulsion Unit; Photosynthetic
+Physician; Relentless Drednok; Subcommander T'Pol; Suus Mahna Practitioner; The Doctor, EMH; The Duras Sisters;
+U.S.S. Enterprise-A, Free Spirit; Wesley Crusher, Starfleet Cadet (and tmt: Foot Elite, Mechanized Ninja Cavalry).
+Token colors aren't modeled yet (no color characteristic), as for the earlier Officer tokens.
+
+Still waiting on other capabilities: Marooned (can't be beamed up, "doesn't untap"), Pure Energy (beam me up),
+Worf, Honor-Bound Warrior (power doubling, total power), Engineered Explosives (mana value equal to an amount; the
+sacrificed source's counters are kept in the ability's memory `source_counters`), Starfleet Academy (creature-type
+count; a mana ability with a variable amount and color choice), Commander Raffi Musiker, Daniels, Temporal Agent
+and Emergency Holographic Crew (exiling or returning cards from a graveyard).
+
 ## Pipeline
 
 `script/convert_set` (to be written, run from the repo with network access):

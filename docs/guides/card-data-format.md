@@ -61,7 +61,7 @@ Rules for the agent:
 | --- | --- | --- | --- |
 | `name` | yes | string | Unique. Its slug becomes the card id: `"Jace, the Mind Sculptor"` → `jace_the_mind_sculptor`. Two different definitions with the same name in one game raise `CatalogConflict`. |
 | `types` | yes | list | Card types, lowercase: `land`, `creature`, `artifact`, `enchantment`, `planeswalker`, `instant`, `sorcery`. A card can have several (`["artifact", "creature"]`). |
-| `mana_cost` | castable cards | string | `"{2}{W}{W}"`. Symbols: `{N}` generic, `{W}{U}{B}{R}{G}`, `{C}`, `{X}` (announced while casting; use the amount `"x"` in effects, see 4.7). Lands must **not** have one. A card without one can't be cast. Hybrid, Phyrexian and `{S}` are not supported yet. |
+| `mana_cost` | castable cards | string | `"{2}{W}{W}"`. Symbols: `{N}` generic, `{W}{U}{B}{R}{G}`, `{C}`, `{X}` (announced while casting; use the amount `"x"` in effects, see 4.7). Lands must **not** have one. A card without one can't be cast. Two-color hybrid `{R/G}` is supported (paid with either color, CR 107.4e); monocolored hybrid `{2/B}`, Phyrexian and `{S}` are not yet. |
 | `supertypes` | no | list | `basic` (exempt from the 4-copy rule). `legendary` and `snow`: not yet. |
 | `subtypes` | no | list | Lowercase, spaces become `_`: `["human", "wizard"]`. Free-form labels, except the basic land types `plains island swamp mountain forest`, which grant their mana ability automatically (CR 305.6) and are valid only on lands. |
 | `keywords` | no | list | Keyword abilities, lowercase: see `SUPPORTED.md` → *Keyword abilities*. |
@@ -152,8 +152,19 @@ supported yet.
 ```
 
 - `cost`: costs before the colon. `"tap"` is `{T}`; `{ "mana": "{1}{R}" }` is a mana
-  cost. Other costs (sacrifice, discard, pay life, `{Q}`) are not supported yet.
+  cost; `"sacrifice"` sacrifices this permanent; `{ "sacrifice_permanent": { "filter": "creature", "other": true } }`,
+  `{ "tap_permanents": { "count": 3, "filter": ... } }` and `{ "remove_counters": { "count": 3 } }` are chosen while
+  activating; `"exile_self_from_graveyard"` / `"bottom_self_from_graveyard"` make it a graveyard ability. Pay life
+  and `{Q}` are not supported yet.
+- `limit: "once_each_turn"`, `only_if: condition`, `timing: "your_turn"`: "Activate only once each turn / only if …
+  / only during your turn" (CR 602.5b).
 - `timing`: `"sorcery"` if the text says "Activate only as a sorcery"; otherwise omit.
+
+Spells: `{ "kicker": { "cost": [...] } }` (condition `{ "kicked": true }`, spell `kicked_targets`) and
+`{ "additional_cost": { "cost": [...] } }`. Targets: `{ "filter": f, "optional": true }` is "up to one target",
+`"distinct_from": [0]` keeps a second target of the same word different; `"divide": N` with the effect
+`distribute_counters` divides counters among them. "Counter … unless its controller pays {N}" is
+`counter_unless_pays`; "you may pay {1}. If you do, …" is `pay`; ward is `{ "ward": { "cost": "{2}" } }`.
 
 ### 4.3 Loyalty ability
 

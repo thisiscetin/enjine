@@ -3,19 +3,67 @@
 module Enjine
   module Mechanics
     module Abilities
+      # One target of a spell or ability with options (CR 601.2c, 115.1d): {"filter": f, "optional": true}
+      # is "up to one target f" (the player may choose none), and "distinct_from": [i, ...] keeps it
+      # different from earlier targets of the same "target" word ("one or two target creatures").
+      class TargetSpec
+        KEYS = %w[filter optional distinct_from].freeze
+
+        attr_reader :filter, :distinct_from
+
+        def self.build(entry, errors, path, index)
+          Mechanics.check_keys(entry, KEYS, errors, path)
+          filter = Mechanics.build_entry(:filter, entry["filter"], errors, "#{path}.filter")
+          distinct = Array(entry["distinct_from"])
+          errors << "#{path}.distinct_from: must list earlier targets" unless distinct.all? { it.is_a?(Integer) && it >= 0 && it < index }
+          optional = entry["optional"]
+          errors << "#{path}.optional: must be true or false" unless [nil, true, false].include?(optional)
+          filter && new(filter, optional == true, distinct)
+        end
+
+        def initialize(filter, optional, distinct_from)
+          @filter = filter
+          @optional = optional
+          @distinct_from = distinct_from.freeze
+          freeze
+        end
+
+        def optional? = @optional
+        def candidates_for(...) = filter.candidates_for(...)
+        def match_for?(...) = filter.match_for?(...)
+        def candidates(...) = filter.candidates(...)
+        def match?(...) = filter.match?(...)
+        def primitive_name = filter.primitive_name
+        def to_s = "#{"up to one " if optional?}#{filter.is_a?(Class) ? primitive_name : filter}"
+      end
+
       # Shared parsing for abilities that use the stack: targets and effects.
       class StackAbility < Primitive
         # One mode of a modal ability ("Choose one —", CR 700.2): its own targets and effects.
         Mode = Data.define(:targets, :effects)
 
-        attr_reader :targets, :effects, :costs, :modes, :choose
+        # Optional parts of the body: how many modes may be chosen and when more may (CR 700.2), modes
+        # not chosen before for the same object, targets of a kicked spell (CR 702.33g), and an amount
+        # divided among the targets as it's cast (CR 601.2d).
+        Extras = Data.define(:choose_max, :choose_if, :unchosen, :kicked_targets, :divide) do
+          def initialize(choose_max: nil, choose_if: nil, unchosen: false, kicked_targets: nil, divide: nil) = super
+        end
+        NO_EXTRAS = Extras.new
+
+        attr_reader :targets, :effects, :costs, :modes, :choose, :extras
 
         # Parses either plain targets/effects or {"choose": n, "modes": [{targets, effects}, ...]}.
+        # `choose` may be {"min": a, "max": b} ("choose one or more"), and `choose_if` {"if": condition,
+        # "choose": ...} replaces it while the condition holds.
         def self.parse_body(params, errors, path)
           modes_data = Mechanics.fetch_param(params, :modes)
+          extras = parse_extras(params, errors, path)
           if modes_data.nil?
             targets = parse_targets(params, errors, path)
-            return { targets: targets, effects: parse_effects(params, errors, path, targets.size), modes: [].freeze, choose: 0 }
+            check_kicked_targets(extras, targets, errors, path)
+            check_divide(extras, targets, errors, path)
+            return { targets: targets, effects: parse_effects(params, errors, path, targets.size), modes: [].freeze,
+                     choose: 0, extras: extras }
           end
           unless modes_data.is_a?(Array) && modes_data.size >= 2
             errors << "#{path}.modes: must be a list of at least two modes"
@@ -29,16 +77,71 @@ module Enjine
             mode_targets = parse_targets(mode, errors, mode_path)
             Mode.new(targets: mode_targets, effects: parse_effects(mode, errors, mode_path, mode_targets.size))
           end
-          choose = Mechanics.integer_param(params, :choose, errors, path, default: 1, min: 1)
-          errors << "#{path}.choose: can't exceed the number of modes" if choose > modes.size && !modes.empty?
-          { targets: [].freeze, effects: [].freeze, modes: modes.freeze, choose: choose }
+          min, max = parse_choose(Mechanics.fetch_param(params, :choose), errors, "#{path}.choose", modes.size)
+          extras = extras.with(choose_max: max) if max != min
+          { targets: [].freeze, effects: [].freeze, modes: modes.freeze, choose: min, extras: extras }
         end
 
-        BODY_KEYS = %w[targets effects modes choose].freeze
+        BODY_KEYS = %w[targets effects modes choose choose_if unchosen kicked_targets divide].freeze
 
-        def self.parse_targets(params, errors, path)
-          Mechanics.list_param(params, :targets, errors, path).each_with_index.filter_map do |entry, i|
-            Mechanics.build_entry(:filter, entry, errors, "#{path}.targets[#{i}]")
+        # [min, max] modes from 1, n or {"min": a, "max": b}.
+        def self.parse_choose(raw, errors, path, mode_count)
+          raw = 1 if raw.nil?
+          min, max = raw.is_a?(Hash) ? [raw["min"], raw["max"]] : [raw, raw]
+          unless min.is_a?(Integer) && max.is_a?(Integer) && min >= 1 && max >= min && (raw.is_a?(Integer) || raw.size == 2)
+            errors << "#{path}: must be an integer >= 1 or {\"min\": a, \"max\": b}"
+            return [1, 1]
+          end
+          errors << "#{path}: can't exceed the number of modes" if max > mode_count && mode_count.positive?
+          [min, max]
+        end
+
+        def self.parse_extras(params, errors, path)
+          extras = {}
+          if (raw = Mechanics.fetch_param(params, :choose_if))
+            extras[:choose_if] = parse_choose_if(raw, errors, "#{path}.choose_if", params)
+          end
+          unchosen = Mechanics.fetch_param(params, :unchosen)
+          errors << "#{path}.unchosen: must be true or false" unless [nil, true, false].include?(unchosen)
+          extras[:unchosen] = unchosen == true
+          raw = Mechanics.fetch_param(params, :kicked_targets)
+          extras[:kicked_targets] = parse_targets(params, errors, path, key: :kicked_targets) unless raw.nil?
+          extras[:divide] = Mechanics.integer_param(params, :divide, errors, path, min: 1) if params.key?("divide")
+          Extras.new(**extras)
+        end
+
+        def self.parse_choose_if(raw, errors, path, params)
+          unless raw.is_a?(Hash) && raw.key?("if") && raw.key?("choose")
+            errors << "#{path}: must be {\"if\": condition, \"choose\": n or {\"min\": a, \"max\": b}}"
+            return nil
+          end
+          Mechanics.check_keys(raw, %w[if choose], errors, path)
+          count = Array(Mechanics.fetch_param(params, :modes)).size
+          [Condition.build(raw["if"], errors, "#{path}.if"), *parse_choose(raw["choose"], errors, "#{path}.choose", count)]
+        end
+
+        # CR 601.2d: each target gets at least one, so there must be a first, required target.
+        def self.check_divide(extras, targets, errors, path)
+          return if extras.divide.nil? || (targets.first && !(targets.first.respond_to?(:optional?) && targets.first.optional?))
+
+          errors << "#{path}.divide: needs a first target that isn't optional"
+        end
+
+        # CR 702.33g: the kicked spell's targets replace the normal ones, one for one.
+        def self.check_kicked_targets(extras, targets, errors, path)
+          return if extras.kicked_targets.nil? || extras.kicked_targets.size == targets.size
+
+          errors << "#{path}.kicked_targets: must list as many targets as targets"
+        end
+
+        def self.parse_targets(params, errors, path, key: :targets)
+          Mechanics.list_param(params, key, errors, path).each_with_index.filter_map do |entry, i|
+            entry_path = "#{path}.#{key}[#{i}]"
+            if entry.is_a?(Hash) && entry.key?("filter")
+              TargetSpec.build(entry, errors, entry_path, i)
+            else
+              Mechanics.build_entry(:filter, entry, errors, entry_path)
+            end
           end.freeze
         end
 
@@ -58,21 +161,35 @@ module Enjine
           end.freeze
         end
 
-        def initialize(targets:, effects:, costs: [].freeze, modes: [].freeze, choose: 0)
+        def initialize(targets:, effects:, costs: [].freeze, modes: [].freeze, choose: 0, extras: NO_EXTRAS)
           super()
           @targets = targets
           @effects = effects
           @costs = costs
           @modes = modes
           @choose = choose
+          @extras = extras
           freeze
         end
 
         def modal? = !modes.empty?
         def try_effects = effects
 
-        # Targets in order for the chosen modes (or the ability's own targets).
-        def targets_for(chosen) = modal? ? chosen.sort.flat_map { modes[it].targets } : targets
+        # Targets in order for the chosen modes (or the ability's own targets); a kicked spell uses its
+        # kicked targets (CR 702.33g).
+        def targets_for(chosen, kicked: false)
+          return chosen.sort.flat_map { modes[it].targets } if modal?
+
+          kicked && extras.kicked_targets ? extras.kicked_targets : targets
+        end
+
+        # [min, max] modes to choose now (CR 700.2): `choose_if` applies while its condition holds.
+        def choice_range(engine, ctx)
+          cond, min, max = extras.choose_if
+          return [min, max] if cond&.true?(engine, ctx)
+
+          [choose, extras.choose_max || choose]
+        end
 
         # [[effect, target offset, target count, index in its list], ...] in resolution order (modes in
         # printed order, CR 700.2a). The index lets {"result": n} find results within the same list.
@@ -107,15 +224,7 @@ module Enjine
 
         # Total mana cost to pay during activation.
         def mana_cost
-          generic = 0
-          x = 0
-          colored = Hash.new(0)
-          costs.select(&:mana?).each do |cost|
-            generic += cost.mana_cost.generic
-            x += cost.mana_cost.x_symbols
-            cost.mana_cost.colored.each { |c, n| colored[c] += n }
-          end
-          Mana::Cost.new(generic: generic, colored: colored.to_h.freeze, x_symbols: x)
+          Mana.sum_costs(costs.select(&:mana?).map(&:mana_cost))
         end
       end
 
@@ -143,20 +252,24 @@ module Enjine
       class ActivatedAbility < StackAbility
         primitive :ability, :activated,
                   description: "An activated ability: announce it, choose targets, pay its costs, then it goes on " \
-                               "the stack. `timing: \"sorcery\"` restricts it to sorcery speed.",
-                  rules: %w[602.1 602.2 602.5d],
+                               "the stack. `timing: \"sorcery\"` restricts it to sorcery speed, `\"your_turn\"` to your " \
+                               "turns; `limit: \"once_each_turn\"` to one activation per turn; `only_if` to when a " \
+                               "condition holds.",
+                  rules: %w[602.1 602.2 602.5b 602.5d],
                   params: { "cost" => "list of costs (tap, {\"mana\": \"{1}\"}, {\"mana\": \"{X}\"})",
                             "targets" => "list of target filters", "effects" => "list of effects",
-                            "timing" => "\"instant\" (default) or \"sorcery\"",
+                            "timing" => "\"instant\" (default), \"sorcery\" or \"your_turn\"",
+                            "limit" => "\"once_each_turn\" (CR 602.5b)", "only_if" => "condition (\"activate only if ...\")",
                             "cost_reduction" => "{\"amount\": amount, \"if\": condition}: \"this ability costs {N} less " \
                                                 "to activate\" (CR 601.2f, 602.2b)" },
                   example: { "activated" => { "cost" => ["tap"], "targets" => ["any_target"],
                                               "effects" => [{ "deal_damage" => { "amount" => 1, "to" => { "target" => 0 } } }] } }
 
         def self.build(params, errors, path, **)
-          Mechanics.check_keys(params, %w[cost timing cost_reduction] + BODY_KEYS, errors, path)
+          Mechanics.check_keys(params, %w[cost timing cost_reduction limit only_if] + BODY_KEYS, errors, path)
           timing = Mechanics.fetch_param(params, :timing) || "instant"
-          errors << "#{path}.timing: must be \"instant\" or \"sorcery\"" unless %w[instant sorcery].include?(timing)
+          errors << "#{path}.timing: must be one of #{TIMINGS.join(", ")}" unless TIMINGS.include?(timing)
+          restriction = parse_restriction(params, errors, path)
           costs = parse_costs(params, errors, path)
           errors << "#{path}.cost: must be a non-empty list" if costs.empty? && errors.none? { it.start_with?("#{path}.cost") }
           raw = Mechanics.fetch_param(params, :cost_reduction)
@@ -164,7 +277,19 @@ module Enjine
           check_cost_zones(costs, errors, path)
           body = parse_body(params, errors, path)
           check_mana_ability(body, errors, path)
-          new(**body, costs: costs, sorcery: timing == "sorcery", cost_reduction: reduction)
+          new(**body, costs: costs, sorcery: timing == "sorcery", cost_reduction: reduction,
+                      restriction: restriction.merge(your_turn: timing == "your_turn"))
+        end
+
+        TIMINGS = %w[instant sorcery your_turn].freeze
+        LIMITS = { "once_each_turn" => 1 }.freeze
+
+        # CR 602.5b: "Activate only once each turn" and "Activate only if [condition]".
+        def self.parse_restriction(params, errors, path)
+          limit = Mechanics.fetch_param(params, :limit)
+          errors << "#{path}.limit: must be one of #{LIMITS.keys.join(", ")}" unless limit.nil? || LIMITS.key?(limit)
+          raw = Mechanics.fetch_param(params, :only_if)
+          { per_turn: LIMITS[limit], only_if: raw && Condition.build(raw, errors, "#{path}.only_if") }
         end
 
         # CR 605.1a: an activated ability without targets that could add mana is a mana ability,
@@ -177,24 +302,38 @@ module Enjine
                     "use a \"mana\" ability"
         end
 
-        # CR 113.6m: an ability can't both function from the hand and tap or sacrifice its permanent.
+        # CR 113.6m: an ability can't both function from the hand (or graveyard) and tap or sacrifice its
+        # permanent, nor function from two zones.
         def self.check_cost_zones(costs, errors, path)
-          return unless costs.any? { it.respond_to?(:zone) && it.zone == :hand }
-          return unless costs.any? { it.is_a?(Costs::Tap) || it.is_a?(Costs::SacrificeSelf) }
+          zones = costs.filter_map { it.zone if it.respond_to?(:zone) }.uniq
+          errors << "#{path}.cost: costs can't be paid from both #{zones.join(" and ")}" if zones.size > 1
+          return if zones.empty? || costs.none? { it.is_a?(Costs::Tap) || it.is_a?(Costs::SacrificeSelf) }
 
-          errors << "#{path}.cost: a cost paid from the hand can't be combined with tap or sacrifice"
+          errors << "#{path}.cost: a cost paid from the #{zones.first} can't be combined with tap or sacrifice"
         end
 
         attr_reader :cost_reduction
 
-        def initialize(sorcery:, cost_reduction: nil, **)
+        def initialize(sorcery:, cost_reduction: nil, restriction: {}, **)
           @sorcery = sorcery
           @cost_reduction = cost_reduction
+          @restriction = restriction
           super(**)
         end
 
         def kind = :activated
         def sorcery_speed? = @sorcery
+
+        # How many times it may be activated each turn (nil: no limit, CR 602.5b).
+        def per_turn = @restriction[:per_turn]
+
+        # CR 602.5b: restrictions on when it may be activated, besides timing and costs.
+        def restriction_met?(engine, index, source)
+          return false if @restriction[:your_turn] && engine.state.active != index
+          return false if @restriction[:only_if] && !@restriction[:only_if].true?(engine, EffectContext.new(index, source, nil, nil))
+
+          true
+        end
       end
 
       # A triggered ability "When/Whenever/At [trigger], [effect]" (CR 603).

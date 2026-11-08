@@ -14,15 +14,15 @@ module Enjine
                   description: "You add mana to your mana pool: the fixed mana in `produce`, or `amount` mana of a " \
                                "color you choose as it resolves (`color: \"any_one\"`: all of one color; " \
                                "`color: \"any\"`: each mana's color chosen separately, \"in any combination of " \
-                               "colors\").",
+                               "colors\"). `colors` limits the choice (\"add {R} or {G}\").",
                   rules: %w[106.1a 106.4 608.2d 605.1a],
                   params: { "produce" => "mana symbols, e.g. \"{R}{R}\"", "amount" => "amount (with color; default 1)",
-                            "color" => CHOICES.join(" | ") },
+                            "color" => CHOICES.join(" | "), "colors" => "list of colors to choose from (default all five)" },
                   example: { "add_mana" => { "amount" => 2, "color" => "any_one" } }
 
         attr_reader :produce, :color
 
-        def self.keys = %w[produce amount color if]
+        def self.keys = %w[produce amount color colors if]
         def self.default_to = "you"
 
         def initialize(to:, params:, errors:, path:, targets_count: 0, results_count: 0)
@@ -38,6 +38,12 @@ module Enjine
           @produce = raw && Mana.parse_produce(raw, errors, "#{path}.produce")
           errors << "#{path}: needs exactly one of produce, color" unless raw.nil? ^ @color.nil?
           errors << "#{path}.color: must be one of #{CHOICES.join(", ")}" if @color && !CHOICES.include?(@color)
+          raw_colors = Mechanics.fetch_param(params, :colors)
+          @colors = raw_colors || COLORS
+          return if raw_colors.nil?
+          return if @color && @colors.is_a?(Array) && @colors.size >= 2 && (@colors - COLORS).empty? && @colors.uniq == @colors
+
+          errors << "#{path}.colors: must list two or more colors (W U B R G), with color"
         end
 
         def run(engine, ctx, locals)
@@ -50,7 +56,7 @@ module Enjine
           picks = answers(locals)
           if picks.size < (@color == "any_one" ? [n, 1].min : n)
             return ask(engine, locals, index, "Choose the color of #{@color == "any_one" ? "the" : "the next"} mana",
-                       COLORS.map { { "type" => "color", "color" => it } })
+                       @colors.map { { "type" => "color", "color" => it } })
           end
           colors = picks.map { it["color"].to_sym }
           add(engine, index, @color == "any_one" ? colors * n : colors, ctx)
@@ -58,6 +64,8 @@ module Enjine
 
         def to_s
           return "add #{produce.map { "{#{it}}" }.join}" if produce
+
+          return "add #{amount} mana: #{@colors.map { "{#{it}}" }.join(" or ")}" unless @colors == COLORS
 
           "add #{amount} mana of #{@color == "any_one" ? "any one color" : "any combination of colors"}"
         end

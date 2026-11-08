@@ -106,6 +106,8 @@ module Enjine
           Many.new(key, parts.compact)
         elsif data.key?("your_turn") then YourTurn.new(data["your_turn"] != false)
         elsif data.key?("was_cast") then WasCast.new(data["was_cast"] != false)
+        elsif data.key?("kicked") then WasKicked.new(data["kicked"] != false)
+        elsif data.key?("sacrificed") then Sacrificed.build(data, errors, path)
         elsif data.key?("targets") then Targets.build(data, errors, path)
         elsif data.key?("attacked") then Attacked.new(data["attacked"] != false)
         else Compare.build(data, errors, path, targets_count)
@@ -212,6 +214,44 @@ module Enjine
         end
 
         def to_s = @wanted ? "it was cast" : "it wasn't cast"
+      end
+
+      # "If this spell was kicked" (CR 702.33d): the resolving spell (or the spell a permanent was) paid
+      # its kicker cost. Recorded on the stack object as it became cast.
+      class WasKicked
+        def initialize(wanted)
+          @wanted = wanted
+          freeze
+        end
+
+        def true?(engine, ctx) = (engine.state.objects[ctx.object]&.memory&.[]("kicked") == true) == @wanted
+        def to_s = @wanted ? "it was kicked" : "it wasn't kicked"
+      end
+
+      # "If you sacrificed a Klingon this way" (CR 608.2h): a permanent sacrificed to pay the resolving
+      # spell's or ability's cost had these subtypes / card types as it last existed.
+      #   {"sacrificed": {"subtypes": ["klingon"]}}   {"sacrificed": {"types": ["artifact"]}}
+      class Sacrificed
+        def self.build(data, errors, path)
+          Mechanics.check_keys(data, %w[sacrificed], errors, path)
+          spec = data["sacrificed"]
+          ok = spec.is_a?(Hash) && !spec.empty? && (spec.keys - %w[types subtypes]).empty? &&
+               spec.values.all? { it.is_a?(Array) && !it.empty? && it.all?(String) }
+          errors << "#{path}.sacrificed: must be {\"types\": [...]} and/or {\"subtypes\": [...]}" unless ok
+          new(ok ? spec : {})
+        end
+
+        def initialize(spec)
+          @spec = spec
+          freeze
+        end
+
+        def true?(engine, ctx)
+          paid = engine.state.objects[ctx.object]&.paid || []
+          paid.any? { |entry| entry["subtypes"] && @spec.all? { |key, wanted| entry[key].intersect?(wanted) } }
+        end
+
+        def to_s = "a sacrificed permanent was #{@spec.values.flatten.join(" or ")}"
       end
 
       # Negation.

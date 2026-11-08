@@ -31,6 +31,7 @@ module Enjine
           add_options(engine, index, id, out) if engine.object(id).controller == index
         end
         engine.player(index).hand.each { add_options(engine, index, it, out) } # CR 602.2: the owner activates
+        engine.player(index).graveyard.each { add_options(engine, index, it, out) } # CR 113.6m: e.g. "exile this card from your graveyard"
         out
       end
 

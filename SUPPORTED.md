@@ -43,6 +43,7 @@ Rules version: Comprehensive Rules effective 2026-09-25.
 | [`attacks_each_combat`](docs/reference/keywords.md#attacks_each_combat) | 508.1d | Requirement: this creature attacks each combat if able. Declaring attackers can't finish while it could still attack. |
 | [`cant_attack`](docs/reference/keywords.md#cant_attack) | 508.1c | Restriction: this creature can't attack. |
 | [`cant_be_blocked`](docs/reference/keywords.md#cant_be_blocked) | 509.1b | Restriction: this creature can't be blocked. |
+| [`cant_be_countered`](docs/reference/keywords.md#cant_be_countered) | 701.6a, 101.2 | This spell can't be countered: counter effects leave it on the stack. |
 | [`cant_block`](docs/reference/keywords.md#cant_block) | 509.1b | Restriction: this creature can't block. |
 | [`deathtouch`](docs/reference/keywords.md#deathtouch) | 702.2b, 702.2c, 704.5h | Any damage it deals to a creature is enough to destroy it; 1 damage counts as lethal when assigning combat damage. |
 | [`defender`](docs/reference/keywords.md#defender) | 702.3b | Can't attack. |
@@ -65,7 +66,8 @@ Rules version: Comprehensive Rules effective 2026-09-25.
 
 | Name | Rules | Description |
 | --- | --- | --- |
-| [`activated`](docs/reference/abilities.md#activated) | 602.1, 602.2, 602.5d | An activated ability: announce it, choose targets, pay its costs, then it goes on the stack. `timing: "sorcery"` restricts it to sorcery speed. |
+| [`activated`](docs/reference/abilities.md#activated) | 602.1, 602.2, 602.5b, 602.5d | An activated ability: announce it, choose targets, pay its costs, then it goes on the stack. `timing: "sorcery"` restricts it to sorcery speed, `"your_turn"` to your turns; `limit: "once_each_turn"` to one activation per turn; `only_if` to when a condition holds. |
+| [`additional_cost`](docs/reference/abilities.md#additional_cost) | 601.2b, 601.2f, 601.2h, 118.8 | As an additional cost to cast this spell, pay `cost` too (mana and/or chosen costs such as `sacrifice_permanent`). The spell can't be cast without it. |
 | [`chapter`](docs/reference/abilities.md#chapter) | 715.2, 715.2b, 715.2c, 715.2d, 122.6 | A Saga's chapter ability: triggers when lore counters put on it bring their number from below `chapter` to at least `chapter`. Its targets are chosen as it's put on the stack. A Saga's final chapter number is its greatest `chapter`. |
 | [`cost_modifier`](docs/reference/abilities.md#cost_modifier) | 601.2f, 118.7a, 604.1 | While on the battlefield: spells cast by `caster` (you, opponent or any; default you) whose card types match `spells` ({"any_of": [types], "not": [types]}, default all spells) cost `reduce` less or `increase` more generic mana. |
 | [`cost_reduction`](docs/reference/abilities.md#cost_reduction) | 601.2f, 118.7a, 702.41a | This spell costs `amount` generic mana less to cast, if the optional `if` condition holds when its total cost is determined (after targets are chosen). `amount` may be computed, e.g. {"count": {"each": "artifact", "controller": "you"}} for affinity for artifacts (CR 702.41a). It can't reduce colored mana or go below {0}. |
@@ -76,12 +78,14 @@ Rules version: Comprehensive Rules effective 2026-09-25.
 | [`enters_tapped_unless_pay_life`](docs/reference/abilities.md#enters_tapped_unless_pay_life) | 614.12, 119.4 | As this permanent enters, its controller may pay `life` life; if they don't, it enters tapped. You can't pay more life than you have. |
 | [`enters_with_counters`](docs/reference/abilities.md#enters_with_counters) | 614.1c, 614.12, 122.6, 122.6a | Without `affects`: this permanent enters with the `counters` on it. With `affects` ({"each": filter, "controller": you|opponent|any, "other": true}, relative to this permanent's controller): while this permanent is on the battlefield, each matching permanent enters with the `counters` in addition to any others. |
 | [`equip`](docs/reference/abilities.md#equip) | 702.6a, 301.5b, 301.5c, 701.3a | Equip: pay `cost` to attach this Equipment to target creature you control (not itself). Sorcery speed. Only Equipment have it. |
+| [`kicker`](docs/reference/abilities.md#kicker) | 702.33a, 702.33d, 702.33g, 601.2b, 601.2f, 601.2h | Kicker: as you cast this spell you may also pay `cost` (mana and/or chosen costs such as `sacrifice_permanent`). The spell is then kicked: `{"kicked": true}` conditions hold and its `kicked_targets` are used. |
 | [`loyalty`](docs/reference/abilities.md#loyalty) | 606.3, 606.4, 606.5, 602.2b | A loyalty ability. Its cost adds (positive) or removes (negative) loyalty counters and is paid on activation. Sorcery speed, and only one loyalty ability per planeswalker per turn. |
 | [`mana`](docs/reference/abilities.md#mana) | 605.1a, 605.3a, 605.3b, 106.4 | An activated mana ability: pay the cost, add the mana to your mana pool immediately. It does not use the stack and can be activated whenever you have priority. |
 | [`spell`](docs/reference/abilities.md#spell) | 113.3a, 601.2c, 608.2b, 608.2c | The spell ability of an instant or sorcery: its targets are chosen while casting and its effects happen in order when it resolves. If every target is illegal on resolution, it doesn't resolve. |
 | [`static`](docs/reference/abilities.md#static) | 604.1, 611.3a, 613.1f, 613.4c, 301.5f, 303.4m | While its source is on the battlefield, every matching permanent gets `pump` and/or the `keywords`. `affects` is {"each": filter, "controller": you|opponent|any, "other": true} (relative to the source's controller), or "attached": the permanent the source is attached to ("equipped/enchanted creature"). |
 | [`station_symbol`](docs/reference/abilities.md#station_symbol) | 722.2a, 722.2b, 722.2c, 613.1d, 613.4b | While this permanent has at least `at` charge counters it has `keywords` and `abilities`; with `power`/`toughness` it is also a creature with that base power and toughness (layers 4 and 7b). |
 | [`triggered`](docs/reference/abilities.md#triggered) | 603.2, 603.3, 603.3b, 603.3d | A triggered ability: when its trigger condition happens, it is put on the stack the next time a player would receive priority (in APNAP order), with targets chosen then. |
+| [`ward`](docs/reference/abilities.md#ward) | 702.21a, 601.2c, 603.2, 701.6a | Ward: whenever this permanent becomes the target of a spell or ability an opponent controls, counter that spell or ability unless its controller pays `cost`. |
 
 ## Trigger conditions
 
@@ -105,26 +109,33 @@ Rules version: Comprehensive Rules effective 2026-09-25.
 
 | Name | Rules | Description |
 | --- | --- | --- |
+| [`bottom_self_from_graveyard`](docs/reference/costs.md#bottom_self_from_graveyard) | 401.1, 113.6m, 602.2b, 118.3 | Put this card from your graveyard on the bottom of your library. An ability with this cost is activated from your graveyard. |
 | [`discard_self`](docs/reference/costs.md#discard_self) | 701.9a, 602.2b, 113.6m, 118.3 | Discard the card the ability belongs to (it goes from your hand to your graveyard). An ability with this cost is activated from your hand. |
+| [`exile_self_from_graveyard`](docs/reference/costs.md#exile_self_from_graveyard) | 406.1, 113.6m, 602.2b, 118.3 | Exile this card from your graveyard. An ability with this cost is activated from your graveyard. |
 | [`mana`](docs/reference/costs.md#mana) | 601.2g, 601.2h, 602.2b | Pay mana as part of an activation. Paid during the activation by spending mana from your pool, tapping sources one at a time. |
+| [`remove_counters`](docs/reference/costs.md#remove_counters) | 602.2b, 601.2h, 118.3, 122.1 | Remove `count` counters (of kind `counter`, or any kind) from among permanents you control matching `filter` (default creature), one counter per choice. Removed as it becomes cast. |
 | [`sacrifice`](docs/reference/costs.md#sacrifice) | 701.21a, 602.2b, 118.3 | Sacrifice the permanent the ability belongs to (it goes to its owner's graveyard). |
+| [`sacrifice_permanent`](docs/reference/costs.md#sacrifice_permanent) | 701.21a, 601.2h, 602.2b, 118.3, 608.2h | Sacrifice `count` permanents you control matching `filter` (`other: true`: not the source). Chosen while casting or activating, sacrificed as it becomes cast; the sacrificed permanent's last known types and subtypes are remembered (condition `sacrificed`). |
 | [`tap`](docs/reference/costs.md#tap) | 107.5, 602.5a | {T} — tap the permanent the ability belongs to. Requires it to be untapped. |
 | [`tap_another_creature`](docs/reference/costs.md#tap_another_creature) | 702.184a, 601.2h, 602.2b, 302.6 | Tap another untapped creature you control, chosen while activating. A creature that came under your control this turn can be tapped this way. |
+| [`tap_permanents`](docs/reference/costs.md#tap_permanents) | 601.2h, 602.2b, 302.6, 118.3 | Tap `count` untapped permanents you control matching `filter` (default: creature), chosen while casting or activating; `other: true` excludes the source. They are tapped as they are chosen; cancelling untaps them. |
 
 ## Effects
 
 | Name | Rules | Description |
 | --- | --- | --- |
 | [`add_counters`](docs/reference/effects.md#add_counters) | 122.1, 122.6, 613.4c | Put `amount` counters named `counter` on each referenced permanent. Any counter name works (+1/+1, -1/-1, loyalty, stun, shield, oil, a keyword, ...); see docs/reference/counters.md for the ones with rules. |
-| [`add_mana`](docs/reference/effects.md#add_mana) | 106.1a, 106.4, 608.2d, 605.1a | You add mana to your mana pool: the fixed mana in `produce`, or `amount` mana of a color you choose as it resolves (`color: "any_one"`: all of one color; `color: "any"`: each mana's color chosen separately, "in any combination of colors"). |
+| [`add_mana`](docs/reference/effects.md#add_mana) | 106.1a, 106.4, 608.2d, 605.1a | You add mana to your mana pool: the fixed mana in `produce`, or `amount` mana of a color you choose as it resolves (`color: "any_one"`: all of one color; `color: "any"`: each mana's color chosen separately, "in any combination of colors"). `colors` limits the choice ("add {R} or {G}"). |
 | [`assimilate`](docs/reference/effects.md#assimilate) | 701.72a, 701.72b, 205.1b, 613.1b, 613.1d | Assimilate each referenced permanent or permanent card: you gain control of it (or put it onto the battlefield under your control) with a +1/+1 counter, and it becomes a Borg artifact creature while it stays on the battlefield. |
 | [`attach`](docs/reference/effects.md#attach) | 701.3a, 701.3b, 701.3c, 301.5c | Attach this Aura or Equipment (the ability's source) to the referenced permanent. Nothing happens if it can't legally be attached to it, if it's already attached to it, or if the source has left the battlefield. |
-| [`counter`](docs/reference/effects.md#counter) | 701.6a | Counter each referenced spell: it leaves the stack for its owner's graveyard without resolving. |
+| [`counter`](docs/reference/effects.md#counter) | 701.6a, 701.6b, 101.2 | Counter each referenced spell or ability: a spell leaves the stack for its owner's graveyard without resolving, an ability ceases to exist. A spell that can't be countered stays. |
+| [`counter_unless_pays`](docs/reference/effects.md#counter_unless_pays) | 701.6a, 118.12a, 605.3a | Counter each referenced spell or ability unless its controller pays `mana` as this resolves (they choose, and pay like any cost; mana abilities allowed). |
 | [`create_token`](docs/reference/effects.md#create_token) | 111.1, 111.10, 701.7a, 704.5d | Create `amount` tokens under the referenced player's control (default: you). `token` is a predefined token name (Treasure, Clue, Food) or an inline card definition. `tapped: true` creates them tapped. |
 | [`deal_damage`](docs/reference/effects.md#deal_damage) | 120.3a, 120.3c, 120.3e, 120.6 | Deal `amount` damage to each referenced creature, planeswalker or player. Damage to a player causes life loss; to a planeswalker removes loyalty counters; to a creature is marked until cleanup. |
 | [`delayed_trigger`](docs/reference/effects.md#delayed_trigger) | 603.7a, 603.7b, 603.7c, 603.7d, 603.7e | Creates a delayed triggered ability with the controller and source of the resolving spell or ability. It triggers only once, the next time `when` happens (e.g. {"step_begins": {"step": "end", "whose": "each"}} for the next end step). Its `effects` may use {"result": n} for what earlier effects of the creating list moved or created; those objects are affected only if they are still where they were put. |
 | [`destroy`](docs/reference/effects.md#destroy) | 701.8a | Destroy each referenced permanent (it goes to its owner's graveyard). |
 | [`discard`](docs/reference/effects.md#discard) | 701.9a, 701.9b | Each referenced player discards `amount` cards of their choice (default: you). |
+| [`distribute_counters`](docs/reference/effects.md#distribute_counters) | 601.2d, 608.2b, 122.1 | Put on each legal target the number of `counter` counters assigned to it as the spell or ability was cast (its `divide` amount, at least one per target). |
 | [`draw`](docs/reference/effects.md#draw) | 121.1, 121.2 | Each referenced player draws `amount` cards (default: you). |
 | [`exile`](docs/reference/effects.md#exile) | 406.1, 701.13a | Exile each referenced permanent. |
 | [`gain_life`](docs/reference/effects.md#gain_life) | 119.3 | Each referenced player gains `amount` life (default: you). |
@@ -132,6 +143,7 @@ Rules version: Comprehensive Rules effective 2026-09-25.
 | [`lose_life`](docs/reference/effects.md#lose_life) | 119.3 | Each referenced player loses `amount` life. |
 | [`may`](docs/reference/effects.md#may) | 118.12, 118.3, 608.2d | An optional effect. The controller chooses yes or no as it resolves; yes is offered only if every effect in `effects` can be done fully. On yes, `effects` then `then` ("if you do") happen; on no, `otherwise` ("if you don't"). Nested effects may name the results of earlier effects of the enclosing list. |
 | [`mill`](docs/reference/effects.md#mill) | 701.17a | Each referenced player puts the top `amount` cards of their library into their graveyard (default: you). |
+| [`pay`](docs/reference/effects.md#pay) | 118.12, 118.12a, 118.3, 119.4, 605.3a | You may pay `mana` or `life` as it resolves. If you do, `then` happens; if you don't, `otherwise`. Paying mana works like paying a spell's cost (mana abilities may be activated); life can be paid only if you have that much (CR 119.4). For another player paying, see `counter_unless_pays`. |
 | [`pump`](docs/reference/effects.md#pump) | 611.2a, 611.2c, 613.4c, 514.2 | Each referenced creature gets +power/+toughness until end of turn. The set of affected creatures is locked in when the effect starts. |
 | [`return_to_battlefield`](docs/reference/effects.md#return_to_battlefield) | 400.7, 400.4a, 110.2, 111.8, 603.7c | Put each referenced card that is in exile or a graveyard onto the battlefield under its owner's control (`under: "you"`: under the controller's), tapped if `tapped: true`. A card that is no longer in the zone it was expected in, or isn't a permanent card, stays where it is. |
 | [`return_to_hand`](docs/reference/effects.md#return_to_hand) | 400.6 | Return each referenced permanent to its owner's hand. |
@@ -158,6 +170,7 @@ Rules version: Comprehensive Rules effective 2026-09-25.
 | [`planeswalker`](docs/reference/filters.md#planeswalker) | 115.1 | A planeswalker on the battlefield. |
 | [`player`](docs/reference/filters.md#player) | 115.1 | A player. |
 | [`spell`](docs/reference/filters.md#spell) | 112.1, 115.1 | A spell on the stack. |
+| [`stack_ability`](docs/reference/filters.md#stack_ability) | 113.1b, 115.1, 605.3b | An activated or triggered ability on the stack (`kind`: "activated" or "triggered" for only one of them). |
 
 ## Counters with rules
 

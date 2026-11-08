@@ -97,38 +97,7 @@ module Enjine
           end
       end
 
-      # ---- costs that need a choice (CR 601.2h, 602.2b): "tap another untapped creature you control" ----
-
-      # The index of the next cost of the ability being activated that still needs its choice.
-      def next_cost_choice(ctx, ability)
-        return nil unless ctx["kind"] == "ability"
-
-        choosing = ability.costs.each_index.select { ability.costs[it].respond_to?(:choice_candidates) }
-        made = (ctx["paid"] || []).size
-        choosing[made]
-      end
-
-      def ask_cost_choice!(ctx, cost)
-        ask!("kind" => "choose_cost", "player" => ctx["player"], "cost" => cost.to_s)
-        :wait
-      end
-
-      def cost_choice_candidates
-        ctx = casting
-        cost = casting_ability.costs[next_cost_choice(ctx, casting_ability)]
-        cost.choice_candidates(self, object(ctx["source"]))
-      end
-
-      # Pays the chosen part of the cost now (costs may be paid in any order, CR 601.2h). Cancelling the
-      # activation untaps it again (ctx "tapped"). The creature's power is kept for effects that use it.
-      def choose_cost!(id)
-        ctx = casting
-        creature = object(id)
-        tap!(creature)
-        ctx["tapped"] << id
-        (ctx["paid"] ||= []) << { "object" => id, "power" => power(creature) }
-        ask!(nil)
-      end
+      # (Costs that need a choice, e.g. tapping another creature: see Engine::CastChoices.)
 
       # As a spell or ability becomes cast, activated or put on the stack: it keeps the cost choices
       # (CR 702.184a uses the tapped creature's power), and chosen modes mean its controller faced a

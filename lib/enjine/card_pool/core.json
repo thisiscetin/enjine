@@ -2630,5 +2630,830 @@
         }
       }
     ]
+  },
+  {
+    "name": "Thornmarsh Hybrid",
+    "mana_cost": "{1}{B/G}{B/G}",
+    "types": [
+      "creature"
+    ],
+    "power": 3,
+    "toughness": 3,
+    "subtypes": [
+      "beast"
+    ]
+  },
+  {
+    "name": "Tidal Rebuke",
+    "mana_cost": "{U}",
+    "types": [
+      "instant"
+    ],
+    "abilities": [
+      {
+        "kicker": {
+          "cost": [
+            {
+              "mana": "{2}{U}"
+            }
+          ]
+        }
+      },
+      {
+        "spell": {
+          "targets": [
+            {
+              "spell": {
+                "mana_value": {
+                  "at_most": 1
+                }
+              }
+            }
+          ],
+          "kicked_targets": [
+            "spell"
+          ],
+          "effects": [
+            {
+              "counter": {
+                "to": {
+                  "target": 0
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Reactor Purge",
+    "mana_cost": "{B}",
+    "types": [
+      "instant"
+    ],
+    "abilities": [
+      {
+        "kicker": {
+          "cost": [
+            {
+              "sacrifice_permanent": {
+                "filter": {
+                  "permanent": {
+                    "any_of": [
+                      "artifact",
+                      "creature"
+                    ]
+                  }
+                }
+              }
+            }
+          ]
+        }
+      },
+      {
+        "spell": {
+          "targets": [
+            "creature"
+          ],
+          "effects": [
+            {
+              "pump": {
+                "power": -1,
+                "toughness": -1,
+                "to": {
+                  "target": 0
+                },
+                "if": {
+                  "kicked": false
+                }
+              }
+            },
+            {
+              "pump": {
+                "power": -5,
+                "toughness": -5,
+                "to": {
+                  "target": 0
+                },
+                "if": {
+                  "kicked": true
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Grim Tithe",
+    "mana_cost": "{B}",
+    "types": [
+      "sorcery"
+    ],
+    "abilities": [
+      {
+        "additional_cost": {
+          "cost": [
+            {
+              "sacrifice_permanent": {
+                "filter": "creature"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "spell": {
+          "effects": [
+            {
+              "draw": {
+                "amount": 2
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Warband Quartermaster",
+    "mana_cost": "{1}{B}",
+    "types": [
+      "creature"
+    ],
+    "power": 2,
+    "toughness": 2,
+    "subtypes": [
+      "warrior"
+    ],
+    "abilities": [
+      {
+        "activated": {
+          "cost": [
+            {
+              "sacrifice_permanent": {
+                "filter": "creature",
+                "other": true
+              }
+            }
+          ],
+          "effects": [
+            {
+              "grant": {
+                "keywords": [
+                  "trample"
+                ],
+                "to": "self"
+              }
+            },
+            {
+              "draw": {
+                "amount": 1,
+                "if": {
+                  "sacrificed": {
+                    "subtypes": [
+                      "warrior"
+                    ]
+                  }
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Lattice Hive",
+    "mana_cost": "{1}{B}",
+    "types": [
+      "artifact",
+      "creature"
+    ],
+    "power": 1,
+    "toughness": 1,
+    "abilities": [
+      {
+        "activated": {
+          "cost": [
+            {
+              "tap_permanents": {
+                "count": 2,
+                "filter": {
+                  "creature": {
+                    "types": [
+                      "artifact"
+                    ]
+                  }
+                }
+              }
+            }
+          ],
+          "effects": [
+            {
+              "draw": {
+                "amount": 1
+              }
+            },
+            {
+              "lose_life": {
+                "amount": 1,
+                "to": "you"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Tally Engineer",
+    "mana_cost": "{1}{U}",
+    "types": [
+      "creature"
+    ],
+    "power": 1,
+    "toughness": 2,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "cast": {
+              "controller": "any",
+              "spell": "noncreature"
+            }
+          },
+          "effects": [
+            {
+              "add_counters": {
+                "counter": "+1/+1",
+                "amount": 1,
+                "to": "self"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "activated": {
+          "cost": [
+            {
+              "mana": "{1}"
+            },
+            {
+              "remove_counters": {
+                "count": 2
+              }
+            }
+          ],
+          "effects": [
+            {
+              "draw": {
+                "amount": 1
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Ashbound Revenant",
+    "mana_cost": "{B}",
+    "types": [
+      "creature"
+    ],
+    "power": 1,
+    "toughness": 1,
+    "abilities": [
+      {
+        "activated": {
+          "cost": [
+            {
+              "mana": "{1}{B}"
+            },
+            "exile_self_from_graveyard"
+          ],
+          "effects": [
+            {
+              "draw": {
+                "amount": 1
+              }
+            },
+            {
+              "lose_life": {
+                "amount": 1,
+                "to": "you"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Cyclic Archivist",
+    "mana_cost": "{1}{G}",
+    "types": [
+      "creature"
+    ],
+    "power": 2,
+    "toughness": 1,
+    "abilities": [
+      {
+        "activated": {
+          "cost": [
+            {
+              "mana": "{1}"
+            },
+            "bottom_self_from_graveyard"
+          ],
+          "effects": [
+            {
+              "gain_life": {
+                "amount": 2
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Gearwright Mender",
+    "mana_cost": "{2}{W}",
+    "types": [
+      "creature"
+    ],
+    "power": 2,
+    "toughness": 3,
+    "abilities": [
+      {
+        "activated": {
+          "cost": [
+            {
+              "mana": "{W}"
+            }
+          ],
+          "targets": [
+            "creature"
+          ],
+          "timing": "sorcery",
+          "limit": "once_each_turn",
+          "effects": [
+            {
+              "untap": {
+                "to": {
+                  "target": 0
+                }
+              }
+            }
+          ]
+        }
+      },
+      {
+        "activated": {
+          "cost": [
+            {
+              "mana": "{1}"
+            }
+          ],
+          "timing": "your_turn",
+          "only_if": {
+            "life": "you",
+            "at_most": 15
+          },
+          "effects": [
+            {
+              "gain_life": {
+                "amount": 1
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Driftgate Warden",
+    "mana_cost": "{2}{W}",
+    "types": [
+      "creature"
+    ],
+    "power": 2,
+    "toughness": 2,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "enters": {}
+          },
+          "targets": [
+            {
+              "filter": {
+                "permanent": {
+                  "controller": "you",
+                  "not": [
+                    "land"
+                  ],
+                  "other": true
+                }
+              },
+              "optional": true
+            }
+          ],
+          "effects": [
+            {
+              "exile": {
+                "to": {
+                  "target": 0
+                }
+              }
+            },
+            {
+              "delayed_trigger": {
+                "when": {
+                  "step_begins": {
+                    "step": "end",
+                    "whose": "each"
+                  }
+                },
+                "effects": [
+                  {
+                    "return_to_battlefield": {
+                      "to": {
+                        "result": 0
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Kindled Blessing",
+    "mana_cost": "{1}{W}",
+    "types": [
+      "sorcery"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "targets": [
+            "creature",
+            {
+              "filter": "creature",
+              "optional": true,
+              "distinct_from": [
+                0
+              ]
+            }
+          ],
+          "divide": 3,
+          "effects": [
+            {
+              "distribute_counters": {
+                "counter": "+1/+1"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Rallying Marshal",
+    "mana_cost": "{2}{R}",
+    "types": [
+      "creature"
+    ],
+    "power": 2,
+    "toughness": 2,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "any_of": [
+              {
+                "enters": {}
+              },
+              {
+                "attacks": {}
+              }
+            ]
+          },
+          "choose": 1,
+          "choose_if": {
+            "if": {
+              "hand_size": "you",
+              "at_most": 1
+            },
+            "choose": {
+              "min": 1,
+              "max": 3
+            }
+          },
+          "modes": [
+            {
+              "effects": [
+                {
+                  "gain_life": {
+                    "amount": 2
+                  }
+                }
+              ]
+            },
+            {
+              "effects": [
+                {
+                  "pump": {
+                    "power": 1,
+                    "toughness": 0,
+                    "to": {
+                      "each": "creature",
+                      "controller": "you"
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              "effects": [
+                {
+                  "draw": {
+                    "amount": 1
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Toll of Reason",
+    "mana_cost": "{1}{U}",
+    "types": [
+      "instant"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "choose": 1,
+          "modes": [
+            {
+              "targets": [
+                "spell"
+              ],
+              "effects": [
+                {
+                  "counter_unless_pays": {
+                    "mana": "{2}",
+                    "to": {
+                      "target": 0
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              "targets": [
+                {
+                  "filter": "creature",
+                  "optional": true
+                }
+              ],
+              "effects": [
+                {
+                  "tap": {
+                    "to": {
+                      "target": 0
+                    }
+                  }
+                },
+                {
+                  "add_counters": {
+                    "counter": "stun",
+                    "amount": 1,
+                    "to": {
+                      "target": 0
+                    }
+                  }
+                },
+                {
+                  "draw": {
+                    "amount": 1
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Ferryman's Toll",
+    "mana_cost": "{G}",
+    "types": [
+      "sorcery"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "effects": [
+            {
+              "pay": {
+                "mana": "{1}",
+                "then": [
+                  {
+                    "draw": {
+                      "amount": 1
+                    }
+                  }
+                ],
+                "otherwise": [
+                  {
+                    "gain_life": {
+                      "amount": 2
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "may": {
+                "effects": [
+                  {
+                    "pay": {
+                      "life": 2,
+                      "then": [
+                        {
+                          "gain_life": {
+                            "amount": 1
+                          }
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Quiet Arbiter",
+    "mana_cost": "{1}{U}",
+    "types": [
+      "creature"
+    ],
+    "power": 1,
+    "toughness": 2,
+    "keywords": [
+      "flash"
+    ],
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "enters": {}
+          },
+          "choose": 1,
+          "modes": [
+            {
+              "targets": [
+                "stack_ability"
+              ],
+              "effects": [
+                {
+                  "counter": {
+                    "to": {
+                      "target": 0
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              "targets": [
+                {
+                  "filter": {
+                    "permanent": {
+                      "any_of": [
+                        "artifact",
+                        "creature"
+                      ]
+                    }
+                  },
+                  "optional": true
+                }
+              ],
+              "effects": [
+                {
+                  "tap": {
+                    "to": {
+                      "target": 0
+                    }
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Unyielding Oxen",
+    "mana_cost": "{2}{G}",
+    "types": [
+      "creature"
+    ],
+    "power": 3,
+    "toughness": 3,
+    "keywords": [
+      "cant_be_countered"
+    ]
+  },
+  {
+    "name": "Shoalguard Whale",
+    "mana_cost": "{3}{U}",
+    "types": [
+      "creature"
+    ],
+    "power": 3,
+    "toughness": 4,
+    "abilities": [
+      {
+        "ward": {
+          "cost": "{1}"
+        }
+      }
+    ]
+  },
+  {
+    "name": "Bramble Courier",
+    "mana_cost": "{R}{G}",
+    "types": [
+      "creature"
+    ],
+    "power": 2,
+    "toughness": 2,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "enters": {
+              "subject": {
+                "each": "land",
+                "controller": "you"
+              }
+            }
+          },
+          "effects": [
+            {
+              "add_mana": {
+                "color": "any_one",
+                "colors": [
+                  "R",
+                  "G"
+                ]
+              }
+            }
+          ]
+        }
+      },
+      {
+        "activated": {
+          "cost": [
+            {
+              "mana": "{2}"
+            },
+            {
+              "sacrifice_permanent": {
+                "filter": "land"
+              }
+            }
+          ],
+          "effects": [
+            {
+              "draw": {
+                "amount": 1
+              }
+            }
+          ]
+        }
+      }
+    ]
   }
 ]

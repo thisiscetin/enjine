@@ -15,9 +15,43 @@ RSpec.describe Enjine::Mana do
     end
 
     it "rejects unsupported symbols and junk" do
-      expect { described_class.parse("{R/G}") }.to raise_error(ArgumentError, /unsupported mana symbol/)
+      expect { described_class.parse("{2/B}") }.to raise_error(ArgumentError, /unsupported mana symbol/)
+      expect { described_class.parse("{B/P}") }.to raise_error(ArgumentError, /unsupported mana symbol/)
+      expect { described_class.parse("{G/G}") }.to raise_error(ArgumentError, /two different colors/)
       expect { described_class.parse("2R") }.to raise_error(ArgumentError, /unexpected characters/)
       expect { described_class.parse(3) }.to raise_error(ArgumentError, /must be a string/)
+    end
+  end
+
+  describe "hybrid symbols (CR 107.4e, 202.2d, 202.3f)" do
+    it "parses two-color hybrid symbols in printed order and round-trips" do
+      cost = Enjine::Mana::Cost.parse("{2}{R/G}{R/G}")
+      expect(cost.hybrid).to eq([%i[R G], %i[R G]])
+      expect(cost.to_s).to eq("{2}{R/G}{R/G}")
+      expect(Enjine::Mana::Cost.parse("{G/W}{G/W}").to_s).to eq("{G/W}{G/W}")
+      expect(Enjine::Mana::Cost.parse(cost.to_s)).to eq(cost)
+    end
+
+    it "counts each hybrid symbol as 1 toward mana value (its largest component)" do
+      expect(Enjine::Mana::Cost.parse("{3}{W/U}{W/U}").mana_value).to eq(5)
+      expect(Enjine::Mana::Cost.parse("{B/R}{B/R}").mana_value).to eq(2)
+    end
+
+    it "is all of its components' colors, with colored symbols, in WUBRG order" do
+      expect(Enjine::Mana::Cost.parse("{1}{U/B}{U/B}").colors).to eq(%i[U B])
+      expect(Enjine::Mana::Cost.parse("{G/W}{R}").colors).to eq(%i[W R G])
+      expect(Enjine::Mana::Cost.parse("{3}").colors).to eq([])
+    end
+
+    it "lists what can pay each colored or hybrid symbol, and keeps hybrids when X is announced or costs are summed" do
+      cost = Enjine::Mana::Cost.parse("{X}{R/G}{B}")
+      expect(cost.requirements).to eq([%i[B], %i[R G]])
+      expect(cost.with_x(2).to_s).to eq("{2}{R/G}{B}")
+      expect(described_class.sum_costs([cost, Enjine::Mana::Cost.parse("{U/B}")]).to_s).to eq("{X}{R/G}{U/B}{B}")
+    end
+
+    it "doesn't count hybrid as colorless: a hybrid-only cost renders without {0}" do
+      expect(Enjine::Mana::Cost.parse("{W/U}").to_s).to eq("{W/U}")
     end
   end
 
