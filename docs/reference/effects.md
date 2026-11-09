@@ -4,9 +4,9 @@
 
 ## add_counters
 
-Put `amount` counters named `counter` on each referenced permanent. Any counter name works (+1/+1, -1/-1, loyalty, stun, shield, oil, a keyword, ...); see docs/reference/counters.md for the ones with rules.
+Put `amount` counters named `counter` on each referenced permanent or player. Any counter name works (+1/+1, -1/-1, loyalty, stun, shield, oil, a keyword, ...; on a player poison, experience, ...); see docs/reference/counters.md for the ones with rules. A player with ten or more poison counters loses the game.
 
-Rules: CR 122.1, CR 122.6, CR 613.4c
+Rules: CR 122.1, CR 122.1f, CR 122.6, CR 613.4c, CR 704.5c
 
 | Parameter | Description |
 | --- | --- |
@@ -202,9 +202,9 @@ Rules: CR 701.3a, CR 701.3b, CR 701.3c, CR 301.5c
 
 ## become
 
-Each referenced permanent becomes what the parameters say, for `duration` (end_of_turn, default, or indefinite: as long as it stays on the battlefield): it has the card `types`, `supertypes` and `subtypes` in addition to its other types (layer 4, "becomes an artifact creature"), its creature types are exactly `creature_types` (layer 4), its colors are `colors` (layer 5), it has the `keywords` and `abilities` (layer 6: triggered, mana, play_from or additional_land_plays abilities) and its base power and toughness are `base_power_toughness` (layer 7b). A permanent that becomes a creature has its printed power and toughness (a Vehicle's), or 0/0.
+Each referenced permanent becomes what the parameters say, for `duration` (end_of_turn, default; indefinite: as long as it stays on the battlefield; while_source_on_battlefield: for as long as this effect's source remains on the battlefield): it has the card `types`, `supertypes` and `subtypes` in addition to its other types (layer 4, "becomes an artifact creature"), its creature types are exactly `creature_types` (layer 4), its colors are `colors` (layer 5), with `loses_abilities: true` it loses all the abilities it had (layer 6; abilities granted later, keyword counters put on it later and this effect's own `keywords` and `abilities` stay, CR 613.7), it has the `keywords` and `abilities` (layer 6: triggered, activated, mana, play_from or additional_land_plays abilities) and its base power and toughness are `base_power_toughness` (layer 7b). A permanent that becomes a creature has its printed power and toughness (a Vehicle's), or 0/0.
 
-Rules: CR 611.2a, CR 611.2b, CR 611.2c, CR 613.1d, CR 613.1e, CR 613.1f, CR 613.4b, CR 205.1a, CR 205.1b, CR 301.7b, CR 514.2
+Rules: CR 611.2a, CR 611.2b, CR 611.2c, CR 613.1d, CR 613.1e, CR 613.1f, CR 613.4b, CR 613.7b, CR 205.1a, CR 205.1b, CR 301.7b, CR 514.2
 
 | Parameter | Description |
 | --- | --- |
@@ -213,10 +213,11 @@ Rules: CR 611.2a, CR 611.2b, CR 611.2c, CR 613.1d, CR 613.1e, CR 613.1f, CR 613.
 | `subtypes` | subtypes it also has ("in addition to its other types") |
 | `creature_types` | list of creature types (replaces the others) |
 | `colors` | list of W, U, B, R, G (replaces its colors) |
+| `loses_abilities` | true: it loses all abilities ("loses all abilities") |
 | `keywords` | list of keywords it gains |
 | `base_power_toughness` | {"power": n, "toughness": n} |
 | `abilities` | list of abilities it gains |
-| `duration` | end_of_turn | indefinite |
+| `duration` | end_of_turn | indefinite | while_source_on_battlefield |
 | `to` | selector |
 
 ```json
@@ -643,6 +644,38 @@ Rules: CR 701.6a, CR 118.12a, CR 605.3a, CR 701.67a
 }
 ```
 
+## create_emblem
+
+Each referenced player (default you) gets an emblem with the `abilities` (triggered, static or player_rule abilities). An emblem is in the command zone for the rest of the game; its abilities work there, and "this emblem" is the source of what they do.
+
+Rules: CR 114.1, CR 114.2, CR 114.3, CR 114.4, CR 113.6p
+
+| Parameter | Description |
+| --- | --- |
+| `abilities` | list of triggered, static or player_rule abilities |
+| `to` | selector |
+
+```json
+{
+  "create_emblem": {
+    "abilities": [
+      {
+        "static": {
+          "affects": {
+            "each": "creature",
+            "controller": "you"
+          },
+          "pump": {
+            "power": 2,
+            "toughness": 2
+          }
+        }
+      }
+    ]
+  }
+}
+```
+
 ## create_token
 
 Create `amount` tokens under the referenced player's control (default: you). `token` is a predefined token name (Treasure, Clue, Food) or an inline card definition. `tapped: true` creates them tapped; `attacking: true` attacking (only for the attacking player during combat, CR 506.3b).
@@ -946,6 +979,51 @@ Rules: CR 701.63a, CR 701.63b
 }
 ```
 
+## exchange_control
+
+The permanent `to` references and the one `with` references exchange controllers. If either is gone or both have the same controller, nothing happens.
+
+Rules: CR 701.12a, CR 701.12b, CR 613.1b
+
+| Parameter | Description |
+| --- | --- |
+| `to` | selector (a permanent) |
+| `with` | selector (a permanent) |
+
+```json
+{
+  "exchange_control": {
+    "to": {
+      "target": 0
+    },
+    "with": {
+      "target": 1
+    }
+  }
+}
+```
+
+## exchange_life_totals
+
+The player `to` references (default you) and the one `with` references exchange life totals: each gains or loses the difference. If either can't gain life and would, no exchange happens. The life the first player lost this way is recorded for {"this_way": n}.
+
+Rules: CR 701.12a, CR 701.12c, CR 119.7
+
+| Parameter | Description |
+| --- | --- |
+| `to` | selector (a player, default you) |
+| `with` | selector (a player) |
+
+```json
+{
+  "exchange_life_totals": {
+    "with": {
+      "target": 0
+    }
+  }
+}
+```
+
 ## exile
 
 Exile each referenced permanent, spell, or card in a graveyard or hand. `link: true`: the cards are exiled with the source, for its "exiled with" abilities (the `exiled_with` selector). `until_source_leaves: true`: they return to the battlefield under their owners' control when the source leaves the battlefield; if it already has, nothing is exiled.
@@ -1106,15 +1184,15 @@ Rules: CR 701.14a, CR 701.14b, CR 701.14c, CR 701.14d
 
 ## gain_control
 
-The player referenced by `gains` (default you) gains control of each referenced permanent: indefinitely (`duration: "permanent"`, default) or until end of turn. A permanent that changes control leaves combat and is newly under its controller's control (it can't attack or {T} without haste).
+The player referenced by `gains` (default you) gains control of each referenced permanent: indefinitely (`duration: "permanent"`, default), until end of turn, or for as long as this effect's source remains on the battlefield / tapped (it does nothing if that is already over). A permanent that changes control leaves combat and is newly under its controller's control (it can't attack or {T} without haste).
 
-Rules: CR 613.1b, CR 108.4, CR 506.4, CR 302.6, CR 514.2
+Rules: CR 613.1b, CR 108.4, CR 506.4, CR 302.6, CR 514.2, CR 611.2b
 
 | Parameter | Description |
 | --- | --- |
 | `to` | selector (permanents) |
 | `gains` | selector (a player; default "you") |
-| `duration` | permanent | end_of_turn |
+| `duration` | permanent | end_of_turn | while_source_on_battlefield | while_source_tapped |
 
 ```json
 {
@@ -1405,13 +1483,13 @@ Rules: CR 611.2a, CR 601.3, CR 305.1, CR 400.7, CR 514.2, CR 601.2f, CR 108.3, C
 
 ## player_rule
 
-Each referenced player (default you) gets `rule` for the `duration`: end_of_turn (default) or until_your_next_turn (until the controller's next turn begins). Rules: hexproof, cant_attack, no_max_hand_size, prevent_all_damage, cant_lose_for_life.
+Each referenced player (default you) gets `rule` for the `duration`: end_of_turn (default) or until_your_next_turn (until the controller's next turn begins). Rules: hexproof, cant_attack, no_max_hand_size, prevent_all_damage, cant_lose_for_life, cant_cast, cant_cast_except_from_hand, spells_cant_be_countered, cant_gain_life, cant_activate, damage_cant_be_prevented, combat_damage_cant_be_prevented.
 
-Rules: CR 702.11c, CR 115.4, CR 508.1c, CR 402.2, CR 514.1, CR 615.1, CR 615.1a, CR 704.5a, CR 104.3b, CR 701.21a, CR 614.17b, CR 611.2a, CR 514.2
+Rules: CR 702.11c, CR 115.4, CR 508.1c, CR 402.2, CR 514.1, CR 615.1, CR 615.1a, CR 704.5a, CR 104.3b, CR 701.21a, CR 614.17b, CR 101.2, CR 601.3, CR 701.6a, CR 119.7, CR 602.5, CR 615.12, CR 611.2a, CR 514.2
 
 | Parameter | Description |
 | --- | --- |
-| `rule` | hexproof | cant_attack | no_max_hand_size | prevent_all_damage | cant_lose_for_life |
+| `rule` | hexproof | cant_attack | no_max_hand_size | prevent_all_damage | cant_lose_for_life | cant_cast | cant_cast_except_from_hand | spells_cant_be_countered | cant_gain_life | cant_activate | damage_cant_be_prevented | combat_damage_cant_be_prevented |
 | `to` | selector |
 | `duration` | end_of_turn | until_your_next_turn |
 
@@ -1835,6 +1913,25 @@ Rules: CR 205.1a, CR 613.1d, CR 611.2c, CR 514.2
 }
 ```
 
+## set_life
+
+Each referenced player's life total becomes `amount` (default: you): they gain or lose the difference (so "can't gain life" and life-gain triggers apply).
+
+Rules: CR 119.5, CR 119.7
+
+| Parameter | Description |
+| --- | --- |
+| `amount` | amount |
+| `to` | selector |
+
+```json
+{
+  "set_life": {
+    "amount": 10
+  }
+}
+```
+
 ## shuffle_into_library
 
 Put each referenced card (in a graveyard or exile) or permanent into its owner's library; each of those owners shuffles their library.
@@ -1868,6 +1965,28 @@ Rules: CR 701.24a
 ```json
 {
   "shuffle_library": {}
+}
+```
+
+## skip_turns
+
+Each referenced player skips their next `amount` turns (extra turns included): each of those turns doesn't happen, and the next player in turn order takes theirs. Several skips add up.
+
+Rules: CR 614.1b, CR 614.10, CR 614.10a
+
+| Parameter | Description |
+| --- | --- |
+| `amount` | amount |
+| `to` | selector |
+
+```json
+{
+  "skip_turns": {
+    "amount": 1,
+    "to": {
+      "target": 0
+    }
+  }
 }
 ```
 

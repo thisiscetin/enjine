@@ -56,7 +56,7 @@ RSpec.describe "Aura and Equipment card data (CR 301.5, 303.4, 702.5, 702.6)" do
     expect(errors_for(types: ["creature"], subtypes: ["aura"], power: 1, toughness: 1, abilities: [{ "enchant" => "creature" }]))
       .to include(a_string_matching(/aura is only valid for enchantment cards/))
     expect(errors_for(types: ["artifact"], subtypes: ["equipment"], abilities: [{ "static" => { "affects" => "attached" } }]))
-      .to include("abilities[0].static: needs pump and/or keywords (or creature_types, types, subtypes, abilities)")
+      .to include(a_string_starting_with("abilities[0].static: needs at least one of pump, keywords"))
   end
 
   it "attach takes a single target (CR 301.5c)" do

@@ -17,7 +17,7 @@ module Enjine
         current = chars(obj)
         { "controller" => obj.controller, "card" => obj.card, "types" => current.types, "subtypes" => current.subtypes,
           "power" => current.power, "toughness" => current.toughness, "counters" => obj.counters.dup,
-          "token" => token?(obj), "except" => copy_exceptions(obj) }
+          "token" => token?(obj), "except" => copy_exceptions(obj), "abilities" => current.abilities }
           .merge(obj.memory.slice(Mechanics::Linked::EXILED)) # the cards exiled with it (CR 607.2a)
       end
 
@@ -117,7 +117,7 @@ module Enjine
 
         @trigger_epoch = @epoch
         @trigger_state = state
-        @trigger_sources = state.battlefield.filter_map do |id|
+        @trigger_sources = (state.battlefield + (state.command || [])).filter_map do |id| # emblems too (CR 114.4)
           instances = chars(id).triggered_abilities.select { it.ability.zone == :battlefield }
           [id, instances] unless instances.empty?
         end
@@ -131,17 +131,15 @@ module Enjine
 
         lki = last_known(event.old_id) or return
         @departed_together&.each_value { queue_leaving_triggers(it, event) }
-        gone = { "id" => event.old_id, "card" => event.card, "controller" => lki["controller"] }
+        gone = { "id" => event.old_id, "card" => event.card, "controller" => lki["controller"], "lki" => lki }
         queue_leaving_triggers(gone, event)
-        @departed_together[event.old_id] = gone.merge("lki" => lki) if @departed_together
+        @departed_together[event.old_id] = gone if @departed_together
       end
 
+      # The abilities it had as it last existed (CR 603.10a): not those it had lost, but those it was granted.
       def queue_leaving_triggers(gone, event)
-        defn = catalog.fetch(gone["card"])
-        return unless defn.triggered?
-
         source = gone.slice("id", "card", "controller")
-        defn.ability_instances.each do |inst|
+        gone["lki"]["abilities"].each do |inst|
           ability = inst.ability
           queue_trigger(inst, event, source) if ability.kind == :triggered && ability.zone == :battlefield &&
                                                 ability.trigger.leaves_battlefield?

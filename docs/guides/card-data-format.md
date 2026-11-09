@@ -978,6 +978,102 @@ power"). Keyword *actions* are effects.
                                  "effects": [{ "add_counters": { "counter": "+1/+1", "amount": 2, "to": "self" } }] } }] }
 ```
 
+### 4.21 Rules-changing effects: losing abilities, restrictions, protection
+
+**Losing all abilities** (CR 613.1f). `"loses_abilities": true` on a `become` effect or a `static`
+ability. Layer 6 applies in timestamp order (CR 613.7): the permanent loses what it had, and
+keeps abilities granted later and keyword counters put on it later. A permanent that loses its
+abilities loses its static abilities' effects on others too (CR 613.8a), its characteristic-defining
+power and toughness, and its "when this dies" abilities. A `static` can also set `colors` (layer 5)
+and `base_power_toughness` (layer 7b); its `abilities` may be activated abilities, as `become`'s may.
+
+| Oracle words | Data |
+| --- | --- |
+| "Target creature loses all abilities until end of turn" | `{ "become": { "loses_abilities": true, "to": { "target": 0 } } }` |
+| "… loses all abilities for as long as this creature remains on the battlefield" | `become` with `"duration": "while_source_on_battlefield"` (does nothing if this has already left, CR 611.2b) |
+| "Enchanted creature loses all abilities and is a black Skeleton with base power and toughness 1/1" | `{ "static": { "affects": "attached", "loses_abilities": true, "colors": ["B"], "creature_types": ["skeleton"], "base_power_toughness": { "power": 1, "toughness": 1 } } }` |
+| "Other creatures you control have '{1}: This creature gets +1/+0 until end of turn'" | `static` with `"abilities": [{ "activated": … }]` (`self` is the creature that has it) |
+| "This creature is the chosen type in addition to its other types" | `{ "choose_creature_type": {} }` and `{ "static": { "affects": "self", "subtypes": "chosen" } }` |
+| "As this land enters, choose a basic land type. This land is the chosen type." | `{ "choose_basic_land_type": {} }` and the same `static` (a land with a basic land type has its mana ability, CR 305.6) |
+
+```json
+{ "name": "Example Fishbowl", "mana_cost": "{1}{U}", "types": ["enchantment"], "subtypes": ["aura"],
+  "keywords": ["flash"],
+  "abilities": [{ "enchant": "creature" },
+                { "static": { "affects": "attached", "loses_abilities": true, "colors": ["U"],
+                              "creature_types": ["fish"], "base_power_toughness": { "power": 1, "toughness": 1 } } }] }
+```
+
+**Restrictions on players and the game** (CR 101.2: a "can't" beats any "can"). They are
+`player_rule` abilities (static, with an optional `if` condition seen from the source) or
+`player_rule` effects (for a duration), with `affects` / `to` naming the players:
+
+| Oracle words | Data |
+| --- | --- |
+| "Your opponents can't cast spells during your turn" | `{ "player_rule": { "rule": "cant_cast", "affects": "opponents", "if": { "your_turn": true } } }` |
+| "Players can't cast spells this turn" | effect `{ "player_rule": { "rule": "cant_cast", "to": { "each": "player" } } }` |
+| "… can't cast spells from anywhere other than their hands" | rule `cant_cast_except_from_hand` |
+| "Creature spells you control can't be countered" | `{ "player_rule": { "rule": "spells_cant_be_countered", "spells": { "types": ["creature"] } } }` (`spells`: a card spec; also on `cant_cast`) |
+| "Players can't gain life" | `{ "player_rule": { "rule": "cant_gain_life", "affects": "each" } }` |
+| "Activated abilities of creatures can't be activated unless they're mana abilities" | `{ "player_rule": { "rule": "cant_activate", "affects": "each", "filter": "creature" } }` |
+| "Damage can't be prevented (this turn)" / "Combat damage can't be prevented" | rule `damage_cant_be_prevented` / `combat_damage_cant_be_prevented` (game-wide, CR 615.12) |
+
+```json
+{ "name": "Example Hush Captain", "mana_cost": "{1}{W}", "types": ["creature"], "subtypes": ["human"],
+  "power": 2, "toughness": 2,
+  "abilities": [{ "player_rule": { "rule": "cant_cast", "affects": "opponents", "if": { "your_turn": true } } },
+                { "player_rule": { "rule": "cant_gain_life", "affects": "opponents" } }] }
+```
+
+**Life totals, exchanges and player counters** (CR 119.5, 701.12, 122.1).
+
+| Oracle words | Data |
+| --- | --- |
+| "Your life total becomes 10" | `{ "set_life": { "amount": 10 } }` (gains or loses the difference) |
+| "Exchange life totals with target opponent. If you lost life this way, draw that many cards" | `{ "exchange_life_totals": { "with": { "target": 0 } } }`, then `{ "draw": { "amount": { "this_way": 0 } } }` |
+| "Gain control of target creature for as long as this creature remains on the battlefield" | `{ "gain_control": { "to": { "target": 0 }, "duration": "while_source_on_battlefield" } }` (also `while_source_tapped`; control goes back as it ends, CR 611.2b) |
+| "Exchange control of target creature you control and target creature an opponent controls" | `{ "exchange_control": { "to": { "target": 0 }, "with": { "target": 1 } } }` |
+| "that player gets two poison counters" / "you get an experience counter" | `{ "add_counters": { "counter": "poison", "amount": 2, "to": { "triggering": "player" } } }` / `"counter": "experience", "to": "you"` |
+| "the number of experience counters you have" | amount `{ "counters": { "of": "you", "kind": "experience" } }` |
+| "Target opponent skips their next turn" | `{ "skip_turns": { "amount": 1, "to": { "target": 0 } } }` (CR 614.10; skips add up) |
+
+A player with ten or more poison counters loses the game (CR 704.5c). An exchange that can't be
+completed doesn't happen at all (CR 701.12a).
+
+```json
+{ "name": "Example Venom Adder", "mana_cost": "{1}{G}", "types": ["creature"], "subtypes": ["snake"],
+  "power": 1, "toughness": 2, "keywords": ["deathtouch"],
+  "abilities": [{ "triggered": { "when": { "deals_damage": { "combat": true, "to": "player" } },
+                                 "effects": [{ "add_counters": { "counter": "poison", "amount": 2,
+                                                                 "to": { "triggering": "player" } } }] } }] }
+```
+
+**Emblems** (CR 114). "You get an emblem with '…'" is `create_emblem` with the emblem's
+`abilities` (triggered, static or player_rule). The emblem goes to the command zone for the rest
+of the game and its abilities work from there; "this emblem" is the source of what they do. The
+game view lists emblems under `command`.
+
+```json
+{ "loyalty": { "cost": -7, "effects": [
+  { "create_emblem": { "abilities": [
+    { "triggered": { "when": { "cast": {} }, "targets": ["any_target"],
+                     "effects": [{ "deal_damage": { "amount": 5, "to": { "target": 0 } } }] } }] } }] } }
+```
+
+**Hexproof from and protection from a quality** (CR 702.11d, 702.16). Abilities whose value is a
+card spec of the quality, matched against the spell, or the source of the ability or damage, as it
+is now: `{ "colors": ["B"] }` (any of those colors), `{ "types": ["instant"] }`,
+`{ "color_count": { "equal": 1 } }` (monocolored; `at_least: 2` multicolored). "From A and from B"
+is two abilities. Protection also prevents damage from such sources, stops such creatures from
+blocking it and such Auras and Equipment from staying attached (CR 704.5m-n). `"protection_from":
+"everything"` is protection from everything. Both may be granted by `static` and `become` `abilities`.
+
+```json
+{ "name": "Example Ward Knight", "mana_cost": "{1}{W}", "types": ["creature"], "subtypes": ["human", "knight"],
+  "power": 2, "toughness": 2,
+  "abilities": [{ "hexproof_from": { "colors": ["B"] } }, { "protection_from": { "colors": ["R"] } }] }
+```
+
 ---
 
 ## 5. Worked examples

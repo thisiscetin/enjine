@@ -12,17 +12,32 @@ module Enjine
       # ---- player rules -------------------------------------------------------------------
 
       # Whether `rule` applies to the player: a `player_rule` effect naming them (state.effects) or a
-      # `player_rule` static ability of a permanent on the battlefield. `object`: the permanent a
-      # filtered rule ("can't sacrifice Treasure tokens") is asked about.
+      # `player_rule` static ability of a permanent on the battlefield whose condition holds. `object`: the
+      # permanent or card a filtered rule ("can't sacrifice Treasure tokens", "creature spells can't be
+      # countered") is asked about.
       def player_rule?(index, rule, object = nil)
         ref = Mechanics::Filters.player_ref(self, index)
         return true if state.effects.any? { it["kind"] == "player_rule" && it["rule"] == rule && it["affected"].include?(ref) }
 
         player_rule_statics.any? do |source, ability|
           ability.rule == rule && ability.applies_to?(index, source.controller) &&
-            (object.nil? || ability.matches?(self, object, source))
+            (object.nil? || ability.matches?(self, object, source)) && ability.active?(self, source)
         end
       end
+
+      # A rule of the whole game ("Damage can't be prevented"), whichever player it was given to.
+      def game_rule?(rule) = state.players.each_index.any? { player_rule?(it, rule) }
+
+      # CR 101.2: "can't cast" beats any permission to cast. `obj`: the card (or stand-in) to be cast.
+      def cast_forbidden?(index, obj)
+        player_rule?(index, "cant_cast", obj) || (obj.zone != :hand && player_rule?(index, "cant_cast_except_from_hand"))
+      end
+
+      # CR 602.5, 101.2: abilities of a permanent matching a `cant_activate` filter can't be activated.
+      def activation_forbidden?(index, obj) = obj.zone == :battlefield && player_rule?(index, "cant_activate", obj)
+
+      # CR 615.12: damage that can't be prevented.
+      def unpreventable?(combat) = game_rule?("damage_cant_be_prevented") || (combat && game_rule?("combat_damage_cant_be_prevented"))
 
       # [[source permanent, PlayerRule ability]] on the battlefield, cached with the layer pass (they
       # change only on the events that change characteristics).
@@ -31,7 +46,7 @@ module Enjine
 
         @player_rule_epoch = @epoch
         @player_rule_state = state
-        @player_rule_statics = state.battlefield.flat_map do |id|
+        @player_rule_statics = (state.battlefield + (state.command || [])).flat_map do |id| # emblems too (CR 114.4)
           source = object(id)
           chars(source).abilities.filter_map { [source, it.ability] if it.ability.kind == :player_rule }
         end
@@ -49,7 +64,7 @@ module Enjine
       # CR 704.5a, unless an effect says the player doesn't lose for having 0 or less life.
       def loses_for_life?(index) = player(index).life <= 0 && !player_rule?(index, "cant_lose_for_life")
 
-      # CR 615.1: a prevention effect protecting a player from all damage.
+      # CR 615.1: a prevention effect protecting a player from all damage (Replacements#preventing!).
       def damage_prevented?(ref)
         index = Mechanics::Filters.player_index(self, ref)
         !index.nil? && player_rule?(index, "prevent_all_damage")
@@ -69,17 +84,32 @@ module Enjine
       # Whether choosing `ref` as a target is forbidden for player `index`: a player with hexproof can't
       # be targeted by opponents (CR 702.11c), and a permanent may say it can't be the target of
       # abilities from some sources its controller's opponents control. `source`: the permanent whose
-      # ability is targeting (nil for a spell).
-      def targeting_forbidden?(ref, index, source = nil)
+      # ability is targeting (nil for a spell). `targeter`: the spell, or the ability's source, whose qualities
+      # protection and hexproof from a quality look at (CR 702.16b, 702.11d).
+      def targeting_forbidden?(ref, index, source = nil, targeter: source)
         player = Mechanics::Filters.player_index(self, ref)
         return player != index && player_rule?(player, "hexproof") if player
-        return false unless source
 
         obj = state.objects[ref]
-        src = state.objects[source]
-        return false unless obj && src && obj.zone == :battlefield && obj.controller != index
+        return false unless obj && obj.zone == :battlefield
 
-        chars(obj).abilities.any? { it.ability.kind == :cant_be_targeted_by && it.ability.forbids?(self, src) }
+        quality = targeter && state.objects[targeter]
+        return true if protected_from?(obj, quality)
+        return false if obj.controller == index
+
+        src = source && state.objects[source]
+        protected_from?(obj, quality, :hexproof_from) ||
+          (!src.nil? && chars(obj).abilities.any? { it.ability.kind == :cant_be_targeted_by && it.ability.forbids?(self, src) })
+      end
+
+      # ---- protection and hexproof from a quality (CR 702.11d, 702.16) ----------------------
+
+      # Whether the permanent has protection (or, with `kind` :hexproof_from, hexproof) from `other`: a spell,
+      # the source of an ability or of damage, an Aura, an Equipment or a blocking creature.
+      def protected_from?(obj, other, kind = :protection_from)
+        return false if other.nil?
+
+        chars(obj).abilities.any? { it.ability.kind == kind && it.ability.from?(self, other) }
       end
 
       # ---- winning and losing by an effect (CR 104.2b, 104.3e) ------------------------------
@@ -96,7 +126,7 @@ module Enjine
         end_game_if_decided!
       end
 
-      # ---- extra turns (CR 500.7) -----------------------------------------------------------
+      # ---- extra and skipped turns (CR 500.7, 614.10) ----------------------------------------
 
       # CR 500.7: the turn is added directly after this one; the most recently created is taken first.
       def add_extra_turn!(index)
@@ -104,13 +134,30 @@ module Enjine
         emit Events::ExtraTurnAdded.new(player: name(index))
       end
 
-      # The player whose turn comes next: an extra turn if one was added, else the next in turn order.
-      def take_next_turn!
-        index = state.extra_turns["queue"].pop
-        return state.opponent(state.active) unless index
+      # CR 614.10a: the player skips their next `count` turns (each skip waits for a turn that isn't skipped).
+      def skip_turns!(index, count)
+        return unless count.positive?
 
-        state.extra_turns["begun"] |= [index]
-        index
+        (state.extra_turns["skip"] ||= []).concat([index] * count)
+      end
+
+      # The player whose turn comes next: an extra turn if one was added, else the next in turn order. A
+      # skipped turn doesn't happen (CR 614.10): the turn after it comes next.
+      def take_next_turn!
+        last = state.active
+        loop do
+          extra = state.extra_turns["queue"].pop
+          index = extra || state.opponent(last)
+          skip = state.extra_turns.fetch("skip", []).index(index)
+          unless skip
+            state.extra_turns["begun"] |= [index] if extra
+            return index
+          end
+          state.extra_turns["skip"].delete_at(skip)
+          state.extra_turns.delete("skip") if state.extra_turns["skip"].empty?
+          emit Events::TurnSkipped.new(player: name(index))
+          last = index
+        end
       end
 
       def began_extra_turn?(index) = state.extra_turns["begun"].include?(index)
@@ -130,24 +177,29 @@ module Enjine
         emit Events::ControlChanged.new(object: obj.id, controller: name(controller))
       end
 
-      # Control of `obj` until end of turn: an effect that ends in the cleanup step (CR 514.2), handing
+      # Control of `obj` for a while: until end of turn, an effect that ends in the cleanup step (CR 514.2), handing
       # it back unless a newer control change has happened since.
-      def gain_control_until_end_of_turn!(obj, controller, ctx)
+      # `duration`: "end_of_turn", or "for as long as" its source remains tapped / on the battlefield (CR 611.2b,
+      # `source` set; Engine::Rules#end_while_source_effects! hands it back).
+      def gain_control_for!(obj, controller, ctx, duration: "end_of_turn", source: nil)
         return if obj.controller == controller
 
         timestamp = next_timestamp!
         previous = obj.controller
         gain_control!(obj, controller, timestamp)
         state.effects << { "kind" => "control", "timestamp" => timestamp, "controller" => ctx.controller,
-                           "affected" => [obj.id], "duration" => "end_of_turn", "previous" => previous }
+                           "affected" => [obj.id], "duration" => duration, "previous" => previous,
+                           "source" => source }.compact
         emit Events::EffectStarted.new(kind: "control", affected: [obj.id], details: { "controller" => controller })
       end
 
       # CR 514.2: as "until end of turn" control effects end, control returns to the previous controller.
-      # Several of them on one permanent all end together: it goes back to whoever had it before the first.
-      def revert_temporary_control!
-        ending = state.effects.select { it["kind"] == "control" && it["duration"] == "end_of_turn" }
-        ending.group_by { it["affected"].first }.each do |id, list|
+      def revert_temporary_control! = revert_control!(state.effects.select { it["duration"] == "end_of_turn" })
+
+      # As temporary control effects end, control returns to the previous controller. Several of them on one
+      # permanent all end together: it goes back to whoever had it before the first.
+      def revert_control!(ending)
+        ending.select { it["kind"] == "control" }.group_by { it["affected"].first }.each do |id, list|
           obj = state.objects[id]
           next unless obj && obj.zone == :battlefield && obj.memory["control_timestamp"] == list.last["timestamp"]
 
@@ -188,14 +240,19 @@ module Enjine
         state.battlefield.include?(source) && object(source).tapped
       end
 
-      # CR 611.2b: once the duration ends (the source untaps, leaves or phases out), the effect is over
-      # for good, even if the source becomes tapped again.
-      def end_while_source_effects!(id)
-        ending = state.effects.count { it["duration"] == "while_source_tapped" && it["source"] == id }
-        return if ending.zero?
+      # "For as long as [source] remains tapped / on the battlefield" (CR 611.2b).
+      WHILE_SOURCE = %w[while_source_tapped while_source_on_battlefield].freeze
 
-        state.effects.reject! { it["duration"] == "while_source_tapped" && it["source"] == id }
-        emit Events::EffectsEnded.new(count: ending)
+      # CR 611.2b: once the duration ends (the source untaps, leaves or phases out, CR 702.26f), the effect
+      # is over for good, even if the source becomes tapped again. Untapping ends only `while_source_tapped`.
+      def end_while_source_effects!(id, durations = WHILE_SOURCE)
+        ending = ->(effect) { durations.include?(effect["duration"]) && effect["source"] == id }
+        count = state.effects.count(&ending)
+        return if count.zero?
+
+        revert_control!(state.effects.select(&ending)) # "for as long as" control (CR 611.2b)
+        state.effects.reject!(&ending)
+        emit Events::EffectsEnded.new(count: count)
       end
     end
 

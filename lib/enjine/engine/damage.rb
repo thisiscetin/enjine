@@ -10,8 +10,9 @@ module Enjine
       def deal_damage!(source, ref, amount, combat: false, lifelink: true)
         return 0 unless amount.positive?
 
-        amount = propose("damage", { "source" => source, "target" => ref, "amount" => amount, "combat" => combat })
-                 .data["amount"]
+        data = { "source" => source, "target" => ref, "amount" => amount, "combat" => combat }
+        data["unpreventable"] = true if unpreventable?(combat) # CR 615.12 (Engine::Rules)
+        amount = propose("damage", data).data["amount"]
         return 0 unless amount.positive? # prevention (CR 615) will reduce it here
 
         source_chars = damage_source_chars(source)
@@ -68,6 +69,7 @@ module Enjine
 
       def change_life!(index, delta)
         return if delta.zero?
+        return if delta.positive? && player_rule?(index, "cant_gain_life") # CR 119.7: not even replaced
 
         delta = propose("life", { "player" => index, "delta" => delta }).data["delta"]
         return if delta.zero?
@@ -88,7 +90,25 @@ module Enjine
 
         before = object.counters.fetch(kind, 0)
         object.counters[kind] = before + amount
+        # CR 613.7c: keyword counters of this kind get the new counter's timestamp (Engine::Characteristics#ability_layers).
+        # The next timestamp isn't taken: an effect created later gets this number too and sorts after it.
+        (object.memory["counter_timestamps"] ||= {})[kind] = state.next_id if Mechanics::Counters.keyword?(kind)
         emit Events::CountersChanged.new(object: object.id, counter: kind, from: before, to: before + amount)
+      end
+
+      # Counters on a player (CR 122.1): poison (ten or more lose the game, CR 122.1f, 704.5c), experience, rad, ...
+      def player_counters(index)
+        pl = player(index)
+        (pl.counters || {}).merge(pl.poison.positive? ? { "poison" => pl.poison } : {})
+      end
+
+      def add_player_counters!(index, kind, amount)
+        return unless amount.positive?
+
+        pl = player(index)
+        before = player_counters(index).fetch(kind, 0)
+        kind == "poison" ? pl.poison += amount : (pl.counters ||= {})[kind] = before + amount
+        emit Events::PlayerCountersChanged.new(player: pl.name, counter: kind, from: before, to: before + amount)
       end
 
       def remove_counters!(object, kind, amount)

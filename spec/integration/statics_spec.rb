@@ -76,7 +76,7 @@ RSpec.describe "Static abilities and keyword grants (CR 604, 611, 613)" do
 
   it "validates static abilities and grants" do
     expect { Enjine::CardDefinition.from_h(banner.merge("abilities" => [{ "static" => { "affects" => "all" } }])) }
-      .to raise_error(Enjine::InvalidCardDefinition, %r{affects: must be.*needs pump and/or keywords}m)
+      .to raise_error(Enjine::InvalidCardDefinition, /affects: must be.*needs at least one of pump/m)
     expect { Enjine::CardDefinition.from_h(wings.merge("abilities" => [{ "spell" => { "effects" => [{ "grant" => { "keywords" => ["shiny"], "to" => "you" } }] } }])) }
       .to raise_error(Enjine::InvalidCardDefinition, /unknown keyword "shiny"/)
     expect(Enjine::CardDefinition.from_h(banner).abilities.first.to_s).to eq("creatures you control get +1/+1")

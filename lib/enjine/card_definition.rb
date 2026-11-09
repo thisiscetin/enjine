@@ -129,6 +129,14 @@ module Enjine
       abilities.map { AbilityInstance.new(ref: "keyword:#{keyword}", ability: it) }
     end
 
+    # The abilities a subtype grants ("Forest" has "{T}: Add {G}.", CR 305.6), referenced "intrinsic:<subtype>";
+    # the same for a printed subtype and one an effect adds.
+    def self.intrinsic_instances(subtype)
+      rule = Enjine.registry.fetch(:subtype, subtype.to_s)
+      abilities = rule.respond_to?(:intrinsic_abilities) ? rule.intrinsic_abilities : []
+      abilities.each_with_index.map { |a, i| AbilityInstance.new(ref: "intrinsic:#{subtype}#{":#{i}" if i.positive?}", ability: a) }
+    end
+
     # Abilities an effect of this card grants for a while ("<effect ref>:<j>", see Effects::Become).
     def effect_granted(ref) = @effect_granted.fetch(ref, EMPTY)
 
@@ -367,11 +375,7 @@ module Enjine
         ability = Mechanics.build_entry(:ability, entry, errors, "abilities[#{i}]")
         AbilityInstance.new(ref: "printed:#{i}", ability: ability) if ability
       end
-      intrinsic = @subtypes.flat_map do |sub|
-        rule = Enjine.registry.fetch(:subtype, sub)
-        abilities = rule.respond_to?(:intrinsic_abilities) ? rule.intrinsic_abilities : []
-        abilities.each_with_index.map { |a, i| AbilityInstance.new(ref: "intrinsic:#{sub}#{":#{i}" if i.positive?}", ability: a) }
-      end
+      intrinsic = @subtypes.flat_map { CardDefinition.intrinsic_instances(it) }
       @ability_instances = (explicit + linked_instances(explicit) + intrinsic + keyword_abilities).freeze
       read_nested_abilities(explicit)
       @ability_instances.map(&:ability).freeze

@@ -116,9 +116,10 @@ module Enjine
       end
 
       # CR 509.1b restrictions: "can't be blocked", "can't be blocked by [quality] creatures", flying
-      # (702.9b) / reach (702.17b).
+      # (702.9b) / reach (702.17b), protection from the blocker's quality (702.16f).
       def can_block?(blocker, attacker)
         return false if chars(attacker).keyword?(:cant_be_blocked)
+        return false if protected_from?(object(attacker), object(blocker))
         return false if chars(attacker).abilities.any? { it.ability.kind == :cant_be_blocked_by && it.ability.forbids?(self, blocker) }
         return true unless chars(attacker).keyword?(:flying)
 

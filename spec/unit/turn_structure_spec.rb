@@ -61,7 +61,7 @@ RSpec.describe "Turn structure primitives validation" do
       expect(errors_for(become("base_power_toughness" => { "power" => 1, "toughness" => -1, "x" => 0 })))
         .to include(a_string_matching(/base_power_toughness\.toughness/), a_string_matching(/base_power_toughness/))
       expect(errors_for(become("abilities" => ["may_not_untap"])))
-        .to include(a_string_matching(/become\.abilities\[0\]: only triggered, mana, play_from/))
+        .to include(a_string_matching(/become\.abilities\[0\]: only triggered, activated, mana, play_from/))
     end
   end
 

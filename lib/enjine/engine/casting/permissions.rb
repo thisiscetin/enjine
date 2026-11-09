@@ -163,6 +163,7 @@ module Enjine
         c = chars(obj)
         return false if c.land? || (method["alt"].nil? && c.mana_cost.nil?) # CR 305.9
         return false unless c.type?(:instant) || c.keyword?(:flash) || method["instant"] || sorcery_timing?(index)
+        return false if cast_forbidden?(index, obj) # CR 101.2
         return false if returns_creature?(method["alt"]) && return_candidates(index, method["alt"]).empty?
         return false unless additional_costs_payable?(obj) && alt_parts_payable?(obj, method) # CR 601.2f
 
@@ -178,7 +179,7 @@ module Enjine
       # (timing doesn't apply; lands can't be cast, CR 305.9; it needs legal targets, CR 601.2c).
       def free_castable?(index, id)
         obj = object(id)
-        obj.kind == "card" && !chars(obj).land? && additional_costs_payable?(obj) &&
+        obj.kind == "card" && !chars(obj).land? && !cast_forbidden?(index, obj) && additional_costs_payable?(obj) &&
           ability_targetable?(spell_ability_of(obj), index, id)
       end
 

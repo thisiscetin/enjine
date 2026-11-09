@@ -12,11 +12,13 @@ module Enjine
     module Chosen
       # What is chosen -> [memory key, option key].
       MEMORY = { "color" => "chosen_color", "creature_type" => "chosen_type", "card_type" => "chosen_card_type",
-                 "option" => "chosen_option" }.freeze
+                 "basic_land_type" => "chosen_type", "option" => "chosen_option" }.freeze
       # CR 105.4: one of the five colors.
       COLORS = %w[W U B R G].freeze
       # CR 205.2a: the card types of traditional Magic cards.
       CARD_TYPES = %w[artifact battle creature enchantment instant kindred land planeswalker sorcery].freeze
+      # CR 305.6: the basic land types.
+      BASIC_LAND_TYPES = %w[plains island swamp mountain forest].freeze
       WORD = /\A[a-z][a-z0-9_]*\z/
 
       # The values a player may choose: every color, creature type (CR 205.3m) or card type, or the named options.
@@ -25,6 +27,7 @@ module Enjine
         when "color" then COLORS
         when "creature_type" then Keywords::Changeling::CREATURE_TYPES.map(&:to_s)
         when "card_type" then CARD_TYPES
+        when "basic_land_type" then BASIC_LAND_TYPES
         else words
         end
       end
@@ -94,6 +97,16 @@ module Enjine
                                "\"chosen\" (or \"not\": \"chosen\") use it.",
                   rules: %w[614.12 205.2a 607.2d], example: { "choose_card_type" => {} }
         def self.kind_name = "card_type"
+      end
+
+      # "As this enters, choose a basic land type." (Multiversal Passage: "This land is the chosen type.")
+      class ChooseBasicLandType < EnteringChosen
+        primitive :ability, :choose_basic_land_type,
+                  description: "As this permanent enters, its controller chooses a basic land type; filters with " \
+                               "\"subtypes\": \"chosen\" and a static ability's `\"subtypes\": \"chosen\"` use it " \
+                               "(\"this land is the chosen type\").",
+                  rules: %w[614.12 305.6 607.2d], example: { "choose_basic_land_type" => {} }
+        def self.kind_name = "basic_land_type"
       end
 
       # "As this enters, choose Khans or Dragons." Abilities of it check the word with {"chosen": word}.

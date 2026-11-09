@@ -28,7 +28,8 @@ module Enjine
                            :restricted_mana, # mana with a spending restriction (CR 106.6), see Engine#add_mana!
                            :outside, # definition ids of the cards they own outside the game (CR 400.11a)
                            :speed, # nil (no speed) or 1-4 (CR 702.179), see Engine::Speed
-                           :designations) do # player designations, e.g. "enduring_story" (CR 702.195b), see Engine::Designations
+                           :designations, # player designations, e.g. "enduring_story" (CR 702.195b), see Engine::Designations
+                           :counters) do # nil or {kind => n}: counters other than poison (CR 122.1), see Engine#add_player_counters!
     def zone(name)
       case name
       when :library then library
@@ -46,6 +47,7 @@ module Enjine
         "restricted_mana" => Marshal.load(Marshal.dump(restricted_mana || [])),
         "outside" => (outside || []).dup }.merge(speed ? { "speed" => speed } : {})
         .merge(designations.to_a.empty? ? {} : { "designations" => designations.dup })
+        .merge(counters.nil? || counters.empty? ? {} : { "counters" => counters.dup })
     end
   end
 
@@ -55,12 +57,14 @@ module Enjine
     STARTING_LIFE = 20
     PLAYER_ZONES = %i[library hand graveyard].freeze
     # `phased_out` is not a zone of the rules: phased-out permanents are on the battlefield but treated as
-    # though they don't exist (CR 702.26b, 702.26d), so they are kept apart from `battlefield`.
-    SHARED_ZONES = %i[battlefield stack exile phased_out].freeze
+    # though they don't exist (CR 702.26b, 702.26d), so they are kept apart from `battlefield`. The command
+    # zone holds emblems (CR 114, 408).
+    SHARED_ZONES = %i[battlefield stack exile phased_out command].freeze
     ZONES = (PLAYER_ZONES + SHARED_ZONES).freeze
     STEP_STATES = %w[begin active done].freeze
 
-    attr_accessor :seed, :rng, :decklists, :players, :objects, :battlefield, :stack, :exile, :phased_out, :turn, :active,
+    attr_accessor :seed, :rng, :decklists, :players, :objects, :battlefield, :stack, :exile, :phased_out, :command, :turn,
+                  :active,
                   :step, :step_state, :priority, :passes, :next_id, :starting_player, :pending, :result,
                   :attackers, :blockers, :effects, :frames, :attacks_declared,
                   :pending_triggers, :repeat_cleanup, :combat_damage_pass, :delayed_triggers,
@@ -81,6 +85,7 @@ module Enjine
       state.stack = []
       state.exile = []
       state.phased_out = []
+      state.command = []
       state.attackers = {}
       state.blockers = {}
       state.effects = []
@@ -120,6 +125,7 @@ module Enjine
         "starting_player" => starting_player, "pending" => pending&.dup, "result" => result&.dup,
         "players" => players.map(&:to_h), "objects" => objects.values.map(&:to_h),
         "battlefield" => battlefield.dup, "stack" => stack.dup, "exile" => exile.dup, "phased_out" => phased_out.dup,
+        "command" => (command || []).dup,
         "attackers" => attackers.dup, "blockers" => blockers.dup, "effects" => effects.map { deep_dup(it) },
         "frames" => deep_dup(frames), "pending_triggers" => deep_dup(pending_triggers),
         "delayed_triggers" => deep_dup(delayed_triggers), "extra_turns" => deep_dup(extra_turns),

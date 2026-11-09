@@ -23,11 +23,18 @@ module Enjine
         "stack" => state.stack.map { object_view(engine, it) },
         "exile" => state.exile.map { exiled_view(engine, it, viewer) },
         "phased_out" => state.phased_out.map { object_view(engine, it) },
+        "command" => engine.emblems.map { emblem_view(engine, it) },
         "pending" => pending_view(engine, viewer),
         "result" => state.result&.dup,
         "effects" => state.effects.map { it.except("controller").merge("controller" => engine.name(it["controller"])) },
         "delayed_triggers" => state.delayed_triggers.map { delayed_view(engine, it) }
       }
+    end
+
+    # An emblem in the command zone (CR 114): public, with its owner and abilities.
+    def emblem_view(engine, obj)
+      { "id" => obj.id, "kind" => "emblem", "owner" => engine.name(obj.owner),
+        "abilities" => engine.chars(obj).abilities.map { it.ability.to_s } }
     end
 
     # A delayed triggered ability waiting for its event (CR 603.7): public, like the spell that made it.
@@ -54,6 +61,7 @@ module Enjine
       }
       view["speed"] = player.speed if player.speed # CR 702.179: public; absent while they have no speed
       view["designations"] = player.designations.dup unless player.designations.to_a.empty? # public (CR 702.195b)
+      view["counters"] = player.counters.dup unless player.counters.nil? || player.counters.empty? # CR 122.1: rad, experience
       view["hand"] = player.hand.map { object_view(engine, it) } if sees_hand
       view["outside"] = outside_view(engine, player) if sees_hand # CR 400.11a: only its owner knows their sideboard
       view["library"] = player.library.map { object_view(engine, it) } if sees_library

@@ -1,0 +1,776 @@
+[
+  {
+    "name": "Island",
+    "types": [
+      "land"
+    ],
+    "supertypes": [
+      "basic"
+    ],
+    "subtypes": [
+      "island"
+    ],
+    "rarity": "common",
+    "printing": {
+      "set": "sos",
+      "number": "274"
+    }
+  },
+  {
+    "name": "Adaptive Automaton",
+    "mana_cost": "{3}",
+    "types": [
+      "artifact",
+      "creature"
+    ],
+    "subtypes": [
+      "construct"
+    ],
+    "power": 2,
+    "toughness": 2,
+    "abilities": [
+      {
+        "choose_creature_type": {}
+      },
+      {
+        "static": {
+          "affects": "self",
+          "subtypes": "chosen"
+        }
+      },
+      {
+        "static": {
+          "affects": {
+            "each": {
+              "creature": {
+                "subtypes": "chosen"
+              }
+            },
+            "controller": "you",
+            "other": true
+          },
+          "pump": {
+            "power": 1,
+            "toughness": 1
+          }
+        }
+      }
+    ],
+    "rarity": "rare",
+    "printing": {
+      "set": "fdn",
+      "number": "723"
+    }
+  },
+  {
+    "name": "Ajani Resolute",
+    "mana_cost": "{1}{W}",
+    "types": [
+      "planeswalker"
+    ],
+    "supertypes": [
+      "legendary"
+    ],
+    "subtypes": [
+      "ajani"
+    ],
+    "loyalty": 2,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "gains_life": {}
+          },
+          "effects": [
+            {
+              "add_counters": {
+                "counter": "loyalty",
+                "amount": 1,
+                "to": "self"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "loyalty": {
+          "cost": 0,
+          "effects": [
+            {
+              "gain_life": {
+                "amount": 1
+              }
+            }
+          ]
+        }
+      },
+      {
+        "loyalty": {
+          "cost": -4,
+          "effects": [
+            {
+              "create_token": {
+                "token": {
+                  "name": "Ajani's Pridemate",
+                  "colors": [
+                    "W"
+                  ],
+                  "types": [
+                    "creature"
+                  ],
+                  "subtypes": [
+                    "cat",
+                    "soldier"
+                  ],
+                  "power": 2,
+                  "toughness": 2,
+                  "abilities": [
+                    {
+                      "triggered": {
+                        "when": {
+                          "gains_life": {}
+                        },
+                        "effects": [
+                          {
+                            "add_counters": {
+                              "counter": "+1/+1",
+                              "amount": 1,
+                              "to": "self"
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      },
+      {
+        "loyalty": {
+          "cost": -10,
+          "effects": [
+            {
+              "create_emblem": {
+                "abilities": [
+                  {
+                    "static": {
+                      "affects": {
+                        "each": "creature",
+                        "controller": "you"
+                      },
+                      "pump": {
+                        "power": 2,
+                        "toughness": 2
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "mythic",
+    "printing": {
+      "set": "fra",
+      "number": "195"
+    }
+  },
+  {
+    "name": "Trade the Helm",
+    "mana_cost": "{4}{U}",
+    "types": [
+      "sorcery"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "targets": [
+            {
+              "permanent": {
+                "any_of": [
+                  "artifact",
+                  "creature"
+                ],
+                "controller": "you"
+              }
+            },
+            {
+              "permanent": {
+                "any_of": [
+                  "artifact",
+                  "creature"
+                ],
+                "controller": "opponent"
+              }
+            }
+          ],
+          "effects": [
+            {
+              "exchange_control": {
+                "to": {
+                  "target": 0
+                },
+                "with": {
+                  "target": 1
+                }
+              }
+            }
+          ]
+        }
+      },
+      {
+        "cycling": {
+          "cost": "{2}"
+        }
+      }
+    ],
+    "rarity": "uncommon",
+    "printing": {
+      "set": "dft",
+      "number": "69"
+    }
+  },
+  {
+    "name": "Fynn, the Fangbearer",
+    "mana_cost": "{1}{G}",
+    "types": [
+      "creature"
+    ],
+    "supertypes": [
+      "legendary"
+    ],
+    "subtypes": [
+      "human",
+      "warrior"
+    ],
+    "power": 1,
+    "toughness": 3,
+    "keywords": [
+      "deathtouch"
+    ],
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "deals_damage": {
+              "subject": {
+                "each": {
+                  "creature": {
+                    "keywords": [
+                      "deathtouch"
+                    ]
+                  }
+                },
+                "controller": "you"
+              },
+              "combat": true,
+              "to": "player"
+            }
+          },
+          "effects": [
+            {
+              "add_counters": {
+                "counter": "poison",
+                "amount": 2,
+                "to": {
+                  "triggering": "player"
+                }
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "uncommon",
+    "printing": {
+      "set": "fdn",
+      "number": "637"
+    }
+  },
+  {
+    "name": "Virulent Silencer",
+    "mana_cost": "{3}",
+    "types": [
+      "artifact",
+      "creature"
+    ],
+    "subtypes": [
+      "robot",
+      "assassin"
+    ],
+    "power": 2,
+    "toughness": 3,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "deals_damage": {
+              "subject": {
+                "each": {
+                  "creature": {
+                    "types": [
+                      "artifact"
+                    ],
+                    "token": false
+                  }
+                },
+                "controller": "you"
+              },
+              "combat": true,
+              "to": "player"
+            }
+          },
+          "effects": [
+            {
+              "add_counters": {
+                "counter": "poison",
+                "amount": 2,
+                "to": {
+                  "triggering": "player"
+                }
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "uncommon",
+    "printing": {
+      "set": "eoe",
+      "number": "248"
+    }
+  },
+  {
+    "name": "Knight of Malice",
+    "mana_cost": "{1}{B}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "human",
+      "knight"
+    ],
+    "power": 2,
+    "toughness": 2,
+    "keywords": [
+      "first_strike"
+    ],
+    "abilities": [
+      {
+        "hexproof_from": {
+          "colors": [
+            "W"
+          ]
+        }
+      },
+      {
+        "static": {
+          "affects": "self",
+          "pump": {
+            "power": 1,
+            "toughness": 0
+          },
+          "if": {
+            "controls": {
+              "each": {
+                "permanent": {
+                  "colors": [
+                    "W"
+                  ]
+                }
+              },
+              "controller": "any"
+            },
+            "at_least": 1
+          }
+        }
+      }
+    ],
+    "rarity": "uncommon",
+    "printing": {
+      "set": "fdn",
+      "number": "608"
+    }
+  },
+  {
+    "name": "Knight of Grace",
+    "mana_cost": "{1}{W}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "human",
+      "knight"
+    ],
+    "power": 2,
+    "toughness": 2,
+    "keywords": [
+      "first_strike"
+    ],
+    "abilities": [
+      {
+        "hexproof_from": {
+          "colors": [
+            "B"
+          ]
+        }
+      },
+      {
+        "static": {
+          "affects": "self",
+          "pump": {
+            "power": 1,
+            "toughness": 0
+          },
+          "if": {
+            "controls": {
+              "each": {
+                "permanent": {
+                  "colors": [
+                    "B"
+                  ]
+                }
+              },
+              "controller": "any"
+            },
+            "at_least": 1
+          }
+        }
+      }
+    ],
+    "rarity": "uncommon",
+    "printing": {
+      "set": "fdn",
+      "number": "576"
+    }
+  },
+  {
+    "name": "Impractical Joke",
+    "mana_cost": "{R}",
+    "types": [
+      "sorcery"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "targets": [
+            {
+              "filter": {
+                "permanent": {
+                  "any_of": [
+                    "creature",
+                    "planeswalker"
+                  ]
+                }
+              },
+              "optional": true
+            }
+          ],
+          "effects": [
+            {
+              "player_rule": {
+                "rule": "damage_cant_be_prevented"
+              }
+            },
+            {
+              "deal_damage": {
+                "amount": 3,
+                "to": {
+                  "target": 0
+                }
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "uncommon",
+    "printing": {
+      "set": "sos",
+      "number": "119"
+    }
+  },
+  {
+    "name": "Frenzied Baloth",
+    "mana_cost": "{G}{G}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "beast"
+    ],
+    "power": 3,
+    "toughness": 2,
+    "keywords": [
+      "cant_be_countered",
+      "trample",
+      "haste"
+    ],
+    "abilities": [
+      {
+        "player_rule": {
+          "rule": "spells_cant_be_countered",
+          "spells": {
+            "types": [
+              "creature"
+            ]
+          }
+        }
+      },
+      {
+        "player_rule": {
+          "rule": "combat_damage_cant_be_prevented",
+          "affects": "each"
+        }
+      }
+    ],
+    "rarity": "rare",
+    "printing": {
+      "set": "eoe",
+      "number": "183"
+    }
+  },
+  {
+    "name": "Voice of Victory",
+    "mana_cost": "{1}{W}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "human",
+      "bard"
+    ],
+    "power": 1,
+    "toughness": 3,
+    "abilities": [
+      {
+        "mobilize": {
+          "amount": 2
+        }
+      },
+      {
+        "player_rule": {
+          "rule": "cant_cast",
+          "affects": "opponents",
+          "if": {
+            "your_turn": true
+          }
+        }
+      }
+    ],
+    "rarity": "rare",
+    "printing": {
+      "set": "tdm",
+      "number": "33"
+    }
+  },
+  {
+    "name": "Giant Cindermaw",
+    "mana_cost": "{2}{R}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "dinosaur",
+      "beast"
+    ],
+    "power": 4,
+    "toughness": 3,
+    "keywords": [
+      "trample"
+    ],
+    "abilities": [
+      {
+        "player_rule": {
+          "rule": "cant_gain_life",
+          "affects": "each"
+        }
+      }
+    ],
+    "rarity": "uncommon",
+    "printing": {
+      "set": "fdn",
+      "number": "624"
+    }
+  },
+  {
+    "name": "The Wondrous Wasp",
+    "mana_cost": "{1}{U}",
+    "types": [
+      "creature"
+    ],
+    "supertypes": [
+      "legendary"
+    ],
+    "subtypes": [
+      "human",
+      "hero"
+    ],
+    "power": 2,
+    "toughness": 1,
+    "keywords": [
+      "flash",
+      "flying"
+    ],
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "enters": {}
+          },
+          "targets": [
+            {
+              "filter": "creature",
+              "optional": true
+            }
+          ],
+          "effects": [
+            {
+              "tap": {
+                "to": {
+                  "target": 0
+                }
+              }
+            },
+            {
+              "become": {
+                "loses_abilities": true,
+                "duration": "while_source_on_battlefield",
+                "to": {
+                  "target": 0
+                }
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "rare",
+    "printing": {
+      "set": "msh",
+      "number": "84"
+    }
+  },
+  {
+    "name": "Day of Black Sun",
+    "mana_cost": "{X}{B}{B}",
+    "types": [
+      "sorcery"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "effects": [
+            {
+              "become": {
+                "loses_abilities": true,
+                "to": {
+                  "each": {
+                    "creature": {
+                      "mana_value": {
+                        "at_most": "x"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "destroy": {
+                "to": {
+                  "each": {
+                    "creature": {
+                      "mana_value": {
+                        "at_most": "x"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "rare",
+    "printing": {
+      "set": "tla",
+      "number": "94"
+    }
+  },
+  {
+    "name": "Noggle the Mind",
+    "mana_cost": "{1}{U}",
+    "types": [
+      "enchantment"
+    ],
+    "subtypes": [
+      "aura"
+    ],
+    "keywords": [
+      "flash"
+    ],
+    "abilities": [
+      {
+        "enchant": "creature"
+      },
+      {
+        "static": {
+          "affects": "attached",
+          "loses_abilities": true,
+          "colors": [],
+          "creature_types": [
+            "noggle"
+          ],
+          "base_power_toughness": {
+            "power": 1,
+            "toughness": 1
+          }
+        }
+      }
+    ],
+    "rarity": "uncommon",
+    "printing": {
+      "set": "ecl",
+      "number": "60"
+    }
+  },
+  {
+    "name": "Fresh Start",
+    "mana_cost": "{1}{U}",
+    "types": [
+      "enchantment"
+    ],
+    "subtypes": [
+      "aura"
+    ],
+    "keywords": [
+      "flash"
+    ],
+    "abilities": [
+      {
+        "enchant": "creature"
+      },
+      {
+        "static": {
+          "affects": "attached",
+          "pump": {
+            "power": -5,
+            "toughness": 0
+          },
+          "loses_abilities": true
+        }
+      }
+    ],
+    "rarity": "uncommon",
+    "printing": {
+      "set": "tdm",
+      "number": "46"
+    }
+  }
+]

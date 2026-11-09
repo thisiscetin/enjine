@@ -21,9 +21,11 @@ module Enjine
         end
       end
 
-      # Whether `attachment` could legally be attached to the permanent `target_id` (CR 701.3a).
+      # Whether `attachment` could legally be attached to the permanent `target_id` (CR 701.3a): not to a
+      # permanent with protection from it (CR 702.16c-d).
       def can_attach?(attachment, target_id)
         return false if target_id == attachment.id || !state.battlefield.include?(target_id) # CR 301.5c, 303.4d
+        return false if protected_from?(object(target_id), attachment)
 
         if aura?(attachment)
           enchantable?(attachment, target_id)

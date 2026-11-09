@@ -66,6 +66,211 @@
     "rules_text": "+1: Creatures you control get +1/+1 until end of turn.\n−2: Put a +1/+1 counter on each creature you control.\n−3: Vessa deals 3 damage to target creature."
   },
   {
+    "name": "Ilsa, Ember Herald",
+    "mana_cost": "{2}{R}{W}",
+    "types": [
+      "planeswalker"
+    ],
+    "supertypes": [
+      "legendary"
+    ],
+    "subtypes": [
+      "ilsa"
+    ],
+    "loyalty": 4,
+    "abilities": [
+      {
+        "loyalty": {
+          "cost": 1,
+          "effects": [
+            {
+              "gain_life": {
+                "amount": 2
+              }
+            }
+          ]
+        }
+      },
+      {
+        "loyalty": {
+          "cost": -3,
+          "effects": [
+            {
+              "create_emblem": {
+                "abilities": [
+                  {
+                    "static": {
+                      "affects": {
+                        "each": "creature",
+                        "controller": "you"
+                      },
+                      "pump": {
+                        "power": 2,
+                        "toughness": 2
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      },
+      {
+        "loyalty": {
+          "cost": -4,
+          "effects": [
+            {
+              "create_emblem": {
+                "abilities": [
+                  {
+                    "triggered": {
+                      "when": {
+                        "cast": {}
+                      },
+                      "effects": [
+                        {
+                          "deal_damage": {
+                            "amount": 1,
+                            "to": "each_opponent"
+                          }
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "+1: You gain 2 life.\n−3: You get an emblem with \"Creatures you control get +2/+2.\"\n−4: You get an emblem with \"Whenever you cast a spell, this emblem deals 1 damage to each opponent.\""
+  },
+  {
+    "name": "Hourglass of Balance",
+    "mana_cost": "{4}",
+    "types": [
+      "artifact"
+    ],
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "step_begins": {
+              "step": "end"
+            }
+          },
+          "effects": [
+            {
+              "set_life": {
+                "amount": 10
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "At the beginning of your end step, your life total becomes 10."
+  },
+  {
+    "name": "Prismward Blade",
+    "mana_cost": "{1}",
+    "types": [
+      "artifact"
+    ],
+    "subtypes": [
+      "equipment"
+    ],
+    "abilities": [
+      {
+        "static": {
+          "affects": "attached",
+          "pump": {
+            "power": 1,
+            "toughness": 1
+          },
+          "abilities": [
+            {
+              "hexproof_from": {
+                "color_count": {
+                  "equal": 1
+                }
+              }
+            }
+          ]
+        }
+      },
+      {
+        "equip": {
+          "cost": [
+            {
+              "mana": "{2}"
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "Equipped creature gets +1/+1 and has hexproof from monocolored.\nEquip {2}"
+  },
+  {
+    "name": "Clamp of Stillness",
+    "mana_cost": "{2}{W}",
+    "types": [
+      "artifact"
+    ],
+    "abilities": [
+      {
+        "player_rule": {
+          "rule": "cant_activate",
+          "affects": "each",
+          "filter": {
+            "permanent": {
+              "any_of": [
+                "creature",
+                "planeswalker"
+              ]
+            }
+          }
+        }
+      }
+    ],
+    "rules_text": "Activated abilities of creatures and planeswalkers can't be activated unless they're mana abilities."
+  },
+  {
+    "name": "Hushing Bubble",
+    "mana_cost": "{1}{U}",
+    "types": [
+      "enchantment"
+    ],
+    "subtypes": [
+      "aura"
+    ],
+    "keywords": [
+      "flash"
+    ],
+    "abilities": [
+      {
+        "enchant": "creature"
+      },
+      {
+        "static": {
+          "affects": "attached",
+          "loses_abilities": true,
+          "colors": [],
+          "creature_types": [
+            "frog"
+          ],
+          "base_power_toughness": {
+            "power": 1,
+            "toughness": 1
+          }
+        }
+      }
+    ],
+    "rules_text": "Flash\nEnchant creature\nEnchanted creature loses all abilities and is a colorless Frog with base power and toughness 1/1."
+  },
+  {
     "name": "Clockwork Cog",
     "mana_cost": "{1}",
     "types": [

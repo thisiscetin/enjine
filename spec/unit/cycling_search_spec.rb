@@ -19,8 +19,8 @@ RSpec.describe "Cycling, card specs and library search: validation (unit)" do
 
   it "card specs report unknown keys, names and malformed lists by path (CR 701.23a)" do
     expect(spec_errors(42))
-      .to eq(['s: must be "card" or an object (types, not_types, subtypes, supertypes, name, any_of, permanent, mana_value)'])
-    expect(spec_errors({})).to eq(["s: needs at least one of types, not_types, subtypes, supertypes, name, any_of, permanent, mana_value"])
+      .to eq(["s: must be \"card\" or an object (#{Enjine::Mechanics::CardSpec::KEYS.join(", ")})"])
+    expect(spec_errors({})).to eq(["s: needs at least one of #{Enjine::Mechanics::CardSpec::KEYS.join(", ")}"])
     expect(spec_errors({ "types" => "land" })).to eq(["s.types: must be a list"])
     expect(spec_errors({ "supertypes" => ["ancient"] })).to eq(['s.supertypes: unknown supertype "ancient"'])
     expect(spec_errors({ "subtypes" => ["Bad Type!"] })).to eq(['s.subtypes: invalid subtype "Bad Type!"'])

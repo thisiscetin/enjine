@@ -414,11 +414,20 @@ closed stays under a narrower name with the cards known to need it.
 | Increment, extort, riot, storm, cascade | 702.191, 702.101, 702.136, 702.40, 702.85 | keywords of the same names (4.20) |
 | Storied (enduring story designation) | 702.195 | keyword `storied`; condition `{"designation": "enduring_story"}` (4.20) |
 | Colors among permanents, domain | 105.2, 305.6 | amounts `distinct_colors`, `distinct_land_types` (4.20) |
-
 | Discard a card / pay life / exile cards from your graveyard as a cost (also as a spell's additional cost) | 701.9, 119.4, 118.3 | costs `discard` (`count`, `card`, `random`), `pay_life` (N or `"X"`), `exile_from_graveyard` (4.2) |
 | Behold | 701.4 | cost `behold` (`exile`: linked `exiled_with`, also after leaving); effect `behold` under `may` (4.2) |
 | Monocolored hybrid mana {2/W} | 107.4e, 202.3f | mana cost symbol `{2/W}` (2) |
 | Improvise; mana of the chosen color; activate only once | 702.126, 607.2d, 602.5b | keyword `improvise` (4.10); mana `color: "chosen"` (3); `limit: "once"` (4.2) |
+| Ability removal (loses all abilities) | 613.1f | `"loses_abilities": true` on `become` and `static`; static `colors`, `base_power_toughness` (4.21) |
+| More player/game restrictions (can't cast, can't gain life, spells can't be countered, ...) | 101.2, 604.1 | `player_rule` rules `cant_cast` (`spells`), `cant_cast_except_from_hand`, `spells_cant_be_countered`, `cant_gain_life`, `cant_activate`, `damage_cant_be_prevented`, `combat_damage_cant_be_prevented`; `if` (4.21) |
+| Hexproof from / protection from | 702.11d, 702.16 | abilities `hexproof_from` / `protection_from` with a card spec (`colors`, `color_count`) or `"everything"` (4.21) |
+| Granting activated abilities | 613.1f, 602.1 | `static` / `become` `abilities` with `activated` (4.21) |
+| Emblems | 114 | effect `create_emblem`; the command zone (4.21) |
+| Exchange (control, life totals), set life total | 701.12, 119.5 | effects `exchange_control`, `exchange_life_totals`, `set_life` (4.21) |
+| Player counters (poison, experience) | 122.1f | `add_counters` on players; amount `counters` of players (4.21; rad counters' trigger, CR 729, not yet) |
+| Skip turns | 614.10 | effect `skip_turns` (4.21) |
+| A chosen type added to other types; choosing a basic land type | 614.12, 607.2 | static `"subtypes": "chosen"`; ability `choose_basic_land_type` (4.21) |
+| Control "for as long as" | 611.2b | `gain_control` durations `while_source_on_battlefield`, `while_source_tapped` (4.21) |
 
 Still open in these areas (not yet counted as gaps above, since the census didn't
 separate them):

@@ -202,7 +202,7 @@ module Enjine
 
         def new_choices(engine, spec, controller, spell, current)
           spec.candidates_for(engine, controller, nil).filter_map do |ref|
-            next if ref == current || ref == spell.id || !engine.targetable?(ref, controller)
+            next if ref == current || ref == spell.id || !engine.targetable?(ref, controller, targeter: spell.id)
 
             { "type" => "target", "target" => ref }
           end

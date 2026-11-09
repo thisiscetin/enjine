@@ -6,6 +6,7 @@ RSpec.describe "Guardrails" do
   let(:allowed) do
     {
       "lib/enjine/engine/characteristics.rb" => "the layer system starts from printed values",
+      "lib/enjine/engine/ability_layers.rb" => "granted abilities live in the granting card's data (layer 6)",
       "lib/enjine/engine/casting/casting.rb" => "spells in hand/stack (printed) and stack abilities (CR 113.7a)",
       "lib/enjine/engine/resolution.rb" => "spell abilities and permanence of the printed spell",
       "lib/enjine/replacements.rb" => "entering status from printed card types",

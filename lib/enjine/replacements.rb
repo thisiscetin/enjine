@@ -72,9 +72,15 @@ module Enjine
       proposal.data["token"] = ability.token_definition.id if ability
     end
 
-    # CR 615.1: "prevent all damage that would be dealt to you this turn".
+    # CR 615.1: "prevent all damage that would be dealt to you this turn" and protection from the source's
+    # quality (CR 702.16e), unless the damage can't be prevented (CR 615.12).
     def preventing!(engine, proposal)
-      proposal.data["amount"] = 0 if engine.damage_prevented?(proposal.data["target"])
+      data = proposal.data
+      return if data["unpreventable"]
+
+      target = engine.state.objects[data["target"]]
+      protected = target&.zone == :battlefield && engine.protected_from?(target, engine.state.objects[data["source"]]) # CR 702.16e
+      data["amount"] = 0 if protected || engine.damage_prevented?(data["target"])
     end
 
     # CR 701.8a, 704.5g-h: destroying a permanent, by an effect or for lethal damage / deathtouch.

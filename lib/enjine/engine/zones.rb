@@ -227,7 +227,7 @@ module Enjine
 
         object.tapped = false
         emit Events::Untapped.new(object: object.id)
-        end_while_source_effects!(object.id) # CR 611.2b: "for as long as it remains tapped" ends
+        end_while_source_effects!(object.id, %w[while_source_tapped]) # CR 611.2b: "for as long as it remains tapped" ends
       end
 
       # CR 502.3: the active player's permanents untap, except those effects keep from untapping and those

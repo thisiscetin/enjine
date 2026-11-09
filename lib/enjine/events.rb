@@ -77,6 +77,8 @@ module Enjine
       def loss = [from - to, 0].max
     end
     CountersChanged = define(:counters_changed, :object, :counter, :from, :to)
+    PlayerCountersChanged = define(:player_counters_changed, :player, :counter, :from, :to) # poison, rad, ... (CR 122.1)
+    EmblemCreated = define(:emblem_created, :player, :object, :card) # CR 114.2
     # CR 707.10: a copy of a spell put on the stack (not cast).
     SpellCopied = define(:spell_copied, :player, :object, :card, :original, :targets)
     EffectStarted = define(:effect_started, :kind, :affected, :details)
@@ -103,6 +105,7 @@ module Enjine
     end
     ControlChanged = define(:control_changed, :object, :controller)
     ExtraTurnAdded = define(:extra_turn_added, :player) # CR 500.7
+    TurnSkipped = define(:turn_skipped, :player) # CR 614.10
     DilemmaFaced = define(:dilemma_faced, :player, :object, :modes) # CR 700.17
     # Combat declarations once final (CR 508.3d "whenever [a player] attacks", 509.3c "becomes blocked").
     AttacksDeclared = define(:attacks_declared, :player, :attackers)
