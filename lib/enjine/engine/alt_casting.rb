@@ -119,10 +119,12 @@ module Enjine
       def record_cast_how!(obj, ctx)
         obj.memory["cast_from"] = ctx.dig("origin", "zone") || "hand"
         obj.memory["convoked"] = ctx["convoked"].dup if ctx["convoked"]
+        return unless ctx.dig("method", "alt") # mayhem without a cost: no keyword cost was paid
+
         keyword = ctx.dig("method", "keyword") or return
         obj.memory["cast_with"] = keyword
         (turn_log(ctx["player"])["cast_with"] ||= []) << keyword
-        warp_delayed!(obj, ctx) if keyword == "warp" && ctx.dig("method", "alt")
+        warp_delayed!(obj, ctx) if keyword == "warp"
       end
 
       def warp_delayed!(obj, ctx)

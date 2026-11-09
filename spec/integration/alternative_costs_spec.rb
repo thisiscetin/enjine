@@ -222,6 +222,8 @@ RSpec.describe "Alternative costs from keywords" do
       expect(casts(game)).to eq([{ type: "cast", object: hound, via: "alt:printed:0" }])
       game.submit(type: "cast", object: hound, via: "alt:printed:0")
       expect(game.pending_decision.details["remaining"]).to eq("{1}{R}")
+      pay!(game)
+      expect(game.state.object(game.state.stack.first).memory).to eq("cast_from" => "graveyard") # no mayhem cost paid
     end
   end
 
@@ -245,6 +247,20 @@ RSpec.describe "Alternative costs from keywords" do
       expect(engine(game).play_methods(0, warped)).to eq([])
       game.state.turn = 5
       expect(engine(game).play_methods(0, warped)).to eq([{ "via" => "warped", "play" => "cast" }])
+    end
+
+    it "casts a warped card from exile for its mana cost on a later turn" do
+      game = board(battlefield: %w[Mountain Mountain Mountain Mountain], hand: ["Rift Skipper"])
+      id = card(game, "Rift Skipper", :hand)
+      engine(game).move!(id, :exile, reason: "warp")
+      warped = game.state.exile.first
+      game.state.object(warped).memory["warped"] = 2
+      refresh(game)
+      expect(casts(game)).to eq([{ type: "cast", object: warped, via: "warped" }])
+      game.submit(type: "cast", object: warped, via: "warped")
+      expect(game.pending_decision.details["remaining"]).to eq("{3}{R}")
+      pay!(game)
+      expect(game.state.object(game.state.stack.first).memory).to eq("cast_from" => "exile")
     end
   end
 
