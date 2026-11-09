@@ -1429,5 +1429,56 @@
       "set": "dft",
       "number": "228"
     }
+  },
+  {
+    "name": "Bilbo's Gambit",
+    "mana_cost": "{1}{W}",
+    "types": [
+      "instant"
+    ],
+    "abilities": [
+      "gift",
+      {
+        "spell": {
+          "targets": [
+            "spell"
+          ],
+          "effects": [
+            {
+              "create_token": {
+                "token": "Treasure",
+                "to": "gift_recipient",
+                "if": {
+                  "cast_with": "gift"
+                }
+              }
+            },
+            {
+              "return_to_hand": {
+                "to": {
+                  "target": 0
+                }
+              }
+            },
+            {
+              "player_rule": {
+                "rule": "cant_cast",
+                "to": {
+                  "each": "player"
+                },
+                "if": {
+                  "cast_with": "gift"
+                }
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "rare",
+    "printing": {
+      "set": "hob",
+      "number": "5"
+    }
   }
 ]

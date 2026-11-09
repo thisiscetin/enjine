@@ -162,7 +162,7 @@ module Enjine
       # use the spell's X, CR 107.3m), that it was kicked (CR 702.33d) and the mana spent to cast it (CR 601.2h).
       def carry_from_stack!(fresh, old)
         fresh.x = old.x
-        fresh.memory.merge!(old.memory.slice("kicked", "kicked_with"))
+        fresh.memory.merge!(old.memory.slice("kicked", "kicked_with", "gift")) # gift: CR 702.174b
         fresh.mana_spent = old.mana_spent&.dup
       end
 

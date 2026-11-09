@@ -261,6 +261,7 @@ once-per-turn are automatic.
 | `{ "each": "creature", "controller": "opponent" }` | "creatures your opponents control" |
 | `{ "each": "creature" }` | "each creature", "all creatures" |
 | `{ "result": 0 }` | "it" / "that card" / "the token": what effect 0 of the same list moved or created (CR 400.7j) |
+| `"gift_recipient"` | "the chosen player" of a gift (CR 702.174a; see 4.24) |
 
 ### 4.5a Results, optional effects and delayed triggers
 
@@ -1151,6 +1152,7 @@ its seed and decisions, and an exported game continues with the same results.
 | "Ward—Get five poison counters" | `{ "ward": { "cost": [{ "get_counters": { "counter": "poison", "amount": 5 } }] } }` |
 | "Exile X artifact cards from your graveyard: … -X/-X" (CR 601.2b) | `{ "exile_from_graveyard": { "count": "X", "card": { "types": ["artifact"] } } }` in the `cost` (X is announced, at most the number of matching cards; also `discard`, `exile_from_hand`) and the amount `"x"` in effects |
 | "As this land enters, you may behold a Jace. If you don't, this land enters tapped." (CR 614.12) | `{ "enters_tapped_unless_behold": { "card": { "subtypes": ["jace"] } } }` (the `enter_choice` option `{type: "behold", object: id}`) |
+| "Gift a Treasure … Return target spell to its owner's hand. If the gift was promised, …" (CR 702.174) | `"gift"` in `abilities`; the gift as the spell's first effect, `{ "create_token": { "token": "Treasure", "to": "gift_recipient", "if": { "cast_with": "gift" } } }`, then the rest (on a permanent: an `enters` trigger with `"if": { "cast_with": "gift" }`) |
 | "Counter target spell unless its controller pays {2}. If …, {4} instead" | two `counter_unless_pays` with opposite `if` conditions (`cost` takes a list of costs too) |
 
 Which `one_of` option is paid is announced while casting or activating, after modes and before X

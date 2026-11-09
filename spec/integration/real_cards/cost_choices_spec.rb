@@ -145,6 +145,27 @@ RSpec.describe "Real cards: cost choices" do
     expect(game.state.object(id(game, "Theorist's Sanctum")).tapped).to be(true)
   end
 
+  it "Bilbo's Gambit: promising the gift gives the chosen opponent a Treasure first (CR 702.174a, 702.174j)" do
+    game = board(hand: ["Vision of Love", "Bilbo's Gambit"], battlefield: %w[Mountain Mountain Plains Plains])
+    cast(game, "Vision of Love")
+    pay_all(game)
+    vision = game.state.stack.first
+    cast(game, "Bilbo's Gambit")
+    expect(game.pending_decision.kind).to eq("choose_kicker")
+    game.submit(type: "kick")
+    game.submit(type: "target", target: vision)
+    expect(game.legal_options).to eq([{ type: "cost", object: "player:bob" }, { type: "cancel" }])
+    game.submit(type: "cost", object: "player:bob")
+    pay_all(game)
+    gambit = game.state.object(game.state.stack.first)
+    expect(gambit.memory).to include("kicked_with" => "gift", "gift" => "player:bob")
+    pass_both(game)
+    treasure = game.state.battlefield.find { game.state.object(it).card.start_with?("treasure") }
+    expect(game.state.object(treasure).controller).to eq(1)
+    expect(cards(game, alice(game).hand)).to eq(["vision_of_love"])
+    expect(game.legal_options.none? { it[:type] == "cast" }).to be(true) # players can't cast spells this turn
+  end
+
   it "Winter, Cursed Rider exiles X artifact cards from the graveyard: X is at most how many there are (CR 601.2b)" do
     game = board(battlefield: ["Winter, Cursed Rider", "Island", "Island", "Swamp", "Swamp"],
                  graveyard: ["Arc Reactor", "Steel Wrecking Ball", "Island"], theirs: ["Stony-Voiced Goblins"])

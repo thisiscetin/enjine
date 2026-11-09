@@ -121,7 +121,7 @@ module Enjine
           copy.ability = spell.ability
           copy.memory = Snapshot.deep_copy(spell.memory)
         else
-          copy.memory = Marshal.load(Marshal.dump(spell.memory.slice("kicked", "kicked_with", "division"))).merge("copy" => "spell")
+          copy.memory = Marshal.load(Marshal.dump(spell.memory.slice("kicked", "kicked_with", "gift", "division"))).merge("copy" => "spell")
         end
         copy.memory["copy_except"] = except unless except.empty?
         copy.targets = targets

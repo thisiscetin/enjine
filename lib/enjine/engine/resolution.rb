@@ -56,7 +56,7 @@ module Enjine
 
       # CR 608.2b: targets are checked once, as resolution begins.
       def start_resolution!(frame, obj, ability)
-        specs = ability&.targets_for(obj.modes || [], kicked: obj.memory["kicked"]) || []
+        specs = ability&.targets_for(obj.modes || [], kicked: obj.memory.key?("kicked_with")) || []
         targets = legal_targets(obj, specs)
         frame["pc"] = 0
         # An "up to one" target left unchosen doesn't count: only chosen targets can all be illegal.

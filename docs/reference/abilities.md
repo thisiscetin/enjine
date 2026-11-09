@@ -868,6 +868,16 @@ Rules: CR 702.34a, CR 118.9, CR 601.2b, CR 601.2f, CR 601.2h
 }
 ```
 
+## gift
+
+Gift: as you cast this spell you may promise a gift to an opponent you choose (the `choose_kicker` decision, then `choose_cost` for the opponent). `{"cast_with": "gift"}` holds if you did, and the selector "gift_recipient" is that player; write the gift as the spell's first effect (or an enters trigger) under that condition.
+
+Rules: CR 702.174a, CR 702.174b, CR 702.174j, CR 702.174k, CR 702.174m, CR 601.2b
+
+```json
+"gift"
+```
+
 ## grants_beam_me_up
 
 While this permanent is on the battlefield, during your main phase each instant and sorcery card in your graveyard has beam me up with its mana cost as the beam me up cost; this permanent can't be the creature returned to cast a spell this way. Offered as a cast option with `via: "beam_granted:<permanent>:<ref>"`.

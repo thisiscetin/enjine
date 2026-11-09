@@ -210,4 +210,29 @@ RSpec.describe "Choosing between costs (CR 601.2b, 601.2f, 118.3)" do
       expect(game.state.stack.size).to eq(1)
     end
   end
+
+  describe "gift on a permanent (CR 702.174b)" do
+    def burrowkin(game, promise:)
+      cast(game, "Generous Burrowkin")
+      game.submit(type: promise ? "kick" : "no_kick")
+      game.submit(type: "cost", object: "player:bob") if promise
+      pay_all(game)
+      pass_both(game) # the creature resolves
+      pass_both(game) if promise # its enters trigger
+      game
+    end
+
+    it "when it enters, if the gift was promised, the chosen opponent gets the gift" do
+      game = burrowkin(board(hand: ["Generous Burrowkin"], lands: %w[Forest Forest]), promise: true)
+      expect(game.state.players[1].hand.size).to eq(1)
+      expect(game.state.object(obj_id(game, "Generous Burrowkin")).counters).to eq("+1/+1" => 2)
+      expect(game.catalog.fetch("generous_burrowkin").abilities.first.to_s).to eq("Gift")
+    end
+
+    it "without the promise, nothing triggers" do
+      game = burrowkin(board(hand: ["Generous Burrowkin"], lands: %w[Forest Forest]), promise: false)
+      expect(game.state.stack).to be_empty
+      expect(game.state.players[1].hand).to be_empty
+    end
+  end
 end

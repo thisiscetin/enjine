@@ -4317,5 +4317,45 @@
         }
       }
     ]
+  },
+  {
+    "name": "Generous Burrowkin",
+    "mana_cost": "{1}{G}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "rabbit"
+    ],
+    "power": 2,
+    "toughness": 2,
+    "abilities": [
+      "gift",
+      {
+        "triggered": {
+          "when": {
+            "enters": {}
+          },
+          "if": {
+            "cast_with": "gift"
+          },
+          "effects": [
+            {
+              "draw": {
+                "amount": 1,
+                "to": "gift_recipient"
+              }
+            },
+            {
+              "add_counters": {
+                "counter": "+1/+1",
+                "amount": 2,
+                "to": "self"
+              }
+            }
+          ]
+        }
+      }
+    ]
   }
 ]

@@ -25,6 +25,7 @@ module Enjine
     #                                               "that player", CR 603.2); see Triggers.event_facts
     #   "watched"                                   what a delayed triggered ability watches (CR 603.7c)
     #   "exiled_with"                               cards in exile exiled with the source (linked abilities, CR 607.2a)
+    #   "gift_recipient"                            the opponent chosen for the spell's gift (CR 702.174a)
     class Selector
       CONTROLLERS = %w[you opponent any].freeze
       TRIGGERING = %w[object player].freeze
@@ -35,7 +36,7 @@ module Enjine
 
       def self.build(data, errors, path, targets_count:, results_count: 0)
         case data
-        when "self", "you", "each_opponent", "attached", "watched", "exiled_with" then new(data.to_sym)
+        when "self", "you", "each_opponent", "attached", "watched", "exiled_with", "gift_recipient" then new(data.to_sym)
         when Hash
           data = data.transform_keys(&:to_s)
           return build_result(data, errors, path, results_count) if data.key?("result")
@@ -111,6 +112,7 @@ module Enjine
         when :you then "you"
         when :each_opponent then "each opponent"
         when :exiled_with then "the cards exiled with it"
+        when :gift_recipient then "the chosen opponent"
         when :each then "each #{value.primitive_name.tr("_",
                                                         " ")}#{{ "you" => " you control",
                                                                  "opponent" => " an opponent controls" }[controller]}"
@@ -132,6 +134,8 @@ module Enjine
         when :each then each(engine, ctx)
         when :controller_of then controllers(engine, ctx)
         when :exiled_with then Linked.exiled_with(engine, ctx.source, ctx)
+        when :gift_recipient # the spell, or the permanent it became (CR 702.174b)
+          Array(Selector.memory(engine, ctx)["gift"] || engine.state.objects[ctx.source]&.memory&.[]("gift"))
         end
       end
 

@@ -1823,7 +1823,7 @@ Rules: CR 400.7, CR 400.4a, CR 110.2, CR 111.8, CR 603.7c, CR 614.1c, CR 122.6, 
 
 ## return_to_hand
 
-Return each referenced permanent, or card in a graveyard or exile ("target creature card from your graveyard"), to its owner's hand.
+Return each referenced permanent, spell ("return target spell to its owner's hand"), or card in a graveyard or exile ("target creature card from your graveyard"), to its owner's hand.
 
 Rules: CR 400.6, CR 404.1, CR 608.2b
 
