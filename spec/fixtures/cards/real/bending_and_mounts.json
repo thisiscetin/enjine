@@ -1,0 +1,88 @@
+[
+  {
+    "name": "Earthbending Lesson",
+    "mana_cost": "{3}{G}",
+    "types": ["sorcery"],
+    "subtypes": ["lesson"],
+    "abilities": [
+      { "spell": { "targets": [{ "land": { "controller": "you" } }],
+                   "effects": [{ "earthbend": { "amount": 4, "to": { "target": 0 } } }] } }
+    ],
+    "rarity": "common",
+    "printing": { "set": "tla", "number": "176" }
+  },
+  {
+    "name": "Badgermole",
+    "mana_cost": "{4}{G}",
+    "types": ["creature"],
+    "subtypes": ["badger", "mole"],
+    "power": 4,
+    "toughness": 4,
+    "abilities": [
+      { "triggered": { "when": { "enters": {} }, "targets": [{ "land": { "controller": "you" } }],
+                       "effects": [{ "earthbend": { "amount": 2, "to": { "target": 0 } } }] } },
+      { "static": { "affects": { "each": { "creature": { "counters": "+1/+1" } }, "controller": "you" },
+                    "keywords": ["trample"] } }
+    ],
+    "rarity": "common",
+    "printing": { "set": "tla", "number": "166" }
+  },
+  {
+    "name": "Geyser Leaper",
+    "mana_cost": "{4}{U}",
+    "types": ["creature"],
+    "subtypes": ["human", "warrior", "ally"],
+    "keywords": ["flying"],
+    "power": 4,
+    "toughness": 3,
+    "abilities": [
+      { "activated": { "cost": [{ "waterbend": "{4}" }],
+                       "effects": [{ "draw": { "amount": 1 } }, { "discard": { "amount": 1, "to": "you" } }] } }
+    ],
+    "rarity": "common",
+    "printing": { "set": "tla", "number": "52" }
+  },
+  {
+    "name": "Benevolent River Spirit",
+    "mana_cost": "{U}{U}",
+    "types": ["creature"],
+    "subtypes": ["spirit"],
+    "keywords": ["flying"],
+    "power": 4,
+    "toughness": 5,
+    "abilities": [
+      { "additional_cost": { "cost": [{ "waterbend": "{5}" }] } },
+      { "ward": { "cost": "{2}" } },
+      { "triggered": { "when": { "enters": {} }, "effects": [{ "scry": { "amount": 2 } }] } }
+    ],
+    "rarity": "uncommon",
+    "printing": { "set": "tla", "number": "45" }
+  },
+  {
+    "name": "Airbending Lesson",
+    "mana_cost": "{2}{W}",
+    "types": ["instant"],
+    "subtypes": ["lesson"],
+    "abilities": [
+      { "spell": { "targets": [{ "permanent": { "not": ["land"] } }],
+                   "effects": [{ "airbend": { "to": { "target": 0 } } }, { "draw": { "amount": 1 } }] } }
+    ],
+    "rarity": "common",
+    "printing": { "set": "tla", "number": "8" }
+  },
+  {
+    "name": "Gilded Ghoda",
+    "mana_cost": "{1}{R}",
+    "types": ["creature"],
+    "subtypes": ["horse", "mount"],
+    "power": 2,
+    "toughness": 2,
+    "abilities": [
+      { "triggered": { "when": { "attacks": {} }, "while": { "source": { "creature": { "saddled": true } } },
+                       "effects": [{ "create_token": { "token": "Treasure" } }] } },
+      { "saddle": { "power": 1 } }
+    ],
+    "rarity": "common",
+    "printing": { "set": "dft", "number": "130" }
+  }
+]
