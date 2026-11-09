@@ -113,7 +113,7 @@ game.history_for("alice")
 game.export          # JSON snapshot; Enjine::Game.import(json, catalog: setup.catalog)
 ```
 
-More in [docs/guides/decision-api.md](docs/guides/decision-api.md).
+The full API for callers (decisions, views, events, saving and replaying, bots and RL, errors) is in [docs/guides/api.md](docs/guides/api.md).
 
 ## Cards are data
 
@@ -171,7 +171,7 @@ SUPPORTED.md                generated list of everything the engine supports
 | [SUPPORTED.md](SUPPORTED.md) | every supported type, keyword, ability, cost, effect and filter (generated) |
 | [docs/reference/](docs/reference) | parameters and examples for every primitive and decision (generated) |
 | [docs/guides/card-data-format.md](docs/guides/card-data-format.md) | the card DSL: fields, abilities, effects, validation, DB schema |
-| [docs/guides/decision-api.md](docs/guides/decision-api.md) | playing a game through the API |
+| [docs/guides/api.md](docs/guides/api.md) | the library API for callers: games, decisions, views, events, save/replay, bots and RL, deck builder, errors |
 | [docs/guides/deck-builder.md](docs/guides/deck-builder.md) | random decks from any card pool (a set, your collection), in chosen or random colors (`--pool`, `--random-deck`) |
 | [docs/guides/adding-a-mechanic.md](docs/guides/adding-a-mechanic.md) | how to extend the engine |
 | [docs/MECHANICS_COVERAGE.md](docs/MECHANICS_COVERAGE.md) | the full CR checklist with milestones and priorities |
