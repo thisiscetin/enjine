@@ -135,7 +135,8 @@ class Scenario
     { "name" => spec.name, "life" => attrs.fetch(:life, 20), "poison" => attrs.fetch(:poison, 0),
       **zones, "mana_pool" => Enjine::Mana::TYPES.to_h { |t| [t.to_s, attrs.fetch(:mana_pool, {}).fetch(t, 0)] },
       "lands_played" => attrs.fetch(:lands_played, 0), "drew_from_empty" => attrs.fetch(:drew_from_empty, false),
-      "lost" => nil, "mulligans" => 0, "kept" => true, "mulligan_choice" => nil, "outside" => spec.zones[:outside].dup }
+      "lost" => nil, "mulligans" => 0, "kept" => true, "mulligan_choice" => nil, "outside" => spec.zones[:outside].dup,
+      **attrs.slice(:speed).transform_keys(&:to_s) }
   end
 end
 

@@ -24,7 +24,7 @@ module Enjine
     class Amount
       SELECTOR_KINDS = %w[count power toughness greatest_power hand_size life graveyard_size distinct_names distinct_types
                           life_gained_this_turn life_lost_this_turn dilemmas_this_turn returned_this_turn
-                          spells_cast_this_game].freeze
+                          spells_cast_this_game speed].freeze
       ARITHMETIC = %w[times plus divide].freeze
       KINDS = (SELECTOR_KINDS + ARITHMETIC + %w[counters spells_cast_this_turn died_this_turn entered_this_turn this_way]).freeze
       # Player history counters: kind -> turn_log/game_log key.
@@ -102,6 +102,7 @@ module Enjine
         case @kind
         when "hand_size" then engine.player(index).hand.size
         when "life" then engine.player(index).life
+        when "speed" then engine.speed(index) # CR 702.179f: 0 without speed
         when "graveyard_size" then engine.player(index).graveyard.size
         when "spells_cast_this_game" then engine.game_log(index).fetch("spells", 0)
         else engine.turn_log(index).fetch(HISTORY.fetch(@kind), 0)
@@ -301,7 +302,8 @@ module Enjine
     #                                    mandatory effect: {"amount": {"count": {"result": 0}}, "at_least": 1}
     #   {"controls": selector, "at_least": 3} / {"life": "you", ...} / {"hand_size": "you", ...}  (short forms)
     #   {"your_turn": true}
-    #   {"was_cast": true}                          "if you cast it": the source permanent was cast (CR 400.7d)
+    #   {"max_speed": true}        you have max speed: your speed is 4 (CR 702.179e)
+    #   {"was_cast": true}                         "if you cast it": the source permanent was cast (CR 400.7d)
     #   {"targets": filter}        one of the chosen targets matches (e.g. "if it targets a tapped creature")
     #   {"attacked": true}         a creature is attacking you (CR 508.1b)
     #   {"source": filter}         the source is on the battlefield and matches ("if this isn't a creature":
@@ -311,7 +313,7 @@ module Enjine
     #   {"share_card_type": selector}  the referenced objects share a card type ("exiled_with": linked cards)
     #   {"not": condition}, {"all": [conditions]}, {"any": [conditions]}
     class Condition
-      FLAGS = %w[your_turn was_cast attacked attacked_this_turn].freeze
+      FLAGS = %w[your_turn was_cast attacked attacked_this_turn max_speed].freeze
 
       def self.build(data, errors, path, targets_count: 0, results_count: 0)
         unless data.is_a?(Hash)
@@ -388,7 +390,8 @@ module Enjine
 
         WORDS = { "your_turn" => ["it's your turn", "it's not your turn"], "was_cast" => ["it was cast", "it wasn't cast"],
                   "attacked" => ["a creature is attacking you", "no creature is attacking you"],
-                  "attacked_this_turn" => ["it attacked this turn", "it didn't attack this turn"] }.freeze
+                  "attacked_this_turn" => ["it attacked this turn", "it didn't attack this turn"],
+                  "max_speed" => ["you have max speed", "you don't have max speed"] }.freeze
 
         def to_s = WORDS.fetch(@flag)[@wanted ? 0 : 1]
 
@@ -401,6 +404,7 @@ module Enjine
             you = Filters.player_ref(engine, ctx.controller)
             engine.attackers.values.any? { it["target"] == you }
           when "attacked_this_turn" then engine.attacked_this_turn?(ctx.source)
+          when "max_speed" then engine.max_speed?(ctx.controller) # CR 702.179e
           else was_cast?(engine, ctx)
           end
         end

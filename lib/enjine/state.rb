@@ -26,7 +26,8 @@ module Enjine
                            :drew_from_empty, :lost, :mulligans, :kept, :mulligan_choice,
                            :turn_log, :game_log, # what happened this turn / this game (see Engine::History)
                            :restricted_mana, # mana with a spending restriction (CR 106.6), see Engine#add_mana!
-                           :outside) do # definition ids of the cards they own outside the game (CR 400.11a)
+                           :outside, # definition ids of the cards they own outside the game (CR 400.11a)
+                           :speed) do # nil (no speed) or 1-4 (CR 702.179), see Engine::Speed
     def zone(name)
       case name
       when :library then library
@@ -42,7 +43,7 @@ module Enjine
         "mulligans" => mulligans, "kept" => kept, "mulligan_choice" => mulligan_choice,
         "turn_log" => Marshal.load(Marshal.dump(turn_log || {})), "game_log" => Marshal.load(Marshal.dump(game_log || {})),
         "restricted_mana" => Marshal.load(Marshal.dump(restricted_mana || [])),
-        "outside" => (outside || []).dup }
+        "outside" => (outside || []).dup }.merge(speed ? { "speed" => speed } : {})
     end
   end
 

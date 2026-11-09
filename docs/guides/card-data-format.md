@@ -572,6 +572,74 @@ a card copy outside the stack and battlefield, ceases to exist (CR 707.10a).
                                              { "grant": { "keywords": ["haste"], "to": { "result": 0 } } }] } }] }
 ```
 
+### 4.15 Vehicles, type changes, exhaust and speed
+
+**Vehicles and crew** (CR 301.7, 702.122). A Vehicle is an artifact with `"subtypes": ["vehicle"]`
+and its printed `power`/`toughness` on the card: it has them only while it's a creature (CR 208.3).
+"Crew N" is the ability `{ "crew": { "power": N } }`. Activating it asks a `choose_cost` decision per
+creature to tap (other untapped creatures you control, summoning-sick ones too); once their total
+power is N or more the player answers `done` (or taps more). It becomes an artifact creature until
+end of turn.
+
+```json
+{ "name": "Example Hauler", "mana_cost": "{2}", "types": ["artifact"], "subtypes": ["vehicle"],
+  "power": 4, "toughness": 3, "keywords": ["trample"],
+  "abilities": [{ "crew": { "power": 2 } },
+                { "triggered": { "when": { "becomes_crewed": {} },
+                                 "effects": [{ "gain_life": { "amount": 1 } }] } }] }
+```
+
+| Oracle words | Data |
+| --- | --- |
+| "Whenever this Vehicle becomes crewed" | `{ "becomes_crewed": {} }` (its crew ability resolved, CR 702.122e) |
+| "Whenever this creature crews a Vehicle, that Vehicle gets +2/+0" | `{ "crews_vehicle": {} }` (`subject` like other triggers) with `"to": { "triggering": "object" }` |
+| "During turns other than yours, this Vehicle is an artifact creature" | `{ "static": { "affects": "self", "if": { "not": { "your_turn": true } }, "types": ["artifact", "creature"] } }` |
+| "Target Vehicle becomes an artifact creature until end of turn" | `{ "become": { "types": ["artifact", "creature"], "to": { "target": 0 } } }` |
+
+**Type-changing effects** (CR 205.1b, 613.1d-e). `become` adds card `types`, `supertypes` and
+`subtypes` "in addition to its other types", sets `creature_types` (replacing the others), `colors`
+(layer 5), grants `keywords` and `abilities` and sets `base_power_toughness`, for `duration`
+`end_of_turn` (default) or `indefinite`. A permanent that becomes a creature without a P/T setting
+has its printed power and toughness, or 0/0. A manland, "{1}{R}: This land becomes a 3/1 red
+Elemental creature with haste until end of turn. It's still a land.":
+
+```json
+{ "activated": { "cost": [{ "mana": "{1}{R}" }],
+                 "effects": [{ "become": { "types": ["creature"], "creature_types": ["elemental"], "colors": ["R"],
+                                           "keywords": ["haste"],
+                                           "base_power_toughness": { "power": 3, "toughness": 1 }, "to": "self" } }] } }
+```
+
+"Target creature becomes an artifact in addition to its other types" is `"types": ["artifact"]`;
+"becomes a legendary Spider Hero in addition to its other types" is `"supertypes": ["legendary"],
+"subtypes": ["spider", "hero"]`. Static abilities take `types` the same way.
+
+**Exhaust** (CR 702.177). "Exhaust — {2}{G}: …" is an activated ability with `"exhaust": true`: it
+can be activated only once for as long as the permanent stays. "Whenever you activate an exhaust
+ability" is `{ "activates_ability": { "exhaust": true } }`.
+
+```json
+{ "activated": { "exhaust": true, "cost": [{ "mana": "{2}{G}" }],
+                 "effects": [{ "add_counters": { "counter": "+1/+1", "amount": 2, "to": "self" } }] } }
+```
+
+**Start your engines! and max speed** (CR 702.178, 702.179). `"keywords": ["start_your_engines"]`
+gives its controller speed 1 if they have none; the speed then rises by 1 (to at most 4) once on
+each of their turns when an opponent loses life, as a triggered ability with no source. "Max speed —
+[ability]" is `{ "max_speed": { "keywords": [...], "abilities": [...] } }`: any kind of ability, which
+the object has only while its controller's speed is 4 (a card in the graveyard: its owner's).
+"Your speed" is the amount `{ "speed": "you" }`; "as long as you have max speed" is the condition
+`{ "max_speed": true }`.
+
+```json
+{ "name": "Example Racer", "mana_cost": "{1}{R}", "types": ["creature"], "subtypes": ["goblin", "pilot"],
+  "power": 2, "toughness": 2, "keywords": ["start_your_engines"],
+  "abilities": [{ "max_speed": { "keywords": ["double_strike"] } },
+                { "max_speed": { "abilities": [
+                  { "activated": { "cost": [{ "mana": "{2}" }, "exile_self_from_graveyard"],
+                                   "effects": [{ "draw": { "amount": 1 } }] } }] } }] }
+```
+
 ---
 
 ## 5. Worked examples

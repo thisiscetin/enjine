@@ -13,14 +13,17 @@ module Enjine
                   description: "While its source is on the battlefield (and its `if` condition holds), every permanent " \
                                "it `affects` gets `pump` (fixed or computed amounts, layer 7c), the `keywords` and " \
                                "granted `abilities` (layer 6, triggered or mana abilities), and with `creature_types` " \
-                               "has exactly those creature types (layer 4). `affects` is {\"each\": filter, " \
+                               "has exactly those creature types (layer 4); `types` are card types it has in addition " \
+                               "to its other types (\"this Vehicle is an artifact creature\", layer 4). `affects` is " \
+                               "{\"each\": filter, " \
                                "\"controller\": you|opponent|any, \"other\": true} (relative to the source's " \
                                "controller), \"self\", or \"attached\" (\"equipped/enchanted creature\").",
-                  rules: %w[604.1 604.2 611.3a 613.1d 613.1f 613.4c 205.1a 301.5f 303.4m],
+                  rules: %w[604.1 604.2 611.3a 613.1d 613.1f 613.4c 205.1a 205.1b 301.5f 303.4m],
                   params: { "affects" => "{\"each\": filter, \"controller\": ..., \"other\": bool}, \"self\" or \"attached\"",
                             "if" => "condition (\"as long as ...\", \"during your turn\")",
                             "pump" => "{\"power\": amount, \"toughness\": amount} (\"gets +1/+1 for each ...\")",
                             "keywords" => "list of keywords", "creature_types" => "list of creature types (replaces the others)",
+                            "types" => "list of card types it also has (in addition to its other types)",
                             "abilities" => "list of triggered or mana abilities the affected permanents have" },
                   example: { "static" => { "affects" => { "each" => "creature", "controller" => "you" },
                                            "pump" => { "power" => 1, "toughness" => 1 } } }
@@ -29,10 +32,10 @@ module Enjine
         # Data that would make the layer pass depend on its own result (CR 613.8).
         LIVE = %w[power toughness greatest_power attacking blocking tapped].freeze
 
-        attr_reader :filter, :controller, :other, :keywords, :creature_types, :condition, :granted
+        attr_reader :filter, :controller, :other, :keywords, :creature_types, :condition, :granted, :card_types
 
         def self.build(params, errors, path, **)
-          Mechanics.check_keys(params, %w[affects if pump keywords creature_types abilities], errors, path)
+          Mechanics.check_keys(params, %w[affects if pump keywords creature_types abilities types], errors, path)
           affects = Mechanics.fetch_param(params, :affects)
           filter, controller, other = parse_affects(affects, errors, path)
           raw_if = Mechanics.fetch_param(params, :if)
@@ -42,11 +45,12 @@ module Enjine
           keywords = parse_keywords(params, errors, path)
           types = parse_creature_types(params, errors, path)
           granted = parse_granted(params, errors, path)
-          if pump.empty? && keywords.empty? && types.nil? && granted.empty?
-            errors << "#{path}: needs pump and/or keywords (or creature_types, abilities)"
+          card_types = Effects::Become.names_param(params, :types, :type, errors, path, allowed: Effects::Become::ADDABLE_TYPES)
+          if pump.empty? && keywords.empty? && types.nil? && granted.empty? && card_types.empty?
+            errors << "#{path}: needs pump and/or keywords (or creature_types, types, abilities)"
           end
           new(filter: filter, controller: controller, other: other, pump: pump, keywords: keywords, creature_types: types,
-              condition: condition, granted: granted)
+              condition: condition, granted: granted, card_types: card_types)
         end
 
         def self.parse_affects(affects, errors, path)
@@ -113,8 +117,9 @@ module Enjine
           end.freeze
         end
 
-        def initialize(filter:, controller:, other:, pump:, keywords:, creature_types:, condition:, granted:)
+        def initialize(filter:, controller:, other:, pump:, keywords:, creature_types:, condition:, granted:, card_types: [])
           super()
+          @card_types = card_types.freeze
           @filter = filter
           @controller = controller
           @other = other
@@ -166,6 +171,7 @@ module Enjine
           bits << "#{Effects::Pump.signed_text(@pump["power"] || ZERO)}/#{Effects::Pump.signed_text(@pump["toughness"] || ZERO)}" if pump?
           bits << keywords.join(", ") unless keywords.empty?
           bits << "creature type #{creature_types.join(" ")}" if creature_types
+          bits << "types #{card_types.join(" ")}" unless card_types.empty?
           bits << "\"#{granted.join("; ")}\"" unless granted.empty?
           "#{who} get#{"s" if %i[attached self].include?(@filter)} #{bits.join(" and ")}#{" as long as #{condition}" if condition}"
         end

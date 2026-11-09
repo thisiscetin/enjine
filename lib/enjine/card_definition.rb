@@ -170,7 +170,9 @@ module Enjine
     end
 
     def validate_type_specific(errors)
-      errors << "power/toughness: only creatures have power and toughness" if !creature? && (@power || @toughness)
+      if !creature? && !@subtypes.include?(:vehicle) && (@power || @toughness) # CR 301.7a: a Vehicle has them printed
+        errors << "power/toughness: only creatures and Vehicles have power and toughness"
+      end
       errors << "loyalty: only planeswalkers have loyalty" if !planeswalker? && @loyalty
       @abilities.each_with_index do |ability, i|
         allowed = ability.allowed_types

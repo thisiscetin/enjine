@@ -4,9 +4,9 @@
 
 ## activated
 
-An activated ability: announce it, choose targets, pay its costs, then it goes on the stack. `timing: "sorcery"` restricts it to sorcery speed, `"your_turn"` to your turns; `limit: "once_each_turn"` to one activation per turn; `only_if` to when a condition holds. `zone` ("exile", "graveyard" or "hand") makes it function only while its card is in that zone ("activate only if this card is exiled").
+An activated ability: announce it, choose targets, pay its costs, then it goes on the stack. `timing: "sorcery"` restricts it to sorcery speed, `"your_turn"` to your turns; `limit: "once_each_turn"` to one activation per turn; `only_if` to when a condition holds. `zone` ("exile", "graveyard" or "hand") makes it function only while its card is in that zone ("activate only if this card is exiled"). `exhaust: true` makes it an exhaust ability: it can be activated only once (CR 702.177a).
 
-Rules: CR 602.1, CR 602.2, CR 602.5b, CR 602.5d
+Rules: CR 602.1, CR 602.2, CR 602.5b, CR 602.5d, CR 702.177a
 
 | Parameter | Description |
 | --- | --- |
@@ -16,6 +16,7 @@ Rules: CR 602.1, CR 602.2, CR 602.5b, CR 602.5d
 | `timing` | "instant" (default), "sorcery" or "your_turn" |
 | `limit` | "once_each_turn" (CR 602.5b) |
 | `only_if` | condition ("activate only if ...") |
+| `exhaust` | true: "Exhaust — [cost]: [effect]", activate only once (CR 702.177a) |
 | `zone` | "exile" | "graveyard" | "hand" (CR 113.6b; default: the battlefield, or the zone a cost moves the card from) |
 | `cost_reduction` | {"amount": amount, "if": condition}: "this ability costs {N} less to activate" (CR 601.2f, 602.2b) |
 
@@ -280,6 +281,24 @@ Rules: CR 601.2f, CR 118.7a, CR 702.41a
     "if": {
       "attacked": true
     }
+  }
+}
+```
+
+## crew
+
+Crew N: tap any number of other untapped creatures you control with total power N or more (chosen one at a time; `done` once the total is enough): this permanent becomes an artifact creature until end of turn. A Vehicle has its printed power and toughness only while it's a creature.
+
+Rules: CR 702.122a, CR 702.122b, CR 702.122e, CR 301.7, CR 301.7a, CR 301.7b, CR 208.3, CR 302.6
+
+| Parameter | Description |
+| --- | --- |
+| `power` | integer >= 1 (the N of crew N) |
+
+```json
+{
+  "crew": {
+    "power": 3
   }
 }
 ```
@@ -671,6 +690,40 @@ Rules: CR 605.1a, CR 605.3a, CR 605.3b, CR 106.1a, CR 106.4, CR 106.6
 }
 ```
 
+## max_speed
+
+While your speed is 4 (max speed), this object has `keywords` and `abilities` (any kind: activated, triggered, static, mana; an ability with a graveyard cost works from your graveyard).
+
+Rules: CR 702.178a, CR 702.178b, CR 702.179e, CR 113.6c
+
+| Parameter | Description |
+| --- | --- |
+| `keywords` | list of keywords |
+| `abilities` | list of abilities |
+
+```json
+{
+  "max_speed": {
+    "abilities": [
+      {
+        "activated": {
+          "cost": [
+            "tap"
+          ],
+          "effects": [
+            {
+              "draw": {
+                "amount": 1
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}
+```
+
 ## may_not_untap
 
 Its controller may choose not to untap it during their untap step (decision `untap_choice`, asked only while it's tapped).
@@ -768,9 +821,9 @@ Rules: CR 113.3a, CR 601.2c, CR 608.2b, CR 608.2c
 
 ## static
 
-While its source is on the battlefield (and its `if` condition holds), every permanent it `affects` gets `pump` (fixed or computed amounts, layer 7c), the `keywords` and granted `abilities` (layer 6, triggered or mana abilities), and with `creature_types` has exactly those creature types (layer 4). `affects` is {"each": filter, "controller": you|opponent|any, "other": true} (relative to the source's controller), "self", or "attached" ("equipped/enchanted creature").
+While its source is on the battlefield (and its `if` condition holds), every permanent it `affects` gets `pump` (fixed or computed amounts, layer 7c), the `keywords` and granted `abilities` (layer 6, triggered or mana abilities), and with `creature_types` has exactly those creature types (layer 4); `types` are card types it has in addition to its other types ("this Vehicle is an artifact creature", layer 4). `affects` is {"each": filter, "controller": you|opponent|any, "other": true} (relative to the source's controller), "self", or "attached" ("equipped/enchanted creature").
 
-Rules: CR 604.1, CR 604.2, CR 611.3a, CR 613.1d, CR 613.1f, CR 613.4c, CR 205.1a, CR 301.5f, CR 303.4m
+Rules: CR 604.1, CR 604.2, CR 611.3a, CR 613.1d, CR 613.1f, CR 613.4c, CR 205.1a, CR 205.1b, CR 301.5f, CR 303.4m
 
 | Parameter | Description |
 | --- | --- |
@@ -779,6 +832,7 @@ Rules: CR 604.1, CR 604.2, CR 611.3a, CR 613.1d, CR 613.1f, CR 613.4c, CR 205.1a
 | `pump` | {"power": amount, "toughness": amount} ("gets +1/+1 for each ...") |
 | `keywords` | list of keywords |
 | `creature_types` | list of creature types (replaces the others) |
+| `types` | list of card types it also has (in addition to its other types) |
 | `abilities` | list of triggered or mana abilities the affected permanents have |
 
 ```json

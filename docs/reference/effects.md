@@ -161,13 +161,18 @@ Rules: CR 701.3a, CR 701.3b, CR 701.3c, CR 301.5c
 
 ## become
 
-Each referenced permanent becomes what the parameters say, for `duration` (end_of_turn, default, or indefinite: as long as it stays on the battlefield): its creature types are exactly `creature_types` (layer 4), its base power and toughness are `base_power_toughness` (layer 7b), and it has the `abilities` (layer 6: triggered, mana, play_from or additional_land_plays abilities).
+Each referenced permanent becomes what the parameters say, for `duration` (end_of_turn, default, or indefinite: as long as it stays on the battlefield): it has the card `types`, `supertypes` and `subtypes` in addition to its other types (layer 4, "becomes an artifact creature"), its creature types are exactly `creature_types` (layer 4), its colors are `colors` (layer 5), it has the `keywords` and `abilities` (layer 6: triggered, mana, play_from or additional_land_plays abilities) and its base power and toughness are `base_power_toughness` (layer 7b). A permanent that becomes a creature has its printed power and toughness (a Vehicle's), or 0/0.
 
-Rules: CR 611.2a, CR 611.2b, CR 611.2c, CR 613.1d, CR 613.1f, CR 613.4b, CR 205.1a, CR 514.2
+Rules: CR 611.2a, CR 611.2b, CR 611.2c, CR 613.1d, CR 613.1e, CR 613.1f, CR 613.4b, CR 205.1a, CR 205.1b, CR 301.7b, CR 514.2
 
 | Parameter | Description |
 | --- | --- |
+| `types` | card types it also has: artifact, creature, enchantment, land |
+| `supertypes` | supertypes it also has ("legendary") |
+| `subtypes` | subtypes it also has ("in addition to its other types") |
 | `creature_types` | list of creature types (replaces the others) |
+| `colors` | list of W, U, B, R, G (replaces its colors) |
+| `keywords` | list of keywords it gains |
 | `base_power_toughness` | {"power": n, "toughness": n} |
 | `abilities` | list of abilities it gains |
 | `duration` | end_of_turn | indefinite |
@@ -176,31 +181,22 @@ Rules: CR 611.2a, CR 611.2b, CR 611.2c, CR 613.1d, CR 613.1f, CR 613.4b, CR 205.
 ```json
 {
   "become": {
+    "types": [
+      "creature"
+    ],
     "creature_types": [
-      "ferengi",
-      "scout"
+      "elemental"
+    ],
+    "colors": [
+      "R"
     ],
     "base_power_toughness": {
       "power": 3,
-      "toughness": 4
+      "toughness": 3
     },
-    "abilities": [
-      {
-        "triggered": {
-          "when": {
-            "becomes_tapped": {}
-          },
-          "effects": [
-            {
-              "surveil": {
-                "amount": 2
-              }
-            }
-          ]
-        }
-      }
+    "keywords": [
+      "haste"
     ],
-    "duration": "indefinite",
     "to": "self"
   }
 }

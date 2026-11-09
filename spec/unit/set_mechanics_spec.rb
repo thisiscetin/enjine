@@ -48,7 +48,8 @@ RSpec.describe "Set mechanics validation" do
     end
 
     it "station cards keep power/toughness off the card itself (CR 722.2c)" do
-      expect(errors_for(spacecraft.merge("power" => 2, "toughness" => 2))).to include(a_string_matching(/only creatures have power/))
+      expect(errors_for(spacecraft.merge("power" => 2,
+                                         "toughness" => 2))).to include(a_string_matching(/only creatures and Vehicles have power/))
     end
   end
 

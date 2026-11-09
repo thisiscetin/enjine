@@ -41,6 +41,7 @@ module Enjine
         watch_own_cast!(event) if event.is_a?(Events::SpellCast)
         watch_graveyards!(event)
         watch_delayed!(event) unless state.delayed_triggers.empty?
+        watch_speed!(event) # CR 702.179d (Engine::Speed)
       end
 
       # "For the first time each turn" (trigger counters_placed with first_time_this_turn): every placement of

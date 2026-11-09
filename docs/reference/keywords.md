@@ -324,6 +324,20 @@ Rules: CR 702.17b
 }
 ```
 
+## start_your_engines
+
+If you control this permanent and have no speed, your speed becomes 1. Once you have speed, it increases by 1 (to at most 4) once on each of your turns when one or more opponents lose life. Pair with `max_speed` abilities and the `speed` amount.
+
+Rules: CR 702.179a, CR 702.179b, CR 702.179c, CR 702.179d, CR 704.3
+
+```json
+{
+  "keywords": [
+    "start_your_engines"
+  ]
+}
+```
+
 ## station
 
 An activated ability: tap another untapped creature you control to put charge counters equal to its power on this permanent. Sorcery speed. Pair with `station_symbol` abilities for what the counters unlock.
