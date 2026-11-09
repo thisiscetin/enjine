@@ -1,0 +1,297 @@
+[
+  {
+    "name": "Raubahn, Bull of Ala Mhigo",
+    "mana_cost": "{1}{R}",
+    "supertypes": ["legendary"],
+    "types": ["creature"],
+    "subtypes": ["human", "warrior"],
+    "power": 2,
+    "toughness": 2,
+    "abilities": [
+      { "ward": { "cost": [{ "pay_life": { "power": "self" } }] } },
+      {
+        "triggered": {
+          "when": { "attacks": {} },
+          "targets": [
+            { "filter": { "artifact": { "subtypes": ["equipment"], "controller": "you" } }, "optional": true },
+            { "creature": { "attacking": true } }
+          ],
+          "effects": [{ "attach": { "attachment": { "target": 0 }, "to": { "target": 1 } } }]
+        }
+      }
+    ],
+    "rarity": "rare",
+    "printing": { "set": "fin", "number": "151" }
+  },
+  {
+    "name": "Nita, Forum Conciliator",
+    "mana_cost": "{1}{W}{B}",
+    "supertypes": ["legendary"],
+    "types": ["creature"],
+    "subtypes": ["human", "advisor"],
+    "power": 2,
+    "toughness": 3,
+    "abilities": [
+      {
+        "triggered": {
+          "when": { "cast": { "owner": "not_you" } },
+          "effects": [{ "add_counters": { "counter": "+1/+1", "amount": 1, "to": { "each": "creature", "controller": "you" } } }]
+        }
+      },
+      {
+        "activated": {
+          "cost": [{ "mana": "{2}" }, { "sacrifice_permanent": { "filter": "creature", "other": true } }],
+          "timing": "sorcery",
+          "targets": [{ "graveyard_card": { "any_of": ["instant", "sorcery"], "controller": "opponent" } }],
+          "effects": [
+            { "exile": { "to": { "target": 0 } } },
+            { "play_permission": { "to": { "result": 0 }, "play": "cast", "duration": "end_of_turn",
+                                   "any_mana_type": true, "exile_instead": true } }
+          ]
+        }
+      }
+    ],
+    "rarity": "rare",
+    "printing": { "set": "sos", "number": "206" }
+  },
+  {
+    "name": "Bilbo, Thief in the Night",
+    "mana_cost": "{1}{U}",
+    "supertypes": ["legendary"],
+    "types": ["creature"],
+    "subtypes": ["halfling", "rogue"],
+    "power": 2,
+    "toughness": 2,
+    "abilities": [
+      { "cost_modifier": { "not_from": "hand", "reduce": 1 } },
+      {
+        "triggered": {
+          "when": { "attacks": {} },
+          "effects": [{ "cast": { "from": "graveyard",
+                                  "for": { "any_of": [{ "types": ["artifact"] }, { "types": ["instant"] }, { "types": ["sorcery"] }] },
+                                  "exile_instead": { "any_of": [{ "types": ["instant"] }, { "types": ["sorcery"] }] } } }]
+        }
+      }
+    ],
+    "rarity": "mythic",
+    "printing": { "set": "hob", "number": "33" }
+  },
+  {
+    "name": "Gwen Stacy // Ghost-Spider",
+    "layout": "transform",
+    "faces": [
+      {
+        "name": "Gwen Stacy",
+        "mana_cost": "{1}{R}",
+        "supertypes": ["legendary"],
+        "types": ["creature"],
+        "subtypes": ["human", "performer", "hero"],
+        "power": 2,
+        "toughness": 1,
+        "abilities": [
+          {
+            "triggered": {
+              "when": { "enters": {} },
+              "effects": [
+                { "exile_top": { "amount": 1 } },
+                { "play_permission": { "to": { "result": 0 }, "duration": "while_you_control_source" } }
+              ]
+            }
+          },
+          { "activated": { "cost": [{ "mana": "{2}{U}{R}{W}" }], "timing": "sorcery", "effects": [{ "transform": {} }] } }
+        ]
+      },
+      {
+        "name": "Ghost-Spider",
+        "colors": ["U", "R", "W"],
+        "supertypes": ["legendary"],
+        "types": ["creature"],
+        "subtypes": ["spider", "human", "hero"],
+        "power": 4,
+        "toughness": 4,
+        "keywords": ["flying", "vigilance", "haste"],
+        "abilities": [
+          {
+            "triggered": {
+              "when": { "any_of": [{ "plays_land": { "from": "exile" } }, { "cast": { "from": "exile" } }] },
+              "effects": [{ "add_counters": { "counter": "+1/+1", "amount": 1, "to": "self" } }]
+            }
+          },
+          {
+            "activated": {
+              "cost": [{ "remove_counters": { "count": 2, "self": true } }],
+              "effects": [
+                { "exile_top": { "amount": 1 } },
+                { "play_permission": { "to": { "result": 0 }, "duration": "end_of_turn" } }
+              ]
+            }
+          }
+        ]
+      }
+    ],
+    "rarity": "mythic",
+    "printing": { "set": "spm", "number": "78" }
+  },
+  {
+    "name": "Hama, the Bloodbender",
+    "mana_cost": "{2}{U/B}{U/B}{U/B}",
+    "supertypes": ["legendary"],
+    "types": ["creature"],
+    "subtypes": ["human", "warlock"],
+    "power": 3,
+    "toughness": 3,
+    "abilities": [
+      {
+        "triggered": {
+          "when": { "enters": {} },
+          "targets": ["opponent"],
+          "effects": [
+            { "mill": { "amount": 3, "to": { "target": 0 } } },
+            { "choose_cards": { "from": { "graveyard": { "target": 0 } }, "for": { "not_types": ["creature", "land"] },
+                                "optional": true, "put": "exile" } },
+            { "play_permission": { "to": { "result": 1 }, "play": "cast", "duration": "while_you_control_source",
+                                   "during": "your_turn", "waterbend": "mana_value" } }
+          ]
+        }
+      }
+    ],
+    "rarity": "uncommon",
+    "printing": { "set": "tla", "number": "224" }
+  },
+  {
+    "name": "Molten Exhale",
+    "mana_cost": "{1}{R}",
+    "types": ["sorcery"],
+    "abilities": [
+      { "additional_cost": { "cost": [{ "behold": { "card": { "subtypes": ["dragon"] } } }], "optional": true, "flash": true } },
+      {
+        "spell": {
+          "targets": ["creature_or_planeswalker"],
+          "effects": [{ "deal_damage": { "amount": 4, "to": { "target": 0 } } }]
+        }
+      }
+    ],
+    "rarity": "common",
+    "printing": { "set": "tdm", "number": "113" }
+  },
+  {
+    "name": "Celestial Reunion",
+    "mana_cost": "{X}{G}",
+    "types": ["sorcery"],
+    "abilities": [
+      {
+        "additional_cost": {
+          "cost": [{ "choose_creature_type": {} },
+                   { "behold": { "card": { "types": ["creature"], "subtypes": "chosen" }, "count": 2 } }],
+          "optional": true
+        }
+      },
+      {
+        "spell": {
+          "effects": [
+            {
+              "search_library": {
+                "for": { "types": ["creature"], "mana_value": { "at_most": "x" } },
+                "reveal": true,
+                "battlefield_instead": { "if": { "cast_with": "additional_cost" }, "for": { "subtypes": "chosen" } }
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "mythic",
+    "printing": { "set": "ecl", "number": "170" }
+  },
+  {
+    "name": "Key to the Side-Door",
+    "mana_cost": "{1}",
+    "types": ["artifact"],
+    "abilities": [
+      {
+        "activated": {
+          "cost": [{ "mana": "{2}" }, "tap"],
+          "targets": ["creature"],
+          "effects": [{ "grant": { "keywords": ["cant_be_blocked"], "to": { "target": 0 } } }]
+        }
+      },
+      {
+        "activated": {
+          "cost": [
+            { "mana": "{1}" },
+            "tap",
+            { "discard": { "card": { "supertypes": ["legendary"],
+                                     "same_name_as": { "permanent": { "supertypes": ["legendary"], "controller": "you" } } } } }
+          ],
+          "effects": [{ "draw": { "amount": 2 } }]
+        }
+      }
+    ],
+    "rarity": "uncommon",
+    "printing": { "set": "hob", "number": "175" }
+  },
+  {
+    "name": "Ninja Teen",
+    "mana_cost": "{2}{B}",
+    "types": ["enchantment"],
+    "subtypes": ["class"],
+    "abilities": [
+      {
+        "triggered": {
+          "when": { "leaves_battlefield": { "subject": { "each": "creature", "controller": "you" } } },
+          "effects": [{ "lose_life": { "amount": 1, "to": "each_opponent" } }]
+        }
+      },
+      {
+        "class_level": {
+          "level": 2,
+          "cost": "{1}{B}",
+          "abilities": [
+            { "static": { "affects": { "each": "creature", "controller": "you" }, "pump": { "power": 1, "toughness": 0 },
+                          "keywords": ["menace"] } }
+          ]
+        }
+      },
+      {
+        "class_level": {
+          "level": 3,
+          "cost": "{B}",
+          "abilities": [
+            { "cards_have": { "zone": "graveyard", "cards": { "types": ["creature"] }, "ability": { "sneak": { "cost": "{3}{B}" } } } }
+          ]
+        }
+      }
+    ],
+    "rarity": "rare",
+    "printing": { "set": "tmt", "number": "67" }
+  },
+  {
+    "name": "Baron Helmut Zemo",
+    "mana_cost": "{B}{B}{B}",
+    "supertypes": ["legendary"],
+    "types": ["creature"],
+    "subtypes": ["human", "noble", "villain"],
+    "power": 3,
+    "toughness": 3,
+    "abilities": [
+      {
+        "triggered": {
+          "when": { "cast": { "spell": { "spell": { "colors": ["B"] } }, "from": "hand" } },
+          "effects": [{ "connive": {} }]
+        }
+      },
+      {
+        "activated": {
+          "boast": true,
+          "cost": [{ "exile_from_graveyard": { "count": "any", "card": { "colors": ["B"] }, "symbols": { "color": "B", "at_least": 15 } } }],
+          "effects": [
+            { "copy_card": { "of": "exiled_for_cost" } },
+            { "cast_free": { "to": { "result": 0 }, "count": 3 } }
+          ]
+        }
+      }
+    ],
+    "rarity": "rare",
+    "printing": { "set": "msh", "number": "87" }
+  }
+]

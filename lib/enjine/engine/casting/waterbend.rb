@@ -26,11 +26,16 @@ module Enjine
         abilities.flat_map(&:costs)
       end
 
-      # CR 601.2f: as the total cost is locked in, so is the waterbend cost's generic part.
+      # CR 601.2f: as the total cost is locked in, so is the waterbend cost's generic part (with an alternative cost
+      # that is a waterbend cost, "cast it by waterbending {X} rather than paying its mana cost").
       def lock_waterbend!(ctx)
         costs = frame_costs(ctx) # Engine::CostOptions
-        ctx["waterbend"] = waterbend_generic(costs, ctx["x"].to_i) if costs.any?(WATERBEND)
+        alt = alt_waterbend(ctx["method"])
+        ctx["waterbend"] = waterbend_generic(costs, ctx["x"].to_i) + alt.to_i if alt || costs.any?(WATERBEND)
       end
+
+      # The generic mana of a cast method's waterbend alternative cost (Engine::Permissions#granted_methods), or nil.
+      def alt_waterbend(method) = method&.dig("alt", "waterbend") ? Mana::Cost.parse(method["alt"]["cost"]).generic : nil
 
       def waterbend_candidates(index, excluded = [])
         state.battlefield.select do |id|

@@ -73,42 +73,100 @@ module Enjine
 
       # `count` cards from one of your zones (`zone`) matching the card spec `card`, never the card the spell
       # or ability belongs to: "discard a card", "exile two cards from your graveyard" (CR 601.2h, 602.2b).
+      #
+      # "Exile any number of black cards from your graveyard with fifteen or more black mana symbols among their mana
+      # costs" (CR 107.4, 202.1): `count: "any"` with `symbols: {"color": "B", "at_least": 15}`. The player chooses
+      # cards one at a time (`choose_cost`) and may stop (`done`) once the chosen cards have enough symbols.
       class CardsCost < Choosing
-        def self.keys = %w[count card]
+        # Where cards exiled to pay a cost are remembered on the spell or ability (selector "exiled_for_cost").
+        EXILED = "exiled_for_cost"
+
+        def self.keys = %w[count card symbols]
         def self.zone = raise(NotImplementedError)
 
         # `count` "X": as many as the X announced for the spell or ability (CR 601.2b, 107.3a).
         def self.build(params, errors, path, **)
           Mechanics.check_keys(params, keys, errors, path)
-          count = if Mechanics.fetch_param(params, :count) == "X" then "X"
-                  else Mechanics.integer_param(params, :count, errors, path, default: 1, min: 1)
-                  end
+          count = Mechanics.fetch_param(params, :count)
+          count = Mechanics.integer_param(params, :count, errors, path, default: 1, min: 1) unless %w[X any].include?(count)
           raw = Mechanics.fetch_param(params, :card)
           spec = raw && CardSpec.build(raw, errors, "#{path}.card")
           new(spec, count, false, params, errors, path)
         end
 
+        def initialize(filter, count, other, params, errors, path)
+          @symbols = symbols_param(Mechanics.fetch_param(params, :symbols), errors, path)
+          errors << "#{path}.count: \"any\" needs `symbols`" if (count == "any") != !@symbols.nil?
+          super
+        end
+
+        def symbols_param(raw, errors, path)
+          return nil if raw.nil?
+
+          ok = raw.is_a?(Hash) && Mana::COLORS.include?(raw["color"].to_s.upcase.to_sym) && raw["at_least"].is_a?(Integer) &&
+               raw["at_least"].positive? && raw.keys.sort == %w[at_least color]
+          return { "color" => raw["color"].to_s.upcase.to_sym, "at_least" => raw["at_least"] } if ok
+
+          errors << "#{path}.symbols: must be {\"color\": W|U|B|R|G, \"at_least\": integer >= 1}"
+          nil
+        end
+
+        # The card spec sees who pays (CR 201.2a: "the same name as a legendary permanent you control").
         def candidates(engine, object)
+          ctx = EffectContext.new(object.controller, object.id, object.id, [])
           engine.player(object.controller).public_send(self.class.zone).select do |id|
-            id != object.id && (filter.nil? || filter.match?(engine, engine.object(id)))
+            id != object.id && (filter.nil? || filter.match?(engine, engine.object(id), ctx))
           end
         end
 
         # "Exile X cards": the engine asks for as many as X (Engine::CastChoices#cost_chosen?); X can be at
         # most the number of matching cards (Engine::Costs#x_limit).
         def x? = count == "X"
-        def choices_needed = x? ? 0 : super
-        def payable?(engine, object) = x? || super
+        def any? = count == "any"
+        def choices_needed = x? || any? ? 0 : super
         def x_limit(engine, object) = candidates(engine, object).size
+
+        def payable?(engine, object)
+          return true if x?
+          return super unless any?
+
+          symbols_among(engine, candidates(engine, object)) >= @symbols["at_least"]
+        end
+
+        # An "any number" choice remembers its card's symbols (CR 107.4e: a hybrid symbol is each of its colors).
+        def choose!(engine, option)
+          entry = super
+          any? ? entry.merge("symbols" => symbols_among(engine, [option[:object]])) : entry
+        end
+
+        def finishable?(entries) = any? && entries.sum { it["symbols"].to_i } >= @symbols["at_least"]
+
+        # Engine::CastChoices#cost_chosen?: "any number" is chosen once enough symbols are and the player is done.
+        def chosen?(engine, object, entries, done)
+          return entries.size >= choices_needed unless any?
+
+          finishable?(entries) && (done || choice_options(engine, object, entries).empty?)
+        end
+
+        def symbols_among(engine, ids) = ids.sum { engine.chars(it).mana_cost&.symbols_of(@symbols["color"]).to_i }
 
         # As it becomes cast, the chosen cards still where they were chosen are paid (exiled by default).
         def pay_chosen!(engine, _object, entries)
           entries.map { it["object"] }.select { engine.state.objects[it]&.zone == self.class.zone }.each { pay_card!(engine, it) }
         end
 
-        def pay_card!(engine, id) = engine.move!(id, :exile, reason: "cost")
+        # An exiled card is remembered by the spell or ability being cast ("copy those exiled cards").
+        def pay_card!(engine, id)
+          fresh = engine.move!(id, :exile, reason: "cost") or return
+          holder = engine.casting && engine.state.objects[engine.casting["object"]]
+          (holder.memory[EXILED] ||= []) << fresh.id if holder
+        end
 
-        def cards_text = "#{count == 1 ? "a" : count} #{filter || "card"}#{"s" unless count == 1}"
+        def cards_text
+          many = { 1 => "a", "any" => "any number of" }.fetch(count, count)
+          text = "#{many} #{filter || "card"}#{"s" unless count == 1}"
+          @symbols ? "#{text} with #{@symbols["at_least"]} or more {#{@symbols["color"]}} symbols among their mana costs" : text
+        end
       end
     end
   end

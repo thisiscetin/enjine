@@ -206,31 +206,40 @@ module Enjine
       #   `to_player`      "controller" (default), "owner" (each card's owner, CR 108.3) or a player selector
       #   `cost_increase`  generic mana added to the total cost of a spell cast with this permission (601.2f)
       #   `any_mana_type`  mana of any type may be spent to cast it (CR 609.4b)
+      #   `during`         "your_turn": only during the permission's player's turn
+      #   `waterbend`      "mana_value": cast by waterbending {X} rather than paying its mana cost, X its mana
+      #                    value (an alternative cost, CR 118.9, 701.67a)
       # Riders like these are stored on the permission (`state.effects` entry) and copied into the play
-      # method, so only casts that use this permission (`via: "effect:<timestamp>"`) see them.
+      # method, so only casts that use this permission (`via: "effect:<timestamp>"`) see them. A
+      # `while_you_control_source` permission ends when its source leaves or changes control (CR 611.2b).
       class PlayPermission < ChoiceEffect
-        DURATIONS = %w[end_of_turn end_of_your_next_turn while_exiled].freeze
+        DURATIONS = %w[end_of_turn end_of_your_next_turn while_exiled while_you_control_source].freeze
         PLAYERS = %w[controller owner].freeze
 
         primitive :effect, :play_permission,
                   description: "A player may play (`play: \"play\"`, default) or cast (`\"cast\"`) each referenced " \
                                "exiled card matching `for`/`not_types`, paying its costs and following timing rules, " \
-                               "for `duration`: end_of_turn (default), end_of_your_next_turn or while_exiled. With " \
+                               "for `duration`: end_of_turn (default), end_of_your_next_turn, while_exiled or " \
+                               "while_you_control_source (\"for as long as you control this creature\"). With " \
                                "`choose: \"one_per_owner\"` only one chosen card per owner. `to_player`: who may " \
                                "play it, \"controller\" (default, the effect's controller), \"owner\" (the card's " \
                                "owner) or a player selector (a face-down card: only someone who may look at it). " \
                                "`cost_increase`: spells cast this way cost that much generic mana more. " \
-                               "`any_mana_type: true`: mana of any type can be spent to cast those spells.",
-                  rules: %w[611.2a 601.3 305.1 400.7 514.2 601.2f 108.3 406.3b 609.4b],
+                               "`any_mana_type: true`: mana of any type can be spent to cast those spells. " \
+                               "`during: \"your_turn\"`: only during your turn. `waterbend: \"mana_value\"`: cast it by " \
+                               "waterbending {X} rather than paying its mana cost, where X is its mana value.",
+                  rules: %w[611.2a 611.2b 601.3 305.1 400.7 514.2 601.2f 108.3 406.3b 609.4b 118.9 701.67a],
                   params: { "to" => "selector (usually {\"result\": n})", "duration" => DURATIONS.join(" | "),
                             "play" => "play | cast", "for" => "card spec", "not_types" => "list of card types",
                             "choose" => "one_per_owner", "to_player" => "controller | owner | player selector",
                             "cost_increase" => "integer >= 1", "any_mana_type" => "boolean",
                             "exile_instead" => "true or a card spec: if a spell cast this way (matching it) would be put " \
-                                               "into a graveyard, it's exiled instead (CR 614.1a)" },
+                                               "into a graveyard, it's exiled instead (CR 614.1a)",
+                            "during" => "your_turn", "waterbend" => "mana_value" },
                   example: { "play_permission" => { "to" => { "result" => 0 }, "duration" => "end_of_your_next_turn" } }
 
-        def self.keys = %w[to duration play for not_types choose to_player cost_increase any_mana_type exile_instead if]
+        def self.keys = %w[to duration play for not_types choose to_player cost_increase any_mana_type exile_instead during
+                           waterbend if]
 
         def setup(params, errors, path)
           @duration = Mechanics.fetch_param(params, :duration) || "end_of_turn"
@@ -250,18 +259,23 @@ module Enjine
           more = @riders["cost_increase"] ? ", costs {#{@riders["cost_increase"]}} more" : ""
           more += ", mana of any type" if @riders["any_mana_type"]
           more += ", #{ExileInstead.words(@riders["exile_instead"])}" if @riders["exile_instead"]
+          more += ", during your turn" if @riders["during"]
+          more += ", by waterbending {X} (X: its mana value)" if @riders["waterbend"]
           "#{who} may #{@play} #{@filter} (#{@duration.tr("_", " ")}#{more}) → #{to}"
         end
 
         def run(engine, ctx, locals)
           return :done unless locals["cards"] || condition.nil? || condition.true?(engine, ctx)
+          # CR 611.2b: "for as long as you control [this]" that has already ended never starts.
+          return :done unless engine.source_duration_holds?(@duration, ctx.source, ctx.controller)
 
           cards = (locals["cards"] ||= refs(engine, ctx).select { exiled_match?(engine, it) })
           picks = @choose ? choose(engine, ctx, locals, cards) : cards
           return :wait if picks == :wait
 
+          source = ctx.source if Engine::Rules::WHILE_SOURCE.include?(@duration)
           picks.flat_map { |id| players_for(engine, ctx, id).map { [it, id] } }.group_by(&:first).each do |index, pairs|
-            engine.grant_play_permission!(index, pairs.map(&:last), duration: @duration, play: @play, **@riders)
+            engine.grant_play_permission!(index, pairs.map(&:last), duration: @duration, play: @play, source: source, **@riders)
           end
           :done
         end
@@ -280,7 +294,15 @@ module Enjine
           errors << "#{path}.cost_increase: must be an integer >= 1" unless ok
           any_type = Mechanics.flag_param(params, :any_mana_type, errors, path)
           { "cost_increase" => increase, "any_mana_type" => (true if any_type),
-            "exile_instead" => ExileInstead.build(params, errors, path) }.compact
+            "exile_instead" => ExileInstead.build(params, errors, path),
+            "during" => fixed_word(params, :during, "your_turn", errors, path),
+            "waterbend" => fixed_word(params, :waterbend, "mana_value", errors, path) }.compact
+        end
+
+        def fixed_word(params, key, word, errors, path)
+          value = Mechanics.fetch_param(params, key)
+          errors << "#{path}.#{key}: must be \"#{word}\"" unless value.nil? || value == word
+          value
         end
 
         # The players who may play `id`: the effect's controller, the card's owner, or the selected players.
@@ -318,23 +340,27 @@ module Enjine
       # the controller picks a card, casts it right away (a cast frame on top of the resolving one; nobody
       # gets priority), then the resolution goes on. `count: "any"` repeats until they stop.
       class CastFree < ChoiceEffect
+        FROM = %w[hand graveyard].freeze
+
         primitive :effect, :cast_free,
                   description: "The controller may cast referenced cards without paying their mana costs while this " \
                                "resolves. `to` names the cards ({\"result\": n}), or a player for the cards in their " \
-                               "hand (default: your hand). Only cards matching `for`/`not_types` with mana value up to " \
-                               "`max_mana_value` (optional amount) that could be cast now (legal targets). `count`: 1 " \
-                               "(default) or \"any\" (any number, one at a time). X is 0 (CR 107.3b). `play: true` " \
+                               "hand (default: your hand), or in the zone `from` (hand | graveyard). Only cards " \
+                               "matching `for`/`not_types` with mana value up to `max_mana_value` (optional amount) " \
+                               "that could be cast now (legal targets). `count`: 1 (default), up to N (an integer), or " \
+                               "\"any\" (any number, one at a time). X is 0 (CR 107.3b). `play: true` " \
                                "(\"you may play\"): a land among them may be played, on your turn with a land play " \
                                "left (`{type: \"play_land\"}`). A face-down card is judged face up.",
                   rules: %w[608.2g 118.9 601.2a 107.3b 118.6a 305.2a 305.3 406.3a],
                   params: { "to" => "selector", "for" => "card spec", "not_types" => "list of card types",
-                            "max_mana_value" => "amount", "count" => "1 or \"any\"", "play" => "boolean",
+                            "max_mana_value" => "amount", "count" => "integer >= 1 (default 1) or \"any\"",
+                            "from" => FROM.join(" | "), "play" => "boolean",
                             "exile_instead" => "true or a card spec: if a spell cast this way (matching it) would be put " \
                                                "into a graveyard, it's exiled instead (CR 614.1a)",
                             "any_mana_type" => "boolean: mana of any type can be spent to cast it (CR 609.4b)" },
                   example: { "cast_free" => { "to" => { "result" => 0 }, "max_mana_value" => 3, "count" => "any" } }
 
-        def self.keys = %w[to for not_types max_mana_value count play exile_instead any_mana_type if]
+        def self.keys = %w[to from for not_types max_mana_value count play exile_instead any_mana_type if]
         def self.default_to = "you"
 
         def setup(params, errors, path)
@@ -344,14 +370,17 @@ module Enjine
           raw = Mechanics.fetch_param(params, :max_mana_value)
           @max = raw.nil? ? nil : Amount.build(raw, errors, "#{path}.max_mana_value", targets_count: @targets_count)
           @count = Mechanics.fetch_param(params, :count) || 1
-          errors << "#{path}.count: must be 1 or \"any\"" unless [1, "any"].include?(@count)
+          errors << "#{path}.count: must be an integer >= 1 or \"any\"" unless @count == "any" || (@count.is_a?(Integer) && @count >= 1)
+          @from = Mechanics.fetch_param(params, :from) || "hand"
+          errors << "#{path}.from: must be one of #{FROM.join(", ")}" unless FROM.include?(@from)
           @play = Mechanics.flag_param(params, :play, errors, path)
         end
 
         def to_s
           more = @riders["any_mana_type"] ? ", mana of any type" : ""
           more += ", #{ExileInstead.words(@riders["exile_instead"])}" if @riders["exile_instead"]
-          "you may cast #{@count == "any" ? "any number of" : "a"} #{@filter} free#{more} → #{to}"
+          how_many = { "any" => "any number of", 1 => "a" }.fetch(@count) { "up to #{@count}" }
+          "you may cast #{how_many} #{@filter}#{" from #{@from}" unless @from == "hand"} free#{more} → #{to}"
         end
 
         def run(engine, ctx, locals)
@@ -371,7 +400,7 @@ module Enjine
             locals["playing"] = answer["object"]
             return :wait if play_land!(engine, index, locals) == :wait
           end
-          return :done if @count == 1 && locals["cast"].to_i >= 1
+          return :done if @count != "any" && locals["cast"].to_i >= @count
 
           choices = candidates(engine, ctx, locals)
           return :done if choices.empty?
@@ -432,11 +461,11 @@ module Enjine
           :done
         end
 
-        # Referenced cards still in the zone they were put in; a player stands for their hand.
+        # Referenced cards still in the zone they were put in; a player stands for their hand (or graveyard).
         def cards(engine, ctx)
           refs(engine, ctx).flat_map do |ref|
             index = Filters.player_index(engine, ref)
-            next engine.player(index).hand if index
+            next engine.player(index).public_send(@from).dup if index
             next [] unless engine.state.objects.key?(ref)
 
             %i[stack battlefield].include?(engine.object(ref).zone) ? [] : [ref]

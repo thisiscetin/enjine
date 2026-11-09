@@ -31,6 +31,9 @@ module Enjine
           end
         end
 
+        # The costs with amounts computed as this resolves ("pay life equal to its power", Costs::PayLife#fixed).
+        def costs_now(engine, ctx) = costs.map { it.respond_to?(:fixed) ? it.fixed(engine, ctx) : it }
+
         # Each way of paying `costs` open to the payer now: its other parts payable for `payer_obj` (an object
         # the payer controls, CR 118.3) and its mana affordable.
         def open_variants(engine, payer_obj, costs)
@@ -174,12 +177,12 @@ module Enjine
         def decide(engine, ctx, locals)
           payer = engine.object(ctx.object)
           unless locals["paying"] || answers(locals).first
-            choices = pay_choices(engine, payer, costs) + [{ "type" => "decline" }]
+            choices = pay_choices(engine, payer, costs_now(engine, ctx)) + [{ "type" => "decline" }]
             return ask(engine, locals, payer.controller, "Pay #{what}?", choices)
           end
           return locals["outcome"] = "unpaid" if answers(locals).first["type"] == "decline"
 
-          result = pay_costs(engine, ctx, locals, payer, costs)
+          result = pay_costs(engine, ctx, locals, payer, costs_now(engine, ctx))
           result == :wait ? :wait : (locals["outcome"] = result)
         end
       end
@@ -214,10 +217,10 @@ module Enjine
 
           payer = engine.object(target)
           unless locals["paying"] || answers(locals).first
-            choices = pay_choices(engine, payer, costs) + [{ "type" => "decline" }]
+            choices = pay_choices(engine, payer, costs_now(engine, ctx)) + [{ "type" => "decline" }]
             return ask(engine, locals, payer.controller, "Pay #{what} or #{payer.card} is countered?", choices)
           end
-          paid = answers(locals).first["type"] == "pay" && pay_costs(engine, ctx, locals, payer, costs)
+          paid = answers(locals).first["type"] == "pay" && pay_costs(engine, ctx, locals, payer, costs_now(engine, ctx))
           return :wait if paid == :wait
 
           engine.counter!(target) unless paid == "paid"

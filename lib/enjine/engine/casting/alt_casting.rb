@@ -32,7 +32,30 @@ module Enjine
           ability = inst.ability
           ability.method_for(inst.ref) if ability.kind == :alternative_cost && ability.functions?(self, obj, index)
         end
-        own + warped_methods(index, obj)
+        own + granted_alt_methods(index, obj) + warped_methods(index, obj)
+      end
+
+      GRANTED = "cards_have:"
+
+      # Alternative costs a permanent `index` controls gives their cards (Abilities::CardsHave, CR 611.3a): the ref
+      # "cards_have:<permanent>:<ref>" names the granting ability.
+      def granted_alt_methods(index, obj)
+        return [] if obj.zone == :outside
+
+        board_abilities(:cards_have).filter_map do |perm, grant|
+          next unless perm.controller == index && grant.functions?(self, obj, index)
+
+          inst = chars(perm).abilities.find { it.ability.equal?(grant) }
+          grant.granted.method_for("#{GRANTED}#{perm.id}:#{inst.ref}")
+        end
+      end
+
+      # The alternative cost ability a method's ref names: the card's own, or one a permanent grants.
+      def alt_cost_ability(obj, ref)
+        return chars(obj).ability(ref) unless ref.start_with?(GRANTED)
+
+        perm, inst = ref.delete_prefix(GRANTED).split(":", 2)
+        state.objects[perm] && chars(perm).ability(inst)&.granted
       end
 
       # CR 702.185a: "Its owner may cast this card after the current turn has ended for as long as it remains
@@ -48,7 +71,7 @@ module Enjine
       # The non-mana parts of the alternative cost being paid (a list of costs, CR 601.2h).
       def alt_cost_parts(obj, method)
         ref = method&.dig("alt", "ref") or return []
-        chars(obj).ability(ref).choosing_costs
+        alt_cost_ability(obj, ref)&.choosing_costs || []
       end
 
       def alt_parts_payable?(obj, method) = alt_cost_parts(obj, method).all? { it.payable?(self, obj) }

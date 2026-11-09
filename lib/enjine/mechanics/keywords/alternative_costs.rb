@@ -61,8 +61,10 @@ module Enjine
         # The zone the ability lets the card be cast from (CR 113.6).
         def zone = :hand
 
-        # Whether the card `obj` (owned by `index`) may be cast this way now, before timing and cost checks.
-        def functions?(_engine, obj, _index) = obj.zone == zone
+        # Whether the card `obj` (owned by `index`) may be cast this way now, before timing and cost checks: it is
+        # in the ability's zone (or the zone a granting permanent names, Abilities::CardsHave) and `usable?`.
+        def functions?(engine, obj, index) = obj.zone == zone && usable?(engine, obj, index)
+        def usable?(_engine, _obj, _index) = true
 
         # Paid instead of the mana cost? (Mayhem without a cost only allows playing it.)
         def alternative? = !mana_cost.nil?
@@ -147,7 +149,7 @@ module Enjine
 
         def zone = :graveyard
         def play = alternative? ? "cast" : "play"
-        def functions?(engine, obj, _index) = obj.zone == zone && engine.discarded_this_turn?(obj)
+        def usable?(engine, obj, _index) = engine.discarded_this_turn?(obj)
       end
 
       # CR 702.185a-c: warp, from the hand. The permanent is exiled at the beginning of the next end step; its
@@ -228,9 +230,7 @@ module Enjine
         def returns = "unblocked"
         def instant_speed? = true
 
-        def functions?(engine, obj, index)
-          obj.zone == zone && engine.state.active == index && engine.state.step == :declare_blockers
-        end
+        def usable?(engine, _obj, index) = engine.state.active == index && engine.state.step == :declare_blockers
       end
     end
 
@@ -303,6 +303,10 @@ module Enjine
           @value = value
           freeze
         end
+
+        # Whether `condition` is "if the gift was promised" (the gift triggered ability of a permanent, CR 702.174b).
+        def self.gift?(condition) = condition.is_a?(CastHow) && condition.gift?
+        def gift? = @key == "cast_with" && @value == "gift"
 
         def true?(engine, ctx)
           return engine.cast_with_this_turn?(@value) if @key == "cast_with_this_turn"

@@ -38,6 +38,9 @@ module Enjine
 
         def mana? = false
 
+        # The options with their amounts computed in `ctx` (Costs::PayLife#fixed).
+        def fixed(engine, ctx) = OneOf.new(options.map { it.respond_to?(:fixed) ? it.fixed(engine, ctx) : it })
+
         # Some option could be paid (a mana option is checked against the total cost by the engine).
         def payable?(engine, object) = options.any? { it.mana? || it.payable?(engine, object) }
         # Each option as text: "Behold a Goblin", "Pay {2}".

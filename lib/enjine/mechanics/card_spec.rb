@@ -15,14 +15,19 @@ module Enjine
     #   {"colors": ["B"]}                               a black card: it has any of the listed colors (CR 105.2)
     #   {"color_count": {"equal": 1}}                   monocolored (1), multicolored (at least 2), colorless (0)
     #   {"any_of": [spec, spec, ...]}                   at least one spec must match
+    #   {"subtypes": "chosen"}                          of the creature type chosen for the source (CR 607.2d)
+    #   {"same_name_as": filter}                        the same name as a permanent the filter matches, e.g. "a
+    #                                                   legendary permanent you control" (CR 201.2a)
+    # The last two read the context (an EffectContext): the source's choices and its controller.
     class CardSpec
-      KEYS = %w[types not_types subtypes supertypes name any_of permanent mana_value colors color_count].freeze
+      KEYS = %w[types not_types subtypes supertypes name any_of permanent mana_value colors color_count same_name_as].freeze
       SUBTYPE = /\A[a-z][a-z0-9_]*\z/
       # CR 110.4a: the permanent card types (battles have no primitive yet, so none matches that way).
       PERMANENT_TYPES = %i[artifact battle creature enchantment land planeswalker].freeze
       BOUNDS = %w[at_least at_most equal].freeze
 
-      attr_reader :types, :not_types, :subtypes, :supertypes, :name, :any_of, :permanent, :mana_value, :colors, :color_count
+      attr_reader :types, :not_types, :subtypes, :supertypes, :name, :any_of, :permanent, :mana_value, :colors, :color_count,
+                  :relations
 
       def self.build(data, errors, path)
         return ANY if data.nil? || data == "card"
@@ -31,11 +36,20 @@ module Enjine
         data = data.transform_keys(&:to_s)
         Mechanics.check_keys(data, KEYS, errors, path)
         errors << "#{path}: needs at least one of #{KEYS.join(", ")}" if data.empty?
+        chosen = data["subtypes"] == "chosen"
         new(types: names(data, "types", :type, errors, path), supertypes: names(data, "supertypes", :supertype, errors, path),
-            subtypes: subtype_list(data, errors, path), name: name_param(data, errors, path),
+            subtypes: chosen ? [] : subtype_list(data, errors, path), name: name_param(data, errors, path),
             any_of: alternatives(data, errors, path), not_types: names(data, "not_types", :type, errors, path),
             permanent: permanent_param(data, errors, path), mana_value: bounds_param(data, "mana_value", errors, path),
-            colors: colors_param(data, errors, path), color_count: bounds_param(data, "color_count", errors, path))
+            colors: colors_param(data, errors, path), color_count: bounds_param(data, "color_count", errors, path),
+            relations: relations_param(data, chosen, errors, path))
+      end
+
+      # What the spec compares with its context: the chosen creature type, permanents to share a name with.
+      def self.relations_param(data, chosen, errors, path)
+        raw = data["same_name_as"]
+        same = raw && Mechanics.build_entry(:filter, raw, errors, "#{path}.same_name_as")
+        { "chosen_subtype" => (true if chosen), "same_name_as" => same }.compact
       end
 
       def self.colors_param(data, errors, path)
@@ -109,7 +123,8 @@ module Enjine
       end
 
       def initialize(types: [], subtypes: [], supertypes: [], name: nil, any_of: [], not_types: [], permanent: false,
-                     mana_value: {}, colors: [], color_count: {})
+                     mana_value: {}, colors: [], color_count: {}, relations: {})
+        @relations = relations.freeze
         @colors = colors.freeze
         @color_count = color_count.freeze
         @types = types.freeze
@@ -123,10 +138,17 @@ module Enjine
         freeze
       end
 
+      # The spec without what it reads from its context (the chosen type, a shared name).
+      def unrelated
+        return self if relations.empty?
+
+        CardSpec.new(types:, subtypes:, supertypes:, name:, any_of:, not_types:, permanent:, mana_value:, colors:, color_count:)
+      end
+
       # True when the spec states no quality: "a card" (CR 701.23d).
       def any?
         types.empty? && not_types.empty? && subtypes.empty? && supertypes.empty? && name.nil? && any_of.empty? &&
-          !permanent && mana_value.empty? && colors.empty? && color_count.empty?
+          !permanent && mana_value.empty? && colors.empty? && color_count.empty? && relations.empty?
       end
 
       # Whether a card object matches, by its current characteristics (CR 109.3). `ctx` (an EffectContext)
@@ -139,7 +161,8 @@ module Enjine
           subtypes.all? { chars.subtypes.include?(it) } && supertypes.all? { chars.supertypes.include?(it) } &&
           (name.nil? || chars.name == name) && (!permanent || chars.types.intersect?(PERMANENT_TYPES)) &&
           (colors.empty? || colors.intersect?(chars.colors)) && bounded?(mana_value, chars.mana_cost&.mana_value.to_i, engine, ctx) &&
-          bounded?(color_count, chars.colors.size, engine, ctx) && (any_of.empty? || any_of.any? { it.chars_match?(engine, chars, ctx) })
+          bounded?(color_count, chars.colors.size, engine, ctx) && (any_of.empty? || any_of.any? { it.chars_match?(engine, chars, ctx) }) &&
+          (relations.empty? || related?(engine, chars, ctx))
       end
 
       def to_s
@@ -148,7 +171,9 @@ module Enjine
 
         words = not_types.map { "non#{it}" } + colors + supertypes + subtypes.map { it.to_s.capitalize } + types
         words << "permanent" if permanent
+        words << "chosen-type" if relations["chosen_subtype"]
         text = (words.map { it.to_s.tr("_", " ") } + ["card"]).join(" ")
+        text += " with the same name as a #{relations["same_name_as"]}" if relations["same_name_as"]
         bounds = { "mana value" => mana_value, "number of colors" => color_count }.reject { |_, b| b.empty? }
         return text if bounds.empty?
 
@@ -156,6 +181,21 @@ module Enjine
       end
 
       private
+
+      # The chosen creature type (CR 607.2d) and a shared name (CR 201.2a: an object with no name shares none); both
+      # need the context.
+      def related?(engine, chars, ctx)
+        return false unless ctx
+
+        if relations["chosen_subtype"]
+          chosen = Filters.chosen_memory(engine, ctx.source, ctx)["chosen_type"]
+          return false unless chosen && chars.subtypes.include?(chosen.to_sym)
+        end
+        filter = relations["same_name_as"] or return true
+        !chars.name.to_s.empty? && engine.state.battlefield.any? do
+          filter.match_for?(engine, it, ctx.controller, ctx.source) && engine.chars(it).name == chars.name
+        end
+      end
 
       # CR 202.3: a card's mana value (0 without a mana cost, CR 202.3a), or its number of colors (CR 105.2), within
       # the bounds.

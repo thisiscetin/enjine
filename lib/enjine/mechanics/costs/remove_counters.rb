@@ -9,24 +9,27 @@ module Enjine
         primitive :cost, :remove_counters,
                   description: "Remove `count` counters (of kind `counter`, or any kind) from among permanents you " \
                                "control matching `filter` (default creature), one counter per choice. Removed as " \
-                               "it becomes cast.",
+                               "it becomes cast. `self: true`: only from this permanent (\"Remove two counters from " \
+                               "Ghost-Spider\").",
                   rules: %w[602.2b 601.2h 118.3 122.1],
-                  params: { "count" => "integer", "filter" => "filter (default creature)", "counter" => "counter name (optional)" },
+                  params: { "count" => "integer", "filter" => "filter (default creature)", "counter" => "counter name (optional)",
+                            "self" => "true: from this permanent only" },
                   example: { "remove_counters" => { "count" => 3 } }
 
-        def self.keys = %w[filter count counter]
+        def self.keys = %w[filter count counter self]
         def self.default_filter = "creature"
 
         def initialize(filter, count, other, params, errors, path)
           @counter = Mechanics.fetch_param(params, :counter)
           errors << "#{path}.counter: #{Counters.error(@counter)}" if @counter && Counters.error(@counter)
+          @self = Mechanics.flag_param(params, :self, errors, path)
           super
         end
 
         # Counters still available: [object, kind] once per counter, minus those already chosen.
         def units(engine, object, chosen)
           taken = chosen.map { [it["object"], it["counter"]] }
-          matching(engine, object).flat_map do |id|
+          (@self ? [object.id] : matching(engine, object)).flat_map do |id|
             engine.object(id).counters.flat_map do |kind, n|
               next [] unless @counter.nil? || kind == @counter
 
@@ -44,7 +47,7 @@ module Enjine
           entries.each { engine.remove_counters!(engine.object(it["object"]), it["counter"], 1) }
         end
 
-        def to_s = "Remove #{count} #{"#{@counter} " if @counter}counters from among #{what}s you control"
+        def to_s = "Remove #{count} #{"#{@counter} " if @counter}counters from #{@self ? "this" : "among #{what}s you control"}"
       end
     end
   end

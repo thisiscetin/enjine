@@ -39,7 +39,7 @@ RSpec.describe "Cost options: card data (unit)" do
       .to eq(["abilities[0].spell.effects[0].pay.cost[0].get_counters.counter: must be a counter kind, e.g. \"poison\"",
               "abilities[0].spell.effects[0].pay.cost[0].get_counters.amount: must be an integer >= 1"])
     expect(errors_for(creature([{ "ward" => { "cost" => [{ "pay_life" => 0 }] } }])))
-      .to eq(["abilities[0].ward.cost[0].pay_life: must be an integer >= 1 or \"X\""])
+      .to eq(["abilities[0].ward.cost[0].pay_life: must be an integer >= 1, \"X\" or an amount"])
     expect(errors_for(creature([{ "enters_tapped_unless_behold" => {} }])))
       .to eq(["abilities[0].enters_tapped_unless_behold.card: required"])
     expect(errors_for(card([spell([{ "discard" => { "hand" => true, "random" => true } }])])))

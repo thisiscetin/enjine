@@ -140,7 +140,7 @@ module Enjine
         when "pay_mana"
           "Pay {#{opt[:mana]}} from mana pool#{" (restricted)" if opt[:restricted]}#{" (made by an artifact)" if opt[:from]}"
         when "target" then "Target #{name_of(opt[:target])}"
-        when "cost" then "Use #{name_of(opt[:object])} to pay the cost"
+        when "cost" then opt[:creature_type] ? "Choose #{opt[:creature_type]}" : "Use #{name_of(opt[:object])} to pay the cost"
         when "behold" then "Behold #{name_of(opt[:object])}"
         when "pay" then opt[:cost] ? "Pay: #{opt[:cost]}" : "Pay"
         when "cost_option" then @game.pending_decision.details["costs"][opt[:option]]
@@ -237,7 +237,9 @@ module Enjine
         when "speed_changed" then "#{ev["player"]}: speed #{ev["from"]} → #{ev["to"]}"
         when "coin_flipped"
           "#{ev["player"]} flips #{ev["heads"] ? "heads" : "tails"}#{{ true => " and wins", false => " and loses" }[ev["won"]]}"
-        when "keyword_action" then "#{ev["player"]} #{ev["action"].to_s.tr("_", " ")}#{" #{ev["amount"]}" if ev["amount"]}"
+        when "keyword_action"
+          verb = ev["action"] == "give_gift" ? "gives a gift" : ev["action"].to_s.tr("_", " ")
+          "#{ev["player"]} #{verb}#{" #{ev["amount"]}" if ev["amount"]}"
         else "#{ev["type"]}: #{ev.except("type")}"
         end
       end

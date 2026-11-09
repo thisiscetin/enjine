@@ -68,24 +68,41 @@ module Enjine
       # An additional cost: "As an additional cost to cast this spell, sacrifice a creature." (CR 601.2b,
       # 601.2f-h, 118.8). An optional one ("you may behold a Dragon", CR 118.8b) is announced like kicker (the
       # `choose_kicker` decision) without making the spell kicked: {"cast_with": "additional_cost"} holds if it
-      # was paid.
+      # was paid. "You may cast this spell as though it had flash if you behold a Dragon as an additional cost"
+      # (`flash: true`, CR 601.3c): it may be begun any time you could cast an instant, and then the cost must be paid.
       class AdditionalCost < SpellCost
         primitive :ability, :additional_cost,
                   description: "As an additional cost to cast this spell, pay `cost` too (mana and/or chosen costs " \
                                "such as `sacrifice_permanent`). The spell can't be cast without it. `optional: true`: " \
                                "you may pay it (announced with the `choose_kicker` decision); the condition " \
-                               "`{\"cast_with\": \"additional_cost\"}` then holds (the spell isn't kicked).",
-                  rules: %w[601.2b 601.2f 601.2h 118.8 118.8b],
-                  params: { "cost" => "list of costs", "optional" => "true: you may pay it" },
+                               "`{\"cast_with\": \"additional_cost\"}` then holds (the spell isn't kicked). With " \
+                               "`flash: true` (optional only) you may cast it from your hand as though it had flash if " \
+                               "you pay it: cast that way, only paying it is offered.",
+                  rules: %w[601.2b 601.2f 601.2h 118.8 118.8b 601.3c],
+                  params: { "cost" => "list of costs", "optional" => "true: you may pay it",
+                            "flash" => "true: as though it had flash if you pay it" },
                   example: { "additional_cost" => { "cost" => [{ "sacrifice_permanent" => { "filter" => "creature" } }] } }
 
         def self.build(params, errors, path, **)
           optional = Mechanics.flag_param(params, :optional, errors, path)
-          new(super(params.except("optional", :optional), errors, path).costs, optional: optional)
+          flash = Mechanics.flag_param(params, :flash, errors, path)
+          errors << "#{path}.flash: needs optional: true" if flash && !optional
+          new(super(params.except("optional", :optional, "flash", :flash), errors, path).costs, optional: optional, flash: flash)
         end
 
+        def initialize(costs, optional: false, flash: false)
+          @flash = flash
+          super(costs, optional: optional)
+        end
+
+        # CR 601.3c: the spell may be begun as though it had flash, if this cost is paid.
+        def flash? = @flash
+
         def kind = @optional ? :kicker : :additional_cost
-        def to_s = "As an additional cost to cast this spell#{", you may" if @optional}: #{costs.join(", ")}"
+        def to_s
+          text = "As an additional cost to cast this spell#{", you may" if @optional}: #{costs.join(", ")}"
+          @flash ? "#{text} (as though it had flash if you do)" : text
+        end
       end
     end
   end

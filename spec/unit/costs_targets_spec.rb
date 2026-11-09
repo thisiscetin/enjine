@@ -148,8 +148,8 @@ RSpec.describe "Costs, kicker, targets and payments: card data (unit)" do
     expect(errors_for(activated("cost" => [{ "exile_from_graveyard" => { "count" => 2, "other" => true } }])))
       .to eq(["abilities[0].activated.cost[0].exile_from_graveyard: unknown parameter \"other\""])
     expect(errors_for(activated("cost" => [{ "pay_life" => 0 }, { "pay_life" => "Y" }])))
-      .to eq(["abilities[0].activated.cost[0].pay_life: must be an integer >= 1 or \"X\"",
-              "abilities[0].activated.cost[1].pay_life: must be an integer >= 1 or \"X\""])
+      .to eq(["abilities[0].activated.cost[0].pay_life: must be an integer >= 1, \"X\" or an amount",
+              "abilities[0].activated.cost[1].pay_life: must be an integer >= 1, \"X\" or an amount"])
     expect(errors_for(activated("cost" => [{ "behold" => { "exile" => 1 } }])))
       .to eq(["abilities[0].activated.cost[0].behold.card: required", "abilities[0].activated.cost[0].behold.exile: must be true or false"])
     expect(errors_for(spell("effects" => [{ "behold" => {} }]))).to eq(["abilities[0].spell.effects[0].behold.card: required"])

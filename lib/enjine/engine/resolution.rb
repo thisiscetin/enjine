@@ -50,9 +50,19 @@ module Enjine
           return ask_enter_choice!(obj.id, obj.controller) # CR 614.12: decided before it enters
         end
 
+        gift_given!(obj, ability)
         emit Events::Resolved.new(object: obj.id, card: obj.card, kind: obj.kind)
         finish_resolution!(obj, frame)
         after_resolution!
+      end
+
+      # CR 702.174c: a player gives a gift as their instant or sorcery spell whose gift was promised resolves, or as
+      # the gift triggered ability of their permanent resolves (an enters trigger checking "if the gift was promised").
+      def gift_given!(obj, ability)
+        given = if obj.ability? then ability.respond_to?(:condition) && Mechanics::Condition::CastHow.gift?(ability.condition)
+                else obj.memory["kicked_with"] == "gift" && (chars(obj).type?(:instant) || chars(obj).type?(:sorcery))
+                end
+        emit Events::KeywordAction.new(player: name(obj.controller), action: "give_gift", amount: nil) if given
       end
 
       # CR 608.2b: targets are checked once, as resolution begins.
