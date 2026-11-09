@@ -10,6 +10,9 @@ module Enjine
 
       def self.player_ref(engine, index) = "#{PLAYER_PREFIX}#{engine.name(index)}"
 
+      # "A spell or ability with a single target" (CR 115.7): it has exactly one target (one object or player).
+      def self.single_target?(obj) = Array(obj.targets).flatten.compact.uniq.size == 1
+
       def self.player_index(engine, ref)
         return nil unless ref.is_a?(String) && ref.start_with?(PLAYER_PREFIX)
 
@@ -92,9 +95,11 @@ module Enjine
       #   {"creature": {"transformed": true}}            back face up (CR 701.27h); {"prepared": true} (CR 723.3a)
       #   {"creature": {"saddled": true}}                saddled this turn (CR 702.171b)
       #   {"creature": {"entered_this_turn": true}}      entered the battlefield this turn
+      #   {"spell": {"single_target": true}}             a spell with a single target (CR 115.7)
       class Restricted
         TYPES = %w[artifact creature enchantment land planeswalker instant sorcery].freeze
-        BOOLEANS = %w[other attacking blocking tapped token modified transformed prepared saddled entered_this_turn].freeze
+        BOOLEANS = %w[other attacking blocking tapped token modified transformed prepared saddled entered_this_turn
+                      single_target].freeze
         RANGES = %w[power toughness mana_value].freeze
         TYPE_LISTS = %w[not any_of types].freeze
         NAME_LISTS = %w[subtypes not_subtypes supertypes not_supertypes attached_subtypes].freeze
@@ -105,7 +110,7 @@ module Enjine
                    "subtypes" => "chosen_type", "not_subtypes" => "chosen_type" }.freeze
         # Keys that need current characteristics or combat/tapped status: not usable in the layer pass.
         LIVE = %w[power toughness attacking blocking tapped attached_subtypes transformed prepared saddled
-                  entered_this_turn].freeze
+                  entered_this_turn single_target].freeze
 
         attr_reader :base
 
@@ -205,13 +210,13 @@ module Enjine
         # left the battlefield counts as it last existed, CR 608.2h).
         def candidates_for(engine, controller, source, ctx: nil)
           bounds = resolved_ranges(engine, controller, source, ctx)
-          base.candidates(engine, controller).select { allowed?(engine, it, controller, source, bounds, ctx) }
+          base.candidates_for(engine, controller, source, ctx: ctx).select { allowed?(engine, it, controller, source, bounds, ctx) }
         end
 
         def match?(engine, ref, controller) = match_for?(engine, ref, controller, nil)
 
         def match_for?(engine, ref, controller, source, ctx: nil)
-          base.match?(engine, ref, controller) &&
+          base.match_for?(engine, ref, controller, source, ctx: ctx) &&
             allowed?(engine, ref, controller, source, resolved_ranges(engine, controller, source, ctx), ctx)
         end
 
@@ -237,7 +242,7 @@ module Enjine
           words << { "you" => "you control", "opponent" => "an opponent controls" }[@controller]
           words.concat(@ranges.map { |key, range| "with #{key.tr("_", " ")} #{range_words(range)}" })
           words << "with a #{@lists["attached_subtypes"].join(" or ")} attached" unless @lists["attached_subtypes"].empty?
-          (words + [counter_words] + keyword_words).compact.join(" ")
+          (words + [counter_words, ("with a single target" if @params["single_target"])] + keyword_words).compact.join(" ")
         end
 
         RANGE_WORDS = { "at_least" => "%s or greater", "at_most" => "%s or less", "equal" => "equal to %s" }.freeze
@@ -297,7 +302,7 @@ module Enjine
           return false if @params["modified"] == true && !modified?(engine, obj)
           return false unless attached_ok?(engine, obj)
 
-          bounds.all? { |key, range| in_range?(stat(engine, obj, current, key), range) }
+          bounds.all? { |key, range| in_range?(stat(engine, obj, key), range) }
         end
 
         # Types, subtypes, supertypes, keywords, the chosen values, token-ness, counters and printed mana
@@ -351,6 +356,7 @@ module Enjine
           return false if !@params["prepared"].nil? && engine.prepared?(obj) != @params["prepared"] # CR 723.3a
           return false if !@params["saddled"].nil? && engine.saddled?(obj) != @params["saddled"] # CR 702.171b
           return false if !@params["entered_this_turn"].nil? && engine.entered_this_turn?(obj) != @params["entered_this_turn"]
+          return false if !@params["single_target"].nil? && Filters.single_target?(obj) != @params["single_target"]
 
           @params["tapped"].nil? || obj.tapped == @params["tapped"]
         end
@@ -367,12 +373,12 @@ module Enjine
           Counters.any?(obj.counters) || engine.modifying_attachment?(obj)
         end
 
-        # Current power/toughness (CR 208.3) and mana value (CR 202.3; 0 without a mana cost, 202.3a).
-        def stat(engine, obj, current, key)
+        # Current power/toughness (CR 208.3) and mana value (CR 202.3; 0 without a mana cost, 202.3a; Amount.mana_value).
+        def stat(engine, obj, key)
           case key
           when "power" then engine.power(obj)
           when "toughness" then engine.toughness(obj)
-          else current.mana_cost&.mana_value.to_i
+          else Amount.mana_value(engine, obj)
           end
         end
 

@@ -94,7 +94,7 @@ module Enjine
       return object_view(engine, id) unless engine.face_down?(obj)
 
       hidden = { "id" => id, "face_down" => true, "owner" => engine.name(obj.owner) }
-      looks = viewer == :observer || obj.memory.fetch("may_look", []).map { engine.name(it) }.include?(viewer)
+      looks = viewer == :observer || ((index = engine.names.index(viewer)) && engine.may_look?(obj, index))
       looks ? object_view(engine, id).merge(hidden) : hidden
     end
 

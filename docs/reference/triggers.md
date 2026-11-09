@@ -288,7 +288,7 @@ Rules: CR 603.2, CR 601.2i, CR 113.6, CR 202.3e, CR 201.4, CR 607.2, CR 115.1, C
 
 ## counters_placed
 
-One or more counters (only `counter`, if given) are put on the subject, including the counters it enters the battlefield with. Triggers once per event, however many counters.
+One or more counters (only `counter`, if given) are put on the subject, including the counters it enters the battlefield with. Triggers once per event, however many counters. `nth` (needs `counter`): only when the Nth such counter is put on it (the event that takes it from fewer than N to N or more).
 
 Rules: CR 122.6, CR 603.2, CR 603.2c
 
@@ -297,6 +297,7 @@ Rules: CR 122.6, CR 603.2, CR 603.2c
 | `subject` | "self" (default) or {"each": filter, ...} |
 | `counter` | counter name |
 | `first_time_this_turn` | true: only the first time each turn such counters are put on that permanent (an earlier placement counts even if nothing could trigger then) |
+| `nth` | positive integer |
 
 ```json
 {

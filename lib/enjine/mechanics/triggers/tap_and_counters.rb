@@ -53,30 +53,39 @@ module Enjine
       end
 
       # "Whenever one or more [kind] counters are put on ~" (CR 122.6): counters put on a permanent, including
-      # the counters it enters with. Once per counter-placing event.
+      # the counters it enters with. Once per counter-placing event. `nth`: "when the fourth plan counter is put
+      # on this": only the event that takes the number of those counters from below N to N or more.
       class CountersPlaced < Trigger
         primitive :trigger, :counters_placed,
                   description: "One or more counters (only `counter`, if given) are put on the subject, including the " \
-                               "counters it enters the battlefield with. Triggers once per event, however many counters.",
+                               "counters it enters the battlefield with. Triggers once per event, however many counters. " \
+                               "`nth` (needs `counter`): only when the Nth such counter is put on it (the event that " \
+                               "takes it from fewer than N to N or more).",
                   rules: %w[122.6 603.2 603.2c],
                   params: { "subject" => "\"self\" (default) or {\"each\": filter, ...}", "counter" => "counter name",
                             "first_time_this_turn" => "true: only the first time each turn such counters are put on " \
                                                       "that permanent (an earlier placement counts even if nothing " \
-                                                      "could trigger then)" },
+                                                      "could trigger then)",
+                            "nth" => "positive integer" },
                   example: { "counters_placed" => { "counter" => "+1/+1" } }
 
-        def self.keys = %w[subject counter first_time_this_turn]
+        def self.keys = %w[subject counter first_time_this_turn nth]
         def watches?(event) = event.is_a?(Events::CountersChanged) || event.is_a?(Events::ZoneChanged)
 
         def setup(params, errors, path)
           @counter = params["counter"] && Counters.parse(params["counter"], errors, "#{path}.counter")
           @first_time = params["first_time_this_turn"]
           errors << "#{path}.first_time_this_turn: must be true or false" unless [nil, true, false].include?(@first_time)
+          @nth = params["nth"]
+          errors << "#{path}.nth: must be a positive integer" unless @nth.nil? || (@nth.is_a?(Integer) && @nth.positive?)
+          errors << "#{path}.nth: needs a counter" if @nth && @counter.nil?
         end
 
         def occurrences(engine, event, source)
-          id, amount = placed(engine, event)
-          return [] unless amount&.positive?
+          id, from, to = placed(engine, event)
+          amount = to.to_i - from.to_i
+          return [] unless amount.positive?
+          return [] if @nth && !(from < @nth && to >= @nth)
           return [] if @first_time && engine.counter_placements_this_turn(id, @counter) != 1
 
           obj = engine.object(id)
@@ -88,21 +97,23 @@ module Enjine
         def match?(engine, event, source) = !occurrences(engine, event, source).empty?
 
         def to_s
+          return "When #{@counter} counter number #{@nth} is put on #{@subject}" if @nth
+
           first = " for the first time each turn" if @first_time
           "Whenever one or more #{"#{@counter} " if @counter}counters are put on #{@subject}#{first}"
         end
 
         private
 
-        # [object id, how many matching counters were put on it] for this event, or nil.
+        # [object id, how many matching counters it had before, how many after] for this event, or nil.
         def placed(engine, event)
           if event.is_a?(Events::CountersChanged)
             return nil if @counter && event.counter != @counter
 
-            [event.object, event.to - event.from]
+            [event.object, event.from, event.to]
           elsif event.to == "battlefield" && (obj = engine.state.objects[event.new_id])
             counts = @counter ? [obj.counters.fetch(@counter, 0)] : obj.counters.values
-            [obj.id, counts.sum]
+            [obj.id, 0, counts.sum]
           end
         end
       end

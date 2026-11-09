@@ -6,10 +6,10 @@ module Enjine
   module Mechanics
     module Abilities
       # Hideaway N (CR 702.75a): "When this permanent enters, look at the top N cards of your library. Exile one
-      # of them face down and put the rest on the bottom of your library in a random order." Only its controller
-      # may look at the exiled card. It's linked to the permanent (CR 607.2a): another of its abilities names it
-      # with the selector "exiled_with", e.g. `cast_free` with `play: true` ("you may play the exiled card
-      # without paying its mana cost").
+      # of them face down and put the rest on the bottom of your library in a random order." The player who
+      # controls the permanent may look at the exiled card (`looker`). It's linked to the permanent (CR 607.2a):
+      # another of its abilities names it with the selector "exiled_with", e.g. `cast_free` with `play: true`
+      # ("you may play the exiled card without paying its mana cost").
       class Hideaway < NumberedTrigger
         primitive :ability, :hideaway,
                   description: "Hideaway `amount`: when this permanent enters, look at the top N cards of your library, " \
@@ -20,7 +20,8 @@ module Enjine
 
         def self.expansion(amount)
           { "when" => { "enters" => {} },
-            "effects" => [{ "dig" => { "amount" => amount, "put" => "exile", "face_down" => true, "link" => true } }] }
+            "effects" => [{ "dig" => { "amount" => amount, "put" => "exile", "face_down" => true, "link" => true,
+                                       "looker" => "source_controller" } }] }
         end
       end
     end

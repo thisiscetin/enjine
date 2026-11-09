@@ -39,12 +39,12 @@ module Enjine
       # Whether the referenced objects (e.g. the cards exiled with a source, CR 607.2a) have at least one
       # card type in common. No objects share nothing.
       class ShareCardType
-        def self.build(data, errors, path, targets_count)
+        def self.build(data, errors, path, **context)
           Mechanics.check_keys(data, %w[share_card_type], errors, path)
           raw = data["share_card_type"]
           list = raw.is_a?(Array) ? raw : [raw]
           new(list.each_with_index.map do |sel, i|
-            Selector.build(sel, errors, "#{path}.share_card_type#{"[#{i}]" if raw.is_a?(Array)}", targets_count: targets_count)
+            Selector.build(sel, errors, "#{path}.share_card_type#{"[#{i}]" if raw.is_a?(Array)}", **context)
           end)
         end
 
@@ -61,6 +61,28 @@ module Enjine
         end
 
         def to_s = "#{@selectors.join(" and ")} share a card type"
+      end
+
+      # {"attacking": selector}: "if it was attacking" (CR 506.4, 608.2h). A referenced permanent is attacking,
+      # or one that has left the battlefield during the resolving spell or ability was as it last existed.
+      class Attacking
+        def self.build(data, errors, path, **context)
+          Mechanics.check_keys(data, %w[attacking], errors, path)
+          new(Selector.build(data["attacking"], errors, "#{path}.attacking", **context))
+        end
+
+        def initialize(selector)
+          @selector = selector
+          freeze
+        end
+
+        def true?(engine, ctx)
+          @selector&.resolve(engine, ctx).to_a.any? do |ref|
+            engine.state.battlefield.include?(ref) ? engine.attackers.key?(ref) : engine.resolving_last_known(ref)&.[]("attacking") == true
+          end
+        end
+
+        def to_s = "#{@selector} was attacking"
       end
     end
   end

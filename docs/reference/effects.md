@@ -443,6 +443,26 @@ Rules: CR 608.2g, CR 118.9, CR 601.2a, CR 107.3b, CR 118.6a, CR 305.2a, CR 305.3
 }
 ```
 
+## change_target
+
+Change the target(s) of each spell or ability on the stack `of` refers to: each target becomes another legal target you choose for that spell; if one can't, none change.
+
+Rules: CR 115.7, CR 115.7a, CR 115.7e
+
+| Parameter | Description |
+| --- | --- |
+| `of` | selector (spells or abilities on the stack) |
+
+```json
+{
+  "change_target": {
+    "of": {
+      "target": 0
+    }
+  }
+}
+```
+
 ## choose_card_type
 
 The player (`to`, default you) chooses a card type; later effects of this spell or ability read it with "types": "chosen".
@@ -906,9 +926,9 @@ Rules: CR 701.8a
 
 ## dig
 
-Look at the top `amount` cards of your library (`reveal: "all"`: reveal them). Take `count` (default 1; "all": every matching card, no choice; "any": any number) cards matching `for` and put them into `put` (`tapped` onto the battlefield); `optional`: you may take fewer. `reveal: "chosen"` reveals the cards taken. The rest go to `rest`: "bottom_random" (default), "bottom_any" (in an order you choose) or "graveyard". `put: "exile"` takes `face_down: true` (only you may look at them) and `link: true` (exiled with the source, CR 607.2a: hideaway).
+Look at the top `amount` cards of your library (`reveal: "all"`: reveal them). Take `count` (default 1; "all": every matching card, no choice; "any": any number) cards matching `for` and put them into `put` (`tapped` onto the battlefield); `optional`: you may take fewer. `reveal: "chosen"` reveals the cards taken. The rest go to `rest`: "bottom_random" (default), "bottom_any" (in an order you choose) or "graveyard". `put: "exile"` takes `face_down: true` (only you may look at them) and `link: true` (exiled with the source, CR 607.2a); `looker: "source_controller"`: whoever controls the source may look at them instead of you (hideaway, CR 702.75a).
 
-Rules: CR 701.20a, CR 701.20e, CR 401.4, CR 400.7j, CR 406.3, CR 607.2a
+Rules: CR 701.20a, CR 701.20e, CR 401.4, CR 400.7j, CR 406.3, CR 607.2a, CR 702.75a
 
 | Parameter | Description |
 | --- | --- |
@@ -922,6 +942,7 @@ Rules: CR 701.20a, CR 701.20e, CR 401.4, CR 400.7j, CR 406.3, CR 607.2a
 | `rest` | bottom_random | bottom_any | graveyard |
 | `face_down` | boolean (put exile) |
 | `link` | boolean (put exile) |
+| `looker` | "source_controller" (face_down) |
 
 ```json
 {
@@ -1196,9 +1217,9 @@ Rules: CR 608.2n, CR 406.1
 
 ## exile_top
 
-Each referenced player (default: you) exiles the top `amount` cards of their library (face up). Later effects name them with {"result": n}; `link: true` exiles them with the source. `face_down: true` exiles them face down: only the `looker` players (default: you) may look at them.
+Each referenced player (default: you) exiles the top `amount` cards of their library (face up). Later effects name them with {"result": n}; `link: true` exiles them with the source. `face_down: true` exiles them face down: only the `looker` players (default: you) may look at them. `until` instead of `amount`: exile cards from the top one at a time until {"total_mana_value": N}: those cards have a total mana value of N or more, or {"card": card spec}: a matching card is exiled (or the library is empty).
 
-Rules: CR 406.1, CR 400.7j, CR 607.2a, CR 406.3, CR 406.3a
+Rules: CR 406.1, CR 400.7j, CR 607.2a, CR 406.3, CR 406.3a, CR 202.3, CR 608.2c
 
 | Parameter | Description |
 | --- | --- |
@@ -1207,6 +1228,7 @@ Rules: CR 406.1, CR 400.7j, CR 607.2a, CR 406.3, CR 406.3a
 | `link` | boolean |
 | `face_down` | boolean |
 | `looker` | selector of players who may look (default "you") |
+| `until` | {"total_mana_value": amount} | {"card": card spec} |
 
 ```json
 {
@@ -1876,6 +1898,44 @@ Rules: CR 120.6, CR 514.2
   "remove_damage": {
     "to": {
       "target": 0
+    }
+  }
+}
+```
+
+## repeat
+
+Run `effects`, then run them again for as long as `while` (a condition) holds after a pass ("if the exiled card is a land card, repeat this process"). {"result": n} in the list and in `while` names what effect n did during the current pass. At most 100 passes.
+
+Rules: CR 608.2c, CR 400.7j, CR 104.4b
+
+| Parameter | Description |
+| --- | --- |
+| `effects` | list of effects (one pass) |
+| `while` | condition, checked after each pass |
+
+```json
+{
+  "repeat": {
+    "effects": [
+      {
+        "mill": {
+          "amount": 1
+        }
+      }
+    ],
+    "while": {
+      "amount": {
+        "count": {
+          "result": 0,
+          "for": {
+            "types": [
+              "land"
+            ]
+          }
+        }
+      },
+      "at_least": 1
     }
   }
 }

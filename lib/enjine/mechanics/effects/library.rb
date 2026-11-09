@@ -68,22 +68,27 @@ module Enjine
                                "`optional`: you may take fewer. `reveal: \"chosen\"` reveals the cards taken. The rest go " \
                                "to `rest`: \"bottom_random\" (default), \"bottom_any\" (in an order you choose) or \"graveyard\". " \
                                "`put: \"exile\"` takes `face_down: true` (only you may look at them) and `link: true` " \
-                               "(exiled with the source, CR 607.2a: hideaway).",
-                  rules: %w[701.20a 701.20e 401.4 400.7j 406.3 607.2a],
+                               "(exiled with the source, CR 607.2a); `looker: \"source_controller\"`: whoever controls " \
+                               "the source may look at them instead of you (hideaway, CR 702.75a).",
+                  rules: %w[701.20a 701.20e 401.4 400.7j 406.3 607.2a 702.75a],
                   params: { "amount" => "amount (how many cards)", "for" => "card spec (default any card)",
                             "count" => "integer, \"all\" or \"any\"", "optional" => "boolean", "put" => PUT.join(" | "),
                             "tapped" => "boolean", "reveal" => REVEAL.join(" | "), "rest" => RestOfCards::REST.join(" | "),
-                            "face_down" => "boolean (put exile)", "link" => "boolean (put exile)" },
+                            "face_down" => "boolean (put exile)", "link" => "boolean (put exile)",
+                            "looker" => "\"source_controller\" (face_down)" },
                   example: { "dig" => { "amount" => 6, "for" => { "types" => ["artifact"] }, "optional" => true,
                                         "reveal" => "chosen", "put" => "hand" } }
 
         attr_reader :spec, :count, :put
 
-        def self.keys = %w[amount for count optional put tapped reveal rest face_down link if]
+        def self.keys = %w[amount for count optional put tapped reveal rest face_down link looker if]
         def self.default_to = "you"
 
         def setup(params, errors, path)
           @spec = CardSpec.build(Mechanics.fetch_param(params, :for), errors, "#{path}.for")
+          looker = Mechanics.fetch_param(params, :looker)
+          @source_looks = looker == "source_controller"
+          errors << "#{path}.looker: must be \"source_controller\"" unless looker.nil? || @source_looks
           @count = Mechanics.fetch_param(params, :count) || 1
           unless %w[all any].include?(@count) || (@count.is_a?(Integer) && @count.positive?)
             errors << "#{path}.count: must be a positive integer, \"all\" or \"any\""
@@ -97,6 +102,7 @@ module Enjine
           @rest = parse_rest(params, errors, path)
           @face_down, @link = %i[face_down link].map { Mechanics.flag_param(params, it, errors, path) }
           errors << "#{path}: face_down and link need put: \"exile\"" if (@face_down || @link) && @put != "exile"
+          errors << "#{path}.looker: needs face_down: true" if @source_looks && !@face_down
         end
 
         def to_s
@@ -148,11 +154,12 @@ module Enjine
           put_cards!(engine, locals, taken, ctx.controller, reason: "put", enters: @tapped ? { "tapped" => true } : nil)
         end
 
-        # CR 406.3, 607.2a: face down (only you may look), linked to the source.
+        # CR 406.3, 607.2a: face down (only you may look, or the source's controller: CR 702.75a), linked to the source.
         def exile!(engine, ctx, index, taken)
           taken.each do |id|
-            fresh = engine.move!(id, :exile, reason: "exile", face_down: @face_down ? [index] : nil)
-            engine.link_exiled!(ctx.source, fresh.id) if fresh && @link
+            fresh = engine.move!(id, :exile, reason: "exile", face_down: @face_down ? [index] : nil) or next
+            fresh.memory["looker_source"] = ctx.source if @source_looks
+            engine.link_exiled!(ctx.source, fresh.id) if @link
           end
         end
       end
@@ -227,22 +234,31 @@ module Enjine
 
       # Exile the top N cards of a library (CR 406.1). What was exiled is the effect's result ({"result": n}),
       # for later effects of the list (returning the permanent cards among them, permissions to play them);
-      # `link: true` exiles them with the source (CR 607.2a).
+      # `link: true` exiles them with the source (CR 607.2a). `until` exiles one card at a time instead, until
+      # the cards exiled this way have a total mana value of N or more, or until a card matching a spec is exiled.
       class ExileTop < Effect
+        UNTIL = %w[total_mana_value card].freeze
+
         primitive :effect, :exile_top,
                   description: "Each referenced player (default: you) exiles the top `amount` cards of their library " \
                                "(face up). Later effects name them with {\"result\": n}; `link: true` exiles them with " \
                                "the source. `face_down: true` exiles them face down: only the `looker` players " \
-                               "(default: you) may look at them.",
-                  rules: %w[406.1 400.7j 607.2a 406.3 406.3a],
+                               "(default: you) may look at them. `until` instead of `amount`: exile cards from the top " \
+                               "one at a time until {\"total_mana_value\": N}: those cards have a total mana value of N " \
+                               "or more, or {\"card\": card spec}: a matching card is exiled (or the library is empty).",
+                  rules: %w[406.1 400.7j 607.2a 406.3 406.3a 202.3 608.2c],
                   params: { "amount" => "amount", "to" => "selector of players", "link" => "boolean",
-                            "face_down" => "boolean", "looker" => "selector of players who may look (default \"you\")" },
+                            "face_down" => "boolean", "looker" => "selector of players who may look (default \"you\")",
+                            "until" => "{\"total_mana_value\": amount} | {\"card\": card spec}" },
                   example: { "exile_top" => { "amount" => 4 } }
 
-        def self.keys = %w[amount to link face_down looker if]
+        def self.keys = %w[amount to link face_down looker until if]
         def self.default_to = "you"
+        def self.amount_optional?(params) = !Mechanics.fetch_param(params, :until).nil?
 
         def setup(params, errors, path)
+          @until = build_until(Mechanics.fetch_param(params, :until), errors, "#{path}.until")
+          errors << "#{path}: amount or until, not both" if @until && Mechanics.fetch_param(params, :amount)
           @link = Mechanics.flag_param(params, "link", errors, path)
           @face_down = Mechanics.flag_param(params, :face_down, errors, path)
           raw = Mechanics.fetch_param(params, :looker)
@@ -251,17 +267,59 @@ module Enjine
                                                                            results_count: @results_count)
         end
 
-        def to_s = @face_down ? super.sub(" → ", " face down → ") : super
+        def to_s
+          text = @until ? "exile top cards until #{@until.keys.first.tr("_", " ")} #{@until.values.first} → #{to}" : super
+          @face_down ? text.sub(" → ", " face down → ") : text
+        end
 
         def apply(engine, ctx)
-          n = amount_for(engine, ctx)
           lookers = @face_down ? @looker.resolve(engine, ctx).filter_map { Filters.player_index(engine, it) } : nil
           players(engine, ctx).each do |index|
-            engine.player(index).library.first(n).each do |id|
-              fresh = engine.move!(id, :exile, reason: "exile", face_down: lookers)
-              engine.link_exiled!(ctx.source, fresh.id) if fresh && @link
-            end
+            library = engine.player(index).library
+            next library.first(amount_for(engine, ctx)).each { exile!(engine, ctx, it, lookers) } unless @until
+
+            exile_until!(engine, ctx, library, lookers)
           end
+        end
+
+        def exile_until!(engine, ctx, library, lookers)
+          exiled = []
+          while (id = library.first) && !enough?(engine, ctx, exiled)
+            fresh = exile!(engine, ctx, id, lookers)
+            break if fresh.nil? && library.first == id # a replacement left it where it was
+
+            exiled << fresh if fresh&.zone == :exile
+          end
+        end
+
+        private
+
+        def build_until(raw, errors, path)
+          return nil if raw.nil?
+          return (errors << "#{path}: must be one of {#{UNTIL.join("|")}: ...}") && nil unless raw.is_a?(Hash) && raw.size == 1 &&
+                                                                                               UNTIL.include?(raw.keys.first.to_s)
+
+          kind, value = raw.first
+          kind = kind.to_s
+          { kind => if kind == "card" then CardSpec.build(value, errors, "#{path}.card")
+                    else Amount.build(value, errors, "#{path}.#{kind}", targets_count: @targets_count, results_count: @results_count)
+                    end }
+        end
+
+        def exile!(engine, ctx, id, lookers)
+          fresh = engine.move!(id, :exile, reason: "exile", face_down: lookers)
+          engine.link_exiled!(ctx.source, fresh.id) if fresh && @link
+          fresh
+        end
+
+        # CR 202.3: the cards exiled so far have a total mana value of N or more; or the last one matches the spec.
+        def enough?(engine, ctx, exiled)
+          return false if exiled.empty?
+
+          spec = @until["card"]
+          return spec.match?(engine, exiled.last, ctx) if spec
+
+          exiled.sum { Amount.mana_value(engine, it) } >= @until["total_mana_value"].value(engine, ctx)
         end
       end
 

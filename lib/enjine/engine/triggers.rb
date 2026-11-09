@@ -18,7 +18,8 @@ module Enjine
         { "controller" => obj.controller, "card" => obj.card, "types" => current.types, "subtypes" => current.subtypes,
           "power" => current.power, "toughness" => current.toughness, "counters" => obj.counters.dup,
           "keywords" => current.keywords.map(&:to_s), # deathtouch, lifelink, wither (CR 702.2e, 702.15c, 702.80b)
-          "token" => token?(obj), "except" => copy_exceptions(obj), "abilities" => current.abilities }
+          "token" => token?(obj), "except" => copy_exceptions(obj), "abilities" => current.abilities,
+          "attacking" => attackers.key?(obj.id) } # "if it was attacking" (CR 506.4, 608.2h)
           .merge(obj.memory.slice(Mechanics::Linked::EXILED)) # the cards exiled with it (CR 607.2a)
       end
 
@@ -83,13 +84,15 @@ module Enjine
 
       # CR 603.7: creates a delayed triggered ability. `entry` names the card and the ability ref
       # (see Effects::DelayedTrigger) plus what it remembers ("results", "watched" objects) and, for
-      # one with a duration ("this turn"), the turn it lasts for ("turn").
+      # one with a duration ("this turn"), the turn it lasts for ("turn"). "while_watched": it can only ever
+      # trigger on its watched permanent, so it ends once that permanent has left the battlefield (earthbend).
       def create_delayed_trigger!(entry)
         state.delayed_triggers << entry.merge("id" => "d#{next_timestamp!}")
       end
 
       # CR 603.7b: a delayed triggered ability triggers only once, the next time its event occurs, unless
       # it has a stated duration ("whenever ... this turn"): then it triggers each time until the turn ends.
+      # CR 400.7, 603.7c: one "while_watched" ends when the permanent it watches leaves to any zone.
       def watch_delayed!(event)
         state.delayed_triggers.reject! { it["turn"] && it["turn"] != state.turn } # "this turn" has ended
         fired = []
@@ -105,6 +108,8 @@ module Enjine
           end
         end
         state.delayed_triggers -= fired.reject { repeats?(it) }
+        gone = event.old_id if event.is_a?(Events::ZoneChanged) && event.from == "battlefield"
+        state.delayed_triggers.reject! { it["while_watched"] && Array(it["watched"]).include?(gone) } if gone
       end
 
       # "Whenever ... this turn" triggers each time; "the next ... this turn" ("once") only the first time; one

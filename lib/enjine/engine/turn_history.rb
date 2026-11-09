@@ -109,7 +109,8 @@ module Enjine
       # The part of last known information an ability keeps in its memory ("source_lki"): plain data.
       def last_known_memory(lki)
         info = { "controller" => lki["controller"], "power" => lki["power"], "toughness" => lki["toughness"],
-                 "counters" => lki["counters"].dup, "card" => lki["card"], "keywords" => lki["keywords"].dup }
+                 "counters" => lki["counters"].dup, "card" => lki["card"], "keywords" => lki["keywords"].dup,
+                 "attacking" => lki["attacking"] }
         info["except"] = lki["except"] if lki["except"] # what a copy of it copies (CR 707.2, Engine::Copies)
         info.merge(lki.slice(Mechanics::Linked::EXILED).transform_values(&:dup)) # CR 607.2a (Linked.exiled_with)
       end

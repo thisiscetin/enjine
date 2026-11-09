@@ -20,9 +20,10 @@ module Enjine
         primitive :filter, :stack_ability,
                   description: "An activated or triggered ability on the stack. `kind`: \"activated\" or \"triggered\" " \
                                "for only one of them; `controller`: you | opponent; `source`: a filter its source " \
-                               "matches (e.g. \"creature\", \"artifact\").",
-                  rules: %w[113.1b 115.1 605.3b 113.7],
-                  params: { "kind" => KINDS.join(" | "), "controller" => CONTROLLERS.join(" | "), "source" => "filter" },
+                               "matches (e.g. \"creature\", \"artifact\"); `single_target: true`: one with a single target.",
+                  rules: %w[113.1b 115.1 605.3b 113.7 115.7],
+                  params: { "kind" => KINDS.join(" | "), "controller" => CONTROLLERS.join(" | "), "source" => "filter",
+                            "single_target" => "boolean" },
                   example: { "stack_ability" => { "controller" => "you", "source" => "creature" } }
 
         def self.zone = :stack
@@ -31,22 +32,25 @@ module Enjine
         def self.build(params, errors, path, **)
           return self if params.empty?
 
-          Mechanics.check_keys(params, %w[kind controller source], errors, path)
+          Mechanics.check_keys(params, %w[kind controller source single_target], errors, path)
           kind, controller, source = params.values_at("kind", "controller", "source")
+          single = Mechanics.flag_param(params, "single_target", errors, path)
           errors << "#{path}.kind: must be one of #{KINDS.join(", ")}" unless kind.nil? || KINDS.include?(kind)
           unless controller.nil? || CONTROLLERS.include?(controller)
             errors << "#{path}.controller: must be one of #{CONTROLLERS.join(", ")}"
           end
           source &&= Mechanics.build_entry(:filter, source, errors, "#{path}.source")
-          Narrowed.new(kind, controller, source)
+          Narrowed.new(kind, controller, source, single: single)
         end
 
-        # Only activated (loyalty included) or only triggered abilities, of a controller, from a kind of source.
+        # Only activated (loyalty included) or only triggered abilities, of a controller, from a kind of source,
+        # with a single target (CR 115.7).
         class Narrowed
-          def initialize(kind, controller, source)
+          def initialize(kind, controller, source, single: false)
             @kind = kind
             @controller = controller
             @source = source
+            @single = single
             freeze
           end
 
@@ -54,7 +58,8 @@ module Enjine
 
           def to_s
             whose = { "you" => " you control", "opponent" => " an opponent controls" }[@controller]
-            "#{@kind || "activated or triggered"} ability#{whose}#{" from a source: #{Triggers.filter_words(@source)}" if @source}"
+            "#{@kind || "activated or triggered"} ability#{whose}#{" from a source: #{Triggers.filter_words(@source)}" if @source}" \
+              "#{" with a single target" if @single}"
           end
 
           def candidates(engine, controller) = StackAbility.candidates(engine, controller).select { narrow?(engine, it, controller) }
@@ -76,6 +81,7 @@ module Enjine
             obj = engine.object(ref)
             return false if @kind && (engine.stack_ability(obj).kind == :triggered) != (@kind == "triggered")
             return false if @controller && (@controller == "you") != (obj.controller == controller)
+            return false if @single && !Filters.single_target?(obj)
 
             @source.nil? || source_ok?(engine, obj)
           end
