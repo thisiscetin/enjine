@@ -163,7 +163,7 @@ module Enjine
       end
 
       def each(engine, ctx)
-        value.candidates_for(engine, ctx.controller, ctx.source).select do |ref|
+        value.candidates_for(engine, ctx.controller, ctx.source, ctx: ctx).select do |ref|
           index = Filters.player_index(engine, ref)
           owner = index || engine.object(ref).controller
           controller == "any" || (controller == "you") == (owner == ctx.controller)

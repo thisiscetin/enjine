@@ -330,6 +330,7 @@ module Enjine
         fresh.tapped = data["enters"]["tapped"]
         fresh.counters.merge!(data["enters"]["counters"])
         fresh.x = old.x if old.zone == :stack # CR 107.3m: its ETB abilities use the spell's X
+        fresh.memory["kicked"] = true if old.zone == :stack && old.memory["kicked"] # CR 702.33d, 400.7d
         fresh.attached_to = data["enters"]["attached_to"] # CR 608.3c: an Aura enters attached
         enter_attacking!(fresh) if data["enters"]["attacking"] # CR 508.4
       when :stack

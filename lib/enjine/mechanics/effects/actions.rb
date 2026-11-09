@@ -34,7 +34,7 @@ module Enjine
       # (CR 607.2a). `until_source_leaves`: it returns once the source leaves the battlefield (CR 610.3).
       class Exile < ZoneEffect
         primitive :effect, :exile,
-                  description: "Exile each referenced permanent, or card in a graveyard or hand. `link: true`: the cards " \
+                  description: "Exile each referenced permanent, spell, or card in a graveyard or hand. `link: true`: the cards " \
                                "are exiled with the source, for its \"exiled with\" abilities (the `exiled_with` selector). " \
                                "`until_source_leaves: true`: they return to the battlefield under their owners' control " \
                                "when the source leaves the battlefield; if it already has, nothing is exiled.",
@@ -46,7 +46,7 @@ module Enjine
 
         def self.keys = %w[to link until_source_leaves if]
         def self.zone = :exile
-        def self.from_zones = %i[battlefield graveyard hand]
+        def self.from_zones = %i[battlefield graveyard hand stack] # a spell too ("exile target spell", CR 701.13a)
 
         def setup(params, errors, path)
           @link = Linked.flag(params, "link", errors, path)
