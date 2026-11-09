@@ -238,8 +238,10 @@ module Enjine
                             "during" => "your_turn", "waterbend" => "mana_value" },
                   example: { "play_permission" => { "to" => { "result" => 0 }, "duration" => "end_of_your_next_turn" } }
 
-        def self.keys = %w[to duration play for not_types choose to_player cost_increase any_mana_type exile_instead during
-                           waterbend if]
+        def self.keys
+          %w[to duration play for not_types choose to_player cost_increase any_mana_type exile_instead during
+             waterbend if]
+        end
 
         def setup(params, errors, path)
           @duration = Mechanics.fetch_param(params, :duration) || "end_of_turn"

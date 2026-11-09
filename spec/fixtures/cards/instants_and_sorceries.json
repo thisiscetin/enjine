@@ -5069,5 +5069,135 @@
         }
       }
     ]
+  },
+  {
+    "name": "Goblin Ambush Fire",
+    "mana_cost": "{1}{R}",
+    "types": [
+      "sorcery"
+    ],
+    "abilities": [
+      {
+        "additional_cost": {
+          "cost": [
+            {
+              "behold": {
+                "card": {
+                  "subtypes": [
+                    "goblin"
+                  ]
+                }
+              }
+            }
+          ],
+          "optional": true,
+          "flash": true
+        }
+      },
+      {
+        "spell": {
+          "targets": [
+            "creature_or_planeswalker"
+          ],
+          "effects": [
+            {
+              "deal_damage": {
+                "amount": 3,
+                "to": {
+                  "target": 0
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Kinship Summons",
+    "mana_cost": "{X}{G}",
+    "types": [
+      "sorcery"
+    ],
+    "abilities": [
+      {
+        "additional_cost": {
+          "cost": [
+            {
+              "choose_creature_type": {}
+            },
+            {
+              "behold": {
+                "card": {
+                  "types": [
+                    "creature"
+                  ],
+                  "subtypes": "chosen"
+                },
+                "count": 2
+              }
+            }
+          ],
+          "optional": true
+        }
+      },
+      {
+        "spell": {
+          "effects": [
+            {
+              "search_library": {
+                "for": {
+                  "types": [
+                    "creature"
+                  ],
+                  "mana_value": {
+                    "at_most": "x"
+                  }
+                },
+                "reveal": true,
+                "battlefield_instead": {
+                  "if": {
+                    "cast_with": "additional_cost"
+                  },
+                  "for": {
+                    "subtypes": "chosen"
+                  }
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Ribbon of Plenty",
+    "mana_cost": "{1}{G}",
+    "types": [
+      "sorcery"
+    ],
+    "abilities": [
+      "gift",
+      {
+        "spell": {
+          "effects": [
+            {
+              "draw": {
+                "amount": 1,
+                "to": "gift_recipient",
+                "if": {
+                  "cast_with": "gift"
+                }
+              }
+            },
+            {
+              "draw": {
+                "amount": 1
+              }
+            }
+          ]
+        }
+      }
+    ]
   }
 ]

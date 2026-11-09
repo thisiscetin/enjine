@@ -47,14 +47,15 @@ Rules: CR 602.1, CR 602.2, CR 602.5b, CR 602.5d, CR 702.177a, CR 702.193a, CR 70
 
 ## additional_cost
 
-As an additional cost to cast this spell, pay `cost` too (mana and/or chosen costs such as `sacrifice_permanent`). The spell can't be cast without it. `optional: true`: you may pay it (announced with the `choose_kicker` decision); the condition `{"cast_with": "additional_cost"}` then holds (the spell isn't kicked).
+As an additional cost to cast this spell, pay `cost` too (mana and/or chosen costs such as `sacrifice_permanent`). The spell can't be cast without it. `optional: true`: you may pay it (announced with the `choose_kicker` decision); the condition `{"cast_with": "additional_cost"}` then holds (the spell isn't kicked). With `flash: true` (optional only) you may cast it from your hand as though it had flash if you pay it: cast that way, only paying it is offered.
 
-Rules: CR 601.2b, CR 601.2f, CR 601.2h, CR 118.8, CR 118.8b
+Rules: CR 601.2b, CR 601.2f, CR 601.2h, CR 118.8, CR 118.8b, CR 601.3c
 
 | Parameter | Description |
 | --- | --- |
 | `cost` | list of costs |
 | `optional` | true: you may pay it |
+| `flash` | true: as though it had flash if you pay it |
 
 ```json
 {
@@ -194,6 +195,35 @@ Rules: CR 702.26a, CR 502.1, CR 604.1
 
 ```json
 "cant_phase_in"
+```
+
+## cards_have
+
+While this permanent is on the battlefield, cards you own in `zone` (graveyard (default), hand or exile) matching `cards` have the keyword alternative cost `ability` (flashback, harmonize, mayhem, web_slinging or sneak) and may be cast with it from that zone. Cast option `via: "alt:cards_have:<permanent>:<ref>"`.
+
+Rules: CR 611.3a, CR 604.1, CR 118.9, CR 601.2b, CR 702.190a
+
+| Parameter | Description |
+| --- | --- |
+| `zone` | graveyard | hand | exile |
+| `cards` | card spec |
+| `ability` | a keyword alternative cost, e.g. {"sneak": {"cost": "{3}{B}"}} |
+
+```json
+{
+  "cards_have": {
+    "cards": {
+      "types": [
+        "creature"
+      ]
+    },
+    "ability": {
+      "sneak": {
+        "cost": "{3}{B}"
+      }
+    }
+  }
+}
 ```
 
 ## cast_restriction

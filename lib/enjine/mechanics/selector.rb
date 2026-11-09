@@ -145,9 +145,7 @@ module Enjine
           engine.state.players.each_index.reject { it == ctx.controller }.map { Filters.player_ref(engine, it) }
         when :each then each(engine, ctx)
         when :controller_of then controllers(engine, ctx)
-        when :exiled_with then Linked.exiled_with(engine, ctx.source, ctx)
-        when :exiled_for_cost
-          Array(engine.state.objects[ctx.object]&.memory&.[](Costs::CardsCost::EXILED)).select { engine.state.exile.include?(it) }
+        when :exiled_with, :exiled_for_cost then Linked.exiled(engine, kind, ctx)
         when :granter then granter(engine, ctx)
         end
       end

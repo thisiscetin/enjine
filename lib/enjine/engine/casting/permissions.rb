@@ -30,11 +30,8 @@ module Enjine
       BEAM_COST_TEXT = "Return a creature you control to its owner's hand"
       OUTSIDE = "outside:"
       # Permission effect fields copied into the play method (see Effects::PlayPermission); "alt" is an
-      # alternative cost, {"cost" => "{2}"} (airbend, CR 701.65a, 118.9).
-      RIDERS = %w[cost_increase any_mana_type alt exile_instead].freeze
-      # Permission effect fields read as methods are offered: "during" ("your_turn") and "waterbend" ("mana_value":
-      # the alternative cost waterbend {X}, X the card's mana value, CR 701.67a).
-      CONDITIONS = %w[during waterbend].freeze
+      # alternative cost, {"cost" => "{2}"} (airbend, CR 701.65a, 118.9); "during" and "waterbend": Engine::Waterbending.
+      RIDERS = %w[cost_increase any_mana_type alt exile_instead during waterbend].freeze
 
       # ---- legal actions --------------------------------------------------------------------
 
@@ -170,9 +167,7 @@ module Enjine
         return false if returns_creature?(method["alt"]) && return_candidates(index, method["alt"]).empty?
         return false unless additional_costs_payable?(obj) && alt_parts_payable?(obj, method) # CR 601.2f
 
-        # CR 609.4b; a stand-in for a card outside the game is passed itself (it isn't in state.objects).
-        purpose = { "spell" => state.objects.key?(obj.id) ? obj.id : obj, "any_type" => method["any_mana_type"],
-                    "waterbend" => alt_waterbend(method) }.compact
+        purpose = cast_purpose(obj, method) # Engine::Waterbending
         ability_targetable?(spell_ability_of(obj), index, obj.id) &&
           cost_variant_affordable?(index, spell_cost_list(obj, false), obj, method_cost(obj, method), nil, purpose) do
             harmonize_reduced(total_cost(index, it, spell: obj), best_harmonize_power(index, method)) # CR 601.2b
@@ -220,11 +215,9 @@ module Enjine
       def granted_methods(index, obj)
         state.effects.filter_map do |e|
           next unless e["kind"] == "permission" && e["controller"] == index && e["affected"].include?(obj.id)
-          next unless obj.zone == :exile && may_look?(obj, index)
-          next if e["during"] == "your_turn" && state.active != index
+          next unless obj.zone == :exile && may_look?(obj, index) && (e["during"] != "your_turn" || state.active == index)
 
-          method = { "via" => "effect:#{e["timestamp"]}", "play" => e["play"], **e.slice(*RIDERS) }
-          e["waterbend"] ? method.merge("alt" => { "cost" => "{#{chars(obj).mana_cost&.mana_value.to_i}}", "waterbend" => true }) : method
+          with_waterbend_alt(obj, { "via" => "effect:#{e["timestamp"]}", "play" => e["play"], **e.slice(*RIDERS) })
         end
       end
 
@@ -292,14 +285,13 @@ module Enjine
 
       # Permission to play exiled cards for a duration (CR 611.2): a continuous effect for the exiled
       # objects (a card that leaves exile is a new object, CR 400.7, so the permission ends with it).
-      # `riders` (RIDERS) change how a card is played with this permission, and only then.
-      # `source`: the permanent a "for as long as you control" permission depends on (CR 611.2b, Engine::Rules).
+      # `riders` (RIDERS) change how a card is played with this permission, and only then (`source`: CR 611.2b).
       def grant_play_permission!(index, ids, duration:, play:, source: nil, **riders)
         return if ids.empty?
 
         state.effects << { "kind" => "permission", "timestamp" => next_timestamp!, "controller" => index,
                            "affected" => ids, "duration" => duration, "turn" => state.turn, "play" => play,
-                           "source" => source, **riders.transform_keys(&:to_s).slice(*RIDERS, *CONDITIONS) }.compact
+                           "source" => source, **riders.transform_keys(&:to_s).slice(*RIDERS) }.compact
         emit Events::EffectStarted.new(kind: "permission", affected: ids, details: { "duration" => duration, "play" => play })
       end
 

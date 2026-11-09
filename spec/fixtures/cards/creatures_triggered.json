@@ -5205,5 +5205,230 @@
         }
       }
     ]
+  },
+  {
+    "name": "Ribbon Courier",
+    "mana_cost": "{1}{W}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "rabbit",
+      "citizen"
+    ],
+    "power": 2,
+    "toughness": 2,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "gives_gift": {}
+          },
+          "effects": [
+            {
+              "add_counters": {
+                "counter": "+1/+1",
+                "amount": 1,
+                "to": "self"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Borrowed Muse",
+    "mana_cost": "{1}{U}{B}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "faerie",
+      "rogue"
+    ],
+    "power": 2,
+    "toughness": 2,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "cast": {
+              "owner": "not_you"
+            }
+          },
+          "effects": [
+            {
+              "draw": {
+                "amount": 1
+              }
+            }
+          ]
+        }
+      },
+      {
+        "activated": {
+          "cost": [
+            {
+              "mana": "{1}"
+            },
+            "tap"
+          ],
+          "timing": "sorcery",
+          "targets": [
+            {
+              "graveyard_card": {
+                "any_of": [
+                  "instant",
+                  "sorcery"
+                ],
+                "controller": "opponent"
+              }
+            }
+          ],
+          "effects": [
+            {
+              "exile": {
+                "to": {
+                  "target": 0
+                }
+              }
+            },
+            {
+              "play_permission": {
+                "to": {
+                  "result": 0
+                },
+                "play": "cast",
+                "duration": "end_of_turn",
+                "any_mana_type": true,
+                "exile_instead": true
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Bloodwater Adept",
+    "mana_cost": "{2}{U}{B}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "human",
+      "warlock"
+    ],
+    "power": 3,
+    "toughness": 3,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "enters": {}
+          },
+          "effects": [
+            {
+              "exile_top": {
+                "amount": 1
+              }
+            },
+            {
+              "play_permission": {
+                "to": {
+                  "result": 0
+                },
+                "play": "cast",
+                "duration": "while_you_control_source",
+                "during": "your_turn",
+                "waterbend": "mana_value"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Attic Burglar",
+    "mana_cost": "{1}{U}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "halfling",
+      "rogue"
+    ],
+    "power": 2,
+    "toughness": 1,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "attacks": {}
+          },
+          "effects": [
+            {
+              "cast": {
+                "from": "graveyard",
+                "for": {
+                  "any_of": [
+                    {
+                      "types": [
+                        "instant"
+                      ]
+                    },
+                    {
+                      "types": [
+                        "sorcery"
+                      ]
+                    }
+                  ]
+                },
+                "exile_instead": true
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Curious Busker",
+    "mana_cost": "{1}{R}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "human",
+      "performer"
+    ],
+    "power": 2,
+    "toughness": 1,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "enters": {}
+          },
+          "effects": [
+            {
+              "exile_top": {
+                "amount": 1
+              }
+            },
+            {
+              "play_permission": {
+                "to": {
+                  "result": 0
+                },
+                "duration": "while_you_control_source"
+              }
+            }
+          ]
+        }
+      }
+    ]
   }
 ]

@@ -99,6 +99,7 @@ module Enjine
         def flash? = @flash
 
         def kind = @optional ? :kicker : :additional_cost
+
         def to_s
           text = "As an additional cost to cast this spell#{", you may" if @optional}: #{costs.join(", ")}"
           @flash ? "#{text} (as though it had flash if you do)" : text

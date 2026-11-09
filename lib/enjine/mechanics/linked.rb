@@ -19,6 +19,14 @@ module Enjine
         Array(ids).select { engine.state.exile.include?(it) }
       end
 
+      # Selector "exiled_with" (the source's linked cards) or "exiled_for_cost" (cards the resolving spell or
+      # ability exiled to pay its cost, Costs::CardsCost), still in exile.
+      def self.exiled(engine, kind, ctx)
+        return exiled_with(engine, ctx.source, ctx) if kind == :exiled_with
+
+        Array(engine.state.objects[ctx.object]&.memory&.[](Costs::CardsCost::EXILED)).select { engine.state.exile.include?(it) }
+      end
+
       # Called by a resolving effect before it moves an object: who controlled it (CR 608.2h), kept on the
       # resolving spell or ability. Only a permanent has a controller other than its owner.
       def self.remember!(engine, ctx, id)

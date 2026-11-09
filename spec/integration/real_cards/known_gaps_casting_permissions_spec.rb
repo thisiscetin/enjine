@@ -31,7 +31,7 @@ RSpec.describe "Real cards: casting and permissions (known gaps)" do
   def alice(game) = game.state.players[0]
   def bob(game) = game.state.players[1]
   def cards(game, ids) = ids.map { game.state.object(it).card }
-  def cast(game, name, **opts) = game.submit(type: "cast", object: id(game, name, zone: :hand), **opts)
+  def cast(game, name, **) = game.submit(type: "cast", object: id(game, name, zone: :hand), **)
 
   def pay_all(game)
     game.submit(game.legal_options.find { %w[pay_mana activate_mana].include?(it[:type]) }) while game.pending_decision.kind == "pay_cost"
@@ -77,7 +77,7 @@ RSpec.describe "Real cards: casting and permissions (known gaps)" do
   end
 
   it "Hama: cast the exiled card during your turn by waterbending {X}, X its mana value (CR 701.67a, 118.9)" do
-    game = board(hand: ["Hama, the Bloodbender"], battlefield: %w[Island Island Swamp Swamp Swamp Raubahn,\ Bull\ of\ Ala\ Mhigo],
+    game = board(hand: ["Hama, the Bloodbender"], battlefield: %w[Island Island Swamp Swamp Swamp] + ["Raubahn, Bull of Ala Mhigo"],
                  their_graveyard: ["Lightning Strike"])
     cast(game, "Hama, the Bloodbender")
     pay_all(game)
@@ -100,7 +100,8 @@ RSpec.describe "Real cards: casting and permissions (known gaps)" do
   end
 
   it "Hama: the permission works only during your turn" do
-    game = board(hand: ["Hama, the Bloodbender"], battlefield: %w[Island Island Island Island Swamp Swamp Swamp], their_graveyard: ["Lightning Strike"])
+    game = board(hand: ["Hama, the Bloodbender"], battlefield: %w[Island Island Island Island Swamp Swamp Swamp],
+                 their_graveyard: ["Lightning Strike"])
     cast(game, "Hama, the Bloodbender")
     pay_all(game)
     pass_both(game)
@@ -140,7 +141,7 @@ RSpec.describe "Real cards: casting and permissions (known gaps)" do
     game = board(hand: ["Celestial Reunion", "Mudbutton Cursetosser"], battlefield: ["Forest", "Forest", "Stony-Voiced Goblins"],
                  library: "Fanatical Firebrand")
     cast(game, "Celestial Reunion")
-    expect(game.legal_options).to include(type: "kick", type: "no_kick")
+    expect(game.legal_options).to include({ type: "kick" }, { type: "no_kick" })
     game.submit(type: "kick")
     game.submit(type: "x", value: 1)
     expect(game.legal_options).to include(type: "cost", creature_type: "goblin")
@@ -211,7 +212,7 @@ RSpec.describe "Real cards: casting and permissions (known gaps)" do
   end
 
   it "Baron Helmut Zemo: exile cards with 15+ black symbols, copy them, cast up to three copies (CR 107.4e, 707.12)" do
-    game = board(battlefield: ["Baron Helmut Zemo"], graveyard: ["Hama, the Bloodbender"] * 6 + ["Lightning Strike"],
+    game = board(battlefield: ["Baron Helmut Zemo"], graveyard: (["Hama, the Bloodbender"] * 6) + ["Lightning Strike"],
                  step: :beginning_of_combat)
     zemo = id(game, "Baron Helmut Zemo")
     expect(game.legal_options.none? { it[:type] == "activate" }).to be(true) # boast: only after it attacked

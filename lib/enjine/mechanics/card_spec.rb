@@ -169,9 +169,9 @@ module Enjine
         return "#{any_of.map { it.to_s.delete_suffix(" card") }.join(" or ")} card" unless any_of.empty?
         return "card named #{name}" if name
 
-        words = not_types.map { "non#{it}" } + colors + supertypes + subtypes.map { it.to_s.capitalize } + types
+        chosen = relations["chosen_subtype"] ? ["chosen-type"] : []
+        words = not_types.map { "non#{it}" } + colors + supertypes + subtypes.map { it.to_s.capitalize } + chosen + types
         words << "permanent" if permanent
-        words << "chosen-type" if relations["chosen_subtype"]
         text = (words.map { it.to_s.tr("_", " ") } + ["card"]).join(" ")
         text += " with the same name as a #{relations["same_name_as"]}" if relations["same_name_as"]
         bounds = { "mana value" => mana_value, "number of colors" => color_count }.reject { |_, b| b.empty? }
