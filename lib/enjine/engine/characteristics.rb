@@ -141,6 +141,7 @@ module Enjine
         end
         return base if keywords == base.keywords && abilities.equal?(base.abilities)
 
+        abilities += (keywords - base.keywords).flat_map { CardDefinition.keyword_instances(it) } # e.g. gains prowess
         base.with(keywords: keywords.freeze, abilities: abilities.freeze)
       end
 

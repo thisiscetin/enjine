@@ -84,7 +84,16 @@ module Enjine
     # ("delayed:<path>", see Effects::DelayedTrigger).
     def ability(ref)
       (@ability_instances.find { it.ref == ref } || @nested_instances.find { it.ref == ref })&.ability ||
-        @delayed_abilities[ref] || @effect_granted.values.flatten.find { it.ref == ref }&.ability
+        @delayed_abilities[ref] || @effect_granted.values.flatten.find { it.ref == ref }&.ability ||
+        (ref.start_with?("keyword:") && CardDefinition.keyword_instances(ref.delete_prefix("keyword:")).first&.ability) || nil
+    end
+
+    # The abilities a keyword stands for ("Prowess" is a triggered ability, CR 702.108a), as instances
+    # referenced "keyword:<name>"; the same for a printed keyword and one an effect grants (CR 613.1f).
+    def self.keyword_instances(keyword)
+      rule = Enjine.registry.fetch(:keyword, keyword.to_s)
+      abilities = rule.respond_to?(:intrinsic_abilities) ? rule.intrinsic_abilities : []
+      abilities.map { AbilityInstance.new(ref: "keyword:#{keyword}", ability: it) }
     end
 
     # Abilities an effect of this card grants for a while ("<effect ref>:<j>", see Effects::Become).
@@ -103,6 +112,7 @@ module Enjine
     # Token definitions this card's effects can create; catalogs register them with the card.
     def token_definitions
       (@all_effects.filter_map { it.definition if it.is_a?(Mechanics::Effects::CreateToken) } +
+        @all_effects.flat_map { it.respond_to?(:created_tokens) ? it.created_tokens : [] } + # recruit, amass, ...
         @abilities.filter_map { it.token_definition if it.respond_to?(:token_definition) }).compact.uniq(&:id)
     end
 
@@ -301,13 +311,7 @@ module Enjine
     end
 
     # Keyword abilities that stand for an ability ("Station" is an activated ability, CR 702.184a).
-    def keyword_abilities
-      @keywords.flat_map do |kw|
-        rule = Enjine.registry.fetch(:keyword, kw)
-        abilities = rule.respond_to?(:intrinsic_abilities) ? rule.intrinsic_abilities : []
-        abilities.map { AbilityInstance.new(ref: "keyword:#{kw}", ability: it) }
-      end
-    end
+    def keyword_abilities = @keywords.flat_map { CardDefinition.keyword_instances(it) }
 
     # Abilities nested in another ability (a station symbol's, CR 722.2), referenced as
     # "<parent ref>:<j>". They're part of the object's characteristics only while the parent applies.

@@ -36,15 +36,17 @@ module Enjine
       end
     end
 
-    # Restricted pool mana (CR 106.6): [{"mana" => "C", "spend_only" => {...}}]; absent in older snapshots.
+    # Pool mana kept apart: restricted (CR 106.6) and/or kept until end of combat (CR 702.189a):
+    # [{"mana" => "C", "spend_only" => {...}, "until" => "end_of_combat"}]; absent in older snapshots.
     def validate_restricted_mana(list, errors, path)
       return errors << "#{path}: must be a list" unless list.is_a?(Array)
 
       list.each_with_index do |entry, i|
-        ok = entry.is_a?(Hash) && entry.keys.sort == %w[mana spend_only] && Mana::TYPES.include?(entry["mana"].to_s.to_sym)
+        ok = entry.is_a?(Hash) && (entry.keys - %w[mana spend_only until]).empty? && Mana::TYPES.include?(entry["mana"].to_s.to_sym) &&
+             [nil, "end_of_combat"].include?(entry["until"]) && (entry.key?("spend_only") || entry.key?("until"))
         problems = []
-        Mechanics::SpendOnly.build(entry["spend_only"], problems, "#{path}[#{i}].spend_only") if ok
-        errors << "#{path}[#{i}]: must be {\"mana\": W/U/B/R/G/C, \"spend_only\": restriction}" unless ok
+        Mechanics::SpendOnly.build(entry["spend_only"], problems, "#{path}[#{i}].spend_only") if ok && entry.key?("spend_only")
+        errors << "#{path}[#{i}]: must be {\"mana\": W/U/B/R/G/C, \"spend_only\": restriction, \"until\": \"end_of_combat\"}" unless ok
         errors.concat(problems)
       end
     end

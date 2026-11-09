@@ -118,7 +118,7 @@ module Enjine
         copy.targets = targets
         copy.modes = spell.modes&.dup
         copy.x = spell.x
-        copy.mana_spent = spell.mana_spent&.dup
+        copy.mana_spent = nil # CR 707.10: mana isn't copied; no mana was spent to cast a copy
         copy.paid = spell.paid&.map(&:dup)
         state.stack.unshift(copy.id)
         record_result!(copy.id)

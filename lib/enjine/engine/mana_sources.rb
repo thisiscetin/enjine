@@ -35,7 +35,9 @@ module Enjine
       def as_any_type(units, purpose) = purpose&.[]("any_type") ? units.map { Mana::TYPES } : units
 
       # Whether a restricted pool entry may be spent on `purpose` (CR 106.6).
-      def spendable?(entry, purpose) = Mechanics::SpendOnly.from_data(entry["spend_only"]).allows?(self, purpose)
+      def spendable?(entry, purpose)
+        entry["spend_only"].nil? || Mechanics::SpendOnly.from_data(entry["spend_only"]).allows?(self, purpose)
+      end
 
       # One unit per untapped source not in `excluded`; a source that makes several mana ({C}{C})
       # gives that many units. A source of restricted mana counts only where that mana may be spent; one

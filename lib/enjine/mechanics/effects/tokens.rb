@@ -10,16 +10,18 @@ module Enjine
         primitive :effect, :create_token,
                   description: "Create `amount` tokens under the referenced player's control (default: you). `token` is " \
                                "a predefined token name (Treasure, Clue, Food) or an inline card definition. " \
-                               "`tapped: true` creates them tapped.",
-                  rules: %w[111.1 111.10 701.7a 704.5d],
+                               "`tapped: true` creates them tapped; `attacking: true` attacking (only for the attacking " \
+                               "player during combat, CR 506.3b).",
+                  rules: %w[111.1 111.10 701.7a 704.5d 508.4 506.3b],
                   params: { "token" => "\"Treasure\" | \"Clue\" | \"Food\" | {card data}", "amount" => "integer (default 1)",
-                            "tapped" => "boolean", "to" => "selector (default \"you\")" },
+                            "tapped" => "boolean", "attacking" => "boolean", "to" => "selector (default \"you\")" },
                   example: { "create_token" => { "token" => { "name" => "Soldier", "types" => ["creature"],
                                                               "subtypes" => ["soldier"], "power" => 1, "toughness" => 1 } } }
 
-        attr_reader :definition, :tapped
+        attr_reader :definition, :tapped, :attacking
 
-        def self.keys = %w[token amount tapped to if]
+        def self.keys = %w[token amount tapped attacking to if]
+        ATTACK_STEPS = %i[declare_attackers declare_blockers combat_damage end_of_combat].freeze
         def self.default_to = "you"
 
         def initialize(to:, params:, errors:, path:, targets_count: 0, results_count: 0)
@@ -32,6 +34,7 @@ module Enjine
           raw = Mechanics.fetch_param(params, :token)
           data = raw.is_a?(String) ? Enjine::Tokens.fetch(raw) : raw
           @tapped = Mechanics.fetch_param(params, :tapped) == true
+          @attacking = Mechanics.fetch_param(params, :attacking) == true
           unless data.is_a?(Hash)
             errors << "#{path}.token: must be a predefined token (#{Enjine::Tokens::LIBRARY.keys.join(", ")}) or card data"
             return
@@ -53,12 +56,18 @@ module Enjine
           return :wait if engine.ask_entering_choices!(locals, entries) == :wait
 
           entries.each do |key, index|
-            engine.create_token!(definition, index, tapped: tapped, enters: engine.with_entering_answer(locals, key, index, nil))
+            enters = engine.with_entering_answer(locals, key, index, nil)
+            enters = (enters || {}).merge("attacking" => true) if attacks?(engine, index)
+            engine.create_token!(definition, index, tapped: tapped, enters: enters)
           end
           :done
         end
 
-        def to_s = "create #{amount} #{definition&.name} token#{"s" if amount != 1}#{" tapped" if tapped} → #{to}"
+        def to_s = "create #{amount} #{definition&.name} token#{"s" if amount != 1}#{" tapped" if tapped}" \
+                   "#{" attacking" if attacking} → #{to}"
+
+        # CR 508.4, 506.3b: tokens enter attacking only under the attacking player's control, in combat.
+        def attacks?(engine, index) = attacking && engine.state.active == index && ATTACK_STEPS.include?(engine.state.step)
       end
     end
   end

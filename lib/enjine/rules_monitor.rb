@@ -73,7 +73,7 @@ module Enjine
     def step_began!(_event)
       # CR 500.5: mana pools, restricted mana included, empty between steps.
       state.players.each do |pl|
-        next if pl.mana_pool.values.all?(&:zero?) && pl.restricted_mana.empty?
+        next if pl.mana_pool.values.all?(&:zero?) && pl.restricted_mana.all? { Engine.mana_kept?(it, state.step) }
 
         finding("500.5", "#{pl.name}'s mana pool isn't empty at #{state.step}")
       end
