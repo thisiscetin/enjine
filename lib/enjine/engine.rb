@@ -241,8 +241,9 @@ module Enjine
 
     # ---- objects & zones (CR 400) ------------------------------------------
 
-    def create_object(card, owner, zone)
-      id = "#{card}##{state.next_id}"
+    # A card exiled face down gets an id that doesn't name it (CR 406.3).
+    def create_object(card, owner, zone, hidden: false)
+      id = "#{hidden ? FACE_DOWN_ID : card}##{state.next_id}"
       state.next_id += 1
       state.objects[id] = GameObject.new(id: id, card: card, owner: owner, controller: owner, zone: zone,
                                          tapped: false, controlled_since: nil, kind: "card", counters: {},
@@ -256,8 +257,10 @@ module Enjine
     # `applied`: replacement effects that already modified the event this one replaces (CR 614.5).
     def propose(kind, data, applied = []) = Replacements.apply(self, Proposal.new(kind, data, applied.dup))
 
-    def move!(id, to, reason:, position: :top, controller: nil, enters: nil)
+    # `face_down`: exile it face down (CR 406.3); the list of player indices who may look at it.
+    def move!(id, to, reason:, position: :top, controller: nil, enters: nil, face_down: nil)
       data = { "object" => id, "to" => to, "position" => position, "reason" => reason, "controller" => controller }
+      data["face_down"] = face_down if face_down && to == :exile
       data["enters"] = { "tapped" => enters&.fetch("tapped", false) == true, "counters" => {} } if to == :battlefield
       data = propose("zone_change", data).data
       return nil if data["cancelled"] # e.g. a shield counter instead of being destroyed (CR 122.1c)
@@ -306,14 +309,17 @@ module Enjine
       remember_last_known!(id, lki) if lki # CR 608.2h (see Engine::TurnHistory)
       state.zone_list(old.zone, old.owner).delete(id)
       state.objects.delete(id)
-      fresh = create_object(old.card, old.owner, to)
+      face_down = to == :exile ? data["face_down"] : nil
+      fresh = create_object(old.card, old.owner, to, hidden: !face_down.nil?)
       leave_combat!(id) if old.zone == :battlefield
       arrive!(fresh, old, data)
+      fresh.memory.merge!("face_down" => true, "may_look" => face_down.uniq.sort) if face_down
       list = state.zone_list(to, old.owner)
       data["position"] == :bottom ? list.push(fresh.id) : list.unshift(fresh.id)
       record_result!(fresh.id)
       event = Events::ZoneChanged.new(card: old.card, old_id: id, new_id: fresh.id, owner: name(old.owner),
-                                      from: old.zone.to_s, to: to.to_s, reason: data["reason"])
+                                      from: old.zone.to_s, to: to.to_s, reason: data["reason"],
+                                      lookers: face_down&.map { name(it) })
       lki ? with_last_known(id, lki) { emit event } : emit(event)
       return_exiled_until_leaves!(old) if lki # CR 610.3
       fresh

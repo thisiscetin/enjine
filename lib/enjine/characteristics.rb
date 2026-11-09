@@ -30,4 +30,10 @@ module Enjine
     def activated_abilities = abilities.select { %i[activated loyalty].include?(it.ability.kind) }
     def triggered_abilities = abilities.select { it.ability.kind == :triggered }
   end
+
+  # A card exiled face down has no characteristics (CR 406.3a).
+  Characteristics::FACE_DOWN = Characteristics.new(
+    name: "", mana_cost: nil, colors: [].freeze, types: [].freeze, supertypes: [].freeze, subtypes: [].freeze,
+    keywords: [].freeze, abilities: [].freeze, power: nil, toughness: nil, loyalty: nil
+  )
 end

@@ -163,7 +163,8 @@ module Enjine
     def validate_object(obj, path, catalog, next_id, errors)
       id = obj["id"]
       match = /\A([a-z0-9_]+)#(\d+)\z/.match(id.to_s)
-      errors << "#{path}.id: malformed #{id.inspect}" unless match && match[1] == obj["card"]
+      face_down = match && match[1] == Engine::FACE_DOWN_ID && obj["zone"].to_s == "exile" && obj.dig("memory", "face_down") == true
+      errors << "#{path}.id: malformed #{id.inspect}" unless match && (match[1] == obj["card"] || face_down)
       errors << "#{path}.id: #{id} is not below next_id #{next_id}" if match && match[2].to_i >= next_id.to_i
       errors << "#{path}.card: #{obj["card"].inspect} is not in the catalog" unless catalog.include?(obj["card"].to_s)
       %w[owner controller].each { |k| errors << "#{path}.#{k}: must be 0 or 1" unless [0, 1].include?(obj[k]) }

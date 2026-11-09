@@ -376,6 +376,23 @@ Rule numbers are from the 2026-11-06 Comprehensive Rules.
   in exile). `not_types: ["land"]` keeps only the nonland card an exile-until found;
   `"choose": "one_per_owner"` with `"for": { "types": ["land"] }` makes the controller
   pick one matching card per owner among the exiled ones.
+- **Exiled face down** (CR 406.3): `"face_down": true` on `exile_top`; `looker` names the
+  players who may look at the cards (default: you). A face-down card has no
+  characteristics, its id doesn't name it (`face_down#12`), and views and events show
+  it only to the lookers. `play_permission` takes `player` (who may play the cards,
+  instead of you; a face-down card needs a player who may look at it, CR 406.3b) and
+  `any_mana_type: true` ("mana of any type can be spent to cast those spells", CR 609.4b).
+  The card is turned face up as it's played. "Target opponent exiles the top card of your
+  library face down; you exile the top two cards of theirs face down; each card's exiler
+  may play it while it stays exiled, spending mana as though it were mana of any type":
+
+  ```json
+  { "spell": { "targets": ["opponent"], "effects": [
+    { "exile_top": { "amount": 1, "face_down": true, "looker": { "target": 0 } } },
+    { "exile_top": { "amount": 2, "to": { "target": 0 }, "face_down": true } },
+    { "play_permission": { "to": { "result": 0 }, "player": { "target": 0 }, "duration": "while_exiled", "any_mana_type": true } },
+    { "play_permission": { "to": { "result": 1 }, "duration": "while_exiled", "any_mana_type": true } } ] } }
+  ```
 - **Casting while resolving without paying mana costs** (CR 608.2g):
   `{ "cast_free": { "to": { "result": 0 }, "max_mana_value": 3, "count": "any" } }`;
   with no `to` it offers matching cards from your hand. **Discover N** (CR 701.57) is

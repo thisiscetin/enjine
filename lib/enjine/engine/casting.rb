@@ -97,6 +97,7 @@ module Enjine
         method = via && play_method(index, card_id, via)
         origin = { "id" => card_id, "zone" => card.zone.to_s,
                    "index" => state.zone_list(card.zone, card.owner).index(card_id) }
+        origin["memory"] = card.memory.slice("face_down", "may_look") if face_down?(card) # turned face up (CR 406.3a)
         obj = move!(card_id, :stack, controller: index, reason: "cast")
         extra = method ? { "method" => method } : {}
         extra["no_priority"] = true if via == "free"

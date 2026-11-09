@@ -19,6 +19,8 @@ module Enjine
       # cached until state changes.
       def chars(object)
         object = self.object(object) if object.is_a?(String)
+        return Enjine::Characteristics::FACE_DOWN if face_down?(object) && @face_up != object.id # CR 406.3a
+
         defn = definition(object)
         base = defn.printed_characteristics
         return board_characteristics.fetch(object.id, base) if object.zone == :battlefield
