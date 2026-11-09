@@ -1869,6 +1869,28 @@ Rules: CR 701.24a
 }
 ```
 
+## skip_turns
+
+Each referenced player skips their next `amount` turns (extra turns included): each of those turns doesn't happen, and the next player in turn order takes theirs. Several skips add up.
+
+Rules: CR 614.1b, CR 614.10, CR 614.10a
+
+| Parameter | Description |
+| --- | --- |
+| `amount` | amount |
+| `to` | selector |
+
+```json
+{
+  "skip_turns": {
+    "amount": 1,
+    "to": {
+      "target": 0
+    }
+  }
+}
+```
+
 ## surveil
 
 Look at the top `amount` cards of your library; put any number into your graveyard and the rest on top in any order.

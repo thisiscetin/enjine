@@ -26,9 +26,9 @@ module Enjine
     # CR 500.7: extra turns still to be taken (the last one first) and the players who began one.
     def validate_extra_turns(data, errors)
       extra = data.fetch("extra_turns", { "queue" => [], "begun" => [] })
-      ok = extra.is_a?(Hash) && extra.keys.sort == %w[begun queue] &&
+      ok = extra.is_a?(Hash) && (extra.keys - ["skip"]).sort == %w[begun queue] && # "skip": turns to skip (CR 614.10)
            extra.values.all? { |list| list.is_a?(Array) && list.all? { [0, 1].include?(it) } }
-      errors << "extra_turns: must be {\"queue\": [player index...], \"begun\": [player index...]}" unless ok
+      errors << "extra_turns: must be {\"queue\": [player index...], \"begun\": [...], \"skip\": [...] (optional)}" unless ok
     end
 
     def validate_turn(data, errors)

@@ -126,7 +126,7 @@ module Enjine
         end_game_if_decided!
       end
 
-      # ---- extra turns (CR 500.7) -----------------------------------------------------------
+      # ---- extra and skipped turns (CR 500.7, 614.10) ----------------------------------------
 
       # CR 500.7: the turn is added directly after this one; the most recently created is taken first.
       def add_extra_turn!(index)
@@ -134,13 +134,30 @@ module Enjine
         emit Events::ExtraTurnAdded.new(player: name(index))
       end
 
-      # The player whose turn comes next: an extra turn if one was added, else the next in turn order.
-      def take_next_turn!
-        index = state.extra_turns["queue"].pop
-        return state.opponent(state.active) unless index
+      # CR 614.10a: the player skips their next `count` turns (each skip waits for a turn that isn't skipped).
+      def skip_turns!(index, count)
+        return unless count.positive?
 
-        state.extra_turns["begun"] |= [index]
-        index
+        (state.extra_turns["skip"] ||= []).concat([index] * count)
+      end
+
+      # The player whose turn comes next: an extra turn if one was added, else the next in turn order. A
+      # skipped turn doesn't happen (CR 614.10): the turn after it comes next.
+      def take_next_turn!
+        last = state.active
+        loop do
+          extra = state.extra_turns["queue"].pop
+          index = extra || state.opponent(last)
+          skip = state.extra_turns.fetch("skip", []).index(index)
+          unless skip
+            state.extra_turns["begun"] |= [index] if extra
+            return index
+          end
+          state.extra_turns["skip"].delete_at(skip)
+          state.extra_turns.delete("skip") if state.extra_turns["skip"].empty?
+          emit Events::TurnSkipped.new(player: name(index))
+          last = index
+        end
       end
 
       def began_extra_turn?(index) = state.extra_turns["begun"].include?(index)

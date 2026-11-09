@@ -18,6 +18,24 @@ module Enjine
         def apply(engine, ctx) = players(engine, ctx).each { engine.add_extra_turn!(it) }
         def to_s = "take an extra turn after this one → #{to}"
       end
+
+      # "Target opponent skips their next X turns." (CR 614.10)
+      class SkipTurns < Effect
+        primitive :effect, :skip_turns,
+                  description: "Each referenced player skips their next `amount` turns (extra turns included): " \
+                               "each of those turns doesn't happen, and the next player in turn order takes theirs. " \
+                               "Several skips add up.",
+                  rules: %w[614.1b 614.10 614.10a],
+                  params: { "amount" => "amount", "to" => "selector" },
+                  example: { "skip_turns" => { "amount" => 1, "to" => { "target" => 0 } } }
+
+        def apply(engine, ctx)
+          n = amount_for(engine, ctx)
+          players(engine, ctx).each { engine.skip_turns!(it, n) }
+        end
+
+        def to_s = "skip the next #{amount} turn(s) → #{to}"
+      end
     end
 
     class Condition

@@ -27,6 +27,33 @@
     "rules_text": "Lightning Bolt deals 3 damage to any target."
   },
   {
+    "name": "Stolen Hours",
+    "mana_cost": "{4}{U}{U}",
+    "types": [
+      "sorcery"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "targets": [
+            "opponent"
+          ],
+          "effects": [
+            {
+              "skip_turns": {
+                "amount": 1,
+                "to": {
+                  "target": 0
+                }
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "Target opponent skips their next turn."
+  },
+  {
     "name": "Fortune Inversion",
     "mana_cost": "{2}{W}{B}",
     "types": [
