@@ -10,8 +10,9 @@ module Enjine
       def deal_damage!(source, ref, amount, combat: false, lifelink: true)
         return 0 unless amount.positive?
 
-        amount = propose("damage", { "source" => source, "target" => ref, "amount" => amount, "combat" => combat })
-                 .data["amount"]
+        data = { "source" => source, "target" => ref, "amount" => amount, "combat" => combat }
+        data["unpreventable"] = true if unpreventable?(combat) # CR 615.12 (Engine::Rules)
+        amount = propose("damage", data).data["amount"]
         return 0 unless amount.positive? # prevention (CR 615) will reduce it here
 
         source_chars = damage_source_chars(source)
@@ -60,6 +61,7 @@ module Enjine
 
       def change_life!(index, delta)
         return if delta.zero?
+        return if delta.positive? && player_rule?(index, "cant_gain_life") # CR 119.7: not even replaced
 
         delta = propose("life", { "player" => index, "delta" => delta }).data["delta"]
         return if delta.zero?

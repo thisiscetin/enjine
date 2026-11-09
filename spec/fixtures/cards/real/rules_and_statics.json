@@ -17,6 +17,155 @@
     }
   },
   {
+    "name": "Impractical Joke",
+    "mana_cost": "{R}",
+    "types": [
+      "sorcery"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "targets": [
+            {
+              "filter": {
+                "permanent": {
+                  "any_of": [
+                    "creature",
+                    "planeswalker"
+                  ]
+                }
+              },
+              "optional": true
+            }
+          ],
+          "effects": [
+            {
+              "player_rule": {
+                "rule": "damage_cant_be_prevented"
+              }
+            },
+            {
+              "deal_damage": {
+                "amount": 3,
+                "to": {
+                  "target": 0
+                }
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "uncommon",
+    "printing": {
+      "set": "sos",
+      "number": "119"
+    }
+  },
+  {
+    "name": "Frenzied Baloth",
+    "mana_cost": "{G}{G}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "beast"
+    ],
+    "power": 3,
+    "toughness": 2,
+    "keywords": [
+      "cant_be_countered",
+      "trample",
+      "haste"
+    ],
+    "abilities": [
+      {
+        "player_rule": {
+          "rule": "spells_cant_be_countered",
+          "spells": {
+            "types": [
+              "creature"
+            ]
+          }
+        }
+      },
+      {
+        "player_rule": {
+          "rule": "combat_damage_cant_be_prevented",
+          "affects": "each"
+        }
+      }
+    ],
+    "rarity": "rare",
+    "printing": {
+      "set": "eoe",
+      "number": "183"
+    }
+  },
+  {
+    "name": "Voice of Victory",
+    "mana_cost": "{1}{W}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "human",
+      "bard"
+    ],
+    "power": 1,
+    "toughness": 3,
+    "abilities": [
+      {
+        "mobilize": {
+          "amount": 2
+        }
+      },
+      {
+        "player_rule": {
+          "rule": "cant_cast",
+          "affects": "opponents",
+          "if": {
+            "your_turn": true
+          }
+        }
+      }
+    ],
+    "rarity": "rare",
+    "printing": {
+      "set": "tdm",
+      "number": "33"
+    }
+  },
+  {
+    "name": "Giant Cindermaw",
+    "mana_cost": "{2}{R}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "dinosaur",
+      "beast"
+    ],
+    "power": 4,
+    "toughness": 3,
+    "keywords": [
+      "trample"
+    ],
+    "abilities": [
+      {
+        "player_rule": {
+          "rule": "cant_gain_life",
+          "affects": "each"
+        }
+      }
+    ],
+    "rarity": "uncommon",
+    "printing": {
+      "set": "fdn",
+      "number": "624"
+    }
+  },
+  {
     "name": "The Wondrous Wasp",
     "mana_cost": "{1}{U}",
     "types": [

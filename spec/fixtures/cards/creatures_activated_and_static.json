@@ -36,6 +36,90 @@
     "rules_text": "{T}: Prodigal Pyromancer deals 1 damage to any target."
   },
   {
+    "name": "Unbroken Herald",
+    "mana_cost": "{G}{G}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "beast"
+    ],
+    "power": 3,
+    "toughness": 2,
+    "keywords": [
+      "cant_be_countered",
+      "trample"
+    ],
+    "abilities": [
+      {
+        "player_rule": {
+          "rule": "spells_cant_be_countered",
+          "spells": {
+            "types": [
+              "creature"
+            ]
+          }
+        }
+      },
+      {
+        "player_rule": {
+          "rule": "combat_damage_cant_be_prevented",
+          "affects": "each"
+        }
+      }
+    ],
+    "rules_text": "This spell can't be countered.\nTrample\nCreature spells you control can't be countered.\nCombat damage can't be prevented."
+  },
+  {
+    "name": "Cindermaw Brute",
+    "mana_cost": "{2}{R}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "dinosaur"
+    ],
+    "power": 4,
+    "toughness": 3,
+    "keywords": [
+      "trample"
+    ],
+    "abilities": [
+      {
+        "player_rule": {
+          "rule": "cant_gain_life",
+          "affects": "each"
+        }
+      }
+    ],
+    "rules_text": "Trample\nPlayers can't gain life."
+  },
+  {
+    "name": "Hushwarden Sentinel",
+    "mana_cost": "{1}{W}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "human",
+      "soldier"
+    ],
+    "power": 2,
+    "toughness": 2,
+    "abilities": [
+      {
+        "player_rule": {
+          "rule": "cant_cast",
+          "affects": "opponents",
+          "if": {
+            "your_turn": true
+          }
+        }
+      }
+    ],
+    "rules_text": "Your opponents can't cast spells during your turn."
+  },
+  {
     "name": "Wrenchwright",
     "mana_cost": "{2}{R}",
     "types": [

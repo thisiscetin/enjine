@@ -72,9 +72,10 @@ module Enjine
       proposal.data["token"] = ability.token_definition.id if ability
     end
 
-    # CR 615.1: "prevent all damage that would be dealt to you this turn".
+    # CR 615.1: "prevent all damage that would be dealt to you this turn", unless it can't be prevented
+    # (CR 615.12).
     def preventing!(engine, proposal)
-      proposal.data["amount"] = 0 if engine.damage_prevented?(proposal.data["target"])
+      proposal.data["amount"] = 0 if !proposal.data["unpreventable"] && engine.damage_prevented?(proposal.data["target"])
     end
 
     # CR 701.8a, 704.5g-h: destroying a permanent, by an effect or for lethal damage / deathtouch.

@@ -66,6 +66,30 @@
     "rules_text": "+1: Creatures you control get +1/+1 until end of turn.\n−2: Put a +1/+1 counter on each creature you control.\n−3: Vessa deals 3 damage to target creature."
   },
   {
+    "name": "Clamp of Stillness",
+    "mana_cost": "{2}{W}",
+    "types": [
+      "artifact"
+    ],
+    "abilities": [
+      {
+        "player_rule": {
+          "rule": "cant_activate",
+          "affects": "each",
+          "filter": {
+            "permanent": {
+              "any_of": [
+                "creature",
+                "planeswalker"
+              ]
+            }
+          }
+        }
+      }
+    ],
+    "rules_text": "Activated abilities of creatures and planeswalkers can't be activated unless they're mana abilities."
+  },
+  {
     "name": "Hushing Bubble",
     "mana_cost": "{1}{U}",
     "types": [

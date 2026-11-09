@@ -15,6 +15,7 @@ module Enjine
         defn = definition(obj)
         return false unless defn.castable?
         return false unless defn.instant_speed? || sorcery_timing?(index)
+        return false if cast_forbidden?(index, obj) # CR 101.2 (Engine::Rules)
         return false unless additional_costs_payable?(obj) # CR 601.2f: e.g. "sacrifice a creature"
 
         cost = Mana.sum_costs([defn.mana_cost, *spell_extra_mana(obj, false)])
@@ -32,6 +33,7 @@ module Enjine
         return false unless ability && %i[activated loyalty].include?(ability.kind)
         return false unless obj.zone == ability.zone # CR 113.6: e.g. cycling only from the hand (702.29a)
         return false if ability.sorcery_speed? && !sorcery_timing?(index)
+        return false if activation_forbidden?(index, obj) # CR 602.5, 101.2 (Engine::Rules)
         return false unless ability.costs.reject(&:mana?).all? { it.payable?(self, obj) }
         return false unless activation_allowed?(index, obj, ability_ref, ability) # CR 602.5b
 

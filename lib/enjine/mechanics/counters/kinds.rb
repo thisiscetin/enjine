@@ -70,7 +70,11 @@ module Enjine
         id = proposal.data[proposal.kind == "damage" ? "target" : "object"]
         obj = id && engine.state.objects[id]
         return unless obj && obj.zone == :battlefield
-        return proposal.data["amount"] = 0 if proposal.kind == "damage" && engine.damage_batch&.include?(obj.id)
+
+        if proposal.kind == "damage" && engine.damage_batch&.include?(obj.id) # its shield already applied (CR 615.12a)
+          proposal.data["amount"] = 0 unless proposal.data["unpreventable"]
+          return
+        end
 
         obj.counters.each do |name, n|
           kind = Enjine.registry.fetch(:counter, name)
@@ -173,9 +177,10 @@ module Enjine
           end
         end
 
-        # CR 615.1a. Damage dealt at the same time by several sources is one event: one counter.
+        # CR 615.1a. Damage dealt at the same time by several sources is one event: one counter. Damage that
+        # can't be prevented is dealt, and the counter is still removed (CR 615.12).
         def self.prevent_damage!(engine, obj, proposal)
-          proposal.data["amount"] = 0
+          proposal.data["amount"] = 0 unless proposal.data["unpreventable"]
           engine.damage_batch&.push(obj.id)
           engine.remove_counters!(obj, "shield", 1)
         end

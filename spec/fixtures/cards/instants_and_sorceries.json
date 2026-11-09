@@ -27,6 +27,70 @@
     "rules_text": "Lightning Bolt deals 3 damage to any target."
   },
   {
+    "name": "Unshielded Blast",
+    "mana_cost": "{R}",
+    "types": [
+      "sorcery"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "targets": [
+            {
+              "filter": "creature",
+              "optional": true
+            }
+          ],
+          "effects": [
+            {
+              "player_rule": {
+                "rule": "damage_cant_be_prevented"
+              }
+            },
+            {
+              "deal_damage": {
+                "amount": 3,
+                "to": {
+                  "target": 0
+                }
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "Damage can't be prevented this turn. Unshielded Blast deals 3 damage to up to one target creature."
+  },
+  {
+    "name": "Hush Order",
+    "mana_cost": "{1}{W}",
+    "types": [
+      "instant"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "effects": [
+            {
+              "player_rule": {
+                "rule": "cant_cast",
+                "to": {
+                  "each": "player"
+                }
+              }
+            },
+            {
+              "draw": {
+                "amount": 1
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "Players can't cast spells this turn.\nDraw a card."
+  },
+  {
     "name": "Quieting Word",
     "mana_cost": "{U}",
     "types": [

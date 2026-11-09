@@ -67,6 +67,38 @@ RSpec.describe "Real cards: losing abilities, restrictions and other rules effec
     expect(game.state.pending_triggers).to be_empty
   end
 
+  it "Giant Cindermaw: players can't gain life, not even from lifelink (CR 119.7)" do
+    game = board(mine: ["Giant Cindermaw"], theirs: ["Vampire Nighthawk"])
+    engine = game.instance_variable_get(:@engine)
+    engine.deal_damage!(obj_id(game, "Vampire Nighthawk"), "player:alice", 2)
+    expect([life(game, "alice"), life(game, "bob")]).to eq([18, 20])
+  end
+
+  it "Voice of Victory: opponents can't cast spells during your turn (CR 101.2, 604.2)" do
+    game = board(mine: ["Voice of Victory"], their_mana: { R: 1 })
+    game.state.players[1].hand << game.instance_variable_get(:@engine).create_object("burst_lightning", 1, :hand).id
+    game.submit(type: "pass")
+    expect(game.pending_decision.player).to eq("bob")
+    expect(game.legal_options.map { it[:type] }).not_to include("cast")
+  end
+
+  it "Frenzied Baloth: creature spells you control can't be countered (CR 101.2)" do
+    game = board(hand: ["Vampire Nighthawk"], mine: ["Frenzied Baloth"], mana: { B: 3 }, their_mana: { U: 2 })
+    game.state.players[1].hand << game.instance_variable_get(:@engine).create_object("essence_scatter", 1, :hand).id
+    game.submit(type: "cast", object: obj_id(game, "Vampire Nighthawk", zone: :hand, player: "alice"))
+    game.submit(game.legal_options.find { it[:type] == "pay_mana" }) while game.pending_decision.kind == "pay_cost"
+    game.submit(type: "pass")
+    play(game, { type: "cast", object: ids_in(game, "bob", :hand).first }, { type: "target", target: game.state.stack.first })
+    expect(game.state.battlefield.map { game.state.object(it).card }).to include("vampire_nighthawk")
+  end
+
+  it "Impractical Joke: damage can't be prevented this turn, so a shield counter doesn't save it (CR 615.12)" do
+    game = board(hand: ["Impractical Joke"], theirs: [["Vampire Nighthawk", { counters: { "shield" => 1 } }]], mana: { R: 1 })
+    hawk = obj_id(game, "Vampire Nighthawk")
+    cast(game, "Impractical Joke", target(game, "Vampire Nighthawk"))
+    expect(game.state.battlefield).not_to include(hawk)
+  end
+
   it "The Wondrous Wasp: the target loses all abilities only while the Wasp remains (CR 611.2b)" do
     game = board(hand: ["The Wondrous Wasp"], theirs: ["Vampire Nighthawk"], mana: { U: 2 })
     hawk = obj_id(game, "Vampire Nighthawk")

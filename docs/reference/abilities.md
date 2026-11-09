@@ -937,27 +937,25 @@ Rules: CR 601.3, CR 113.6e, CR 113.6f, CR 305.1, CR 401.5, CR 122.1, CR 614.12, 
 
 ## player_rule
 
-While this permanent is on the battlefield, `rule` applies to the players in `affects` (you | opponents | each; default you). Rules: hexproof, cant_attack, no_max_hand_size, prevent_all_damage, cant_lose_for_life, cant_sacrifice. `cant_sacrifice` takes a `filter` of the permanents that can't be sacrificed.
+While this permanent is on the battlefield (and its `if` condition holds), `rule` applies to the players in `affects` (you | opponents | each; default you). Rules: hexproof, cant_attack, no_max_hand_size, prevent_all_damage, cant_lose_for_life, cant_sacrifice, cant_cast, cant_cast_except_from_hand, spells_cant_be_countered, cant_gain_life, cant_activate, damage_cant_be_prevented, combat_damage_cant_be_prevented. `cant_sacrifice` takes a `filter` of the permanents that can't be sacrificed, `cant_activate` may take a `filter` of the sources whose abilities can't be activated (mana abilities still can), and `cant_cast` and `spells_cant_be_countered` may take a card spec of the `spells`. The damage rules apply to all damage whichever players they name.
 
-Rules: CR 702.11c, CR 115.4, CR 508.1c, CR 402.2, CR 514.1, CR 615.1, CR 615.1a, CR 704.5a, CR 104.3b, CR 701.21a, CR 614.17b, CR 604.1, CR 611.3a
+Rules: CR 702.11c, CR 115.4, CR 508.1c, CR 402.2, CR 514.1, CR 615.1, CR 615.1a, CR 704.5a, CR 104.3b, CR 701.21a, CR 614.17b, CR 101.2, CR 601.3, CR 701.6a, CR 119.7, CR 602.5, CR 615.12, CR 604.1, CR 604.2, CR 611.3a
 
 | Parameter | Description |
 | --- | --- |
-| `rule` | hexproof | cant_attack | no_max_hand_size | prevent_all_damage | cant_lose_for_life | cant_sacrifice |
+| `rule` | hexproof | cant_attack | no_max_hand_size | prevent_all_damage | cant_lose_for_life | cant_sacrifice | cant_cast | cant_cast_except_from_hand | spells_cant_be_countered | cant_gain_life | cant_activate | damage_cant_be_prevented | combat_damage_cant_be_prevented |
 | `affects` | you | opponents | each |
-| `filter` | permanent filter (cant_sacrifice only) |
+| `filter` | permanent filter (cant_sacrifice, cant_activate) |
+| `spells` | card spec of the spells (cant_cast, spells_cant_be_countered) |
+| `if` | condition ("during your turn": {"your_turn": true}) |
 
 ```json
 {
   "player_rule": {
-    "rule": "cant_sacrifice",
-    "filter": {
-      "permanent": {
-        "token": true,
-        "subtypes": [
-          "treasure"
-        ]
-      }
+    "rule": "cant_cast",
+    "affects": "opponents",
+    "if": {
+      "your_turn": true
     }
   }
 }

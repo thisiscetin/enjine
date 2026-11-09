@@ -931,6 +931,27 @@ and `base_power_toughness` (layer 7b); its `abilities` may be activated abilitie
                               "creature_types": ["fish"], "base_power_toughness": { "power": 1, "toughness": 1 } } }] }
 ```
 
+**Restrictions on players and the game** (CR 101.2: a "can't" beats any "can"). They are
+`player_rule` abilities (static, with an optional `if` condition seen from the source) or
+`player_rule` effects (for a duration), with `affects` / `to` naming the players:
+
+| Oracle words | Data |
+| --- | --- |
+| "Your opponents can't cast spells during your turn" | `{ "player_rule": { "rule": "cant_cast", "affects": "opponents", "if": { "your_turn": true } } }` |
+| "Players can't cast spells this turn" | effect `{ "player_rule": { "rule": "cant_cast", "to": { "each": "player" } } }` |
+| "… can't cast spells from anywhere other than their hands" | rule `cant_cast_except_from_hand` |
+| "Creature spells you control can't be countered" | `{ "player_rule": { "rule": "spells_cant_be_countered", "spells": { "types": ["creature"] } } }` (`spells`: a card spec; also on `cant_cast`) |
+| "Players can't gain life" | `{ "player_rule": { "rule": "cant_gain_life", "affects": "each" } }` |
+| "Activated abilities of creatures can't be activated unless they're mana abilities" | `{ "player_rule": { "rule": "cant_activate", "affects": "each", "filter": "creature" } }` |
+| "Damage can't be prevented (this turn)" / "Combat damage can't be prevented" | rule `damage_cant_be_prevented` / `combat_damage_cant_be_prevented` (game-wide, CR 615.12) |
+
+```json
+{ "name": "Example Hush Captain", "mana_cost": "{1}{W}", "types": ["creature"], "subtypes": ["human"],
+  "power": 2, "toughness": 2,
+  "abilities": [{ "player_rule": { "rule": "cant_cast", "affects": "opponents", "if": { "your_turn": true } } },
+                { "player_rule": { "rule": "cant_gain_life", "affects": "opponents" } }] }
+```
+
 ---
 
 ## 5. Worked examples

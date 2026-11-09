@@ -12,17 +12,32 @@ module Enjine
       # ---- player rules -------------------------------------------------------------------
 
       # Whether `rule` applies to the player: a `player_rule` effect naming them (state.effects) or a
-      # `player_rule` static ability of a permanent on the battlefield. `object`: the permanent a
-      # filtered rule ("can't sacrifice Treasure tokens") is asked about.
+      # `player_rule` static ability of a permanent on the battlefield whose condition holds. `object`: the
+      # permanent or card a filtered rule ("can't sacrifice Treasure tokens", "creature spells can't be
+      # countered") is asked about.
       def player_rule?(index, rule, object = nil)
         ref = Mechanics::Filters.player_ref(self, index)
         return true if state.effects.any? { it["kind"] == "player_rule" && it["rule"] == rule && it["affected"].include?(ref) }
 
         player_rule_statics.any? do |source, ability|
           ability.rule == rule && ability.applies_to?(index, source.controller) &&
-            (object.nil? || ability.matches?(self, object, source))
+            (object.nil? || ability.matches?(self, object, source)) && ability.active?(self, source)
         end
       end
+
+      # A rule of the whole game ("Damage can't be prevented"), whichever player it was given to.
+      def game_rule?(rule) = state.players.each_index.any? { player_rule?(it, rule) }
+
+      # CR 101.2: "can't cast" beats any permission to cast. `obj`: the card (or stand-in) to be cast.
+      def cast_forbidden?(index, obj)
+        player_rule?(index, "cant_cast", obj) || (obj.zone != :hand && player_rule?(index, "cant_cast_except_from_hand"))
+      end
+
+      # CR 602.5, 101.2: abilities of a permanent matching a `cant_activate` filter can't be activated.
+      def activation_forbidden?(index, obj) = obj.zone == :battlefield && player_rule?(index, "cant_activate", obj)
+
+      # CR 615.12: damage that can't be prevented.
+      def unpreventable?(combat) = game_rule?("damage_cant_be_prevented") || (combat && game_rule?("combat_damage_cant_be_prevented"))
 
       # [[source permanent, PlayerRule ability]] on the battlefield, cached with the layer pass (they
       # change only on the events that change characteristics).
@@ -49,7 +64,7 @@ module Enjine
       # CR 704.5a, unless an effect says the player doesn't lose for having 0 or less life.
       def loses_for_life?(index) = player(index).life <= 0 && !player_rule?(index, "cant_lose_for_life")
 
-      # CR 615.1: a prevention effect protecting a player from all damage.
+      # CR 615.1: a prevention effect protecting a player from all damage (Replacements#preventing!).
       def damage_prevented?(ref)
         index = Mechanics::Filters.player_index(self, ref)
         !index.nil? && player_rule?(index, "prevent_all_damage")
