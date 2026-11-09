@@ -183,7 +183,8 @@ RSpec.describe "Real cards: cost choices" do
     pay_all(game)
     pass_both(game)
     game.submit(type: "decline")
-    game.submit(option_types(game).include?("pass") ? { type: "pass" } : { type: "done" }) until game.pending_decision.kind == "effect_choice"
+    game.submit(option_types(game).include?("pass") ? { type: "pass" } : { type: "done" }) until
+      game.pending_decision.kind == "effect_choice"
     expect(game.state.step).to eq(:end)
     entry = game.submit(type: "yes")
     discarded = entry.events.count { it.type == "zone_changed" && it.to_h["reason"] == "discard" }

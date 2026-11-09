@@ -127,20 +127,26 @@ module Enjine
         when :self then SELF_ZONES.include?(engine.state.objects[ctx.source]&.zone) ? [ctx.source] : []
         when :attached then attached(engine, ctx)
         when :triggering then triggering(engine, ctx)
-        when :watched then Array(Selector.memory(engine, ctx)["watched"])
+        when :watched, :gift_recipient then remembered(engine, ctx)
         when :you then [Filters.player_ref(engine, ctx.controller)]
         when :each_opponent
           engine.state.players.each_index.reject { it == ctx.controller }.map { Filters.player_ref(engine, it) }
         when :each then each(engine, ctx)
         when :controller_of then controllers(engine, ctx)
         when :exiled_with then Linked.exiled_with(engine, ctx.source, ctx)
-        when :gift_recipient # the spell, or the permanent it became (CR 702.174b)
-          Array(Selector.memory(engine, ctx)["gift"] || engine.state.objects[ctx.source]&.memory&.[]("gift"))
         end
       end
 
       # What the resolving triggered ability remembers (the event facts, watched objects).
       def self.memory(engine, ctx) = ctx.memory || engine.state.objects[ctx.object]&.memory || {}
+
+      # What a delayed trigger watches; the opponent chosen for a gift, kept by the spell or the permanent it
+      # became (CR 702.174b).
+      def remembered(engine, ctx)
+        return Array(Selector.memory(engine, ctx)["watched"]) if kind == :watched
+
+        Array(Selector.memory(engine, ctx)["gift"] || engine.state.objects[ctx.source]&.memory&.[]("gift"))
+      end
 
       private
 

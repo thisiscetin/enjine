@@ -70,7 +70,7 @@ module Enjine
           spell.controller == controller && (spells.nil? || spells.match?(engine, spell)) ? keywords : []
         end
 
-        def to_s = "#{spells.to_s.sub(/ card\z/, "") if spells} spells you cast have #{keywords.join(", ")}".strip.capitalize
+        def to_s = "#{spells&.to_s&.sub(/ card\z/, "")} spells you cast have #{keywords.join(", ")}".strip.capitalize
       end
     end
   end
