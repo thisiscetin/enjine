@@ -19,7 +19,7 @@ module Enjine
           ctx = Mechanics::EffectContext.new(entry["controller"], entry["source"], entry["source"], [], [], [], memory)
           # Effects that need no choice (CR 615.5); with nothing prevented (CR 615.12) no "when damage is prevented
           # this way" triggers.
-          effects = effects.reject { it.is_a?(Mechanics::Effects::ReflexiveTrigger) } if entry["unprevented"]
+          effects = effects.grep_v(Mechanics::Effects::ReflexiveTrigger) if entry["unprevented"]
           with_damage_orders(nil) { effects.each { it.run(self, ctx, {}) } }
         end
       end

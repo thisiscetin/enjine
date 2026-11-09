@@ -216,11 +216,11 @@ module Enjine
           :done
         end
 
-        private
-
         # "Copy that ability" when it has already left the stack copies it as it last existed there, with the
         # choices made for it (CR 707.10, 608.2h): the engine's reading, since the copy needs no object on the stack.
         REMEMBERED = "remembered"
+
+        private
 
         def plan(engine, ctx)
           n = amount_for(engine, ctx)

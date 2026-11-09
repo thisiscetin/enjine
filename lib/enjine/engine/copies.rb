@@ -120,10 +120,8 @@ module Enjine
           copy.kind = "ability"
           copy.source = spell.source
           copy.ability = spell.ability
-          copy.memory = Snapshot.deep_copy(spell.memory.except("trigger_id")) # the copy wasn't triggered
-        else
-          copy.memory = Marshal.load(Marshal.dump(spell.memory.slice("kicked", "kicked_with", "gift", "division"))).merge("copy" => "spell")
         end
+        copy.memory = copied_memory(spell)
         copy.memory["copy_except"] = except unless except.empty?
         redivide!(copy.memory, spell.targets, targets) # CR 115.7f (Engine::TargetCounts)
         copy.targets = targets
@@ -137,6 +135,13 @@ module Enjine
                                      targets: targets)
         Array(targets).flatten.compact.uniq.each { became_target!(controller, copy.id, it) } # ward (CR 702.21a)
         copy
+      end
+
+      # What a copy of a spell or ability knows: an ability's copy keeps what the ability knew, but wasn't triggered.
+      def copied_memory(spell)
+        return Snapshot.deep_copy(spell.memory.except("trigger_id", "ability_lki")) if spell.ability?
+
+        Snapshot.deep_copy(spell.memory.slice("kicked", "kicked_with", "gift", "division")).merge("copy" => "spell")
       end
 
       # ---- zone changes and state-based actions ------------------------------------------------------

@@ -65,6 +65,7 @@ RSpec.describe "Real cards: rules-correctness details" do
   def hand_size(game, name) = ids_in(game, name, :hand).size
   def pay = ->(game) { game.legal_options.find { it[:type] != "decline" } }
   def decline = { type: "decline" }
+
   # The permanent named `name` that `player` controls.
   def permanent(game, name, player = "bob")
     index = game.names.index(player)
