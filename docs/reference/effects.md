@@ -29,9 +29,9 @@ Rules: CR 122.1, CR 122.6, CR 613.4c
 
 ## add_mana
 
-You add mana to your mana pool: the fixed mana in `produce`, or `amount` mana of a color you choose as it resolves (`color: "any_one"`: all of one color; `color: "any"`: each mana's color chosen separately, "in any combination of colors"). `colors` limits the choice ("add {R} or {G}").
+You add mana to your mana pool: the fixed mana in `produce`, or `amount` mana of a color you choose as it resolves (`color: "any_one"`: all of one color; `color: "any"`: each mana's color chosen separately, "in any combination of colors"). `colors` limits the choice ("add {R} or {G}"). `spend_only` restricts how the mana can be spent (CR 106.6).
 
-Rules: CR 106.1a, CR 106.4, CR 608.2d, CR 605.1a
+Rules: CR 106.1a, CR 106.4, CR 608.2d, CR 605.1a, CR 106.6
 
 | Parameter | Description |
 | --- | --- |
@@ -39,6 +39,7 @@ Rules: CR 106.1a, CR 106.4, CR 608.2d, CR 605.1a
 | `amount` | amount (default 1; with produce: how many times) |
 | `color` | any_one | any |
 | `colors` | list of colors to choose from (default all five) |
+| `spend_only` | {"spells": card spec, "abilities": card spec} |
 
 ```json
 {

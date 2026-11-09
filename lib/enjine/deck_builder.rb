@@ -94,7 +94,7 @@ module Enjine
 
     # The colors of mana a permanent's mana abilities produce, in WUBRG order ({C} excluded).
     def self.produced_colors(definition)
-      produced = definition.mana_abilities.flat_map(&:produce)
+      produced = definition.mana_abilities.flat_map { it.produce || it.colors.map(&:to_sym) }
       Mana::COLORS.select { produced.include?(it) }
     end
 

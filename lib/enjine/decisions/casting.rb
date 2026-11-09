@@ -120,21 +120,21 @@ module Enjine
     class PayCost < Base
       def self.doc
         'While casting/activating or paying a cost: `{type: "pay_mana", mana: "R"}` spends one mana from ' \
-          'the pool, `{type: "activate_mana", object: id, ability: ref}` taps a source, `{type: "cancel"}` ' \
+          'the pool (`restricted: i`: restricted mana, CR 106.6), `{type: "activate_mana", object: id, ability: ref}` ' \
+          '(plus `mana: "{G}{G}"` when the mana is chosen) taps a source, `{type: "cancel"}` ' \
           "rewinds (or declines a payment asked for while resolving). Cancel isn't offered once a mana ability " \
           "with a cost other than {T} (a Treasure) has been activated. `remaining` shows what is left to pay."
       end
 
       def self.options(engine, _pending)
-        Decisions.with_cancel(engine, engine.payable_mana_types.map { { type: "pay_mana", mana: it } } +
-          engine.payment_sources.map { |id, i| { type: "activate_mana", object: id, ability: i } })
+        Decisions.with_cancel(engine, engine.payable_mana_options + engine.payment_mana_options)
       end
 
       def self.submit(engine, _pending, option)
         case option[:type]
         when "cancel" then engine.cancel_payment!
-        when "pay_mana" then engine.pay_mana!(option[:mana])
-        else engine.tap_for_payment!(option[:object], option[:ability])
+        when "pay_mana" then engine.pay_mana!(option[:mana], option[:restricted])
+        else engine.tap_for_payment!(option[:object], option[:ability], option[:mana])
         end
       end
     end

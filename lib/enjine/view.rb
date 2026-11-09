@@ -39,6 +39,7 @@ module Enjine
       view = {
         "name" => player.name, "life" => player.life, "poison" => player.poison,
         "mana_pool" => player.mana_pool.reject { |_, n| n.zero? }.transform_keys(&:to_s),
+        "restricted_mana" => player.restricted_mana.map { it.merge("text" => Mechanics::SpendOnly.from_data(it["spend_only"]).to_s) },
         "lands_played" => player.lands_played, "mulligans" => player.mulligans,
         "hand_count" => player.hand.size, "library_count" => player.library.size,
         "graveyard" => player.graveyard.map { object_view(engine, it) }

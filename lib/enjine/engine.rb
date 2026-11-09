@@ -412,17 +412,27 @@ module Enjine
 
     # ---- mana (CR 106) ----------------------------------------------------------
 
-    def add_mana!(index, produce, source)
-      produce.each { |type| player(index).mana_pool[type] += 1 }
-      emit Events::ManaAdded.new(player: name(index), mana: produce.map { "{#{it}}" }.join, source: source)
+    # CR 106.4: mana goes into the pool. Mana with a spending restriction (CR 106.6) is kept apart, one
+    # entry per mana, with the restriction's data.
+    def add_mana!(index, produce, source, restriction: nil)
+      return if produce.empty?
+
+      pl = player(index)
+      if restriction
+        produce.each { pl.restricted_mana << { "mana" => it.to_s, "spend_only" => Snapshot.deep_copy(restriction) } }
+      else
+        produce.each { |type| pl.mana_pool[type] += 1 }
+      end
+      emit Events::ManaAdded.new(player: name(index), mana: Mana.symbols(produce), source: source)
     end
 
     def empty_mana_pools!
       state.players.each do |pl|
-        next if pl.mana_pool.values.all?(&:zero?)
+        next if pl.mana_pool.values.all?(&:zero?) && pl.restricted_mana.empty?
 
-        text = pl.mana_pool.flat_map { |type, n| ["{#{type}}"] * n }.join
+        text = pl.mana_pool.flat_map { |type, n| ["{#{type}}"] * n }.join + pl.restricted_mana.map { "{#{it["mana"]}}" }.join
         pl.mana_pool.transform_values! { 0 }
+        pl.restricted_mana.clear
         emit Events::ManaEmptied.new(player: pl.name, mana: text)
       end
     end

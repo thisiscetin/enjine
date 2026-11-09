@@ -70,7 +70,7 @@ Put one of your pending triggered abilities on the stack next: `{type: "trigger"
 
 ## pay_cost
 
-While casting/activating or paying a cost: `{type: "pay_mana", mana: "R"}` spends one mana from the pool, `{type: "activate_mana", object: id, ability: ref}` taps a source, `{type: "cancel"}` rewinds (or declines a payment asked for while resolving). Cancel isn't offered once a mana ability with a cost other than {T} (a Treasure) has been activated. `remaining` shows what is left to pay.
+While casting/activating or paying a cost: `{type: "pay_mana", mana: "R"}` spends one mana from the pool (`restricted: i`: restricted mana, CR 106.6), `{type: "activate_mana", object: id, ability: ref}` (plus `mana: "{G}{G}"` when the mana is chosen) taps a source, `{type: "cancel"}` rewinds (or declines a payment asked for while resolving). Cancel isn't offered once a mana ability with a cost other than {T} (a Treasure) has been activated. `remaining` shows what is left to pay.
 
 ## play_or_draw
 
@@ -83,7 +83,7 @@ The player holding priority takes an action or passes. Options come from the pri
 ## Priority actions
 
 - `activate` — `{type: "activate", object: id, ability: ref}` — start activating an ability (CR 602.2), including planeswalker loyalty abilities (CR 606) and abilities of cards in your hand (cycling, CR 702.29).
-- `activate_mana` — `{type: "activate_mana", object: id, ability: ref}` — activate a mana ability; it resolves immediately (CR 605.3).
+- `activate_mana` — `{type: "activate_mana", object: id, ability: ref}` — activate a mana ability; it resolves immediately (CR 605.3). `mana: "{G}{G}"` names the mana when it is chosen as the ability is activated.
 - `cast` — `{type: "cast", object: id}` — start casting a card from your hand (CR 601.2). `{type: "cast", object: id, via: method}` casts a card from another zone (graveyard, exile, the top of your library) by the permission or alternative cost `via` names, e.g. beam me up (CR 601.3, 702.196). Offered only when timing allows, targets exist and enough mana is available.
 - `pass` — `{type: "pass"}` — pass priority. When all players pass in succession with an empty stack, the step ends (CR 117.4).
 - `play_land` — `{type: "play_land", object: id}` — special action: your main phase, empty stack, one land per turn (CR 305.1, 305.2). With `via`: a land from another zone that an effect lets you play.
