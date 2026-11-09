@@ -8,8 +8,9 @@ module Enjine
         primitive :effect, :add_counters,
                   description: "Put `amount` counters named `counter` on each referenced permanent. Any counter " \
                                "name works (+1/+1, -1/-1, loyalty, stun, shield, oil, a keyword, ...); see " \
-                               "docs/reference/counters.md for the ones with rules.",
-                  rules: %w[122.1 122.6 613.4c],
+                               "docs/reference/counters.md for the ones with rules. A referenced player gets " \
+                               "`poison` counters (\"that player gets two poison counters\").",
+                  rules: %w[122.1 122.6 613.4c 122.1f 704.5c],
                   params: { "counter" => "counter name (+X/+Y, -X/-Y or a lowercase word)", "amount" => "integer",
                             "to" => "selector" },
                   example: { "add_counters" => { "counter" => "+1/+1", "amount" => 1,
@@ -28,6 +29,7 @@ module Enjine
         def apply(engine, ctx)
           n = amount_for(engine, ctx)
           objects(engine, ctx).each { engine.add_counters!(engine.object(it), counter, n, by_player: ctx.controller) }
+          players(engine, ctx).each { engine.add_player_counters!(it, counter, n) }
         end
       end
 

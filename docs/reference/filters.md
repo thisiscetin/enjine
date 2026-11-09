@@ -152,14 +152,21 @@ Rules: CR 112.1, CR 115.1
 
 ## stack_ability
 
-An activated or triggered ability on the stack (`kind`: "activated" or "triggered" for only one of them).
+An activated or triggered ability on the stack. `kind`: "activated" or "triggered" for only one of them; `controller`: you | opponent; `source`: a filter its source matches (e.g. "creature", "artifact").
 
-Rules: CR 113.1b, CR 115.1, CR 605.3b
+Rules: CR 113.1b, CR 115.1, CR 605.3b, CR 113.7
 
 | Parameter | Description |
 | --- | --- |
 | `kind` | activated | triggered |
+| `controller` | you | opponent |
+| `source` | filter |
 
 ```json
-"stack_ability"
+{
+  "stack_ability": {
+    "controller": "you",
+    "source": "creature"
+  }
+}
 ```

@@ -112,6 +112,14 @@ module Enjine
         ask!(nil)
       end
 
+      # The zone a spell is (being) cast from (CR 601.2a): remembered once cast, the cast frame's origin
+      # while it's being cast, or the zone a card is in before it's cast (when its cost is estimated).
+      def cast_origin(spell)
+        return spell.zone.to_s unless spell.zone == :stack
+
+        spell.memory["cast_from"] || state.frames.rfind { it["object"] == spell.id }&.dig("origin", "zone") || "hand"
+      end
+
       # ---- as the spell becomes cast --------------------------------------------------------------
 
       # Where the spell was cast from and with which keyword (CR 601.2a, 400.7d); a warp spell's delayed

@@ -109,6 +109,7 @@ module Enjine
         when "done" then "Done"
         when "discard", "bottom", "find" then "#{opt[:type].capitalize} #{name_of(opt[:object])}"
         when "keep" then "Keep hand"
+        when "call" then "Call #{opt[:call]}"
         when "mulligan" then "Mulligan"
         when "play", "draw" then "#{opt[:type].capitalize} first"
         else opt.inspect
@@ -185,6 +186,9 @@ module Enjine
         when "dilemma_faced" then "#{ev["player"]} faces a dilemma"
         when "extra_turn_added" then "#{ev["player"]} will take an extra turn"
         when "speed_changed" then "#{ev["player"]}: speed #{ev["from"]} → #{ev["to"]}"
+        when "player_counters_changed" then "#{ev["player"]}: #{ev["counter"]} counters #{ev["from"]} → #{ev["to"]}"
+        when "coin_flipped"
+          "#{ev["player"]} flips #{ev["heads"] ? "heads" : "tails"}#{{ true => " and wins", false => " and loses" }[ev["won"]]}"
         when "keyword_action" then "#{ev["player"]} #{ev["action"].to_s.tr("_", " ")}#{" #{ev["amount"]}" if ev["amount"]}"
         else "#{ev["type"]}: #{ev.except("type")}"
         end

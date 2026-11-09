@@ -126,18 +126,21 @@ module Enjine
         end
       end
 
-      # "Copy [spell]" (CR 707.10): the copy goes on the stack with the same choices; it isn't cast.
+      # "Copy [spell]" / "copy target activated or triggered ability" (CR 707.10): the copy goes on the stack
+      # with the same choices; it isn't cast or activated.
       class CopySpell < ChoiceEffect
         include CopyOf
 
         primitive :effect, :copy_spell,
-                  description: "Copy each spell `of` refers to (\"self\": the spell this ability or spell belongs to) " \
+                  description: "Copy each spell or ability on the stack `of` refers to (\"self\": the spell this ability " \
+                               "or spell belongs to; a `stack_ability` target: an activated or triggered ability) " \
                                "`amount` times. The copies are put on the stack under the referenced player's " \
-                               "control (default: you) with the same modes, X, kicker and targets; they aren't cast. " \
-                               "With `new_targets: true` the controller may choose new targets for each copy. A copy " \
-                               "of a permanent spell becomes a token as it resolves.",
-                  rules: %w[707.10 707.10a 707.10c 707.10f 608.3f],
-                  params: { "of" => "selector (spells on the stack)", "amount" => "amount (default 1)",
+                               "control (default: you) with the same modes, X, kicker and targets; they aren't cast " \
+                               "or activated, and an ability's copy has the same source. With `new_targets: true` " \
+                               "the controller may choose new targets for each copy. A copy of a permanent spell " \
+                               "becomes a token as it resolves.",
+                  rules: %w[707.10 707.10a 707.10b 707.10c 707.10f 608.3f],
+                  params: { "of" => "selector (spells or abilities on the stack)", "amount" => "amount (default 1)",
                             "new_targets" => "boolean", "to" => "selector (default \"you\")" },
                   example: { "copy_spell" => { "of" => "self" } }
 
@@ -182,7 +185,7 @@ module Enjine
 
         def plan(engine, ctx)
           n = amount_for(engine, ctx)
-          spells = of_refs(engine, ctx).select { (obj = engine.state.objects[it]) && obj.zone == :stack && !obj.ability? }
+          spells = of_refs(engine, ctx).select { engine.state.objects[it]&.zone == :stack }
           players(engine, ctx).flat_map { |index| spells.flat_map { |id| Array.new(n) { [id, index] } } }
         end
 
@@ -201,8 +204,9 @@ module Enjine
         end
 
         def new_choices(engine, spec, controller, spell, current)
-          spec.candidates_for(engine, controller, nil).filter_map do |ref|
-            next if ref == current || ref == spell.id || !engine.targetable?(ref, controller)
+          source = spell.ability? ? spell.source : nil # an ability's copy has the same source (CR 707.10b)
+          spec.candidates_for(engine, controller, source).filter_map do |ref|
+            next if ref == current || ref == spell.id || !engine.targetable?(ref, controller, source)
 
             { "type" => "target", "target" => ref }
           end

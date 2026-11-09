@@ -135,7 +135,7 @@ RSpec.describe "Costs, kicker, targets and payments: card data (unit)" do
       .to eq(["Ward {1}", "counter that spell or ability unless its controller pays {1}",
               "When this becomes the target of a spell or ability an opponent controls"])
     expect(Enjine::Mechanics::Condition.build({ "kicked" => false }, [], "c").to_s).to eq("it wasn't kicked")
-    filter = Enjine::Mechanics::Filters::StackAbility::Kind.new("activated")
+    filter = Enjine::Mechanics::Filters::StackAbility::Narrowed.new("activated", nil, nil)
     expect([filter.primitive_name, filter.matches_types?([:creature]), filter.matches_facts?(nil),
             filter.live_keys]).to eq(["stack_ability", false, false, []])
   end

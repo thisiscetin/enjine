@@ -70,6 +70,17 @@ module Enjine
         emit Events::LifeChanged.new(player: pl.name, from: before, to: pl.life)
       end
 
+      # Counters on a player (CR 122.1): poison counters, the kind players can have here (CR 122.1f; ten
+      # or more and they lose, CR 704.5c). Other kinds put on a player do nothing.
+      def add_player_counters!(index, kind, amount)
+        return unless amount.positive? && kind == "poison"
+
+        pl = player(index)
+        before = pl.poison
+        pl.poison += amount
+        emit Events::PlayerCountersChanged.new(player: pl.name, counter: kind, from: before, to: pl.poison)
+      end
+
       # `by_player`: the player putting the counters (CR 122.6a; default the permanent's controller).
       def add_counters!(object, kind, amount, by_player: nil)
         return unless amount.positive?

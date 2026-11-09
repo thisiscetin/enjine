@@ -907,6 +907,34 @@ power"). Keyword *actions* are effects.
                 { "triggered": { "when": { "enters": {} }, "effects": [{ "connive": {} }] } }] }
 ```
 
+### 4.20 Spell targets, cast zones, copying abilities, randomness and proliferate
+
+| Oracle text | Data |
+| --- | --- |
+| "Whenever you cast a spell that targets a creature you control" (CR 603.2, 115.1) | `{ "cast": { "targets": { "creature": { "controller": "you" } } } }` (any target filter, matched relative to the source) |
+| "Whenever you cast a spell that targets this creature" | `{ "cast": { "targets": "self" } }` |
+| "Whenever you cast an instant or sorcery spell that targets an opponent or a creature an opponent controls" | `{ "cast": { "spell": "instant_or_sorcery", "targets": { "one_of": ["opponent", { "creature": { "controller": "opponent" } }] } } }` |
+| "Whenever you cast a spell from anywhere other than your hand" / "from exile" (CR 601.2a) | `{ "cast": { "not_from": "hand" } }` / `{ "cast": { "from": "exile" } }` |
+| "Spells you cast from anywhere other than your hand cost {1} less" | `{ "cost_modifier": { "not_from": "hand", "reduce": 1 } }` (`from` works too) |
+| "Copy target activated or triggered ability you control [from a creature source]. You may choose new targets for the copy." (CR 707.10) | target `{ "stack_ability": { "controller": "you", "source": "creature" } }`, effect `{ "copy_spell": { "of": { "target": 0 }, "new_targets": true } }` (the copy has the same source, CR 707.10b) |
+| "discard a card at random" (CR 701.9b) | `{ "discard": { "amount": 1, "random": true } }` |
+| "exile a card from your graveyard at random" | `{ "choose_cards": { "from": { "graveyard": "you" }, "for": { "permanent": true }, "put": "exile", "random": true } }` |
+| "Flip a coin. If you win the flip, …" (CR 705.2) | `{ "flip_coins": {} }`, then the effect with `"if": { "amount": { "this_way": 0 }, "at_least": 1 }` (you call the flip: a decision) |
+| "Flip five coins. … X, where X is the number of coins that came up heads" | `{ "flip_coins": { "amount": 5, "count": "heads" } }`, X is `{ "this_way": 0 }` |
+| "Proliferate" / "Proliferate X times" (CR 701.34a) | `{ "proliferate": {} }` / `{ "proliferate": { "amount": "x" } }` (permanents and players with poison counters) |
+| "that player gets two poison counters" (CR 122.1f) | `{ "add_counters": { "counter": "poison", "amount": 2, "to": { "triggering": "player" } } }` |
+
+The game's random number generator makes every random choice, so a game replays identically from
+its seed and decisions, and an exported game continues with the same results.
+
+```json
+{ "name": "Example Spell Duelist", "mana_cost": "{1}{W}", "types": ["creature"], "subtypes": ["human", "samurai"],
+  "power": 2, "toughness": 2,
+  "abilities": [{ "triggered": { "when": { "cast": { "targets": { "creature": { "controller": "you" } } } },
+                                 "effects": [{ "add_counters": { "counter": "+1/+1", "amount": 1, "to": "self" } },
+                                             { "scry": { "amount": 1 } }] } }] }
+```
+
 ---
 
 ## 5. Worked examples

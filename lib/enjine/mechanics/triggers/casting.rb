@@ -13,15 +13,19 @@ module Enjine
                                "noncreature | instant_or_sorcery, or any spell filter, e.g. {\"spell\": {\"subtypes\": " \
                                "[\"saga\"]}} or {\"one_of\": [...]} for \"creature or Spacecraft spell\"; `name` / " \
                                "`mana_value`: \"chosen\" (the source's as-it-entered choice); `self: true`: \"when you cast " \
-                               "this spell\" (it functions on the stack).",
-                  rules: %w[603.2 601.2i 113.6 202.3e 201.4 607.2],
+                               "this spell\" (it functions on the stack). `targets`: only a spell that targets something " \
+                               "matching this filter (\"self\": this permanent), e.g. {\"creature\": {\"controller\": " \
+                               "\"you\"}}. `from` / `not_from`: only a spell cast from (not from) that zone: hand | " \
+                               "graveyard | exile | library | outside.",
+                  rules: %w[603.2 601.2i 113.6 202.3e 201.4 607.2 115.1 601.2a 601.2c],
                   params: { "controller" => "you | opponent | any", "spell" => "creature | noncreature | instant_or_sorcery | filter",
-                            "name" => "\"chosen\"", "mana_value" => "\"chosen\"", "self" => "true" },
+                            "name" => "\"chosen\"", "mana_value" => "\"chosen\"", "self" => "true",
+                            "targets" => "\"self\" or a target filter", "from" => "zone", "not_from" => "zone" },
                   example: { "cast" => { "controller" => "you", "spell" => "noncreature" } }
 
         SPELLS = %w[creature noncreature instant_or_sorcery].freeze
 
-        def self.keys = %w[controller spell name mana_value self]
+        def self.keys = %w[controller spell name mana_value self targets from not_from]
         def event_class = Events::SpellCast
         def own_spell? = @self
 
@@ -36,6 +40,8 @@ module Enjine
           elsif raw then errors << "#{path}.spell: must be one of #{SPELLS.join(", ")} or a spell filter"
           end
           setup_chosen(params, errors, path)
+          setup_targets(params, errors, path)
+          @zones = CastFrom.build(params, errors, path)
         end
 
         def match?(engine, event, source)
@@ -43,9 +49,25 @@ module Enjine
 
           caster = engine.names.index(event.player)
           return false unless @controller == "any" || (@controller == "you") == (caster == source["controller"])
-          return false unless spell_ok?(engine, event, caster, source)
+          return false unless spell_ok?(engine, event, caster, source) && targets_ok?(engine, event, source)
+          return false unless @zones.match?((spell = engine.state.objects[event.object]) && engine.cast_origin(spell))
 
           chosen_ok?(engine, source, event.card, engine.state.objects[event.object]&.x)
+        end
+
+        # "A spell that targets this creature / a creature you control" (CR 115.1, 601.2c): one of the
+        # targets chosen as it was cast matches, relative to the trigger's source.
+        def setup_targets(params, errors, path)
+          raw = params["targets"]
+          @targets = raw == "self" ? :self : raw && Mechanics.build_entry(:filter, raw, errors, "#{path}.targets")
+        end
+
+        def targets_ok?(engine, event, source)
+          return true unless @targets
+
+          Array(event.targets).flatten.compact.uniq.any? do |ref|
+            @targets == :self ? ref == source["id"] : @targets.match_for?(engine, ref, source["controller"], source["id"])
+          end
         end
 
         def spell_ok?(engine, event, caster, source)
@@ -65,7 +87,13 @@ module Enjine
 
           kind = Triggers.filter_words(@filter) || @spell || "spell"
           "Whenever #{{ "you" => "you cast", "opponent" => "an opponent casts" }.fetch(@controller, "a player casts")} a #{kind}" \
-            "#{chosen_words}"
+            "#{@zones}#{target_words}#{chosen_words}"
+        end
+
+        def target_words
+          return "" unless @targets
+
+          " that targets #{@targets == :self ? "this" : Triggers.filter_words(@targets)}"
         end
       end
 

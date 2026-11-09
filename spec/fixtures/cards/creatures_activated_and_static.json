@@ -477,6 +477,144 @@
     ]
   },
   {
+    "name": "Graverunner Savant",
+    "mana_cost": "{1}{U}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "human",
+      "wizard"
+    ],
+    "power": 1,
+    "toughness": 3,
+    "abilities": [
+      {
+        "cost_modifier": {
+          "not_from": "hand",
+          "reduce": 1
+        }
+      }
+    ],
+    "rules_text": "Spells you cast from anywhere other than your hand cost {1} less to cast."
+  },
+  {
+    "name": "Echo Tactician",
+    "mana_cost": "{1}{U}{R}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "human",
+      "artificer"
+    ],
+    "power": 2,
+    "toughness": 2,
+    "abilities": [
+      {
+        "activated": {
+          "cost": [
+            {
+              "mana": "{1}"
+            },
+            "tap"
+          ],
+          "targets": [
+            {
+              "stack_ability": {
+                "controller": "you"
+              }
+            }
+          ],
+          "effects": [
+            {
+              "copy_spell": {
+                "of": {
+                  "target": 0
+                },
+                "new_targets": true
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "{1}, {T}: Copy target activated or triggered ability you control. You may choose new targets for the copy."
+  },
+  {
+    "name": "Counter Tender",
+    "mana_cost": "{1}{G}{U}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "elf",
+      "druid"
+    ],
+    "power": 1,
+    "toughness": 3,
+    "abilities": [
+      {
+        "activated": {
+          "cost": [
+            {
+              "mana": "{1}"
+            },
+            "tap"
+          ],
+          "effects": [
+            {
+              "proliferate": {}
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "{1}, {T}: Proliferate."
+  },
+  {
+    "name": "Coinflip Gambler",
+    "mana_cost": "{1}{R}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "goblin",
+      "rogue"
+    ],
+    "power": 2,
+    "toughness": 1,
+    "abilities": [
+      {
+        "activated": {
+          "cost": [
+            {
+              "mana": "{1}"
+            },
+            "tap"
+          ],
+          "effects": [
+            {
+              "flip_coins": {}
+            },
+            {
+              "draw": {
+                "amount": 1,
+                "if": {
+                  "amount": {
+                    "this_way": 0
+                  },
+                  "at_least": 1
+                }
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "{1}, {T}: Flip a coin. If you win the flip, draw a card."
+  },
+  {
     "name": "Vanguard Marshal",
     "mana_cost": "{1}{R}{W}",
     "types": [
