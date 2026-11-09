@@ -43,6 +43,8 @@ RSpec.describe "Emblems (CR 114)" do
     expect(view).to eq([{ "id" => emblem.id, "kind" => "emblem", "owner" => "alice",
                           "abilities" => [engine(game).chars(emblem).abilities.first.ability.to_s] }])
     expect(Enjine::Game.import(game.export, catalog: game.catalog).state.to_h).to eq(game.state.to_h)
+    entry = Enjine::HistoryEntry.new(seq: 0, turn: 3, step: "x", player: nil, kind: nil, option: nil, events: [])
+    expect(Enjine::RulesMonitor.new(game).check!(entry)).to be_empty # the monitor counts the emblem's pump
   end
 
   it "an emblem's triggered ability triggers and 'this emblem' is the source (CR 114.4, 113.6p)" do

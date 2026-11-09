@@ -171,5 +171,16 @@ RSpec.describe "Damage replacement, redirection and prevention (CR 614.1a, 614.9
       expect(engine(game).deal_damage!(nil, "player:alice", 2)).to eq(2)
       expect(game.state.effects.last).to include("remaining" => 3)
     end
+
+    it "a shield counter doesn't prevent damage that can't be prevented, but is still removed (CR 122.1c, 615.12)" do
+      game = build_game(catalog) do
+        turn 3, active: "alice", step: :precombat_main
+        player("alice") { battlefield "Grizzly Bears", counters: { "shield" => 1 } }
+        player("bob") { battlefield "Grudge Spoiler" }
+      end
+      bears = game.state.object(id(game, "Grizzly Bears"))
+      expect(engine(game).deal_damage!(id(game, "Grudge Spoiler"), bears.id, 1)).to eq(1)
+      expect([bears.damage, bears.counters.fetch("shield", 0)]).to eq([1, 0])
+    end
   end
 end

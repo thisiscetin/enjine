@@ -172,13 +172,7 @@ module Enjine
       # A replacement may create several instead ("twice that many", CR 614.1a): the extra ones are part of the
       # replaced event (`replaced`), so the replacement effects don't apply to them again (CR 614.5).
       def create_token!(definition, controller, tapped: false, memory: nil, enters: nil, replaced: false)
-        unless replaced
-          data = propose("create_token", { "player" => controller, "token" => definition.id, "count" => 1 }).data
-          definition = catalog.fetch(data["token"])
-          (data["count"] - 1).times do
-            create_token!(definition, controller, tapped:, memory: memory && Snapshot.deep_copy(memory), enters:, replaced: true)
-          end
-        end
+        definition = replace_token_creation!(definition, controller, tapped:, memory:, enters:) unless replaced
         obj = create_object(definition.id, controller, :battlefield)
         obj.memory.merge!(memory) if memory
         entering = enters # an "as this enters" choice made before it's created (CR 614.12a)
@@ -200,6 +194,17 @@ module Enjine
                                      from: "none", to: "battlefield", reason: "create_token")
         prepare!(obj) if enters["prepared"] # CR 723.3a (Engine::Faces)
         obj
+      end
+
+      # The create_token replacements (CR 614.1a): the token definition to create, after creating the extra
+      # ones a "twice that many" replacement adds.
+      def replace_token_creation!(definition, controller, memory:, **)
+        data = propose("create_token", { "player" => controller, "token" => definition.id, "count" => 1 }).data
+        definition = catalog.fetch(data["token"])
+        (data["count"] - 1).times do
+          create_token!(definition, controller, memory: memory && Snapshot.deep_copy(memory), replaced: true, **)
+        end
+        definition
       end
 
       # CR 121.2: one card at a time. A replacement may turn one draw into several (CR 614.11); those

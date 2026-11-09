@@ -133,12 +133,13 @@ module Enjine
         "battlefield" => battlefield.dup, "stack" => stack.dup, "exile" => exile.dup, "phased_out" => phased_out.dup,
         "command" => (command || []).dup,
         "attackers" => attackers.dup, "blockers" => blockers.dup, "effects" => effects.map { deep_dup(it) },
-        "frames" => deep_dup(frames), "pending_triggers" => deep_dup(pending_triggers),
-        "delayed_triggers" => deep_dup(delayed_triggers), "extra_turns" => deep_dup(extra_turns),
-        "extra_phases" => deep_dup(extra_phases),
+        **DEEP_FIELDS.to_h { [it, deep_dup(public_send(it))] },
         "repeat_cleanup" => repeat_cleanup, "combat_damage_pass" => combat_damage_pass,
         "attacks_declared" => attacks_declared }.merge("outside_lists" => (outside_lists || []).map(&:dup))
     end
+
+    # Nested fields #to_h deep-copies as they are.
+    DEEP_FIELDS = %w[frames pending_triggers delayed_triggers extra_turns extra_phases].freeze
 
     # An independent deep copy, about 10x faster than a Marshal round trip. It walks every
     # instance variable, so fields added later are copied automatically. Strings, symbols,

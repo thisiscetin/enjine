@@ -189,7 +189,6 @@ module Enjine
         when "emblem_created" then "#{ev["player"]} gets an emblem from #{card_name(ev["card"])}"
         when "player_counters_changed" then "#{ev["player"]}: #{ev["counter"]} counters #{ev["from"]} → #{ev["to"]}"
         when "speed_changed" then "#{ev["player"]}: speed #{ev["from"]} → #{ev["to"]}"
-        when "player_counters_changed" then "#{ev["player"]}: #{ev["counter"]} counters #{ev["from"]} → #{ev["to"]}"
         when "coin_flipped"
           "#{ev["player"]} flips #{ev["heads"] ? "heads" : "tails"}#{{ true => " and wins", false => " and loses" }[ev["won"]]}"
         when "keyword_action" then "#{ev["player"]} #{ev["action"].to_s.tr("_", " ")}#{" #{ev["amount"]}" if ev["amount"]}"

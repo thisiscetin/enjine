@@ -174,6 +174,14 @@ RSpec.describe "Stack, cast filters and randomness" do
       expect(game.state.players[1].poison).to eq(4)
     end
 
+    it "gives a chosen player another counter of each kind they have, not only poison (CR 122.1)" do
+      game = board(battlefield: ["Counter Tender"], poison: 1, mana: { C: 1 })
+      game.state.players[1].counters = { "experience" => 2 }
+      play(game, { type: "activate", object: obj_id(game, "Counter Tender"), ability: "printed:0" },
+           ->(g) { g.legal_options.find { it[:object] == "player:bob" } })
+      expect([game.state.players[1].poison, game.state.players[1].counters]).to eq([2, { "experience" => 3 }])
+    end
+
     it "\"that player gets two poison counters\"; ten poison counters lose the game (CR 704.5c)" do
       game = build_game do
         turn 3, active: "alice", step: :beginning_of_combat

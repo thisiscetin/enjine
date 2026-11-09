@@ -45,6 +45,8 @@ module Enjine
 
     # A permanent's printed abilities, the abilities of its unlocked symbols in their place.
     def abilities_of(obj)
+      return defn(obj.card).effect_granted(obj.ability).map(&:ability) if obj.kind == "emblem" # CR 114.3
+
       defn(obj.card).abilities.reject { UNLOCKABLE.include?(it.kind) } + unlocked(obj).flat_map(&:nested_abilities)
     end
 
@@ -174,11 +176,14 @@ module Enjine
       applying_statics(obj).any?(&:loses_abilities?)
     end
 
-    # The static abilities of permanents on the battlefield that apply to `obj` now, matched on printed types.
+    # Permanents and emblems, whose static abilities function in the command zone (CR 114.4).
+    def static_holders = state.battlefield + (state.command || [])
+
+    # The static abilities of permanents on the battlefield and emblems that apply to `obj` now, matched on printed types.
     def applying_statics(obj)
       engine = @game.instance_variable_get(:@engine)
       facts = facts(obj, defn(obj.card))
-      state.battlefield.flat_map do |id|
+      static_holders.flat_map do |id|
         source = state.objects[id]
         abilities_of(source).select do |ability|
           ability.kind == :static && ability.affects?(obj, source, facts) && ability.active?(engine, source)
@@ -281,7 +286,7 @@ module Enjine
     # primitives' own; which creatures get the bonus is decided here from printed types and raw counters.
     def static_pumps
       engine = @game.instance_variable_get(:@engine)
-      state.battlefield.flat_map do |id|
+      static_holders.flat_map do |id|
         source = state.objects[id]
         abilities_of(source).filter_map do |ability|
           next unless ability.kind == :static && ability.pump? && !ability.attached? && ability.active?(engine, source)
