@@ -11,12 +11,13 @@ RSpec.describe "Mana spent to cast a spell (CR 601.2h, 207.2c) and prowess (CR 7
     [
       { "name" => "Spec Prism Burst", "mana_cost" => "{2}{R}", "types" => ["instant"],
         "abilities" => [{ "spell" => { "targets" => ["any_target"],
-                                       "effects" => [{ "deal_damage" => { "amount" => spent(colors: true), "to" => { "target" => 0 } } }] } }] },
+                                       "effects" => [{ "deal_damage" => { "amount" => spent(colors: true),
+                                                                          "to" => { "target" => 0 } } }] } }] },
       { "name" => "Spec Dawn Herald", "mana_cost" => "{1}{W/G}{W/G}", "types" => ["creature"], "power" => 2, "toughness" => 2,
         "abilities" => [{ "triggered" => { "when" => { "enters" => {} },
                                            "if" => { "amount" => spent(color: "W"), "at_least" => 2 },
                                            "effects" => [{ "gain_life" => { "amount" => 3 } }] } }] },
-      { "name" => "Spec Tally Golem", "mana_cost" => "{X}", "types" => ["artifact", "creature"], "power" => 0, "toughness" => 0,
+      { "name" => "Spec Tally Golem", "mana_cost" => "{X}", "types" => %w[artifact creature], "power" => 0, "toughness" => 0,
         "abilities" => [{ "enters_with_counters" => { "counters" => { "+1/+1" => spent } } }] },
       { "name" => "Spec Grand Listener", "mana_cost" => "{1}{U}", "types" => ["creature"], "power" => 1, "toughness" => 1,
         "abilities" => [{ "triggered" => { "when" => { "cast" => { "controller" => "you", "spell" => "noncreature" } },
@@ -54,9 +55,9 @@ RSpec.describe "Mana spent to cast a spell (CR 601.2h, 207.2c) and prowess (CR 7
     end
   end
 
-  def cast(game, card, player: "alice", x: nil, target: nil, pay: [])
+  def cast(game, card, player: "alice", x_value: nil, target: nil, pay: [])
     game.submit(type: "cast", object: ids_in(game, player, :hand).find { game.state.object(it).card == Enjine::CardDefinition.slug(card) })
-    game.submit(type: "x", value: x) if x
+    game.submit(type: "x", value: x_value) if x_value
     game.submit(type: "target", target: target) if target
     pay.each { game.submit(type: "pay_mana", mana: it) }
   end
@@ -95,7 +96,7 @@ RSpec.describe "Mana spent to cast a spell (CR 601.2h, 207.2c) and prowess (CR 7
 
     it "enters with counters equal to the amount spent, and a snapshot keeps it" do
       game = board(hand: ["Spec Tally Golem"], pool: { C: 3 })
-      cast(game, "Spec Tally Golem", x: 3, pay: %w[C C C])
+      cast(game, "Spec Tally Golem", x_value: 3, pay: %w[C C C])
       resolve_all(game)
       golem = game.state.object(obj_id(game, "Spec Tally Golem"))
       expect(golem.counters).to eq("+1/+1" => 3)

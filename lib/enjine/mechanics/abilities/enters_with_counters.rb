@@ -27,8 +27,7 @@ module Enjine
           Mechanics.check_keys(params, %w[counters affects], errors, path)
           affects = Mechanics.fetch_param(params, :affects)
           counters = read_counters(Mechanics.fetch_param(params, :counters), errors, "#{path}.counters", amounts: affects.nil?)
-          amounts = counters.reject { |_, n| n.is_a?(Integer) }
-          counters = counters.select { |_, n| n.is_a?(Integer) }
+          counters, amounts = counters.partition { |_, n| n.is_a?(Integer) }.map(&:to_h)
           return new(counters, nil, nil, amounts) if affects.nil?
 
           unless affects.is_a?(Hash) && affects["each"]

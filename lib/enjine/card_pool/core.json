@@ -8535,5 +8535,476 @@
         }
       }
     ]
+  },
+  {
+    "name": "Prism Tide Caller",
+    "mana_cost": "{2}{G}{U}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "elemental"
+    ],
+    "power": 1,
+    "toughness": 1,
+    "abilities": [
+      {
+        "enters_with_counters": {
+          "counters": {
+            "+1/+1": {
+              "mana_spent": {
+                "colors": true
+              }
+            }
+          }
+        }
+      },
+      {
+        "triggered": {
+          "when": {
+            "enters": {}
+          },
+          "if": {
+            "amount": {
+              "mana_spent": {
+                "color": "U"
+              }
+            },
+            "at_least": 2
+          },
+          "effects": [
+            {
+              "draw": {
+                "amount": 1
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "Converge — This creature enters with a +1/+1 counter on it for each color of mana spent to cast it. When it enters, if {U}{U} was spent to cast it, draw a card."
+  },
+  {
+    "name": "Spectrum Lash",
+    "mana_cost": "{2}{R}",
+    "types": [
+      "instant"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "targets": [
+            "any_target"
+          ],
+          "effects": [
+            {
+              "deal_damage": {
+                "amount": {
+                  "plus": [
+                    1,
+                    {
+                      "mana_spent": {
+                        "colors": true
+                      }
+                    }
+                  ]
+                },
+                "to": {
+                  "target": 0
+                }
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "Spectrum Lash deals 1 damage plus 1 for each color of mana spent to cast it to any target."
+  },
+  {
+    "name": "Grand Audience",
+    "mana_cost": "{1}{U}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "human",
+      "wizard"
+    ],
+    "power": 1,
+    "toughness": 3,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "cast": {
+              "controller": "you",
+              "spell": "noncreature"
+            }
+          },
+          "if": {
+            "amount": {
+              "mana_spent": {
+                "of": {
+                  "triggering": "object"
+                }
+              }
+            },
+            "at_least": 3
+          },
+          "effects": [
+            {
+              "add_counters": {
+                "counter": "+1/+1",
+                "amount": 1,
+                "to": "self"
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "Whenever you cast a noncreature spell, if at least three mana was spent to cast it, put a +1/+1 counter on this creature."
+  },
+  {
+    "name": "Ember Pupil",
+    "mana_cost": "{1}{R}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "human",
+      "monk"
+    ],
+    "keywords": [
+      "prowess"
+    ],
+    "power": 2,
+    "toughness": 1,
+    "rules_text": "Prowess"
+  },
+  {
+    "name": "Thornrot Bargain",
+    "mana_cost": "{1}{B}",
+    "types": [
+      "instant"
+    ],
+    "abilities": [
+      {
+        "additional_cost": {
+          "cost": [
+            {
+              "blight": {
+                "amount": 1
+              }
+            }
+          ]
+        }
+      },
+      {
+        "spell": {
+          "targets": [
+            "creature"
+          ],
+          "effects": [
+            {
+              "add_counters": {
+                "counter": "-1/-1",
+                "amount": 3,
+                "to": {
+                  "target": 0
+                }
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "As an additional cost to cast this spell, blight 1. Put three -1/-1 counters on target creature."
+  },
+  {
+    "name": "Hollow Hedge Witch",
+    "mana_cost": "{2}{B}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "elf",
+      "warlock"
+    ],
+    "power": 3,
+    "toughness": 3,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "enters": {}
+          },
+          "effects": [
+            {
+              "may": {
+                "effects": [
+                  {
+                    "blight": {
+                      "amount": 1
+                    }
+                  }
+                ],
+                "then": [
+                  {
+                    "blight": {
+                      "amount": 1,
+                      "to": "each_opponent"
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "When this creature enters, you may blight 1. If you do, each opponent blights 1."
+  },
+  {
+    "name": "Velvet Informant",
+    "mana_cost": "{1}{U}{B}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "human",
+      "rogue"
+    ],
+    "power": 2,
+    "toughness": 2,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "enters": {}
+          },
+          "effects": [
+            {
+              "connive": {}
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "When this creature enters, it connives."
+  },
+  {
+    "name": "Harbor Muster",
+    "mana_cost": "{1}{W}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "human",
+      "soldier"
+    ],
+    "power": 1,
+    "toughness": 2,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "enters": {}
+          },
+          "effects": [
+            {
+              "recruit": {}
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "When this creature enters, recruit."
+  },
+  {
+    "name": "Warren Drumbeat",
+    "mana_cost": "{2}{B}",
+    "types": [
+      "sorcery"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "effects": [
+            {
+              "amass": {
+                "subtype": "goblin",
+                "amount": 2
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "Amass Goblins 2."
+  },
+  {
+    "name": "Lecture Hall Echo",
+    "mana_cost": "{1}{U}",
+    "types": [
+      "instant"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "effects": [
+            {
+              "draw": {
+                "amount": 1
+              }
+            },
+            {
+              "empower_jace": {
+                "amount": 2
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "Draw a card. Empower Jace 2."
+  },
+  {
+    "name": "Steppe Holdout",
+    "mana_cost": "{1}{W}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "human",
+      "warrior"
+    ],
+    "power": 2,
+    "toughness": 1,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "enters": {}
+          },
+          "effects": [
+            {
+              "endure": {
+                "amount": 1
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "When this creature enters, it endures 1."
+  },
+  {
+    "name": "Squire's Longsword",
+    "mana_cost": "{2}",
+    "types": [
+      "artifact"
+    ],
+    "subtypes": [
+      "equipment"
+    ],
+    "keywords": [
+      "job_select"
+    ],
+    "abilities": [
+      {
+        "static": {
+          "affects": "attached",
+          "pump": {
+            "power": 1,
+            "toughness": 1
+          }
+        }
+      },
+      {
+        "equip": {
+          "cost": [
+            {
+              "mana": "{2}"
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "Job select. Equipped creature gets +1/+1. Equip {2}"
+  },
+  {
+    "name": "Horde Banner Bearer",
+    "mana_cost": "{2}{R}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "orc",
+      "warrior"
+    ],
+    "power": 2,
+    "toughness": 2,
+    "abilities": [
+      {
+        "mobilize": {
+          "amount": 1
+        }
+      }
+    ],
+    "rules_text": "Mobilize 1"
+  },
+  {
+    "name": "Ashfall Sentry",
+    "mana_cost": "{2}{R}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "human",
+      "soldier"
+    ],
+    "power": 2,
+    "toughness": 3,
+    "abilities": [
+      {
+        "firebending": {
+          "amount": 2
+        }
+      }
+    ],
+    "rules_text": "Firebending 2"
+  },
+  {
+    "name": "Goblin Warcry",
+    "mana_cost": "{R}",
+    "types": [
+      "kindred",
+      "instant"
+    ],
+    "subtypes": [
+      "goblin"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "targets": [
+            "creature"
+          ],
+          "effects": [
+            {
+              "pump": {
+                "power": 2,
+                "toughness": 0,
+                "to": {
+                  "target": 0
+                }
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "Target creature gets +2/+0 until end of turn."
   }
 ]

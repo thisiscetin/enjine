@@ -14,7 +14,8 @@ module Enjine
                   example: { "name" => "Example Goblin Gambit", "mana_cost" => "{R}", "types" => %w[kindred sorcery],
                              "subtypes" => ["goblin"],
                              "abilities" => [{ "spell" => { "targets" => ["any_target"],
-                                                            "effects" => [{ "deal_damage" => { "amount" => 1, "to" => { "target" => 0 } } }] } }] }
+                                                            "effects" => [{ "deal_damage" => { "amount" => 1,
+                                                                                               "to" => { "target" => 0 } } }] } }] }
 
         def self.permanent? = false
         def self.playable_as_land? = false

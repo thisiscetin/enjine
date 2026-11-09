@@ -28,7 +28,7 @@ module Enjine
                           spells_cast_this_game].freeze
       ARITHMETIC = %w[times plus divide].freeze
       KINDS = (SELECTOR_KINDS + ARITHMETIC + %w[counters spells_cast_this_turn died_this_turn entered_this_turn this_way
-                                                 mana_spent]).freeze
+                                                mana_spent]).freeze
       # Player history counters: kind -> turn_log/game_log key.
       HISTORY = { "life_gained_this_turn" => "life_gained", "life_lost_this_turn" => "life_lost",
                   "dilemmas_this_turn" => "dilemmas", "returned_this_turn" => "returned" }.freeze

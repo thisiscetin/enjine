@@ -63,8 +63,10 @@ module Enjine
           :done
         end
 
-        def to_s = "create #{amount} #{definition&.name} token#{"s" if amount != 1}#{" tapped" if tapped}" \
-                   "#{" attacking" if attacking} → #{to}"
+        def to_s
+          "create #{amount} #{definition&.name} token#{"s" if amount != 1}#{" tapped" if tapped}" \
+            "#{" attacking" if attacking} → #{to}"
+        end
 
         # CR 508.4, 506.3b: tokens enter attacking only under the attacking player's control, in combat.
         def attacks?(engine, index) = attacking && engine.state.active == index && ATTACK_STEPS.include?(engine.state.step)

@@ -40,7 +40,12 @@ module Enjine
               return ask(engine, locals, index, "Endure #{@n}: put #{@n} +1/+1 counters on it, or create a #{@n}/#{@n} Spirit?",
                          [{ "type" => "counters", "object" => id }, { "type" => "spirit" }])
             end
-            answer&.[]("type") == "counters" ? engine.add_counters!(perm, "+1/+1", @n, by_player: index) : engine.create_token!(@spirit, index)
+            if answer&.[]("type") == "counters"
+              engine.add_counters!(perm, "+1/+1", @n,
+                                   by_player: index)
+            else
+              engine.create_token!(@spirit, index)
+            end
             queue.shift
             locals.delete("answers")
           end

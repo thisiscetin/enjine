@@ -20,7 +20,7 @@ module Enjine
           data = data.is_a?(Hash) ? data.transform_keys(&:to_s) : {}
           Mechanics.check_keys(data, %w[of color colors], errors, path)
           of = Selector.build(data.fetch("of", "self"), errors, "#{path}.of", targets_count: targets_count,
-                                                                                results_count: results_count)
+                                                                              results_count: results_count)
           errors << "#{path}.of: must be #{OF}" if of && !(%i[self target].include?(of.kind) || of.value == "object")
           color = data["color"]
           errors << "#{path}.color: must be one of #{Mana::TYPES.join(", ")}" unless color.nil? || Mana::TYPES.map(&:to_s).include?(color)
@@ -29,15 +29,15 @@ module Enjine
           new(of, color, data["colors"] == true)
         end
 
-        def initialize(of, color, colors)
-          @of = of
+        def initialize(whose, color, colors)
+          @of = whose
           @color = color
           @colors = colors
           freeze
         end
 
         def value(engine, ctx)
-          spent = ManaSpent.spent(engine, ctx, @of&.kind, @of&.value) || []
+          spent = ManaSpent.spent(engine, ctx, @of) || []
           return (spent.uniq & Keywords::Sunburst::COLORS).size if @colors
           return spent.count(@color) if @color
 
@@ -52,10 +52,10 @@ module Enjine
           "#{what} spent to cast #{@of&.kind == :self ? "it" : @of}"
         end
 
-        # The mana types spent on the object `kind` names, or nil when none was recorded.
-        def self.spent(engine, ctx, kind, index)
-          case kind
-          when :target then engine.state.objects[ctx.targets&.[](index)]&.mana_spent
+        # The mana types spent on the object `whose` (the `of` selector) names, or nil when none was recorded.
+        def self.spent(engine, ctx, whose)
+          case whose&.kind
+          when :target then engine.state.objects[ctx.targets&.[](whose.value)]&.mana_spent
           when :triggering then Selector.memory(engine, ctx).dig("triggering", "mana_spent")
           else own(engine, ctx)
           end

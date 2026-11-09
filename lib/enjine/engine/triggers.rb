@@ -171,16 +171,13 @@ module Enjine
 
         found = Mechanics::Triggers.occurrences(trigger, self, event, source)
         return if found.empty?
+
         # CR 603.4: an intervening "if" is checked for each trigger event, and may ask about it ("that spell")
         found = found.select { ability.condition_met?(self, source["controller"], source["id"], facts: it) }
         return if found.empty?
         return if once_each_turn_used!(ability, inst.ref, source)
 
-        source_memory = state.objects[source["id"]]&.memory || {}
-        memory = source_memory["cast"] ? { "source_cast" => true } : {}
-        memory["kicked"] = true if source_memory["kicked"] # CR 702.33d: a kicked permanent's "if it was kicked"
-        spent = state.objects[source["id"]]&.mana_spent
-        memory["source_mana_spent"] = spent.dup if spent # CR 601.2h: what was spent to cast its source
+        memory = memory_of_source(state.objects[source["id"]])
         batch = trigger.respond_to?(:batched?) && trigger.batched? ? event_batch : nil
         times = 1 + additional_triggers(event, source)
         card, ref = granted_origin(inst.ref) # a granted ability lives in the granting card's data (CR 613.1f)
@@ -192,6 +189,16 @@ module Enjine
             queue_pending_trigger!(queued, event, memory.merge("triggering" => facts), batch: batch)
           end
         end
+      end
+
+      # What a triggered ability remembers about its source: that it was cast (CR 400.7d), kicked (CR 702.33d)
+      # and the mana spent to cast it (CR 601.2h), for when the source has left.
+      def memory_of_source(obj)
+        source_memory = obj&.memory || {}
+        memory = source_memory["cast"] ? { "source_cast" => true } : {}
+        memory["kicked"] = true if source_memory["kicked"]
+        memory["source_mana_spent"] = obj.mana_spent.dup if obj&.mana_spent
+        memory
       end
 
       # A once-each-turn limit: remembered on the source object, so the same card
