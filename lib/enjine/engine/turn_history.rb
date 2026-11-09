@@ -53,6 +53,9 @@ module Enjine
       # Whether the permanent attacked this turn (CR 508.1).
       def attacked_this_turn?(id) = !turned_memory(state.objects[id], "attacked").nil?
 
+      # Whether the permanent entered the battlefield this turn (memory "entered", stamped as it enters).
+      def entered_this_turn?(obj) = obj.memory["entered"] == state.turn
+
       # CR 608.2h: a permanent leaving the battlefield is remembered as it last existed by the abilities it
       # is the source of (on the stack, being activated or waiting to be put on the stack: "source_lki" in
       # their memory) and by the spell or ability resolving now ("its controller" of a destroyed target).
@@ -163,7 +166,7 @@ module Enjine
         source_memory = obj&.memory || {}
         memory = source_memory["cast"] ? { "source_cast" => true } : {}
         memory["kicked"] = true if source_memory["kicked"] # CR 702.33d: a kicked permanent's "if it was kicked"
-        memory.merge!(source_memory.slice("cast_from", "cast_with")) # "if its evoke cost was paid" (Engine::AltCasting)
+        memory.merge!(source_memory.slice("cast_from", "cast_with", "kicked_with")) # "if its evoke cost was paid" (Engine::AltCasting)
         memory["source_mana_spent"] = obj.mana_spent.dup if obj&.mana_spent
         lki = last_known(source["id"])
         memory["source_lki"] = last_known_memory(lki) if lki

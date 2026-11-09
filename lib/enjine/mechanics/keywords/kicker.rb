@@ -50,6 +50,8 @@ module Enjine
                   example: { "kicker" => { "cost" => [{ "mana" => "{1}{U}" }] } }
 
         def kind = :kicker
+        # Recorded as the spell's "kicked_with".
+        def keyword = self.class.primitive_name.to_s
         def to_s = "Kicker #{costs.join(", ")}"
       end
 

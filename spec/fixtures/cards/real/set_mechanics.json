@@ -1,0 +1,278 @@
+[
+  {
+    "name": "Aerial Doombot",
+    "mana_cost": "{U}",
+    "types": [
+      "artifact",
+      "creature"
+    ],
+    "subtypes": [
+      "robot",
+      "villain"
+    ],
+    "power": 1,
+    "toughness": 1,
+    "keywords": [
+      "flying"
+    ],
+    "abilities": [
+      {
+        "activated": {
+          "power_up": true,
+          "cost": [
+            {
+              "mana": "{5}{U}"
+            }
+          ],
+          "effects": [
+            {
+              "add_counters": {
+                "counter": "+1/+1",
+                "amount": 3,
+                "to": "self"
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "common",
+    "printing": {
+      "set": "msh",
+      "number": "43"
+    }
+  },
+  {
+    "name": "Brave Brawler",
+    "mana_cost": "{1}{W}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "human",
+      "warrior",
+      "hero"
+    ],
+    "power": 2,
+    "toughness": 1,
+    "keywords": [
+      "lifelink"
+    ],
+    "abilities": [
+      {
+        "activated": {
+          "power_up": true,
+          "cost": [
+            {
+              "mana": "{4}{W}"
+            }
+          ],
+          "effects": [
+            {
+              "add_counters": {
+                "counter": "+1/+1",
+                "amount": 2,
+                "to": "self"
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "common",
+    "printing": {
+      "set": "msh",
+      "number": "8"
+    }
+  },
+  {
+    "name": "Cruel Alliance",
+    "mana_cost": "{2}{B}",
+    "types": [
+      "sorcery"
+    ],
+    "abilities": [
+      {
+        "teamwork": {
+          "power": 2
+        }
+      },
+      {
+        "spell": {
+          "targets": [
+            {
+              "creature": {
+                "mana_value": {
+                  "at_most": 3
+                }
+              }
+            }
+          ],
+          "kicked_targets": [
+            "creature"
+          ],
+          "effects": [
+            {
+              "exile": {
+                "to": {
+                  "target": 0
+                }
+              }
+            },
+            {
+              "gain_life": {
+                "amount": 3,
+                "if": {
+                  "cast_with": "teamwork"
+                }
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "common",
+    "printing": {
+      "set": "msh",
+      "number": "92"
+    }
+  },
+  {
+    "name": "The Kingpin of Crime",
+    "mana_cost": "{1}{W}{B}",
+    "types": [
+      "creature"
+    ],
+    "supertypes": [
+      "legendary"
+    ],
+    "subtypes": [
+      "human",
+      "villain"
+    ],
+    "power": 1,
+    "toughness": 5,
+    "keywords": [
+      "extort"
+    ],
+    "rarity": "rare",
+    "printing": {
+      "set": "msh",
+      "number": "220"
+    }
+  },
+  {
+    "name": "Hungry Graffalon",
+    "mana_cost": "{3}{G}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "giraffe"
+    ],
+    "power": 3,
+    "toughness": 4,
+    "keywords": [
+      "reach",
+      "increment"
+    ],
+    "rarity": "common",
+    "printing": {
+      "set": "sos",
+      "number": "151"
+    }
+  },
+  {
+    "name": "Luminollusk",
+    "mana_cost": "{3}{G}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "elemental"
+    ],
+    "power": 2,
+    "toughness": 4,
+    "keywords": [
+      "deathtouch"
+    ],
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "enters": {}
+          },
+          "effects": [
+            {
+              "gain_life": {
+                "amount": {
+                  "distinct_colors": {
+                    "each": "permanent",
+                    "controller": "you"
+                  }
+                }
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "uncommon",
+    "printing": {
+      "set": "ecl",
+      "number": "179"
+    }
+  },
+  {
+    "name": "Shimmercreep",
+    "mana_cost": "{4}{B}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "elemental"
+    ],
+    "power": 3,
+    "toughness": 5,
+    "keywords": [
+      "menace"
+    ],
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "enters": {}
+          },
+          "effects": [
+            {
+              "lose_life": {
+                "amount": {
+                  "distinct_colors": {
+                    "each": "permanent",
+                    "controller": "you"
+                  }
+                },
+                "to": "each_opponent"
+              }
+            },
+            {
+              "gain_life": {
+                "amount": {
+                  "distinct_colors": {
+                    "each": "permanent",
+                    "controller": "you"
+                  }
+                }
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "uncommon",
+    "printing": {
+      "set": "ecl",
+      "number": "120"
+    }
+  }
+]

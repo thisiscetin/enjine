@@ -198,6 +198,20 @@ Rules: CR 702.4b, CR 510.4
 }
 ```
 
+## extort
+
+Whenever you cast a spell, you may pay {W/B}. If you do, each opponent loses 1 life and you gain life equal to the total life lost this way.
+
+Rules: CR 702.101a, CR 702.101b, CR 118.12
+
+```json
+{
+  "keywords": [
+    "extort"
+  ]
+}
+```
+
 ## first_strike
 
 Deals combat damage in a first combat damage step, before creatures without first strike.
@@ -264,6 +278,20 @@ Rules: CR 702.11b
 {
   "keywords": [
     "hexproof"
+  ]
+}
+```
+
+## increment
+
+Whenever you cast a spell, if this is a creature and the mana spent to cast that spell is greater than its power or its toughness, put a +1/+1 counter on it.
+
+Rules: CR 702.191a, CR 702.191b, CR 603.4
+
+```json
+{
+  "keywords": [
+    "increment"
   ]
 }
 ```

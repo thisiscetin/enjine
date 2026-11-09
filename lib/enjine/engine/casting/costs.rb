@@ -13,7 +13,7 @@ module Enjine
       def total_cost(index, cost, spell: nil, ability: nil, source: nil, x_value: 0, targets: nil)
         return nil if cost.nil?
 
-        cost = cost.with_x(x_value)
+        cost = Mechanics::Keywords::PowerUp.reduced(self, cost.with_x(x_value), ability, source) # CR 702.193a
         change = cost_change(index, spell, ability, source, targets)
         change.zero? ? cost : cost.with(generic: [cost.generic + change, 0].max)
       end

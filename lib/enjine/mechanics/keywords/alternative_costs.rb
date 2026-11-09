@@ -282,12 +282,15 @@ module Enjine
       class CastHow
         KEYS = %w[cast_with cast_from cast_with_this_turn].freeze
         KEYWORDS = %w[flashback harmonize mayhem warp evoke web_slinging sneak].freeze
+        # Optional additional costs announced as the spell is cast (Engine::CastChoices#announce_kicker!):
+        # "if this spell was cast using teamwork" (CR 702.194b).
+        OPTIONAL = %w[teamwork].freeze
         ZONES = %w[hand graveyard exile library outside].freeze
 
         def self.build(key, data, errors, path)
           Mechanics.check_keys(data, [key], errors, path)
           value = data[key]
-          allowed = key == "cast_from" ? ZONES : KEYWORDS
+          allowed = { "cast_from" => ZONES, "cast_with" => KEYWORDS + OPTIONAL }.fetch(key, KEYWORDS)
           errors << "#{path}.#{key}: must be one of #{allowed.join(", ")}" unless allowed.include?(value)
           new(key, value)
         end
@@ -302,12 +305,14 @@ module Enjine
           return engine.cast_with_this_turn?(@value) if @key == "cast_with_this_turn"
 
           holder = engine.state.objects[ctx.object || ctx.source]
+          return holder&.memory&.[]("kicked_with") == @value if OPTIONAL.include?(@value)
+
           holder&.memory&.[](@key) == @value
         end
 
         def to_s
           case @key
-          when "cast_with" then "its #{@value.tr("_", "-")} cost was paid"
+          when "cast_with" then OPTIONAL.include?(@value) ? "it was cast using #{@value}" : "its #{@value.tr("_", "-")} cost was paid"
           when "cast_from" then "it was cast from #{@value == "hand" ? "a hand" : "a #{@value}"}"
           else "a spell was cast with #{@value.tr("_", "-")} this turn"
           end

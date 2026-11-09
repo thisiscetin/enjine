@@ -215,7 +215,7 @@ RSpec.describe "Delayed triggers, optional effects, results and \"if you cast it
       game = game_with("Herald of Arrival")
       cast(game, "Herald of Arrival")
       pass_both(game)
-      expect(game.state.object(obj_id(game, "Herald of Arrival")).memory).to eq("cast" => true, "cast_from" => "hand")
+      expect(game.state.object(obj_id(game, "Herald of Arrival")).memory).to eq("cast" => true, "cast_from" => "hand", "entered" => 3)
       expect(game.view_for(:observer)["stack"].map { it["name"] }).to eq(["Herald of Arrival ability"])
       pass_both(game)
       expect(ids_in(game, "alice", :hand).size).to eq(1)

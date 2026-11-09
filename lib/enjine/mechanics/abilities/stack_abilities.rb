@@ -283,13 +283,19 @@ module Enjine
                                "turns; `limit: \"once_each_turn\"` to one activation per turn; `only_if` to when a " \
                                "condition holds. `zone` (\"exile\", \"graveyard\" or \"hand\") makes it function only " \
                                "while its card is in that zone (\"activate only if this card is exiled\"). `exhaust: " \
-                               "true` makes it an exhaust ability: it can be activated only once (CR 702.177a).",
-                  rules: %w[602.1 602.2 602.5b 602.5d 702.177a],
+                               "true` makes it an exhaust ability: it can be activated only once (CR 702.177a). " \
+                               "`power_up: true` makes it a power-up ability: activate only once, and if the " \
+                               "permanent entered this turn its cost is reduced by the permanent's mana cost " \
+                               "(CR 702.193). `boast: true`: activate only if this creature attacked this turn and " \
+                               "only once each turn (CR 702.142a).",
+                  rules: %w[602.1 602.2 602.5b 602.5d 702.177a 702.193a 702.193b 702.142a],
                   params: { "cost" => "list of costs (tap, {\"mana\": \"{1}\"}, {\"mana\": \"{X}\"})",
                             "targets" => "list of target filters", "effects" => "list of effects",
                             "timing" => "\"instant\" (default), \"sorcery\" or \"your_turn\"",
                             "limit" => "\"once_each_turn\" (CR 602.5b)", "only_if" => "condition (\"activate only if ...\")",
                             "exhaust" => "true: \"Exhaust — [cost]: [effect]\", activate only once (CR 702.177a)",
+                            "power_up" => "true: \"Power-up — [cost]: [effect]\" (CR 702.193a)",
+                            "boast" => "true: \"Boast — [cost]: [effect]\" (CR 702.142a)",
                             "zone" => "\"exile\" | \"graveyard\" | \"hand\" (CR 113.6b; default: the battlefield, or the " \
                                       "zone a cost moves the card from)",
                             "cost_reduction" => "{\"amount\": amount, \"if\": condition}: \"this ability costs {N} less " \
@@ -298,7 +304,7 @@ module Enjine
                                               "effects" => [{ "deal_damage" => { "amount" => 1, "to" => { "target" => 0 } } }] } }
 
         def self.build(params, errors, path, **)
-          Mechanics.check_keys(params, %w[cost timing cost_reduction limit only_if zone exhaust] + BODY_KEYS, errors, path)
+          Mechanics.check_keys(params, %w[cost timing cost_reduction limit only_if zone exhaust power_up boast] + BODY_KEYS, errors, path)
           timing = Mechanics.fetch_param(params, :timing) || "instant"
           errors << "#{path}.timing: must be one of #{TIMINGS.join(", ")}" unless TIMINGS.include?(timing)
           restriction = parse_restriction(params, errors, path)
@@ -337,8 +343,11 @@ module Enjine
           limit = Mechanics.fetch_param(params, :limit)
           errors << "#{path}.limit: must be one of #{LIMITS.keys.join(", ")}" unless limit.nil? || LIMITS.key?(limit)
           raw = Mechanics.fetch_param(params, :only_if)
-          { per_turn: LIMITS[limit], only_if: raw && Condition.build(raw, errors, "#{path}.only_if"),
-            exhaust: Mechanics.flag_param(params, :exhaust, errors, path) }
+          flags = %i[exhaust power_up boast].to_h { [it, Mechanics.flag_param(params, it, errors, path)] }
+          errors << "#{path}: exhaust and power_up can't be used together" if flags[:exhaust] && flags[:power_up]
+          errors << "#{path}.boast: can't be combined with limit" if flags[:boast] && limit
+          { per_turn: flags[:boast] ? 1 : LIMITS[limit], only_if: raw && Condition.build(raw, errors, "#{path}.only_if"),
+            **flags }
         end
 
         # CR 605.1a: an activated ability without targets that could add mana is a mana ability,
@@ -381,10 +390,26 @@ module Enjine
         # An exhaust ability: "Activate only once" (CR 702.177a), see Engine::CastChoices#activation_allowed?.
         def exhaust? = @restriction[:exhaust] == true
 
-        def to_s = exhaust? ? "Exhaust — #{super}" : super
+        # A power-up ability (CR 702.193a): activate only once; cheaper the turn its permanent entered
+        # (Keywords::PowerUp).
+        def power_up? = @restriction[:power_up] == true
+
+        # A boast ability (CR 702.142a): only if this creature attacked this turn, and only once each turn.
+        def boast? = @restriction[:boast] == true
+
+        # "Activate only once" for as long as the object exists: exhaust and power-up.
+        def once? = exhaust? || power_up?
+
+        KEYWORD_WORDS = { exhaust?: "Exhaust", power_up?: "Power-up", boast?: "Boast" }.freeze
+
+        def to_s
+          word = KEYWORD_WORDS.find { |flag, _| public_send(flag) }&.last
+          word ? "#{word} — #{super}" : super
+        end
 
         # CR 602.5b: restrictions on when it may be activated, besides timing and costs.
         def restriction_met?(engine, index, source)
+          return false if boast? && !engine.attacked_this_turn?(source) # CR 702.142a
           return false if @restriction[:your_turn] && engine.state.active != index
           return false if @restriction[:only_if] && !@restriction[:only_if].true?(engine, EffectContext.new(index, source, nil, nil))
 

@@ -113,7 +113,7 @@ module Enjine
       def copy_spell!(spell, controller, targets)
         card, except = copiable_values(spell)
         copy = create_object(card, controller, :stack)
-        copy.memory = Marshal.load(Marshal.dump(spell.memory.slice("kicked", "division"))).merge("copy" => "spell")
+        copy.memory = Marshal.load(Marshal.dump(spell.memory.slice("kicked", "kicked_with", "division"))).merge("copy" => "spell")
         copy.memory["copy_except"] = except unless except.empty?
         copy.targets = targets
         copy.modes = spell.modes&.dup

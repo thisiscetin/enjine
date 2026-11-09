@@ -1318,71 +1318,10 @@
     ],
     "power": 0,
     "toughness": 2,
+    "keywords": [
+      "increment"
+    ],
     "abilities": [
-      {
-        "triggered": {
-          "when": {
-            "cast": {}
-          },
-          "if": {
-            "any": [
-              {
-                "amount": {
-                  "plus": [
-                    {
-                      "mana_spent": {
-                        "of": {
-                          "triggering": "object"
-                        }
-                      }
-                    },
-                    {
-                      "times": [
-                        {
-                          "power": "self"
-                        },
-                        -1
-                      ]
-                    }
-                  ]
-                },
-                "at_least": 1
-              },
-              {
-                "amount": {
-                  "plus": [
-                    {
-                      "mana_spent": {
-                        "of": {
-                          "triggering": "object"
-                        }
-                      }
-                    },
-                    {
-                      "times": [
-                        {
-                          "toughness": "self"
-                        },
-                        -1
-                      ]
-                    }
-                  ]
-                },
-                "at_least": 1
-              }
-            ]
-          },
-          "effects": [
-            {
-              "add_counters": {
-                "counter": "+1/+1",
-                "amount": 1,
-                "to": "self"
-              }
-            }
-          ]
-        }
-      },
       {
         "triggered": {
           "when": {

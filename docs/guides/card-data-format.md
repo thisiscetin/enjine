@@ -907,6 +907,26 @@ power"). Keyword *actions* are effects.
                 { "triggered": { "when": { "enters": {} }, "effects": [{ "connive": {} }] } }] }
 ```
 
+### 4.20 Set mechanics: power-up, teamwork, increment, extort, boast, colors among, domain
+
+| Oracle text | Data |
+| --- | --- |
+| "Power-up — {5}{U}: …" (CR 702.193) | `{ "activated": { "power_up": true, "cost": [{ "mana": "{5}{U}" }], "effects": [...] } }`: activate only once; the turn the permanent entered, the cost is reduced by its mana cost (colored mana by the same color, the excess and generic by generic, CR 118.7) |
+| "Boast — {1}{R}: …" (CR 702.142) | `"boast": true` on the activated ability: only if this creature attacked this turn, once each turn |
+| "Teamwork 4" (CR 702.194) | ability `{ "teamwork": { "power": 4 } }`: announced like kicker (`choose_kicker`), then one `choose_cost` per creature tapped until their total power is 4 or more |
+| "if this spell was cast using teamwork" | condition `{ "cast_with": "teamwork" }`; "choose both instead" is `"choose_if": { "if": { "cast_with": "teamwork" }, "choose": 2 }`; targets only with teamwork are `kicked_targets` |
+| "Increment" (CR 702.191) | `"keywords": ["increment"]` |
+| "Extort" (CR 702.101) | `"keywords": ["extort"]` (a `pay` {W/B} choice as it resolves) |
+| "the number of colors among permanents you control" (CR 105.2) | amount `{ "distinct_colors": { "each": "permanent", "controller": "you" } }` |
+| domain: "the number of basic land types among lands you control" (CR 305.6) | amount `{ "distinct_land_types": { "each": "land", "controller": "you" } }` |
+
+```json
+{ "name": "Example Gamma Brawler", "mana_cost": "{1}{W}", "types": ["creature"], "power": 2, "toughness": 1,
+  "keywords": ["increment"],
+  "abilities": [{ "activated": { "power_up": true, "cost": [{ "mana": "{4}{W}" }],
+                                 "effects": [{ "add_counters": { "counter": "+1/+1", "amount": 2, "to": "self" } }] } }] }
+```
+
 ---
 
 ## 5. Worked examples
