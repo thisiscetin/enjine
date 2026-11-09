@@ -3,6 +3,25 @@
 module Enjine
   module Mechanics
     module Effects
+      # Cards an effect puts onto the battlefield under one player's control: each one's "as this enters"
+      # choice is made first, one card at a time, then they all enter at once (CR 614.12, 614.12a). The
+      # including effect has a `put` zone; other zones move one card at a time as before.
+      module EntersBattlefield
+        # Whether a choice is now pending (the effect returns :wait and asks again on resume).
+        def entering_choices?(engine, controller, locals, ids)
+          @put.to_s == "battlefield" && engine.ask_entering_choices!(locals, ids.map { [it, controller] }) == :wait
+        end
+
+        # Moves the cards to `@put`; onto the battlefield, under `controller`'s control and all at once.
+        def put_cards!(engine, locals, ids, controller, reason:, enters: nil)
+          if @put.to_s == "battlefield"
+            return engine.enter_battlefield!(locals, ids.map { [it, controller, enters] }, reason: reason)
+          end
+
+          ids.each { engine.move!(it, @put.to_sym, reason: reason, enters: enters) }
+        end
+      end
+
       # Where the cards a library effect didn't take go: the bottom of the library in a random order or in
       # an order the player chooses (CR 401.4), or the graveyard.
       module RestOfCards
@@ -39,6 +58,7 @@ module Enjine
       # number, or up to a number), then put the rest away (CR 701.20a, 701.20e, 401.4).
       class Dig < ChoiceEffect
         include RestOfCards
+        include EntersBattlefield
 
         PUT = %w[hand battlefield graveyard].freeze
         REVEAL = %w[none chosen all].freeze
@@ -93,7 +113,9 @@ module Enjine
             return ask(engine, locals, index, "Choose #{spec} to take", choices) unless choices.empty?
 
             taken = seen.select { spec.match?(engine, engine.object(it), ctx) } if count == "all"
-            take!(engine, ctx, index, taken)
+            return :wait if entering_choices?(engine, ctx.controller, locals, taken)
+
+            take!(engine, ctx, index, taken, locals)
             locals["taken"] = taken
           end
           place_rest(engine, locals, index, seen - locals["taken"])
@@ -116,12 +138,9 @@ module Enjine
           options
         end
 
-        def take!(engine, ctx, index, taken)
+        def take!(engine, ctx, index, taken, locals)
           engine.reveal!(index, taken) if @reveal == "chosen"
-          enters = @tapped ? { "tapped" => true } : nil
-          taken.each do
-            engine.move!(it, put.to_sym, controller: put == "battlefield" ? ctx.controller : nil, reason: "put", enters: enters)
-          end
+          put_cards!(engine, locals, taken, ctx.controller, reason: "put", enters: @tapped ? { "tapped" => true } : nil)
         end
       end
 
@@ -129,6 +148,7 @@ module Enjine
       # those go to a zone, the other revealed cards are put away (CR 701.20a, 401.4).
       class RevealUntil < ChoiceEffect
         include RestOfCards
+        include EntersBattlefield
 
         PUT = %w[hand battlefield].freeze
 
@@ -163,12 +183,14 @@ module Enjine
           index = ctx.controller
           unless locals.key?("found")
             revealed, found = reveal(engine, ctx, index)
-            enters = @tapped ? { "tapped" => true } : nil
-            found.each do |id|
-              engine.move!(id, @put.to_sym, controller: @put == "battlefield" ? index : nil, reason: "put", enters: enters)
-            end
             locals["found"] = found
             locals["rest"] = revealed - found
+          end
+          unless locals["moved"]
+            return :wait if entering_choices?(engine, index, locals, locals["found"])
+
+            put_cards!(engine, locals, locals["found"], index, reason: "put", enters: @tapped ? { "tapped" => true } : nil)
+            locals["moved"] = true
           end
           place_rest(engine, locals, index, locals["rest"])
         end

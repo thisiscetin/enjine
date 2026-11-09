@@ -57,14 +57,17 @@ module Enjine
           next unless trigger.watches?(event)
 
           found = Mechanics::Triggers.occurrences(trigger, self, event, delayed_source(entry))
-          found = found.first(1) unless entry["turn"]
+          found = found.first(1) unless repeats?(entry)
           fired << entry unless found.empty?
           found.each do
             queue_pending_trigger!(delayed_source(entry).merge("ability" => entry["ability"]), event, delayed_memory(entry, it))
           end
         end
-        state.delayed_triggers -= fired.reject { it["turn"] }
+        state.delayed_triggers -= fired.reject { repeats?(it) }
       end
+
+      # "Whenever ... this turn" triggers each time; "the next ... this turn" ("once") only the first time.
+      def repeats?(entry) = entry["turn"] && !entry["once"]
 
       def delayed_memory(entry, facts)
         { "results" => entry["results"], "watched" => entry["watched"], "triggering" => facts }.compact
