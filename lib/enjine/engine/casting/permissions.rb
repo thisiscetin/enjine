@@ -31,7 +31,7 @@ module Enjine
       OUTSIDE = "outside:"
       # Permission effect fields copied into the play method (see Effects::PlayPermission); "alt" is an
       # alternative cost, {"cost" => "{2}"} (airbend, CR 701.65a, 118.9).
-      RIDERS = %w[cost_increase any_mana_type alt].freeze
+      RIDERS = %w[cost_increase any_mana_type alt exile_instead].freeze
 
       # ---- legal actions --------------------------------------------------------------------
 
@@ -184,11 +184,15 @@ module Enjine
       end
 
       # CR 608.2g, 707.12: whether a card could be cast now during resolution, paying its costs.
-      def castable_while_resolving?(index, id)
+      # `any_mana_type`: mana of any type can be spent to cast it (CR 609.4b).
+      def castable_while_resolving?(index, id, any_mana_type: nil)
         obj = object(id)
         own = chars(obj).mana_cost or return false # CR 118.6a: no mana cost, can't be cast paying it
+        purpose = { "spell" => id, "any_type" => any_mana_type }.compact
         free_castable?(index, id) &&
-          cost_variant_affordable?(index, spell_cost_list(obj, false), obj, own, nil, {}) { total_cost(index, it, spell: obj) }
+          cost_variant_affordable?(index, spell_cost_list(obj, false), obj, own, nil, purpose) do
+            total_cost(index, it, spell: obj)
+          end
       end
 
       # The mana cost paid with a method: the card's own, nothing (CR 118.9) or the beam me up cost, plus a
@@ -351,12 +355,16 @@ module Enjine
         method = ctx["method"] or return
         returned_creature!(obj, ctx) if ctx["beam_creature"]
         obj.memory["leaves_to_exile"] = true if method.dig("alt", "beam") || method.dig("alt", "exile")
+        # "If that spell would be put into a graveyard, exile it instead" (CR 614.1a)
+        obj.memory["graveyard_to_exile"] = true if method["exile_instead"] &&
+                                                   Mechanics::ExileInstead.applies?(self, method["exile_instead"], obj)
         obj.memory["enters_with"] = method["enters_with"] if method["enters_with"]
         use_play_method!(method)
       end
 
       # Replacement effects of how a spell was cast (CR 614.1a, 614.12): a beamed-up or flashed-back spell
-      # is exiled whenever it would leave the stack (CR 702.196a, 702.34a); a permanent spell cast with an
+      # is exiled whenever it would leave the stack (CR 702.196a, 702.34a), one cast with an `exile_instead`
+      # rider whenever it would be put into a graveyard; a permanent spell cast with an
       # "enters with" rider gets those counters as it enters; a permanent remembers how its spell was cast
       # (CR 400.7d, Engine::AltCasting#alt_enters!).
       def cast_replacements!(proposal)
@@ -365,6 +373,7 @@ module Enjine
         return unless obj && obj.zone == :stack
 
         data["to"] = :exile if obj.memory["leaves_to_exile"] && data["to"] != :exile
+        data["to"] = :exile if obj.memory["graveyard_to_exile"] && data["to"] == :graveyard
         return unless data["to"] == :battlefield
 
         alt_enters!(obj, data["enters"])

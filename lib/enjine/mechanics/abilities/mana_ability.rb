@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require_relative "../keywords/alternative_costs"
+
 module Enjine
   module Mechanics
     # "Spend this mana only to cast [quality] spells or activate abilities of [quality] sources" (CR 106.6):
@@ -7,19 +9,24 @@ module Enjine
     #   {"spells": card spec, "abilities": card spec}   at least one; "card" matches every spell or source
     # The spec is matched against the spell being cast or the source of the ability being activated. Mana
     # paid for a cost while a spell or ability resolves (CR 118.12) is neither, so restricted mana can't pay it.
+    # `from` / `not_from` a zone limit the spells to those cast from (not from) it ("spend this mana only to cast
+    # a spell from anywhere other than your hand": {"not_from": "hand"}; CR 601.2a); alone, they mean spells.
     class SpendOnly
-      KEYS = %w[spells abilities].freeze
+      KEYS = (%w[spells abilities] + CastFrom::KEYS).freeze
 
       attr_reader :data
 
       def self.build(data, errors, path)
         unless data.is_a?(Hash) && !data.empty? && (data.keys.map(&:to_s) - KEYS).empty?
-          errors << "#{path}: must be {\"spells\": card spec, \"abilities\": card spec} (at least one)"
+          errors << "#{path}: must be {\"spells\": card spec, \"abilities\": card spec, \"from\" | \"not_from\": zone} " \
+                    "(at least one)"
           return nil
         end
         data = data.transform_keys(&:to_s)
-        specs = data.to_h { |key, spec| [key, CardSpec.build(spec, errors, "#{path}.#{key}")] }
-        new(data, specs)
+        zones = CastFrom.build(data, errors, path)
+        specs = data.slice("spells", "abilities").to_h { |key, spec| [key, CardSpec.build(spec, errors, "#{path}.#{key}")] }
+        specs["spells"] ||= CardSpec.build("card", errors, path) if data.keys.intersect?(CastFrom::KEYS)
+        new(data, specs, zones)
       end
 
       # The restriction kept on pool mana (plain data, CR 106.6), rebuilt once per distinct data.
@@ -27,9 +34,10 @@ module Enjine
         (@cache ||= {})[data] ||= build(data, [], "spend_only")
       end
 
-      def initialize(data, specs)
+      def initialize(data, specs, zones = CastFrom.new(nil, nil))
         @data = Snapshot.deep_copy(data).freeze
         @specs = specs.freeze
+        @zones = zones
         freeze
       end
 
@@ -38,15 +46,16 @@ module Enjine
       def allows?(engine, purpose)
         return false if purpose.nil?
 
-        spec = purpose.key?("spell") ? @specs["spells"] : @specs["abilities"]
+        spell = purpose.key?("spell")
+        spec = spell ? @specs["spells"] : @specs["abilities"]
         ref = purpose["spell"] || purpose["ability"]
         obj = ref.is_a?(GameObject) ? ref : engine.state.objects[ref] # a card outside the game is its stand-in
-        !spec.nil? && !obj.nil? && spec.match?(engine, obj)
+        !spec.nil? && !obj.nil? && spec.match?(engine, obj) && (!spell || @zones.match?(engine.cast_origin(obj)))
       end
 
       def to_s
         parts = []
-        parts << "cast #{@specs["spells"]} spells" if @specs["spells"]
+        parts << "cast #{"#{@specs["spells"]} " unless @specs["spells"].any?}spells#{@zones}" if @specs["spells"]
         parts << "activate abilities of #{@specs["abilities"]}s" if @specs["abilities"]
         "spend this mana only to #{parts.join(" or ")}"
       end
@@ -67,19 +76,20 @@ module Enjine
                                "`amount` mana (default 1) of one color you choose as you activate it " \
                                "(`\"any_one\"`) or in any combination of colors (`\"any\"`); `colors` limits " \
                                "the choice. `\"chosen\"`: of the color chosen as this entered (choose_color). " \
-                               "`spend_only` restricts how the mana can be spent.",
-                  rules: %w[605.1a 605.3a 605.3b 106.1a 106.4 106.6 607.2d],
+                               "`spend_only` restricts how the mana can be spent. `only_if`: \"Activate only if ...\".",
+                  rules: %w[605.1a 605.3a 605.3b 106.1a 106.4 106.6 607.2d 602.5b],
                   params: { "cost" => "list of costs (e.g. [\"tap\"])",
                             "produce" => "mana symbols added, e.g. \"{G}\" or \"{C}{C}\"",
                             "amount" => "amount (default 1; with produce: how many times)",
                             "color" => CHOICES.join(" | "), "colors" => "list of colors to choose from (default all five)",
-                            "spend_only" => "{\"spells\": card spec, \"abilities\": card spec}" },
+                            "spend_only" => "{\"spells\": card spec, \"abilities\": card spec, \"from\" | \"not_from\": zone}",
+                            "only_if" => "condition: it can be activated only while it holds (CR 602.5b)" },
                   example: { "mana" => { "cost" => ["tap"], "produce" => "{C}" } }
 
         attr_reader :costs, :produce, :color, :colors, :amount, :spend_only
 
         def self.build(params, errors, path, **)
-          Mechanics.check_keys(params, %w[cost produce amount color colors spend_only], errors, path)
+          Mechanics.check_keys(params, %w[cost produce amount color colors spend_only only_if], errors, path)
           costs = build_costs(Mechanics.fetch_param(params, :cost), errors, path)
           raw = Mechanics.fetch_param(params, :produce)
           color = Mechanics.fetch_param(params, :color)
@@ -90,8 +100,10 @@ module Enjine
           amount = raw_amount.nil? ? nil : Amount.build(raw_amount, errors, "#{path}.amount", targets_count: 0)
           raw_spend = Mechanics.fetch_param(params, :spend_only)
           spend_only = raw_spend.nil? ? nil : SpendOnly.build(raw_spend, errors, "#{path}.spend_only")
+          raw_if = Mechanics.fetch_param(params, :only_if)
+          only_if = raw_if && Condition.build(raw_if, errors, "#{path}.only_if")
           new(costs.compact.freeze, produce, color: color, colors: build_colors(params, color, errors, path),
-                                             amount: amount, spend_only: spend_only)
+                                             amount: amount, spend_only: spend_only, only_if: only_if)
         end
 
         # CR 605.3a: a mana ability is paid for and resolves at once, so none of its costs can wait for a
@@ -125,7 +137,7 @@ module Enjine
           COLORS
         end
 
-        def initialize(costs, produce, color: nil, colors: COLORS, amount: nil, spend_only: nil)
+        def initialize(costs, produce, color: nil, colors: COLORS, amount: nil, spend_only: nil, only_if: nil)
           super()
           @costs = costs
           @produce = produce
@@ -133,6 +145,7 @@ module Enjine
           @colors = colors
           @amount = amount
           @spend_only = spend_only
+          @only_if = only_if
           list = costs.select(&:mana?).map(&:mana_cost)
           @mana_cost = list.empty? ? nil : Mana.sum_costs(list)
           freeze
@@ -144,7 +157,10 @@ module Enjine
         def allowed_types = nil
 
         # A mana cost ("{1}, {T}: Add …") is paid from the mana already in the pool (CR 605.3a, 601.2g-h).
+        # "Activate only if ..." (CR 602.5b) is checked for its controller.
         def activatable?(engine, object)
+          return false if @only_if && !@only_if.true?(engine, EffectContext.new(object.controller, object.id, nil, nil))
+
           costs.all? { |c| c.payable?(engine, object) } && (mana_cost.nil? || engine.pool_covers?(object.controller, mana_cost))
         end
 
@@ -184,7 +200,8 @@ module Enjine
                  else "Add #{amount || 1} mana of #{color == "any_one" ? "any one color" : "any combination of colors"}" \
                    "#{" (#{colors.join("/")})" unless colors == COLORS}"
                  end
-          "#{costs.join(", ")}: #{what}.#{" #{spend_only.to_s.capitalize}." if spend_only}"
+          "#{costs.join(", ")}: #{what}.#{" #{spend_only.to_s.capitalize}." if spend_only}" \
+            "#{" Activate only if #{@only_if}." if @only_if}"
         end
       end
     end

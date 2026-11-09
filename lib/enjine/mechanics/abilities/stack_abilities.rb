@@ -138,7 +138,7 @@ module Enjine
           extras[:unchosen] = Mechanics.flag_param(params, :unchosen, errors, path)
           raw = Mechanics.fetch_param(params, :kicked_targets)
           extras[:kicked_targets] = parse_targets(params, errors, path, key: :kicked_targets) unless raw.nil?
-          extras[:divide] = Mechanics.integer_param(params, :divide, errors, path, min: 1) if params.key?("divide")
+          extras[:divide] = Amount.build(params["divide"], errors, "#{path}.divide", targets_count: 0, min: 1) if params.key?("divide")
           Extras.new(**extras)
         end
 
@@ -152,9 +152,11 @@ module Enjine
           [Condition.build(raw["if"], errors, "#{path}.if"), *parse_choose(raw["choose"], errors, "#{path}.choose", count)]
         end
 
-        # CR 601.2d: each target gets at least one, so there must be a first, required target.
+        # CR 601.2d: each target gets at least one, so there must be a first, required target. A counted one
+        # ("one, two, or three targets": count 3, optional) needs at least one target when dividing.
         def self.check_divide(extras, targets, errors, path)
-          return if extras.divide.nil? || (targets.first && !(targets.first.respond_to?(:optional?) && targets.first.optional?))
+          first = targets.first
+          return if extras.divide.nil? || (first && (!first.respond_to?(:optional?) || !first.optional? || first.counted?))
 
           errors << "#{path}.divide: needs a first target that isn't optional"
         end

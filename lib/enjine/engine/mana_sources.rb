@@ -117,10 +117,11 @@ module Enjine
         obj = object(id)
         ability = chars(obj).ability(ability_ref) or raise ArgumentError, "#{id} has no ability #{ability_ref}"
         chosen = mana && Mana.parse_produce(mana, [], "mana")
+        from = mana_provenance(id) # before a cost sacrifices it (a Treasure)
         pay_from_pool!(index, ability.mana_cost, id) if ability.mana_cost
         ability.costs.each { |cost| cost.pay!(self, obj) }
         produced = chosen || ability.outcomes(self, obj).first # CR 605.3b: a fixed amount is counted as it resolves
-        add_mana!(index, produced, id, restriction: ability.spend_only&.data)
+        add_mana!(index, produced, id, restriction: ability.spend_only&.data, from: from)
       end
 
       # Whether the mana in the pool (unrestricted) can pay `cost` (a mana ability's mana cost, CR 605.3a).
@@ -150,23 +151,56 @@ module Enjine
           pool[type] -= 1
           emit Events::ManaPaid.new(player: name(index), mana: "{#{type}}", object: source)
         end
+        trim_pool_sources!(player(index)) # mana spent on a mana ability: its source no longer matters
       end
 
       # ---- mana (CR 106) ----------------------------------------------------------
 
       # CR 106.4: mana goes into the pool. Mana with a spending restriction (CR 106.6), or that isn't lost as
-      # steps end (`keep_until: "end_of_combat"`, CR 702.189a), is kept apart, one entry per mana.
-      def add_mana!(index, produce, source, restriction: nil, keep_until: nil)
+      # steps end (`keep_until: "end_of_combat"`, CR 702.189a), is kept apart, one entry per mana. Mana made by
+      # an artifact remembers its source ("if mana from a Treasure was spent", `from`: #mana_provenance): an
+      # entry's "from", or for pool mana one PlayerState#pool_sources entry per mana.
+      def add_mana!(index, produce, source, restriction: nil, keep_until: nil, from: mana_provenance(source))
         return if produce.empty?
 
         pl = player(index)
         if restriction || keep_until
-          entry = { "spend_only" => restriction && Snapshot.deep_copy(restriction), "until" => keep_until }.compact
+          entry = { "spend_only" => restriction && Snapshot.deep_copy(restriction), "until" => keep_until, "from" => from }.compact
           produce.each { pl.restricted_mana << { "mana" => it.to_s }.merge(entry) }
         else
           produce.each { |type| pl.mana_pool[type] += 1 }
+          produce.each { (pl.pool_sources ||= []) << { "mana" => it.to_s, "from" => from } } if from
         end
         emit Events::ManaAdded.new(player: name(index), mana: Mana.symbols(produce), source: source)
+      end
+
+      # Pool mana of `type` that remembers no source (CR 106.6): the mana of that type beyond the remembered.
+      def unsourced_mana(player, type) = player.mana_pool[type.to_sym] - (player.pool_sources || []).count { it["mana"] == type.to_s }
+
+      # Keeps no more remembered sources of a type than there is mana of it in the pool.
+      def trim_pool_sources!(player)
+        return if player.pool_sources.nil? || player.pool_sources.empty?
+
+        kept = Hash.new(0)
+        player.pool_sources = player.pool_sources.select { (kept[it["mana"]] += 1) <= player.mana_pool[it["mana"].to_sym] }
+      end
+
+      # Where mana comes from, when a spell may ask ("mana from a Treasure", CR 106.6): an artifact source that
+      # isn't a land, as it is now (it may be sacrificed for the mana). Nil for other sources.
+      def mana_provenance(source)
+        obj = state.objects[source] or return nil
+        c = chars(obj)
+        return nil unless c.type?(:artifact) && !c.land?
+
+        { "name" => c.name, "types" => c.types.map(&:to_s), "subtypes" => c.subtypes.map(&:to_s),
+          "supertypes" => c.supertypes.map(&:to_s), "colors" => c.colors.map(&:to_s) }
+      end
+
+      # The characteristics a mana source had as it made the mana (#mana_provenance), to match a card spec.
+      def self.source_chars(from)
+        Enjine::Characteristics::FACE_DOWN.with(name: from["name"], types: from["types"].map(&:to_sym),
+                                                subtypes: from["subtypes"].map(&:to_sym), supertypes: from["supertypes"].map(&:to_sym),
+                                                colors: from["colors"].map(&:to_sym))
       end
 
       # Mana that stays as `step` ends: "until end of combat" mana through the combat steps (CR 702.189a).
@@ -185,6 +219,7 @@ module Enjine
           text = pl.mana_pool.flat_map { |type, n| ["{#{type}}"] * n }.join + lost.map { "{#{it["mana"]}}" }.join
           pl.mana_pool.transform_values! { 0 }
           pl.restricted_mana = kept
+          pl.pool_sources = []
           emit Events::ManaEmptied.new(player: pl.name, mana: text)
         end
       end

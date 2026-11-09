@@ -4319,6 +4319,206 @@
     ]
   },
   {
+    "name": "Ember Tactician",
+    "mana_cost": "{2}{R}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "human",
+      "wizard"
+    ],
+    "power": 2,
+    "toughness": 2,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "enters": {}
+          },
+          "effects": [
+            {
+              "reflexive_trigger": {
+                "targets": [
+                  {
+                    "filter": "any_target",
+                    "count": 2,
+                    "optional": true
+                  }
+                ],
+                "divide": 2,
+                "effects": [
+                  {
+                    "distribute_damage": {}
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Reprise Adept",
+    "mana_cost": "{3}{U}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "human",
+      "wizard"
+    ],
+    "power": 2,
+    "toughness": 3,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "enters": {}
+          },
+          "targets": [
+            {
+              "graveyard_card": {
+                "any_of": [
+                  "instant",
+                  "sorcery"
+                ],
+                "controller": "you"
+              }
+            }
+          ],
+          "effects": [
+            {
+              "cast_free": {
+                "to": {
+                  "target": 0
+                },
+                "max_mana_value": 2,
+                "exile_instead": {
+                  "types": [
+                    "instant"
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Hoard Watcher",
+    "mana_cost": "{2}{B}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "dragon"
+    ],
+    "power": 2,
+    "toughness": 2,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "enters": {}
+          },
+          "effects": [
+            {
+              "create_token": {
+                "token": "Treasure"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "triggered": {
+          "when": {
+            "cast": {}
+          },
+          "if": {
+            "amount": {
+              "mana_spent": {
+                "of": {
+                  "triggering": "object"
+                },
+                "from": {
+                  "subtypes": [
+                    "treasure"
+                  ]
+                }
+              }
+            },
+            "at_least": 1
+          },
+          "effects": [
+            {
+              "gain_life": {
+                "amount": 2,
+                "to": "you"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Thrift Warden",
+    "mana_cost": "{1}{B}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "human",
+      "rogue"
+    ],
+    "power": 2,
+    "toughness": 1,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "cast": {
+              "controller": "any"
+            }
+          },
+          "if": {
+            "amount": {
+              "mana_spent": {
+                "of": {
+                  "triggering": "object"
+                }
+              }
+            },
+            "at_most": {
+              "plus": [
+                {
+                  "mana_value": {
+                    "triggering": "object"
+                  }
+                },
+                -1
+              ]
+            }
+          },
+          "effects": [
+            {
+              "lose_life": {
+                "amount": 1,
+                "to": {
+                  "triggering": "player"
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
     "name": "Generous Burrowkin",
     "mana_cost": "{1}{G}",
     "types": [

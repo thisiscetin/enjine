@@ -98,6 +98,7 @@ module Enjine
         pl.speed = hash["speed"] # CR 702.179; absent: no speed
         pl.designations = hash.fetch("designations", []).dup # CR 702.195b (Engine::Designations)
         pl.counters = hash.fetch("counters", {}).dup # CR 122.1: counters other than poison
+        pl.pool_sources = deep_copy(hash.fetch("pool_sources", [])) # Engine::ManaSources#add_mana!
       end
     end
 
@@ -127,6 +128,7 @@ module Enjine
           errors << "#{path}.mana_pool: must map W/U/B/R/G/C to non-negative integers"
         end
         validate_restricted_mana(pl.fetch("restricted_mana", []), errors, "#{path}.restricted_mana")
+        validate_pool_sources(pl, errors, "#{path}.pool_sources")
         errors << "#{path}.speed: must be 1, 2, 3 or 4 (or absent)" unless [nil, 1, 2, 3, 4].include?(pl["speed"]) # CR 702.179
         validate_designations(pl.fetch("designations", []), errors, "#{path}.designations")
       end

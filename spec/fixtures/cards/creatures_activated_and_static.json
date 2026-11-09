@@ -2552,6 +2552,101 @@
     ]
   },
   {
+    "name": "Late Bloomer Titan",
+    "mana_cost": "{2}{G}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "giant"
+    ],
+    "power": 5,
+    "toughness": 5,
+    "abilities": [
+      {
+        "cast_restriction": {
+          "only_if": {
+            "any": [
+              {
+                "not": {
+                  "your_turn": true
+                }
+              },
+              {
+                "amount": {
+                  "turns_taken": "you"
+                },
+                "at_least": 4
+              }
+            ]
+          }
+        }
+      }
+    ]
+  },
+  {
+    "name": "Bulwark Colossus",
+    "mana_cost": "{7}{W}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "giant"
+    ],
+    "power": 4,
+    "toughness": 8,
+    "abilities": [
+      {
+        "cost_reduction": {
+          "amount": {
+            "greatest_toughness": {
+              "each": "creature",
+              "controller": "you"
+            }
+          }
+        }
+      }
+    ]
+  },
+  {
+    "name": "Grove Herald",
+    "mana_cost": "{1}{G}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "elf",
+      "druid"
+    ],
+    "power": 1,
+    "toughness": 3,
+    "abilities": [
+      {
+        "mana": {
+          "cost": [
+            "tap"
+          ],
+          "produce": "{G}{G}",
+          "only_if": {
+            "amount": {
+              "count": {
+                "each": {
+                  "graveyard_card": {
+                    "subtypes": [
+                      "elf"
+                    ]
+                  }
+                },
+                "controller": "you"
+              }
+            },
+            "at_least": 1
+          }
+        }
+      }
+    ]
+  },
+  {
     "name": "Bloodward Sentinel",
     "mana_cost": "{1}{B}",
     "types": [

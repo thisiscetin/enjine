@@ -101,11 +101,12 @@ module Enjine
       # hand is cast (see Engine::Permissions); "free" casts it without paying its mana cost during
       # the resolution of a spell or ability (CR 608.2g, 118.9), after which nobody gets priority.
       # `face`: cast another face of the card (a modal card's back, an Adventure, an Omen; Engine::Faces).
-      def begin_cast!(index, card_id, via: nil, face: nil)
+      # `riders`: how an effect casting it while resolving changes the cast ("exile_instead", "any_mana_type").
+      def begin_cast!(index, card_id, via: nil, face: nil, riders: {})
         return begin_outside_cast!(index, card_id, via) if outside_key?(card_id) # CR 400.11b
 
         card = object(card_id)
-        method = via && play_method(index, card_id, via)
+        method = via && play_method(index, card_id, via).merge(riders)
         origin = { "id" => card_id, "zone" => card.zone.to_s,
                    "index" => state.zone_list(card.zone, card.owner).index(card_id) }
         origin["memory"] = card.memory.slice("face_down", "may_look") if face_down?(card) # turned face up (CR 406.3a)
@@ -139,6 +140,7 @@ module Enjine
                           "x" => nil, "remaining" => nil,
                           "pool" => player(index).mana_pool.transform_keys(&:to_s), "tapped" => [],
                           "restricted" => Snapshot.deep_copy(player(index).restricted_mana),
+                          "pool_sources" => Snapshot.deep_copy(player(index).pool_sources),
                           "triggers_before" => state.pending_triggers.map { it["id"] } }.merge(extra)
         ask!(nil) # advance! now steps the cast frame
       end
@@ -232,6 +234,7 @@ module Enjine
         obj.targets = ctx["targets"].dup
         obj.modes = ctx["modes"].dup unless ctx["modes"].empty?
         obj.mana_spent = ctx["spent"].dup if ctx["spent"]
+        obj.memory["mana_from"] = Snapshot.deep_copy(ctx["spent_from"]) if ctx["spent_from"] # the sources (ManaSources)
         record_announcements!(obj, ctx) # kicked (CR 702.33d), division (CR 601.2d), modes chosen before
         record_cast_choices!(obj, ctx) # cost choices; facing a dilemma (CR 700.17)
         waterbent!(ctx) # CR 701.67c (Engine::Waterbending)

@@ -136,7 +136,7 @@ module Enjine
 
       # Each chosen target gets one; the rest is assigned one at a time when there's a choice.
       def ask_distribution!(ctx, ability)
-        amount = ability&.extras&.divide or return false
+        amount = divided_amount(ctx, ability) or return false
         chosen = ctx["targets"].flatten.compact
         ctx["division"] ||= chosen.to_h { [it, 1] }
         left = amount - ctx["division"].values.sum
@@ -149,6 +149,14 @@ module Enjine
 
         ask!("kind" => "distribute", "player" => ctx["player"], "left" => left)
         true
+      end
+
+      # The amount divided (CR 601.2d), an amount such as "X damage, where X is the number of lands you
+      # control": computed once, as the spell or ability is put on the stack, and kept in the frame.
+      def divided_amount(ctx, ability)
+        divide = ability&.extras&.divide or return nil
+        ctx["divide"] ||= [divide.value(self, Mechanics::EffectContext.new(ctx["player"], ctx["source"] || ctx["object"],
+                                                                           ctx["object"], nil, [])), 0].max
       end
 
       def distribute_options = casting["division"].keys.map { { type: "assign", target: it } }

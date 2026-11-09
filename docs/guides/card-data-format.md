@@ -1172,6 +1172,41 @@ but cards already revealed for a behold or permanents tapped for a cost stay so.
                 { "ward": { "cost": [{ "one_of": ["discard", { "mana": "{2}" }] }] } }] }
 ```
 
+### 4.25 Casting and mana: divided damage, casting restrictions, where mana came from
+
+| Oracle text | Data |
+| --- | --- |
+| "deals 3 damage divided as you choose among one, two, or three targets" (CR 601.2d) | targets `[{ "filter": "any_target", "count": 3, "optional": true }]`, `"divide": 3`, effect `{ "distribute_damage": {} }` (at least one target; each gets at least 1) |
+| "deals X damage divided as you choose among any number of target creatures, where X is the number of lands you control" | `"count": "any"` with `"divide": { "count": { "each": "land", "controller": "you" } }` (an amount, computed as it's cast or put on the stack) |
+| "When you do, it deals 7 damage divided as you choose among one or two targets" | `reflexive_trigger` takes `divide` too |
+| "You can't cast this spell unless there are seven or more cards in your graveyard" (CR 601.3) | ability `{ "cast_restriction": { "only_if": { "amount": { "graveyard_size": "you" }, "at_least": 7 } } }` |
+| "You can't cast this spell during your first, second, or third turns of the game" | `"only_if": { "any": [{ "not": { "your_turn": true } }, { "amount": { "turns_taken": "you" }, "at_least": 4 }] }` (`turns_taken`: turns the player has begun, this one included) |
+| "if the amount of mana spent to cast that spell was less than its mana value" | `{ "amount": { "mana_spent": { "of": { "target": 0 } } }, "at_most": { "plus": [{ "mana_value": { "target": 0 } }, -1] } }` (bounds may be amounts; a spell countered by this one is read as it last existed, CR 608.2h) |
+| "if mana from a Treasure was spent to cast it" | `{ "amount": { "mana_spent": { "of": { "triggering": "object" }, "from": { "subtypes": ["treasure"] } } }, "at_least": 1 }` |
+| "costs {X} less to cast, where X is the greatest toughness among creatures you control" | `{ "cost_reduction": { "amount": { "greatest_toughness": { "each": "creature", "controller": "you" } } } }` |
+| "Spend this mana only to cast a spell from anywhere other than your hand" / "only to cast spells from exile" | `"spend_only": { "not_from": "hand" }` / `{ "from": "exile" }` (also with `spells`) |
+| "{T}: Add {G}{G}. Activate only if there is an Elf card in your graveyard." (CR 602.5b) | `{ "mana": { "cost": ["tap"], "produce": "{G}{G}", "only_if": condition } }` |
+| "If that spell would be put into a graveyard, exile it instead" (CR 614.1a) | `"exile_instead": true` on `cast_free`, `cast` or `play_permission`; a card spec instead of `true` limits it ("if an instant or sorcery spell cast this way …": `{ "any_of": [{ "types": ["instant"] }, { "types": ["sorcery"] }] }`) |
+| "you may cast it, and mana of any type can be spent to cast that spell" (while resolving) | `{ "cast": { "to": { "target": 0 }, "any_mana_type": true } }` |
+
+Mana made by an artifact that isn't a land remembers its source's characteristics as it made the mana: pool
+mana in the player's `pool_sources`, restricted mana in its entry's `from`. When the pool holds the same type both
+from such a source and from another, paying offers `{type: "pay_mana", mana: "R", from: i}` (the remembered
+one) beside plain `{type: "pay_mana", mana: "R"}` (the other one first). The amount `mana_value` (of a
+selector) counts X on the stack (CR 202.3e).
+
+```json
+{ "name": "Example Hoard Drake", "mana_cost": "{3}{B}{R}", "types": ["creature"], "subtypes": ["dragon"],
+  "power": 4, "toughness": 4,
+  "abilities": [
+    { "triggered": { "when": { "enters": {} }, "targets": [{ "filter": "any_target", "count": 2, "optional": true }],
+                     "divide": 4, "effects": [{ "distribute_damage": {} }] } },
+    { "triggered": { "when": { "cast": {} },
+                     "if": { "amount": { "mana_spent": { "of": { "triggering": "object" }, "from": { "subtypes": ["treasure"] } } },
+                             "at_least": 1 },
+                     "effects": [{ "draw": { "amount": 1 } }] } }] }
+```
+
 ---
 
 ## 5. Worked examples

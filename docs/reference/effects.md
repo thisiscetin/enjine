@@ -389,7 +389,7 @@ Rules: CR 701.68a, CR 701.68b, CR 701.68c
 
 ## cast
 
-The controller may cast referenced cards (or card copies) now, while this resolves, paying their costs; timing restrictions don't apply. `to`, `for`, `not_types`, `max_mana_value` and `count` work as for `cast_free`.
+The controller may cast referenced cards (or card copies) now, while this resolves, paying their costs; timing restrictions don't apply. `to`, `for`, `not_types`, `max_mana_value`, `count`, `exile_instead` and `any_mana_type` work as for `cast_free`.
 
 Rules: CR 608.2g, CR 707.12, CR 707.12a, CR 601.2a, CR 601.2f
 
@@ -400,6 +400,8 @@ Rules: CR 608.2g, CR 707.12, CR 707.12a, CR 601.2a, CR 601.2f
 | `not_types` | list of card types |
 | `max_mana_value` | amount |
 | `count` | 1 or "any" |
+| `exile_instead` | true or a card spec (as for cast_free) |
+| `any_mana_type` | boolean: mana of any type can be spent to cast it (CR 609.4b) |
 
 ```json
 {
@@ -424,6 +426,8 @@ Rules: CR 608.2g, CR 118.9, CR 601.2a, CR 107.3b, CR 118.6a
 | `not_types` | list of card types |
 | `max_mana_value` | amount |
 | `count` | 1 or "any" |
+| `exile_instead` | true or a card spec: if a spell cast this way (matching it) would be put into a graveyard, it's exiled instead (CR 614.1a) |
+| `any_mana_type` | boolean: mana of any type can be spent to cast it (CR 609.4b) |
 
 ```json
 {
@@ -937,6 +941,18 @@ Rules: CR 601.2d, CR 608.2b, CR 122.1
   "distribute_counters": {
     "counter": "+1/+1"
   }
+}
+```
+
+## distribute_damage
+
+Deal each legal target the damage assigned to it as the spell or ability was cast or put on the stack (its `divide` amount, at least one per target). {"this_way": n} naming it is the excess damage dealt.
+
+Rules: CR 601.2d, CR 608.2b, CR 120.3, CR 120.4a
+
+```json
+{
+  "distribute_damage": {}
 }
 ```
 
@@ -1526,6 +1542,7 @@ Rules: CR 611.2a, CR 601.3, CR 305.1, CR 400.7, CR 514.2, CR 601.2f, CR 108.3, C
 | `to_player` | controller | owner | player selector |
 | `cost_increase` | integer >= 1 |
 | `any_mana_type` | boolean |
+| `exile_instead` | true or a card spec: if a spell cast this way (matching it) would be put into a graveyard, it's exiled instead (CR 614.1a) |
 
 ```json
 {
@@ -1691,6 +1708,7 @@ Rules: CR 603.12, CR 603.12a, CR 603.7d, CR 603.7e, CR 603.3d
 | --- | --- |
 | `targets` | list of target filters |
 | `effects` | list of effects |
+| `divide` | amount divided among the targets as it's put on the stack (CR 601.2d) |
 
 ```json
 {

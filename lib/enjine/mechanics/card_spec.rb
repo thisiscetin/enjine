@@ -131,15 +131,15 @@ module Enjine
 
       # Whether a card object matches, by its current characteristics (CR 109.3). `ctx` (an EffectContext)
       # computes mana value bounds given as amounts; without one, only fixed bounds can be met.
-      def match?(engine, object, ctx = nil)
-        return false unless object.kind == "card"
+      def match?(engine, object, ctx = nil) = object.kind == "card" && chars_match?(engine, engine.chars(object), ctx)
 
-        chars = engine.chars(object)
+      # Whether characteristics match (an object's, or remembered ones such as a mana source's, CR 106.6).
+      def chars_match?(engine, chars, ctx = nil)
         types.all? { chars.type?(it) } && not_types.none? { chars.type?(it) } &&
           subtypes.all? { chars.subtypes.include?(it) } && supertypes.all? { chars.supertypes.include?(it) } &&
           (name.nil? || chars.name == name) && (!permanent || chars.types.intersect?(PERMANENT_TYPES)) &&
           (colors.empty? || colors.intersect?(chars.colors)) && bounded?(mana_value, chars.mana_cost&.mana_value.to_i, engine, ctx) &&
-          bounded?(color_count, chars.colors.size, engine, ctx) && (any_of.empty? || any_of.any? { it.match?(engine, object, ctx) })
+          bounded?(color_count, chars.colors.size, engine, ctx) && (any_of.empty? || any_of.any? { it.chars_match?(engine, chars, ctx) })
       end
 
       def to_s

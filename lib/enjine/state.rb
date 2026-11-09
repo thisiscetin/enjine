@@ -29,7 +29,8 @@ module Enjine
                            :outside, # definition ids of the cards they own outside the game (CR 400.11a)
                            :speed, # nil (no speed) or 1-4 (CR 702.179), see Engine::Speed
                            :designations, # player designations, e.g. "enduring_story" (CR 702.195b), see Engine::Designations
-                           :counters) do # nil or {kind => n}: counters other than poison (CR 122.1), see Engine#add_player_counters!
+                           :counters, # nil or {kind => n}: counters other than poison (CR 122.1), see Engine#add_player_counters!
+                           :pool_sources) do # nil or [{"mana", "from"}]: sources of pool mana made by artifacts (Engine#add_mana!)
     def zone(name)
       case name
       when :library then library
@@ -48,6 +49,7 @@ module Enjine
         "outside" => (outside || []).dup }.merge(speed ? { "speed" => speed } : {})
         .merge(designations.to_a.empty? ? {} : { "designations" => designations.dup })
         .merge(counters.nil? || counters.empty? ? {} : { "counters" => counters.dup })
+        .merge(pool_sources.nil? || pool_sources.empty? ? {} : { "pool_sources" => Marshal.load(Marshal.dump(pool_sources)) })
     end
   end
 

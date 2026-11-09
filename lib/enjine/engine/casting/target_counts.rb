@@ -70,10 +70,11 @@ module Enjine
         count_ctx = Mechanics::EffectContext.new(ctx["player"], ctx["source"] || ctx["object"], ctx["object"], nil, [])
         min, max = spec.count_range(self, count_ctx)
         available = target_candidates.size
-        divide = casting_ability&.extras&.divide
+        divide = divided_amount(ctx, casting_ability) # Engine::CastChoices
         return [min, min] if min > available && cancellable?
 
         max = [max || available, available, divide].compact.min
+        min = 1 if divide&.positive? && max.positive? # CR 601.2d: divided among one or more targets
         [[min, max].min, max]
       end
 

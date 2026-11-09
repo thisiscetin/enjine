@@ -25,12 +25,18 @@ module Enjine
         when Events::CountersChanged then facts.merge!("object" => event.object, "amount" => event.to - event.from)
         when Events::StepBegan then facts["player"] = engine.state.active # "that player": whose step it is
         end
-        # CR 601.2h: the mana spent to cast "that spell", as it was cast
-        facts["mana_spent"] = engine.state.objects[event.object]&.mana_spent&.dup if event.is_a?(Events::SpellCast)
-        facts["amount"] = Triggers.spells_before(engine) if event.is_a?(Events::SpellCast) # storm (CR 702.40a)
+        facts.merge!(spell_facts(engine, event)) if event.is_a?(Events::SpellCast)
         facts["player"] ||= engine.names.index(event.player) if event.respond_to?(:player)
         facts["card"] = event.respond_to?(:card) ? event.card : engine.state.objects[facts["object"]]&.card
         facts.compact
+      end
+
+      # CR 601.2h: the mana spent to cast "that spell" and the sources of what artifacts made, as it was cast;
+      # storm's count of spells cast before it (CR 702.40a).
+      def self.spell_facts(engine, event)
+        spell = engine.state.objects[event.object]
+        { "mana_spent" => spell&.mana_spent&.dup, "mana_from" => Snapshot.deep_copy(spell&.memory&.[]("mana_from")),
+          "amount" => Triggers.spells_before(engine) }
       end
 
       def self.filter_words(filter)
