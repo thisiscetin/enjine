@@ -244,7 +244,10 @@ module Enjine
           end
           frame["queue"].shift
         end
-        deal_combat_damage!(frame["assigned"])
+        hits = combat_hits(frame["assigned"])
+        return :wait if ask_damage_orders!(hits, frame, combat: true) == :wait # CR 616.1 (Engine::Damage)
+
+        with_damage_orders(frame["damage_orders"]) { deal_combat_damage!(hits) }
         :done
       end
 
@@ -270,8 +273,8 @@ module Enjine
         ask!(nil)
       end
 
-      # CR 510.2: all combat damage in a step is dealt simultaneously.
-      def deal_combat_damage!(assigned)
+      # The combat damage of this step, as assigned: [[source, recipient, amount]] (CR 510.1).
+      def combat_hits(assigned)
         hits = []
         attackers.each do |id, info|
           next unless deals_damage_now?(id)
@@ -287,6 +290,11 @@ module Enjine
         state.blockers.each do |blocker, attacker|
           hits << [blocker, attacker, combat_damage_amount(blocker)] if deals_damage_now?(blocker)
         end
+        hits
+      end
+
+      # CR 510.2: all combat damage in a step is dealt simultaneously.
+      def deal_combat_damage!(hits)
         simultaneous_damage do # CR 510.2
           dealt = Hash.new(0)
           lifelinked = hits.map(&:first).uniq.select { damage_source_keyword?(it, :lifelink) }

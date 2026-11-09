@@ -16,6 +16,55 @@ module Enjine
         dealt
       end
 
+      # ---- the order of replacement and prevention effects (CR 616.1) ------------------------------------------
+
+      # The key naming one damage event of an effect or combat in a chosen order.
+      def self.hit_key(source, target) = "#{source}>#{target}"
+
+      # Before damage is dealt (`hits`: [[source, recipient, amount]]), the affected player of each event whose
+      # result depends on the order of the effects that apply to it chooses one (CR 616.1), in APNAP order (CR
+      # 101.4). The chosen orders are kept in `store` ("damage_orders": the effect's locals, or the combat damage
+      # frame). Returns :wait while asking. Not asked while damage is being dealt (follow-ups): the default order.
+      def ask_damage_orders!(hits, store, combat: false)
+        return if hits.empty? || @damage_orders
+
+        orders = store["damage_orders"] || {}
+        asks = hits.filter_map do |source, ref, amount|
+          key = Damage.hit_key(source, ref)
+          found = !orders.key?(key) && Mechanics::DamageEvents.orders(self, source, ref, amount, combat)
+          [key, *found] if found
+        end
+        key, chooser, outcomes = asks.min_by { apnap_rank(it[1]) }
+        return unless key
+
+        ask!("kind" => "damage_order", "player" => chooser, "hit" => key,
+             "choices" => outcomes.map do |order, amount|
+               { "type" => "order", "order" => order.map(&:first), "steps" => order.map(&:last), "amount" => amount }
+             end)
+        :wait
+      end
+
+      def apnap_rank(index) = (index - state.active) % state.players.size
+
+      # The affected player answered: the order is kept where #ask_damage_orders! looks for it.
+      def damage_order_answer!(pending, option)
+        frame = state.frames.last
+        store = frame["type"] == "resolve" ? answering_locals : frame
+        (store["damage_orders"] ||= {})[pending["hit"]] = option[:order]
+        ask!(nil)
+      end
+
+      # Deals damage with the orders chosen for it (#damage_order).
+      def with_damage_orders(orders)
+        before = @damage_orders
+        @damage_orders = orders || {}
+        yield
+      ensure
+        @damage_orders = before
+      end
+
+      def damage_order(hit) = @damage_orders&.[](hit)
+
       # The damage event after replacement and prevention effects (CR 614, 615).
       def deal_proposed_damage!(source, data, combat, lifelink)
         amount = data["amount"]

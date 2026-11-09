@@ -45,7 +45,7 @@ module Enjine
     # Resolving the top object of the stack, one effect at a time (CR 608).
     class Resolve < Base
       def self.step(engine, frame) = engine.step_resolution!(frame)
-      def self.decisions = %w[effect_choice enter_choice]
+      def self.decisions = %w[effect_choice enter_choice damage_order]
 
       def self.validate(frame, data, errors)
         errors << "frames: resolving object #{frame["object"]} is not on the stack" unless data["stack"].include?(frame["object"])
@@ -56,7 +56,7 @@ module Enjine
     # Assigning and dealing combat damage (CR 510).
     class CombatDamage < Base
       def self.step(engine, frame) = engine.step_combat_damage!(frame)
-      def self.decisions = %w[assign_damage]
+      def self.decisions = %w[assign_damage damage_order]
     end
     register("combat_damage", CombatDamage)
 

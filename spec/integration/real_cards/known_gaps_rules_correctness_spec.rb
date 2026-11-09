@@ -15,14 +15,18 @@ RSpec.describe "Real cards: rules-correctness details" do
        "abilities" => [{ "triggered" => { "when" => { "becomes_target" => {} },
                                           "effects" => [{ "draw" => { "amount" => 1 } }] } }] },
      { "name" => "Test Trinket", "mana_cost" => "{1}", "types" => ["artifact"] },
+     { "name" => "Test Raw Shock", "mana_cost" => "{R}", "types" => ["instant"],
+       "abilities" => [{ "spell" => { "targets" => ["any_target"],
+                                      "effects" => ["damage_unpreventable",
+                                                    { "deal_damage" => { "amount" => 2, "to" => { "target" => 0 } } }] } }] },
      { "name" => "Test Bear", "mana_cost" => "{1}{G}", "types" => ["creature"], "power" => 2, "toughness" => 2 }]
   end
   let(:catalog) { Enjine::Catalog.from_definitions(CardFixtures.real_cards + test_cards) }
 
   def board(hand: [], battlefield: [], theirs: [], their_hand: [], mana: {}, their_mana: {}, step: :precombat_main,
-            life: 20, their_life: 20)
+            life: 20, their_life: 20, active: "alice")
     build_game(catalog) do
-      turn 3, active: "alice", step: step
+      turn 3, active: active, step: step
       player("alice", mana_pool: mana, life: life) do
         hand(*hand)
         library "Island", count: 10
@@ -139,6 +143,45 @@ RSpec.describe "Real cards: rules-correctness details" do
       attack_with_harrier(game)
       play(game, nil, pay)
       expect(game.state.attackers.values.map { it["target"] }).to eq(["player:bob", "player:bob"])
+    end
+  end
+
+  describe "New Way Forward against an opponent's spell" do
+    # Bob casts `spell` at alice; alice answers with New Way Forward choosing that spell as the source.
+    def bob_casts_at_alice(game, spell)
+      game.submit(type: "cast", object: obj_id(game, spell, zone: :hand, player: "bob"))
+      game.submit(target("player:alice"))
+      game.submit(game.legal_options.find { it[:type] == "pay_mana" }) while game.pending_decision.kind == "pay_cost"
+      game.submit(type: "pass")
+      shock = game.state.stack.first
+      game.submit(type: "cast", object: obj_id(game, "New Way Forward", zone: :hand, player: "alice"))
+      game.submit(game.legal_options.find { it[:type] == "pay_mana" }) while game.pending_decision.kind == "pay_cost"
+      game.submit(type: "pass") while game.pending_decision.kind == "priority"
+      game.submit(type: "source", object: shock)
+    end
+
+    it "lets alice double the damage before preventing it, with Twinflame Tyrant's doubling (CR 616.1)" do
+      game = board(hand: ["New Way Forward"], mana: { U: 1, R: 1, W: 1, C: 2 }, their_hand: ["Test Shock"],
+                   their_mana: { R: 1 }, theirs: ["Twinflame Tyrant"], active: "bob")
+      bob_casts_at_alice(game, "Test Shock")
+      game.submit(type: "pass") until game.pending_decision.kind != "priority" # New Way Forward resolved; the Shock resolves
+      expect(game.pending_decision.kind).to eq("damage_order")
+      orders = game.legal_options
+      expect(orders.size).to eq(2)
+      play(game, orders.find { it[:steps].first.start_with?("Twinflame") })
+      expect(life(game, "alice")).to eq(20)
+      expect(life(game, "bob")).to eq(16) # the doubled 4, dealt back
+      expect(hand_size(game, "alice")).to eq(4)
+    end
+
+    it "prevents nothing and doesn't trigger when the damage can't be prevented (CR 615.12)" do
+      game = board(hand: ["New Way Forward"], mana: { U: 1, R: 1, W: 1, C: 2 }, their_hand: ["Test Raw Shock"],
+                   their_mana: { R: 1 }, active: "bob")
+      bob_casts_at_alice(game, "Test Raw Shock")
+      game.submit(type: "pass") while game.state.stack.any? && game.pending_decision.kind == "priority"
+      expect(life(game, "alice")).to eq(18)
+      expect([life(game, "bob"), hand_size(game, "alice")]).to eq([20, 0])
+      expect(game.state.effects.count { it["kind"] == "prevent_damage" }).to eq(1) # the shield isn't used up
     end
   end
 

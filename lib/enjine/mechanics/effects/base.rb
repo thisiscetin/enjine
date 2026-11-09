@@ -64,10 +64,18 @@ module Enjine
 
         # Runs the effect during resolution. Effects that need a player's choice override this,
         # keep their progress in `locals` (plain JSON data) and return :wait after asking.
-        def run(engine, ctx, _locals)
-          apply(engine, ctx) if condition.nil? || condition.true?(engine, ctx)
+        # An effect that deals damage first asks the affected players to order the replacement and prevention
+        # effects where the order matters (CR 616.1, Engine::Damage#ask_damage_orders!).
+        def run(engine, ctx, locals)
+          return :done unless locals.key?("damage_orders") || condition.nil? || condition.true?(engine, ctx)
+          return :wait if engine.ask_damage_orders!(damage_hits(engine, ctx), locals) == :wait
+
+          engine.with_damage_orders(locals["damage_orders"]) { apply(engine, ctx) }
           :done
         end
+
+        # The damage it would deal now: [[source, recipient, amount]].
+        def damage_hits(_engine, _ctx) = []
 
         def refs(engine, ctx) = to ? to.resolve(engine, ctx) : []
 

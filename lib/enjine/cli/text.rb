@@ -120,6 +120,8 @@ module Enjine
                 when "bottom" then " — put #{decision.details["count"]} more on the bottom"
                 when "assign_damage" then " — #{name_of(decision.details["attacker"])}: #{decision.details["remaining"]} damage left"
                 when "choose_target" then " — target ##{decision.details["index"] + 1}"
+                when "damage_order"
+                  " — damage #{decision.details["hit"].split(">").map { name_of(it) }.join(" → ")}"
                 when "choose_target_count" then " — how many for target ##{decision.details["index"] + 1}"
                 else ""
                 end
@@ -150,6 +152,7 @@ module Enjine
         when "assign" then "Assign 1 damage to #{name_of(opt[:object])}"
         when "done" then "Done"
         when "source" then "Choose #{name_of(opt[:object])} as the source"
+        when "order" then "Apply #{opt[:steps].join(", then ")} (#{opt[:amount]} damage)"
         when "devour" then "Devour #{name_of(opt[:object])}"
         when "discard", "bottom", "find" then "#{opt[:type].capitalize} #{name_of(opt[:object])}"
         when "keep" then "Keep hand"

@@ -40,6 +40,13 @@ module Enjine
 
         def self.other_key = "with"
 
+        def damage_hits(engine, ctx)
+          pair = [refs(engine, ctx).first, other.resolve(engine, ctx).first]
+          return [] unless pair.all? { engine.state.battlefield.include?(it) && engine.chars(it).creature? }
+
+          [[pair[0], pair[1], engine.power(engine.object(pair[0]))], [pair[1], pair[0], engine.power(engine.object(pair[1]))]].uniq
+        end
+
         def apply(engine, ctx)
           one = refs(engine, ctx).first
           other_one = other.resolve(engine, ctx).first
@@ -62,6 +69,10 @@ module Enjine
                   example: { "bite" => { "from" => { "target" => 0 }, "to" => { "target" => 1 } } }
 
         def self.other_key = "from"
+
+        def damage_hits(engine, ctx)
+          other_creatures(engine, ctx).product(refs(engine, ctx)).map { |source, ref| [source, ref, engine.power(engine.object(source))] }
+        end
 
         def apply(engine, ctx)
           sources = other_creatures(engine, ctx)
