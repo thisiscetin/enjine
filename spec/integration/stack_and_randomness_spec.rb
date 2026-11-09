@@ -96,6 +96,24 @@ RSpec.describe "Stack, cast filters and randomness" do
       expect(hand_size(game, "alice")).to eq(2)
     end
 
+    it "a copy of a targeted trigger may get a new target; both resolve (CR 707.10c)" do
+      herald = { "name" => "Spark Herald", "mana_cost" => "{R}", "types" => ["creature"], "power" => 1, "toughness" => 1,
+                 "abilities" => [{ "triggered" => { "when" => { "enters" => {} }, "targets" => ["creature"],
+                                                    "effects" => [{ "deal_damage" => { "amount" => 2, "to" => { "target" => 0 } } }] } }] }
+      game = board(hand: ["Spark Herald"], battlefield: ["Echo Tactician"], theirs: ["Grizzly Bears", "Grizzly Bears"],
+                   mana: { R: 1, C: 1 }, catalog: catalog_with(herald))
+      first, second = game.state.battlefield.select { game.state.object(it).card == "grizzly_bears" }
+      cast(game, "Spark Herald", resolve: false)
+      game.submit(type: "pass")
+      game.submit(type: "pass")
+      game.submit(target(first)) # the enters trigger's target (CR 603.3d)
+      trigger = game.state.stack.first
+      expect(game.state.object(trigger).targets).to eq([first])
+      play(game, { type: "activate", object: obj_id(game, "Echo Tactician"), ability: "printed:0" }, target(trigger),
+           ->(g) { g.legal_options.find { it[:target] == second } || raise("no new target: #{g.legal_options}") })
+      expect(game.state.players[1].graveyard.size).to eq(2)
+    end
+
     it "can't target an opponent's ability (`controller: you`)" do
       game = board(battlefield: ["Echo Tactician"], their_hand: ["Tower Scholar"], mana: { C: 1 })
       expect(game.legal_options.map { it[:type] }).not_to include("activate")
