@@ -40,7 +40,8 @@ RSpec.describe "Cost options: card data (unit)" do
               "abilities[0].spell.effects[0].pay.cost[0].get_counters.amount: must be an integer >= 1"])
     expect(errors_for(creature([{ "ward" => { "cost" => [{ "pay_life" => 0 }] } }])))
       .to eq(["abilities[0].ward.cost[0].pay_life: must be an integer >= 1 or \"X\""])
-    expect(errors_for(creature([{ "enters_tapped_unless_behold" => {} }]))).to eq(["abilities[0].enters_tapped_unless_behold.card: required"])
+    expect(errors_for(creature([{ "enters_tapped_unless_behold" => {} }])))
+      .to eq(["abilities[0].enters_tapped_unless_behold.card: required"])
   end
 
   it "describes them" do
