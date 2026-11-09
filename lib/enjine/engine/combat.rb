@@ -143,13 +143,22 @@ module Enjine
         attackers.keys.select do |id|
           next false unless chars(id).keyword?(:must_be_blocked) && blockers_of(id).empty?
 
-          able_blockers.count { can_block?(it, id) } >= (chars(id).keyword?(:menace) ? 2 : 1)
+          able_blockers.count { could_obey?(it, id) } >= (chars(id).keyword?(:menace) ? 2 : 1)
         end
+      end
+
+      # Whether `blocker` blocking `attacker` would obey more requirements: it can block it and blocks nothing,
+      # or blocks an attacker without such a requirement (moving it from one that must be blocked gains nothing).
+      def could_obey?(blocker, attacker)
+        return false unless can_block?(blocker, attacker)
+
+        blocking = state.blockers[blocker]
+        blocking.nil? || !chars(blocking).keyword?(:must_be_blocked)
       end
 
       # Blocks to undo so a creature can block an attacker that must be blocked.
       def requirement_unblocks
-        unmet_block_requirements.flat_map { |id| state.blockers.keys.select { can_block?(it, id) } }.uniq
+        unmet_block_requirements.flat_map { |id| state.blockers.keys.select { could_obey?(it, id) } }.uniq
       end
 
       def menace_violations

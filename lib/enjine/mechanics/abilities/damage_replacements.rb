@@ -41,7 +41,7 @@ module Enjine
       # Whether `ref` (a player reference or an object id) is in scope for the permanent `holder`.
       def match?(engine, ref, holder)
         return ref == holder.id if @kind == :self
-        return ref == holder.attached_to if @kind == :attached
+        return !holder.attached_to.nil? && ref == holder.attached_to if @kind == :attached
         return false if @other && ref == holder.id
 
         index = Filters.player_index(engine, ref)

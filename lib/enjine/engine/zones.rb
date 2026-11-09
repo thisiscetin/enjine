@@ -174,7 +174,9 @@ module Enjine
         unless replaced
           data = propose("create_token", { "player" => controller, "token" => definition.id, "count" => 1 }).data
           definition = catalog.fetch(data["token"])
-          (data["count"] - 1).times { create_token!(definition, controller, tapped:, memory:, enters:, replaced: true) }
+          (data["count"] - 1).times do
+            create_token!(definition, controller, tapped:, memory: memory && Snapshot.deep_copy(memory), enters:, replaced: true)
+          end
         end
         obj = create_object(definition.id, controller, :battlefield)
         obj.memory.merge!(memory) if memory

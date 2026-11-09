@@ -123,6 +123,19 @@ RSpec.describe "Damage triggers, combat requirements, extra phases and replaceme
       expect(game.state.blockers).to eq(giant => brute)
     end
 
+    it "two attackers that must be blocked, one blocker: blocking either obeys the most requirements (CR 509.1c)" do
+      game = board(alice: ["Lure Brute", "Lure Brute"], bob: ["Hill Giant"], step: :beginning_of_combat)
+      pass_both(game)
+      brutes = game.state.battlefield.select { game.state.object(it).card == "lure_brute" }
+      brutes.each { game.submit(type: "attack", object: it, target: "player:bob") }
+      pass_both(game)
+      expect(game.legal_options).not_to include(type: "done")
+      game.submit(type: "block", object: id(game, "Hill Giant"), attacker: brutes.last)
+      expect(game.step).to eq(:declare_blockers)
+      expect(game.state.blockers).to eq(id(game, "Hill Giant") => brutes.last)
+      expect(game.pending_decision.kind).to eq("priority") # the declaration finished
+    end
+
     it "assigns combat damage equal to toughness when it's greater than power (CR 510.1a)" do
       game = board(alice: ["Tall Wall"], step: :beginning_of_combat)
       pass_both(game)
