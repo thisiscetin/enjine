@@ -194,12 +194,7 @@ module Enjine
         return unless ability.condition_met?(self, source["controller"], source["id"]) # CR 603.4
         return if once_each_turn_used!(ability, inst.ref, source)
 
-        source_memory = state.objects[source["id"]]&.memory || {}
-        memory = source_memory["cast"] ? { "source_cast" => true } : {}
-        memory["kicked"] = true if source_memory["kicked"] # CR 702.33d: a kicked permanent's "if it was kicked"
-        # A source that just left the battlefield ("when this leaves, put its counters on ..."): as it last existed
-        # (CR 603.10a, 608.2h).
-        memory["source_lki"] = last_known_memory(last_known(source["id"])) if last_known(source["id"])
+        memory = trigger_memory(source)
         batch = trigger.respond_to?(:batched?) && trigger.batched? ? event_batch : nil
         times = 1 + additional_triggers(event, source)
         card, ref = granted_origin(inst.ref) # a granted ability lives in the granting card's data (CR 613.1f)
@@ -207,11 +202,21 @@ module Enjine
         found.first(limited?(ability) ? 1 : found.size).each do |facts|
           next if batch && batched_pending!(source, queued["ability"], batch)
 
-          times.times do
-            facts = facts.merge("amount" => 1) if batch # "that many": the occurrences so far (batched_pending!)
-            queue_pending_trigger!(queued, event, memory.merge("triggering" => facts), batch: batch)
-          end
+          facts = facts.merge("amount" => 1) if batch # "that many": the occurrences so far (batched_pending!)
+          times.times { queue_pending_trigger!(queued, event, memory.merge("triggering" => facts), batch: batch) }
         end
+      end
+
+      # What a triggered ability remembers of its source: whether it was cast and kicked, and, for a source that
+      # just left the battlefield ("when this leaves, put its counters on ..."), how it last existed (CR 603.10a,
+      # 608.2h).
+      def trigger_memory(source)
+        source_memory = state.objects[source["id"]]&.memory || {}
+        memory = source_memory["cast"] ? { "source_cast" => true } : {}
+        memory["kicked"] = true if source_memory["kicked"] # CR 702.33d: a kicked permanent's "if it was kicked"
+        lki = last_known(source["id"])
+        memory["source_lki"] = last_known_memory(lki) if lki
+        memory
       end
 
       # A once-each-turn limit: remembered on the source object, so the same card

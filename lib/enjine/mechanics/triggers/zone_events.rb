@@ -65,7 +65,11 @@ module Enjine
           @subject.match?(engine, event.old_id, lki["controller"], event.card, source, types: lki["types"])
         end
 
-        def to_s = "When #{@subject} #{@to ? "is put into #{@to == "exile" ? "exile" : "a #{@to}"} from the battlefield" : "leaves the battlefield"}"
+        def to_s
+          return "When #{@subject} leaves the battlefield" unless @to
+
+          "When #{@subject} is put into #{"a " unless @to == "exile"}#{@to} from the battlefield"
+        end
       end
 
       # "Whenever you sacrifice another permanent" / "a Food" (CR 701.21a): only its controller can sacrifice
@@ -123,7 +127,9 @@ module Enjine
           event.reason == "discard" && event.from == "hand" && player_ok?(engine, event.owner, source) && card_ok?(engine, event.card)
         end
 
-        def to_s = "Whenever #{who} discard#{"s" unless @controller == "you"} #{@batched ? "one or more #{card_words}s" : "a #{card_words}"}"
+        def to_s
+          "Whenever #{who} discard#{"s" unless @controller == "you"} #{@batched ? "one or more #{card_words}s" : "a #{card_words}"}"
+        end
       end
 
       # "Whenever you cycle a card" (CR 702.29a): a player activates a cycling (or typecycling) ability.

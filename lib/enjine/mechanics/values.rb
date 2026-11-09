@@ -95,8 +95,14 @@ module Enjine
       def self.last_known(engine, ctx, selector, key)
         return 0 unless selector.kind == :self
 
-        lki = engine.state.objects[ctx.object]&.memory&.[]("source_lki")
+        lki = source_lki(engine, ctx)
         lki ? lki[key].to_i : 0
+      end
+
+      # How a source that has left the battlefield last existed: remembered by the resolving ability, or,
+      # while its leaves-the-battlefield trigger is being checked (CR 603.4, 603.10a), the engine's.
+      def self.source_lki(engine, ctx)
+        engine.state.objects[ctx.object]&.memory&.[]("source_lki") || engine.last_known(ctx.source)
       end
 
       private
@@ -220,10 +226,7 @@ module Enjine
         def value(engine, ctx)
           refs = @selector.resolve(engine, ctx).select { engine.state.objects.key?(it) }
           counters = refs.map { engine.object(it).counters }
-          if refs.empty? && @selector.kind == :self
-            counters = [engine.state.objects[ctx.object]&.memory&.dig("source_lki",
-                                                                      "counters") || {}]
-          end
+          counters = [Amount.source_lki(engine, ctx)&.[]("counters") || {}] if refs.empty? && @selector.kind == :self
           counters.sum { @kind ? it.fetch(@kind, 0) : it.values.sum }
         end
 
@@ -264,6 +267,7 @@ module Enjine
       # attacking player; for a card exiled from another zone, its owner). Without `each`, every one counts.
       class Departed
         def self.build(kind, data, errors, path)
+          errors << "#{path}: must be an object {\"each\": filter, \"controller\": ...}" unless data.is_a?(Hash)
           data = data.is_a?(Hash) ? data.transform_keys(&:to_s) : {}
           Mechanics.check_keys(data, %w[each controller], errors, path)
           filter = data.key?("each") ? Mechanics.build_entry(:filter, data["each"], errors, "#{path}.each") : nil
@@ -298,7 +302,10 @@ module Enjine
           end
         end
 
-        def to_s = "the number of #{@filter || "objects"} in this turn's #{@key}"
+        WORDS = { "died" => "that died", "entered" => "that entered", "left" => "that left the battlefield",
+                  "sacrificed" => "sacrificed", "attackers" => "that attacked", "exiled" => "put into exile" }.freeze
+
+        def to_s = "the number of #{Triggers.filter_words(@filter) || "object"}s #{WORDS.fetch(@key)} this turn"
       end
     end
 

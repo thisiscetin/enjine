@@ -14,16 +14,18 @@ RSpec.describe "Turn-history conditions and zone-change triggers (CR 508.1, 400.
 
   def triggered(when_, effects, **extra) = { "triggered" => { "when" => when_, "effects" => effects }.merge(extra.transform_keys(&:to_s)) }
   def gain(amount) = { "gain_life" => { "amount" => amount } }
+  def its_counters = { "counters" => { "of" => "self", "kind" => "+1/+1" } }
   def at_least(kind, data, n = 1) = { "amount" => { kind => data }, "at_least" => n }
 
   let(:cards) do
     [
       creature("Parting Gift", [1, 1], [triggered({ "leaves_battlefield" => {} }, [gain(2)])]),
       creature("Hoarding Mentor", [1, 1], [triggered({ "leaves_battlefield" => {} },
-                                                     [{ "add_counters" => { "counter" => "+1/+1",
-                                                                            "amount" => { "counters" => { "of" => "self", "kind" => "+1/+1" } },
+                                                     [{ "add_counters" => { "counter" => "+1/+1", "amount" => its_counters,
                                                                             "to" => { "target" => 0 } } }],
                                                      targets: ["creature"])]),
+      creature("Proud Martyr", [2, 2], [triggered({ "any_of" => [{ "dies" => {} }, { "leaves_battlefield" => { "to" => "exile" } }] },
+                                                  [gain(5)], if: { "amount" => { "power" => "self" }, "at_least" => 4 })]),
       creature("Exile Watcher", [1, 1], [triggered({ "leaves_battlefield" => { "to" => "exile",
                                                                                "subject" => { "each" => "creature", "controller" => "you",
                                                                                               "other" => true } } },
@@ -211,6 +213,22 @@ RSpec.describe "Turn-history conditions and zone-change triggers (CR 508.1, 400.
       engine_of(game).move!(obj_id(game, "Hoarding Mentor"), :graveyard, reason: "destroy")
       flush(game)
       expect(game.state.object(obj_id(game, "Grizzly Bears")).counters).to eq("+1/+1" => 3)
+    end
+
+    it "an intervening if reads the power it had as it last existed (CR 603.4, 603.10a)" do
+      game = board do
+        player("alice") do
+          battlefield "Proud Martyr", counters: { "+1/+1" => 2 }
+          battlefield "Proud Martyr"
+        end
+        player("bob")
+      end
+      big, small = game.state.battlefield.first(2)
+      engine_of(game).move!(small, :exile, reason: "exile")
+      expect(game.state.pending_triggers).to be_empty
+      engine_of(game).move!(big, :exile, reason: "exile")
+      flush(game)
+      expect(life(game)).to eq(25)
     end
 
     it "`to: exile` triggers only for permanents put into exile; `other` skips the source" do

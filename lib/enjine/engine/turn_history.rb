@@ -102,7 +102,7 @@ module Enjine
         departed_recorded!(event, lki) if lki
         log = lki ? turn_log(lki["controller"]) : log_of(event.owner)
         case event.reason
-        when "draw" then bump!(log_of(event.owner), "drawn", 1) if event.to == "hand"
+        when "draw" then bump!(log_of(event.owner), "drawn", 1)
         when "discard" then bump!(log_of(event.owner), "discarded", 1)
         end
         (log["exiled"] ||= []) << [event.card, (lki ? lki["types"] : printed_types(event.card)).map(&:to_s)] if event.to == "exile"
@@ -129,7 +129,7 @@ module Enjine
         (turn_log(obj.controller)["attackers"] ||= []) << history_entry(obj.card, chars(obj))
       end
 
-      def history_entry(card, c) = [card, c.types.map(&:to_s), c.subtypes.map(&:to_s)]
+      def history_entry(card, current) = [card, current.types.map(&:to_s), current.subtypes.map(&:to_s)]
       def printed_types(card) = catalog.fetch(card).types
 
       def resolution_recorded!(event)
