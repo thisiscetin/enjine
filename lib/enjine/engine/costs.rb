@@ -58,8 +58,9 @@ module Enjine
         obj = object(ctx["object"])
         spell = ctx["kind"] == "spell" ? obj : nil
         ability = ctx["kind"] == "ability" ? stack_ability(obj) : nil
-        total_cost(ctx["player"], base_cost(ctx), spell: spell, ability: ability, source: ctx["source"],
-                                                  x_value: x_value, targets: targets)
+        total = total_cost(ctx["player"], base_cost(ctx), spell: spell, ability: ability, source: ctx["source"],
+                                                          x_value: x_value, targets: targets)
+        harmonize_reduced(total, frame_harmonize_power(ctx)) # CR 702.180a (Engine::AltCasting)
       end
 
       # CR 601.2f: the total cost is determined once and locked in.

@@ -24,7 +24,9 @@ module Enjine
         when Events::TurnBegan then state.players.each { it.turn_log = {} }
         when Events::SpellCast then cast_recorded!(event)
         when Events::LifeChanged then life_recorded!(event)
-        when Events::ZoneChanged then zone_change_recorded!(event)
+        when Events::ZoneChanged
+          zone_change_recorded!(event)
+          discard_recorded!(event) # mayhem (Engine::AltCasting)
         when Events::DilemmaFaced then bump!(log_of(event.player), "dilemmas", 1)
         when Events::AttackerDeclared then object_memory!(event.object, "attacked")["count"] = 1
         when Events::Resolved then resolution_recorded!(event)

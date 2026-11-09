@@ -302,6 +302,8 @@ module Enjine
     #   {"controls": selector, "at_least": 3} / {"life": "you", ...} / {"hand_size": "you", ...}  (short forms)
     #   {"your_turn": true}
     #   {"was_cast": true}                          "if you cast it": the source permanent was cast (CR 400.7d)
+    #   {"cast_with": "warp"} / {"cast_from": "graveyard"}   how this spell (or the spell this permanent was) was
+    #                              cast; {"cast_with_this_turn": "warp"}: a spell was cast with it this turn
     #   {"targets": filter}        one of the chosen targets matches (e.g. "if it targets a tapped creature")
     #   {"attacked": true}         a creature is attacking you (CR 508.1b)
     #   {"source": filter}         the source is on the battlefield and matches ("if this isn't a creature":
@@ -326,6 +328,7 @@ module Enjine
           parts = Array(data[key]).each_with_index.map { |c, i| build(c, errors, "#{path}.#{key}[#{i}]", **context) }
           Many.new(key, parts.compact)
         elsif data.key?("kicked") then WasKicked.new(data["kicked"] != false)
+        elsif (key = CastHow::KEYS.find { data.key?(it) }) then CastHow.build(key, data, errors, path) # keywords/alternative_costs.rb
         elsif data.key?("sacrificed") then Sacrificed.build(data, errors, path)
         elsif (flag = FLAGS.find { data.key?(it) }) then Flag.new(flag, data[flag] != false)
         elsif data.key?("targets") then Targets.build(data, errors, path)
@@ -347,7 +350,8 @@ module Enjine
           subject = (data.keys & (SUBJECTS.keys + ["amount"])).first
           unless subject
             errors << "#{path}: unknown condition (use amount, controls, life, hand_size, your_turn, was_cast, targets, " \
-                      "attacked, source, attacked_this_turn, nth_resolution, kicked, sacrificed, not, all, any)"
+                      "attacked, source, attacked_this_turn, nth_resolution, kicked, sacrificed, cast_with, cast_from, " \
+                      "cast_with_this_turn, not, all, any)"
             return nil
           end
           Mechanics.check_keys(data, [subject, "at_least", "at_most"], errors, path)

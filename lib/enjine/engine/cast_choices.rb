@@ -28,7 +28,7 @@ module Enjine
           obj = object(ctx["object"])
           costs = spell_cost_abilities(obj, :additional_cost)
           costs += spell_cost_abilities(obj, :kicker) if ctx["kicked"]
-          costs.flat_map(&:choosing_costs)
+          costs.flat_map(&:choosing_costs) + alt_cost_parts(obj, ctx["method"]) # Engine::AltCasting
         else []
         end
       end
@@ -169,6 +169,7 @@ module Enjine
 
       def cost_choice_candidates
         ctx = casting
+        return harmonize_options(ctx) if harmonize_pending?(ctx) # Engine::AltCasting
         return beam_choices(ctx).map { { object: it } } if beam_choice_pending?(ctx) # Engine::Permissions
 
         index = next_cost_choice(ctx)
@@ -179,6 +180,7 @@ module Enjine
       # CR 601.2h). Cancelling the cast untaps what was tapped (ctx "tapped").
       def choose_cost!(option)
         ctx = casting
+        return choose_harmonize!(ctx, option[:object]) if harmonize_pending?(ctx) # Engine::AltCasting
         return choose_beam_creature!(option[:object]) if beam_choice_pending?(ctx) # Engine::Permissions
 
         index = next_cost_choice(ctx)

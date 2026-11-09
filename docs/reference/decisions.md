@@ -70,7 +70,7 @@ Put one of your pending triggered abilities on the stack next: `{type: "trigger"
 
 ## pay_cost
 
-While casting/activating or paying a cost: `{type: "pay_mana", mana: "R"}` spends one mana from the pool (`restricted: i`: restricted mana, CR 106.6), `{type: "activate_mana", object: id, ability: ref}` (plus `mana: "{G}{G}"` when the mana is chosen) taps a source, `{type: "cancel"}` rewinds (or declines a payment asked for while resolving). Cancel isn't offered once a mana ability with a cost other than {T} (a Treasure) has been activated. `remaining` shows what is left to pay.
+While casting/activating or paying a cost: `{type: "pay_mana", mana: "R"}` spends one mana from the pool (`restricted: i`: restricted mana, CR 106.6), `{type: "activate_mana", object: id, ability: ref}` (plus `mana: "{G}{G}"` when the mana is chosen) taps a source, `{type: "cancel"}` rewinds (or declines a payment asked for while resolving). Cancel isn't offered once a mana ability with a cost other than {T} (a Treasure) has been activated. `{type: "convoke", object: id}` taps a creature to pay for {1} or one mana of its color (a spell with convoke). `remaining` shows what is left to pay.
 
 ## play_or_draw
 

@@ -123,17 +123,19 @@ module Enjine
           'the pool (`restricted: i`: restricted mana, CR 106.6), `{type: "activate_mana", object: id, ability: ref}` ' \
           '(plus `mana: "{G}{G}"` when the mana is chosen) taps a source, `{type: "cancel"}` ' \
           "rewinds (or declines a payment asked for while resolving). Cancel isn't offered once a mana ability " \
-          "with a cost other than {T} (a Treasure) has been activated. `remaining` shows what is left to pay."
+          "with a cost other than {T} (a Treasure) has been activated. `{type: \"convoke\", object: id}` taps a " \
+          "creature to pay for {1} or one mana of its color (a spell with convoke). `remaining` shows what is left to pay."
       end
 
       def self.options(engine, _pending)
-        Decisions.with_cancel(engine, engine.payable_mana_options + engine.payment_mana_options)
+        Decisions.with_cancel(engine, engine.payable_mana_options + engine.payment_mana_options + engine.convoke_options)
       end
 
       def self.submit(engine, _pending, option)
         case option[:type]
         when "cancel" then engine.cancel_payment!
         when "pay_mana" then engine.pay_mana!(option[:mana], option[:restricted])
+        when "convoke" then engine.convoke!(option[:object]) # CR 702.51a
         else engine.tap_for_payment!(option[:object], option[:ability], option[:mana])
         end
       end

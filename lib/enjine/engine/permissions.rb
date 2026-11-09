@@ -34,12 +34,13 @@ module Enjine
 
       # ---- legal actions --------------------------------------------------------------------
 
-      # Cards outside the hand `index` might play: their graveyard, every exiled card and their library's
-      # top card (deterministic order: graveyard, exile, library), then the cards they own outside the game
-      # (one key per distinct card) while something lets them play those.
+      # Cards `index` might play by a permission or an alternative cost: their hand (alternative costs such
+      # as warp, Engine::AltCasting), graveyard, every exiled card and their library's top card (deterministic
+      # order: hand, graveyard, exile, library), then the cards they own outside the game (one key per
+      # distinct card) while something lets them play those.
       def permission_candidates(index, sources = permission_sources(index))
         pl = player(index)
-        ids = pl.graveyard + state.exile
+        ids = pl.hand + pl.graveyard + state.exile
         ids += [pl.library.first] unless pl.library.empty?
         return ids unless sources.any? { |_, inst| inst.ability.kind == :play_from && inst.ability.outside? }
 
@@ -141,7 +142,7 @@ module Enjine
       def play_methods(index, id, sources = permission_sources(index))
         obj = id.is_a?(GameObject) ? id : candidate_object(index, id)
         granted_methods(index, obj) + own_methods(index, obj) + static_methods(index, obj, sources) +
-          beam_methods(index, obj, sources)
+          beam_methods(index, obj, sources) + alt_methods(index, obj)
       end
 
       # The method named `via`, or an error (the option was offered from this list).
@@ -160,15 +161,15 @@ module Enjine
 
         c = chars(obj)
         return false if c.land? || (method["alt"].nil? && c.mana_cost.nil?) # CR 305.9
-        return false unless c.type?(:instant) || c.keyword?(:flash) || sorcery_timing?(index)
-        return false if method.dig("alt", "beam") && beam_candidates(index, method["alt"]["not"]).empty?
-        return false unless additional_costs_payable?(obj) # CR 601.2f
+        return false unless c.type?(:instant) || c.keyword?(:flash) || method["instant"] || sorcery_timing?(index)
+        return false if returns_creature?(method["alt"]) && return_candidates(index, method["alt"]).empty?
+        return false unless additional_costs_payable?(obj) && alt_parts_payable?(obj, method) # CR 601.2f
 
         cost = Mana.sum_costs([method_cost(obj, method), *spell_extra_mana(obj, false)])
         # CR 609.4b; a stand-in for a card outside the game is passed itself (it isn't in state.objects).
         purpose = { "spell" => state.objects.key?(obj.id) ? obj.id : obj, "any_type" => method["any_mana_type"] }.compact
-        ability_targetable?(spell_ability_of(obj), index, obj.id) &&
-          affordable?(index, total_cost(index, cost, spell: obj), nil, purpose)
+        total = harmonize_reduced(total_cost(index, cost, spell: obj), best_harmonize_power(index, method))
+        ability_targetable?(spell_ability_of(obj), index, obj.id) && affordable?(index, total, nil, purpose)
       end
 
       # CR 608.2g: whether a card could be cast now during resolution without paying its mana cost
@@ -193,7 +194,7 @@ module Enjine
         alt = method && method["alt"]
         cost = if alt.nil? then chars(obj).mana_cost
                elsif alt["free"] then ZERO
-               else Mana::Cost.parse(alt["beam"])
+               else Mana::Cost.parse(alt["beam"] || alt["cost"]) # beam me up, or a keyword's (Engine::AltCasting)
                end
         increase = method && method["cost_increase"]
         increase && cost ? cost.with(generic: cost.generic + increase) : cost
@@ -314,20 +315,38 @@ module Enjine
         end
       end
 
-      # The choices for the cast in progress.
-      def beam_choices(ctx) = beam_candidates(ctx["player"], ctx.dig("method", "alt", "not"))
+      # Whether an alternative cost returns a creature to its owner's hand: beam me up, web-slinging, sneak.
+      def returns_creature?(alt) = !alt.nil? && (alt.key?("beam") || alt.key?("returns"))
 
-      # True while the beam me up creature still has to be chosen (or the chosen one is no longer there).
+      # The creatures `index` could return for the alternative cost `alt`: any (beam me up, CR 702.196a), a
+      # tapped one (web-slinging, CR 702.188a) or an unblocked attacking one (sneak, CR 702.190a).
+      def return_candidates(index, alt)
+        case alt["returns"]
+        when "tapped" then state.battlefield.select { (o = object(it)).controller == index && o.tapped && chars(o).creature? }
+        when "unblocked"
+          attackers.filter_map { |id, a| id if !a["blocked"] && object(id).controller == index && chars(id).creature? }
+        else beam_candidates(index, alt["not"])
+        end
+      end
+
+      # The choices for the cast in progress.
+      def beam_choices(ctx) = return_candidates(ctx["player"], ctx.dig("method", "alt"))
+
+      # True while the returned creature still has to be chosen (or the chosen one is no longer there).
       def beam_choice_pending?(ctx)
-        return false unless ctx.dig("method", "alt", "beam")
+        return false unless returns_creature?(ctx.dig("method", "alt"))
         return false if ctx["beam_creature"] && beam_choices(ctx).include?(ctx["beam_creature"])
 
         ctx.delete("beam_creature")
         true
       end
 
+      RETURN_TEXT = { "tapped" => "Return a tapped creature you control to its owner's hand",
+                      "unblocked" => "Return an unblocked attacking creature you control to its owner's hand" }.freeze
+
       def ask_beam_choice!(ctx)
-        ask!("kind" => "choose_cost", "player" => ctx["player"], "cost" => BEAM_COST_TEXT)
+        text = RETURN_TEXT.fetch(ctx.dig("method", "alt", "returns"), BEAM_COST_TEXT)
+        ask!("kind" => "choose_cost", "player" => ctx["player"], "cost" => text)
         :wait
       end
 
@@ -338,28 +357,32 @@ module Enjine
         ask!(nil)
       end
 
-      # As the spell becomes cast (CR 601.2h-i): return the beam creature, remember the riders and use up
-      # a "once each turn" permission.
+      # As the spell becomes cast (CR 601.2h-i): remember where it was cast from and how (Engine::AltCasting),
+      # return the creature an alternative cost returns, remember the riders and use up a "once each turn"
+      # permission.
       def finish_cast_method!(obj, ctx)
+        record_cast_how!(obj, ctx)
         method = ctx["method"] or return
-        move!(ctx["beam_creature"], :hand, reason: "beam_me_up") if ctx["beam_creature"]
-        obj.memory["beamed"] = true if method.dig("alt", "beam")
+        returned_creature!(obj, ctx) if ctx["beam_creature"]
+        obj.memory["leaves_to_exile"] = true if method.dig("alt", "beam") || method.dig("alt", "exile")
         obj.memory["enters_with"] = method["enters_with"] if method["enters_with"]
         use_play_method!(method)
       end
 
-      # Replacement effects of how a spell was cast (CR 614.1a, 614.12): a beamed-up spell is exiled
-      # whenever it would leave the stack (CR 702.196a); a permanent spell cast with an "enters with"
-      # rider gets those counters as it enters.
+      # Replacement effects of how a spell was cast (CR 614.1a, 614.12): a beamed-up or flashed-back spell
+      # is exiled whenever it would leave the stack (CR 702.196a, 702.34a); a permanent spell cast with an
+      # "enters with" rider gets those counters as it enters; a permanent remembers how its spell was cast
+      # (CR 400.7d, Engine::AltCasting#alt_enters!).
       def cast_replacements!(proposal)
         data = proposal.data
         obj = state.objects[data["object"]]
         return unless obj && obj.zone == :stack
 
-        data["to"] = :exile if obj.memory["beamed"] && data["to"] != :exile
-        extra = obj.memory["enters_with"]
-        return unless extra && data["to"] == :battlefield
+        data["to"] = :exile if obj.memory["leaves_to_exile"] && data["to"] != :exile
+        return unless data["to"] == :battlefield
 
+        alt_enters!(obj, data["enters"])
+        extra = obj.memory["enters_with"] or return
         extra.each { |name, n| data["enters"]["counters"][name] = data["enters"]["counters"].fetch(name, 0) + n }
       end
 

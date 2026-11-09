@@ -128,6 +128,20 @@ Rules: CR 702.73a, CR 604.3, CR 205.3m, CR 113.6a
 }
 ```
 
+## convoke
+
+Convoke: while paying this spell's total cost you may tap untapped creatures you control, each paying for {1} or one mana of one of its colors (pay_cost option `{type: "convoke", object: id}`). It isn't an alternative or additional cost.
+
+Rules: CR 702.51a, CR 702.51b, CR 702.51c, CR 702.51d
+
+```json
+{
+  "keywords": [
+    "convoke"
+  ]
+}
+```
+
 ## deathtouch
 
 Any damage it deals to a creature is enough to destroy it; 1 damage counts as lethal when assigning combat damage.
