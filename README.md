@@ -92,7 +92,9 @@ uses) and `pool.json`, a JSON array of cards to build random decks from. They're
 part of the gem.
 
 ```
-━━ Turn 3 · Main 1 · active: alice · priority: alice ━━━━━━━━━━━━━━━━━━━━━━━━━
+━━ Turn 3 · alice's turn · Main 1 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  Beginning › ▶MAIN 1 › Combat › Main 2 › End
+  Priority: alice
   BOB — life 18 · library 50 · hand 6 · graveyard 0
     Lands:     Plains [plains#88], Island [island#97]
     Permanents:
@@ -104,7 +106,7 @@ part of the gem.
     Hand:      Lightning Bolt {R} [lightning_bolt#93], Hill Giant {3}{R} [hill_giant#108], …
   Stack (top first): empty
 
-▶ ALICE must act: priority
+▶ ALICE must act: priority  (Turn 3 · alice's turn · Main 1)
    1) Pass priority
    2) Cast Lightning Bolt {R}
    3) Tap Mountain for mana ({T}: Add {R}.)
@@ -112,8 +114,9 @@ part of the gem.
 alice> 2
 ```
 
-Commands: a number picks an option, `f` fast-forwards through priority passes,
-`o` toggles the observer view (both hands and library order), `h` shows the
+When passing priority is your only option, the CLI passes for you. The board
+header shows whose turn it is and the current phase and step. Commands: a number
+picks an option, `o` toggles the observer view (both hands and library order), `h` shows the
 history, `u` undoes, `s FILE` saves, `--load FILE` resumes, and `?` shows help.
 
 ## Use it as a library

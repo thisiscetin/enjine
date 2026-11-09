@@ -43,11 +43,11 @@ RSpec.describe Enjine::CLI do
     expect(out).to match(/Hand: .*\[/) # the deciding player's own hand is visible
   end
 
-  it "supports fast-forward, board, observer, history, help, save, undo and concede" do
+  it "supports board, observer, history, help, save, undo and concede" do
     Dir.mktmpdir do |dir|
       path = File.join(dir, "game.json")
-      _, out = play(%w[--seed 4], "1\n1\n1\nf\nb\no\nh 3\n?\ns #{path}\nu\nc\n")
-      expect(out).to include("(passed", "Observer view on", "Library (top first)", "Commands:", "Saved to",
+      _, out = play(%w[--seed 4], "1\n1\n1\nb\no\nh 3\n?\ns #{path}\nu\nc\n")
+      expect(out).to include("Observer view on", "Library (top first)", "Commands:", "Saved to",
                              "Undid", "GAME OVER")
       expect(File).to exist(path)
 
@@ -115,6 +115,28 @@ RSpec.describe Enjine::CLI do
       expect(run(pool + %w[--deck1 random:colors=X --deck2 random --p1 random --p2 random]))
         .to eq([1, "error: unknown color X (use W U B R G)\n"])
     end
+  end
+
+  it "passes for a human seat when passing (or making unspendable mana) is all it can do" do
+    _, out = play(%w[--seed 4], "1\n1\n1\n3\n1\nq\n")
+    expect(out).to include("alice plays Mountain", "─ Combat › Declare Attackers", "─ Main 2")
+    # asked twice in Main 1 and once in Main 2; the combat steps pass by themselves
+    expect(out.scan("must act: priority").size).to eq(3)
+    expect(out).not_to include("alice's turn · Beginning of Combat")
+  end
+
+  it "shows whose turn it is and where in the turn the game is" do
+    game = build_game do
+      turn 3, active: "bob", step: :declare_blockers
+      player("alice")
+      player("bob")
+    end
+    text = described_class::Text.new(game)
+    board = text.board(game.view_for("alice"))
+    expect(board).to start_with("━━ Turn 3 · bob's turn · Declare Blockers")
+    expect(board).to include("Beginning › Main 1 › ▶COMBAT (begin · attackers · [blockers] · damage · end) › Main 2 › End")
+    expect(text.event("type" => "step_began", "step" => "upkeep")).to eq("─ Beginning › Upkeep")
+    expect(text.event("type" => "step_began", "step" => "postcombat_main")).to eq("─ Main 2")
   end
 
   it "says when there is nothing to undo" do

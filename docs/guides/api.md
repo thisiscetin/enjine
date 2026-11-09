@@ -229,9 +229,9 @@ An option that isn't legal raises `Enjine::IllegalDecision` (`#option`,
 **Priority.** Most decisions are `priority`: the player holding priority picks an
 action (`play_land`, `cast`, `activate`, `activate_mana`) or `{type: "pass"}`.
 When both players pass in succession with an empty stack, the step ends; with
-something on the stack, its top resolves (CR 117.4). There is no auto-pass:
-a client that wants "pass until something happens" loops on `pass` itself (the
-CLI's `f` command does exactly that).
+something on the stack, its top resolves (CR 117.4). The engine never passes
+for anyone: a client that wants auto-pass submits `pass` itself when it is the
+only option (the CLI does this for human seats).
 
 ### Casting is several small decisions
 
@@ -564,8 +564,8 @@ exe/enjine --verify my_cards/ [--games N] [--seed S] [--json]  # validate and pl
 exe/enjine --load game.json                              # resume a game saved with `s`
 ```
 
-In a game: a number picks an option, `f` passes until something happens, `b`
-shows the board, `o` toggles the observer view, `h [n]` shows history, `u` undoes,
+In a game: a human seat whose only option is to pass priority passes
+automatically. A number picks an option, `b` shows the board, `o` toggles the observer view, `h [n]` shows history, `u` undoes,
 `s FILE` saves, `c` concedes, `q` quits, `?` helps.
 
 ## 15. Errors

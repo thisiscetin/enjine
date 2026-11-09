@@ -18,7 +18,6 @@ module Enjine
     HELP = <<~HELP
       Commands:
         <number>   choose that option
-        f          fast-forward: pass priority while passing is the only option
         b          show the board again          o   toggle observer view (see everything)
         h [n]      show the last n history entries (default 10)
         u          undo your last decision (replays the game from its seed)
@@ -203,13 +202,17 @@ module Enjine
         end
         decision = @game.pending_decision
         seat = @seats.fetch(decision.player)
-        option = seat == :human ? ask(decision) : seat.choose(decision)
+        auto = seat == :human && only_pass?(decision) # nothing else to do: pass for them
+        option = if seat != :human then seat.choose(decision)
+                 elsif auto then { type: "pass" }
+                 else ask(decision)
+                 end
         break if option == :quit
         next if option == :again
 
         entry = @game.submit(option)
         count += 1
-        show_events(entry) unless @options[:quiet]
+        show_events(entry, auto:) unless @options[:quiet]
       end
     end
 
@@ -240,7 +243,6 @@ module Enjine
       when /\A\d+\z/
         option = decision.options[line.to_i - 1]
         option || (say("Choose 1-#{decision.options.size}.") && nil)
-      when "f" then fast_forward
       when "b" then show_board(decision) && nil
       when "o"
         @options[:observer] = !@options[:observer]
@@ -257,14 +259,10 @@ module Enjine
       end
     end
 
-    def fast_forward
-      passed = 0
-      while !@game.over? && @game.legal_options == [{ type: "pass" }] && @seats[@game.pending_decision.player] == :human
-        show_events(@game.submit(type: "pass"))
-        passed += 1
-      end
-      say "(passed #{passed} time#{"s" unless passed == 1})"
-      :again
+    # Priority where passing is the only real choice: a human seat passes without being asked. Mana abilities
+    # don't count: with nothing castable or activatable to spend it on, the mana would just empty (CR 500.4).
+    def only_pass?(decision)
+      decision.kind == "priority" && decision.options.all? { %w[pass activate_mana].include?(it[:type]) }
     end
 
     def undo
@@ -297,9 +295,12 @@ module Enjine
       end
     end
 
-    def show_events(entry)
+    # An automatic pass doesn't print its own "passes" line; what it caused (a resolution, the next step) does.
+    def show_events(entry, auto: false)
       viewer = @options[:observer] || @seats.values.none?(:human) ? :observer : entry.player || :observer
-      lines = @text.events(entry.for_viewer(viewer)["events"])
+      events = entry.for_viewer(viewer)["events"]
+      events = events.reject { it["type"] == "priority_passed" && it["player"] == entry.player } if auto
+      lines = @text.events(events)
       lines.each { say "  #{it}" }
     end
 

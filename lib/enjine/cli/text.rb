@@ -11,6 +11,13 @@ module Enjine
         "declare_blockers" => "Declare Blockers", "combat_damage" => "Combat Damage", "end_of_combat" => "End of Combat",
         "postcombat_main" => "Main 2", "end" => "End Step", "cleanup" => "Cleanup"
       }.freeze
+      # CR 500.1: the phases of a turn and their steps (main phases have none), as the board's turn tracker.
+      PHASES = [["Beginning", { "untap" => "untap", "upkeep" => "upkeep", "draw" => "draw" }],
+                ["Main 1", { "precombat_main" => nil }],
+                ["Combat", { "beginning_of_combat" => "begin", "declare_attackers" => "attackers",
+                             "declare_blockers" => "blockers", "combat_damage" => "damage", "end_of_combat" => "end" }],
+                ["Main 2", { "postcombat_main" => nil }],
+                ["End", { "end" => "end step", "cleanup" => "cleanup" }]].freeze
 
       def initialize(game)
         @game = game
@@ -19,8 +26,8 @@ module Enjine
       # ---- board -----------------------------------------------------------------
 
       def board(view)
-        lines = [rule("Turn #{view["turn"]} · #{STEP_NAMES.fetch(view["step"].to_s, "Pregame")} · " \
-                      "active: #{view["active"] || "-"} · priority: #{view["priority"] || "-"}")]
+        lines = [rule(turn_title(view["turn"], view["active"], view["step"])), "  #{tracker(view["step"].to_s)}"]
+        lines << "  Priority: #{view["priority"]}" if view["priority"]
         viewer = view["viewer"]
         view["players"].sort_by { it["name"] == viewer ? 1 : 0 }.each { lines.concat(player_block(view, it)) }
         lines << "  Stack (top first): #{"empty" if view["stack"].empty?}"
@@ -31,6 +38,34 @@ module Enjine
           end.join(", ")}"
         end
         lines.join("\n")
+      end
+
+      # "Turn 3 · alice's turn · Upkeep", or "Pregame" before the first turn.
+      def turn_title(turn, active, step)
+        return "Pregame" if step.nil? || active.nil?
+
+        "Turn #{turn} · #{active}'s turn · #{STEP_NAMES.fetch(step.to_s, step.to_s)}"
+      end
+
+      # The phases of the turn with the current one marked, its steps listed:
+      # "Beginning › ▶MAIN 1 › Combat › Main 2 › End" or
+      # "Beginning › Main 1 › ▶COMBAT (begin · attackers · [blockers] · damage · end) › Main 2 › End".
+      def tracker(step)
+        return "Mulligans and play/draw choices" unless STEP_NAMES.key?(step)
+
+        PHASES.map do |phase, steps|
+          next phase unless steps.key?(step)
+
+          inner = steps.values.compact.map { |name| steps[step] == name ? "[#{name}]" : name }
+          "▶#{phase.upcase}#{" (#{inner.join(" · ")})" unless inner.empty?}"
+        end.join(" › ")
+      end
+
+      # "Combat › Declare Attackers", "Main 1".
+      def step_line(step)
+        phase, steps = PHASES.find { |_, names| names.key?(step) }
+        name = STEP_NAMES.fetch(step, step)
+        phase.nil? || steps[step].nil? ? name : "#{phase} › #{name}"
       end
 
       def player_block(view, player)
@@ -88,7 +123,9 @@ module Enjine
                 when "choose_target_count" then " — how many for target ##{decision.details["index"] + 1}"
                 else ""
                 end
-        "▶ #{decision.player.upcase} must act: #{decision.kind.tr("_", " ")}#{extra}"
+        "▶ #{decision.player.upcase} must act: #{decision.kind.tr("_", " ")}#{extra}  (#{turn_title(
+          @game.turn, @game.state.active && @game.names[@game.state.active], @game.step
+        )})"
       end
 
       def option(opt)
@@ -123,8 +160,8 @@ module Enjine
       def event(ev)
         case ev["type"]
         when "zone_changed" then zone_changed(ev)
-        when "turn_began" then "══ Turn #{ev["turn"]}: #{ev["active"]} ══"
-        when "step_began" then "· #{STEP_NAMES.fetch(ev["step"], ev["step"])}"
+        when "turn_began" then "══ Turn #{ev["turn"]}: #{ev["active"]}'s turn ══"
+        when "step_began" then "─ #{step_line(ev["step"])}"
         when "priority_passed" then "#{ev["player"]} passes"
         when "tapped" then "#{name_of(ev["object"])} becomes tapped"
         when "untapped" then "#{name_of(ev["object"])} untaps"
