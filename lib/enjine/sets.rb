@@ -105,7 +105,7 @@ module Enjine
         printing = raw["printing"]
         raise InvalidSet, "#{where}: printing must be {\"set\", \"number\"}" unless printing.nil? || printing.is_a?(Hash)
 
-        printing = printing&.slice("set", "number")&.transform_values(&:to_s)&.freeze
+        printing = printing.slice("set", "number").transform_values(&:to_s).freeze if printing
         Entry.new(definition: CardDefinition.from_h(raw.except("rarity", "printing")), rarity: raw["rarity"],
                   printing: printing)
       rescue InvalidCardDefinition => e
