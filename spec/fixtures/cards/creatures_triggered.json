@@ -2058,6 +2058,181 @@
     ]
   },
   {
+    "name": "Spellguard Duelist",
+    "mana_cost": "{1}{W}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "human",
+      "soldier"
+    ],
+    "power": 2,
+    "toughness": 2,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "cast": {
+              "targets": {
+                "creature": {
+                  "controller": "you"
+                }
+              }
+            }
+          },
+          "effects": [
+            {
+              "add_counters": {
+                "counter": "+1/+1",
+                "amount": 1,
+                "to": "self"
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "Whenever you cast a spell that targets a creature you control, put a +1/+1 counter on this creature."
+  },
+  {
+    "name": "Lodestar Rhino",
+    "mana_cost": "{2}{G}{G}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "rhino"
+    ],
+    "power": 4,
+    "toughness": 4,
+    "keywords": [
+      "trample"
+    ],
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "cast": {
+              "targets": "self"
+            }
+          },
+          "effects": [
+            {
+              "draw": {
+                "amount": 1
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "Trample. Whenever you cast a spell that targets this creature, draw a card."
+  },
+  {
+    "name": "Afterimage Adept",
+    "mana_cost": "{1}{U}{R}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "human",
+      "wizard"
+    ],
+    "power": 2,
+    "toughness": 3,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "cast": {
+              "not_from": "hand"
+            }
+          },
+          "effects": [
+            {
+              "deal_damage": {
+                "amount": 1,
+                "to": "each_opponent"
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "Whenever you cast a spell from anywhere other than your hand, this creature deals 1 damage to each opponent."
+  },
+  {
+    "name": "Rift Toad",
+    "mana_cost": "{1}{B}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "frog"
+    ],
+    "power": 2,
+    "toughness": 1,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "enters": {}
+          },
+          "effects": [
+            {
+              "discard": {
+                "amount": 1,
+                "to": "each_opponent",
+                "random": true
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "When this creature enters, each opponent discards a card at random."
+  },
+  {
+    "name": "Venomtongue Stalker",
+    "mana_cost": "{1}{G}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "snake"
+    ],
+    "power": 1,
+    "toughness": 2,
+    "keywords": [
+      "deathtouch"
+    ],
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "deals_damage": {
+              "combat": true,
+              "to": "player"
+            }
+          },
+          "effects": [
+            {
+              "add_counters": {
+                "counter": "poison",
+                "amount": 2,
+                "to": {
+                  "triggering": "player"
+                }
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "Deathtouch. Whenever this creature deals combat damage to a player, that player gets two poison counters."
+  },
+  {
     "name": "Signal Adept",
     "mana_cost": "{2}{U}",
     "types": [

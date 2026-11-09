@@ -349,9 +349,9 @@ Rules: CR 717.2a, CR 717.2b, CR 717.2d, CR 717.3, CR 602.5d
 
 ## cost_modifier
 
-While on the battlefield: spells cast by `caster` (you, opponent or any; default you) whose card types match `spells` ({"any_of": [types], "not": [types]}, default all spells) cost `reduce` less or `increase` more generic mana.
+While on the battlefield: spells cast by `caster` (you, opponent or any; default you) whose card types match `spells` ({"any_of": [types], "not": [types]}, default all spells) cost `reduce` less or `increase` more generic mana. `from` / `not_from`: only spells cast from (not from) that zone (hand | graveyard | exile | library | outside).
 
-Rules: CR 601.2f, CR 118.7a, CR 604.1
+Rules: CR 601.2f, CR 118.7a, CR 604.1, CR 601.2a
 
 | Parameter | Description |
 | --- | --- |
@@ -359,6 +359,8 @@ Rules: CR 601.2f, CR 118.7a, CR 604.1
 | `caster` | you | opponent | any |
 | `reduce` | amount |
 | `increase` | amount |
+| `from` | zone |
+| `not_from` | zone |
 
 ```json
 {

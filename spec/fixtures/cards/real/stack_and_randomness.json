@@ -1,0 +1,474 @@
+[
+  {
+    "name": "Plains",
+    "types": [
+      "land"
+    ],
+    "supertypes": [
+      "basic"
+    ],
+    "subtypes": [
+      "plains"
+    ],
+    "rarity": "common",
+    "printing": {
+      "set": "fdn",
+      "number": "272"
+    }
+  },
+  {
+    "name": "Island",
+    "types": [
+      "land"
+    ],
+    "supertypes": [
+      "basic"
+    ],
+    "subtypes": [
+      "island"
+    ],
+    "rarity": "common",
+    "printing": {
+      "set": "fdn",
+      "number": "274"
+    }
+  },
+  {
+    "name": "Swamp",
+    "types": [
+      "land"
+    ],
+    "supertypes": [
+      "basic"
+    ],
+    "subtypes": [
+      "swamp"
+    ],
+    "rarity": "common",
+    "printing": {
+      "set": "fdn",
+      "number": "276"
+    }
+  },
+  {
+    "name": "Mountain",
+    "types": [
+      "land"
+    ],
+    "supertypes": [
+      "basic"
+    ],
+    "subtypes": [
+      "mountain"
+    ],
+    "rarity": "common",
+    "printing": {
+      "set": "fdn",
+      "number": "278"
+    }
+  },
+  {
+    "name": "Forest",
+    "types": [
+      "land"
+    ],
+    "supertypes": [
+      "basic"
+    ],
+    "subtypes": [
+      "forest"
+    ],
+    "rarity": "common",
+    "printing": {
+      "set": "fdn",
+      "number": "280"
+    }
+  },
+  {
+    "name": "Colleen Wing, Street Samurai",
+    "mana_cost": "{1}{W}",
+    "types": [
+      "creature"
+    ],
+    "supertypes": [
+      "legendary"
+    ],
+    "subtypes": [
+      "human",
+      "samurai",
+      "hero"
+    ],
+    "power": 2,
+    "toughness": 2,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "cast": {
+              "targets": {
+                "creature": {
+                  "controller": "you"
+                }
+              }
+            }
+          },
+          "effects": [
+            {
+              "add_counters": {
+                "counter": "+1/+1",
+                "amount": 1,
+                "to": "self"
+              }
+            },
+            {
+              "scry": {
+                "amount": 1
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "uncommon",
+    "printing": {
+      "set": "msh",
+      "number": "13"
+    }
+  },
+  {
+    "name": "Gnarlback Rhino",
+    "mana_cost": "{2}{G}{G}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "rhino"
+    ],
+    "power": 4,
+    "toughness": 4,
+    "keywords": [
+      "trample"
+    ],
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "cast": {
+              "targets": "self"
+            }
+          },
+          "effects": [
+            {
+              "draw": {
+                "amount": 1
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "uncommon",
+    "printing": {
+      "set": "fdn",
+      "number": "638"
+    }
+  },
+  {
+    "name": "Echo, Perceptive Prodigy",
+    "mana_cost": "{2}{U}",
+    "types": [
+      "creature"
+    ],
+    "supertypes": [
+      "legendary"
+    ],
+    "subtypes": [
+      "human",
+      "hero"
+    ],
+    "power": 1,
+    "toughness": 4,
+    "keywords": [
+      "vigilance"
+    ],
+    "abilities": [
+      {
+        "activated": {
+          "cost": [
+            {
+              "mana": "{1}"
+            },
+            "tap"
+          ],
+          "targets": [
+            {
+              "stack_ability": {
+                "controller": "you",
+                "source": "creature"
+              }
+            }
+          ],
+          "effects": [
+            {
+              "copy_spell": {
+                "of": {
+                  "target": 0
+                },
+                "new_targets": true
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "uncommon",
+    "printing": {
+      "set": "msh",
+      "number": "51"
+    }
+  },
+  {
+    "name": "Curse-Marred Demon",
+    "mana_cost": "{2}{R}{R}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "demon"
+    ],
+    "power": 4,
+    "toughness": 4,
+    "keywords": [
+      "flying",
+      "trample"
+    ],
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "enters": {}
+          },
+          "effects": [
+            {
+              "search_library": {}
+            },
+            {
+              "discard": {
+                "amount": 1,
+                "random": true
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "rare",
+    "printing": {
+      "set": "fra",
+      "number": "79"
+    }
+  },
+  {
+    "name": "Fynn, the Fangbearer",
+    "mana_cost": "{1}{G}",
+    "types": [
+      "creature"
+    ],
+    "supertypes": [
+      "legendary"
+    ],
+    "subtypes": [
+      "human",
+      "warrior"
+    ],
+    "power": 1,
+    "toughness": 3,
+    "keywords": [
+      "deathtouch"
+    ],
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "deals_damage": {
+              "subject": {
+                "each": {
+                  "creature": {
+                    "keywords": [
+                      "deathtouch"
+                    ]
+                  }
+                },
+                "controller": "you"
+              },
+              "combat": true,
+              "to": "player"
+            }
+          },
+          "effects": [
+            {
+              "add_counters": {
+                "counter": "poison",
+                "amount": 2,
+                "to": {
+                  "triggering": "player"
+                }
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "uncommon",
+    "printing": {
+      "set": "fdn",
+      "number": "637"
+    }
+  },
+  {
+    "name": "High Perfect Morcant",
+    "mana_cost": "{2}{B}{G}",
+    "types": [
+      "creature"
+    ],
+    "supertypes": [
+      "legendary"
+    ],
+    "subtypes": [
+      "elf",
+      "noble"
+    ],
+    "power": 4,
+    "toughness": 4,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "enters": {
+              "subject": {
+                "each": {
+                  "creature": {
+                    "subtypes": [
+                      "elf"
+                    ]
+                  }
+                },
+                "controller": "you"
+              }
+            }
+          },
+          "effects": [
+            {
+              "blight": {
+                "amount": 1,
+                "to": "each_opponent"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "activated": {
+          "cost": [
+            {
+              "tap_permanents": {
+                "count": 3,
+                "filter": {
+                  "creature": {
+                    "subtypes": [
+                      "elf"
+                    ]
+                  }
+                }
+              }
+            }
+          ],
+          "timing": "sorcery",
+          "effects": [
+            {
+              "proliferate": {}
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "rare",
+    "printing": {
+      "set": "ecl",
+      "number": "229"
+    }
+  },
+  {
+    "name": "The Gold Saucer",
+    "types": [
+      "land"
+    ],
+    "subtypes": [
+      "town"
+    ],
+    "abilities": [
+      {
+        "mana": {
+          "cost": [
+            "tap"
+          ],
+          "produce": "{C}"
+        }
+      },
+      {
+        "activated": {
+          "cost": [
+            {
+              "mana": "{2}"
+            },
+            "tap"
+          ],
+          "effects": [
+            {
+              "flip_coins": {}
+            },
+            {
+              "create_token": {
+                "token": "Treasure",
+                "if": {
+                  "amount": {
+                    "this_way": 0
+                  },
+                  "at_least": 1
+                }
+              }
+            }
+          ]
+        }
+      },
+      {
+        "activated": {
+          "cost": [
+            {
+              "mana": "{3}"
+            },
+            "tap",
+            {
+              "sacrifice_permanent": {
+                "filter": "artifact",
+                "count": 2
+              }
+            }
+          ],
+          "effects": [
+            {
+              "draw": {
+                "amount": 1
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "uncommon",
+    "printing": {
+      "set": "fin",
+      "number": "279"
+    }
+  }
+]

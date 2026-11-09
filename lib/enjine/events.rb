@@ -79,6 +79,8 @@ module Enjine
     CountersChanged = define(:counters_changed, :object, :counter, :from, :to)
     PlayerCountersChanged = define(:player_counters_changed, :player, :counter, :from, :to) # poison, rad, ... (CR 122.1)
     EmblemCreated = define(:emblem_created, :player, :object, :card) # CR 114.2
+    # CR 705: a coin flip; `won` is nil for a flip no one wins or loses (CR 705.2).
+    CoinFlipped = define(:coin_flipped, :player, :heads, :won)
     # CR 707.10: a copy of a spell put on the stack (not cast).
     SpellCopied = define(:spell_copied, :player, :object, :card, :original, :targets)
     EffectStarted = define(:effect_started, :kind, :affected, :details)

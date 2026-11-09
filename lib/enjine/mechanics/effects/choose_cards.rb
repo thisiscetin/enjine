@@ -22,18 +22,19 @@ module Enjine
                                "they are put into `put` (`tapped` onto the battlefield, under your control; exiled cards " \
                                "`link`ed to the source). `look`: you look at the whole zone first; `reveal`: \"chosen\" " \
                                "reveals what you chose, \"all\" the whole set. `then` runs if a card was chosen, " \
-                               "`otherwise` if none was (\"if you can't\").",
-                  rules: %w[701.20a 701.20e 400.7j 608.2c 607.2a 118.12],
+                               "`otherwise` if none was (\"if you can't\"). `random: true`: the cards are picked at random " \
+                               "(the game's random number generator) instead of chosen.",
+                  rules: %w[701.20a 701.20e 400.7j 608.2c 607.2a 118.12 701.9b],
                   params: { "from" => "selector or {\"hand\"|\"graveyard\": player selector}", "for" => "card spec",
                             "count" => "integer or \"any\"", "optional" => "boolean", "put" => PUT.join(" | "),
-                            "tapped" => "boolean", "link" => "boolean", "look" => "boolean",
+                            "tapped" => "boolean", "link" => "boolean", "look" => "boolean", "random" => "boolean",
                             "reveal" => REVEAL.join(" | "), "then" => "list of effects", "otherwise" => "list of effects" },
                   example: { "choose_cards" => { "from" => { "result" => 0 }, "for" => { "permanent" => true },
                                                  "optional" => true, "put" => "hand" } }
 
         attr_reader :spec, :count, :put
 
-        def self.keys = %w[from for count optional put tapped link look reveal then otherwise if]
+        def self.keys = %w[from for count optional put tapped link look random reveal then otherwise if]
         def self.default_to = "you"
 
         def setup(params, errors, path)
@@ -46,7 +47,8 @@ module Enjine
           @optional = Mechanics.flag_param(params, "optional", errors, path)
           @put = Mechanics.fetch_param(params, :put).to_s
           errors << "#{path}.put: must be one of #{PUT.join(", ")}" unless PUT.include?(@put)
-          @flags = %w[tapped link look].to_h { [it, Mechanics.flag_param(params, it, errors, path)] }
+          @flags = %w[tapped link look random].to_h { [it, Mechanics.flag_param(params, it, errors, path)] }
+          errors << "#{path}.count: must be a number to pick at random" if @flags["random"] && @count == "any"
           @reveal = Mechanics.fetch_param(params, :reveal)
           errors << "#{path}.reveal: must be one of #{REVEAL.join(", ")}" unless @reveal.nil? || REVEAL.include?(@reveal)
           @lists = parse_lists(params, errors, path, LISTS)
@@ -65,7 +67,8 @@ module Enjine
 
         def to_s
           many = count == "any" ? "any number of" : "#{"up to " if @optional}#{count}"
-          "choose #{many} #{spec} from #{"the #{@from_zone} of " if @from_zone}#{@from} → #{put.tr("_", " ")}"
+          "choose #{many} #{spec}#{" at random" if @flags["random"]} from #{"the #{@from_zone} of " if @from_zone}#{@from} " \
+            "→ #{put.tr("_", " ")}"
         end
 
         # CR 118.3: as the optional part of a "may", the full number of cards must be available.
@@ -76,8 +79,8 @@ module Enjine
 
           unless locals.key?("chose")
             show!(engine, ctx, locals)
-            chosen = answers(locals).select { it["type"] == "choose" }.map { it["object"] }
-            choices = stop?(locals, chosen) ? [] : choices(engine, ctx, chosen)
+            chosen = picked(engine, ctx, locals)
+            choices = @flags["random"] || stop?(locals, chosen) ? [] : choices(engine, ctx, chosen)
             return ask(engine, locals, ctx.controller, "Choose #{spec}", choices) unless choices.empty?
 
             return :wait if put == "battlefield" && engine.ask_entering_choices!(locals, chosen.map { [it, ctx.controller] }) == :wait
@@ -89,6 +92,13 @@ module Enjine
         end
 
         private
+
+        # The cards chosen so far, or picked at random once (as in CR 701.9b, through the game's RNG).
+        def picked(engine, ctx, locals)
+          return answers(locals).select { it["type"] == "choose" }.map { it["object"] } unless @flags["random"]
+
+          locals["picked"] ||= engine.state.rng.shuffle!(pool(engine, ctx)).first(count)
+        end
 
         # The cards to choose from, in a stable order.
         def pool(engine, ctx)

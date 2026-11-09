@@ -319,5 +319,40 @@ module Enjine
         end
       end
     end
+
+    # Where a spell is cast from (CR 601.2a), as a filter of the `cast` trigger and of `cost_modifier`:
+    # `from` / `not_from` a zone ("spells you cast from anywhere other than your hand" is
+    # {"not_from": "hand"}). Engine#cast_origin knows the zone while the spell is being cast and after.
+    class CastFrom
+      KEYS = %w[from not_from].freeze
+
+      def self.build(params, errors, path)
+        from, not_from = KEYS.map { Mechanics.fetch_param(params, it) }
+        KEYS.zip([from, not_from]).each do |key, zone|
+          next if zone.nil? || Condition::CastHow::ZONES.include?(zone)
+
+          errors << "#{path}.#{key}: must be one of #{Condition::CastHow::ZONES.join(", ")}"
+        end
+        new(from, not_from)
+      end
+
+      def initialize(from, not_from)
+        @from = from
+        @not_from = not_from
+        freeze
+      end
+
+      def match?(zone) = (@from.nil? || zone == @from) && (@not_from.nil? || zone != @not_from)
+
+      WORDS = { "hand" => "your hand", "graveyard" => "a graveyard", "exile" => "exile", "library" => "a library",
+                "outside" => "outside the game" }.freeze
+
+      def to_s
+        return " from #{WORDS.fetch(@from)}" if @from
+        return " from anywhere other than #{WORDS.fetch(@not_from)}" if @not_from
+
+        ""
+      end
+    end
   end
 end

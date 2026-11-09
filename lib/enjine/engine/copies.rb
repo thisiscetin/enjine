@@ -108,12 +108,21 @@ module Enjine
         obj
       end
 
-      # CR 707.10: a copy of a spell on the stack, with the same modes, X, kicker and other choices, put on
-      # top of the stack by `controller` (who owns and controls it). It isn't cast.
+      # CR 707.10: a copy of a spell or ability on the stack, with the same modes, X, kicker and other
+      # choices, put on top of the stack by `controller` (who owns and controls it). A spell copy isn't
+      # cast, an ability copy isn't activated; an ability copy has the same source (CR 707.10b) and keeps
+      # what the ability knew (its trigger event, the objects paid for its costs).
       def copy_spell!(spell, controller, targets)
-        card, except = copiable_values(spell)
+        card, except = spell.ability? ? [spell.card, {}] : copiable_values(spell)
         copy = create_object(card, controller, :stack)
-        copy.memory = Marshal.load(Marshal.dump(spell.memory.slice("kicked", "kicked_with", "division"))).merge("copy" => "spell")
+        if spell.ability?
+          copy.kind = "ability"
+          copy.source = spell.source
+          copy.ability = spell.ability
+          copy.memory = Snapshot.deep_copy(spell.memory)
+        else
+          copy.memory = Marshal.load(Marshal.dump(spell.memory.slice("kicked", "kicked_with", "division"))).merge("copy" => "spell")
+        end
         copy.memory["copy_except"] = except unless except.empty?
         copy.targets = targets
         copy.modes = spell.modes&.dup

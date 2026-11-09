@@ -455,9 +455,9 @@ Rules: CR 205.2a, CR 607.2d, CR 608.2c
 
 ## choose_cards
 
-You choose `count` (default 1; "any": any number) cards matching `for` from `from`: a selector (e.g. {"result": 0}, the cards an earlier effect milled) or a player's zone, {"hand": selector} / {"graveyard": selector}. `optional`: you may choose fewer. Then they are put into `put` (`tapped` onto the battlefield, under your control; exiled cards `link`ed to the source). `look`: you look at the whole zone first; `reveal`: "chosen" reveals what you chose, "all" the whole set. `then` runs if a card was chosen, `otherwise` if none was ("if you can't").
+You choose `count` (default 1; "any": any number) cards matching `for` from `from`: a selector (e.g. {"result": 0}, the cards an earlier effect milled) or a player's zone, {"hand": selector} / {"graveyard": selector}. `optional`: you may choose fewer. Then they are put into `put` (`tapped` onto the battlefield, under your control; exiled cards `link`ed to the source). `look`: you look at the whole zone first; `reveal`: "chosen" reveals what you chose, "all" the whole set. `then` runs if a card was chosen, `otherwise` if none was ("if you can't"). `random: true`: the cards are picked at random (the game's random number generator) instead of chosen.
 
-Rules: CR 701.20a, CR 701.20e, CR 400.7j, CR 608.2c, CR 607.2a, CR 118.12
+Rules: CR 701.20a, CR 701.20e, CR 400.7j, CR 608.2c, CR 607.2a, CR 118.12, CR 701.9b
 
 | Parameter | Description |
 | --- | --- |
@@ -469,6 +469,7 @@ Rules: CR 701.20a, CR 701.20e, CR 400.7j, CR 608.2c, CR 607.2a, CR 118.12
 | `tapped` | boolean |
 | `link` | boolean |
 | `look` | boolean |
+| `random` | boolean |
 | `reveal` | chosen | all |
 | `then` | list of effects |
 | `otherwise` | list of effects |
@@ -585,13 +586,13 @@ Rules: CR 707.12, CR 707.12a, CR 707.10a, CR 704.5d
 
 ## copy_spell
 
-Copy each spell `of` refers to ("self": the spell this ability or spell belongs to) `amount` times. The copies are put on the stack under the referenced player's control (default: you) with the same modes, X, kicker and targets; they aren't cast. With `new_targets: true` the controller may choose new targets for each copy. A copy of a permanent spell becomes a token as it resolves.
+Copy each spell or ability on the stack `of` refers to ("self": the spell this ability or spell belongs to; a `stack_ability` target: an activated or triggered ability) `amount` times. The copies are put on the stack under the referenced player's control (default: you) with the same modes, X, kicker and targets; they aren't cast or activated, and an ability's copy has the same source. With `new_targets: true` the controller may choose new targets for each copy. A copy of a permanent spell becomes a token as it resolves.
 
-Rules: CR 707.10, CR 707.10a, CR 707.10c, CR 707.10f, CR 608.3f
+Rules: CR 707.10, CR 707.10a, CR 707.10b, CR 707.10c, CR 707.10f, CR 608.3f
 
 | Parameter | Description |
 | --- | --- |
-| `of` | selector (spells on the stack) |
+| `of` | selector (spells or abilities on the stack) |
 | `amount` | amount (default 1) |
 | `new_targets` | boolean |
 | `to` | selector (default "you") |
@@ -882,7 +883,7 @@ Rules: CR 701.20a, CR 701.20e, CR 401.4, CR 400.7j
 
 ## discard
 
-Each referenced player discards `amount` cards of their choice (default: you).
+Each referenced player discards `amount` cards of their choice (default: you). `random: true`: the cards are chosen at random (the game's random number generator), with no decision.
 
 Rules: CR 701.9a, CR 701.9b
 
@@ -890,6 +891,7 @@ Rules: CR 701.9a, CR 701.9b
 | --- | --- |
 | `amount` | integer |
 | `to` | selector |
+| `random` | boolean |
 
 ```json
 {
@@ -1214,6 +1216,23 @@ Rules: CR 701.14a, CR 701.14b, CR 701.14c, CR 701.14d
       "target": 1
     }
   }
+}
+```
+
+## flip_coins
+
+You flip `amount` coins (default 1), each coming up heads or tails at random (the game's random number generator). `count`: "wins" (default; you call each flip and win it if the call matches) or "heads" (no one wins or loses). How many were counted is this effect's amount: {"this_way": n} in later effects and conditions.
+
+Rules: CR 705.1, CR 705.2, CR 608.2c
+
+| Parameter | Description |
+| --- | --- |
+| `amount` | amount (default 1) |
+| `count` | wins | heads |
+
+```json
+{
+  "flip_coins": {}
 }
 ```
 
@@ -1577,6 +1596,22 @@ Rules: CR 615.1, CR 615.3, CR 615.7, CR 611.2a
     },
     "combat": "combat"
   }
+}
+```
+
+## proliferate
+
+You choose any number of permanents and/or players that have counters (one at a time, then done); each gets one more counter of each kind already on it. `amount` (default 1): how many times to proliferate.
+
+Rules: CR 701.34a, CR 122.1, CR 122.6
+
+| Parameter | Description |
+| --- | --- |
+| `amount` | amount (default 1) |
+
+```json
+{
+  "proliferate": {}
 }
 ```
 
