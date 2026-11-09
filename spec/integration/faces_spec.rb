@@ -34,7 +34,8 @@ RSpec.describe "Multi-face cards (CR 712, 716, 721, 723)" do
           { "exile" => { "to" => "self" } },
           { "return_to_battlefield" => { "to" => { "result" => 0 }, "transformed" => true } }
         ] } }] },
-      { "name" => "Phased Sage", "colors" => ["U"], "types" => ["creature"], "power" => 3, "toughness" => 3 }
+      { "name" => "Phased Sage", "colors" => ["U"], "types" => ["creature"], "power" => 3, "toughness" => 3,
+        "abilities" => [{ "triggered" => { "when" => { "dies" => {} }, "effects" => [{ "gain_life" => { "amount" => 3 } }] } }] }
     ] }
   end
   let(:mdfc) do
@@ -194,6 +195,19 @@ RSpec.describe "Multi-face cards (CR 712, 716, 721, 723)" do
       sage = face_on_battlefield(game, "phasing_scholar/1")
       expect(engine(game).chars(sage).name).to eq("Phased Sage")
       expect(view_of(game, sage)).to include("power" => 3)
+    end
+
+    it "triggers the back face's leaves-the-battlefield ability as it last existed (CR 603.10a)" do
+      game = board(battlefield: ["Phasing Scholar"])
+      activate(game, obj_id(game, "phasing_scholar"))
+      resolve(game)
+      sage = face_on_battlefield(game, "phasing_scholar/1")
+      engine(game).move!(sage, :graveyard, reason: "destroy")
+      expect(game.state.object(game.state.players[0].graveyard.first).card).to eq("phasing_scholar")
+      refresh(game)
+      game.submit(type: "pass") # the dies trigger goes on the stack first
+      resolve(game)
+      expect(life(game)).to eq(23)
     end
 
     it "copies the face that's up; a token copy is double-faced and can transform (CR 707.8, 707.8a)" do

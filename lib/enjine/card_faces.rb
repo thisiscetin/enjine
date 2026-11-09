@@ -29,21 +29,20 @@ module Enjine
       FACED_KEYS = %w[name layout faces].freeze
       FACE_SEPARATOR = "/"
 
-      # Collects a face's errors under its path ("faces[1].types: ...").
-      class PathErrors
+      # A face's error list: it holds the face's own messages (so validation reading them back sees the
+      # same paths as for a single-faced card) and adds each to the card's errors under the face's path
+      # ("faces[1].types: ...").
+      class PathErrors < Array
         def initialize(errors, path)
+          super()
           @errors = errors
           @path = path
-          @count = 0
         end
 
         def <<(message)
-          @count += 1
           @errors << "#{@path}.#{message}"
-          self
+          super
         end
-
-        def empty? = @count.zero?
       end
 
       # The layout of the card this face belongs to (nil for a single-faced card).

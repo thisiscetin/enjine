@@ -60,6 +60,12 @@ RSpec.describe "Card faces" do
     )
   end
 
+  it "reports an ability's errors on a face under the face's path" do
+    broken = back.merge("abilities" => [{ "activated" => { "effects" => [{ "transform" => {} }] } }])
+    expect(errors_for("layout" => "transform", "faces" => [front, broken]))
+      .to eq(["faces[1].abilities[0].activated.cost: must be a non-empty list"])
+  end
+
   it "needs exactly two faces" do
     expect(errors_for("layout" => "modal", "faces" => [front])).to include(
       "faces: must be a list of two faces, each a card object", a_string_matching(/\Afaces\[1\]\.name: required/)
