@@ -28,6 +28,11 @@ The result is a deck document (see the [card data format](card-data-format.md#6-
   "main":  [ { "card": "Plains", "count": 12 }, ... ] }
 ```
 
+A deck document may also carry an `outside` list: the cards its player owns outside
+the game (a sideboard of at most 15, see [Decks](card-data-format.md#6-decks)).
+`DeckBuilder.random(cards, rng:, outside: n)` in the core card pool adds `n` random
+outside cards and keeps the same main deck.
+
 The same inputs and seed always give the same deck. The `description` records the
 recipe, including colors that were picked at random, so you can rebuild any deck.
 
