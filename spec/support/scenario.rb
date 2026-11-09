@@ -103,7 +103,7 @@ class Scenario
       "turn" => @turn, "active" => active, "step" => @step.to_s, "step_state" => "active",
       "priority" => pending["kind"] == "priority" ? pending["player"] : nil, "passes" => 0,
       "next_id" => next_id, "starting_player" => 0, "pending" => pending, "result" => nil,
-      "outside_lists" => @players.map { it.zones[:outside].dup },
+      "outside_lists" => outside_lists,
       "players" => players, "objects" => objects, "battlefield" => battlefield, "stack" => [], "exile" => exile
     }
   end
@@ -111,6 +111,8 @@ class Scenario
   def game = Enjine::Game.import({ "state" => to_h }, catalog: @catalog)
 
   private
+
+  def outside_lists = @players.map { it.zones[:outside].dup }
 
   def object_h(id, entry, owner, zone)
     { "id" => id, "card" => id.split("#").first, "owner" => owner, "controller" => owner, "zone" => zone.to_s,

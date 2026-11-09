@@ -11,7 +11,9 @@ module Enjine
 
     # Data form of "who/what does this effect apply to":
     #   {"target": 0}                               the first chosen target
-    #   "self"                                      the source permanent
+    #   "self"                                      the source permanent, or the source card while it's still in
+    #                                               the graveyard, hand or exile ("return this card from your
+    #                                               graveyard", CR 113.6m; it's a new object once it moves, CR 400.7)
     #   "you"                                       the controller
     #   "each_opponent"                             every opponent
     #   "attached"                                  what the source is attached to ("enchanted creature", CR 303.4m)
@@ -26,6 +28,7 @@ module Enjine
     class Selector
       CONTROLLERS = %w[you opponent any].freeze
       TRIGGERING = %w[object player].freeze
+      CARD_ZONES = %i[graveyard hand exile].freeze # where "self" can be the source card (CR 113.6m)
 
       attr_reader :kind, :value, :controller
 
@@ -118,7 +121,7 @@ module Enjine
         case kind
         when :target then Array(ctx.targets[value]).compact # a counted target's slot holds a list (CR 601.2c)
         when :result then Array(ctx.results&.[](value))
-        when :self then engine.state.battlefield.include?(ctx.source) ? [ctx.source] : []
+        when :self then source(engine, ctx)
         when :attached then attached(engine, ctx)
         when :triggering then triggering(engine, ctx)
         when :watched then Array(Selector.memory(engine, ctx)["watched"])
@@ -135,6 +138,12 @@ module Enjine
       def self.memory(engine, ctx) = ctx.memory || engine.state.objects[ctx.object]&.memory || {}
 
       private
+
+      def source(engine, ctx)
+        obj = engine.state.objects[ctx.source]
+        here = obj && (obj.zone == :battlefield ? engine.state.battlefield.include?(obj.id) : CARD_ZONES.include?(obj.zone))
+        here ? [ctx.source] : []
+      end
 
       def controllers(engine, ctx)
         Array(value&.resolve(engine, ctx)).filter_map do |ref|
