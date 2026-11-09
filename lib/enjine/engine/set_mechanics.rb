@@ -114,7 +114,8 @@ module Enjine
       # CR 701.72a: a permanent: gain control of it, put a +1/+1 counter on it, it becomes a Borg artifact creature.
       # CR 701.72b: a permanent card elsewhere: put it onto the battlefield under your control with a +1/+1
       # counter; it's a Borg artifact creature. Returns the assimilated permanent's id (or nil).
-      def assimilate!(ref, controller, ctx)
+      # `enters`: what an "as this enters" choice adds for a card put onto the battlefield (CR 614.12a).
+      def assimilate!(ref, controller, ctx, enters: nil)
         obj = state.objects[ref] or return nil
         if obj.zone == :battlefield
           gain_control!(obj, controller)
@@ -122,7 +123,8 @@ module Enjine
         else
           return nil unless obj.kind == "card" && catalog.fetch(obj.card).permanent? && %i[graveyard exile hand library].include?(obj.zone)
 
-          obj = move!(ref, :battlefield, controller: controller, reason: "assimilate", enters: { "counters" => { "+1/+1" => 1 } })
+          status = (enters || {}).merge("counters" => (enters || {}).fetch("counters", {}).merge("+1/+1" => 1) { |_, a, b| a + b })
+          obj = move!(ref, :battlefield, controller: controller, reason: "assimilate", enters: status) or return nil
         end
         # The type change lasts while it stays on the battlefield; ones about objects that left are dropped.
         state.effects.reject! { it["kind"] == "assimilate" && !state.battlefield.include?(it["affected"].first) }
