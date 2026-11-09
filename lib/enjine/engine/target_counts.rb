@@ -64,14 +64,14 @@ module Enjine
       # [min, max] targets to announce: the spec's count (0 up to it with "up to"; any number with "any"),
       # never more than there are different legal targets, nor (dividing, CR 601.2d) more than the amount.
       # Too few legal targets for an exact count makes the cast illegal: only cancelling is left (CR 734.1).
-      # A triggered ability without enough never gets here: it is removed instead (CR 603.3d).
+      # A triggered ability can't be rewound: one whose count turns out larger than the legal targets
+      # (an X only known once it is put on the stack) gets as many as there are.
       def target_count_range(ctx, spec)
         count_ctx = Mechanics::EffectContext.new(ctx["player"], ctx["source"] || ctx["object"], ctx["object"], nil, [])
         min, max = spec.count_range(self, count_ctx)
         available = target_candidates.size
         divide = casting_ability&.extras&.divide
-        min = [min, 1].max if divide
-        return [min, min] if min > available
+        return [min, min] if min > available && cancellable?
 
         max = [max || available, available, divide].compact.min
         [[min, max].min, max]

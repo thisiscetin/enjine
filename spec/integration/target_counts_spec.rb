@@ -47,7 +47,41 @@ RSpec.describe "Variable numbers of targets (CR 601.2c, 115.3)" do
                                          "targets" => [{ "filter" => { "creature" => { "controller" => "you" } }, "count" => lands }],
                                          "effects" => [{ "pump" => { "power" => 1, "toughness" => 1, "to" => { "target" => 0 } } }] } }] }
   end
-  let(:catalog) { catalog_with(mass_tap, recall, rally, infiltration, fan, mirror, herald) }
+  let(:x_herald) do
+    { "name" => "Spec Surge Herald", "mana_cost" => "{X}{U}", "types" => ["creature"], "power" => 1, "toughness" => 1,
+      "abilities" => [{ "triggered" => { "when" => { "enters" => {} }, "targets" => [{ "filter" => "creature", "count" => "x" }],
+                                         "effects" => [{ "pump" => { "power" => 1, "toughness" => 0, "to" => { "target" => 0 } } }] } }] }
+  end
+  let(:sower) do
+    { "name" => "Spec Lone Sower", "mana_cost" => "{U}", "types" => ["creature"], "power" => 1, "toughness" => 1,
+      "abilities" => [{ "triggered" => { "when" => { "enters" => {} }, "divide" => 2,
+                                         "targets" => [{ "filter" => { "creature" => { "other" => true } }, "count" => "any" }],
+                                         "effects" => [{ "distribute_counters" => { "counter" => "+1/+1" } }] } }] }
+  end
+  let(:catalog) { catalog_with(mass_tap, recall, rally, infiltration, fan, mirror, herald, x_herald, sower) }
+
+  it "a triggered ability whose X exceeds the legal targets gets as many as there are (it can't be rewound)" do
+    game = game_with(hand: ["Spec Surge Herald"], board: ["Hill Giant"], lands: 4)
+    cast(game, "Spec Surge Herald")
+    game.submit(type: "x", value: 3)
+    pay(game)
+    pass_both(game)
+    expect(game.pending_decision.kind).to eq("choose_target")
+    game.submit(type: "target", target: obj_id(game, "Hill Giant"))
+    game.submit(type: "target", target: obj_id(game, "Spec Surge Herald"))
+    expect(game.state.object(game.state.stack.first).targets.first.size).to eq(2)
+  end
+
+  it "dividing among any number of targets with none available: no targets, nothing divided" do
+    game = game_with(hand: ["Spec Lone Sower"])
+    cast(game, "Spec Lone Sower")
+    pay(game)
+    pass_both(game)
+    expect(game.state.object(game.state.stack.first).targets).to eq([[]])
+    pass_both(game)
+    expect(game.state.stack).to be_empty
+    expect(game.state.object(obj_id(game, "Spec Lone Sower")).counters).to be_empty
+  end
 
   it "a triggered ability without enough legal targets for its count is removed (CR 603.3d)" do
     game = game_with(hand: ["Spec Tide Herald"], board: ["Hill Giant"], lands: 3)
@@ -208,10 +242,10 @@ RSpec.describe "Variable numbers of targets (CR 601.2c, 115.3)" do
     expect(game.state.battlefield.count { engine(game).token?(game.state.object(it)) }).to eq(0)
   end
 
-  it "divides among any number of targets: at least one, at most the amount (CR 601.2d)" do
+  it "divides among any number of targets: at most the amount (CR 601.2d)" do
     game = game_with(hand: ["Spec Blessing Fan"], board: ["Hill Giant", "Gray Ogre", "Craw Wurm", "Moss Grower"])
     cast(game, "Spec Blessing Fan")
-    expect(game.legal_options.map { it[:count] }).to eq([1, 2, 3, nil])
+    expect(game.legal_options.map { it[:count] }).to eq([0, 1, 2, 3, nil])
     game.submit(type: "count", count: 2)
     game.submit(type: "target", target: obj_id(game, "Hill Giant"))
     game.submit(type: "target", target: obj_id(game, "Gray Ogre"))

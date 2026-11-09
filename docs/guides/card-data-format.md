@@ -178,7 +178,7 @@ is fixed) and then chooses that many different objects; `{ "target": n }` then m
 | "two target creatures" | `{ "filter": "creature", "count": 2 }` |
 | "up to X target creatures you control, where X is the number of lands you control" | `{ "filter": { "creature": { "controller": "you" } }, "count": { "count": { "each": "land", "controller": "you" } }, "optional": true }` |
 | "any number of target players" | `{ "filter": "player", "count": "any" }` |
-| "divided as you choose among any number of target creatures" | `{ "filter": "creature", "count": "any" }` with `"divide": N` (at least one, at most N targets) |
+| "divided as you choose among any number of target creatures" | `{ "filter": "creature", "count": "any" }` with `"divide": N` (at most N targets; each gets at least one) |
 
 ```json
 { "name": "Example Mimic Raid", "mana_cost": "{X}{U}{B}", "types": ["sorcery"],
