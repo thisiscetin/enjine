@@ -68,7 +68,7 @@ RSpec.describe "Library, hand and graveyard effects, edicts and linked exile: ca
     expect(errors_for([{ "dig" => {} }])).to eq(["#{base}.dig.amount: required"])
     expect(errors_for([{ "dig" => { "amount" => 3, "count" => 0, "put" => "exile", "reveal" => "some", "rest" => "top",
                                     "optional" => "yes", "tapped" => 1 } }]))
-      .to eq(["#{base}.dig.count: must be a positive integer or \"all\"", "#{base}.dig.optional: must be true or false",
+      .to eq(["#{base}.dig.count: must be a positive integer, \"all\" or \"any\"", "#{base}.dig.optional: must be true or false",
               "#{base}.dig.put: must be one of hand, battlefield, graveyard", "#{base}.dig.tapped: must be true or false",
               "#{base}.dig.reveal: must be one of none, chosen, all",
               "#{base}.dig.rest: must be one of bottom_random, bottom_any, graveyard"])

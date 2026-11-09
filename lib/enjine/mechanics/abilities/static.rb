@@ -14,7 +14,9 @@ module Enjine
                                "it `affects` gets `pump` (fixed or computed amounts, layer 7c), the `keywords` and " \
                                "granted `abilities` (layer 6, triggered or mana abilities), and with `creature_types` " \
                                "has exactly those creature types (layer 4); `types` are card types it has in addition " \
-                               "to its other types (\"this Vehicle is an artifact creature\", layer 4). `affects` is " \
+                               "to its other types (\"this Vehicle is an artifact creature\", layer 4) and `subtypes` subtypes it has in " \
+                               "addition to its other types (\"is a Wizard in addition to its other types\", layer 4). " \
+                               "`affects` is " \
                                "{\"each\": filter, " \
                                "\"controller\": you|opponent|any, \"other\": true} (relative to the source's " \
                                "controller), \"self\", or \"attached\" (\"equipped/enchanted creature\").",
@@ -24,6 +26,7 @@ module Enjine
                             "pump" => "{\"power\": amount, \"toughness\": amount} (\"gets +1/+1 for each ...\")",
                             "keywords" => "list of keywords", "creature_types" => "list of creature types (replaces the others)",
                             "types" => "list of card types it also has (in addition to its other types)",
+                            "subtypes" => "list of subtypes it also has (in addition to its other types)",
                             "abilities" => "list of triggered or mana abilities the affected permanents have" },
                   example: { "static" => { "affects" => { "each" => "creature", "controller" => "you" },
                                            "pump" => { "power" => 1, "toughness" => 1 } } }
@@ -32,10 +35,10 @@ module Enjine
         # Data that would make the layer pass depend on its own result (CR 613.8).
         LIVE = %w[power toughness greatest_power attacking blocking tapped].freeze
 
-        attr_reader :filter, :controller, :other, :keywords, :creature_types, :condition, :granted, :card_types
+        attr_reader :filter, :controller, :other, :keywords, :creature_types, :condition, :granted, :card_types, :subtypes
 
         def self.build(params, errors, path, **)
-          Mechanics.check_keys(params, %w[affects if pump keywords creature_types abilities types], errors, path)
+          Mechanics.check_keys(params, %w[affects if pump keywords creature_types abilities types subtypes], errors, path)
           affects = Mechanics.fetch_param(params, :affects)
           filter, controller, other = parse_affects(affects, errors, path)
           raw_if = Mechanics.fetch_param(params, :if)
@@ -43,14 +46,15 @@ module Enjine
           condition = raw_if && Condition.build(raw_if, errors, "#{path}.if")
           pump = parse_pump(params, errors, path)
           keywords = parse_keywords(params, errors, path)
-          types = parse_creature_types(params, errors, path)
+          types = parse_subtypes(params, :creature_types, errors, path)
           granted = parse_granted(params, errors, path)
           card_types = Effects::Become.names_param(params, :types, :type, errors, path, allowed: Effects::Become::ADDABLE_TYPES)
-          if pump.empty? && keywords.empty? && types.nil? && granted.empty? && card_types.empty?
-            errors << "#{path}: needs pump and/or keywords (or creature_types, types, abilities)"
+          subtypes = parse_subtypes(params, :subtypes, errors, path) || []
+          if pump.empty? && keywords.empty? && types.nil? && granted.empty? && card_types.empty? && subtypes.empty?
+            errors << "#{path}: needs pump and/or keywords (or creature_types, types, subtypes, abilities)"
           end
           new(filter: filter, controller: controller, other: other, pump: pump, keywords: keywords, creature_types: types,
-              condition: condition, granted: granted, card_types: card_types)
+              condition: condition, granted: granted, card_types: card_types, subtypes: subtypes)
         end
 
         def self.parse_affects(affects, errors, path)
@@ -96,12 +100,12 @@ module Enjine
           keywords.map(&:to_sym)
         end
 
-        def self.parse_creature_types(params, errors, path)
-          raw = Mechanics.fetch_param(params, :creature_types)
+        def self.parse_subtypes(params, key, errors, path)
+          raw = Mechanics.fetch_param(params, key)
           return nil if raw.nil?
 
           ok = raw.is_a?(Array) && !raw.empty? && raw.all? { CardDefinition::SUBTYPE_FORMAT.match?(it.to_s) }
-          errors << "#{path}.creature_types: must be a non-empty list of lowercase creature types" unless ok
+          errors << "#{path}.#{key}: must be a non-empty list of lowercase subtypes" unless ok
           ok ? raw.map(&:to_sym).freeze : nil
         end
 
@@ -117,9 +121,11 @@ module Enjine
           end.freeze
         end
 
-        def initialize(filter:, controller:, other:, pump:, keywords:, creature_types:, condition:, granted:, card_types: [])
+        def initialize(filter:, controller:, other:, pump:, keywords:, creature_types:, condition:, granted:, card_types: [],
+                       subtypes: [])
           super()
           @card_types = card_types.freeze
+          @subtypes = subtypes.freeze
           @filter = filter
           @controller = controller
           @other = other
@@ -172,6 +178,7 @@ module Enjine
           bits << keywords.join(", ") unless keywords.empty?
           bits << "creature type #{creature_types.join(" ")}" if creature_types
           bits << "types #{card_types.join(" ")}" unless card_types.empty?
+          bits << "subtypes #{subtypes.join(" ")}" unless subtypes.empty?
           bits << "\"#{granted.join("; ")}\"" unless granted.empty?
           "#{who} get#{"s" if %i[attached self].include?(@filter)} #{bits.join(" and ")}#{" as long as #{condition}" if condition}"
         end

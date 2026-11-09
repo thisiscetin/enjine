@@ -63,13 +63,13 @@ module Enjine
 
         primitive :effect, :dig,
                   description: "Look at the top `amount` cards of your library (`reveal: \"all\"`: reveal them). Take " \
-                               "`count` (default 1; \"all\": every matching card, no choice) cards matching `for` and put " \
+                               "`count` (default 1; \"all\": every matching card, no choice; \"any\": any number) cards matching `for` and put " \
                                "them into `put` (`tapped` onto the battlefield); `optional`: you may take fewer. " \
                                "`reveal: \"chosen\"` reveals the cards taken. The rest go to `rest`: \"bottom_random\" " \
                                "(default), \"bottom_any\" (in an order you choose) or \"graveyard\".",
                   rules: %w[701.20a 701.20e 401.4 400.7j],
                   params: { "amount" => "amount (how many cards)", "for" => "card spec (default any card)",
-                            "count" => "integer or \"all\"", "optional" => "boolean", "put" => PUT.join(" | "),
+                            "count" => "integer, \"all\" or \"any\"", "optional" => "boolean", "put" => PUT.join(" | "),
                             "tapped" => "boolean", "reveal" => REVEAL.join(" | "), "rest" => RestOfCards::REST.join(" | ") },
                   example: { "dig" => { "amount" => 6, "for" => { "types" => ["artifact"] }, "optional" => true,
                                         "reveal" => "chosen", "put" => "hand" } }
@@ -82,8 +82,8 @@ module Enjine
         def setup(params, errors, path)
           @spec = CardSpec.build(Mechanics.fetch_param(params, :for), errors, "#{path}.for")
           @count = Mechanics.fetch_param(params, :count) || 1
-          unless @count == "all" || (@count.is_a?(Integer) && @count.positive?)
-            errors << "#{path}.count: must be a positive integer or \"all\""
+          unless %w[all any].include?(@count) || (@count.is_a?(Integer) && @count.positive?)
+            errors << "#{path}.count: must be a positive integer, \"all\" or \"any\""
           end
           @optional = Mechanics.flag_param(params, "optional", errors, path)
           @put = (Mechanics.fetch_param(params, :put) || "hand").to_s
@@ -95,7 +95,7 @@ module Enjine
         end
 
         def to_s
-          many = count == "all" ? "all" : "#{"up to " if @optional}#{count}"
+          many = { "all" => "all", "any" => "any number of" }[count] || "#{"up to " if @optional}#{count}"
           "#{@reveal == "all" ? "reveal" : "look at"} the top #{amount} cards, #{many} #{spec} → #{put}, rest → " \
             "#{@rest.tr("_", " ")}"
         end
@@ -128,11 +128,11 @@ module Enjine
         end
 
         def choices(engine, ctx, seen, taken, locals)
-          return [] if answers(locals).any? { it["type"] == "done" } || taken.size >= count
+          return [] if answers(locals).any? { it["type"] == "done" } || (count != "any" && taken.size >= count)
 
           ids = (seen - taken).select { spec.match?(engine, engine.object(it), ctx) }
           options = ids.uniq { engine.object(it).card }.map { { "type" => "take", "object" => it } }
-          options << { "type" => "done" } if @optional && !options.empty?
+          options << { "type" => "done" } if (@optional || count == "any") && !options.empty?
           options
         end
 
