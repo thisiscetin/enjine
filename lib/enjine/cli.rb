@@ -108,13 +108,12 @@ module Enjine
       today = Date.today
       Sets.all(dir: @options[:sets_dir]).each do |set|
         legal = set.standard_legal?(today) ? "standard" : "-"
-        say "#{set.code.ljust(6)} #{set.name} (#{set.released_at}) · #{set.size} playable, " \
-            "#{set.unsupported.size} unsupported · #{legal}"
+        say "#{set.code.ljust(6)} #{set.name} (#{set.released_at}) · #{set.size} cards · #{legal}"
       end
       0
     end
 
-    # What a collection resolved to: resolved, unsupported and unknown entries. Exit code 1 if any are unknown.
+    # What a collection resolved to: resolved and unknown entries. Exit code 1 if any are unknown.
     def collection_report(path)
       report = Collection.load(path, sets_dir: @options[:sets_dir]).report
       say JSON.pretty_generate(report)

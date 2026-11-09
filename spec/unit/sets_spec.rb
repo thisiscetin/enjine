@@ -17,7 +17,6 @@ RSpec.describe Enjine::Sets do
     expect(set.size).to eq(48)
     expect(set.cards).to all(be_a(Enjine::CardDefinition))
     expect(set.entries.first).to have_attributes(rarity: "common", printing: { "set" => "fxa", "number" => "1" }, id: "fxa:1")
-    expect(set.unsupported.map { it["name"] }).to eq(["Skyveil Seraph", "Echoing Grudge"])
     expect(described_class.load(set)).to be(set)
   end
 
@@ -45,20 +44,24 @@ RSpec.describe Enjine::Sets do
     expect { described_class.parse_date("soon") }.to raise_error(described_class::InvalidSet, /invalid date/)
   end
 
-  it "moves cards that no longer validate to unsupported and never loads them" do
+  it "loads hand-written cards and refuses a set with an invalid card, naming where it is" do
     Dir.mktmpdir do |tmp|
-      write_set(tmp, "tst", "format" => 1, "name" => "Test",
-                            "cards" => [{ "card" => { "name" => "Bad Angel", "types" => ["creature"], "keywords" => ["banding"] } },
-                                        "not an entry",
-                                        { "card" => { "name" => "Forest", "types" => ["land"], "supertypes" => ["basic"],
-                                                      "subtypes" => ["forest"] } }])
+      forest = { "card" => { "name" => "Forest", "types" => ["land"], "supertypes" => ["basic"], "subtypes" => ["forest"] } }
+      write_set(tmp, "tst", "format" => 1, "name" => "Test", "cards" => [forest])
       set = described_class.load("tst", dir: tmp)
       expect(set.cards.map(&:name)).to eq(["Forest"])
       expect(set.entries.first).to have_attributes(printing: nil, id: nil)
-      expect(set.unsupported.map { it["name"] }).to eq(["Bad Angel", nil])
-      expect(set.unsupported.first["missing"]).to include(/unknown keyword "banding"/)
       expect(set).to have_attributes(code: "tst", released_at: nil, standard_legal_until: nil)
       expect(set.standard_legal?(Date.new(2000, 1, 1))).to be(true)
+
+      bad = { "card" => { "name" => "Bad Angel", "types" => ["creature"], "keywords" => ["banding"] } }
+      write_set(tmp, "bad", "format" => 1, "cards" => [forest, bad])
+      expect { described_class.load("bad", dir: tmp) }
+        .to raise_error(described_class::InvalidSet, /cards\[1\] \("Bad Angel"\): .*unknown keyword "banding"/)
+      write_set(tmp, "junk", "format" => 1, "cards" => ["not an entry"])
+      expect { described_class.load("junk", dir: tmp) }.to raise_error(described_class::InvalidSet, /cards\[0\]: must be an object/)
+      write_set(tmp, "notlist", "format" => 1, "cards" => {})
+      expect { described_class.load("notlist", dir: tmp) }.to raise_error(described_class::InvalidSet, /must be an array/)
     end
   end
 

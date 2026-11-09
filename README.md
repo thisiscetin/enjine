@@ -27,26 +27,23 @@ simulations, bots and reinforcement learning, or for a game client.
 > See [`SUPPORTED.md`](SUPPORTED.md) (generated from the code) and the
 > [mechanics coverage checklist](docs/MECHANICS_COVERAGE.md).
 
-## Verified sets
+## Card sets
 
-A set is **verified** when every card in it is imported and playable, every
-mechanic it uses is implemented and tested, and observed sample games with random
-decks built from it finish with zero rules findings. See the
-[definition](docs/plans/standard.md#definition-of-verified) and the full
-[Standard program](docs/plans/standard.md).
+Enjine ships no real cards. You write each card yourself in the
+[card DSL](docs/guides/card-data-format.md), a JSON block naming what the card
+does, and Enjine validates it:
 
-| Set | Code | Cards playable | Status |
-| --- | --- | ---: | --- |
-| Star Trek | `trk` | 227 / 311 | in progress |
-| Teenage Mutant Ninja Turtles | `tmt` | 28 / 195 | imported, waiting on mechanics |
+```json
+{ "name": "Alfa", "mana_cost": "{1}{U}{U}", "types": ["instant"],
+  "abilities": [ { "spell": { "targets": ["spell"], "effects": [ { "counter": { "to": { "target": 0 } } } ] } } ] }
+```
 
-Other Standard sets follow newest first: Reality Fracture, The Hobbit, Marvel
-Super Heroes, and so on back to Foundations. Sets that leave Standard at the next
-rotation aren't imported. Each set file records the date it stops being Standard
-(`standard_legal_until`), and `sets=standard` only uses sets legal on that day. Card data lives in
-`lib/enjine/sets/<code>.json`. It ships with the gem, isn't loaded by default, and
-the [deck builder](docs/guides/deck-builder.md) reads it (`--random-deck sets=trk`),
-or builds only from the cards you own across sets (`--collection mine.json`).
+Nothing reads rules text. Put cards in a deck's `cards`, or in a set file
+`lib/enjine/sets/<code>.json` (or your own `--sets-dir`), where the
+[deck builder](docs/guides/deck-builder.md) and collections find them
+(`--random-deck sets=trk`, `--collection mine.json`). Set files ship empty, with
+their metadata only: name, release date and `standard_legal_until`, so
+`sets=standard` only uses sets legal on a given day.
 
 ## Try it: play both sides in your terminal
 
@@ -123,14 +120,14 @@ More in [docs/guides/decision-api.md](docs/guides/decision-api.md).
     { "pump": { "power": 1, "toughness": 1, "to": { "each": "creature", "controller": "you" } } }] } }] }
 ```
 
-Validate cards in bulk, for example from a Scryfall import pipeline:
+Validate cards in bulk:
 
 ```sh
 bundle exec exe/enjine --validate cards.json   # JSON report, exit code 1 if any card is invalid
 ```
 
-The [card data format guide](docs/guides/card-data-format.md) is written so you
-can hand it to an agent that converts a card database into Enjine format.
+The [card DSL guide](docs/guides/card-data-format.md) lists every field, ability,
+effect and filter with examples.
 
 ## Where things are
 
@@ -161,7 +158,7 @@ SUPPORTED.md                generated list of everything the engine supports
 | --- | --- |
 | [SUPPORTED.md](SUPPORTED.md) | every supported type, keyword, ability, cost, effect and filter (generated) |
 | [docs/reference/](docs/reference) | parameters and examples for every primitive and decision (generated) |
-| [docs/guides/card-data-format.md](docs/guides/card-data-format.md) | the card data format, Scryfall mapping, validation, DB schema |
+| [docs/guides/card-data-format.md](docs/guides/card-data-format.md) | the card DSL: fields, abilities, effects, validation, DB schema |
 | [docs/guides/decision-api.md](docs/guides/decision-api.md) | playing a game through the API |
 | [docs/guides/deck-builder.md](docs/guides/deck-builder.md) | random decks from card sets or from your own collection, in chosen or random colors (`--random-deck`, `--collection`) |
 | [docs/guides/adding-a-mechanic.md](docs/guides/adding-a-mechanic.md) | how to extend the engine |

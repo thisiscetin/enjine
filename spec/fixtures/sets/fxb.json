@@ -1151,13 +1151,5 @@
         "number": "43"
       }
     }
-  ],
-  "unsupported": [
-    {
-      "name": "Prismatic Tidecaller",
-      "missing": [
-        "any-color mana"
-      ]
-    }
   ]
 }

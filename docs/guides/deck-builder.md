@@ -40,8 +40,7 @@ until you ask for it.
 { "format": 1, "code": "trk", "name": "...", "released_at": "2026-11-13",
   "standard_legal_until": "2029-01-19", "standard_legal_until_estimated": true,
   "cards": [ { "card": { ...a card data block in CardDefinition#to_h form... },
-               "rarity": "common", "printing": { "set": "trk", "number": "12" } } ],
-  "unsupported": [ { "name": "...", "missing": ["flying"] } ] }
+               "rarity": "common", "printing": { "set": "trk", "number": "12" } } ] }
 ```
 
 `printing` identifies the printing without depending on any card database: the
@@ -49,15 +48,15 @@ set code and the collector number printed on the card. The number is a string,
 because collector numbers can contain letters or symbols (`"12a"`, `"★"`).
 `Sets::Entry#id` returns `"trk:12"`.
 
-Only `cards` are playable. Names in `unsupported` are never used. If an entry in
-`cards` fails validation, for example because the engine changed, the loader moves
-it to `unsupported` along with its errors.
+You write every card yourself in the [card DSL](card-data-format.md). Every card
+must validate: a set with an invalid card fails to load with
+`Sets::InvalidSet`, which names the card's index, its name and each error.
 
 ```ruby
 require "enjine/sets"
 
 Enjine::Sets.codes                              # => ["abc", "trk"]
-set = Enjine::Sets.load("trk")                  # Sets::CardSet: code, name, released_at, cards, entries, unsupported
+set = Enjine::Sets.load("trk")                  # Sets::CardSet: code, name, released_at, cards, entries
 Enjine::Sets.standard_legal(on: Date.today)     # sets released by then and not yet rotated out
 Enjine::Sets.dir = "path/to/sets"               # or ENV["ENJINE_SETS_DIR"]; default lib/enjine/sets
 ```
@@ -134,8 +133,7 @@ through these steps in order:
    The message names the sets, the colors, the number of playable cards it found
    and how many cards were missing. `#details` returns the same facts as a Hash.
 
-It never pads the deck with extra basics beyond the land maximum, and it never
-uses unsupported cards.
+It never pads the deck with extra basics beyond the land maximum.
 
 ## Command line
 
@@ -219,20 +217,17 @@ array, a bad `count`, an entry with neither `name` nor `set` + `number`) raises
 
 ### The resolution report
 
-Cards the engine can't play yet, and cards that can't be found, are reported, not
-silently dropped. `Collection#report` has three lists (string keys, so it is also
+Cards that can't be found are reported, not silently dropped. `Collection#report`
+has two lists (string keys, so it is also
 the JSON that `--collection-report` prints):
 
 ```json
 { "resolved":    [ { "id": "lantern_warden", "name": "Lantern Warden", "set": "fxa", "count": 5 } ],
-  "unsupported": [ { "name": "Skyveil Seraph", "set": "fxa", "reason": "needs flying", "count": 2 } ],
   "unknown":     [ { "name": "Dawnward Squire", "set": "zzz", "count": 1, "reason": "unknown set \"zzz\"" } ] }
 ```
 
 - `resolved`: one row per distinct playable card, with the total copies owned.
   `set` is where the definition came from (missing for `cards:`).
-- `unsupported`: the entry names a card that a set lists in its `unsupported`
-  section, with what the engine still lacks. The builder never uses these.
 - `unknown`: the original entry plus a `reason`: no such card, unknown set or set
   name, no card at that collector number, or a name that doesn't match the number.
 
@@ -284,6 +279,6 @@ bundle exec exe/enjine --collection-report mine.json
 `--collection` applies to `--random-deck` and to every `--deck1`/`--deck2
 random:...` seat, and can't be combined with a `sets=` key. `--collection-report`
 prints the resolution report as JSON and exits with code 1 if any entry is
-unknown (unsupported cards alone don't fail it), or prints `{"error": ...}` for a
+unknown, or prints `{"error": ...}` for a
 malformed file. Both honor `--sets-dir`. The deck's `description` records the
 recipe as `collection=mine.json colors=WU seed=3`.

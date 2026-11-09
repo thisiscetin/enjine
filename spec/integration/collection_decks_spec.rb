@@ -7,8 +7,8 @@ RSpec.describe "Random decks from a multi-set collection" do
   it "resolves the binder's cards from both sets and reports the rest" do
     report = collection.report
     expect(report["resolved"].map { it["set"] }.uniq).to contain_exactly("fxa", "fxb")
-    expect(report["unsupported"].map { it["name"] }).to eq(["Prismatic Tidecaller", "Skyveil Seraph"])
-    expect(report["unknown"].size).to eq(4)
+    expect(report["unknown"].map { it["name"] }).to include("Prismatic Tidecaller", "Skyveil Seraph")
+    expect(report["unknown"].size).to eq(6)
     expect(collection.count("Lantern Warden")).to eq(5)
     expect(collection.count("Mountain")).to eq(16)
   end

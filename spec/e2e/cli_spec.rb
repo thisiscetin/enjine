@@ -87,7 +87,7 @@ RSpec.describe Enjine::CLI do
 
     it "lists the sets in the sets directory" do
       _, out = run(sets + %w[--list-sets])
-      expect(out).to include("fxa    Ashfall Reaches (2025-06-13) · 48 playable, 2 unsupported",
+      expect(out).to include("fxa    Ashfall Reaches (2025-06-13) · 48 cards",
                              "fxb    Tidewild Expanse")
     end
 
@@ -130,8 +130,8 @@ RSpec.describe Enjine::CLI do
       code, out = run(sets + ["--collection-report", DeckBuilderHelpers::BINDER])
       expect(code).to eq(1)
       report = JSON.parse(out)
-      expect(report.keys).to eq(%w[resolved unsupported unknown])
-      expect(report["unsupported"].map { it["name"] }).to eq(["Prismatic Tidecaller", "Skyveil Seraph"])
+      expect(report.keys).to eq(%w[resolved unknown])
+      expect(report["unknown"].map { it["name"] }).to include("Prismatic Tidecaller", "Skyveil Seraph")
       Dir.mktmpdir do |dir|
         clean = File.join(dir, "clean.json")
         File.write(clean, JSON.generate("format" => 1, "cards" => [{ "name" => "Dawnward Squire", "count" => 4 }]))

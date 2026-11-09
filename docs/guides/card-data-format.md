@@ -1,57 +1,47 @@
-# Card data format — a guide for conversion agents
+# The card DSL — writing cards for Enjine
 
-This guide is written for an agent (or a person) whose job is:
+Enjine has no built-in card list and never reads card text. A card exists only as a
+**data block** (JSON) that you write by hand in Enjine's card DSL. Enjine validates
+it and compiles it. Nothing parses rules text: what a card does is exactly what its
+data block says.
 
-1. **pull** cards from a card database (Scryfall, MTGJSON, your own DB),
-2. **convert** each card into Enjine's card data format,
-3. **validate** it with Enjine,
-4. **push** the valid result to a database, and report what could not be converted.
+```json
+{ "name": "Ember Sprite", "mana_cost": "{1}{R}", "types": ["creature"], "subtypes": ["elemental"],
+  "keywords": ["haste"], "power": 2, "toughness": 1,
+  "abilities": [ { "triggered": { "trigger": { "enters": "self" },
+                                  "effects": [ { "deal_damage": { "amount": 1, "to": { "target": 0 } } } ],
+                                  "targets": ["any"] } } ] }
+```
 
-Enjine has no built-in card list. A card exists only as a *data block* (JSON) that
-Enjine validates and compiles. If a card uses a mechanic Enjine does not support
-yet, validation **fails with a precise error**. That is expected: store the card
-as *unsupported*, record the errors, and move on. Never approximate a card. A
-wrong card is worse than a missing one.
+If a block uses something Enjine doesn't support, or has a typo, validation
+**fails with a precise error** that names the exact path in your data
+(`abilities[0].triggered.effects[0].deal_damage.amount: …`). Nothing is ever
+guessed or silently dropped.
 
-**Source of truth for what is supported:** [`SUPPORTED.md`](../../SUPPORTED.md) and
-[`docs/reference/`](../reference). These files are generated from the code, so a
-primitive listed there works, and a primitive not listed there does not exist yet.
+**Source of truth for what exists:** [`SUPPORTED.md`](../../SUPPORTED.md) and
+[`docs/reference/`](../reference). Both are generated from the code. A primitive
+listed there works, and one that isn't listed doesn't exist yet.
 
 ---
 
-## 1. The workflow
+## 1. Adding a card
 
-```
-for each card in source DB:
-    data   = convert(card)                 # this guide, sections 2-6
-    report = enjine --validate data.json   # section 7
-    if valid:   upsert(cards_table, report.valid[i].card)      # canonical form
-    else:       upsert(unsupported_table, card.name, report.invalid[i].errors)
-```
+1. Write the data block using sections 2–5 (fields, mana abilities, abilities, examples).
+2. Validate it: `bundle exec exe/enjine --validate cards.json` (section 7).
+3. Put it where you need it:
+   - **In a deck document's `cards`** (section 6). This is the simplest option and needs nothing else.
+   - **In a set file** `lib/enjine/sets/<code>.json` (or your own `--sets-dir`), as
+     `{ "card": { ... }, "rarity": "common", "printing": { "set": "trk", "number": "12" } }`.
+     The deck builder and collections read set files. A set with an invalid card fails
+     to load and names the card and the error.
+   - **In your own database** (section 8).
 
-Rules for the agent:
-
-- **Convert from the oracle text, not the printed text.** Use Scryfall's
-  `oracle_text` and `type_line`, or MTGJSON's `text`. Oracle text is the up-to-date
-  wording that the rules use.
-- **One card, one block.** For multi-face cards (split, adventure, MDFC,
-  transform), *skip the card for now* and record `"unsupported": "multi-face"`.
-  Enjine doesn't model faces yet.
-- **Never invent mechanics.** If any part of the oracle text can't be expressed
-  with the primitives in `SUPPORTED.md`, the card is unsupported. Don't drop that
-  part, and don't "close enough" it.
-- **Store the canonical form.** Store `report.valid[i].card` (the output of
-  `CardDefinition#to_h`), not your input. It is normalized: mana costs are
-  re-rendered and empty fields are dropped.
-- **Record the printing, not a vendor id.** Store the set code and collector
-  number printed on the card (`trk`, `12`). Any card source resolves them
-  (Scryfall `/cards/trk/12`, MTGJSON set + `number`), so images and prices stay
-  one lookup away without tying your data to a single provider.
-- **Version your rows.** Store `rules_version` and `engine_version` from the
-  report next to each card. When Enjine gains a mechanic, re-run the unsupported
-  table, not the whole database.
-- **Prioritize Standard-legal cards.** Mechanics that only appear on cards that
-  have left Standard are low priority.
+Tips:
+- **Store the canonical form.** `CardDefinition#to_h` (the `card` in the validation
+  report) is normalized and round-trips exactly.
+- **Record the printing, not a vendor id.** The set code and collector number printed on
+  the card (`trk`, `12`) can be looked up in any card source.
+- **Multi-face cards** (split, adventure, MDFC, transform) aren't modelled yet.
 
 ---
 
@@ -69,27 +59,12 @@ Rules for the agent:
 | `colors` | no | list | `W U B R G`. Only for a color indicator or a token's colors (CR 202.2e, 111.3); otherwise colors come from the mana cost. |
 | `loyalty` | planeswalkers | integer | Starting loyalty. |
 | `abilities` | no | list | Section 4. |
-| `rules_text` | no | string | Informational only (shown in the CLI). Put the oracle text here. |
+| `rules_text` | no | string | Informational only (shown in the CLI). Never interpreted. |
 
 Any other field is an error. That's deliberate: a typo must never be silently ignored.
 
-### Mapping a Scryfall object
-
-| Scryfall | Enjine |
-| --- | --- |
-| `name` | `name` |
-| `mana_cost` (`"{1}{G}"`) | `mana_cost` (omit for lands, and when Scryfall's value is `""`) |
-| `type_line` `"Legendary Creature — Elf Druid"` | split on `—`. Left side: words in `{legendary, basic, snow, world}` → `supertypes`, the other words → `types` (lowercased). Right side → `subtypes` (lowercased, spaces → `_`). |
-| `power` / `toughness` / `loyalty` (strings) | integers. Any `*` or `X` → unsupported. |
-| `keywords` (`["Flying", "Haste"]`) | `keywords`, lowercased. **Check every one against SUPPORTED.md.** |
-| `oracle_text` | `rules_text` (verbatim), and the source of `abilities` |
-| `card_faces` present | unsupported (`multi-face`) |
-| `layout` not `normal` | unsupported for now (`layout: <value>`) |
-
-Watch out: Scryfall's `keywords` array includes **keyword actions** too (e.g.
-`"Scry"`, `"Mill"`), and those are not `keywords` in Enjine. Only keyword
-*abilities* (rule 702) go in `keywords`. Keyword actions are effects inside an
-ability.
+Keyword *actions* such as scry and mill are effects inside an ability, not `keywords`.
+Only keyword *abilities* (rule 702) go in `keywords`.
 
 ---
 
@@ -299,12 +274,6 @@ An activated ability without targets that adds mana is a *mana ability* (CR 605.
 use `mana`, not `activated` with `add_mana` (validation rejects it). In an
 enters-the-battlefield trigger, `"x"` is the X the permanent was cast with (CR 107.3m).
 
-Anything with *conditions* ("if …", "unless …"), *choices* ("choose one —"),
-*variable amounts* ("X", "equal to the number of …"), *durations other than until
-end of turn*, *triggers* ("when/whenever/at") or *static abilities* ("creatures
-you control get +1/+1" with no duration) is **not supported yet**, so the card is
-unsupported.
-
 ### 4.8 Auras and Equipment
 
 Give the card the subtype `aura` (enchantments only) or `equipment` (artifacts only).
@@ -472,13 +441,11 @@ Generic shapes (N, [quality] and [zone] stand for whatever the card says):
   ] }
 ```
 
-**Unsupported (correctly rejected).** "Serra Angel, Flying, vigilance":
+**Rejected with a path.** A typo or an unknown keyword:
 ```json
-{ "name": "Serra Angel", "mana_cost": "{3}{W}{W}", "types": ["creature"], "subtypes": ["angel"],
-  "keywords": ["flying", "vigilance"], "power": 4, "toughness": 4 }
+{ "name": "Gale Drifter", "mana_cost": "{2}{U}", "types": ["creature"], "keywords": ["flyng"], "power": 2, "toughness": 2 }
 ```
-→ `keywords[0]: unknown keyword "flying" (supported: flash, haste)`. Store it as
-unsupported, with that error, and convert it again when flying lands.
+→ `keywords[0]: unknown keyword "flyng" (supported: …)`.
 
 ---
 
@@ -510,7 +477,7 @@ bundle exec exe/enjine --validate cards.json
 ```json
 { "rules_version": "2026-09-25", "engine_version": "0.1.0",
   "valid":   [ { "index": 0, "id": "lightning_bolt", "name": "Lightning Bolt", "card": { ...canonical... } } ],
-  "invalid": [ { "index": 1, "name": "Serra Angel", "errors": ["keywords[0]: unknown keyword \"flying\" ..."] } ] }
+  "invalid": [ { "index": 1, "name": "Gale Drifter", "errors": ["keywords[0]: unknown keyword \"flyng\" ..."] } ] }
 ```
 
 From Ruby:
@@ -522,7 +489,7 @@ begin
   defn = Enjine::CardDefinition.from_h(data)   # data: Hash parsed from JSON
   store(defn.id, defn.to_h)                    # canonical, round-trips exactly
 rescue Enjine::InvalidCardDefinition => e
-  store_unsupported(data["name"], e.errors)    # every problem, each with a path
+  warn e.errors                                # every problem, each with a path
 end
 ```
 
@@ -541,14 +508,6 @@ CREATE TABLE enjine_cards (
   printing_number TEXT,                  -- collector number printed on the card, e.g. '12'
   rules_version   TEXT NOT NULL,         -- report.rules_version
   engine_version  TEXT NOT NULL,         -- report.engine_version
-  updated_at      TIMESTAMPTZ DEFAULT now()
-);
-CREATE TABLE enjine_unsupported (
-  name            TEXT PRIMARY KEY,
-  printing_set    TEXT,
-  printing_number TEXT,
-  errors          JSONB NOT NULL,        -- report.invalid[i].errors
-  engine_version  TEXT NOT NULL,
   updated_at      TIMESTAMPTZ DEFAULT now()
 );
 ```

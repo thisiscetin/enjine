@@ -69,37 +69,21 @@ RSpec.describe Enjine::Collection do
       end
     end
 
-    it "reports unsupported cards with the reason, and unknown cards, instead of dropping them" do
-      collection = load([{ "name" => "Skyveil Seraph", "count" => 2 }, { "name" => "prismatic tidecaller", "set" => "fxb" },
+    it "reports unknown cards instead of dropping them" do
+      collection = load([{ "name" => "Skyveil Seraph", "count" => 2 },
                          { "name" => "Unheard-of Wanderer", "count" => 3 }, { "name" => "Dawnward Squire", "set" => "zzz" },
                          { "name" => "Dawnward Squire", "set_name" => "Nowhere" },
                          { "name" => "Halo Bearer", "set" => "fxa", "set_name" => "Tidewild Expanse" },
                          { "name" => "Halo Bearer", "set" => "fxa" },
                          { "set" => "fxa", "number" => "1", "name" => "Halo Bearer" }, { "set" => "fxb", "number" => "999" }])
       expect(collection.entries).to be_empty
-      expect(collection.report["unsupported"]).to eq(
-        [{ "name" => "Prismatic Tidecaller", "set" => "fxb", "reason" => "needs any-color mana", "count" => 1 },
-         { "name" => "Skyveil Seraph", "set" => "fxa", "reason" => "needs flying", "count" => 2 }]
-      )
+      expect(collection.report.keys).to eq(%w[resolved unknown])
       expect(collection.report["unknown"].map { it["reason"] }).to contain_exactly(
-        "no card named \"Unheard-of Wanderer\"", "unknown set \"zzz\"", "unknown set name \"Nowhere\"",
-        "set \"fxa\" and set_name \"Tidewild Expanse\" disagree", "no card named \"Halo Bearer\" in fxa",
-        "fxa:1 is \"Dawnward Squire\", not \"Halo Bearer\"", "no printing fxb:999 (or it is unsupported)"
+        "no card named \"Skyveil Seraph\"", "no card named \"Unheard-of Wanderer\"", "unknown set \"zzz\"",
+        "unknown set name \"Nowhere\"", "set \"fxa\" and set_name \"Tidewild Expanse\" disagree",
+        "no card named \"Halo Bearer\" in fxa", "fxa:1 is \"Dawnward Squire\", not \"Halo Bearer\"", "no printing fxb:999"
       )
       expect(collection.report["unknown"].find { it["name"] == "Unheard-of Wanderer" }).to include("count" => 3)
-    end
-
-    it "prefers a playable printing over an unsupported one, and explains unsupported cards with no listed reason" do
-      Dir.mktmpdir do |tmp|
-        File.write(File.join(tmp, "aaa.json"), JSON.generate("format" => 1, "code" => "aaa", "name" => "A",
-                                                             "unsupported" => [{ "name" => "Dawnward Squire" },
-                                                                               { "name" => "Odd Relic" }]))
-        FileUtils.cp(File.join(dir, "fxa.json"), tmp)
-        collection = described_class.load([{ "name" => "Dawnward Squire" }, { "name" => "Odd Relic" }], sets_dir: tmp)
-        expect(collection.count("Dawnward Squire")).to eq(1)
-        expect(collection.report["unsupported"]).to eq([{ "name" => "Odd Relic", "set" => "aaa",
-                                                          "reason" => "not supported by the engine yet", "count" => 1 }])
-      end
     end
   end
 

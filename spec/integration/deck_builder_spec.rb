@@ -2,7 +2,6 @@
 
 RSpec.describe "Random decks from card sets" do
   let(:dir) { DeckBuilderHelpers::SET_FIXTURES }
-  let(:unsupported) { Enjine::Sets.all(dir: dir).flat_map(&:unsupported).map { it["name"] } }
 
   [%w[fxa], %w[fxb], %w[fxa fxb]].each do |sets|
     [1, 2, 3].each do |count|
@@ -18,7 +17,6 @@ RSpec.describe "Random decks from card sets" do
           defs = doc["cards"].map { Enjine::CardDefinition.from_h(it) }
           expect(defs).to all(satisfy { Enjine::DeckBuilder.fits?(it, colors) })
           expect(defs.select(&:land?).flat_map { Enjine::DeckBuilder.produced_colors(it) } - colors).to be_empty
-          expect(doc["main"].map { it["card"] } & unsupported).to be_empty
         end
       end
     end

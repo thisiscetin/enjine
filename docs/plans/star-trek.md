@@ -1,99 +1,14 @@
-# Plan: Star Trek (`trk`) fully verified
+# Star Trek (`trk`) mechanics
 
-Goal: every card of the Star Trek expansion (Scryfall set `trk`, released
-2026-11-13, 311 unique cards) is converted to Enjine card data, passes
-validation, and is verified in play. Then the README lists `trk` as a
-**verified set**.
+Goal: the engine supports every mechanic that Star Trek cards use, so you can
+write any `trk` card yourself in the [card DSL](../guides/card-data-format.md).
+Enjine ships no real card data and never reads card text. `lib/enjine/sets/trk.json`
+holds only the set's metadata (release date, `standard_legal_until`) and an empty
+`cards` list for your own cards.
 
-Status (2026-11-09): 227 of 311 cards convert (`lib/enjine/sets/trk.json`); 84 are listed as
-unsupported with the capabilities they still need. Cards waiting on a capability are named
-in each group's section below.
-
-Data goes in `lib/enjine/sets/trk.json`. It ships with the gem and isn't loaded
-by default. It contains structured card data plus each card's **printing
-identifier**: the set code and collector number printed on the card
-(`"printing": {"set": "trk", "number": "12"}`). That identifier belongs to the
-card, not to any database. Scryfall (`/cards/trk/12`), MTGJSON (set + `number`),
-Gatherer and most price sites can all resolve it, so images and prices are one
-lookup away without tying Enjine to a vendor. The file does **not** contain
-oracle text. The legal-until date is estimated from the usual rotation pattern
-and flagged as an estimate.
-
-## Census: what the cards need
-
-A pattern census over the oracle text (fetched from the Scryfall API on
-2026-11-08; counts are approximate, and a card can appear in several rows):
-
-| Capability | Cards | Status |
-| --- | ---: | --- |
-| conditions ("if", "unless", "as long as") | 112 | todo (F8) |
-| legendary permanents (legend rule, 704.5j) | 104 | todo |
-| triggered: enters the battlefield | 102 | todo (F5) |
-| triggered: other "whenever" | 79 | todo (F5) |
-| counters (+1/+1 and named counters) | 66 | done: any named counter; stun, shield, finality, keyword counters; enters-with and doubling replacements |
-| tokens (create; Treasure, Food, Clue, creature tokens) | 61 | todo (F12) |
-| X costs and variable amounts ("equal to", "for each") | 55 | todo (F8, F10) |
-| exile | 53 | todo |
-| sacrifice | 47 | todo |
-| modal ("choose one") | 47 | todo (F9) |
-| cast from graveyard/exile | 37 | todo (F9) |
-| triggered: "at the beginning of" | 33 | todo (F5) |
-| look at the top / scry / surveil | 30 | todo (frames) |
-| static grants and anthems | 25 | todo (F4) |
-| tap/untap effects | 23 | todo |
-| discard | 20 | todo |
-| bounce | 17 | todo |
-| **Station** (set mechanic) | 17 | core done (see *Set mechanics* below) |
-| search library | 16 | partial (`search_library`: hand or battlefield, tapped, reveal, count) |
-| mana of any color / choices | 15 | todo (F10) |
-| dies / leaves triggers (last-known information) | 13 | todo (F5) |
-| **Strange new worlds** (set mechanic) | 13 | count done; cost reduction, X pumps and CDAs wait on F8/F10 |
-| copy | 12 | todo (707) |
-| Sagas | 10 | done (chapter effects still need their own capabilities) |
-| equipment / auras | 10 | done: enchant, equip, attach, "equipped/enchanted creature" statics, 704.5m/n (Bat'leth, Captain's Tutelage, Tricorder convert; the rest need stun counters, copy, granted triggers or type changes) |
-| flying, menace, trample, vigilance, reach, lifelink, first strike, double strike, deathtouch, defender, ward | 1–9 each | todo (F11) |
-| landfall | 9 | todo (F5) |
-| **Face a dilemma** (set mechanic) | 8 | trigger done; "dilemmas faced this turn" todo |
-| cycling, landcycling, typecycling | 5 each | done (`cycling`, CR 702.29) |
-| kicker, affinity, threshold, sunburst, explore, discover, fight, mill, investigate | 1–6 each | todo |
-| **Assimilate** (set mechanic, CR 701.72 in the 2026-11-06 CR) | 2 | done; "exiled with" linkage (607) todo |
-| one-off named abilities (flavor-named activated/triggered abilities) | ~40 | covered by the general ability system |
-
-About 8 cards are supportable with today's engine.
-
-## Phases
-
-The structural core comes first (done: F1 frames, F2 `chars`, F3 ability refs,
-F6 replacement seam). Each phase below ends with `bundle exec rake` and
-`rake fuzz` green and the converter re-run (see *Pipeline*).
-
-1. **Triggers and last-known information (F5).** Trigger events from the event
-   stream, APNAP ordering through frames, targets chosen when put on the stack,
-   intervening "if", delayed triggers. Unlocks ETB, dies, attacks, landfall,
-   beginning-of-step and cast triggers (about 230 cards touch these).
-2. **Expressive card data (F7, F8, F9).**
-   - Parameterized filters: "creature you control", "nonland permanent",
-     "with mana value N or less", legendary.
-   - Amounts: X, "equal to", "for each", counts.
-   - Conditions: "if", "unless", "as long as".
-   - Modal spells, additional and alternative costs (kicker), casting from the graveyard.
-3. **Core actions.** Exile, sacrifice, bounce, discard, tap/untap, search,
-   scry/surveil/look-at-top, mill, fight, investigate.
-4. **Tokens (F12)**, including predefined Treasure, Food and Clue, then copy effects.
-5. **Evergreen keywords (F11)** and combat hooks: flying, reach, menace, trample,
-   vigilance, lifelink, deathtouch, first and double strike (an extra damage
-   step), defender, ward, indestructible, hexproof.
-6. **Static abilities and the layer system (F4)**: anthems, grants, cost
-   reduction, the legend rule, equipment and auras (attach).
-7. **Mana (F10)**: any-color mana and choices; landcycling, typecycling, cycling.
-8. **Set mechanics**: Station, Strange new worlds, Face a dilemma, Assimilate,
-   Sagas. Core done; see *Set mechanics* below. `RULES_VERSION` stays pinned to
-   2026-09-25 until the whole engine is re-pinned (see
-   [standard.md](standard.md)); these mechanics cite the 2026-11-06 numbering.
-9. **Verification**: every card gets at least one scripted interaction scenario
-   (integration spec) plus fuzz coverage through generated `trk` decks. The cast
-   histogram must show every card cast or activated. Then the README "Verified
-   sets" section.
+Every mechanic is tested with invented cards (unit, integration and fuzz through
+`lib/enjine/card_pool/core.json`). The notes below record how each Star Trek
+mechanic is implemented and which rules it cites.
 
 ## Set mechanics
 
@@ -148,25 +63,7 @@ Still to do:
   amount), `pump` with computed amounts, and characteristic-defining P/T (card data
   `"power": <amount>`, layer 7a).
 - Done: `RulesMonitor` adds static-ability pumps (fixed, computed, conditional) in its
-  independent P/T check, so the converter's static-line pattern matches
-  "Artifact creatures you control get +1/+1" case-insensitively.
-
-Converted with these mechanics (converter phrasings or `data/translations/trk.json`):
-Class-F Shuttlecraft, Suurok-Class Science Vessel, U.S.S. Cerritos, U.S.S. Excelsior
-(station); Year of Hell (Saga); Elim Garak, Obsidian Order Operative, Melkotian
-Adjudicator, Seven of Nine (dilemma); Death Is Irrelevant (assimilate, translation);
-Excalbian Gamemaster (strange new worlds, translation).
-Energize, Open Communications, Transporter Malfunction, Adversary by Algorithm, Federation
-Resupply, Final Frontier, Scotty (beam me up, translations); Storied Veteran, Overflow
-Submatrix, Zefram Cochrane (casting from the graveyard / library top); Reckless Impulse,
-Silicate Surveyor, Encounter the Unknown, Ensign Pavel Chekov (impulse draw); U.S.S.
-Discovery (discover); Andromedan Automatons, Oberth-Class Starship, Primary Unimatrix
-Adjunct, Shields Up! (translations).
-Waiting on other capabilities: Captain Benjamin Sisko and The Caretaker (dilemmas faced this
-turn, token colors, ward), Captain Pike (characteristic-defining P/T), Kirk and Exploratory
-Mission (total power, counters-on-self amounts), U.S.S. Enterprise-D (charge counters trigger),
-Khan (choose and sacrifice), Brazen Bluff (a "may" decided by another player), Boarding Action
-(token colors).
+  independent P/T check.
 
 ## Costs, mana and targets
 
@@ -187,46 +84,16 @@ Rule numbers from the pinned 2026-09-25 CR (`cr0925`).
 | Ward | 702.21a | ability `ward` | done |
 | Choice among listed colors | 106.4, 608.2d | `add_mana` `colors` | done |
 
-Converted with these: Armus, Skin of Evil; Astute Terraformer; Captain James T. Kirk; Cetacean Ops; Cleveland
-Booker, Empath; Collation Trimatrix; Consider the Prime Directive; Constable Odo; D'Vana Tendi, Optimistic
-Ensign; Dal R'El, Augment Orphan; DOT-7 Repair Squad; Eject the Warp Core; General Chang, Cold Warrior; Ghost of
-Illyria; Gowron, Eager for Battle; Highly Illogical; Humpback Whales; L'Rell, Fierce Visionary; Lieutenant
-Commander Data; Lore, Positronic Provocateur; Lt. Cmdr. Geordi La Forge; Organic Avulsion Unit; Photosynthetic
-Physician; Relentless Drednok; Subcommander T'Pol; Suus Mahna Practitioner; The Doctor, EMH; The Duras Sisters;
-U.S.S. Enterprise-A, Free Spirit; Wesley Crusher, Starfleet Cadet (and tmt: Foot Elite, Mechanized Ninja Cavalry).
-Token colors aren't modeled yet (no color characteristic), as for the earlier Officer tokens.
-
 Still waiting on other capabilities: Marooned (can't be beamed up, "doesn't untap"), Pure Energy (beam me up),
 Worf, Honor-Bound Warrior (power doubling, total power), Engineered Explosives (mana value equal to an amount; the
 sacrificed source's counters are kept in the ability's memory `source_counters`), Starfleet Academy (creature-type
 count; a mana ability with a variable amount and color choice), Commander Raffi Musiker, Daniels, Temporal Agent
 and Emergency Holographic Crew (exiling or returning cards from a graveyard).
 
-Amounts, conditions, turn history, statics and layers (translations): Academy Instructor,
-Anthropological Mission, Cantankerous Captain, Captain Jonathan Archer, Captain Michael
-Burnham, Cloak and Phaser, Collective Drone, Conquest Mission, De-evolve, Genesis Effect,
-Gul Dukat, Hologram Janeway, I'm a Doctor, Impossible Choice, Jadzia Dax, Jake Sisko,
-La'An Noonien-Singh, Locutus, Make It So, Pah-Wraith, Picard, Planetary Bombardment,
-Resistance Is Futile, Rok-Tahk, Romulan Bird-of-Prey, Saavik, Sarcophagus, Sarek,
-Sickbay, Starfleet Spanner Jockey, Tactical Officer, Tal Shiar Operative, Test of
-Identity, The Destruction of Praxis, The Traveler, Una Chin-Riley, Vengeance Mission.
-Waiting on other capabilities: Miles O'Brien ("up to one" target), Seven of Nine
-(activation restriction; the 7b setting effect is done), Grand Nagus Zek (once-each-turn
-trigger), Shuttle Ace and Hemmer ("becomes tapped" trigger), Targ Wrangler (choose and
-sacrifice), Antagonist Incorporator and Hive Mind Coprocessor (a cost paid inside "may";
-granting the triggered ability is done).
-
 Trigger capabilities (group 4: becomes tapped, counters put, becomes the target, leaves a
 graveyard, activates an ability, cast filters and chosen values, once each turn, additional
 triggers, created and reflexive triggers, `may` decided by another player, as-enters number and
 card-name choices, enters tapped unless, enters untapped triggers, another counter of a kind).
-Converted by translation: A Good Day to Die, Battle-Scarred Survivalist, Dathon, David and Carol
-Marcus, Dr. Beverly Crusher, Federation Outpost, Kai Winn, Khan, MACO Strike Team (token colors wait for G3), Ni'Var Science Academy, Nyota
-Uhura, Planetary Patrol, Q Continuum, Quark's Bar, Ravenous Cosmozoan, Starfleet Security, Tell
-Me What You See, U.S.S. Reliant, Vash. Their trigger primitives are in place but they still wait
-for other groups: Captain Jean-Luc Picard, Sulu, Jett Reno, Gabriel Lorca, Sela, Beckett Mariner,
-Hologram Stalker, Support Mission, The Unicomplex, Dahar Master, The Naked Time,
-Dr. Leonard "Bones" McCoy, Sylvia Tilly, The Inner Light.
 
 ## Replacement, prevention and player rules (group 5)
 
@@ -254,19 +121,6 @@ implemented so far has an order that player always prefers (stay on the battlefi
 exiled, "+1" before doubling, untapped after tapped), so the engine applies that order without
 asking; a decision frame is needed once two effects can be usefully ordered either way.
 
-Converted: Mr. Spock, Pet Sehlat, Cold-Blooded Crew, Species 8472, Holo-Engineer, Deep Space Scan,
-Georgiou (Officer tokens without color, like other token translations), Quark, Dr. McCoy, H.M.S.
-Bounty, Warp Speed, Dr. Joseph M'Benga, Saru, Saurian Explorer, Stable Wormhole, Phlox, Tea, Earl
-Grey, Hot, Warp Core.
-
-Waiting on other capabilities: Brad Boimler ("becomes tapped" trigger), The Needs of the Many
-(additional sacrifice cost), Peace in Our Time ("that player may", peace counter count), Kobayashi Maru
-Scenario (modes not chosen before, up to one target), Khaaaaaaaaaaaannn! (twice X), Kira Nerys (the
-entering creature as the trigger's object), Live Long and Prosper (can't be countered),
-Rules of Acquisition (the target's controller, "if they do"), Worf (one target per opponent,
-up to one), The Wrath of Khan (next-combat delayed trigger, exile from hand, edict), Amok Time (up to
-one target, return from graveyard), Common Goal (one or two targets).
-
 ### Zone effects: library, hand, graveyard, edicts, linked exile
 
 Primitives (2026-09-25 numbering unless noted): `dig` (look at or reveal the top N, take
@@ -284,29 +138,5 @@ known controller of what a resolving effect moved), condition `{"share_card_type
 Card specs gained `not_types`, `permanent` and `mana_value`. `search_library` gained `searcher`,
 `may`, a computed `count` ("up to that many") and `counters`.
 
-Converted with these: 70,000 Light-Years from Home, All Good Things..., Automated Warfare
-System, Branching Timeline, Cybernetic Specialist, D'Ghor Bloodletter, Dathon and Picard at
-El-Adrel, Dominion Assault Force, Genesis Device, Guidance Failure, Hit It!, In the Pale
-Moonlight, Salt Vampire, Spock, Always Your Friend, Temporal Conqueror, Test of Courage, Test of
-Loyalty, U.S.S. Voyager, Will Riker, Temporal Anomaly, Artificial/Gaseous/Spatial/Subspace
-Anomaly, Unexplored Territory (translations). Waiting on other capabilities: The Measure of a
-Man, Those Old Scientists, Stray from History, Borg Cube ("up to N" / "one or two" targets);
-Malfunctioning Holodeck (ward); Rutherford (cast trigger for a subtype), Erica Ortegas
-(becomes tapped), Captain Kathryn Janeway ("that creature" trigger selector; an additional land
-play static); Hoshi Sato (creature types among creatures), First Contact (first spell this
-game), Deep Space 9 (the rules monitor's static pumps); V'Ger ("until your next turn");
-There's Coffee in that Nebula, Pattern Buffer Preservation (beam me up).
-
 `RulesMonitor#keyword?` now counts keywords granted by static abilities (haste from Hit It!,
 flying or reach), so trk games with those grants no longer report false 302.6 / 702.9b findings.
-
-## Pipeline
-
-`script/convert_set` (to be written, run from the repo with network access):
-1. Fetch the set from a card source (today the Scryfall API, `/cards/search?q=e:trk&unique=cards`; the converter keeps the source behind an adapter).
-2. Map each card to Enjine data. Mechanical fields are mapped automatically, and
-   abilities from a hand-maintained translation file:
-   `data/translations/trk.json`, keyed by card name (names are unique across Magic).
-3. Validate with `CardDefinition.from_h`, and write `lib/enjine/sets/trk.json`
-   with `cards` (valid) and `unsupported` (name plus the missing capabilities).
-4. The run prints the remaining count; the target is 0 unsupported.

@@ -1,27 +1,28 @@
-# Program: every Standard set imported, implemented and verified
+# Program: every Standard mechanic implemented
 
-**Goal.** For each Standard-legal set that stays legal past the next rotation, newest first:
-1. Import every card into `lib/enjine/sets/<code>.json` (`script/convert_set.rb`).
-2. Implement every mechanic the set needs, until `unsupported` is empty.
-3. Play observed sample games with random decks built from the set
-   (`Enjine::DeckBuilder` + `Enjine::RulesMonitor`), with zero rules findings and
-   every card cast or activated at least once.
-4. Mark the set **verified** in the README.
+**Goal.** The engine supports every mechanic used by cards of the Standard-legal
+sets that stay legal past the next rotation, newest set first. **Cards are written
+by hand** in the [card DSL](../guides/card-data-format.md). The engine never reads
+card text, and the repository ships no real card data. Set files hold only
+metadata (name, release date, `standard_legal_until`) and an empty `cards` list
+for cards you author.
 
-The deck builder reads the same set files (`sets=<code>`, `sets=standard`).
+For each set:
+1. List the mechanics its cards need (keywords, keyword actions, set mechanics,
+   ability and effect shapes) and compare that list with `SUPPORTED.md`.
+2. Implement each missing mechanic as a primitive, cite its Comprehensive Rules
+   numbers, and test it at every level with **invented** cards (unit, integration,
+   and fuzz through `lib/enjine/card_pool/core.json`).
+3. Mark the set's mechanics **supported** in the table below.
 
-## Definition of "verified"
+## Definition of "supported"
 
-A set is verified when all of the following hold:
-- `script/convert_set.rb <code>` reports **0 unsupported** cards.
-- Every new mechanic has unit, integration and e2e specs (see
-  `docs/guides/adding-a-mechanic.md`), and `bundle exec rake` is green.
-- `script/observe_games.rb` runs at least 20 games with random 1-, 2- and 3-color
-  decks from the set, alone and mixed with already verified sets. It finishes with
-  **0 RulesMonitor findings** and a cast/activation for **every card** in the
-  set; cards the random agent can't reach get a scripted scenario spec instead.
-- The fuzzer (`rake fuzz` with invariants, rules monitor and export/import
-  round-trips) passes on decks from the set.
+A set's mechanics are supported when:
+- every mechanic it uses is listed in `SUPPORTED.md`, or is expressible with
+  listed primitives, and is documented in `docs/guides/card-data-format.md`;
+- every new mechanic has unit and integration specs plus at least one invented
+  fuzz card, and `bundle exec rake` is green;
+- `rake fuzz` (invariants, rules monitor, export/import round-trips) passes.
 
 ## Sets, in work order
 
@@ -34,12 +35,12 @@ the set files.
 
 | # | Set | Released | Leaves Standard | Status |
 | ---: | --- | --- | --- | --- |
-| 1 | Star Trek | 2026-11-13 | 2029 (est.) | in progress: 227/311 cards |
+| 1 | Star Trek | 2026-11-13 | 2029 (est.) | in progress |
 | 2 | Reality Fracture | 2026-10-02 | 2029 (est.) | not started |
 | 3 | The Hobbit | 2026-08-14 | 2029 (est.) | not started |
 | 4 | Marvel Super Heroes | 2026-06-26 | 2029 (est.) | not started |
 | 5 | Secrets of Strixhaven | 2026-04-24 | 2029 (est.) | not started |
-| 6 | Teenage Mutant Ninja Turtles | 2026-03-06 | 2029 (est.) | imported: 28/195 cards |
+| 6 | Teenage Mutant Ninja Turtles | 2026-03-06 | 2029 (est.) | partial |
 | 7 | Lorwyn Eclipsed | 2026-01-23 | 2029 (est.) | not started |
 | 8 | Avatar: The Last Airbender | 2025-11-21 | 2028 (est.) | not started |
 | 9 | Spider-Man | 2025-09-26 | 2028 (est.) | not started |
@@ -50,12 +51,11 @@ the set files.
 | 14 | Foundations | 2024-11-15 | 2029 (est.) | not started |
 
 **Out of scope:** sets that are no longer Standard-legal, or that rotate out at the
-next announced rotation, are not imported. On 2027-02-05 Wilds of Eldraine, The
+next announced rotation, are out of scope. On 2027-02-05 Wilds of Eldraine, The
 Lost Caverns of Ixalan, Murders at Karlov Manor, Outlaws of Thunder Junction,
 Bloomburrow and Duskmourn leave Standard, so they're skipped (the maintainer
 decided this on 2026-11-08). When a new set releases, add it at the top. When a
-rotation is announced, drop the rotating sets from this table and stop shipping
-their set files.
+rotation is announced, drop the rotating sets from this table and their set files.
 
 **Every set file records when it stops being Standard:** `standard_legal_until`
 (ISO date, the first day the set is no longer legal) and
@@ -63,23 +63,14 @@ their set files.
 `Sets.standard_legal(on: date)` and the deck builder's `sets=standard` use those
 fields, so a set drops out of generated decks automatically on that date.
 
-## How the work compounds
-
-Most mechanics are shared across sets: triggered abilities, conditions, tokens,
-evergreen keywords, the layer system, replacement effects, modal spells and
-library manipulation. Star Trek pays for most of that infrastructure. Each later
-set mostly adds its named mechanics plus long-tail effects. Track per set:
-converted / total, and the top missing capabilities from the converter output.
-
 ## Card data rules
 
-- **Structured data only.** Never store oracle or flavor text. Translations
-  describe what a card does in Enjine primitives.
-- **Printing identifier:** set code + collector number (`"printing": {"set", "number"}`).
-  It's vendor-neutral; Scryfall is only the current converter source.
-- **Card identity across sets:** a card's name is unique in Magic. A reprint in a
-  later set must produce an identical definition, and the catalog raises
-  `CatalogConflict` if two set files disagree.
+- Cards are authored by hand in the DSL. Nothing in the repository derives card
+  data from rules text.
+- **Printing identifier:** set code + collector number (`"printing": {"set", "number"}`),
+  which is vendor-neutral.
+- **Card identity across sets:** a card's name is unique in Magic. The catalog
+  raises `CatalogConflict` if two definitions with one name disagree.
 
 ## Rules version
 

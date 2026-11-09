@@ -1190,19 +1190,5 @@
         "number": "48"
       }
     }
-  ],
-  "unsupported": [
-    {
-      "name": "Skyveil Seraph",
-      "missing": [
-        "flying"
-      ]
-    },
-    {
-      "name": "Echoing Grudge",
-      "missing": [
-        "triggered abilities"
-      ]
-    }
   ]
 }

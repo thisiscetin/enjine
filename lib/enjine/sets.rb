@@ -10,18 +10,19 @@ module Enjine
   #
   #   { "format": 1, "code": "trk", "name": "...", "released_at": "2026-11-13",
   #     "standard_legal_until": "2029-01-19", "standard_legal_until_estimated": true,
-  #     "cards": [ { "card": { ...CardDefinition#to_h... }, "rarity": "common", ... } ],
-  #     "unsupported": [ { "name": "...", "missing": ["flying"] } ] }
+  #     "cards": [ { "card": { ...card DSL... }, "rarity": "common",
+  #                  "printing": { "set": "trk", "number": "12" } } ] }
   #
-  # Only `cards` are playable. A `cards` entry that no longer validates (the engine
-  # changed) is moved to `unsupported` with its errors instead of failing the load.
+  # Cards are written by hand in Enjine's card DSL (docs/guides/card-data-format.md).
+  # Every card must validate: a set with an invalid card fails to load with each
+  # error's path, so a mistake is never silently skipped.
   module Sets
     FORMAT = 1
     DEFAULT_DIR = File.join(__dir__, "sets")
 
     # A loaded set. `cards` are CardDefinitions; `entries` keep the per-card metadata.
     CardSet = Data.define(:code, :name, :released_at, :standard_legal_until, :standard_legal_until_estimated,
-                          :entries, :unsupported) do
+                          :entries) do
       def cards = entries.map(&:definition)
       def size = entries.size
 
@@ -87,22 +88,23 @@ module Enjine
         raise InvalidSet, "#{path}: a set must be a JSON object" unless doc.is_a?(Hash)
         raise InvalidSet, "#{path}: unsupported format #{doc["format"].inspect} (expected #{FORMAT})" unless doc["format"] == FORMAT
 
-        unsupported = Array(doc["unsupported"]).map { it.slice("name", "missing") }
-        entries = Array(doc["cards"]).filter_map { entry(it, unsupported) }
+        raise InvalidSet, "#{path}: `cards` must be an array" unless doc.fetch("cards", []).is_a?(Array)
+
+        entries = Array(doc["cards"]).each_with_index.map { |raw, i| entry(raw, "#{path}: cards[#{i}]") }
         CardSet.new(code: doc.fetch("code", File.basename(path, ".json")).to_s.downcase, name: doc["name"],
                     released_at: parse_date(doc["released_at"]),
                     standard_legal_until: parse_date(doc["standard_legal_until"]),
                     standard_legal_until_estimated: doc["standard_legal_until_estimated"] == true,
-                    entries: entries.freeze, unsupported: unsupported.freeze)
+                    entries: entries.freeze)
       end
 
-      def entry(raw, unsupported)
-        data = raw.is_a?(Hash) ? raw["card"] : nil
+      def entry(raw, where)
+        raise InvalidSet, "#{where}: must be an object with a \"card\"" unless raw.is_a?(Hash) && raw["card"].is_a?(Hash)
+
         printing = raw["printing"].is_a?(Hash) ? raw["printing"].slice("set", "number").transform_values(&:to_s).freeze : nil
-        Entry.new(definition: CardDefinition.from_h(data), rarity: raw["rarity"], printing: printing)
+        Entry.new(definition: CardDefinition.from_h(raw["card"]), rarity: raw["rarity"], printing: printing)
       rescue InvalidCardDefinition => e
-        unsupported << { "name" => data.is_a?(Hash) ? data["name"] : nil, "missing" => e.errors }
-        nil
+        raise InvalidSet, "#{where} (#{raw.dig("card", "name").inspect}): #{e.errors.join("; ")}"
       end
     end
   end

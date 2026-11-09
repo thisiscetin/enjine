@@ -16,8 +16,8 @@ module Enjine
   #
   # Each entry is resolved against the set files in `sets_dir` and any extra card data
   # blocks in `cards:`. Names match case-insensitively via CardDefinition.slug. `count`
-  # defaults to 1, and entries for the same card add up. Cards a set lists as unsupported
-  # and cards nobody knows are reported (#report), never silently dropped.
+  # defaults to 1, and entries for the same card add up. Cards nobody knows are
+  # reported (#report), never silently dropped.
   class Collection
     FORMAT = 1
 
@@ -109,7 +109,7 @@ module Enjine
 
     def resolve!
       found = {}
-      @report = { "resolved" => [], "unsupported" => [], "unknown" => [] }
+      @report = { "resolved" => [], "unknown" => [] }
       @cards.each do |entry|
         outcome = @index.resolve(entry)
         case outcome
@@ -117,7 +117,6 @@ module Enjine
           held = found[src.definition.id]
           best = held.nil? || src.rank < held[0].rank ? src : held[0]
           found[src.definition.id] = [best, (held ? held[1] : 0) + entry["count"]]
-        in [:unsupported, unsupported] then @report["unsupported"] << unsupported.merge("count" => entry["count"])
         in [:unknown, reason] then @report["unknown"] << entry.merge("reason" => reason)
         end
       end
@@ -130,7 +129,7 @@ module Enjine
       @report["resolved"] = found.sort.map do |id, (src, n)|
         { "id" => id, "name" => src.definition.name, "set" => src.set, "count" => n }.compact
       end
-      %w[unsupported unknown].each { |k| @report[k].sort_by! { [CardDefinition.slug(it["name"]), it["set"].to_s, it.to_s] } }
+      @report["unknown"].sort_by! { [CardDefinition.slug(it["name"]), it["set"].to_s, it.to_s] }
       @report.each_value(&:freeze).freeze
     end
 
@@ -149,7 +148,7 @@ module Enjine
         end
       end
 
-      # A Source, [:unsupported, {"name", "set", "reason"}], or [:unknown, reason].
+      # A Source or [:unknown, reason].
       def resolve(entry)
         code = restricted_set(entry)
         return [:unknown, code[1]] if code.is_a?(Array)
@@ -180,7 +179,7 @@ module Enjine
 
       def by_printing(entry, code)
         src = @printings["#{code}:#{entry["number"]}"]
-        return [:unknown, "no printing #{code}:#{entry["number"]} (or it is unsupported)"] if src.nil?
+        return [:unknown, "no printing #{code}:#{entry["number"]}"] if src.nil?
         if entry["name"] && CardDefinition.slug(entry["name"]) != src.definition.id
           return [:unknown, "#{code}:#{entry["number"]} is #{src.definition.name.inspect}, not #{entry["name"].inspect}"]
         end
@@ -193,24 +192,7 @@ module Enjine
         candidates = @by_name.fetch(slug, []).select { code.nil? || it.set == code }
         return candidates.min_by(&:rank) unless candidates.empty?
 
-        unsupported(slug, code) || [:unknown, "no card named #{entry["name"].inspect}#{" in #{code}" if code}"]
-      end
-
-      def unsupported(slug, code)
-        @sets.each do |set|
-          next if code && set.code != code
-
-          hit = set.unsupported.find { CardDefinition.slug(it["name"]) == slug }
-          next unless hit
-
-          return [:unsupported, { "name" => hit["name"], "set" => set.code, "reason" => reason(hit["missing"]) }]
-        end
-        nil
-      end
-
-      def reason(missing)
-        list = Array(missing).map(&:to_s)
-        list.empty? ? "not supported by the engine yet" : "needs #{list.join(", ")}"
+        [:unknown, "no card named #{entry["name"].inspect}#{" in #{code}" if code}"]
       end
     end
     private_constant :Index
