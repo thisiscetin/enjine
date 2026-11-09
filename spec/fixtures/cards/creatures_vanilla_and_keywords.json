@@ -12,6 +12,62 @@
     "toughness": 2
   },
   {
+    "name": "Ashen Paladin",
+    "mana_cost": "{2}{B}{B}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "zombie",
+      "knight"
+    ],
+    "power": 3,
+    "toughness": 3,
+    "abilities": [
+      {
+        "protection_from": {
+          "colors": [
+            "W"
+          ]
+        }
+      },
+      {
+        "protection_from": {
+          "colors": [
+            "G"
+          ]
+        }
+      }
+    ],
+    "rules_text": "Protection from white and from green"
+  },
+  {
+    "name": "Dawnguard Knight",
+    "mana_cost": "{1}{W}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "human",
+      "knight"
+    ],
+    "power": 2,
+    "toughness": 2,
+    "keywords": [
+      "first_strike"
+    ],
+    "abilities": [
+      {
+        "hexproof_from": {
+          "colors": [
+            "B"
+          ]
+        }
+      }
+    ],
+    "rules_text": "First strike\nHexproof from black"
+  },
+  {
     "name": "Hill Giant",
     "mana_cost": "{3}{R}",
     "types": [

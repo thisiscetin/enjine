@@ -66,6 +66,46 @@
     "rules_text": "+1: Creatures you control get +1/+1 until end of turn.\n−2: Put a +1/+1 counter on each creature you control.\n−3: Vessa deals 3 damage to target creature."
   },
   {
+    "name": "Prismward Blade",
+    "mana_cost": "{1}",
+    "types": [
+      "artifact"
+    ],
+    "subtypes": [
+      "equipment"
+    ],
+    "abilities": [
+      {
+        "static": {
+          "affects": "attached",
+          "pump": {
+            "power": 1,
+            "toughness": 1
+          },
+          "abilities": [
+            {
+              "hexproof_from": {
+                "color_count": {
+                  "equal": 1
+                }
+              }
+            }
+          ]
+        }
+      },
+      {
+        "equip": {
+          "cost": [
+            {
+              "mana": "{2}"
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "Equipped creature gets +1/+1 and has hexproof from monocolored.\nEquip {2}"
+  },
+  {
     "name": "Clamp of Stillness",
     "mana_cost": "{2}{W}",
     "types": [

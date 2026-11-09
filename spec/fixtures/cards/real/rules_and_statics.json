@@ -17,6 +17,110 @@
     }
   },
   {
+    "name": "Knight of Malice",
+    "mana_cost": "{1}{B}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "human",
+      "knight"
+    ],
+    "power": 2,
+    "toughness": 2,
+    "keywords": [
+      "first_strike"
+    ],
+    "abilities": [
+      {
+        "hexproof_from": {
+          "colors": [
+            "W"
+          ]
+        }
+      },
+      {
+        "static": {
+          "affects": "self",
+          "pump": {
+            "power": 1,
+            "toughness": 0
+          },
+          "if": {
+            "controls": {
+              "each": {
+                "permanent": {
+                  "colors": [
+                    "W"
+                  ]
+                }
+              },
+              "controller": "any"
+            },
+            "at_least": 1
+          }
+        }
+      }
+    ],
+    "rarity": "uncommon",
+    "printing": {
+      "set": "fdn",
+      "number": "608"
+    }
+  },
+  {
+    "name": "Knight of Grace",
+    "mana_cost": "{1}{W}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "human",
+      "knight"
+    ],
+    "power": 2,
+    "toughness": 2,
+    "keywords": [
+      "first_strike"
+    ],
+    "abilities": [
+      {
+        "hexproof_from": {
+          "colors": [
+            "B"
+          ]
+        }
+      },
+      {
+        "static": {
+          "affects": "self",
+          "pump": {
+            "power": 1,
+            "toughness": 0
+          },
+          "if": {
+            "controls": {
+              "each": {
+                "permanent": {
+                  "colors": [
+                    "B"
+                  ]
+                }
+              },
+              "controller": "any"
+            },
+            "at_least": 1
+          }
+        }
+      }
+    ],
+    "rarity": "uncommon",
+    "printing": {
+      "set": "fdn",
+      "number": "576"
+    }
+  },
+  {
     "name": "Impractical Joke",
     "mana_cost": "{R}",
     "types": [

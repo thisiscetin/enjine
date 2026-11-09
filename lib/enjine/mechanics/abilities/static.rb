@@ -38,7 +38,7 @@ module Enjine
                   example: { "static" => { "affects" => { "each" => "creature", "controller" => "you" },
                                            "pump" => { "power" => 1, "toughness" => 1 } } }
 
-        GRANTABLE = %i[triggered mana activated].freeze
+        GRANTABLE = %i[triggered mana activated hexproof_from protection_from].freeze
         # Data that would make the layer pass depend on its own result (CR 613.8).
         LIVE = %w[power toughness greatest_power attacking blocking tapped].freeze
         KEYS = %w[affects if pump keywords creature_types abilities types subtypes loses_abilities colors
@@ -138,7 +138,7 @@ module Enjine
             ability = Mechanics.build_entry(:ability, entry, errors, "#{path}.abilities[#{j}]")
             next ability if ability.nil? || GRANTABLE.include?(ability.kind)
 
-            errors << "#{path}.abilities[#{j}]: only triggered, activated and mana abilities can be granted yet"
+            errors << "#{path}.abilities[#{j}]: only #{GRANTABLE.join(", ")} abilities can be granted yet"
             nil
           end.freeze
         end

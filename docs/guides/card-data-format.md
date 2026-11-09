@@ -952,6 +952,20 @@ and `base_power_toughness` (layer 7b); its `abilities` may be activated abilitie
                 { "player_rule": { "rule": "cant_gain_life", "affects": "opponents" } }] }
 ```
 
+**Hexproof from and protection from a quality** (CR 702.11d, 702.16). Abilities whose value is a
+card spec of the quality, matched against the spell, or the source of the ability or damage, as it
+is now: `{ "colors": ["B"] }` (any of those colors), `{ "types": ["instant"] }`,
+`{ "color_count": { "equal": 1 } }` (monocolored; `at_least: 2` multicolored). "From A and from B"
+is two abilities. Protection also prevents damage from such sources, stops such creatures from
+blocking it and such Auras and Equipment from staying attached (CR 704.5m-n). `"protection_from":
+"everything"` is protection from everything. Both may be granted by `static` and `become` `abilities`.
+
+```json
+{ "name": "Example Ward Knight", "mana_cost": "{1}{W}", "types": ["creature"], "subtypes": ["human", "knight"],
+  "power": 2, "toughness": 2,
+  "abilities": [{ "hexproof_from": { "colors": ["B"] } }, { "protection_from": { "colors": ["R"] } }] }
+```
+
 ---
 
 ## 5. Worked examples

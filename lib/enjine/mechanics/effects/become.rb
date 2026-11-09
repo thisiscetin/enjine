@@ -13,7 +13,7 @@ module Enjine
       # (CardDefinition#effect_granted); on the permanent they are "granted:<card>:<ref>:<j>".
       class Become < Effect
         DURATIONS = %w[end_of_turn indefinite while_source_on_battlefield].freeze
-        GRANTABLE = %i[triggered mana activated play_from additional_land_plays].freeze
+        GRANTABLE = %i[triggered mana activated play_from additional_land_plays hexproof_from protection_from].freeze
         # Card types an effect can add (CR 205.1b); instants, sorceries and planeswalkers aren't permanents it makes.
         ADDABLE_TYPES = %w[artifact creature enchantment land].freeze
         CHANGES = %w[types supertypes subtypes creature_types colors loses_abilities keywords base_power_toughness
@@ -169,8 +169,8 @@ module Enjine
             ability = Mechanics.build_entry(:ability, entry, errors, "#{path}.abilities[#{j}]")
             next ability if ability.nil? || (GRANTABLE.include?(ability.kind) && !(ability.kind == :play_from && ability.self?))
 
-            errors << "#{path}.abilities[#{j}]: only triggered, activated, mana, play_from (for other cards) and " \
-                      "additional_land_plays abilities can be gained"
+            errors << "#{path}.abilities[#{j}]: only triggered, activated, mana, play_from (for other cards), " \
+                      "additional_land_plays, hexproof_from and protection_from abilities can be gained"
             nil
           end.freeze
         end

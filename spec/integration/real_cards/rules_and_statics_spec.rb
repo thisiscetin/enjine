@@ -99,6 +99,17 @@ RSpec.describe "Real cards: losing abilities, restrictions and other rules effec
     expect(game.state.battlefield).not_to include(hawk)
   end
 
+  it "Knight of Grace and Knight of Malice: hexproof from each other's color, +1/+0 while that color is around (CR 702.11d)" do
+    game = board(mine: ["Knight of Grace"], theirs: ["Knight of Malice"])
+    grace = obj_id(game, "Knight of Grace")
+    malice = obj_id(game, "Knight of Malice")
+    engine = game.instance_variable_get(:@engine)
+    expect([chars(game, grace).power, chars(game, malice).power]).to eq([3, 3])
+    expect(engine.targetable?(grace, 1, targeter: malice)).to be(false) # a black source an opponent controls
+    expect(engine.targetable?(malice, 0, targeter: grace)).to be(false)
+    expect(engine.targetable?(grace, 0, targeter: malice)).to be(true) # its own controller may
+  end
+
   it "The Wondrous Wasp: the target loses all abilities only while the Wasp remains (CR 611.2b)" do
     game = board(hand: ["The Wondrous Wasp"], theirs: ["Vampire Nighthawk"], mana: { U: 2 })
     hawk = obj_id(game, "Vampire Nighthawk")

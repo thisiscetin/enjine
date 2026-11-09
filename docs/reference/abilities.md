@@ -738,6 +738,26 @@ Rules: CR 702.180a, CR 702.180b, CR 118.9, CR 601.2b, CR 601.2f, CR 601.2h
 }
 ```
 
+## hexproof_from
+
+Hexproof from the quality: this permanent can't be the target of spells with the quality, or abilities from sources with it, that its controller's opponents control. The quality is a card spec (`{"colors": ["B"]}`, `{"types": ["instant"]}`, `{"color_count": {"equal": 1}}` for monocolored).
+
+Rules: CR 702.11d, CR 702.11f, CR 115.4
+
+| Parameter | Description |
+| --- | --- |
+| `(value)` | card spec of the quality |
+
+```json
+{
+  "hexproof_from": {
+    "colors": [
+      "B"
+    ]
+  }
+}
+```
+
 ## kicker
 
 Kicker: as you cast this spell you may also pay `cost` (mana and/or chosen costs such as `sacrifice_permanent`). The spell is then kicked: `{"kicked": true}` conditions hold and its `kicked_targets` are used.
@@ -957,6 +977,26 @@ Rules: CR 702.11c, CR 115.4, CR 508.1c, CR 402.2, CR 514.1, CR 615.1, CR 615.1a,
     "if": {
       "your_turn": true
     }
+  }
+}
+```
+
+## protection_from
+
+Protection from the quality (a card spec, or "everything"): damage from sources with the quality is prevented, and this permanent can't be enchanted or equipped by, blocked by or targeted by anything with the quality (Auras and Equipment already attached fall off as a state-based action).
+
+Rules: CR 702.16a, CR 702.16b, CR 702.16c, CR 702.16d, CR 702.16e, CR 702.16f, CR 702.16g, CR 702.16j, CR 704.5m, CR 704.5n
+
+| Parameter | Description |
+| --- | --- |
+| `(value)` | card spec of the quality, or "everything" |
+
+```json
+{
+  "protection_from": {
+    "colors": [
+      "W"
+    ]
   }
 }
 ```

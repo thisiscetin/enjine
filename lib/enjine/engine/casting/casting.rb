@@ -64,16 +64,19 @@ module Enjine
       def targets_available?(specs, index, exclude, source = nil)
         specs.all? do |spec|
           need = target_minimum(spec, index, source) # Engine::TargetCounts
-          need.zero? || spec.candidates_for(self, index, source).count { it != exclude && targetable?(it, index, source) } >= need
+          need.zero? || spec.candidates_for(self, index, source).count do
+            it != exclude && targetable?(it, index, source, targeter: source || exclude) # a spell's card is `exclude`
+          end >= need
         end
       end
 
       def optional_target?(spec) = spec.respond_to?(:optional?) && spec.optional?
 
       # CR 702.11b: hexproof permanents can't be targeted by their controller's opponents. `source`: the
-      # permanent whose ability targets (nil for a spell); see Engine::Rules#targeting_forbidden?.
-      def targetable?(ref, index, source = nil)
-        return false if targeting_forbidden?(ref, index, source) # CR 702.11c, 115.4
+      # permanent whose ability targets (nil for a spell); `targeter`: the spell, or the ability's source (protection,
+      # CR 702.16b); see Engine::Rules#targeting_forbidden?.
+      def targetable?(ref, index, source = nil, targeter: source)
+        return false if targeting_forbidden?(ref, index, source, targeter: targeter) # CR 702.11c, 115.4
 
         obj = state.objects[ref]
         return true unless obj && obj.zone == :battlefield && obj.controller != index
@@ -196,7 +199,8 @@ module Enjine
         taken = spec.respond_to?(:distinct_from) ? spec.distinct_from.flat_map { Array(ctx["targets"][it]) } : []
         taken += open_target_group(ctx)
         spec.candidates_for(self, ctx["player"], ctx["source"]).reject do
-          it == ctx["object"] || taken.include?(it) || !targetable?(it, ctx["player"], ctx["source"])
+          it == ctx["object"] || taken.include?(it) || !targetable?(it, ctx["player"], ctx["source"],
+                                                                    targeter: ctx["source"] || ctx["object"])
         end
       end
 

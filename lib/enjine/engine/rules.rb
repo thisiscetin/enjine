@@ -84,17 +84,32 @@ module Enjine
       # Whether choosing `ref` as a target is forbidden for player `index`: a player with hexproof can't
       # be targeted by opponents (CR 702.11c), and a permanent may say it can't be the target of
       # abilities from some sources its controller's opponents control. `source`: the permanent whose
-      # ability is targeting (nil for a spell).
-      def targeting_forbidden?(ref, index, source = nil)
+      # ability is targeting (nil for a spell). `targeter`: the spell, or the ability's source, whose qualities
+      # protection and hexproof from a quality look at (CR 702.16b, 702.11d).
+      def targeting_forbidden?(ref, index, source = nil, targeter: source)
         player = Mechanics::Filters.player_index(self, ref)
         return player != index && player_rule?(player, "hexproof") if player
-        return false unless source
 
         obj = state.objects[ref]
-        src = state.objects[source]
-        return false unless obj && src && obj.zone == :battlefield && obj.controller != index
+        return false unless obj && obj.zone == :battlefield
 
-        chars(obj).abilities.any? { it.ability.kind == :cant_be_targeted_by && it.ability.forbids?(self, src) }
+        quality = targeter && state.objects[targeter]
+        return true if protected_from?(obj, quality)
+        return false if obj.controller == index
+
+        src = source && state.objects[source]
+        protected_from?(obj, quality, :hexproof_from) ||
+          (!src.nil? && chars(obj).abilities.any? { it.ability.kind == :cant_be_targeted_by && it.ability.forbids?(self, src) })
+      end
+
+      # ---- protection and hexproof from a quality (CR 702.11d, 702.16) ----------------------
+
+      # Whether the permanent has protection (or, with `kind` :hexproof_from, hexproof) from `other`: a spell,
+      # the source of an ability or of damage, an Aura, an Equipment or a blocking creature.
+      def protected_from?(obj, other, kind = :protection_from)
+        return false if other.nil?
+
+        chars(obj).abilities.any? { it.ability.kind == kind && it.ability.from?(self, other) }
       end
 
       # ---- winning and losing by an effect (CR 104.2b, 104.3e) ------------------------------

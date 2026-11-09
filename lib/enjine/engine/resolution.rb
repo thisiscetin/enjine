@@ -122,7 +122,10 @@ module Enjine
 
       # Targets that are still legal; illegal ones become nil and are ignored (CR 608.2b).
       def legal_targets(obj, specs)
-        legal = ->(ref, spec) { spec&.match_for?(self, ref, obj.controller, obj.source) && targetable?(ref, obj.controller, obj.source) }
+        legal = lambda { |ref, spec|
+          spec&.match_for?(self, ref, obj.controller,
+                           obj.source) && targetable?(ref, obj.controller, obj.source, targeter: obj.source || obj.id)
+        }
         (obj.targets || []).each_with_index.map do |ref, i|
           ref.is_a?(Array) ? ref.select { legal.call(it, specs[i]) } : (ref if legal.call(ref, specs[i])) # a counted slot's list
         end
