@@ -158,7 +158,7 @@ module Enjine
           return false if @other && object.id == source.id
           return false unless @controller == "any" || (@controller == "you") == (object.controller == source.controller)
 
-          @filter.matches_facts?(facts)
+          @filter.matches_facts?(@filter.uses_chosen? ? facts.with(chosen: source.memory) : facts) # CR 607.2d
         end
 
         def to_s

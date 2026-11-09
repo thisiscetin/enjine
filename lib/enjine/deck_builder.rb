@@ -209,7 +209,7 @@ module Enjine
     # Most copies of a card the deck may hold: 4 (CR 100.2a) or any number if exempt, and never
     # more than a collection owns.
     def limit(definition)
-      rule = definition.deck_limit_exempt? ? @size : Deck::MAX_COPIES
+      rule = definition.deck_limit || @size
       @collection ? [rule, @collection.count(definition.id)].min : rule
     end
 

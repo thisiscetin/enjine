@@ -8535,5 +8535,224 @@
         }
       }
     ]
+  },
+  {
+    "name": "Skyline Snare",
+    "mana_cost": "{1}{G}",
+    "types": [
+      "instant"
+    ],
+    "rules_text": "Destroy target creature with flying.",
+    "abilities": [
+      {
+        "spell": {
+          "targets": [
+            {
+              "creature": {
+                "keywords": [
+                  "flying"
+                ]
+              }
+            }
+          ],
+          "effects": [
+            {
+              "destroy": {
+                "to": {
+                  "target": 0
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Groundling Muster",
+    "mana_cost": "{1}{W}",
+    "types": [
+      "sorcery"
+    ],
+    "rules_text": "Creatures you control without flying get +1/+1 until end of turn.",
+    "abilities": [
+      {
+        "spell": {
+          "effects": [
+            {
+              "pump": {
+                "power": 1,
+                "toughness": 1,
+                "to": {
+                  "each": {
+                    "creature": {
+                      "not_keywords": [
+                        "flying"
+                      ]
+                    }
+                  },
+                  "controller": "you"
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Kinsong Pennant",
+    "mana_cost": "{2}",
+    "types": [
+      "artifact"
+    ],
+    "rules_text": "As this artifact enters, choose a creature type. Creatures you control of the chosen type get +1/+1. Whenever you cast a creature spell of the chosen type, you gain 1 life.",
+    "abilities": [
+      {
+        "choose_creature_type": {}
+      },
+      {
+        "static": {
+          "affects": {
+            "each": {
+              "creature": {
+                "subtypes": "chosen"
+              }
+            },
+            "controller": "you"
+          },
+          "pump": {
+            "power": 1,
+            "toughness": 1
+          }
+        }
+      },
+      {
+        "triggered": {
+          "when": {
+            "cast": {
+              "spell": {
+                "spell": {
+                  "subtypes": "chosen"
+                }
+              }
+            }
+          },
+          "effects": [
+            {
+              "gain_life": {
+                "amount": 1
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Prism Reckoning",
+    "mana_cost": "{3}{B}",
+    "types": [
+      "sorcery"
+    ],
+    "rules_text": "Choose a color. Destroy each creature of the chosen color.",
+    "abilities": [
+      {
+        "spell": {
+          "effects": [
+            {
+              "choose_color": {}
+            },
+            {
+              "destroy": {
+                "to": {
+                  "each": {
+                    "creature": {
+                      "colors": "chosen"
+                    }
+                  }
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Twofold Omen",
+    "mana_cost": "{1}{U}",
+    "types": [
+      "enchantment"
+    ],
+    "rules_text": "As this enchantment enters, choose tides or storms. At the beginning of your upkeep, if tides was chosen, draw a card. If storms was chosen, Twofold Omen deals 1 damage to each opponent.",
+    "abilities": [
+      {
+        "choose_option": {
+          "options": [
+            "tides",
+            "storms"
+          ]
+        }
+      },
+      {
+        "triggered": {
+          "when": {
+            "step_begins": {
+              "step": "upkeep"
+            }
+          },
+          "effects": [
+            {
+              "draw": {
+                "amount": 1,
+                "if": {
+                  "chosen": "tides"
+                }
+              }
+            },
+            {
+              "deal_damage": {
+                "amount": 1,
+                "to": "each_opponent",
+                "if": {
+                  "chosen": "storms"
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Warren Herald",
+    "mana_cost": "{1}{W}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "rabbit"
+    ],
+    "power": 1,
+    "toughness": 1,
+    "deck_limit": "any",
+    "rules_text": "When this creature enters, you gain 1 life. A deck can have any number of cards named Warren Herald.",
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "enters": {}
+          },
+          "effects": [
+            {
+              "gain_life": {
+                "amount": 1
+              }
+            }
+          ]
+        }
+      }
+    ]
   }
 ]

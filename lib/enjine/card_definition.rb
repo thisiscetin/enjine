@@ -9,7 +9,7 @@ module Enjine
   # Enjine.registry. Anything unknown is reported (with its path) in a single
   # InvalidCardDefinition error.
   class CardDefinition
-    KEYS = %w[name mana_cost colors types supertypes subtypes keywords power toughness loyalty abilities rules_text].freeze
+    KEYS = %w[name mana_cost colors types supertypes subtypes keywords power toughness loyalty abilities rules_text deck_limit].freeze
     SUBTYPE_FORMAT = /\A[a-z][a-z0-9_]*\z/
 
     attr_reader :id, :name, :mana_cost, :types, :supertypes, :subtypes, :keywords, :power, :toughness, :loyalty,
@@ -54,6 +54,7 @@ module Enjine
       @mana_cost = card.key?("mana_cost") ? Mana.parse_cost(card["mana_cost"], errors) : nil
       @keywords, keyword_modules = read_names(card, "keywords", :keyword, errors)
       @colors = read_colors(card, errors)
+      @deck_limit = read_deck_limit(card, errors)
       @power, @power_amount = read_pt(card, "power", errors)
       @toughness, @toughness_amount = read_pt(card, "toughness", errors)
       @loyalty = read_stat(card, "loyalty", errors)
@@ -115,6 +116,10 @@ module Enjine
     def planeswalker? = @planeswalker
     def deck_limit_exempt? = @deck_limit_exempt
 
+    # Most copies a constructed deck may hold (CR 100.2a): nil for any number (basic lands, or a card that
+    # says "a deck can have any number of cards named ~").
+    def deck_limit = @deck_limit_exempt ? nil : (@deck_limit || Deck::MAX_COPIES)
+
     # Whether this card can be cast at instant speed (CR 304.1, 702.8a).
     def instant_speed? = @instant_speed
 
@@ -146,7 +151,7 @@ module Enjine
       @permanent = @type_modules.any?(&:permanent?)
       @instant_speed = @type_modules.any?(&:instant_speed?) || @keywords.include?(:flash)
       @castable = !@land && !@mana_cost.nil?
-      @deck_limit_exempt = @supertypes.any? { Enjine.registry.fetch(:supertype, it).deck_limit_exempt? }
+      @deck_limit_exempt = @deck_limit == "any" || @supertypes.any? { Enjine.registry.fetch(:supertype, it).deck_limit_exempt? }
       @spell_ability = @abilities.find { it.kind == :spell } || aura_spell_ability
       every = @abilities + @nested_instances.map(&:ability)
       @triggered = every.any? { it.kind == :triggered }
@@ -257,6 +262,15 @@ module Enjine
       ok ? Mana::COLORS.select { |c| list.map { it.to_s.upcase }.include?(c.to_s) }.freeze : [].freeze
     end
 
+    # CR 100.2a: "a deck can have any number of cards named ~" is `"deck_limit": "any"`; "up to seven" is 7.
+    def read_deck_limit(card, errors)
+      value = card["deck_limit"]
+      return value if value.nil? || value == "any" || (value.is_a?(Integer) && value >= 1)
+
+      errors << "deck_limit: must be \"any\" or an integer >= 1"
+      nil
+    end
+
     # Power/toughness: an integer, or an amount for a characteristic-defining ability ("*", CR 604.3,
     # 208.2a), e.g. {"count": {"each": {"creature": {"types": ["artifact"]}}, "controller": "you"}}.
     # Returns [printed value, amount]; the defined value is computed in layer 7a (CR 613.4a).
@@ -331,6 +345,7 @@ module Enjine
       out["loyalty"] = @loyalty unless @loyalty.nil?
       out["abilities"] = deep_stringify(card["abilities"]) if card["abilities"].is_a?(Array) && !card["abilities"].empty?
       out["rules_text"] = @rules_text if @rules_text
+      out["deck_limit"] = @deck_limit if @deck_limit
       deep_freeze(out)
     end
 

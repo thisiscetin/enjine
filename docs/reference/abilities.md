@@ -216,6 +216,42 @@ Rules: CR 614.12, CR 614.12a, CR 201.4, CR 201.4a, CR 607.2
 }
 ```
 
+## choose_card_type
+
+As this permanent enters, its controller chooses a card type; filters with "types": "chosen" (or "not": "chosen") use it.
+
+Rules: CR 614.12, CR 205.2a, CR 607.2d
+
+```json
+{
+  "choose_card_type": {}
+}
+```
+
+## choose_color
+
+As this permanent enters, its controller chooses a color; filters with "colors": "chosen" (and other abilities of it) use it.
+
+Rules: CR 614.12, CR 105.4, CR 607.2d
+
+```json
+{
+  "choose_color": {}
+}
+```
+
+## choose_creature_type
+
+As this permanent enters, its controller chooses a creature type; filters with "subtypes": "chosen" use it.
+
+Rules: CR 614.12, CR 205.3m, CR 607.2d
+
+```json
+{
+  "choose_creature_type": {}
+}
+```
+
 ## choose_number
 
 As this permanent enters, its controller chooses a number from `min` to `max`; abilities of it that say "the chosen number" use it.
@@ -232,6 +268,27 @@ Rules: CR 614.12, CR 614.12a, CR 607.2
   "choose_number": {
     "min": 0,
     "max": 10
+  }
+}
+```
+
+## choose_option
+
+As this permanent enters, its controller chooses one of the `options` (words with no rules meaning); a condition {"chosen": word} is true when that word was chosen.
+
+Rules: CR 614.12, CR 607.2f, CR 614.12b
+
+| Parameter | Description |
+| --- | --- |
+| `options` | list of two or more lowercase words |
+
+```json
+{
+  "choose_option": {
+    "options": [
+      "khans",
+      "dragons"
+    ]
   }
 }
 ```

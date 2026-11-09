@@ -27,6 +27,20 @@ RSpec.describe Enjine::Deck do
     expect(d.errors).to eq(["Lone Tower: 5 copies; at most 4 are allowed (CR 100.2a)"])
   end
 
+  it "honours a card's own deck limit: any number, or up to N (CR 100.2a)" do
+    swarm = { "name" => "Spec Hare Swarm", "mana_cost" => "{1}{W}", "types" => ["creature"], "power" => 1, "toughness" => 1,
+              "deck_limit" => "any" }
+    dwarves = { "name" => "Spec Seven Smiths", "mana_cost" => "{1}{R}", "types" => ["creature"], "power" => 2, "toughness" => 2,
+                "deck_limit" => 7 }
+    d = deck([{ "card" => "Spec Hare Swarm", "count" => 30 }, { "card" => "Spec Seven Smiths", "count" => 8 },
+              { "card" => "Forest", "count" => 22 }], cards: pool + [swarm, dwarves])
+    expect(d.errors).to eq(["Spec Seven Smiths: 8 copies; at most 7 are allowed (CR 100.2a)"])
+    expect(d.catalog.fetch("spec_hare_swarm").deck_limit).to be_nil
+    expect(d.catalog.fetch("spec_hare_swarm").source["deck_limit"]).to eq("any")
+    expect { Enjine::CardDefinition.from_h(swarm.merge("deck_limit" => 0)) }
+      .to raise_error(Enjine::InvalidCardDefinition, /deck_limit: must be "any" or an integer >= 1/)
+  end
+
   it "reports malformed and undefined entries" do
     d = deck([{ "card" => "Bolt", "count" => 1 }, { "card" => "Forest" }, "x"])
     expect(d.errors).to include(a_string_matching(/main\[0\].card: "Bolt" is not defined/),

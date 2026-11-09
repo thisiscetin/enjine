@@ -89,7 +89,8 @@ module Enjine
           chars = types ? defn.printed_characteristics.with(types: types) : defn.printed_characteristics
           lki = engine.last_known(object_id) || {}
           token = lki.fetch("token") { defn.token? } # a token copy of a card (CR 111.1)
-          @filter.matches_facts?(Filters::Facts.new(chars: chars, counters: lki.fetch("counters", nil) || {}, token: token))
+          @filter.matches_facts?(Filters::Facts.new(chars: chars, counters: lki.fetch("counters", nil) || {}, token: token,
+                                                    chosen: engine.state.objects[source["id"]]&.memory))
         end
 
         def controller_ok?(object_controller, you)
@@ -302,13 +303,13 @@ module Enjine
 
           caster = engine.names.index(event.player)
           return false unless @controller == "any" || (@controller == "you") == (caster == source["controller"])
-          return false unless spell_ok?(engine, event, caster)
+          return false unless spell_ok?(engine, event, caster, source)
 
           chosen_ok?(engine, source, event.card, engine.state.objects[event.object]&.x)
         end
 
-        def spell_ok?(engine, event, caster)
-          return @filter.match?(engine, event.object, caster) if @filter
+        def spell_ok?(engine, event, caster, source)
+          return @filter.match_for?(engine, event.object, caster, source["id"]) if @filter # "of the chosen color"
 
           types = engine.catalog.fetch(event.card).types
           case @spell

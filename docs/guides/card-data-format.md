@@ -61,6 +61,7 @@ Tips:
 | `loyalty` | planeswalkers | integer | Starting loyalty. |
 | `abilities` | no | list | Section 4. |
 | `rules_text` | no | string | Informational only (shown in the CLI). Never interpreted. |
+| `deck_limit` | no | `"any"` or integer | CR 100.2a exception: "A deck can have any number of cards named ~" is `"deck_limit": "any"`; "up to seven cards named ~" is `7`. Without it a deck may hold four (basic lands: any number). |
 
 Any other field is an error. That's deliberate: a typo must never be silently ignored.
 
@@ -199,7 +200,8 @@ once-per-turn are automatic.
 | "land, or creature with power 6 or greater" | `{ "one_of": [{ "permanent": { "any_of": ["land"] } }, { "creature": { "power": { "at_least": 6 } } }] }` |
 | "noncreature spell" | `{ "spell": { "not": ["creature"] } }` |
 
-"Target creature with flying" (keyword restrictions) is not supported yet.
+| "with flying", "with flying or reach", "without flying" | `{ "creature": { "keywords": ["flying"] } }`, `{ "creature": { "keywords": ["flying", "reach"] } }`, `{ "creature": { "not_keywords": ["flying"] } }` (current keywords: granted ones count, CR 702.1) |
+| "of the chosen color / creature type / card type", "not of the chosen type" | `{ "creature": { "subtypes": "chosen" } }`, `{ "spell": { "colors": "chosen" } }`, `{ "permanent": { "types": "chosen" } }`, `{ "creature": { "not_subtypes": "chosen" } }` (see 4.15) |
 
 ### 4.5 Who an effect applies to: the `to` selector
 
@@ -570,6 +572,42 @@ a card copy outside the stack and battlefield, ceases to exist (CR 707.10a).
                 { "activated": { "cost": [{ "mana": "{2}" }], "targets": [{ "creature": { "controller": "you" } }],
                                  "effects": [{ "create_token_copy": { "of": { "target": 0 } } },
                                              { "grant": { "keywords": ["haste"], "to": { "result": 0 } } }] } }] }
+```
+
+### 4.15 Chosen colors, creature types, card types and words (CR 607.2d)
+
+A choice is remembered on an object; "the chosen …" reads it. Made **as a permanent enters**
+(an ability, CR 614.12; the enter_choice decision) it is remembered on the permanent, and the
+permanent's other abilities read it. Made **while a spell or ability resolves** (an effect, an
+effect_choice decision) it is remembered on that spell or ability, and its later effects read
+it (and, failing that, its source's choice).
+
+| Oracle words | Data |
+| --- | --- |
+| "As this enters, choose a color / creature type / card type" | ability `{ "choose_color": {} }`, `{ "choose_creature_type": {} }`, `{ "choose_card_type": {} }` |
+| "As this enters, choose Khans or Dragons" (CR 607.2f) | ability `{ "choose_option": { "options": ["khans", "dragons"] } }` |
+| "Choose a color / creature type / card type." / "Choose odd or even." (on resolution) | effect `{ "choose_color": {} }` (same names; `to`: who chooses, default you), `{ "choose_option": { "options": ["odd", "even"] } }` |
+| "… of the chosen color / type / card type", "not of the chosen type" | filter `"colors": "chosen"`, `"subtypes": "chosen"`, `"types": "chosen"`, `"not": "chosen"`, `"not_subtypes": "chosen"` |
+| "If odd was chosen …", "• Khans — …" | condition `{ "chosen": "odd" }` (in an effect's `if`, a static's `if`, a trigger's `if`) |
+
+Nothing matches "the chosen type" while nothing was chosen. The options offered are the five
+colors (CR 105.4), every creature type (CR 205.3m) and the card types (CR 205.2a).
+
+```json
+{ "name": "Example Kin Banner", "mana_cost": "{3}", "types": ["artifact"],
+  "abilities": [{ "choose_creature_type": {} },
+                { "static": { "affects": { "each": { "creature": { "subtypes": "chosen" } }, "controller": "you" },
+                              "pump": { "power": 1, "toughness": 1 } } },
+                { "triggered": { "when": { "cast": { "spell": { "spell": { "subtypes": "chosen" } } } },
+                                 "effects": [{ "draw": { "amount": 1 } }] } }] }
+```
+
+```json
+{ "name": "Example Kin Recall", "mana_cost": "{3}{B}", "types": ["sorcery"],
+  "abilities": [{ "spell": { "effects": [
+    { "choose_creature_type": {} },
+    { "return_to_battlefield": { "to": { "each": { "graveyard_card": { "controller": "you", "any_of": ["creature"],
+                                                                       "subtypes": "chosen" } } } } }] } }] }
 ```
 
 ---

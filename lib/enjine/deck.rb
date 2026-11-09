@@ -62,9 +62,10 @@ module Enjine
       errs << "deck has #{size} cards; at least #{MIN_SIZE} are required (CR 100.2a)" if size < MIN_SIZE
       errs << "outside: #{outside_size} cards; at most #{MAX_OUTSIDE} are allowed (CR 100.4a)" if outside_size > MAX_OUTSIDE
       @entries.merge(@outside) { |_, a, b| a + b }.each do |id, n|
-        next if n <= MAX_COPIES || @catalog.fetch(id).deck_limit_exempt?
+        limit = @catalog.fetch(id).deck_limit # nil: any number (basic lands, "deck_limit": "any")
+        next if limit.nil? || n <= limit
 
-        errs << "#{@catalog.fetch(id).name}: #{n} copies; at most #{MAX_COPIES} are allowed (CR 100.2a#{", 100.4a" if @outside.key?(id)})"
+        errs << "#{@catalog.fetch(id).name}: #{n} copies; at most #{limit} are allowed (CR 100.2a#{", 100.4a" if @outside.key?(id)})"
       end
       errs
     end

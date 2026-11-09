@@ -56,7 +56,7 @@ module Enjine
       def draw(definitions, counts, rng, number)
         number.times do
           defn = definitions[rng.rand(definitions.size)]
-          defn = definitions[rng.rand(definitions.size)] until defn.deck_limit_exempt? || counts[defn.id] < Deck::MAX_COPIES
+          defn = definitions[rng.rand(definitions.size)] until defn.deck_limit.nil? || counts[defn.id] < defn.deck_limit
           yield defn.id
         end
       end

@@ -17,8 +17,19 @@ module Enjine
       end
 
       # What is known about an object without computing its current characteristics: its printed
-      # (or last known) characteristics, its counters and whether it is a token.
-      Facts = Data.define(:chars, :counters, :token)
+      # (or last known) characteristics, its counters and whether it is a token. `chosen`: the memory of
+      # the object whose choice "the chosen color/type" refers to (CR 607.2d), when the filter needs one.
+      Facts = Data.define(:chars, :counters, :token, :chosen) do
+        def initialize(chars:, counters:, token:, chosen: nil) = super
+      end
+
+      # The choices "the chosen ..." can refer to (CR 607.2d): the resolving spell's or ability's own
+      # (an effect's "choose a creature type"), else its source's (an "as this enters" choice, CR 614.12).
+      def self.chosen_memory(engine, source, ctx)
+        own = engine.state.objects[source]&.memory || {}
+        resolving = ctx && ctx.object != source ? engine.state.objects[ctx.object]&.memory : nil
+        resolving ? own.merge(resolving.select { |k, _| k.start_with?("chosen_") }) : own
+      end
 
       # Base filter: subclasses define players? and match_object?.
       class Filter < Primitive
@@ -63,6 +74,7 @@ module Enjine
         # a match on characteristics and counters only (Facts), never on current power/toughness.
         def self.matches_facts?(facts) = matches_types?(facts.chars.types)
         def self.live_keys = []
+        def self.uses_chosen? = false
       end
 
       # A filter narrowed by restrictions (CR 115.1, 109.2), e.g.
@@ -74,13 +86,20 @@ module Enjine
       #   {"creature": {"token": false}}                 {"permanent": {"counters": true}} / {"counters": "+1/+1"}
       #   {"creature": {"modified": true}}               {"spell": {"not": ["creature"]}}
       #   {"creature": {"attached_subtypes": ["communicator"]}}  with a Communicator attached to it (CR 301.5, 303.4)
+      #   {"creature": {"keywords": ["flying"]}}         with flying (any listed); "not_keywords": without (CR 702.1)
+      #   {"creature": {"subtypes": "chosen"}}           of the chosen creature type; also "colors", "types", "not",
+      #                                                  "not_subtypes": "chosen" (CR 607.2d, see Filters.chosen_memory)
       class Restricted
         TYPES = %w[artifact creature enchantment land planeswalker instant sorcery].freeze
         BOOLEANS = %w[other attacking blocking tapped token modified].freeze
         RANGES = %w[power toughness mana_value].freeze
         TYPE_LISTS = %w[not any_of types].freeze
         NAME_LISTS = %w[subtypes not_subtypes supertypes not_supertypes attached_subtypes].freeze
-        KEYS = (%w[controller counters colors] + BOOLEANS + RANGES + TYPE_LISTS + NAME_LISTS).freeze
+        KEYWORD_LISTS = %w[keywords not_keywords].freeze
+        KEYS = (%w[controller counters colors] + BOOLEANS + RANGES + TYPE_LISTS + NAME_LISTS + KEYWORD_LISTS).freeze
+        # Lists that may be "chosen": the choice remembered under that memory key (CR 607.2d).
+        CHOSEN = { "colors" => "chosen_color", "types" => "chosen_card_type", "not" => "chosen_card_type",
+                   "subtypes" => "chosen_type", "not_subtypes" => "chosen_type" }.freeze
         # Keys that need current characteristics or combat/tapped status: not usable in the layer pass.
         LIVE = %w[power toughness attacking blocking tapped attached_subtypes].freeze
 
@@ -99,27 +118,43 @@ module Enjine
             errors << "#{path}.counters: must be true, false or a counter name"
           end
           colors = params["colors"]
-          unless colors.nil? || (colors.is_a?(Array) && !colors.empty? && colors.all? { Mana::COLORS.include?(it.to_s.to_sym) })
-            errors << "#{path}.colors: must be a non-empty list of W, U, B, R, G (any of them)"
+          unless colors.nil? || colors == "chosen" ||
+                 (colors.is_a?(Array) && !colors.empty? && colors.all? { Mana::COLORS.include?(it.to_s.to_sym) })
+            errors << "#{path}.colors: must be a non-empty list of W, U, B, R, G (any of them) or \"chosen\""
           end
           new(base, params, ranges)
         end
 
         def self.validate_lists(params, errors, path)
+          validate_keywords(params, errors, path)
           TYPE_LISTS.each do |key|
             list = params[key]
-            next if list.nil? || (list.is_a?(Array) && (list - TYPES).empty?)
+            next if list.nil? || (list == "chosen" && CHOSEN.key?(key)) || (list.is_a?(Array) && (list - TYPES).empty?)
 
             errors << "#{path}.#{key}: must be a list of card types (#{TYPES.join(", ")})"
           end
           NAME_LISTS.each do |key|
             list = params[key]
-            next if list.nil?
+            next if list.nil? || (list == "chosen" && CHOSEN.key?(key))
 
             supertypes = key.end_with?("supertypes")
             ok = list.is_a?(Array) && !list.empty? &&
                  list.all? { supertypes ? Enjine.registry.fetch(:supertype, it) : CardDefinition::SUBTYPE_FORMAT.match?(it.to_s) }
             errors << "#{path}.#{key}: must be a non-empty list of #{supertypes ? "supertypes" : "lowercase subtypes"}" unless ok
+          end
+        end
+
+        # A keyword's registered name: "first strike" -> "first_strike".
+        def self.keyword(name) = name.to_s.downcase.tr(" -", "__")
+
+        # "with flying" / "without flying": keyword names as in a card's `keywords` (CR 702.1).
+        def self.validate_keywords(params, errors, path)
+          KEYWORD_LISTS.each do |key|
+            list = params[key]
+            next if list.nil?
+
+            ok = list.is_a?(Array) && !list.empty? && list.all? { Enjine.registry.fetch(:keyword, Restricted.keyword(it)) }
+            errors << "#{path}.#{key}: must be a non-empty list of keywords (e.g. [\"flying\"])" unless ok
           end
         end
 
@@ -145,13 +180,17 @@ module Enjine
           @controller = params["controller"]
           @other = params["other"] == true
           @params = params
-          @lists = (TYPE_LISTS + NAME_LISTS).to_h { [it, Array(params[it]).map(&:to_sym)] }
+          @chosen = CHOSEN.select { |key, _| params[key] == "chosen" }
+          @lists = (TYPE_LISTS + NAME_LISTS).to_h { |key| [key, @chosen.key?(key) ? [] : Array(params[key]).map(&:to_sym)] }
+          KEYWORD_LISTS.each { |key| @lists[key] = Array(params[key]).map { Restricted.keyword(it).to_sym } }
+          @colors = params["colors"].is_a?(Array) ? params["colors"].map(&:to_sym) : nil
           @ranges = ranges.freeze
           @computed = ranges.values.any? { |range| range.values.any? { !it.is_a?(Amount::Fixed) } }
           freeze
         end
 
         def primitive_name = base.primitive_name
+        def uses_chosen? = !@chosen.empty?
 
         # A computed bound depends on the game, so (like power) it isn't usable in the layer pass.
         def live_keys = LIVE.select { @params.key?(it) } + (@computed ? ["computed_range"] : [])
@@ -162,14 +201,14 @@ module Enjine
         # left the battlefield counts as it last existed, CR 608.2h).
         def candidates_for(engine, controller, source, ctx: nil)
           bounds = resolved_ranges(engine, controller, source, ctx)
-          base.candidates(engine, controller).select { allowed?(engine, it, controller, source, bounds) }
+          base.candidates(engine, controller).select { allowed?(engine, it, controller, source, bounds, ctx) }
         end
 
         def match?(engine, ref, controller) = match_for?(engine, ref, controller, nil)
 
         def match_for?(engine, ref, controller, source, ctx: nil)
           base.match?(engine, ref, controller) &&
-            allowed?(engine, ref, controller, source, resolved_ranges(engine, controller, source, ctx))
+            allowed?(engine, ref, controller, source, resolved_ranges(engine, controller, source, ctx), ctx)
         end
 
         # Card types only.
@@ -189,12 +228,12 @@ module Enjine
           words.concat(@lists["supertypes"]).concat(@lists["not_supertypes"].map { "non#{it}" })
           words << "non#{@lists["not"].join("/non")}" unless @lists["not"].empty?
           words.concat(@lists["types"] + @lists["subtypes"]).concat(@lists["not_subtypes"].map { "non-#{it}" })
+          words.concat(chosen_words)
           words << (@lists["any_of"].empty? ? base.primitive_name.tr("_", " ") : @lists["any_of"].join(" or "))
           words << { "you" => "you control", "opponent" => "an opponent controls" }[@controller]
           words.concat(@ranges.map { |key, range| "with #{key.tr("_", " ")} #{range_words(range)}" })
           words << "with a #{@lists["attached_subtypes"].join(" or ")} attached" unless @lists["attached_subtypes"].empty?
-          words << counter_words
-          words.compact.join(" ")
+          (words + [counter_words] + keyword_words).compact.join(" ")
         end
 
         RANGE_WORDS = { "at_least" => "%s or greater", "at_most" => "%s or less", "equal" => "equal to %s" }.freeze
@@ -203,6 +242,13 @@ module Enjine
         private
 
         def range_words(range) = range.map { |k, n| format(RANGE_WORDS.fetch(k), n) }.join(" and ")
+
+        def chosen_words = @chosen.keys.map { "#{"non-" if it.start_with?("not")}chosen-#{it.delete_prefix("not_")}" }
+
+        def keyword_words
+          [("with #{@lists["keywords"].join(" or ")}" unless @lists["keywords"].empty?),
+           ("without #{@lists["not_keywords"].join(" or ")}" unless @lists["not_keywords"].empty?)]
+        end
 
         def counter_words
           case @params["counters"]
@@ -221,7 +267,7 @@ module Enjine
           @ranges.transform_values { |range| range.transform_values { it.value(engine, ctx) } }
         end
 
-        def allowed?(engine, ref, controller, source, bounds)
+        def allowed?(engine, ref, controller, source, bounds, ctx)
           return false if @other && ref == source
 
           index = Filters.player_index(engine, ref)
@@ -229,13 +275,13 @@ module Enjine
           return false if @controller && (@controller == "you") != (owner == controller)
           return true if index
 
-          object_allowed?(engine, ref, bounds)
+          object_allowed?(engine, ref, bounds, uses_chosen? ? Filters.chosen_memory(engine, source, ctx) : nil)
         end
 
-        def object_allowed?(engine, ref, bounds)
+        def object_allowed?(engine, ref, bounds, chosen)
           obj = engine.object(ref)
           current = engine.chars(ref)
-          facts = Facts.new(chars: current, counters: obj.counters, token: engine.token?(obj))
+          facts = Facts.new(chars: current, counters: obj.counters, token: engine.token?(obj), chosen: chosen)
           return false unless characteristics_ok?(facts) && status_ok?(engine, obj)
           return false if @params["modified"] == true && !modified?(engine, obj)
           return false unless attached_ok?(engine, obj)
@@ -243,17 +289,40 @@ module Enjine
           bounds.all? { |key, range| in_range?(stat(engine, obj, current, key), range) }
         end
 
-        # Types, subtypes, supertypes, token-ness, counters and printed mana value (CR 109.3, 122, 202.3).
+        # Types, subtypes, supertypes, keywords, the chosen values, token-ness, counters and printed mana
+        # value (CR 109.3, 122, 202.3).
         def characteristics_ok?(facts)
           c = facts.chars
+          return false unless chosen_ok?(c, facts.chosen)
           return false unless matches_types?(c.types) && (@lists["subtypes"].empty? || c.subtypes.intersect?(@lists["subtypes"]))
           return false if c.subtypes.intersect?(@lists["not_subtypes"]) || c.supertypes.intersect?(@lists["not_supertypes"])
           return false unless (@lists["supertypes"] - c.supertypes).empty?
-          return false if @params["colors"] && !c.colors.intersect?(@params["colors"].map(&:to_sym)) # CR 105.2
+          return false if @colors && !c.colors.intersect?(@colors) # CR 105.2
+          return false unless keywords_ok?(c.keywords)
           return false if !@params["token"].nil? && facts.token != @params["token"]
           return false if @params["modified"] == false && Counters.any?(facts.counters)
 
           counters_ok?(facts.counters)
+        end
+
+        # Current keywords (CR 702.1): granted ones and keyword counters count.
+        def keywords_ok?(keywords)
+          (@lists["keywords"].empty? || keywords.intersect?(@lists["keywords"])) && !keywords.intersect?(@lists["not_keywords"])
+        end
+
+        # "Of the chosen color/type" (CR 607.2d): nothing matches while nothing was chosen, and "not of
+        # the chosen type" then excludes nothing.
+        def chosen_ok?(chars, memory)
+          @chosen.all? do |key, memory_key|
+            value = memory&.[](memory_key)
+            have = case key
+                   when "colors" then chars.colors
+                   when "types", "not" then chars.types
+                   else chars.subtypes
+                   end
+            hit = !value.nil? && have.include?(value.to_sym)
+            key.start_with?("not") ? !hit : hit
+          end
         end
 
         def counters_ok?(counters)
@@ -401,6 +470,7 @@ module Enjine
 
         def primitive_name = "one_of"
         def live_keys = filters.flat_map(&:live_keys).uniq
+        def uses_chosen? = filters.any?(&:uses_chosen?)
         def to_s = filters.map { it.is_a?(Class) ? it.primitive_name.tr("_", " ") : it.to_s }.join(" or ")
         def candidates(engine, controller) = candidates_for(engine, controller, nil)
 

@@ -304,6 +304,22 @@ Rules: CR 608.2g, CR 118.9, CR 601.2a, CR 107.3b, CR 118.6a
 }
 ```
 
+## choose_card_type
+
+The player (`to`, default you) chooses a card type; later effects of this spell or ability read it with "types": "chosen".
+
+Rules: CR 205.2a, CR 607.2d, CR 608.2c
+
+| Parameter | Description |
+| --- | --- |
+| `to` | player selector (default you) |
+
+```json
+{
+  "choose_card_type": {}
+}
+```
+
 ## choose_cards
 
 You choose `count` (default 1; "any": any number) cards matching `for` from `from`: a selector (e.g. {"result": 0}, the cards an earlier effect milled) or a player's zone, {"hand": selector} / {"graveyard": selector}. `optional`: you may choose fewer. Then they are put into `put` (`tapped` onto the battlefield, under your control; exiled cards `link`ed to the source). `look`: you look at the whole zone first; `reveal`: "chosen" reveals what you chose, "all" the whole set. `then` runs if a card was chosen, `otherwise` if none was ("if you can't").
@@ -335,6 +351,60 @@ Rules: CR 701.20a, CR 701.20e, CR 400.7j, CR 608.2c, CR 607.2a, CR 118.12
     },
     "optional": true,
     "put": "hand"
+  }
+}
+```
+
+## choose_color
+
+The player (`to`, default you) chooses a color; later effects of this spell or ability read it with "colors": "chosen".
+
+Rules: CR 105.4, CR 607.2d, CR 608.2c
+
+| Parameter | Description |
+| --- | --- |
+| `to` | player selector (default you) |
+
+```json
+{
+  "choose_color": {}
+}
+```
+
+## choose_creature_type
+
+The player (`to`, default you) chooses a creature type; later effects of this spell or ability read it with "subtypes": "chosen".
+
+Rules: CR 205.3m, CR 607.2d, CR 608.2c
+
+| Parameter | Description |
+| --- | --- |
+| `to` | player selector (default you) |
+
+```json
+{
+  "choose_creature_type": {}
+}
+```
+
+## choose_option
+
+The player (`to`, default you) chooses one of the `options` (words); later effects of this spell or ability check it with the condition {"chosen": word}.
+
+Rules: CR 607.2f, CR 608.2c
+
+| Parameter | Description |
+| --- | --- |
+| `options` | list of two or more lowercase words |
+| `to` | player selector (default you) |
+
+```json
+{
+  "choose_option": {
+    "options": [
+      "odd",
+      "even"
+    ]
   }
 }
 ```
