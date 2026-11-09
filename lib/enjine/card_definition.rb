@@ -84,8 +84,11 @@ module Enjine
     # ("delayed:<path>", see Effects::DelayedTrigger).
     def ability(ref)
       (@ability_instances.find { it.ref == ref } || @nested_instances.find { it.ref == ref })&.ability ||
-        @delayed_abilities[ref]
+        @delayed_abilities[ref] || @effect_granted.values.flatten.find { it.ref == ref }&.ability
     end
+
+    # Abilities an effect of this card grants for a while ("<effect ref>:<j>", see Effects::Become).
+    def effect_granted(ref) = @effect_granted.fetch(ref, EMPTY)
 
     # Abilities the ability at `ref` grants while it applies (a station symbol's, CR 722.2).
     def nested_instances(ref) = @nested_by_ref.fetch(ref, EMPTY)
@@ -151,6 +154,9 @@ module Enjine
         ability.respond_to?(:modes) && ability.modal? ? ability.modes.flat_map(&:effects) : ability.try_effects
       end).freeze
       @delayed_abilities = @all_effects.select { it.respond_to?(:delayed_ability) }.to_h { [it.ref, it.delayed_ability] }.freeze
+      @effect_granted = @all_effects.select { it.respond_to?(:granted_abilities) }.to_h do |effect|
+        [effect.ref, effect.granted_abilities.each_with_index.map { |a, j| AbilityInstance.new(ref: "#{effect.ref}:#{j}", ability: a) }.freeze]
+      end.freeze
     end
 
     def nested(effects) = effects.flat_map { [it, *nested(it.nested_effects)] }

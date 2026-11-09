@@ -29,6 +29,8 @@ module Enjine
       def watch_triggers!(event)
         return if state.step.nil? # no triggers during the pregame
 
+        record_counter_placement!(event)
+
         trigger_sources.each do |id, instances|
           obj = state.objects[id] or next
           source = { "id" => id, "card" => obj.card, "controller" => obj.controller }
@@ -38,6 +40,32 @@ module Enjine
         watch_own_cast!(event) if event.is_a?(Events::SpellCast)
         watch_graveyards!(event)
         watch_delayed!(event) unless state.delayed_triggers.empty?
+      end
+
+      # "For the first time each turn" (trigger counters_placed with first_time_this_turn): every placement of
+      # counters on a permanent is counted per kind in its memory, stamped with the turn, whether or not any
+      # ability triggers on it, so a later placement is never the first (CR 603.2, 122.6). Entering with
+      # counters is a placement (CR 122.6).
+      def record_counter_placement!(event)
+        kinds = case event
+                when Events::CountersChanged then event.to > event.from ? [event.counter] : []
+                when Events::ZoneChanged
+                  obj = event.to == "battlefield" && state.objects[event.new_id]
+                  obj ? obj.counters.select { |_, n| n.positive? }.keys : []
+                else []
+                end
+        return if kinds.empty?
+
+        id = event.is_a?(Events::CountersChanged) ? event.object : event.new_id
+        return unless state.objects.key?(id)
+
+        placed = object_memory!(id, "counters_placed")
+        (kinds + ["*"]).each { placed[it] = placed.fetch(it, 0) + 1 }
+      end
+
+      # How many times counters of `kind` (nil: any kind) were put on `id` this turn.
+      def counter_placements_this_turn(id, kind)
+        turned_memory(state.objects[id], "counters_placed")&.fetch(kind || "*", 0).to_i
       end
 
       # CR 603.7: creates a delayed triggered ability. `entry` names the card and the ability ref
@@ -174,14 +202,19 @@ module Enjine
       # CR 603.2d: static abilities such as "if you gaining life causes a triggered ability of a permanent
       # you control to trigger, that ability triggers an additional time". Only abilities of permanents;
       # never delayed or reflexive triggered abilities.
+      # Resolved effects do the same for the triggered abilities of the objects they affect
+      # (Effects::AdditionalTriggersEffect, "for as long as [its source] remains tapped", CR 611.2b).
       def additional_triggers(event, source)
         return 0 unless state.battlefield.include?(source["id"])
 
-        state.battlefield.sum do |id|
+        statics = state.battlefield.sum do |id|
           obj = object(id)
           chars(obj).abilities.count do |inst|
             inst.ability.respond_to?(:additional_trigger?) && inst.ability.additional_trigger?(self, event, obj, source)
           end
+        end
+        statics + state.effects.count do |effect|
+          effect["kind"] == "additional_triggers" && effect["affected"].include?(source["id"]) && while_source_holds?(effect)
         end
       end
 

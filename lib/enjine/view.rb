@@ -22,6 +22,7 @@ module Enjine
         "battlefield" => state.battlefield.map { object_view(engine, it) },
         "stack" => state.stack.map { object_view(engine, it) },
         "exile" => state.exile.map { object_view(engine, it) },
+        "phased_out" => state.phased_out.map { object_view(engine, it) },
         "pending" => pending_view(engine, viewer),
         "result" => state.result&.dup,
         "effects" => state.effects.map { it.except("controller").merge("controller" => engine.name(it["controller"])) },
@@ -67,6 +68,9 @@ module Enjine
       case obj.zone
       when :battlefield then permanent_view(engine, obj, defn, view)
       when :stack then view.merge!("controller" => engine.name(obj.controller), "targets" => obj.targets || [])
+      when :phased_out # public: still on the battlefield, treated as though it doesn't exist (CR 702.26b)
+        view.merge!("controller" => engine.name(obj.controller), "tapped" => obj.tapped, "phased_out" => true)
+        view["attached_to"] = obj.attached_to if obj.attached_to
       end
       view
     end

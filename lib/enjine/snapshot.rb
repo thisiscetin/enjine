@@ -46,7 +46,7 @@ module Enjine
       state.objects = data["objects"].to_h do |o|
         [o["id"], build_object(o)]
       end
-      %w[battlefield stack exile].each { |z| state.public_send("#{z}=", data[z].dup) }
+      State::SHARED_ZONES.each { |z| state.public_send("#{z}=", data.fetch(z.to_s, []).dup) }
       state.attackers = deep_copy(data.fetch("attackers", {}))
       state.blockers = deep_copy(data.fetch("blockers", {}))
       state.effects = deep_copy(data.fetch("effects", []))
@@ -74,7 +74,8 @@ module Enjine
                      targets: deep_copy(hash["targets"]), loyalty_turn: hash["loyalty_turn"],
                      deathtouched: hash.fetch("deathtouched", false), modes: hash["modes"]&.dup,
                      memory: deep_copy(hash.fetch("memory", {})), x: hash["x"], mana_spent: hash["mana_spent"]&.dup,
-                     attached_to: hash["attached_to"], paid: hash["paid"] && deep_copy(hash["paid"]))
+                     attached_to: hash["attached_to"], paid: hash["paid"] && deep_copy(hash["paid"]),
+                     phased_out: hash["phased_out"]&.dup)
     end
 
     def deep_copy(value) = Marshal.load(Marshal.dump(value))
@@ -95,6 +96,7 @@ module Enjine
       errors << "next_id: must be a positive integer" unless data["next_id"].is_a?(Integer) && data["next_id"].positive?
       errors << "decklists: must be a list of card id lists" unless data["decklists"].is_a?(Array) && data["decklists"].all?(Array)
       %w[battlefield stack exile].each { |z| errors << "#{z}: must be a list" unless data[z].is_a?(Array) }
+      errors << "phased_out: must be a list" unless data.fetch("phased_out", []).is_a?(Array)
     end
 
     def validate_players(data, errors)
@@ -156,7 +158,8 @@ module Enjine
       errors << "#{path}.zone: unknown zone #{zone.inspect}" unless State::ZONES.map(&:to_s).include?(zone)
       errors << "#{path}.tapped: must be true or false" unless [true, false].include?(obj["tapped"])
       validate_object_state(obj, path, zone, errors)
-      return if %w[battlefield stack].include?(zone)
+      validate_phasing(obj, path, zone, errors)
+      return if %w[battlefield stack phased_out].include?(zone)
 
       errors << "#{path}: only permanents on the battlefield can be tapped" if obj["tapped"]
       errors << "#{path}: controller must equal owner outside the battlefield and stack" if obj["controller"] != obj["owner"]
@@ -177,7 +180,7 @@ module Enjine
       errors << "#{path}.memory: must be an object" unless obj.fetch("memory", {}).is_a?(Hash)
       validate_cast_info(obj, path, errors)
       validate_attachment(obj, path, zone, errors)
-      return if zone == "battlefield"
+      return if ON_BATTLEFIELD.include?(zone)
 
       return unless counters.values.any?(&:positive?) || obj["damage"].to_i.positive?
 
@@ -200,7 +203,20 @@ module Enjine
       return if to.nil?
 
       errors << "#{path}.attached_to: must be another object's id" unless to.is_a?(String) && to != obj["id"]
-      errors << "#{path}: only permanents on the battlefield can be attached" unless zone == "battlefield"
+      errors << "#{path}: only permanents on the battlefield can be attached" unless ON_BATTLEFIELD.include?(zone)
+    end
+
+    # Phased out (CR 702.26): still a permanent on the battlefield, kept in the `phased_out` list with who
+    # controlled it as it phased out and whether it phased out indirectly.
+    ON_BATTLEFIELD = %w[battlefield phased_out].freeze
+
+    def validate_phasing(obj, path, zone, errors)
+      info = obj["phased_out"]
+      return errors << "#{path}.phased_out: only phased-out permanents have it" if info && zone != "phased_out"
+      return if zone != "phased_out"
+      return if info.is_a?(Hash) && [0, 1].include?(info["by"]) && [true, false].include?(info["indirectly"])
+
+      errors << "#{path}.phased_out: must be {\"by\": 0 or 1, \"indirectly\": true or false}"
     end
 
     def validate_combat(data, errors)
@@ -237,7 +253,7 @@ module Enjine
 
     def validate_zone_membership(data, objects, errors)
       placed = Hash.new(0)
-      lists = State::SHARED_ZONES.map { |z| [z.to_s, nil, data[z.to_s]] }
+      lists = State::SHARED_ZONES.map { |z| [z.to_s, nil, data.fetch(z.to_s, [])] }
       data["players"].each_with_index do |pl, i|
         State::PLAYER_ZONES.each { |z| lists << [z.to_s, i, pl[z.to_s]] }
       end

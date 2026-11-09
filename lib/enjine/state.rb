@@ -6,7 +6,8 @@ module Enjine
   GameObject = Struct.new(:id, :card, :owner, :controller, :zone, :tapped, :controlled_since, :kind, :counters,
                           :damage, :source, :ability, :targets, :loyalty_turn, :deathtouched, :modes, :memory,
                           :x, :mana_spent, :attached_to,
-                          :paid) do # paid: choices made paying costs, e.g. the creature tapped (CR 702.184a)
+                          :paid, # paid: choices made paying costs, e.g. the creature tapped (CR 702.184a)
+                          :phased_out) do # {"by" => controller, "indirectly" => bool} while phased out (CR 702.26)
     def ability? = kind == "ability"
 
     def to_h
@@ -15,7 +16,8 @@ module Enjine
         "damage" => damage, "source" => source, "ability" => ability, "targets" => targets&.dup,
         "loyalty_turn" => loyalty_turn, "deathtouched" => deathtouched,
         "modes" => modes&.dup, "memory" => Marshal.load(Marshal.dump(memory || {})), "x" => x,
-        "mana_spent" => mana_spent&.dup, "attached_to" => attached_to, "paid" => paid&.map(&:dup) }
+        "mana_spent" => mana_spent&.dup, "attached_to" => attached_to, "paid" => paid&.map(&:dup),
+        "phased_out" => phased_out&.dup }
     end
   end
 
@@ -45,11 +47,13 @@ module Enjine
   class State
     STARTING_LIFE = 20
     PLAYER_ZONES = %i[library hand graveyard].freeze
-    SHARED_ZONES = %i[battlefield stack exile].freeze
+    # `phased_out` is not a zone of the rules: phased-out permanents are on the battlefield but treated as
+    # though they don't exist (CR 702.26b, 702.26d), so they are kept apart from `battlefield`.
+    SHARED_ZONES = %i[battlefield stack exile phased_out].freeze
     ZONES = (PLAYER_ZONES + SHARED_ZONES).freeze
     STEP_STATES = %w[begin active done].freeze
 
-    attr_accessor :seed, :rng, :decklists, :players, :objects, :battlefield, :stack, :exile, :turn, :active,
+    attr_accessor :seed, :rng, :decklists, :players, :objects, :battlefield, :stack, :exile, :phased_out, :turn, :active,
                   :step, :step_state, :priority, :passes, :next_id, :starting_player, :pending, :result,
                   :attackers, :blockers, :effects, :frames, :attacks_declared,
                   :pending_triggers, :repeat_cleanup, :combat_damage_pass, :delayed_triggers,
@@ -65,6 +69,7 @@ module Enjine
       state.battlefield = []
       state.stack = []
       state.exile = []
+      state.phased_out = []
       state.attackers = {}
       state.blockers = {}
       state.effects = []
@@ -102,7 +107,7 @@ module Enjine
         "step_state" => step_state, "priority" => priority, "passes" => passes, "next_id" => next_id,
         "starting_player" => starting_player, "pending" => pending&.dup, "result" => result&.dup,
         "players" => players.map(&:to_h), "objects" => objects.values.map(&:to_h),
-        "battlefield" => battlefield.dup, "stack" => stack.dup, "exile" => exile.dup,
+        "battlefield" => battlefield.dup, "stack" => stack.dup, "exile" => exile.dup, "phased_out" => phased_out.dup,
         "attackers" => attackers.dup, "blockers" => blockers.dup, "effects" => effects.map { deep_dup(it) },
         "frames" => deep_dup(frames), "pending_triggers" => deep_dup(pending_triggers),
         "delayed_triggers" => deep_dup(delayed_triggers), "extra_turns" => deep_dup(extra_turns),

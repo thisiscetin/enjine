@@ -37,7 +37,8 @@ module Enjine
       # permanent has a characteristic-defining power/toughness, any event may change the result, so every
       # event drops the cache (`@volatile`, see Engine#emit).
       LAYER_EVENTS = [Events::ZoneChanged, Events::CountersChanged, Events::EffectStarted,
-                      Events::EffectsEnded, Events::Attached, Events::Unattached, Events::ControlChanged].freeze
+                      Events::EffectsEnded, Events::Attached, Events::Unattached, Events::ControlChanged,
+                      Events::PhasedOut, Events::PhasedIn].freeze
 
       def touch! = @epoch = @epoch.to_i + 1
       def volatile_layers? = @volatile
@@ -102,7 +103,12 @@ module Enjine
           keywords |= ability.keywords
           abilities += granted_instances(source, ability) unless ability.granted.empty?
         end
-        effects.each { keywords |= it["keywords"].map(&:to_sym) if it["kind"] == "grant" && it["affected"].include?(obj.id) }
+        effects.each do |effect|
+          next unless effect["affected"].include?(obj.id)
+
+          keywords |= effect["keywords"].map(&:to_sym) if effect["kind"] == "grant"
+          abilities += effect_granted_instances(effect) if effect["kind"] == "abilities" # e.g. Effects::Become
+        end
         return base if keywords == base.keywords && abilities.equal?(base.abilities)
 
         base.with(keywords: keywords.freeze, abilities: abilities.freeze)
@@ -153,6 +159,13 @@ module Enjine
         defn.nested_instances(ref).map { AbilityInstance.new(ref: "granted:#{defn.id}:#{it.ref}", ability: it.ability) }
       end
 
+      # Abilities a resolved effect grants (layer 6, CR 613.1f): the effect's card holds them under its ref.
+      def effect_granted_instances(effect)
+        catalog.fetch(effect["card"]).effect_granted(effect["ref"]).map do |inst|
+          AbilityInstance.new(ref: "granted:#{effect["card"]}:#{inst.ref}", ability: inst.ability)
+        end
+      end
+
       # For a granted ability's reference: [granting card id, its ref in that card], else nil.
       def granted_origin(ref)
         return nil unless ref.start_with?("granted:")
@@ -173,7 +186,9 @@ module Enjine
       # The affected set is locked in now (CR 611.2c). An indefinite effect ("permanent") on objects that
       # have all left the battlefield no longer does anything and is dropped. `details` may set "duration".
       def add_continuous_effect!(kind, ctx, affected, details)
-        state.effects.reject! { it["duration"] == "permanent" && it["affected"].none? { state.battlefield.include?(it) } }
+        state.effects.reject! do |effect| # a phased-out permanent is still there (CR 702.26d, 702.26f)
+          effect["duration"] == "permanent" && effect["affected"].none? { state.battlefield.include?(it) || state.phased_out.include?(it) }
+        end
         details = details.dup
         duration = details.delete("duration") || "end_of_turn"
         effect = { "kind" => kind, "timestamp" => next_timestamp!, "controller" => ctx.controller,
