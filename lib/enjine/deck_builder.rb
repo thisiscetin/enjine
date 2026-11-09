@@ -12,6 +12,7 @@ module Enjine
   #   builder.build(colors: %w[W U], seed: 7)         # explicit colors
   #   builder.build(colors: 2, seed: 8)               # two random colors
   #   builder.build(seed: 9, size: 80)                # :any: a random number of colors (profile :random_colors)
+  #   builder.build(colors: "G", seed: 3, including: ["Giant Growth"])   # these cards, then random ones
   #
   # A pool entry may also be {"card" => card, "count" => n}: a collection you own, so a deck
   # never holds more than n copies (and never more than CR 100.2a allows). Basic lands are always
@@ -87,6 +88,9 @@ module Enjine
       Mana::COLORS.select { produced.include?(it) }
     end
 
+    # One of the five basic lands every deck draws its basics from (Wastes is not: no deck color makes it).
+    def self.basic?(definition) = BASIC_LAND_NAMES.value?(definition.name) && definition.supertype?(:basic)
+
     # Colorless cards fit every deck (CR 105.2c); others fit when all their colors are deck colors.
     def self.fits?(definition, colors)
       required_colors(definition).all? { colors.include?(it) }
@@ -129,8 +133,11 @@ module Enjine
     # colors:  %w[W U], "WU", an Integer 1-5 (that many random colors), or :any (random count, see random_colors)
     # size:    deck size, at least 60; every profile count scales with it
     # profile: overrides for DEFAULT_PROFILE, merged key by key
-    def build(seed:, colors: :any, size: BASE_SIZE, profile: {})
-      Draft.new(self, seed: seed, colors: colors, size: size, profile: profile).deck
+    # including: pool cards (names or ids) the deck must hold, as many copies as allowed up to 4; they must fit
+    #            the colors (a land: produce only deck colors). They define the deck, so a chosen color then
+    #            needs no card of its own: it may only bring basics.
+    def build(seed:, colors: :any, size: BASE_SIZE, profile: {}, including: [])
+      Draft.new(self, seed: seed, colors: colors, size: size, profile: profile, including: including).deck
     end
 
     # Copies of a card the pool holds: nil when uncapped, 0 when it isn't in the pool.
@@ -158,7 +165,7 @@ module Enjine
 
     # One #build call: the seed-dependent choices for one deck.
     class Draft
-      def initialize(builder, seed:, colors:, size:, profile:)
+      def initialize(builder, seed:, colors:, size:, profile:, including:)
         raise ArgumentError, "size must be an Integer of at least #{Deck::MIN_SIZE}" unless size.is_a?(Integer) && size >= Deck::MIN_SIZE
 
         @builder = builder
@@ -170,11 +177,13 @@ module Enjine
         @colors = resolve_colors(colors)
         @creatures = {}
         @others = {}
+        @lands = {}
+        include_cards(including)
       end
 
       def deck
-        check_colors!
-        lands = scaled(sample(@profile[:lands]))
+        check_colors! if @creatures.empty? && @others.empty? && @lands.empty?
+        lands = [scaled(sample(@profile[:lands])), @lands.values.sum].max
         creatures = scaled(sample(@profile[:creatures])).clamp(0, @size - lands)
         lands += fill_spells(lands, creatures)
         document(lands)
@@ -226,6 +235,24 @@ module Enjine
       # Most copies of a card the deck may hold: 4 (CR 100.2a) or any number if exempt, and never
       # more than the pool holds.
       def limit(definition) = [definition.deck_limit || @size, @builder.count(definition.id) || @size].min
+
+      # Puts each required card in the deck with as many copies as it may hold, up to 4 (basics come anyway).
+      def include_cards(cards)
+        cards.each do |card|
+          id = CardDefinition.slug(card)
+          raise ArgumentError, "#{card.inspect} is not in the pool" if @builder.count(id)&.zero?
+
+          defn = @builder.definition(id)
+          fits = defn.land? ? DeckBuilder.produced_colors(defn).all? { @colors.include?(it) } : DeckBuilder.fits?(defn, @colors)
+          raise ArgumentError, "#{defn.name} does not fit a #{@colors.join} deck" unless fits
+          next if DeckBuilder.basic?(defn) # every deck has its basics
+
+          group = if defn.land? then @lands
+                  else defn.creature? ? @creatures : @others
+                  end
+          group[id] = [limit(defn), Deck::MAX_COPIES].min
+        end
+      end
 
       # --- spells -------------------------------------------------------------------------------------
 
@@ -341,8 +368,9 @@ module Enjine
       def pick_nonbasic_lands(total)
         pool = @pool.select { nonbasic_land?(it) }
         range = @profile[:nonbasic_lands][@colors.size == 1 ? :mono : :multi]
-        want = [scaled(uniform(range)), total / 2].min
-        chosen = {}
+        want = [scaled(uniform(range)), total / 2].min.clamp(@lands.values.sum..)
+        chosen = @lands.dup
+        pool.reject! { chosen.key?(it.id) }
         take(by_land_weight(pool), pool, chosen, chosen.values.sum, want) while chosen.values.sum < want && !pool.empty?
         chosen
       end
@@ -362,7 +390,7 @@ module Enjine
       # Basic lands split by the deck's colored mana symbols: every color that has symbols
       # gets at least one, the rest is proportional (largest remainder, ties in WUBRG order).
       def split_basics(count)
-        pips = @colors.to_h { |c| [c, spell_entries.sum { |defn, n| defn.mana_cost.colored.fetch(c, 0) * n }] }
+        pips = @colors.to_h { |c| [c, spell_entries.sum { |defn, n| (defn.mana_cost&.colored || {}).fetch(c, 0) * n }] }
         pips = @colors.to_h { [it, 1] } if pips.values.sum.zero?
         split = pips.to_h { |c, n| [c, n.positive? && count >= pips.count { it[1].positive? } ? 1 : 0] }
         rest = count - split.values.sum

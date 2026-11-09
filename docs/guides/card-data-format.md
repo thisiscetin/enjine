@@ -999,7 +999,19 @@ bundle exec exe/enjine --validate cards.json
   "invalid": [ { "index": 1, "name": "Gale Drifter", "errors": ["keywords[0]: unknown keyword \"flyng\" ..."] } ] }
 ```
 
-From Ruby:
+To play-test a whole folder of cards (every `.json` file below it, each a card or an
+array of cards), use `--verify`. It validates every card, builds random decks that
+together include each valid card, plays rules-monitored games with them, and reports
+invalid cards, cards never used in play (cast, played, activated, triggered or
+resolved), and any rules finding or engine error with its seed. Exit code 1 means
+something needs a look; `--json` prints the report as JSON.
+
+```sh
+bundle exec exe/enjine --verify cards/ --games 20 --seed 1
+```
+
+From Ruby (`require "enjine/verify"`, then `Enjine::Verify.new(dir, games:, seed:).run`
+returns the same report as a Hash).
 
 ```ruby
 require "enjine"

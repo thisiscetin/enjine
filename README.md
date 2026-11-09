@@ -47,6 +47,34 @@ Every mechanic of **Star Trek** (`trk`) can be written in the DSL: the set is
 supported. For the other Standard sets, the mechanics that can't be written yet
 are listed per set in [docs/plans/standard.md](docs/plans/standard.md#mechanics-gaps).
 
+To check a folder of your cards, run `bundle exec exe/enjine --verify DIR` (add
+`--games N`, `--seed S` or `--json`). It validates every card, then plays
+rules-monitored games with random decks built from them, and reports invalid cards,
+cards that were never used in play, and any rules finding.
+
+## Set support
+
+| Set | Creature | Instant | Sorcery | Artifact | Enchantment | Land | Planeswalker | Battle | Kindred |
+|---|---|---|---|---|---|---|---|---|---|
+| Star Trek (`trk`) | — | — | — | — | — | — | n/a | n/a | n/a |
+| Reality Fracture (`fra`) | — | — | — | — | — | — | — | n/a | n/a |
+| The Hobbit (`hob`) | — | — | — | — | — | — | n/a | n/a | n/a |
+| Marvel Super Heroes (`msh`) | — | — | — | — | — | — | n/a | n/a | n/a |
+| Secrets of Strixhaven (`sos`) | — | — | — | — | — | — | — | n/a | n/a |
+| Teenage Mutant Ninja Turtles (`tmt`) | — | — | — | — | — | — | n/a | n/a | n/a |
+| Lorwyn Eclipsed (`ecl`) | — | — | — | — | — | — | — | n/a | — |
+| Avatar: The Last Airbender (`tla`) | — | — | — | — | — | — | n/a | n/a | n/a |
+| Spider-Man (`spm`) | — | — | — | — | — | — | n/a | n/a | n/a |
+| Edge of Eternities (`eoe`) | — | — | — | — | — | — | — | n/a | n/a |
+| Final Fantasy (`fin`) | — | — | — | — | — | — | n/a | n/a | n/a |
+| Tarkir: Dragonstorm (`tdm`) | — | — | — | — | — | — | — | n/a | n/a |
+| Aetherdrift (`dft`) | — | — | — | — | — | — | — | n/a | n/a |
+| Foundations (`fdn`) | — | — | — | — | — | — | — | n/a | n/a |
+
+✓ means every card of that type in the set was written in the DSL, validated, and
+used in rules-monitored play with `enjine --verify`. The card data used for these
+checks is kept outside this repository. n/a means the set has no card of that type.
+
 ## Try it: play both sides in your terminal
 
 ```sh

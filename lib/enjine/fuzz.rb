@@ -5,13 +5,15 @@ module Enjine
   # engine's invariants after every decision. A crash, a stall, a broken invariant
   # or an export/import mismatch raises Fuzz::Failure with the seed to reproduce it.
   module Fuzz
-    # Raised when a fuzzed game breaks; carries the reproduction data.
+    # Raised when a fuzzed game breaks; carries the reproduction data. `kind`: :finding (the rules monitor
+    # disagreed), :stall (the decision cap was hit), :error (an exception, a broken invariant or roundtrip).
     class Failure < Error
-      attr_reader :seed, :decisions
+      attr_reader :seed, :decisions, :kind
 
-      def initialize(message, seed:, decisions:)
+      def initialize(message, seed:, decisions:, kind: :error)
         @seed = seed
         @decisions = decisions
+        @kind = kind
         super("#{message} (seed #{seed}, after #{decisions} decisions)")
       end
     end
@@ -71,7 +73,7 @@ module Enjine
     def play(game, agent, seed, max_decisions, roundtrip_every, invariants, watcher = nil)
       count = 0
       until game.over?
-        raise Failure.new("game exceeded #{max_decisions} decisions", seed: seed, decisions: count) if count >= max_decisions
+        raise Failure.new("game exceeded #{max_decisions} decisions", seed: seed, decisions: count, kind: :stall) if count >= max_decisions
 
         begin
           entry = game.submit(agent.choose(game.pending_decision))
@@ -93,7 +95,7 @@ module Enjine
       return if found.empty?
 
       first = found.first
-      raise Failure.new("rules finding CR #{first.rule}: #{first.message}", seed: seed, decisions: count)
+      raise Failure.new("rules finding CR #{first.rule}: #{first.message}", seed: seed, decisions: count, kind: :finding)
     end
 
     def check!(game, seed, count)

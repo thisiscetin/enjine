@@ -41,5 +41,6 @@ require_relative "enjine/setup"
 module Enjine
 end
 require_relative "enjine/agents/random"
+require_relative "enjine/agents/busy"
 require_relative "enjine/fuzz"
 require_relative "enjine/rules_monitor"

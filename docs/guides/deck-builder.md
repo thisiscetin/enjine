@@ -65,6 +65,7 @@ basic lands are always available, owned or not.
 | `colors:` | `:any` | `%w[W U]`, `"WU"`, a number `1`-`5` (that many random colors), or `:any` (a random count from `random_colors`). |
 | `size:` | `60` | Deck size, at least 60. Every count in the profile scales with it. |
 | `profile:` | `{}` | Overrides for `DEFAULT_PROFILE`, merged key by key. |
+| `including:` | `[]` | Pool cards (names or ids) the deck must hold, as many copies as allowed up to 4. Each must fit the colors (a land: make only deck colors). A deck with included cards may name colors the pool has no other card of; those bring only basics. |
 
 Random colors are drawn uniformly from the color combinations the pool can fill:
 each color needs at least one card, and there must be enough cards in total. If no

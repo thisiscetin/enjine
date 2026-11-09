@@ -176,6 +176,26 @@ RSpec.describe Enjine::DeckBuilder do
       expect(seen.uniq).to include("Seagate Bastion")
       expect(seen).not_to include("Murkwater Cove", "Cindermarsh", "Ember Thicket")
     end
+
+    it "includes the cards it's asked to, four copies each, and checks they fit the colors" do
+      pool = described_class.new(CardFixtures.pool("fxa") + CardFixtures.cards.select { it["name"] == "Wastes" })
+      doc = pool.build(colors: "G", seed: 5, including: ["Elderbark Ancient", "verdant_blessing", "Forest", "Wastes"])
+      counts = deck_stats(doc)[:counts].to_h { |d, n| [d.name, n] }
+      expect(counts).to include("Elderbark Ancient" => 4, "Verdant Blessing" => 4, "Wastes" => 4)
+      expect(counts["Forest"]).to be > 4 # a basic of the deck's colors comes anyway
+      expect(Enjine::Deck.from_h(doc)).to be_valid
+      expect { pool.build(colors: "G", seed: 5, including: ["Searing Jolt"]) }
+        .to raise_error(ArgumentError, /Searing Jolt does not fit a G deck/)
+      expect { pool.build(colors: "G", seed: 5, including: ["Nope"]) }.to raise_error(ArgumentError, /"Nope" is not in the pool/)
+      expect { pool.build(colors: "R", seed: 5, including: ["Ember Thicket"]) }.to raise_error(ArgumentError, /Ember Thicket does not fit/)
+    end
+
+    it "builds a deck around included cards in colors the pool has no other card of, padding with basics" do
+      pool = described_class.new([pool_card("Lone Bear", "{1}{G}")])
+      doc = pool.build(colors: "GU", seed: 1, including: ["Lone Bear"], profile: { outlier_chance: 0, lands: { outliers: 20..60 } })
+      counts = deck_stats(doc)[:counts].to_h { |d, n| [d.name, n] }
+      expect(counts).to include("Lone Bear" => 4, "Forest" => 56)
+    end
   end
 
   describe "scarcity" do

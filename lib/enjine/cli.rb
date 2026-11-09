@@ -2,6 +2,7 @@
 
 require "optparse"
 require "enjine/deck_builder"
+require "enjine/verify"
 require_relative "cli/text"
 
 module Enjine
@@ -11,6 +12,7 @@ module Enjine
   #
   #   enjine --deck1 examples/decks/gruul_beats.json --deck2 examples/decks/azorius_walkers.json
   #   enjine --pool examples/pool.json --deck1 random:colors=RG --deck2 random --p2 random
+  #   enjine --verify cards/ --games 20 --seed 1   # check a folder of card JSON (see Enjine::Verify)
   class CLI
     SEATS = %w[human random].freeze
     HELP = <<~HELP
@@ -28,7 +30,7 @@ module Enjine
     def initialize(argv, input: $stdin, output: $stdout)
       @input = input
       @out = output
-      @options = { seed: Random.new_seed % (2**31), p1: "human", p2: "human", quiet: false, max_decisions: 100_000,
+      @options = { p1: "human", p2: "human", quiet: false, max_decisions: 100_000,
                    observer: false, names: %w[alice bob] }
       parser.parse!(argv)
       # `--random-deck colors=WU seed=7` works unquoted: the key=value words after it belong to the spec.
@@ -36,6 +38,9 @@ module Enjine
     end
 
     def run
+      return verify(@options[:verify]) if @options[:verify]
+
+      @options[:seed] ||= Random.new_seed % (2**31)
       return validate(@options[:validate]) if @options[:validate]
       return random_deck(@options[:random_deck]) if @options.key?(:random_deck)
 
@@ -66,6 +71,11 @@ module Enjine
         end
         o.on("--names A,B", Array, "Player names (default alice,bob)") { @options[:names] = it }
         o.on("--validate FILE", "Validate a JSON array of card data blocks; prints a JSON report") { @options[:validate] = it }
+        o.on("--verify DIR", "Validate and play-test every card in DIR's JSON files; exit 1 on any problem") do
+          @options[:verify] = it
+        end
+        o.on("--games N", Integer, "With --verify: play at least N games (default 10)") { @options[:games] = it }
+        o.on("--json", "With --verify: print the report as JSON") { @options[:json] = true }
         o.on("--load FILE", "Resume a game saved with the s command") { @options[:load] = it }
         o.on("--observer", "Start in observer view (see both hands and library order)") { @options[:observer] = true }
         o.on("--quiet", "Only print the result (useful with random seats)") { @options[:quiet] = true }
@@ -88,6 +98,16 @@ module Enjine
       report["invalid"].empty? ? 0 : 1
     rescue JSON::ParserError => e
       say JSON.generate("error" => "not valid JSON: #{e.message}")
+      1
+    end
+
+    # Checks a folder of cards (seed 0 unless --seed); exit code 1 if a card is invalid or a game went wrong.
+    def verify(dir)
+      report = Verify.new(dir, games: @options.fetch(:games, 10), seed: @options.fetch(:seed, 0)).run
+      say @options[:json] ? JSON.pretty_generate(report) : Verify.text(report)
+      report["ok"] ? 0 : 1
+    rescue ArgumentError => e
+      say "error: #{e.message}"
       1
     end
 
