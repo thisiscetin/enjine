@@ -162,14 +162,17 @@ module Enjine
                   description: "The controller may play (`play: \"play\"`, default) or cast (`\"cast\"`) each referenced " \
                                "exiled card matching `for`/`not_types`, paying its costs and following timing rules, " \
                                "for `duration`: end_of_turn (default), end_of_your_next_turn or while_exiled. With " \
-                               "`choose: \"one_per_owner\"` only one chosen card per owner.",
-                  rules: %w[611.2a 601.3 305.1 400.7 514.2],
+                               "`choose: \"one_per_owner\"` only one chosen card per owner. `player`: who gets the " \
+                               "permission instead of the controller (a face-down card: only someone who may look at " \
+                               "it). `any_mana_type: true`: mana of any type can be spent to cast those spells.",
+                  rules: %w[611.2a 601.3 305.1 400.7 514.2 406.3b 609.4b],
                   params: { "to" => "selector (usually {\"result\": n})", "duration" => DURATIONS.join(" | "),
                             "play" => "play | cast", "for" => "card spec", "not_types" => "list of card types",
-                            "choose" => "one_per_owner" },
+                            "choose" => "one_per_owner", "player" => "selector of players (default \"you\")",
+                            "any_mana_type" => "boolean" },
                   example: { "play_permission" => { "to" => { "result" => 0 }, "duration" => "end_of_your_next_turn" } }
 
-        def self.keys = %w[to duration play for not_types choose if]
+        def self.keys = %w[to duration play for not_types choose player any_mana_type if]
 
         def setup(params, errors, path)
           @duration = Mechanics.fetch_param(params, :duration) || "end_of_turn"
@@ -180,9 +183,17 @@ module Enjine
           @choose = Mechanics.fetch_param(params, :choose)
           errors << "#{path}.choose: must be one_per_owner" unless [nil, "one_per_owner"].include?(@choose)
           @filter = CardFilter.build(params, errors, path)
+          @any_type = Mechanics.fetch_param(params, :any_mana_type)
+          errors << "#{path}.any_mana_type: must be true or false" unless [nil, true, false].include?(@any_type)
+          raw = Mechanics.fetch_param(params, :player)
+          @player = raw && Selector.build(raw, errors, "#{path}.player", targets_count: @targets_count,
+                                                                         results_count: @results_count)
         end
 
-        def to_s = "you may #{@play} #{@filter} (#{@duration.tr("_", " ")}) → #{to}"
+        def to_s
+          who = @player ? "#{@player} may" : "you may"
+          "#{who} #{@play} #{@filter} (#{@duration.tr("_", " ")})#{", mana of any type" if @any_type} → #{to}"
+        end
 
         def run(engine, ctx, locals)
           return :done unless locals["cards"] || condition.nil? || condition.true?(engine, ctx)
@@ -191,15 +202,24 @@ module Enjine
           picks = @choose ? choose(engine, ctx, locals, cards) : cards
           return :wait if picks == :wait
 
-          engine.grant_play_permission!(ctx.controller, picks, duration: @duration, play: @play)
+          grantees(engine, ctx).each do |index|
+            engine.grant_play_permission!(index, picks, duration: @duration, play: @play, any_mana_type: @any_type == true)
+          end
           :done
         end
 
         private
 
+        def grantees(engine, ctx)
+          return [ctx.controller] unless @player
+
+          @player.resolve(engine, ctx).filter_map { Filters.player_index(engine, it) }.uniq
+        end
+
+        # A face-down card is judged face up (the permission is to play it face up, CR 406.3a).
         def exiled_match?(engine, id)
           obj = engine.state.objects[id]
-          obj && obj.zone == :exile && @filter.match?(engine, obj)
+          obj && obj.zone == :exile && engine.face_up(id) { @filter.match?(engine, obj) }
         end
 
         # One card per owner, in seat order; asked only when there's a choice.

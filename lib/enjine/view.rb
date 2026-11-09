@@ -21,7 +21,7 @@ module Enjine
         "players" => state.players.map { |pl| player_view(engine, pl, observer || pl.name == viewer, observer) },
         "battlefield" => state.battlefield.map { object_view(engine, it) },
         "stack" => state.stack.map { object_view(engine, it) },
-        "exile" => state.exile.map { object_view(engine, it) },
+        "exile" => state.exile.map { exiled_view(engine, it, viewer) },
         "phased_out" => state.phased_out.map { object_view(engine, it) },
         "pending" => pending_view(engine, viewer),
         "result" => state.result&.dup,
@@ -40,6 +40,7 @@ module Enjine
       view = {
         "name" => player.name, "life" => player.life, "poison" => player.poison,
         "mana_pool" => player.mana_pool.reject { |_, n| n.zero? }.transform_keys(&:to_s),
+        "restricted_mana" => player.restricted_mana.map { it.merge("text" => Mechanics::SpendOnly.from_data(it["spend_only"]).to_s) },
         "lands_played" => player.lands_played, "mulligans" => player.mulligans,
         "hand_count" => player.hand.size, "library_count" => player.library.size,
         "graveyard" => player.graveyard.map { object_view(engine, it) }
@@ -53,6 +54,17 @@ module Enjine
     # CR 401.5: an effect letting a player look at the top card of their library shows it to that player only.
     def looks_at_top?(engine, player)
       !player.library.empty? && engine.may_look_at_top?(engine.state.players.index(player))
+    end
+
+    # CR 406.3: a card exiled face down shows only that it's face down, except to an observer and to the
+    # players who may look at it.
+    def exiled_view(engine, id, viewer)
+      obj = engine.object(id)
+      return object_view(engine, id) unless engine.face_down?(obj)
+
+      hidden = { "id" => id, "face_down" => true, "owner" => engine.name(obj.owner) }
+      looks = viewer == :observer || obj.memory.fetch("may_look", []).map { engine.name(it) }.include?(viewer)
+      looks ? object_view(engine, id).merge(hidden) : hidden
     end
 
     def object_view(engine, id)

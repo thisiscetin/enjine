@@ -43,45 +43,71 @@ module Enjine
 
       # ---- paying from the pool ----------------------------------------------------------
 
-      # Mana types in the pool that can pay part of the remaining cost (CR 601.2h).
-      def payable_mana_types
-        frame = payment
-        player(frame["player"]).mana_pool.filter_map do |type, n|
-          next unless n.positive?
+      # What the payment is for, deciding where restricted mana may be spent (CR 106.6) and whether any
+      # mana may pay any symbol (CR 609.4b, a permission's `any_mana_type`): {"spell" => id} or
+      # {"ability" => source id}, plus "any_type"; nil for a cost paid while resolving (CR 118.12).
+      def payment_purpose(frame)
+        return nil unless frame["type"] == "cast"
 
-          # Once a mana can go somewhere, some place keeps the rest payable (pay_mana! picks it), so no
-          # pool mana can strand an irreversible payment.
-          type.to_s unless pay_slots(frame["remaining"], type.to_s).empty?
+        purpose = frame["kind"] == "spell" ? { "spell" => frame["object"] } : { "ability" => frame["source"] }
+        purpose["any_type"] = true if frame.dig("method", "any_mana_type")
+        purpose
+      end
+
+      # Pool mana that can pay part of the remaining cost (CR 601.2h): `{type: "pay_mana", mana: "R"}`, and
+      # `restricted: i` for restricted mana (entry i of the restricted pool) that may be spent here.
+      def payable_mana_options
+        frame = payment
+        pl = player(frame["player"])
+        any = payment_purpose(frame)&.[]("any_type") == true
+        # Once a mana can go somewhere, some place keeps the rest payable (pay_mana! picks it), so no
+        # pool mana can strand an irreversible payment.
+        plain = pl.mana_pool.filter_map do |type, n|
+          { type: "pay_mana", mana: type.to_s } if n.positive? && !pay_slots(frame["remaining"], type.to_s, any: any).empty?
+        end
+        plain + restricted_mana_options(frame, pl, any)
+      end
+
+      # One option per distinct restricted mana that may be spent on this payment.
+      def restricted_mana_options(frame, player, any)
+        purpose = payment_purpose(frame)
+        seen = []
+        player.restricted_mana.each_with_index.filter_map do |entry, i|
+          next if seen.include?(entry) || !spendable?(entry, purpose) ||
+                  pay_slots(frame["remaining"], entry["mana"], any: any).empty?
+
+          seen << entry
+          { type: "pay_mana", mana: entry["mana"], restricted: i }
         end
       end
 
-      # Where one mana of `type` can go: its own colored symbol, a hybrid symbol that includes it,
-      # or generic mana. [[:color], [:hybrid, i], [:generic]].
-      def pay_slots(rem, type)
-        slots = []
-        slots << [:color] if rem.fetch(type, 0).positive?
-        rem.fetch("hybrid", []).each_with_index { |pair, i| slots << [:hybrid, i] if pair.include?(type) }
+      # Where one mana of `type` can go: a colored symbol (its own, or any with "any_type"), a hybrid symbol
+      # that includes it, or generic mana. [[:color, key], [:hybrid, i], [:generic]].
+      def pay_slots(rem, type, any: false)
+        slots = (any ? Mana::TYPES.map(&:to_s) : [type]).filter_map { [:color, it] if rem.fetch(it, 0).positive? }
+        rem.fetch("hybrid", []).each_with_index { |pair, i| slots << [:hybrid, i] if any || pair.include?(type) }
         slots << [:generic] if rem["generic"].positive?
         slots
       end
 
-      # Spends one mana; it pays the first slot that keeps the rest payable (a hybrid symbol the other
-      # color could also pay waits for it), deterministically.
-      def pay_mana!(type)
+      # Spends one mana (restricted entry `restricted`, or a plain one); it pays the first slot that keeps
+      # the rest payable (a hybrid symbol the other color could also pay waits for it), deterministically.
+      def pay_mana!(type, restricted = nil)
         frame = payment
-        slots = pay_slots(frame["remaining"], type)
-        slot = slots.find { completable_after_paying?(frame, type, it) } || slots.first
-        player(frame["player"]).mana_pool[type.to_sym] -= 1
-        frame["remaining"] = after_paying(frame["remaining"], type, slot)
-        (frame["spent"] ||= []) << type # what was spent matters later (sunburst, CR 702.44a)
+        pl = player(frame["player"])
+        slots = pay_slots(frame["remaining"], type, any: payment_purpose(frame)&.[]("any_type") == true)
+        slot = slots.find { completable_after_paying?(frame, type, it, restricted) } || slots.first
+        restricted ? pl.restricted_mana.delete_at(restricted) : pl.mana_pool[type.to_sym] -= 1
+        frame["remaining"] = after_paying(frame["remaining"], slot)
+        (frame["spent"] ||= []) << type # what was spent matters later (sunburst, CR 702.44a; 609.4b: its real type)
         emit Events::ManaPaid.new(player: name(frame["player"]), mana: "{#{type}}", object: frame["object"])
         ask!(nil)
       end
 
-      def after_paying(rem, type, slot)
+      def after_paying(rem, slot)
         rem = Snapshot.deep_copy(rem)
         case slot.first
-        when :color then rem[type] -= 1
+        when :color then rem[slot.last] -= 1
         when :hybrid then rem["hybrid"].delete_at(slot.last)
         else rem["generic"] -= 1
         end
@@ -89,28 +115,39 @@ module Enjine
         rem
       end
 
-      def completable_after_paying?(frame, type, slot)
-        pool = player(frame["player"]).mana_pool.dup
-        pool[type.to_sym] -= 1
-        payable_with?(frame["player"], remaining_cost(after_paying(frame["remaining"], type, slot)), pool,
-                      payment_reserved(frame))
+      def completable_after_paying?(frame, type, slot, restricted)
+        pl = player(frame["player"])
+        pool = pl.mana_pool.dup
+        rest = pl.restricted_mana.dup
+        restricted ? rest.delete_at(restricted) : pool[type.to_sym] -= 1
+        payable_with?(frame, remaining_cost(after_paying(frame["remaining"], slot)), pool, payment_reserved(frame),
+                      restricted: rest)
       end
 
       # ---- mana abilities during payment (CR 601.2g, 605.3a) ---------------------------------
 
-      # Mana sources usable during payment: not a source the spell or ability still needs for one of
-      # its own costs ({T}, or a cost that sacrifices or exiles it), unless the mana ability only taps it
-      # and the cost doesn't.
-      def payment_sources
+      # Mana ability activation options usable during payment: not a source the spell or ability still
+      # needs for one of its own costs ({T}, or a cost that sacrifices or exiles it), unless the mana
+      # ability only taps it and the cost doesn't; not a source of restricted mana that can't be spent
+      # here; and, once the payment is irreversible, only activations that keep the rest payable.
+      def payment_mana_options
         frame = payment
-        sources = all_mana_sources(frame["player"]).reject { |id, ref| reserved_for_cost?(frame, id, ref) }
-        sources.select do |id, ref|
-          (!frame["irreversible"] && !irreversible_mana_ability?(id, ref)) || completable_after_activating?(frame, id, ref)
+        purpose = payment_purpose(frame)
+        sources = all_mana_sources(frame["player"]).reject do |id, ref|
+          spend_only = chars(id).ability(ref).spend_only
+          reserved_for_cost?(frame, id, ref) || (spend_only && !spend_only.allows?(self, purpose))
+        end
+        mana_activation_options(sources).select do |option|
+          id = option[:object]
+          next !frame["irreversible"] && !irreversible_mana_ability?(id, option[:ability]) if chars(id).ability(option[:ability]).mana_cost
+
+          (!frame["irreversible"] && !irreversible_mana_ability?(id, option[:ability])) ||
+            completable_after_activating?(frame, option)
         end
       end
 
-      # A mana ability whose costs include more than {T} (a sacrifice, life, a discard) can't be undone.
-      def irreversible_mana_ability?(id, ref) = chars(id).ability(ref).costs.any? { !it.is_a?(Mechanics::Costs::Tap) }
+      # A mana ability whose costs include more than {T} and mana (a sacrifice, life, a discard) can't be undone.
+      def irreversible_mana_ability?(id, ref) = chars(id).ability(ref).costs.any? { !it.is_a?(Mechanics::Costs::Tap) && !it.mana? }
 
       def reserved_for_cost?(frame, id, ref)
         return true if id == payment_excluded_source(frame)
@@ -128,27 +165,38 @@ module Enjine
         reserved
       end
 
-      def completable_after_activating?(frame, id, ref)
+      def completable_after_activating?(frame, option)
+        id = option[:object]
+        ability = chars(id).ability(option[:ability])
+        produced = option[:mana] ? Mana.parse_produce(option[:mana], [], "mana") : ability.outcomes(self, object(id)).first
         pool = player(frame["player"]).mana_pool.dup
-        chars(id).ability(ref).produce.each { pool[it] += 1 }
-        payable_with?(frame["player"], remaining_cost(frame["remaining"]), pool, payment_reserved(frame) + [id])
+        rest = player(frame["player"]).restricted_mana
+        if ability.spend_only
+          rest += produced.map { { "mana" => it.to_s, "spend_only" => ability.spend_only.data } }
+        else
+          produced.each { pool[it] += 1 }
+        end
+        payable_with?(frame, remaining_cost(frame["remaining"]), pool, payment_reserved(frame) + [id], restricted: rest)
       end
 
       # CR 605.3: activating a mana ability while paying. One whose costs include more than {T} (a
       # sacrifice, life, a discard) can't be undone, so the payment stops being cancellable.
-      def tap_for_payment!(id, ability_ref)
+      def tap_for_payment!(id, ability_ref, mana = nil)
         frame = payment
         frame["irreversible"] = true if irreversible_mana_ability?(id, ability_ref)
-        activate_mana_ability!(frame["player"], id, ability_ref)
+        activate_mana_ability!(frame["player"], id, ability_ref, mana)
         frame["tapped"] << id
         ask!(nil)
       end
 
-      # Whether `cost` can be paid from `pool` plus the player's untapped sources, minus `excluded`.
-      def payable_with?(index, cost, pool, excluded)
+      # Whether `cost` can be paid from `pool` (and the `restricted` pool) plus the player's untapped
+      # sources, minus `excluded`, for the payment `frame`.
+      def payable_with?(frame, cost, pool, excluded, restricted:)
         return true if cost.mana_value.zero?
 
-        units = pool.flat_map { |type, n| Array.new([n, 0].max) { [type] } } + source_units(index, excluded)
+        index = frame["player"]
+        purpose = payment_purpose(frame)
+        units = pool_units(index, pool, purpose, restricted) + source_units(index, excluded, purpose)
         units.size >= cost.mana_value && match_colored(cost.requirements, units)
       end
 
@@ -167,6 +215,7 @@ module Enjine
           emit Events::Untapped.new(object: id)
         end
         player(frame["player"]).mana_pool = Mana::TYPES.to_h { |t| [t, frame["pool"].fetch(t.to_s, 0)] }
+        player(frame["player"]).restricted_mana = Snapshot.deep_copy(frame["restricted"]) if frame["restricted"]
         state.pending_triggers.select! { frame["triggers_before"].include?(it["id"]) }
       end
 
@@ -194,6 +243,7 @@ module Enjine
       def begin_payment!(index, cost, object)
         state.frames << { "type" => "pay", "player" => index, "object" => object, "remaining" => remaining_hash(cost),
                           "pool" => player(index).mana_pool.transform_keys(&:to_s), "tapped" => [],
+                          "restricted" => Snapshot.deep_copy(player(index).restricted_mana),
                           "triggers_before" => state.pending_triggers.map { it["id"] } }
         ask!(nil)
       end

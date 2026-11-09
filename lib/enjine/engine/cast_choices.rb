@@ -68,7 +68,7 @@ module Enjine
                        targets_available?(spell.targets_for([], kicked: true),
                                           index, obj.id)
                      end
-        kicker.payable?(self, obj) && targetable && affordable?(index, total, nil)
+        kicker.payable?(self, obj) && targetable && affordable?(index, total, nil, { "spell" => obj.id })
       end
 
       def announce_kicker!(kicked)

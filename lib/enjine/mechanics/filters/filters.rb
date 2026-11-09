@@ -50,8 +50,9 @@ module Enjine
           Restricted.build(self, params.transform_keys(&:to_s), errors, path)
         end
 
-        def self.candidates_for(engine, controller, _source) = candidates(engine, controller)
-        def self.match_for?(engine, ref, controller, _source) = match?(engine, ref, controller)
+        def self.candidates_for(engine, controller, _source, **) = candidates(engine, controller)
+
+        def self.match_for?(engine, ref, controller, _source, **) = match?(engine, ref, controller)
 
         def self.type?(engine, object, type) = object.kind == "card" && engine.chars(object).type?(type)
 
@@ -92,7 +93,7 @@ module Enjine
           BOOLEANS.each do |key|
             errors << "#{path}.#{key}: must be true or false" unless params[key].nil? || [true, false].include?(params[key])
           end
-          RANGES.each { |key| validate_range(params[key], errors, "#{path}.#{key}") if params.key?(key) }
+          ranges = build_ranges(params, errors, path)
           counters = params["counters"]
           unless counters.nil? || [true, false].include?(counters) || Counters.valid?(counters)
             errors << "#{path}.counters: must be true, false or a counter name"
@@ -101,7 +102,7 @@ module Enjine
           unless colors.nil? || (colors.is_a?(Array) && !colors.empty? && colors.all? { Mana::COLORS.include?(it.to_s.to_sym) })
             errors << "#{path}.colors: must be a non-empty list of W, U, B, R, G (any of them)"
           end
-          new(base, params)
+          new(base, params, ranges)
         end
 
         def self.validate_lists(params, errors, path)
@@ -122,36 +123,53 @@ module Enjine
           end
         end
 
-        # {"at_least": n} and/or {"at_most": n}.
+        BOUNDS = %w[at_least at_most equal].freeze
+
+        # {"at_least": n}, {"at_most": n} and/or {"equal": n}; each bound is an integer or a computed
+        # amount ("mana value equal to the number of charge counters on it", CR 202.3, 608.2h). Returns
+        # the bounds as Amounts.
         def self.validate_range(range, errors, path)
-          ok = range.is_a?(Hash) && !range.empty? && (range.keys - %w[at_least at_most]).empty? &&
-               range.values.all?(Integer)
-          errors << "#{path}: must be {\"at_least\": n} and/or {\"at_most\": n}" unless ok
+          unless range.is_a?(Hash) && !range.empty? && (range.keys - BOUNDS).empty?
+            errors << "#{path}: must be {\"at_least\": n}, {\"at_most\": n} and/or {\"equal\": n} (n: an amount)"
+            return {}
+          end
+          range.to_h { |key, n| [key, Amount.build(n, errors, "#{path}.#{key}", targets_count: 0, min: -1_000)] }
         end
 
-        def initialize(base, params)
+        def self.build_ranges(params, errors, path)
+          RANGES.filter_map { |key| [key, validate_range(params[key], errors, "#{path}.#{key}")] if params.key?(key) }.to_h
+        end
+
+        def initialize(base, params, ranges = {})
           @base = base
           @controller = params["controller"]
           @other = params["other"] == true
           @params = params
           @lists = (TYPE_LISTS + NAME_LISTS).to_h { [it, Array(params[it]).map(&:to_sym)] }
-          @ranges = RANGES.to_h { [it, params[it]] }.compact
+          @ranges = ranges.freeze
+          @computed = ranges.values.any? { |range| range.values.any? { !it.is_a?(Amount::Fixed) } }
           freeze
         end
 
         def primitive_name = base.primitive_name
-        def live_keys = LIVE.select { @params.key?(it) }
+
+        # A computed bound depends on the game, so (like power) it isn't usable in the layer pass.
+        def live_keys = LIVE.select { @params.key?(it) } + (@computed ? ["computed_range"] : [])
 
         def candidates(engine, controller) = candidates_for(engine, controller, nil)
 
-        def candidates_for(engine, controller, source)
-          base.candidates(engine, controller).select { allowed?(engine, it, controller, source) }
+        # `ctx`: the resolving spell's or ability's EffectContext, for computed range bounds (a source that
+        # left the battlefield counts as it last existed, CR 608.2h).
+        def candidates_for(engine, controller, source, ctx: nil)
+          bounds = resolved_ranges(engine, controller, source, ctx)
+          base.candidates(engine, controller).select { allowed?(engine, it, controller, source, bounds) }
         end
 
         def match?(engine, ref, controller) = match_for?(engine, ref, controller, nil)
 
-        def match_for?(engine, ref, controller, source)
-          base.match?(engine, ref, controller) && allowed?(engine, ref, controller, source)
+        def match_for?(engine, ref, controller, source, ctx: nil)
+          base.match?(engine, ref, controller) &&
+            allowed?(engine, ref, controller, source, resolved_ranges(engine, controller, source, ctx))
         end
 
         # Card types only.
@@ -179,9 +197,12 @@ module Enjine
           words.compact.join(" ")
         end
 
+        RANGE_WORDS = { "at_least" => "%s or greater", "at_most" => "%s or less", "equal" => "equal to %s" }.freeze
+        private_constant :RANGE_WORDS
+
         private
 
-        def range_words(range) = range.map { |k, n| k == "at_least" ? "#{n} or greater" : "#{n} or less" }.join(" and ")
+        def range_words(range) = range.map { |k, n| format(RANGE_WORDS.fetch(k), n) }.join(" and ")
 
         def counter_words
           case @params["counters"]
@@ -191,7 +212,16 @@ module Enjine
           end
         end
 
-        def allowed?(engine, ref, controller, source)
+        # The range bounds as numbers, computed once per query. Without a resolving context (a target
+        # being chosen) the filter's source stands for "it".
+        def resolved_ranges(engine, controller, source, ctx)
+          return @ranges.transform_values { |range| range.transform_values(&:n) } unless @computed
+
+          ctx ||= EffectContext.new(controller, source, source, [], [])
+          @ranges.transform_values { |range| range.transform_values { it.value(engine, ctx) } }
+        end
+
+        def allowed?(engine, ref, controller, source, bounds)
           return false if @other && ref == source
 
           index = Filters.player_index(engine, ref)
@@ -199,10 +229,10 @@ module Enjine
           return false if @controller && (@controller == "you") != (owner == controller)
           return true if index
 
-          object_allowed?(engine, ref)
+          object_allowed?(engine, ref, bounds)
         end
 
-        def object_allowed?(engine, ref)
+        def object_allowed?(engine, ref, bounds)
           obj = engine.object(ref)
           current = engine.chars(ref)
           facts = Facts.new(chars: current, counters: obj.counters, token: engine.token?(obj))
@@ -210,7 +240,7 @@ module Enjine
           return false if @params["modified"] == true && !modified?(engine, obj)
           return false unless attached_ok?(engine, obj)
 
-          @ranges.all? { |key, range| in_range?(stat(engine, obj, current, key), range) }
+          bounds.all? { |key, range| in_range?(stat(engine, obj, current, key), range) }
         end
 
         # Types, subtypes, supertypes, token-ness, counters and printed mana value (CR 109.3, 122, 202.3).
@@ -263,7 +293,8 @@ module Enjine
         end
 
         def in_range?(value, range)
-          (range["at_least"].nil? || value >= range["at_least"]) && (range["at_most"].nil? || value <= range["at_most"])
+          (range["at_least"].nil? || value >= range["at_least"]) && (range["at_most"].nil? || value <= range["at_most"]) &&
+            (range["equal"].nil? || value == range["equal"])
         end
       end
 
@@ -372,9 +403,17 @@ module Enjine
         def live_keys = filters.flat_map(&:live_keys).uniq
         def to_s = filters.map { it.is_a?(Class) ? it.primitive_name.tr("_", " ") : it.to_s }.join(" or ")
         def candidates(engine, controller) = candidates_for(engine, controller, nil)
-        def candidates_for(engine, controller, source) = filters.flat_map { it.candidates_for(engine, controller, source) }.uniq
+
+        def candidates_for(engine, controller, source, ctx: nil)
+          filters.flat_map { it.candidates_for(engine, controller, source, ctx: ctx) }.uniq
+        end
+
         def match?(engine, ref, controller) = match_for?(engine, ref, controller, nil)
-        def match_for?(engine, ref, controller, source) = filters.any? { it.match_for?(engine, ref, controller, source) }
+
+        def match_for?(engine, ref, controller, source, ctx: nil)
+          filters.any? { it.match_for?(engine, ref, controller, source, ctx: ctx) }
+        end
+
         def matches_types?(types) = filters.any? { it.matches_types?(types) }
         def matches_facts?(facts) = filters.any? { it.matches_facts?(facts) }
       end

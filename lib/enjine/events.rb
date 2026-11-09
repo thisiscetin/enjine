@@ -108,10 +108,16 @@ module Enjine
     AttacksDeclared = define(:attacks_declared, :player, :attackers)
     BecameBlocked = define(:became_blocked, :object, :blockers)
 
-    # A card moved between zones; old_id stops existing and new_id is born (CR 400.7).
-    ZoneChanged = define(:zone_changed, :card, :old_id, :new_id, :owner, :from, :to, :reason) do
+    # A card moved between zones; old_id stops existing and new_id is born (CR 400.7). `lookers`: the card
+    # was exiled face down, and only these players (by name) see which card it is (CR 406.3).
+    ZoneChanged = define(:zone_changed, :card, :old_id, :new_id, :owner, :from, :to, :reason, :lookers) do
+      def initialize(card:, old_id:, new_id:, owner:, from:, to:, reason:, lookers: nil) = super
+
       def for_viewer(viewer)
-        if Events.zone_visible?(from, owner, viewer) || Events.zone_visible?(to, owner, viewer)
+        if lookers && viewer != :observer && !lookers.include?(viewer)
+          { "type" => type, "owner" => owner, "new_id" => new_id, "from" => from, "to" => to, "reason" => reason,
+            "face_down" => true }
+        elsif Events.zone_visible?(from, owner, viewer) || Events.zone_visible?(to, owner, viewer)
           to_h
         else
           { "type" => type, "owner" => owner, "from" => from, "to" => to, "reason" => reason }

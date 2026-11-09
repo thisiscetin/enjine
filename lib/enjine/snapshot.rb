@@ -88,6 +88,7 @@ module Enjine
         pl.mana_pool = Mana::TYPES.to_h { |t| [t, hash["mana_pool"].fetch(t.to_s, 0)] }
         pl.turn_log = deep_copy(hash.fetch("turn_log", {}))
         pl.game_log = deep_copy(hash.fetch("game_log", {}))
+        pl.restricted_mana = deep_copy(hash.fetch("restricted_mana", []))
       end
     end
 
@@ -116,10 +117,24 @@ module Enjine
         unless pool.is_a?(Hash) && pool.all? { |t, n| Mana::TYPES.include?(t.to_sym) && non_negative?(n) }
           errors << "#{path}.mana_pool: must map W/U/B/R/G/C to non-negative integers"
         end
+        validate_restricted_mana(pl.fetch("restricted_mana", []), errors, "#{path}.restricted_mana")
       end
       validate_logs(players, errors)
       names = players.map { it.is_a?(Hash) ? it["name"] : nil }
       errors << "players: names must be distinct non-empty strings" unless names.all?(String) && names.uniq.size == 2
+    end
+
+    # Restricted pool mana (CR 106.6): [{"mana" => "C", "spend_only" => {...}}]; absent in older snapshots.
+    def validate_restricted_mana(list, errors, path)
+      return errors << "#{path}: must be a list" unless list.is_a?(Array)
+
+      list.each_with_index do |entry, i|
+        ok = entry.is_a?(Hash) && entry.keys.sort == %w[mana spend_only] && Mana::TYPES.include?(entry["mana"].to_s.to_sym)
+        problems = []
+        Mechanics::SpendOnly.build(entry["spend_only"], problems, "#{path}[#{i}].spend_only") if ok
+        errors << "#{path}[#{i}]: must be {\"mana\": W/U/B/R/G/C, \"spend_only\": restriction}" unless ok
+        errors.concat(problems)
+      end
     end
 
     # What happened this turn and this game (Engine::TurnHistory); absent in older snapshots.
@@ -151,7 +166,8 @@ module Enjine
       id = obj["id"]
       match = /\A([a-z0-9_]+)#(\d+)\z/.match(id.to_s)
       own = (obj["memory"].is_a?(Hash) && obj["memory"]["own_card"]) || obj["card"] # a copy (Engine::Copies)
-      errors << "#{path}.id: malformed #{id.inspect}" unless match && match[1] == own
+      face_down = match && match[1] == Engine::FACE_DOWN_ID && obj["zone"].to_s == "exile" && obj.dig("memory", "face_down") == true
+      errors << "#{path}.id: malformed #{id.inspect}" unless match && (match[1] == own || face_down)
       errors << "#{path}.memory.own_card: #{own.inspect} is not in the catalog" unless catalog.include?(own.to_s)
       errors << "#{path}.id: #{id} is not below next_id #{next_id}" if match && match[2].to_i >= next_id.to_i
       errors << "#{path}.card: #{obj["card"].inspect} is not in the catalog" unless catalog.include?(obj["card"].to_s)

@@ -47,7 +47,7 @@ module Enjine
       def permission_land_options(index)
         sources = permission_sources(index)
         permission_candidates(index).flat_map do |id|
-          next [] unless chars(id).land?
+          next [] unless face_up(id) { chars(id).land? } # a face-down card is played face up (CR 406.3a)
 
           play_methods(index, id, sources).filter_map do |method|
             { type: "play_land", object: id, via: method["via"] } if method["play"] == "play"
@@ -87,6 +87,8 @@ module Enjine
       # resolution (CR 304.1, 307.1); a card without a mana cost needs an alternative cost (CR 118.6a).
       def castable_via?(index, id, method)
         obj = object(id)
+        return face_up(id) { castable_via?(index, id, method) } if face_down?(obj) && @face_up != id # CR 406.3a
+
         c = chars(obj)
         return false if c.land? || (method["alt"].nil? && c.mana_cost.nil?) # CR 305.9
         return false unless c.type?(:instant) || c.keyword?(:flash) || sorcery_timing?(index)
@@ -94,7 +96,8 @@ module Enjine
         return false unless additional_costs_payable?(obj) # CR 601.2f
 
         cost = Mana.sum_costs([method_cost(obj, method), *spell_extra_mana(obj, false)])
-        ability_targetable?(spell_ability_of(obj), index, id) && affordable?(index, total_cost(index, cost, spell: obj), nil)
+        purpose = { "spell" => id, "any_type" => method["any_mana_type"] }.compact # CR 609.4b
+        ability_targetable?(spell_ability_of(obj), index, id) && affordable?(index, total_cost(index, cost, spell: obj), nil, purpose)
       end
 
       # CR 608.2g: whether a card could be cast now during resolution without paying its mana cost
@@ -127,12 +130,15 @@ module Enjine
 
       # ---- where methods come from ------------------------------------------------------------
 
-      # Permissions from resolved effects (impulse draw, CR 611.2): the card is still the exiled object.
+      # Permissions from resolved effects (impulse draw, CR 611.2): the card is still the exiled object. A
+      # face-down card only for a player who may look at it (CR 406.3b). `any_mana_type`: mana of any type
+      # can be spent to cast it (CR 609.4b).
       def granted_methods(index, obj)
         state.effects.filter_map do |e|
           next unless e["kind"] == "permission" && e["controller"] == index && e["affected"].include?(obj.id)
+          next unless obj.zone == :exile && may_look?(obj, index)
 
-          { "via" => "effect:#{e["timestamp"]}", "play" => e["play"] } if obj.zone == :exile
+          { "via" => "effect:#{e["timestamp"]}", "play" => e["play"], "any_mana_type" => e["any_mana_type"] }.compact
         end
       end
 
@@ -200,11 +206,12 @@ module Enjine
 
       # Permission to play exiled cards for a duration (CR 611.2): a continuous effect for the exiled
       # objects (a card that leaves exile is a new object, CR 400.7, so the permission ends with it).
-      def grant_play_permission!(index, ids, duration:, play:)
+      def grant_play_permission!(index, ids, duration:, play:, any_mana_type: false)
         return if ids.empty?
 
         state.effects << { "kind" => "permission", "timestamp" => next_timestamp!, "controller" => index,
                            "affected" => ids, "duration" => duration, "turn" => state.turn, "play" => play }
+        state.effects.last["any_mana_type"] = true if any_mana_type
         emit Events::EffectStarted.new(kind: "permission", affected: ids, details: { "duration" => duration, "play" => play })
       end
 
@@ -288,7 +295,8 @@ module Enjine
         state.objects[origin["id"]] = GameObject.new(
           id: origin["id"], card: obj.card, owner: obj.owner, controller: obj.owner, zone: zone, tapped: false,
           controlled_since: nil, kind: "card", counters: {}, damage: 0, source: nil, ability: nil, targets: nil,
-          loyalty_turn: nil, deathtouched: false, modes: nil, memory: {}, attached_to: nil
+          loyalty_turn: nil, deathtouched: false, modes: nil, memory: Snapshot.deep_copy(origin.fetch("memory", {})),
+          attached_to: nil # a face-down card goes back face down (CR 406.3)
         )
         carry_copy_status!(state.objects[origin["id"]], obj, zone) # a card copy stays one (Engine::Copies)
         list = state.zone_list(zone, obj.owner)

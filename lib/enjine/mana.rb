@@ -97,6 +97,9 @@ module Enjine
       nil
     end
 
+    # Pool types as mana symbols: [:G, :G] -> "{G}{G}".
+    def self.symbols(types) = types.map { "{#{it}}" }.join
+
     # Parses produced mana such as "{G}" or "{C}{C}" into an Array of pool types.
     def self.parse_produce(text, errors, path)
       unless text.is_a?(String) && !text.empty?

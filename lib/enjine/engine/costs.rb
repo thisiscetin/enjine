@@ -83,7 +83,7 @@ module Enjine
       # The largest X the player could pay for: the mana available beyond the rest of the cost.
       def x_limit(ctx)
         cost = frame_total_cost(ctx, x_value: 0, targets: nil)
-        spare = mana_units(ctx["player"], payment_excluded_source(ctx)).size - cost.mana_value
+        spare = mana_units(ctx["player"], payment_excluded_source(ctx), payment_purpose(ctx)).size - cost.mana_value
         [spare, 0].max / base_cost(ctx).x_symbols
       end
 

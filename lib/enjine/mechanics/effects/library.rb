@@ -197,23 +197,34 @@ module Enjine
         primitive :effect, :exile_top,
                   description: "Each referenced player (default: you) exiles the top `amount` cards of their library " \
                                "(face up). Later effects name them with {\"result\": n}; `link: true` exiles them with " \
-                               "the source.",
-                  rules: %w[406.1 400.7j 607.2a],
-                  params: { "amount" => "amount", "to" => "selector of players", "link" => "boolean" },
+                               "the source. `face_down: true` exiles them face down: only the `looker` players " \
+                               "(default: you) may look at them.",
+                  rules: %w[406.1 400.7j 607.2a 406.3 406.3a],
+                  params: { "amount" => "amount", "to" => "selector of players", "link" => "boolean",
+                            "face_down" => "boolean", "looker" => "selector of players who may look (default \"you\")" },
                   example: { "exile_top" => { "amount" => 4 } }
 
-        def self.keys = %w[amount to link if]
+        def self.keys = %w[amount to link face_down looker if]
         def self.default_to = "you"
 
         def setup(params, errors, path)
           @link = Linked.flag(params, "link", errors, path)
+          @face_down = Mechanics.fetch_param(params, :face_down)
+          errors << "#{path}.face_down: must be true or false" unless [nil, true, false].include?(@face_down)
+          raw = Mechanics.fetch_param(params, :looker)
+          errors << "#{path}.looker: needs face_down: true" if raw && @face_down != true
+          @looker = Selector.build(raw || "you", errors, "#{path}.looker", targets_count: @targets_count,
+                                                                           results_count: @results_count)
         end
+
+        def to_s = @face_down ? super.sub(" → ", " face down → ") : super
 
         def apply(engine, ctx)
           n = amount_for(engine, ctx)
+          lookers = @face_down ? @looker.resolve(engine, ctx).filter_map { Filters.player_index(engine, it) } : nil
           players(engine, ctx).each do |index|
             engine.player(index).library.first(n).each do |id|
-              fresh = engine.move!(id, :exile, reason: "exile")
+              fresh = engine.move!(id, :exile, reason: "exile", face_down: lookers)
               engine.link_exiled!(ctx.source, fresh.id) if fresh && @link
             end
           end

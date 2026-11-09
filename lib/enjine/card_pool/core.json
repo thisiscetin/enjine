@@ -6911,6 +6911,299 @@
     ]
   },
   {
+    "name": "Lyceum of Many Hands",
+    "types": [
+      "land"
+    ],
+    "abilities": [
+      {
+        "mana": {
+          "cost": [
+            "tap"
+          ],
+          "produce": "{C}"
+        }
+      },
+      {
+        "mana": {
+          "cost": [
+            "tap"
+          ],
+          "color": "any_one",
+          "amount": {
+            "count": {
+              "each": "creature",
+              "controller": "you"
+            }
+          }
+        }
+      }
+    ]
+  },
+  {
+    "name": "Twinbloom Well",
+    "mana_cost": "{2}",
+    "types": [
+      "artifact"
+    ],
+    "abilities": [
+      {
+        "mana": {
+          "cost": [
+            "tap"
+          ],
+          "color": "any",
+          "amount": 2,
+          "colors": [
+            "R",
+            "G"
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Cogwork Conduit",
+    "mana_cost": "{1}",
+    "types": [
+      "artifact"
+    ],
+    "abilities": [
+      {
+        "mana": {
+          "cost": [
+            "tap"
+          ],
+          "produce": "{C}{C}",
+          "spend_only": {
+            "spells": {
+              "types": [
+                "artifact"
+              ]
+            },
+            "abilities": {
+              "types": [
+                "artifact"
+              ]
+            }
+          }
+        }
+      }
+    ]
+  },
+  {
+    "name": "Surge Raptor",
+    "mana_cost": "{1}{G}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "dinosaur"
+    ],
+    "power": 2,
+    "toughness": 2,
+    "abilities": [
+      {
+        "kicker": {
+          "cost": [
+            {
+              "mana": "{2}"
+            }
+          ]
+        }
+      },
+      {
+        "triggered": {
+          "when": {
+            "enters": {}
+          },
+          "if": {
+            "kicked": true
+          },
+          "effects": [
+            {
+              "add_counters": {
+                "counter": "+1/+1",
+                "amount": 2,
+                "to": "self"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Charge Lattice",
+    "mana_cost": "{2}",
+    "types": [
+      "artifact"
+    ],
+    "abilities": [
+      {
+        "activated": {
+          "cost": [
+            {
+              "mana": "{1}"
+            },
+            "tap"
+          ],
+          "effects": [
+            {
+              "add_counters": {
+                "counter": "charge",
+                "amount": 1,
+                "to": "self"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "activated": {
+          "cost": [
+            {
+              "mana": "{2}"
+            },
+            "sacrifice"
+          ],
+          "effects": [
+            {
+              "destroy": {
+                "to": {
+                  "each": {
+                    "permanent": {
+                      "not": [
+                        "land"
+                      ],
+                      "mana_value": {
+                        "equal": {
+                          "counters": {
+                            "of": "self",
+                            "kind": "charge"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Rebuff Gambit",
+    "mana_cost": "{1}{R}",
+    "types": [
+      "instant"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "targets": [
+            {
+              "spell": {
+                "not": [
+                  "creature"
+                ],
+                "controller": "opponent"
+              }
+            }
+          ],
+          "effects": [
+            {
+              "may": {
+                "chooser": {
+                  "controller_of": {
+                    "target": 0
+                  }
+                },
+                "effects": [
+                  {
+                    "exile": {
+                      "to": {
+                        "target": 0
+                      }
+                    }
+                  }
+                ],
+                "otherwise": [
+                  {
+                    "cast_free": {
+                      "not_types": [
+                        "creature"
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Mindswap Gambit",
+    "mana_cost": "{2}{U}",
+    "types": [
+      "sorcery"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "targets": [
+            "opponent"
+          ],
+          "effects": [
+            {
+              "exile_top": {
+                "amount": 1,
+                "face_down": true,
+                "looker": {
+                  "target": 0
+                }
+              }
+            },
+            {
+              "exile_top": {
+                "amount": 2,
+                "to": {
+                  "target": 0
+                },
+                "face_down": true
+              }
+            },
+            {
+              "play_permission": {
+                "to": {
+                  "result": 0
+                },
+                "player": {
+                  "target": 0
+                },
+                "duration": "while_exiled",
+                "any_mana_type": true
+              }
+            },
+            {
+              "play_permission": {
+                "to": {
+                  "result": 1
+                },
+                "duration": "while_exiled",
+                "any_mana_type": true
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
     "name": "Flickerwing Drake",
     "mana_cost": "{1}{U}",
     "types": [

@@ -19,6 +19,8 @@ module Enjine
       # cached until state changes.
       def chars(object)
         object = self.object(object) if object.is_a?(String)
+        return Enjine::Characteristics::FACE_DOWN if face_down?(object) && @face_up != object.id # CR 406.3a
+
         defn = definition(object)
         base = copy_base(object) # layer 1 (CR 613.2a-c): its copiable values
         return board_characteristics.fetch(object.id, base) if object.zone == :battlefield

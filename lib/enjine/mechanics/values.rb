@@ -475,14 +475,20 @@ module Enjine
       end
 
       # "If this spell was kicked" (CR 702.33d): the resolving spell (or the spell a permanent was) paid
-      # its kicker cost. Recorded on the stack object as it became cast.
+      # its kicker cost. Recorded on the stack object as it became cast, and carried to the permanent it
+      # becomes (CR 400.7d) and to that permanent's triggered abilities. While a trigger is being checked
+      # (no ability object yet, CR 603.4) the source permanent answers.
       class WasKicked
         def initialize(wanted)
           @wanted = wanted
           freeze
         end
 
-        def true?(engine, ctx) = (engine.state.objects[ctx.object]&.memory&.[]("kicked") == true) == @wanted
+        def true?(engine, ctx)
+          holder = engine.state.objects[ctx.object || ctx.source]
+          (holder&.memory&.[]("kicked") == true) == @wanted
+        end
+
         def to_s = @wanted ? "it was kicked" : "it wasn't kicked"
       end
 

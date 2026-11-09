@@ -29,9 +29,9 @@ Rules: CR 122.1, CR 122.6, CR 613.4c
 
 ## add_mana
 
-You add mana to your mana pool: the fixed mana in `produce`, or `amount` mana of a color you choose as it resolves (`color: "any_one"`: all of one color; `color: "any"`: each mana's color chosen separately, "in any combination of colors"). `colors` limits the choice ("add {R} or {G}").
+You add mana to your mana pool: the fixed mana in `produce`, or `amount` mana of a color you choose as it resolves (`color: "any_one"`: all of one color; `color: "any"`: each mana's color chosen separately, "in any combination of colors"). `colors` limits the choice ("add {R} or {G}"). `spend_only` restricts how the mana can be spent (CR 106.6).
 
-Rules: CR 106.1a, CR 106.4, CR 608.2d, CR 605.1a
+Rules: CR 106.1a, CR 106.4, CR 608.2d, CR 605.1a, CR 106.6
 
 | Parameter | Description |
 | --- | --- |
@@ -39,6 +39,7 @@ Rules: CR 106.1a, CR 106.4, CR 608.2d, CR 605.1a
 | `amount` | amount (default 1; with produce: how many times) |
 | `color` | any_one | any |
 | `colors` | list of colors to choose from (default all five) |
+| `spend_only` | {"spells": card spec, "abilities": card spec} |
 
 ```json
 {
@@ -684,7 +685,7 @@ Rules: CR 121.1, CR 121.2
 
 ## exile
 
-Exile each referenced permanent, or card in a graveyard or hand. `link: true`: the cards are exiled with the source, for its "exiled with" abilities (the `exiled_with` selector). `until_source_leaves: true`: they return to the battlefield under their owners' control when the source leaves the battlefield; if it already has, nothing is exiled.
+Exile each referenced permanent, spell, or card in a graveyard or hand. `link: true`: the cards are exiled with the source, for its "exiled with" abilities (the `exiled_with` selector). `until_source_leaves: true`: they return to the battlefield under their owners' control when the source leaves the battlefield; if it already has, nothing is exiled.
 
 Rules: CR 406.1, CR 701.13a, CR 607.2a, CR 406.6, CR 610.3, CR 610.3a, CR 610.3b, CR 610.3c
 
@@ -736,15 +737,17 @@ Rules: CR 608.2n, CR 406.1
 
 ## exile_top
 
-Each referenced player (default: you) exiles the top `amount` cards of their library (face up). Later effects name them with {"result": n}; `link: true` exiles them with the source.
+Each referenced player (default: you) exiles the top `amount` cards of their library (face up). Later effects name them with {"result": n}; `link: true` exiles them with the source. `face_down: true` exiles them face down: only the `looker` players (default: you) may look at them.
 
-Rules: CR 406.1, CR 400.7j, CR 607.2a
+Rules: CR 406.1, CR 400.7j, CR 607.2a, CR 406.3, CR 406.3a
 
 | Parameter | Description |
 | --- | --- |
 | `amount` | amount |
 | `to` | selector of players |
 | `link` | boolean |
+| `face_down` | boolean |
+| `looker` | selector of players who may look (default "you") |
 
 ```json
 {
@@ -1109,9 +1112,9 @@ Rules: CR 702.26a, CR 702.26b, CR 702.26d, CR 702.26g, CR 702.26h, CR 502.1, CR 
 
 ## play_permission
 
-The controller may play (`play: "play"`, default) or cast (`"cast"`) each referenced exiled card matching `for`/`not_types`, paying its costs and following timing rules, for `duration`: end_of_turn (default), end_of_your_next_turn or while_exiled. With `choose: "one_per_owner"` only one chosen card per owner.
+The controller may play (`play: "play"`, default) or cast (`"cast"`) each referenced exiled card matching `for`/`not_types`, paying its costs and following timing rules, for `duration`: end_of_turn (default), end_of_your_next_turn or while_exiled. With `choose: "one_per_owner"` only one chosen card per owner. `player`: who gets the permission instead of the controller (a face-down card: only someone who may look at it). `any_mana_type: true`: mana of any type can be spent to cast those spells.
 
-Rules: CR 611.2a, CR 601.3, CR 305.1, CR 400.7, CR 514.2
+Rules: CR 611.2a, CR 601.3, CR 305.1, CR 400.7, CR 514.2, CR 406.3b, CR 609.4b
 
 | Parameter | Description |
 | --- | --- |
@@ -1121,6 +1124,8 @@ Rules: CR 611.2a, CR 601.3, CR 305.1, CR 400.7, CR 514.2
 | `for` | card spec |
 | `not_types` | list of card types |
 | `choose` | one_per_owner |
+| `player` | selector of players (default "you") |
+| `any_mana_type` | boolean |
 
 ```json
 {

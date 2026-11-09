@@ -34,7 +34,7 @@ module Enjine
       end
 
       def player_block(view, player)
-        pool = player["mana_pool"].map { |t, n| "{#{t}}" * n }.join
+        pool = player["mana_pool"].map { |t, n| "{#{t}}" * n }.join + player.fetch("restricted_mana", []).map { "{#{it["mana"]}}*" }.join
         poison = player["poison"].positive? ? " · poison #{player["poison"]}" : ""
         lines = ["", "  #{player["name"].upcase} — life #{player["life"]}#{poison} · " \
                      "library #{player["library_count"]} · hand #{player["hand_count"]} · " \
@@ -95,8 +95,9 @@ module Enjine
         when "play_land" then "Play land #{name_of(opt[:object])}"
         when "cast" then "Cast #{name_of(opt[:object])} #{cost_of(opt[:object])}".rstrip
         when "activate" then "Activate #{name_of(opt[:object])}: #{ability_text(opt[:object], opt[:ability])}"
-        when "activate_mana" then "Tap #{name_of(opt[:object])} for mana (#{ability_text(opt[:object], opt[:ability])})"
-        when "pay_mana" then "Pay {#{opt[:mana]}} from mana pool"
+        when "activate_mana"
+          "Tap #{name_of(opt[:object])} for #{opt[:mana] || "mana"} (#{ability_text(opt[:object], opt[:ability])})"
+        when "pay_mana" then "Pay {#{opt[:mana]}} from mana pool#{" (restricted)" if opt[:restricted]}"
         when "target" then "Target #{name_of(opt[:target])}"
         when "cost" then "Use #{name_of(opt[:object])} to pay the cost"
         when "cancel" then "Cancel (rewind this cast/activation)"

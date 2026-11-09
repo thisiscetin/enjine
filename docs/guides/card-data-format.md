@@ -84,11 +84,34 @@ Any other mana ability is written explicitly:
   "abilities": [{ "mana": { "cost": ["tap"], "produce": "{C}" } }] }
 ```
 
-`produce` is a string of mana symbols: `"{G}"`, `"{C}{C}"`. "Add one mana of any
-color" is written as one mana ability per color (`{W}`, `{U}`, ...), and "add two
-mana of any one color" as one per color producing `{W}{W}`, `{U}{U}`, ... (the same
-decisions, no new rules). A mana ability whose amount varies ("add X mana") is not
-supported yet.
+`produce` is a string of mana symbols: `"{G}"`, `"{C}{C}"`. When the colors are chosen,
+use `color` instead of `produce`, the same shape as the `add_mana` effect (CR 605.3b:
+the choice is made as the ability is activated, so each activation option names the
+mana it adds, e.g. `{"type": "activate_mana", ..., "mana": "{G}{G}"}`). A mana cost
+in a mana ability's `cost` ("{1}, {T}: Add …") is paid from the mana already in your
+pool, so tap other sources first:
+
+| Oracle text | Data |
+| --- | --- |
+| "{T}: Add one mana of any color." | `{ "mana": { "cost": ["tap"], "color": "any_one" } }` |
+| "{T}: Add {R} or {G}." | `{ "mana": { "cost": ["tap"], "color": "any_one", "colors": ["R", "G"] } }` |
+| "{T}: Add two mana in any combination of {R} and/or {G}." | `{ "mana": { "cost": ["tap"], "color": "any", "amount": 2, "colors": ["R", "G"] } }` |
+| "{T}: Add {G} for each creature you control." | `{ "mana": { "cost": ["tap"], "produce": "{G}", "amount": { "count": { "each": "creature", "controller": "you" } } } }` |
+| "{T}: Add X mana of any one color, where X is …" | `"color": "any_one", "amount": <amount>` |
+| "{T}: Add {C}. Spend this mana only to cast artifact spells or activate abilities of artifacts." | `{ "mana": { "cost": ["tap"], "produce": "{C}", "spend_only": { "spells": { "types": ["artifact"] }, "abilities": { "types": ["artifact"] } } } }` |
+
+```json
+{ "name": "Example Lyceum", "types": ["land"],
+  "abilities": [{ "mana": { "cost": ["tap", { "mana": "{5}" }], "color": "any_one",
+                            "amount": { "distinct_types": { "each": "creature", "controller": "you" } } } }] }
+```
+
+**Restricted mana** (CR 106.6): `spend_only` takes `spells` and/or `abilities`, each a
+card spec (`"card"` for any spell or source). The mana stays in its own part of the pool
+(`restricted_mana` in the view) and is offered as `{"type": "pay_mana", "mana": "C",
+"restricted": 0}` only while casting a matching spell or activating an ability of a
+matching source; it can't pay a cost asked for while something resolves. `add_mana`
+takes `spend_only` too ("Add {C}{C}. Spend this mana only to cast spells.").
 
 ---
 
@@ -166,6 +189,7 @@ once-per-turn are automatic.
 | "nonland", "artifact or creature" | `{ "permanent": { "not": ["land"] } }`, `{ "permanent": { "any_of": ["artifact", "creature"] } }` |
 | "artifact creature" | `{ "creature": { "types": ["artifact"] } }` |
 | "with power 4 or greater", "with mana value 3 or less" | `{ "creature": { "power": { "at_least": 4 } } }`, `{ "permanent": { "mana_value": { "at_most": 3 } } }` (also `toughness`) |
+| "with mana value equal to the number of charge counters on this" | `{ "permanent": { "mana_value": { "equal": { "counters": { "of": "self", "kind": "charge" } } } } }`: a bound is any amount; a sacrificed source counts as it last existed (CR 608.2h) |
 | "Human", "non-Doctor" | `{ "creature": { "subtypes": ["human"] } }`, `{ "creature": { "not_subtypes": ["doctor"] } }` |
 | "legendary", "nonlegendary" | `{ "creature": { "supertypes": ["legendary"] } }`, `{ "creature": { "not_supertypes": ["legendary"] } }` |
 | "token", "nontoken" | `{ "creature": { "token": true } }`, `{ "creature": { "token": false } }` |
@@ -263,6 +287,7 @@ See `docs/reference/effects.md` for the generated list. Currently:
 | "Add {R}{R}{R}." (a spell or trigger, not a mana ability) | `{ "add_mana": { "produce": "{R}{R}{R}" } }` |
 | "Add two mana of any one color." | `{ "add_mana": { "amount": 2, "color": "any_one" } }` |
 | "Add two mana in any combination of colors." | `{ "add_mana": { "amount": 2, "color": "any" } }` |
+| "Add {C}{C}. Spend this mana only to cast spells." | `{ "add_mana": { "produce": "{C}{C}", "spend_only": { "spells": "card" } } }` |
 | `{X}` in the cost, "deals X damage" | `"mana_cost": "{X}{R}"`, `{ "deal_damage": { "amount": "x", ... } }` |
 | "... costs {2} less to cast if it targets a tapped creature." | `{ "cost_reduction": { "amount": 2, "if": { "targets": { "creature": { "tapped": true } } } } }` |
 | "... costs {1} less to cast if a creature is attacking you." | `{ "cost_reduction": { "amount": 1, "if": { "attacked": true } } }` |
@@ -353,6 +378,23 @@ Rule numbers are from the 2026-11-06 Comprehensive Rules.
   in exile). `not_types: ["land"]` keeps only the nonland card an exile-until found;
   `"choose": "one_per_owner"` with `"for": { "types": ["land"] }` makes the controller
   pick one matching card per owner among the exiled ones.
+- **Exiled face down** (CR 406.3): `"face_down": true` on `exile_top`; `looker` names the
+  players who may look at the cards (default: you). A face-down card has no
+  characteristics, its id doesn't name it (`face_down#12`), and views and events show
+  it only to the lookers. `play_permission` takes `player` (who may play the cards,
+  instead of you; a face-down card needs a player who may look at it, CR 406.3b) and
+  `any_mana_type: true` ("mana of any type can be spent to cast those spells", CR 609.4b).
+  The card is turned face up as it's played. "Target opponent exiles the top card of your
+  library face down; you exile the top two cards of theirs face down; each card's exiler
+  may play it while it stays exiled, spending mana as though it were mana of any type":
+
+  ```json
+  { "spell": { "targets": ["opponent"], "effects": [
+    { "exile_top": { "amount": 1, "face_down": true, "looker": { "target": 0 } } },
+    { "exile_top": { "amount": 2, "to": { "target": 0 }, "face_down": true } },
+    { "play_permission": { "to": { "result": 0 }, "player": { "target": 0 }, "duration": "while_exiled", "any_mana_type": true } },
+    { "play_permission": { "to": { "result": 1 }, "duration": "while_exiled", "any_mana_type": true } } ] } }
+  ```
 - **Casting while resolving without paying mana costs** (CR 608.2g):
   `{ "cast_free": { "to": { "result": 0 }, "max_mana_value": 3, "count": "any" } }`;
   with no `to` it offers matching cards from your hand. **Discover N** (CR 701.57) is

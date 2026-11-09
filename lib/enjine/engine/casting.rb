@@ -18,7 +18,10 @@ module Enjine
         return false unless additional_costs_payable?(obj) # CR 601.2f: e.g. "sacrifice a creature"
 
         cost = Mana.sum_costs([defn.mana_cost, *spell_extra_mana(obj, false)])
-        return true if ability_targetable?(defn.spell_ability, index, id) && affordable?(index, total_cost(index, cost, spell: obj), nil)
+        if ability_targetable?(defn.spell_ability, index, id) &&
+           affordable?(index, total_cost(index, cost, spell: obj), nil, { "spell" => id })
+          return true
+        end
 
         kicked_castable?(index, obj) # CR 702.33g: only the kicked spell has legal targets
       end
@@ -38,7 +41,8 @@ module Enjine
         end
 
         cost = total_cost(index, ability.mana_cost, ability: ability, source: id)
-        ability_targetable?(ability, index, nil, id, ref: ability_ref) && affordable?(index, cost, needs_tap?(ability) ? id : nil)
+        ability_targetable?(ability, index, nil, id,
+                            ref: ability_ref) && affordable?(index, cost, needs_tap?(ability) ? id : nil, { "ability" => id })
       end
 
       # Whether the ability can get legal targets: for modal abilities, enough modes must (CR 700.2),
@@ -74,85 +78,6 @@ module Enjine
         !chars(obj).keyword?(:hexproof)
       end
 
-      # Whether the cost could be paid with the mana pool plus untapped mana sources (CR 601.2g-h).
-      # Each colored symbol needs mana of that color, a hybrid symbol mana of either of its colors
-      # (CR 107.4e); generic is paid by anything left.
-      def affordable?(index, cost, excluded_source)
-        return true if cost.nil? || cost.mana_value.zero?
-
-        units = mana_units(index, excluded_source)
-        return false if units.size < cost.mana_value
-
-        match_colored(cost.requirements, units)
-      end
-
-      # Every unit of mana the player could make: pool mana (one fixed type each) and one unit per
-      # untapped source, with the set of types it could produce (a Treasure: any color).
-      def mana_units(index, excluded_source)
-        player(index).mana_pool.flat_map { |type, n| Array.new(n) { [type] } } + source_units(index, [excluded_source])
-      end
-
-      # One unit per untapped source not in `excluded`; a source that makes several mana ({C}{C})
-      # gives that many units.
-      def source_units(index, excluded)
-        by_source = Hash.new { |h, k| h[k] = [] }
-        all_mana_sources(index).each do |id, ref|
-          by_source[id] << chars(id).ability(ref).produce unless excluded.include?(id)
-        end
-        by_source.values.flat_map { |options| Array.new(options.map(&:size).max) { options.flatten.uniq } }
-      end
-
-      # Bipartite matching (augmenting paths): can every colored or hybrid symbol (the list of types
-      # that can pay it) get its own unit?
-      def match_colored(symbols, units)
-        owner = Array.new(units.size)
-        symbols.each_index.all? { |s| augment(s, symbols, units, owner, Array.new(units.size, false)) }
-      end
-
-      def augment(symbol, symbols, units, owner, seen)
-        units.each_index.any? do |u|
-          next false if seen[u] || !units[u].intersect?(symbols[symbol])
-
-          seen[u] = true
-          next false unless owner[u].nil? || augment(owner[u], symbols, units, owner, seen)
-
-          owner[u] = symbol
-          true
-        end
-      end
-
-      def mana_sources(index, excluded_source)
-        list = all_mana_sources(index)
-        excluded_source ? list.reject { it[0] == excluded_source } : list
-      end
-
-      # Every activatable mana ability [id, ability_index] the player controls. Memoized only
-      # while legal options are being computed (state can't change then); recomputed otherwise.
-      def all_mana_sources(index)
-        return scan_mana_sources(index) unless @options_memo
-
-        @options_memo[index] ||= scan_mana_sources(index)
-      end
-
-      def scan_mana_sources(index)
-        out = []
-        state.battlefield.each do |id|
-          obj = object(id)
-          next unless obj.controller == index
-
-          chars(obj).mana_abilities.each { |inst| out << [id, inst.ref] if inst.ability.activatable?(self, obj) }
-        end
-        out
-      end
-
-      # CR 605.3: pay the ability's costs and add its mana immediately. Shared by priority and payment.
-      def activate_mana_ability!(index, id, ability_ref)
-        obj = object(id)
-        ability = chars(obj).ability(ability_ref) or raise ArgumentError, "#{id} has no ability #{ability_ref}"
-        ability.costs.each { |cost| cost.pay!(self, obj) }
-        add_mana!(index, ability.produce, id)
-      end
-
       # The ability an ability object on the stack represents. It keeps existing even if its
       # source has left the battlefield (CR 113.7a), so it's looked up on the source's card.
       def stack_ability(obj) = definition(obj).ability(obj.ability)
@@ -172,6 +97,7 @@ module Enjine
         method = via && play_method(index, card_id, via)
         origin = { "id" => card_id, "zone" => card.zone.to_s,
                    "index" => state.zone_list(card.zone, card.owner).index(card_id) }
+        origin["memory"] = card.memory.slice("face_down", "may_look") if face_down?(card) # turned face up (CR 406.3a)
         obj = move!(card_id, :stack, controller: index, reason: "cast")
         extra = method ? { "method" => method } : {}
         extra["no_priority"] = true if %w[free resolving].include?(via) # cast while resolving (CR 608.2g)
@@ -201,6 +127,7 @@ module Enjine
                           "origin" => origin, "source" => source, "ability" => ability, "targets" => [], "modes" => [],
                           "x" => cost&.x_symbols&.positive? ? nil : 0, "remaining" => nil,
                           "pool" => player(index).mana_pool.transform_keys(&:to_s), "tapped" => [],
+                          "restricted" => Snapshot.deep_copy(player(index).restricted_mana),
                           "triggers_before" => state.pending_triggers.map { it["id"] } }.merge(extra)
         ask!(nil) # advance! now steps the cast frame
       end

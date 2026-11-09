@@ -647,14 +647,18 @@ Rules: CR 606.3, CR 606.4, CR 606.5, CR 602.2b
 
 ## mana
 
-An activated mana ability: pay the cost, add the mana to your mana pool immediately. It does not use the stack and can be activated whenever you have priority.
+An activated mana ability: pay the cost, add the mana to your mana pool immediately. It does not use the stack and can be activated whenever you have priority. `produce`: the fixed mana (`amount` times). Or `color`: `amount` mana (default 1) of one color you choose as you activate it (`"any_one"`) or in any combination of colors (`"any"`); `colors` limits the choice. `spend_only` restricts how the mana can be spent.
 
-Rules: CR 605.1a, CR 605.3a, CR 605.3b, CR 106.4
+Rules: CR 605.1a, CR 605.3a, CR 605.3b, CR 106.1a, CR 106.4, CR 106.6
 
 | Parameter | Description |
 | --- | --- |
 | `cost` | list of costs (e.g. ["tap"]) |
 | `produce` | mana symbols added, e.g. "{G}" or "{C}{C}" |
+| `amount` | amount (default 1; with produce: how many times) |
+| `color` | any_one | any |
+| `colors` | list of colors to choose from (default all five) |
+| `spend_only` | {"spells": card spec, "abilities": card spec} |
 
 ```json
 {
