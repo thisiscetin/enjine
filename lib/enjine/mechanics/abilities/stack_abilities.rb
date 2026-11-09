@@ -68,8 +68,11 @@ module Enjine
 
       # Shared parsing for abilities that use the stack: targets and effects.
       class StackAbility < Primitive
-        # One mode of a modal ability ("Choose one —", CR 700.2): its own targets and effects.
-        Mode = Data.define(:targets, :effects)
+        # One mode of a modal ability ("Choose one —", CR 700.2): its own targets and effects, and for a spell
+        # the additional mana cost paid when it's chosen (tiered, CR 702.183a), or nil.
+        Mode = Data.define(:targets, :effects, :cost) do
+          def initialize(targets:, effects:, cost: nil) = super
+        end
 
         # Optional parts of the body: how many modes may be chosen and when more may (CR 700.2), modes
         # not chosen before for the same object, targets of a kicked spell (CR 702.33g), and an amount
@@ -84,7 +87,8 @@ module Enjine
         # Parses either plain targets/effects or {"choose": n, "modes": [{targets, effects}, ...]}.
         # `choose` may be {"min": a, "max": b} ("choose one or more"), and `choose_if` {"if": condition,
         # "choose": ...} replaces it while the condition holds.
-        def self.parse_body(params, errors, path)
+        # `mode_costs`: modes may have a `cost` (a spell's tiered modes, CR 702.183a).
+        def self.parse_body(params, errors, path, mode_costs: false)
           modes_data = Mechanics.fetch_param(params, :modes)
           extras = parse_extras(params, errors, path)
           if modes_data.nil?
@@ -102,9 +106,10 @@ module Enjine
           modes = modes_data.each_with_index.map do |mode, i|
             mode_path = "#{path}.modes[#{i}]"
             mode = mode.is_a?(Hash) ? mode.transform_keys(&:to_s) : {}
-            Mechanics.check_keys(mode, %w[targets effects], errors, mode_path)
+            Mechanics.check_keys(mode, %w[targets effects] + (mode_costs ? %w[cost] : []), errors, mode_path)
             mode_targets = parse_targets(mode, errors, mode_path)
-            Mode.new(targets: mode_targets, effects: parse_effects(mode, errors, mode_path, mode_targets.size))
+            cost = mode.key?("cost") ? Mana.parse_cost(mode["cost"], errors, "#{mode_path}.cost") : nil
+            Mode.new(targets: mode_targets, effects: parse_effects(mode, errors, mode_path, mode_targets.size), cost: cost)
           end
           min, max = parse_choose(Mechanics.fetch_param(params, :choose), errors, "#{path}.choose", modes.size)
           extras = extras.with(choose_max: max) if max != min
@@ -202,6 +207,9 @@ module Enjine
         def modal? = !modes.empty?
         def try_effects = effects
 
+        # The additional mana costs of the chosen modes (a spell's tiered modes, CR 702.183a).
+        def mode_costs(chosen) = modal? ? chosen.filter_map { modes[it].cost } : []
+
         # Targets in order for the chosen modes (or the ability's own targets); a kicked spell uses its
         # kicked targets (CR 702.33g).
         def targets_for(chosen, kicked: false)
@@ -260,15 +268,18 @@ module Enjine
         primitive :ability, :spell,
                   description: "The spell ability of an instant or sorcery: its targets are chosen while casting " \
                                "and its effects happen in order when it resolves. If every target is illegal on " \
-                               "resolution, it doesn't resolve.",
-                  rules: %w[113.3a 601.2c 608.2b 608.2c],
-                  params: { "targets" => "list of target filters", "effects" => "list of effects" },
+                               "resolution, it doesn't resolve. A mode of a modal spell may have a `cost`: a mana " \
+                               "cost paid in addition when that mode is chosen (tiered: \"Choose one additional " \
+                               "cost\").",
+                  rules: %w[113.3a 601.2c 608.2b 608.2c 702.183a 601.2f],
+                  params: { "targets" => "list of target filters", "effects" => "list of effects",
+                            "modes" => "list of {targets, effects, cost} (with `choose`)" },
                   example: { "spell" => { "targets" => ["any_target"],
                                           "effects" => [{ "deal_damage" => { "amount" => 3, "to" => { "target" => 0 } } }] } }
 
         def self.build(params, errors, path, **)
           Mechanics.check_keys(params, BODY_KEYS, errors, path)
-          new(**parse_body(params, errors, path))
+          new(**parse_body(params, errors, path, mode_costs: true))
         end
 
         def kind = :spell
@@ -283,13 +294,19 @@ module Enjine
                                "turns; `limit: \"once_each_turn\"` to one activation per turn; `only_if` to when a " \
                                "condition holds. `zone` (\"exile\", \"graveyard\" or \"hand\") makes it function only " \
                                "while its card is in that zone (\"activate only if this card is exiled\"). `exhaust: " \
-                               "true` makes it an exhaust ability: it can be activated only once (CR 702.177a).",
-                  rules: %w[602.1 602.2 602.5b 602.5d 702.177a],
+                               "true` makes it an exhaust ability: it can be activated only once (CR 702.177a). " \
+                               "`power_up: true` makes it a power-up ability: activate only once, and if the " \
+                               "permanent entered this turn its cost is reduced by the permanent's mana cost " \
+                               "(CR 702.193). `boast: true`: activate only if this creature attacked this turn and " \
+                               "only once each turn (CR 702.142a).",
+                  rules: %w[602.1 602.2 602.5b 602.5d 702.177a 702.193a 702.193b 702.142a],
                   params: { "cost" => "list of costs (tap, {\"mana\": \"{1}\"}, {\"mana\": \"{X}\"})",
                             "targets" => "list of target filters", "effects" => "list of effects",
                             "timing" => "\"instant\" (default), \"sorcery\" or \"your_turn\"",
                             "limit" => "\"once_each_turn\" (CR 602.5b)", "only_if" => "condition (\"activate only if ...\")",
                             "exhaust" => "true: \"Exhaust — [cost]: [effect]\", activate only once (CR 702.177a)",
+                            "power_up" => "true: \"Power-up — [cost]: [effect]\" (CR 702.193a)",
+                            "boast" => "true: \"Boast — [cost]: [effect]\" (CR 702.142a)",
                             "zone" => "\"exile\" | \"graveyard\" | \"hand\" (CR 113.6b; default: the battlefield, or the " \
                                       "zone a cost moves the card from)",
                             "cost_reduction" => "{\"amount\": amount, \"if\": condition}: \"this ability costs {N} less " \
@@ -298,7 +315,7 @@ module Enjine
                                               "effects" => [{ "deal_damage" => { "amount" => 1, "to" => { "target" => 0 } } }] } }
 
         def self.build(params, errors, path, **)
-          Mechanics.check_keys(params, %w[cost timing cost_reduction limit only_if zone exhaust] + BODY_KEYS, errors, path)
+          Mechanics.check_keys(params, %w[cost timing cost_reduction limit only_if zone exhaust power_up boast] + BODY_KEYS, errors, path)
           timing = Mechanics.fetch_param(params, :timing) || "instant"
           errors << "#{path}.timing: must be one of #{TIMINGS.join(", ")}" unless TIMINGS.include?(timing)
           restriction = parse_restriction(params, errors, path)
@@ -337,8 +354,11 @@ module Enjine
           limit = Mechanics.fetch_param(params, :limit)
           errors << "#{path}.limit: must be one of #{LIMITS.keys.join(", ")}" unless limit.nil? || LIMITS.key?(limit)
           raw = Mechanics.fetch_param(params, :only_if)
-          { per_turn: LIMITS[limit], only_if: raw && Condition.build(raw, errors, "#{path}.only_if"),
-            exhaust: Mechanics.flag_param(params, :exhaust, errors, path) }
+          flags = %i[exhaust power_up boast].to_h { [it, Mechanics.flag_param(params, it, errors, path)] }
+          errors << "#{path}: exhaust and power_up can't be used together" if flags[:exhaust] && flags[:power_up]
+          errors << "#{path}.boast: can't be combined with limit" if flags[:boast] && limit
+          { per_turn: flags[:boast] ? 1 : LIMITS[limit], only_if: raw && Condition.build(raw, errors, "#{path}.only_if"),
+            **flags }
         end
 
         # CR 605.1a: an activated ability without targets that could add mana is a mana ability,
@@ -381,10 +401,26 @@ module Enjine
         # An exhaust ability: "Activate only once" (CR 702.177a), see Engine::CastChoices#activation_allowed?.
         def exhaust? = @restriction[:exhaust] == true
 
-        def to_s = exhaust? ? "Exhaust — #{super}" : super
+        # A power-up ability (CR 702.193a): activate only once; cheaper the turn its permanent entered
+        # (Keywords::PowerUp).
+        def power_up? = @restriction[:power_up] == true
+
+        # A boast ability (CR 702.142a): only if this creature attacked this turn, and only once each turn.
+        def boast? = @restriction[:boast] == true
+
+        # "Activate only once" for as long as the object exists: exhaust and power-up.
+        def once? = exhaust? || power_up?
+
+        KEYWORD_WORDS = { exhaust?: "Exhaust", power_up?: "Power-up", boast?: "Boast" }.freeze
+
+        def to_s
+          word = KEYWORD_WORDS.find { |flag, _| public_send(flag) }&.last
+          word ? "#{word} — #{super}" : super
+        end
 
         # CR 602.5b: restrictions on when it may be activated, besides timing and costs.
         def restriction_met?(engine, index, source)
+          return false if boast? && !engine.attacked_this_turn?(source) # CR 702.142a
           return false if @restriction[:your_turn] && engine.state.active != index
           return false if @restriction[:only_if] && !@restriction[:only_if].true?(engine, EffectContext.new(index, source, nil, nil))
 

@@ -1574,6 +1574,267 @@
     ]
   },
   {
+    "name": "Pack Assault",
+    "mana_cost": "{1}{G}",
+    "types": [
+      "sorcery"
+    ],
+    "abilities": [
+      {
+        "teamwork": {
+          "power": 3
+        }
+      },
+      {
+        "spell": {
+          "choose": 1,
+          "choose_if": {
+            "if": {
+              "cast_with": "teamwork"
+            },
+            "choose": 2
+          },
+          "modes": [
+            {
+              "targets": [
+                "creature"
+              ],
+              "effects": [
+                {
+                  "add_counters": {
+                    "counter": "+1/+1",
+                    "amount": 1,
+                    "to": {
+                      "target": 0
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              "targets": [
+                {
+                  "creature": {
+                    "controller": "you"
+                  }
+                },
+                {
+                  "creature": {
+                    "controller": "opponent"
+                  }
+                }
+              ],
+              "effects": [
+                {
+                  "fight": {
+                    "to": {
+                      "target": 0
+                    },
+                    "with": {
+                      "target": 1
+                    }
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "Teamwork 3. Choose one. If this spell was cast using teamwork, choose both instead. • Put a +1/+1 counter on target creature. • Target creature you control fights target creature an opponent controls."
+  },
+  {
+    "name": "Combined Strike",
+    "mana_cost": "{2}{B}",
+    "types": [
+      "sorcery"
+    ],
+    "abilities": [
+      {
+        "teamwork": {
+          "power": 2
+        }
+      },
+      {
+        "spell": {
+          "targets": [
+            {
+              "creature": {
+                "mana_value": {
+                  "at_most": 3
+                }
+              }
+            }
+          ],
+          "kicked_targets": [
+            "creature"
+          ],
+          "effects": [
+            {
+              "exile": {
+                "to": {
+                  "target": 0
+                }
+              }
+            },
+            {
+              "gain_life": {
+                "amount": 3,
+                "if": {
+                  "cast_with": "teamwork"
+                }
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "Teamwork 2. Exile target creature with mana value 3 or less. If this spell was cast using teamwork, instead exile target creature and you gain 3 life."
+  },
+  {
+    "name": "Domain Surge",
+    "mana_cost": "{1}{R}",
+    "types": [
+      "instant"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "targets": [
+            "any_target"
+          ],
+          "effects": [
+            {
+              "deal_damage": {
+                "amount": {
+                  "distinct_land_types": {
+                    "each": "land",
+                    "controller": "you"
+                  }
+                },
+                "to": {
+                  "target": 0
+                }
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "Domain — This spell deals damage to any target equal to the number of basic land types among lands you control."
+  },
+  {
+    "name": "Tiered Squall",
+    "mana_cost": "{U}",
+    "types": [
+      "instant"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "choose": 1,
+          "modes": [
+            {
+              "cost": "{0}",
+              "targets": [
+                "creature"
+              ],
+              "effects": [
+                {
+                  "tap": {
+                    "to": {
+                      "target": 0
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              "cost": "{2}",
+              "targets": [
+                "creature"
+              ],
+              "effects": [
+                {
+                  "return_to_hand": {
+                    "to": {
+                      "target": 0
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              "cost": "{4}{U}",
+              "effects": [
+                {
+                  "draw": {
+                    "amount": 3
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "Tiered. • {0} — Tap target creature. • {2} — Return target creature to its owner's hand. • {4}{U} — Draw three cards."
+  },
+  {
+    "name": "Gathering Squall",
+    "mana_cost": "{1}{R}",
+    "types": [
+      "instant"
+    ],
+    "keywords": [
+      "storm"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "targets": [
+            "any_target"
+          ],
+          "effects": [
+            {
+              "deal_damage": {
+                "amount": 1,
+                "to": {
+                  "target": 0
+                }
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "Gathering Squall deals 1 damage to any target. Storm"
+  },
+  {
+    "name": "Rippling Discovery",
+    "mana_cost": "{3}{G}",
+    "types": [
+      "sorcery"
+    ],
+    "keywords": [
+      "cascade"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "effects": [
+            {
+              "draw": {
+                "amount": 1
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "Cascade. Draw a card."
+  },
+  {
     "name": "Surge Pageant",
     "mana_cost": "{1}{G}",
     "types": [

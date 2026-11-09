@@ -94,6 +94,7 @@ module Enjine
         pl.restricted_mana = deep_copy(hash.fetch("restricted_mana", []))
         pl.outside = hash.fetch("outside", []).dup
         pl.speed = hash["speed"] # CR 702.179; absent: no speed
+        pl.designations = hash.fetch("designations", []).dup # CR 702.195b (Engine::Designations)
       end
     end
 
@@ -124,6 +125,7 @@ module Enjine
         end
         validate_restricted_mana(pl.fetch("restricted_mana", []), errors, "#{path}.restricted_mana")
         errors << "#{path}.speed: must be 1, 2, 3 or 4 (or absent)" unless [nil, 1, 2, 3, 4].include?(pl["speed"]) # CR 702.179
+        validate_designations(pl.fetch("designations", []), errors, "#{path}.designations")
       end
       validate_logs(players, errors)
       names = players.map { it.is_a?(Hash) ? it["name"] : nil }

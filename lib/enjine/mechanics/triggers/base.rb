@@ -26,6 +26,7 @@ module Enjine
         end
         # CR 601.2h: the mana spent to cast "that spell", as it was cast
         facts["mana_spent"] = engine.state.objects[event.object]&.mana_spent&.dup if event.is_a?(Events::SpellCast)
+        facts["amount"] = Triggers.spells_before(engine) if event.is_a?(Events::SpellCast) # storm (CR 702.40a)
         facts["player"] ||= engine.names.index(event.player) if event.respond_to?(:player)
         facts["card"] = event.respond_to?(:card) ? event.card : engine.state.objects[facts["object"]]&.card
         facts.compact

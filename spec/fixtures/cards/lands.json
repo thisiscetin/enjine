@@ -200,5 +200,16 @@
       }
     ],
     "rules_text": "Tap: add one red mana. Two mana: this land becomes a 3/1 red Elemental creature with haste until end of turn. It's still a land."
+  },
+  {
+    "name": "Verdant Ford",
+    "types": [
+      "land"
+    ],
+    "subtypes": [
+      "forest",
+      "island"
+    ],
+    "rules_text": "({T}: Add {G} or {U}.)"
   }
 ]

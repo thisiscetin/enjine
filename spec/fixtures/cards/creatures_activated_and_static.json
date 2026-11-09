@@ -624,6 +624,192 @@
     ]
   },
   {
+    "name": "Gammabright Brawler",
+    "mana_cost": "{1}{W}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "human",
+      "warrior"
+    ],
+    "power": 2,
+    "toughness": 1,
+    "abilities": [
+      {
+        "activated": {
+          "power_up": true,
+          "cost": [
+            {
+              "mana": "{4}{W}"
+            }
+          ],
+          "effects": [
+            {
+              "add_counters": {
+                "counter": "+1/+1",
+                "amount": 2,
+                "to": "self"
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "Power-up — {4}{W}: Put two +1/+1 counters on this creature."
+  },
+  {
+    "name": "Gamma Wrecker",
+    "mana_cost": "{2}{R/G}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "giant"
+    ],
+    "power": 3,
+    "toughness": 3,
+    "keywords": [
+      "trample"
+    ],
+    "abilities": [
+      {
+        "activated": {
+          "power_up": true,
+          "cost": [
+            {
+              "mana": "{4}{R/G}{R/G}"
+            }
+          ],
+          "targets": [
+            {
+              "filter": {
+                "creature": {
+                  "controller": "opponent"
+                }
+              },
+              "optional": true
+            }
+          ],
+          "effects": [
+            {
+              "add_counters": {
+                "counter": "+1/+1",
+                "amount": 1,
+                "to": "self"
+              }
+            },
+            {
+              "fight": {
+                "to": "self",
+                "with": {
+                  "target": 0
+                }
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "Trample. Power-up — {4}{R/G}{R/G}: Put a +1/+1 counter on this creature. It fights up to one target creature an opponent controls."
+  },
+  {
+    "name": "Boastful Raider",
+    "mana_cost": "{1}{R}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "human",
+      "berserker"
+    ],
+    "power": 2,
+    "toughness": 2,
+    "abilities": [
+      {
+        "activated": {
+          "boast": true,
+          "cost": [
+            {
+              "mana": "{1}{R}"
+            }
+          ],
+          "targets": [
+            "any_target"
+          ],
+          "effects": [
+            {
+              "deal_damage": {
+                "amount": 1,
+                "to": {
+                  "target": 0
+                }
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "Boast — {1}{R}: This creature deals 1 damage to any target. (Activate only if it attacked this turn and only once each turn.)"
+  },
+  {
+    "name": "Hall-Song Chronicler",
+    "mana_cost": "{1}{W}",
+    "types": [
+      "creature"
+    ],
+    "supertypes": [
+      "legendary"
+    ],
+    "subtypes": [
+      "dwarf",
+      "bard"
+    ],
+    "power": 2,
+    "toughness": 2,
+    "keywords": [
+      "storied"
+    ],
+    "abilities": [
+      {
+        "static": {
+          "affects": {
+            "each": "creature",
+            "controller": "you"
+          },
+          "if": {
+            "designation": "enduring_story"
+          },
+          "pump": {
+            "power": 1,
+            "toughness": 0
+          }
+        }
+      },
+      {
+        "activated": {
+          "cost": [
+            {
+              "mana": "{2}"
+            }
+          ],
+          "only_if": {
+            "designation": "enduring_story"
+          },
+          "limit": "once_each_turn",
+          "effects": [
+            {
+              "draw": {
+                "amount": 1
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "Storied. As long as you have an enduring story, creatures you control get +1/+0. {2}: Draw a card. Activate only if you have an enduring story and only once each turn."
+  },
+  {
     "name": "Ascendant Husk",
     "mana_cost": "{2}",
     "types": [

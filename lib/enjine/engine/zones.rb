@@ -143,6 +143,7 @@ module Enjine
         when :battlefield
           fresh.controller = data["controller"] || old.owner
           fresh.controlled_since = state.turn
+          fresh.memory["entered"] = state.turn # "if it entered this turn" (power-up, CR 702.193a)
           fresh.memory["cast"] = true if data["enters"]["cast"] # CR 400.7d: it remembers it was cast
           fresh.memory.merge!(data["enters"]["memory"]) if data["enters"]["memory"] # CR 614.12: an "as this enters" choice
           enter_face!(fresh, data["enters"]["face"]) if data["enters"]["face"] # CR 712.9, 712.11a (Engine::Faces)
@@ -161,7 +162,7 @@ module Enjine
       # use the spell's X, CR 107.3m), that it was kicked (CR 702.33d) and the mana spent to cast it (CR 601.2h).
       def carry_from_stack!(fresh, old)
         fresh.x = old.x
-        fresh.memory["kicked"] = true if old.memory["kicked"]
+        fresh.memory.merge!(old.memory.slice("kicked", "kicked_with"))
         fresh.mana_spent = old.mana_spent&.dup
       end
 
@@ -180,6 +181,7 @@ module Enjine
         merge_enters!(enters, entering.except("tapped")) if entering
         obj.memory.merge!(enters["memory"]) if enters["memory"]
         obj.controlled_since = state.turn
+        obj.memory["entered"] = state.turn
         obj.tapped = enters["tapped"]
         obj.counters.merge!(enters["counters"])
         enter_as_copy!(obj, enters["copy"]) if enters["copy"] # CR 707.5 (Engine::Copies)

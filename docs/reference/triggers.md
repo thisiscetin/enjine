@@ -114,6 +114,24 @@ Rules: CR 702.122e, CR 603.2
 }
 ```
 
+## becomes_level
+
+This permanent's level becomes `level` (a class level bar's ability resolves).
+
+Rules: CR 717.2a, CR 603.2
+
+| Parameter | Description |
+| --- | --- |
+| `level` | integer >= 2 |
+
+```json
+{
+  "becomes_level": {
+    "level": 3
+  }
+}
+```
+
 ## becomes_saddled
 
 The subject becomes saddled (its saddle ability resolved, or an effect saddled it).

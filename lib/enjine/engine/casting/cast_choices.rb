@@ -71,8 +71,15 @@ module Enjine
         kicker.payable?(self, obj) && targetable && affordable?(index, total, nil, { "spell" => obj.id, **spell_waterbend(obj, true) })
       end
 
+      # The spell remembers it at once, so a "choose both if ..." mode count sees it (CR 601.2b, 702.194b);
+      # `kicked_with` names the optional cost paid (kicker, teamwork).
       def announce_kicker!(kicked)
-        casting["kicked"] = kicked
+        ctx = casting
+        ctx["kicked"] = kicked
+        if kicked
+          obj = object(ctx["object"])
+          obj.memory.merge!("kicked" => true, "kicked_with" => spell_cost_abilities(obj, :kicker).first.keyword)
+        end
         ask!(nil)
       end
 
@@ -94,7 +101,17 @@ module Enjine
       # hasn't been chosen" not chosen before for this object).
       def choosable_modes(ctx, ability)
         modes = available_modes(ability, ctx["player"], ctx["object"], ctx["source"]) - ctx["modes"]
-        modes - used_modes(ability, ctx["source"], ctx["ability"])
+        (modes - used_modes(ability, ctx["source"], ctx["ability"])).select { mode_affordable?(ctx, ability.modes[it]) }
+      end
+
+      # A spell's mode with a cost (tiered, CR 702.183a) is offered only if the spell could still be paid for
+      # with it (CR 601.2f, 118.3).
+      def mode_affordable?(ctx, mode)
+        base = mode.cost && base_cost(ctx) or return true
+
+        obj = object(ctx["object"])
+        total = total_cost(ctx["player"], Mana.sum_costs([base, mode.cost]), spell: obj)
+        affordable?(ctx["player"], total, nil, { "spell" => obj.id })
       end
 
       # Modes chosen before for this source's "choose one that hasn't been chosen" ability `ref`.
@@ -233,17 +250,18 @@ module Enjine
       def activation_allowed?(index, obj, ref, ability)
         return true unless ability.respond_to?(:restriction_met?)
         return false if ability.per_turn && activations_this_turn(obj, ref) >= ability.per_turn
-        return false if ability.exhaust? && obj.memory.fetch("exhausted", []).include?(ref) # CR 702.177a
+        return false if ability.once? && obj.memory.fetch("exhausted", []).include?(ref) # CR 702.177a, 702.193a
 
         ability.restriction_met?(self, index, obj.id)
       end
 
-      # Kept on the source object, so the limit applies even if its controller changes (CR 602.5b). An exhaust
-      # ability is remembered for as long as the object exists (CR 702.177a; a new object can again, CR 400.7).
+      # Kept on the source object, so the limit applies even if its controller changes (CR 602.5b). An exhaust or
+      # power-up ability is remembered for as long as the object exists (CR 702.177a, 702.193a; a new object can
+      # again, CR 400.7).
       def record_activation!(ctx)
         source = state.objects[ctx["source"]] or return
         ability = chars(source).ability(ctx["ability"])
-        (source.memory["exhausted"] ||= []) << ctx["ability"] if ability.respond_to?(:exhaust?) && ability.exhaust?
+        (source.memory["exhausted"] ||= []) << ctx["ability"] if ability.respond_to?(:once?) && ability.once?
         return unless ability.respond_to?(:per_turn) && ability.per_turn
 
         (source.memory["activations"] ||= {})[ctx["ability"]] =

@@ -13,7 +13,7 @@ module Enjine
       def total_cost(index, cost, spell: nil, ability: nil, source: nil, x_value: 0, targets: nil)
         return nil if cost.nil?
 
-        cost = cost.with_x(x_value)
+        cost = Mechanics::Keywords::PowerUp.reduced(self, cost.with_x(x_value), ability, source) # CR 702.193a
         change = cost_change(index, spell, ability, source, targets)
         change.zero? ? cost : cost.with(generic: [cost.generic + change, 0].max)
       end
@@ -47,9 +47,11 @@ module Enjine
       def base_cost(ctx)
         obj = object(ctx["object"])
         case ctx["kind"]
-        when "spell" # plus additional costs and kicker (CR 601.2f); alternative costs (CR 118.9, Permissions)
+        when "spell" # plus additional costs, kicker and chosen tiered modes (CR 601.2f, 702.183a); alternative
+          # costs (CR 118.9, Permissions)
           cost = ctx["method"] ? alternative_base_cost(ctx) : chars(obj).mana_cost
-          cost && Mana.sum_costs([cost, *spell_extra_mana(obj, ctx["kicked"])])
+          modes = spell_ability_of(obj)&.mode_costs(ctx["modes"] || []) || []
+          cost && Mana.sum_costs([cost, *spell_extra_mana(obj, ctx["kicked"]), *modes])
         when "ability" then stack_ability(obj).mana_cost
         end
       end

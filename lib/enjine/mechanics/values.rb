@@ -12,6 +12,8 @@ module Enjine
     #   {"hand_size" | "life" | "graveyard_size": player selector}
     #   {"distinct_names": selector}                  how many different names they have (strange new worlds)
     #   {"distinct_types": selector}                  how many different creature types they have (CR 205.3m)
+    #   {"distinct_colors": selector}                 how many colors among them (CR 105.2, 202.2)
+    #   {"distinct_land_types": selector}             how many basic land types among them (domain, CR 305.6)
     #   {"counters": {"of": selector, "kind": name}}  counters on them (any kind without "kind", CR 122)
     #   {"life_gained_this_turn" | "life_lost_this_turn" | "dilemmas_this_turn" | "returned_this_turn"
     #    | "cards_drawn_this_turn" | "cards_discarded_this_turn"
@@ -26,9 +28,11 @@ module Enjine
     # A source that has left the battlefield is used as it last existed (CR 608.2h).
     class Amount
       SELECTOR_KINDS = %w[count power toughness greatest_power hand_size life graveyard_size distinct_names distinct_types
+                          distinct_colors distinct_land_types
                           life_gained_this_turn life_lost_this_turn dilemmas_this_turn returned_this_turn
                           cards_drawn_this_turn cards_discarded_this_turn spells_cast_this_game speed].freeze
       ARITHMETIC = %w[times plus divide].freeze
+      BASIC_LAND_TYPES = %i[plains island swamp mountain forest].freeze # CR 305.6
       # Object history lists: kind -> turn_log key (Engine::TurnHistory).
       DEPARTED = { "died_this_turn" => "died", "entered_this_turn" => "entered", "left_this_turn" => "left",
                    "sacrificed_this_turn" => "sacrificed", "attackers_this_turn" => "attackers",
@@ -83,6 +87,8 @@ module Enjine
         when "greatest_power" then stats(engine, refs).max.to_i
         when "distinct_names" then live(engine, refs).map { engine.chars(it).name }.uniq.size
         when "distinct_types" then live(engine, refs).flat_map { Amount.creature_types(engine.chars(it)) }.uniq.size
+        when "distinct_colors" then live(engine, refs).flat_map { engine.chars(it).colors }.uniq.size # CR 105.2
+        when "distinct_land_types" then (live(engine, refs).flat_map { engine.chars(it).subtypes } & BASIC_LAND_TYPES).size
         else players(engine, refs).sum { player_value(engine, it) }
         end
       end
@@ -337,9 +343,10 @@ module Enjine
     class Condition
       FLAGS = %w[your_turn was_cast attacked attacked_this_turn max_speed
                  you_attacked_this_turn].freeze
-      # Kinds named by one key and built by their class (ChosenIs: abilities/chosen_values.rb).
+      # Kinds named by one key and built by their class (ChosenIs: abilities/chosen_values.rb; Designation:
+      # keywords/storied.rb).
       KEYED = { "targets" => :Targets, "triggering" => :TriggeringIs, "source" => :Source,
-                "nth_resolution" => :NthResolution, "chosen" => :ChosenIs }.freeze
+                "nth_resolution" => :NthResolution, "chosen" => :ChosenIs, "designation" => :Designation }.freeze
 
       def self.build(data, errors, path, targets_count: 0, results_count: 0)
         unless data.is_a?(Hash)
@@ -379,7 +386,7 @@ module Enjine
           unless subject
             errors << "#{path}: unknown condition (use amount, controls, life, hand_size, your_turn, was_cast, targets, " \
                       "attacked, source, attacked_this_turn, you_attacked_this_turn, nth_resolution, kicked, " \
-                      "sacrificed, cast_with, cast_from, cast_with_this_turn, chosen, max_speed, not, all, any)"
+                      "sacrificed, cast_with, cast_from, cast_with_this_turn, chosen, max_speed, designation, not, all, any)"
             return nil
           end
           Mechanics.check_keys(data, [subject, "at_least", "at_most"], errors, path)

@@ -156,6 +156,22 @@
     "toughness": 3
   },
   {
+    "name": "Rampaging Brawlhound",
+    "mana_cost": "{2}{R}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "dog"
+    ],
+    "power": 3,
+    "toughness": 2,
+    "keywords": [
+      "riot"
+    ],
+    "rules_text": "Riot (This creature enters with your choice of a +1/+1 counter or haste.)"
+  },
+  {
     "name": "Craw Wurm",
     "mana_cost": "{4}{G}{G}",
     "types": [

@@ -414,6 +414,83 @@
     ]
   },
   {
+    "name": "Sparring Ground Class",
+    "mana_cost": "{1}{R}",
+    "types": [
+      "enchantment"
+    ],
+    "subtypes": [
+      "class"
+    ],
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "player_attacks": {}
+          },
+          "effects": [
+            {
+              "gain_life": {
+                "amount": 1
+              }
+            }
+          ]
+        }
+      },
+      {
+        "class_level": {
+          "level": 2,
+          "cost": "{1}{R}",
+          "abilities": [
+            {
+              "static": {
+                "affects": {
+                  "each": "creature",
+                  "controller": "you"
+                },
+                "pump": {
+                  "power": 1,
+                  "toughness": 0
+                }
+              }
+            }
+          ]
+        }
+      },
+      {
+        "class_level": {
+          "level": 3,
+          "cost": "{3}{R}",
+          "abilities": [
+            {
+              "triggered": {
+                "when": {
+                  "becomes_level": {
+                    "level": 3
+                  }
+                },
+                "targets": [
+                  "any_target"
+                ],
+                "effects": [
+                  {
+                    "deal_damage": {
+                      "amount": 3,
+                      "to": {
+                        "target": 0
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "Whenever you attack, you gain 1 life. {1}{R}: Level 2 — Creatures you control get +1/+0. {3}{R}: Level 3 — When this Class becomes level 3, it deals 3 damage to any target."
+  },
+  {
     "name": "Keepsake Chronicle",
     "mana_cost": "{2}{U}",
     "types": [

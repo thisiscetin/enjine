@@ -114,6 +114,20 @@ Rules: CR 509.1b
 }
 ```
 
+## cascade
+
+When you cast this spell, exile cards from the top of your library until you exile a nonland card with lesser mana value. You may cast it without paying its mana cost. Then the exiled cards not cast go on the bottom of your library in a random order.
+
+Rules: CR 702.85a, CR 702.85c, CR 608.2g
+
+```json
+{
+  "keywords": [
+    "cascade"
+  ]
+}
+```
+
 ## changeling
 
 This object is every creature type (a characteristic-defining ability that works in all zones).
@@ -212,6 +226,20 @@ Rules: CR 702.4b, CR 510.4
 }
 ```
 
+## extort
+
+Whenever you cast a spell, you may pay {W/B}. If you do, each opponent loses 1 life and you gain life equal to the total life lost this way.
+
+Rules: CR 702.101a, CR 702.101b, CR 118.12
+
+```json
+{
+  "keywords": [
+    "extort"
+  ]
+}
+```
+
 ## first_strike
 
 Deals combat damage in a first combat damage step, before creatures without first strike.
@@ -278,6 +306,20 @@ Rules: CR 702.11b
 {
   "keywords": [
     "hexproof"
+  ]
+}
+```
+
+## increment
+
+Whenever you cast a spell, if this is a creature and the mana spent to cast that spell is greater than its power or its toughness, put a +1/+1 counter on it.
+
+Rules: CR 702.191a, CR 702.191b, CR 603.4
+
+```json
+{
+  "keywords": [
+    "increment"
   ]
 }
 ```
@@ -380,6 +422,20 @@ Rules: CR 702.17b
 }
 ```
 
+## riot
+
+As this permanent enters, its controller chooses an additional +1/+1 counter or haste (an enter_choice: `{type: "option", option: "counter" | "haste"}`).
+
+Rules: CR 702.136a, CR 614.12
+
+```json
+{
+  "keywords": [
+    "riot"
+  ]
+}
+```
+
 ## start_your_engines
 
 If you control this permanent and have no speed, your speed becomes 1. Once you have speed, it increases by 1 (to at most 4) once on each of your turns when one or more opponents lose life. Pair with `max_speed` abilities and the `speed` amount.
@@ -404,6 +460,34 @@ Rules: CR 702.184a, CR 722.4
 {
   "keywords": [
     "station"
+  ]
+}
+```
+
+## storied
+
+While you control this permanent, once you control three or more permanents that are artifacts, Sagas and/or legendary, you have an enduring story for the rest of the game (condition `{"designation": "enduring_story"}`).
+
+Rules: CR 702.195a, CR 702.195b, CR 702.195c
+
+```json
+{
+  "keywords": [
+    "storied"
+  ]
+}
+```
+
+## storm
+
+When you cast this spell, copy it for each other spell cast before it this turn; you may choose new targets for the copies.
+
+Rules: CR 702.40a, CR 702.40b, CR 707.10
+
+```json
+{
+  "keywords": [
+    "storm"
   ]
 }
 ```

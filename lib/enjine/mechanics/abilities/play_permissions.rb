@@ -396,7 +396,7 @@ module Enjine
           hit = locals["hit"]
           return :wait if hit && decide(engine, index, locals, hit) == :wait
 
-          rest = (locals["exiled"] - [hit]).select { engine.state.exile.include?(it) }
+          rest = locals["exiled"].select { engine.state.exile.include?(it) } # all but a card cast or kept
           engine.state.rng.shuffle!(rest)
           rest.each { engine.move!(it, :library, position: :bottom, reason: "discover") }
           :done
@@ -404,8 +404,16 @@ module Enjine
 
         private
 
+        # The greatest mana value a hit may have.
+        def limit(engine, ctx) = amount_for(engine, ctx)
+
+        # What happens to a hit that isn't cast: an option type, a prompt, and the move.
+        def miss_type = "hand"
+        def prompt = "Discover: cast it without paying its mana cost, or put it into your hand"
+        def miss!(engine, hit) = engine.move!(hit, :hand, reason: "discover")
+
         def exile_until_hit!(engine, ctx, locals)
-          n = amount_for(engine, ctx)
+          n = limit(engine, ctx)
           library = engine.player(ctx.controller).library
           locals["exiled"] = []
           until library.empty?
@@ -419,7 +427,7 @@ module Enjine
           end
         end
 
-        # Cast it (a frame), or into the hand; a cancelled cast puts it into the hand too.
+        # Cast it (a frame), or not (`miss!`); a cancelled cast counts as not casting it.
         def decide(engine, index, locals, hit)
           return if locals["decided"]
 
@@ -428,10 +436,9 @@ module Enjine
           else
             answer = answers(locals).first
             unless answer
-              choices = [{ "type" => "hand", "object" => hit }]
+              choices = [{ "type" => miss_type, "object" => hit }]
               choices.unshift({ "type" => "cast", "object" => hit }) if engine.free_castable?(index, hit)
-              return ask(engine, locals, index, "Discover: cast it without paying its mana cost, or put it into your hand",
-                         choices)
+              return ask(engine, locals, index, prompt, choices)
             end
             if answer["type"] == "cast"
               locals["casting"] = hit
@@ -440,7 +447,7 @@ module Enjine
             end
           end
           locals["decided"] = true
-          engine.move!(hit, :hand, reason: "discover") if engine.state.objects.key?(hit)
+          miss!(engine, hit) if engine.state.objects.key?(hit)
           nil
         end
       end

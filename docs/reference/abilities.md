@@ -4,9 +4,9 @@
 
 ## activated
 
-An activated ability: announce it, choose targets, pay its costs, then it goes on the stack. `timing: "sorcery"` restricts it to sorcery speed, `"your_turn"` to your turns; `limit: "once_each_turn"` to one activation per turn; `only_if` to when a condition holds. `zone` ("exile", "graveyard" or "hand") makes it function only while its card is in that zone ("activate only if this card is exiled"). `exhaust: true` makes it an exhaust ability: it can be activated only once (CR 702.177a).
+An activated ability: announce it, choose targets, pay its costs, then it goes on the stack. `timing: "sorcery"` restricts it to sorcery speed, `"your_turn"` to your turns; `limit: "once_each_turn"` to one activation per turn; `only_if` to when a condition holds. `zone` ("exile", "graveyard" or "hand") makes it function only while its card is in that zone ("activate only if this card is exiled"). `exhaust: true` makes it an exhaust ability: it can be activated only once (CR 702.177a). `power_up: true` makes it a power-up ability: activate only once, and if the permanent entered this turn its cost is reduced by the permanent's mana cost (CR 702.193). `boast: true`: activate only if this creature attacked this turn and only once each turn (CR 702.142a).
 
-Rules: CR 602.1, CR 602.2, CR 602.5b, CR 602.5d, CR 702.177a
+Rules: CR 602.1, CR 602.2, CR 602.5b, CR 602.5d, CR 702.177a, CR 702.193a, CR 702.193b, CR 702.142a
 
 | Parameter | Description |
 | --- | --- |
@@ -17,6 +17,8 @@ Rules: CR 602.1, CR 602.2, CR 602.5b, CR 602.5d, CR 702.177a
 | `limit` | "once_each_turn" (CR 602.5b) |
 | `only_if` | condition ("activate only if ...") |
 | `exhaust` | true: "Exhaust — [cost]: [effect]", activate only once (CR 702.177a) |
+| `power_up` | true: "Power-up — [cost]: [effect]" (CR 702.193a) |
+| `boast` | true: "Boast — [cost]: [effect]" (CR 702.142a) |
 | `zone` | "exile" | "graveyard" | "hand" (CR 113.6b; default: the battlefield, or the zone a cost moves the card from) |
 | `cost_reduction` | {"amount": amount, "if": condition}: "this ability costs {N} less to activate" (CR 601.2f, 602.2b) |
 
@@ -289,6 +291,45 @@ Rules: CR 614.12, CR 607.2f, CR 614.12b
     "options": [
       "khans",
       "dragons"
+    ]
+  }
+}
+```
+
+## class_level
+
+A class level bar: `cost` (a mana cost string or a list of costs): this permanent's level becomes `level`; activate only if its level is `level` - 1, as a sorcery. While its level is `level` or greater it has `keywords` and `abilities`. A permanent without a level is level 1.
+
+Rules: CR 717.2a, CR 717.2b, CR 717.2d, CR 717.3, CR 602.5d
+
+| Parameter | Description |
+| --- | --- |
+| `level` | integer >= 2 |
+| `cost` | mana cost string or list of costs |
+| `keywords` | list of keywords |
+| `abilities` | list of abilities |
+
+```json
+{
+  "class_level": {
+    "level": 2,
+    "cost": "{1}{R}",
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "discards": {}
+          },
+          "effects": [
+            {
+              "deal_damage": {
+                "amount": 2,
+                "to": "each_opponent"
+              }
+            }
+          ]
+        }
+      }
     ]
   }
 }
@@ -1001,14 +1042,15 @@ Rules: CR 702.190a, CR 702.190b, CR 506.3a, CR 118.9, CR 601.2b, CR 601.2f, CR 6
 
 ## spell
 
-The spell ability of an instant or sorcery: its targets are chosen while casting and its effects happen in order when it resolves. If every target is illegal on resolution, it doesn't resolve.
+The spell ability of an instant or sorcery: its targets are chosen while casting and its effects happen in order when it resolves. If every target is illegal on resolution, it doesn't resolve. A mode of a modal spell may have a `cost`: a mana cost paid in addition when that mode is chosen (tiered: "Choose one additional cost").
 
-Rules: CR 113.3a, CR 601.2c, CR 608.2b, CR 608.2c
+Rules: CR 113.3a, CR 601.2c, CR 608.2b, CR 608.2c, CR 702.183a, CR 601.2f
 
 | Parameter | Description |
 | --- | --- |
 | `targets` | list of target filters |
 | `effects` | list of effects |
+| `modes` | list of {targets, effects, cost} (with `choose`) |
 
 ```json
 {
@@ -1085,6 +1127,24 @@ Rules: CR 722.2a, CR 722.2b, CR 722.2c, CR 613.1d, CR 613.4b
     "keywords": [
       "flying"
     ]
+  }
+}
+```
+
+## teamwork
+
+Teamwork N: as you cast this spell you may also tap any number of untapped creatures you control with total power N or more (the `choose_kicker` decision, then one `choose_cost` per creature). `{"cast_with": "teamwork"}` holds if you did; `kicked_targets` are its targets then.
+
+Rules: CR 702.194a, CR 702.194b, CR 702.194c, CR 601.2b, CR 601.2f, CR 601.2h
+
+| Parameter | Description |
+| --- | --- |
+| `power` | integer >= 1 (the N of teamwork N) |
+
+```json
+{
+  "teamwork": {
+    "power": 4
   }
 }
 ```

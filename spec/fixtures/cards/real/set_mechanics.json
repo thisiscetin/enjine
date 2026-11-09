@@ -1,0 +1,725 @@
+[
+  {
+    "name": "Aerial Doombot",
+    "mana_cost": "{U}",
+    "types": [
+      "artifact",
+      "creature"
+    ],
+    "subtypes": [
+      "robot",
+      "villain"
+    ],
+    "power": 1,
+    "toughness": 1,
+    "keywords": [
+      "flying"
+    ],
+    "abilities": [
+      {
+        "activated": {
+          "power_up": true,
+          "cost": [
+            {
+              "mana": "{5}{U}"
+            }
+          ],
+          "effects": [
+            {
+              "add_counters": {
+                "counter": "+1/+1",
+                "amount": 3,
+                "to": "self"
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "common",
+    "printing": {
+      "set": "msh",
+      "number": "43"
+    }
+  },
+  {
+    "name": "Brave Brawler",
+    "mana_cost": "{1}{W}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "human",
+      "warrior",
+      "hero"
+    ],
+    "power": 2,
+    "toughness": 1,
+    "keywords": [
+      "lifelink"
+    ],
+    "abilities": [
+      {
+        "activated": {
+          "power_up": true,
+          "cost": [
+            {
+              "mana": "{4}{W}"
+            }
+          ],
+          "effects": [
+            {
+              "add_counters": {
+                "counter": "+1/+1",
+                "amount": 2,
+                "to": "self"
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "common",
+    "printing": {
+      "set": "msh",
+      "number": "8"
+    }
+  },
+  {
+    "name": "Cruel Alliance",
+    "mana_cost": "{2}{B}",
+    "types": [
+      "sorcery"
+    ],
+    "abilities": [
+      {
+        "teamwork": {
+          "power": 2
+        }
+      },
+      {
+        "spell": {
+          "targets": [
+            {
+              "creature": {
+                "mana_value": {
+                  "at_most": 3
+                }
+              }
+            }
+          ],
+          "kicked_targets": [
+            "creature"
+          ],
+          "effects": [
+            {
+              "exile": {
+                "to": {
+                  "target": 0
+                }
+              }
+            },
+            {
+              "gain_life": {
+                "amount": 3,
+                "if": {
+                  "cast_with": "teamwork"
+                }
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "common",
+    "printing": {
+      "set": "msh",
+      "number": "92"
+    }
+  },
+  {
+    "name": "The Kingpin of Crime",
+    "mana_cost": "{1}{W}{B}",
+    "types": [
+      "creature"
+    ],
+    "supertypes": [
+      "legendary"
+    ],
+    "subtypes": [
+      "human",
+      "villain"
+    ],
+    "power": 1,
+    "toughness": 5,
+    "keywords": [
+      "extort"
+    ],
+    "rarity": "rare",
+    "printing": {
+      "set": "msh",
+      "number": "220"
+    }
+  },
+  {
+    "name": "Hungry Graffalon",
+    "mana_cost": "{3}{G}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "giraffe"
+    ],
+    "power": 3,
+    "toughness": 4,
+    "keywords": [
+      "reach",
+      "increment"
+    ],
+    "rarity": "common",
+    "printing": {
+      "set": "sos",
+      "number": "151"
+    }
+  },
+  {
+    "name": "Luminollusk",
+    "mana_cost": "{3}{G}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "elemental"
+    ],
+    "power": 2,
+    "toughness": 4,
+    "keywords": [
+      "deathtouch"
+    ],
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "enters": {}
+          },
+          "effects": [
+            {
+              "gain_life": {
+                "amount": {
+                  "distinct_colors": {
+                    "each": "permanent",
+                    "controller": "you"
+                  }
+                }
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "uncommon",
+    "printing": {
+      "set": "ecl",
+      "number": "179"
+    }
+  },
+  {
+    "name": "Shimmercreep",
+    "mana_cost": "{4}{B}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "elemental"
+    ],
+    "power": 3,
+    "toughness": 5,
+    "keywords": [
+      "menace"
+    ],
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "enters": {}
+          },
+          "effects": [
+            {
+              "lose_life": {
+                "amount": {
+                  "distinct_colors": {
+                    "each": "permanent",
+                    "controller": "you"
+                  }
+                },
+                "to": "each_opponent"
+              }
+            },
+            {
+              "gain_life": {
+                "amount": {
+                  "distinct_colors": {
+                    "each": "permanent",
+                    "controller": "you"
+                  }
+                }
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "uncommon",
+    "printing": {
+      "set": "ecl",
+      "number": "120"
+    }
+  },
+  {
+    "name": "Ori, Keeper of Songs",
+    "mana_cost": "{2}{W}",
+    "types": [
+      "creature"
+    ],
+    "supertypes": [
+      "legendary"
+    ],
+    "subtypes": [
+      "dwarf",
+      "bard"
+    ],
+    "power": 3,
+    "toughness": 3,
+    "keywords": [
+      "storied"
+    ],
+    "abilities": [
+      {
+        "static": {
+          "affects": "self",
+          "if": {
+            "designation": "enduring_story"
+          },
+          "pump": {
+            "power": 1,
+            "toughness": 0
+          },
+          "keywords": [
+            "vigilance"
+          ]
+        }
+      }
+    ],
+    "rarity": "common",
+    "printing": {
+      "set": "hob",
+      "number": "23"
+    }
+  },
+  {
+    "name": "Bombur, Gentle Dreamer",
+    "mana_cost": "{2}{R}",
+    "types": [
+      "creature"
+    ],
+    "supertypes": [
+      "legendary"
+    ],
+    "subtypes": [
+      "dwarf",
+      "bard"
+    ],
+    "power": 5,
+    "toughness": 3,
+    "keywords": [
+      "storied"
+    ],
+    "abilities": [
+      {
+        "static": {
+          "affects": "self",
+          "if": {
+            "not": {
+              "designation": "enduring_story"
+            }
+          },
+          "keywords": [
+            "doesnt_untap"
+          ]
+        }
+      }
+    ],
+    "rarity": "uncommon",
+    "printing": {
+      "set": "hob",
+      "number": "88"
+    }
+  },
+  {
+    "name": "Fíli the Pathfinder",
+    "mana_cost": "{3}{W}",
+    "types": [
+      "creature"
+    ],
+    "supertypes": [
+      "legendary"
+    ],
+    "subtypes": [
+      "dwarf",
+      "scout"
+    ],
+    "power": 2,
+    "toughness": 2,
+    "keywords": [
+      "storied"
+    ],
+    "abilities": [
+      {
+        "static": {
+          "affects": {
+            "each": "creature",
+            "controller": "you"
+          },
+          "if": {
+            "designation": "enduring_story"
+          },
+          "pump": {
+            "power": 1,
+            "toughness": 1
+          }
+        }
+      },
+      {
+        "triggered": {
+          "when": {
+            "any_of": [
+              {
+                "enters": {}
+              },
+              {
+                "enters": {
+                  "subject": {
+                    "each": {
+                      "creature": {
+                        "subtypes": [
+                          "dwarf"
+                        ],
+                        "token": false
+                      }
+                    },
+                    "controller": "you",
+                    "other": true
+                  }
+                }
+              }
+            ]
+          },
+          "effects": [
+            {
+              "create_token": {
+                "token": {
+                  "name": "Dwarf",
+                  "types": [
+                    "creature"
+                  ],
+                  "subtypes": [
+                    "dwarf"
+                  ],
+                  "colors": [
+                    "R"
+                  ],
+                  "power": 2,
+                  "toughness": 2
+                }
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "rare",
+    "printing": {
+      "set": "hob",
+      "number": "14"
+    }
+  },
+  {
+    "name": "Fire Magic",
+    "mana_cost": "{R}",
+    "types": [
+      "instant"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "choose": 1,
+          "modes": [
+            {
+              "cost": "{0}",
+              "effects": [
+                {
+                  "deal_damage": {
+                    "amount": 1,
+                    "to": {
+                      "each": "creature"
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              "cost": "{2}",
+              "effects": [
+                {
+                  "deal_damage": {
+                    "amount": 2,
+                    "to": {
+                      "each": "creature"
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              "cost": "{5}",
+              "effects": [
+                {
+                  "deal_damage": {
+                    "amount": 3,
+                    "to": {
+                      "each": "creature"
+                    }
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "uncommon",
+    "printing": {
+      "set": "fin",
+      "number": "136"
+    }
+  },
+  {
+    "name": "Thunder Magic",
+    "mana_cost": "{R}",
+    "types": [
+      "instant"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "choose": 1,
+          "modes": [
+            {
+              "cost": "{0}",
+              "targets": [
+                "creature"
+              ],
+              "effects": [
+                {
+                  "deal_damage": {
+                    "amount": 2,
+                    "to": {
+                      "target": 0
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              "cost": "{3}",
+              "targets": [
+                "creature"
+              ],
+              "effects": [
+                {
+                  "deal_damage": {
+                    "amount": 4,
+                    "to": {
+                      "target": 0
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              "cost": "{5}{R}",
+              "targets": [
+                "creature"
+              ],
+              "effects": [
+                {
+                  "deal_damage": {
+                    "amount": 8,
+                    "to": {
+                      "target": 0
+                    }
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "common",
+    "printing": {
+      "set": "fin",
+      "number": "165"
+    }
+  },
+  {
+    "name": "Leader's Talent",
+    "mana_cost": "{1}{W}",
+    "types": [
+      "enchantment"
+    ],
+    "subtypes": [
+      "class"
+    ],
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "player_attacks": {}
+          },
+          "targets": [
+            {
+              "creature": {
+                "attacking": true
+              }
+            }
+          ],
+          "effects": [
+            {
+              "add_counters": {
+                "counter": "+1/+1",
+                "amount": 1,
+                "to": {
+                  "target": 0
+                }
+              }
+            }
+          ]
+        }
+      },
+      {
+        "class_level": {
+          "level": 2,
+          "cost": "{2}{W}",
+          "abilities": [
+            {
+              "triggered": {
+                "when": {
+                  "leaves_battlefield": {
+                    "subject": {
+                      "each": "creature",
+                      "controller": "you"
+                    }
+                  }
+                },
+                "if": {
+                  "amount": {
+                    "counters": {
+                      "of": {
+                        "triggering": "object"
+                      }
+                    }
+                  },
+                  "at_least": 1
+                },
+                "effects": [
+                  {
+                    "gain_life": {
+                      "amount": 2
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      },
+      {
+        "class_level": {
+          "level": 3,
+          "cost": "{3}{W}",
+          "abilities": [
+            {
+              "triggered": {
+                "when": {
+                  "cast": {
+                    "controller": "you"
+                  }
+                },
+                "effects": [
+                  {
+                    "add_counters": {
+                      "counter": "+1/+1",
+                      "amount": 1,
+                      "to": {
+                        "each": "creature",
+                        "controller": "you"
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "rare",
+    "printing": {
+      "set": "tmt",
+      "number": "13"
+    }
+  },
+  {
+    "name": "Stormscale Scion",
+    "mana_cost": "{4}{R}{R}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "dragon"
+    ],
+    "power": 4,
+    "toughness": 4,
+    "keywords": [
+      "flying",
+      "storm"
+    ],
+    "abilities": [
+      {
+        "static": {
+          "affects": {
+            "each": {
+              "creature": {
+                "subtypes": [
+                  "dragon"
+                ]
+              }
+            },
+            "controller": "you",
+            "other": true
+          },
+          "pump": {
+            "power": 1,
+            "toughness": 1
+          }
+        }
+      }
+    ],
+    "rarity": "mythic",
+    "printing": {
+      "set": "tdm",
+      "number": "123"
+    }
+  }
+]
