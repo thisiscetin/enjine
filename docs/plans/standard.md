@@ -430,6 +430,16 @@ closed stays under a narrower name with the cards known to need it.
 | Mobilize, firebending | 702.181, 702.189 | abilities `mobilize`, `firebending` (4.19) |
 | Blight, connive, recruit, amass, empower Jace, endure | 701.68, 701.50, 701.70, 701.47, 701.71, 701.63 | effects of the same names; cost `blight` (4.19) |
 | Kindred card type | 308 | `"types": ["kindred", …]` (4.19) |
+| Ability removal (loses all abilities) | 613.1f | `"loses_abilities": true` on `become` and `static`; static `colors`, `base_power_toughness` (4.20) |
+| More player/game restrictions (can't cast, can't gain life, spells can't be countered, ...) | 101.2, 604.1 | `player_rule` rules `cant_cast` (`spells`), `cant_cast_except_from_hand`, `spells_cant_be_countered`, `cant_gain_life`, `cant_activate`, `damage_cant_be_prevented`, `combat_damage_cant_be_prevented`; `if` (4.20) |
+| Hexproof from / protection from | 702.11d, 702.16 | abilities `hexproof_from` / `protection_from` with a card spec (`colors`, `color_count`) or `"everything"` (4.20) |
+| Granting activated abilities | 613.1f, 602.1 | `static` / `become` `abilities` with `activated` (4.20) |
+| Emblems | 114 | effect `create_emblem`; the command zone (4.20) |
+| Exchange (control, life totals), set life total | 701.12, 119.5 | effects `exchange_control`, `exchange_life_totals`, `set_life` (4.20) |
+| Player counters (poison, experience) | 122.1f | `add_counters` on players; amount `counters` of players (4.20; rad counters' trigger, CR 729, not yet) |
+| Skip turns | 614.10 | effect `skip_turns` (4.20) |
+| A chosen type added to other types; choosing a basic land type | 614.12, 607.2 | static `"subtypes": "chosen"`; ability `choose_basic_land_type` (4.20) |
+| Control "for as long as" | 611.2b | `gain_control` durations `while_source_on_battlefield`, `while_source_tapped` (4.20) |
 
 Still open in these areas (not yet counted as gaps above, since the census didn't
 separate them):
