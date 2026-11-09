@@ -328,7 +328,6 @@ module Enjine
           parts = Array(data[key]).each_with_index.map { |c, i| build(c, errors, "#{path}.#{key}[#{i}]", **context) }
           Many.new(key, parts.compact)
         elsif data.key?("kicked") then WasKicked.new(data["kicked"] != false)
-        elsif (key = CastHow::KEYS.find { data.key?(it) }) then CastHow.build(key, data, errors, path) # keywords/alternative_costs.rb
         elsif data.key?("sacrificed") then Sacrificed.build(data, errors, path)
         elsif (flag = FLAGS.find { data.key?(it) }) then Flag.new(flag, data[flag] != false)
         elsif data.key?("targets") then Targets.build(data, errors, path)
@@ -337,8 +336,14 @@ module Enjine
         elsif data.key?("share_card_type") then ShareCardType.build(data, errors, path, targets_count) # effects/zones.rb
         elsif data.key?("source") then Source.build(data, errors, path)
         elsif data.key?("nth_resolution") then NthResolution.build(data, errors, path)
-        else Compare.build(data, errors, path, **context)
+        else build_more(data, errors, path, context)
         end
+      end
+
+      # How a spell was cast (CastHow, keywords/alternative_costs.rb), or a comparison.
+      def self.build_more(data, errors, path, context)
+        key = CastHow::KEYS.find { data.key?(it) }
+        key ? CastHow.build(key, data, errors, path) : Compare.build(data, errors, path, **context)
       end
 
       # An Amount compared with bounds: {"amount": amount, "at_least": n, "at_most": n}, or a short form

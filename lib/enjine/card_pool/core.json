@@ -8535,5 +8535,345 @@
         }
       }
     ]
+  },
+  {
+    "name": "Cinder Reprise",
+    "mana_cost": "{1}{R}",
+    "types": [
+      "sorcery"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "targets": [
+            "any_target"
+          ],
+          "effects": [
+            {
+              "deal_damage": {
+                "amount": 2,
+                "to": {
+                  "target": 0
+                }
+              }
+            },
+            {
+              "gain_life": {
+                "amount": 2,
+                "if": {
+                  "cast_from": "graveyard"
+                }
+              }
+            }
+          ]
+        }
+      },
+      {
+        "flashback": {
+          "cost": "{3}{R}"
+        }
+      }
+    ]
+  },
+  {
+    "name": "Hollow Chorus",
+    "mana_cost": "{1}{U}",
+    "types": [
+      "instant"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "effects": [
+            {
+              "draw": {
+                "amount": 1
+              }
+            }
+          ]
+        }
+      },
+      {
+        "flashback": {
+          "cost": [
+            {
+              "mana": "{U}"
+            },
+            {
+              "tap_permanents": {
+                "count": 2,
+                "filter": "creature"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Grove Cadence",
+    "mana_cost": "{2}{G}",
+    "types": [
+      "sorcery"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "effects": [
+            {
+              "draw": {
+                "amount": 2
+              }
+            }
+          ]
+        }
+      },
+      {
+        "harmonize": {
+          "cost": "{4}{G}"
+        }
+      }
+    ]
+  },
+  {
+    "name": "Scrapyard Riot",
+    "mana_cost": "{1}{R}",
+    "types": [
+      "sorcery"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "targets": [
+            "any_target"
+          ],
+          "effects": [
+            {
+              "deal_damage": {
+                "amount": 1,
+                "to": {
+                  "target": 0
+                }
+              }
+            },
+            {
+              "deal_damage": {
+                "amount": 2,
+                "to": {
+                  "target": 0
+                },
+                "if": {
+                  "cast_with": "mayhem"
+                }
+              }
+            }
+          ]
+        }
+      },
+      {
+        "mayhem": {
+          "cost": "{R}"
+        }
+      }
+    ]
+  },
+  {
+    "name": "Alley Mongrel",
+    "mana_cost": "{1}{R}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "dog"
+    ],
+    "power": 2,
+    "toughness": 1,
+    "abilities": [
+      "mayhem"
+    ]
+  },
+  {
+    "name": "Quick Rifler",
+    "mana_cost": "{R}",
+    "types": [
+      "sorcery"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "effects": [
+            {
+              "discard": {
+                "amount": 1,
+                "to": "you"
+              }
+            },
+            {
+              "draw": {
+                "amount": 1
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Rift Courier",
+    "mana_cost": "{3}{R}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "human"
+    ],
+    "power": 3,
+    "toughness": 3,
+    "abilities": [
+      {
+        "warp": {
+          "cost": "{1}{R}"
+        }
+      }
+    ]
+  },
+  {
+    "name": "Void Sentry",
+    "mana_cost": "{1}{B}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "human"
+    ],
+    "power": 2,
+    "toughness": 1,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "step_begins": {
+              "step": "end",
+              "whose": "your"
+            }
+          },
+          "if": {
+            "cast_with_this_turn": "warp"
+          },
+          "effects": [
+            {
+              "draw": {
+                "amount": 1
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Flicker Wisp",
+    "mana_cost": "{2}{R}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "elemental"
+    ],
+    "power": 2,
+    "toughness": 1,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "enters": {}
+          },
+          "targets": [
+            "any_target"
+          ],
+          "effects": [
+            {
+              "deal_damage": {
+                "amount": 1,
+                "to": {
+                  "target": 0
+                }
+              }
+            }
+          ]
+        }
+      },
+      {
+        "evoke": {
+          "cost": "{R}"
+        }
+      }
+    ]
+  },
+  {
+    "name": "Ledge Vaulter",
+    "mana_cost": "{2}{W}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "human"
+    ],
+    "power": 3,
+    "toughness": 2,
+    "abilities": [
+      {
+        "web_slinging": {
+          "cost": "{W}"
+        }
+      }
+    ]
+  },
+  {
+    "name": "Drain Lurker",
+    "mana_cost": "{3}{B}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "human"
+    ],
+    "power": 3,
+    "toughness": 3,
+    "abilities": [
+      {
+        "sneak": {
+          "cost": "{1}{B}"
+        }
+      }
+    ]
+  },
+  {
+    "name": "Crowd Uprising",
+    "mana_cost": "{3}{W}",
+    "types": [
+      "sorcery"
+    ],
+    "keywords": [
+      "convoke"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "effects": [
+            {
+              "gain_life": {
+                "amount": 3
+              }
+            },
+            {
+              "draw": {
+                "amount": 1
+              }
+            }
+          ]
+        }
+      }
+    ]
   }
 ]

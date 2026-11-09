@@ -40,7 +40,7 @@ module Enjine
       # distinct card) while something lets them play those.
       def permission_candidates(index, sources = permission_sources(index))
         pl = player(index)
-        ids = pl.hand + pl.graveyard + state.exile
+        ids = alt_cost_hand(pl) + pl.graveyard + state.exile
         ids += [pl.library.first] unless pl.library.empty?
         return ids unless sources.any? { |_, inst| inst.ability.kind == :play_from && inst.ability.outside? }
 
@@ -315,20 +315,6 @@ module Enjine
         end
       end
 
-      # Whether an alternative cost returns a creature to its owner's hand: beam me up, web-slinging, sneak.
-      def returns_creature?(alt) = !alt.nil? && (alt.key?("beam") || alt.key?("returns"))
-
-      # The creatures `index` could return for the alternative cost `alt`: any (beam me up, CR 702.196a), a
-      # tapped one (web-slinging, CR 702.188a) or an unblocked attacking one (sneak, CR 702.190a).
-      def return_candidates(index, alt)
-        case alt["returns"]
-        when "tapped" then state.battlefield.select { (o = object(it)).controller == index && o.tapped && chars(o).creature? }
-        when "unblocked"
-          attackers.filter_map { |id, a| id if !a["blocked"] && object(id).controller == index && chars(id).creature? }
-        else beam_candidates(index, alt["not"])
-        end
-      end
-
       # The choices for the cast in progress.
       def beam_choices(ctx) = return_candidates(ctx["player"], ctx.dig("method", "alt"))
 
@@ -341,11 +327,8 @@ module Enjine
         true
       end
 
-      RETURN_TEXT = { "tapped" => "Return a tapped creature you control to its owner's hand",
-                      "unblocked" => "Return an unblocked attacking creature you control to its owner's hand" }.freeze
-
       def ask_beam_choice!(ctx)
-        text = RETURN_TEXT.fetch(ctx.dig("method", "alt", "returns"), BEAM_COST_TEXT)
+        text = AltCasting::RETURN_TEXT.fetch(ctx.dig("method", "alt", "returns"), BEAM_COST_TEXT)
         ask!("kind" => "choose_cost", "player" => ctx["player"], "cost" => text)
         :wait
       end

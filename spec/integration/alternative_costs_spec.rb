@@ -26,7 +26,7 @@ RSpec.describe "Alternative costs from keywords" do
     { "name" => "Scrap Frenzy", "mana_cost" => "{2}{R}", "types" => ["sorcery"],
       "abilities" => [{ "spell" => { "targets" => ["any_target"],
                                      "effects" => [damage(1), { "deal_damage" => { "amount" => 2, "to" => { "target" => 0 },
-                                                                                    "if" => { "cast_with" => "mayhem" } } }] } },
+                                                                                   "if" => { "cast_with" => "mayhem" } } }] } },
                       { "mayhem" => { "cost" => "{R}" } }] }
   end
   let(:hound) do
@@ -90,11 +90,14 @@ RSpec.describe "Alternative costs from keywords" do
     end
   end
 
-  def card(game, name, zone, player = "alice") = ids_in(game, player, zone).find { game.state.object(it).card == Enjine::CardDefinition.slug(name) }
+  def card(game, name, zone, player = "alice")
+    ids_in(game, player, zone).find { game.state.object(it).card == Enjine::CardDefinition.slug(name) }
+  end
+
   def cards_in(game, zone, player = "alice") = ids_in(game, player, zone).map { game.state.object(it).card }
   def exiled(game) = game.state.exile.map { game.state.object(it).card }
   def bob(game) = "player:#{game.names[1]}"
-  def life(game, i) = game.view_for(:observer)["players"][i]["life"]
+  def life(game, seat) = game.view_for(:observer)["players"][seat]["life"]
   def casts(game) = game.legal_options.select { it[:type] == "cast" }
   def engine(game) = game.instance_variable_get(:@engine)
   def mine(game, name) = game.state.battlefield.select { game.state.object(it).card == Enjine::CardDefinition.slug(name) }
@@ -299,6 +302,16 @@ RSpec.describe "Alternative costs from keywords" do
       expect(cards_in(game, :hand)).to eq(["grizzly_bears"])
     end
 
+    it "enters tapped but not attacking when what the returned creature attacked is gone" do
+      game = board(hand: ["Sewer Lurker"], battlefield: ["Swamp"])
+      enters = { "tapped" => false, "counters" => {} }
+      spell = Struct.new(:id, :memory).new("x", { "cast_from" => "hand", "sneak_attack" => "walker#99" })
+      engine(game).alt_enters!(spell, enters)
+      expect(enters).to eq("tapped" => true, "counters" => {}, "memory" => { "cast_from" => "hand" })
+      ctx = Enjine::Mechanics::EffectContext.new(0, "gone#1", nil, [])
+      expect(Enjine::Mechanics::Condition.build({ "cast_from" => "hand" }, [], "if").true?(engine(game), ctx)).to be(false)
+    end
+
     it "isn't offered outside your declare blockers step or with only blocked attackers" do
       game = board(hand: ["Sewer Lurker"], battlefield: ["Swamp", "Grizzly Bears"], step: :declare_attackers)
       game.state.attackers[obj_id(game, "Grizzly Bears")] = { "target" => bob(game), "blocked" => false }
@@ -324,6 +337,22 @@ RSpec.describe "Alternative costs from keywords" do
       pass_both(game)
       expect(life(game, 0)).to eq(24)
       expect(bears.map { game.state.object(it).tapped }).to eq([true, true])
+    end
+
+    it "offers only creatures that can still pay something, and keeps an irreversible payment payable" do
+      game = board(hand: ["Gang Rally"], battlefield: ["Plains"] + (["Grizzly Bears"] * 4))
+      game.submit(casts(game).first)
+      bears = mine(game, "Grizzly Bears")
+      bears.first(3).each { game.submit(type: "convoke", object: it) }
+      expect(game.pending_decision.details["remaining"]).to eq("{W}")
+      expect(game.legal_options.map { it[:type] }).not_to include("convoke")
+      game = board(hand: ["Gang Rally"], battlefield: ["Plains"] + (["Grizzly Bears"] * 3))
+      game.submit(casts(game).first)
+      engine(game).payment["irreversible"] = true
+      refresh(game)
+      expect(game.legal_options.count { it[:type] == "convoke" }).to eq(3)
+      game.submit(type: "convoke", object: mine(game, "Grizzly Bears").first)
+      expect(game.pending_decision.details["remaining"]).to eq("{2}{W}")
     end
 
     it "isn't castable when creatures plus mana fall short; cancelling untaps convoked creatures" do

@@ -388,6 +388,50 @@ equips for a non-mana cost, and granted activated abilities ("equipped creature 
   `"grants_beam_me_up"`; that permanent can't be the creature returned for spells cast
   its way. A creature that can never be returned for a beam me up cost has the keyword
   `"cant_be_beamed_up"`.
+- **Keyword alternative costs** (CR 118.9): each is an ability with a `cost`, either a
+  mana string or a list of costs like kicker's (mana plus chosen costs such as
+  `tap_permanents`). A card with one gets an extra cast option
+  `{type: "cast", object: id, via: "alt:<ability ref>"}` while the keyword works:
+  - `{ "flashback": { "cost": "{2}{R}" } }` (CR 702.34): instant or sorcery, from your
+    graveyard; it's exiled whenever it would leave the stack. "Flashback—{1}{U}, tap two
+    untapped creatures you control" is
+    `{ "flashback": { "cost": [{ "mana": "{1}{U}" }, { "tap_permanents": { "count": 2 } }] } }`.
+  - `{ "harmonize": { "cost": "{4}{G}" } }` (CR 702.180): from your graveyard; while
+    casting you may tap one untapped creature you control (a `choose_cost` decision,
+    `{type: "cost"}` taps none) to reduce the total cost by its power. Exiled like flashback.
+  - `{ "mayhem": { "cost": "{1}{R}" } }` (CR 702.187): from your graveyard if you
+    discarded the card this turn. `"mayhem"` without a cost lets you play it (a land too)
+    from your graveyard for its normal costs.
+  - `{ "warp": { "cost": "{1}{R}" } }` (CR 702.185): from your hand; the permanent is
+    exiled at the beginning of the next end step, and its owner may cast it from exile
+    after that turn (`via: "warped"`) for as long as it stays there.
+  - `{ "evoke": { "cost": "{R/W}{R/W}" } }` (CR 702.74): on a permanent card; it comes
+    with "When this enters, if its evoke cost was paid, sacrifice it".
+  - `{ "web_slinging": { "cost": "{2}{G}" } }` (CR 702.188): also return a tapped
+    creature you control to its owner's hand (a `choose_cost` decision).
+  - `{ "sneak": { "cost": "{1}{B}" } }` (CR 702.190): during your declare blockers step,
+    at instant speed, also return an unblocked attacking creature you control; a
+    permanent spell enters tapped and attacking what that creature attacked.
+
+  **Convoke** (CR 702.51) is the keyword `"convoke"`: while paying, the `pay_cost`
+  option `{type: "convoke", object: id}` taps an untapped creature you control to pay
+  {1} or one mana of its color.
+
+  How a spell was cast is a condition (CR 400.7d): `{ "cast_with": "evoke" }` (its
+  keyword cost was paid), `{ "cast_from": "graveyard" }` (also `hand`, `exile`,
+  `library`, `outside`; "from anywhere other than your hand" is
+  `{ "not": { "cast_from": "hand" } }`), and `{ "cast_with_this_turn": "warp" }` ("if a
+  spell was warped this turn"). The permanent a spell becomes, and its triggered
+  abilities, remember it. "Draw a card. If this spell was cast from a graveyard, draw
+  two cards instead. Flashback {3}{U}":
+  ```json
+  { "name": "Second Glance", "mana_cost": "{1}{U}", "types": ["sorcery"],
+    "abilities": [
+      { "spell": { "effects": [
+        { "draw": { "amount": 1, "if": { "not": { "cast_from": "graveyard" } } } },
+        { "draw": { "amount": 2, "if": { "cast_from": "graveyard" } } } ] } },
+      { "flashback": { "cost": "{3}{U}" } } ] }
+  ```
 - **A card castable from its owner's graveyard or exile**:
   `{ "play_from": { "zone": "graveyard" } }`; add `"enters_with": { "finality": 1 }`
   when a permanent spell cast that way gets a finality counter.

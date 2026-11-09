@@ -15,8 +15,13 @@ module Enjine
     # spells they cast this turn ("cast_with"), for "if a spell was warped this turn" (CR 702.185c).
     module AltCasting
       HARMONIZE_TEXT = "Tap up to one untapped creature you control (harmonize)"
+      RETURN_TEXT = { "tapped" => "Return a tapped creature you control to its owner's hand",
+                      "unblocked" => "Return an unblocked attacking creature you control to its owner's hand" }.freeze
 
       # ---- methods ------------------------------------------------------------------------------
+
+      # The cards in a hand with an alternative cost (only those can be cast from it with a method).
+      def alt_cost_hand(player) = player.hand.select { |id| chars(id).abilities.any? { it.ability.kind == :alternative_cost } }
 
       # The alternative-cost methods of `obj` (a card `index` owns) that function now.
       def alt_methods(index, obj)
@@ -42,11 +47,26 @@ module Enjine
       # The non-mana parts of the alternative cost being paid (a list of costs, CR 601.2h).
       def alt_cost_parts(obj, method)
         ref = method&.dig("alt", "ref") or return []
-        ability = chars(obj).ability(ref)
-        ability.respond_to?(:choosing_costs) ? ability.choosing_costs : []
+        chars(obj).ability(ref).choosing_costs
       end
 
       def alt_parts_payable?(obj, method) = alt_cost_parts(obj, method).all? { it.payable?(self, obj) }
+
+      # ---- returning a creature (beam me up, web-slinging, sneak) -------------------------------------
+
+      # Whether an alternative cost returns a creature to its owner's hand (Engine::Permissions#beam_choices).
+      def returns_creature?(alt) = !alt.nil? && (alt.key?("beam") || alt.key?("returns"))
+
+      # The creatures `index` could return for the alternative cost `alt`: any (beam me up, CR 702.196a), a
+      # tapped one (web-slinging, CR 702.188a) or an unblocked attacking one (sneak, CR 702.190a).
+      def return_candidates(index, alt)
+        case alt["returns"]
+        when "tapped" then state.battlefield.select { (o = object(it)).controller == index && o.tapped && chars(o).creature? }
+        when "unblocked"
+          attackers.filter_map { |id, a| id if !a["blocked"] && object(id).controller == index && chars(id).creature? }
+        else beam_candidates(index, alt["not"])
+        end
+      end
 
       # ---- harmonize (CR 702.180a-b) --------------------------------------------------------------
 
