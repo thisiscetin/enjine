@@ -6,14 +6,16 @@ module Enjine
       # "Gain control of target permanent" / "... until end of turn" / "Target opponent gains control of
       # target permanent you control" (CR 613.1b, 108.4, 506.4, 302.6).
       class GainControl < Effect
-        DURATIONS = %w[permanent end_of_turn].freeze
+        DURATIONS = %w[permanent end_of_turn while_source_on_battlefield while_source_tapped].freeze
 
         primitive :effect, :gain_control,
                   description: "The player referenced by `gains` (default you) gains control of each referenced " \
-                               "permanent: indefinitely (`duration: \"permanent\"`, default) or until end of turn. " \
+                               "permanent: indefinitely (`duration: \"permanent\"`, default), until end of turn, or for " \
+                               "as long as this effect's source remains on the battlefield / tapped (it does nothing " \
+                               "if that is already over). " \
                                "A permanent that changes control leaves combat and is newly under its controller's " \
                                "control (it can't attack or {T} without haste).",
-                  rules: %w[613.1b 108.4 506.4 302.6 514.2],
+                  rules: %w[613.1b 108.4 506.4 302.6 514.2 611.2b],
                   params: { "to" => "selector (permanents)", "gains" => "selector (a player; default \"you\")",
                             "duration" => DURATIONS.join(" | ") },
                   example: { "gain_control" => { "to" => { "target" => 0 }, "duration" => "end_of_turn" } }
@@ -31,13 +33,28 @@ module Enjine
 
         def apply(engine, ctx)
           player = gains.resolve(engine, ctx).filter_map { Filters.player_index(engine, it) }.first or return
+          return unless source_holds?(engine, ctx)
+
           objects(engine, ctx).each do |id|
             obj = engine.object(id)
-            duration == "permanent" ? engine.gain_control!(obj, player) : engine.gain_control_until_end_of_turn!(obj, player, ctx)
+            next engine.gain_control!(obj, player) if duration == "permanent"
+
+            engine.gain_control_for!(obj, player, ctx, duration: duration,
+                                                       source: duration == "end_of_turn" ? nil : ctx.source)
           end
         end
 
         def to_s = "#{gains} gains control#{" until end of turn" if duration == "end_of_turn"} → #{to}"
+
+        private
+
+        # CR 611.2b: a "for as long as" duration that has already ended never starts.
+        def source_holds?(engine, ctx)
+          return true unless duration.start_with?("while_source")
+
+          on = engine.state.battlefield.include?(ctx.source)
+          duration == "while_source_tapped" ? on && engine.object(ctx.source).tapped : on
+        end
       end
 
       # "Exchange control of target artifact you control and target artifact an opponent controls" (CR 701.12a-b):

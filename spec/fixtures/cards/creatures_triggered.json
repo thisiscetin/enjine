@@ -30,6 +30,48 @@
     "rules_text": "When this creature enters, draw a card."
   },
   {
+    "name": "Mindbinder Siren",
+    "mana_cost": "{3}{U}{U}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "siren"
+    ],
+    "power": 2,
+    "toughness": 3,
+    "keywords": [
+      "flying"
+    ],
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "enters": {}
+          },
+          "targets": [
+            {
+              "creature": {
+                "controller": "opponent"
+              }
+            }
+          ],
+          "effects": [
+            {
+              "gain_control": {
+                "to": {
+                  "target": 0
+                },
+                "duration": "while_source_on_battlefield"
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "Flying\nWhen this creature enters, gain control of target creature an opponent controls for as long as this creature remains on the battlefield."
+  },
+  {
     "name": "Venomfang Adder",
     "mana_cost": "{1}{G}",
     "types": [

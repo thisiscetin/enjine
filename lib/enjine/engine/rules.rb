@@ -177,24 +177,29 @@ module Enjine
         emit Events::ControlChanged.new(object: obj.id, controller: name(controller))
       end
 
-      # Control of `obj` until end of turn: an effect that ends in the cleanup step (CR 514.2), handing
+      # Control of `obj` for a while: until end of turn, an effect that ends in the cleanup step (CR 514.2), handing
       # it back unless a newer control change has happened since.
-      def gain_control_until_end_of_turn!(obj, controller, ctx)
+      # `duration`: "end_of_turn", or "for as long as" its source remains tapped / on the battlefield (CR 611.2b,
+      # `source` set; Engine::Rules#end_while_source_effects! hands it back).
+      def gain_control_for!(obj, controller, ctx, duration: "end_of_turn", source: nil)
         return if obj.controller == controller
 
         timestamp = next_timestamp!
         previous = obj.controller
         gain_control!(obj, controller, timestamp)
         state.effects << { "kind" => "control", "timestamp" => timestamp, "controller" => ctx.controller,
-                           "affected" => [obj.id], "duration" => "end_of_turn", "previous" => previous }
+                           "affected" => [obj.id], "duration" => duration, "previous" => previous,
+                           "source" => source }.compact
         emit Events::EffectStarted.new(kind: "control", affected: [obj.id], details: { "controller" => controller })
       end
 
       # CR 514.2: as "until end of turn" control effects end, control returns to the previous controller.
-      # Several of them on one permanent all end together: it goes back to whoever had it before the first.
-      def revert_temporary_control!
-        ending = state.effects.select { it["kind"] == "control" && it["duration"] == "end_of_turn" }
-        ending.group_by { it["affected"].first }.each do |id, list|
+      def revert_temporary_control! = revert_control!(state.effects.select { it["duration"] == "end_of_turn" })
+
+      # As temporary control effects end, control returns to the previous controller. Several of them on one
+      # permanent all end together: it goes back to whoever had it before the first.
+      def revert_control!(ending)
+        ending.select { it["kind"] == "control" }.group_by { it["affected"].first }.each do |id, list|
           obj = state.objects[id]
           next unless obj && obj.zone == :battlefield && obj.memory["control_timestamp"] == list.last["timestamp"]
 
@@ -245,6 +250,7 @@ module Enjine
         count = state.effects.count(&ending)
         return if count.zero?
 
+        revert_control!(state.effects.select(&ending)) # "for as long as" control (CR 611.2b)
         state.effects.reject!(&ending)
         emit Events::EffectsEnded.new(count: count)
       end

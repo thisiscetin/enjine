@@ -960,6 +960,7 @@ and `base_power_toughness` (layer 7b); its `abilities` may be activated abilitie
 | --- | --- |
 | "Your life total becomes 10" | `{ "set_life": { "amount": 10 } }` (gains or loses the difference) |
 | "Exchange life totals with target opponent. If you lost life this way, draw that many cards" | `{ "exchange_life_totals": { "with": { "target": 0 } } }`, then `{ "draw": { "amount": { "this_way": 0 } } }` |
+| "Gain control of target creature for as long as this creature remains on the battlefield" | `{ "gain_control": { "to": { "target": 0 }, "duration": "while_source_on_battlefield" } }` (also `while_source_tapped`; control goes back as it ends, CR 611.2b) |
 | "Exchange control of target creature you control and target creature an opponent controls" | `{ "exchange_control": { "to": { "target": 0 }, "with": { "target": 1 } } }` |
 | "that player gets two poison counters" / "you get an experience counter" | `{ "add_counters": { "counter": "poison", "amount": 2, "to": { "triggering": "player" } } }` / `"counter": "experience", "to": "you"` |
 | "the number of experience counters you have" | amount `{ "counters": { "of": "you", "kind": "experience" } }` |

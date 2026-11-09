@@ -90,7 +90,7 @@ RSpec.describe "Control changes, combat restrictions, fight and bite (CR 613.1b,
       resolve(game)
       # Bob's creature is now alice's; give it back and take it again for good.
       engine = Enjine::Engine.new(game.catalog, game.state) { nil }
-      engine.gain_control_until_end_of_turn!(game.state.object(giant), 0, Enjine::Mechanics::EffectContext.new(0))
+      engine.gain_control_for!(game.state.object(giant), 0, Enjine::Mechanics::EffectContext.new(0))
       expect(game.state.effects.count { it["kind"] == "control" }).to eq(1) # already alice's: nothing new
       engine.gain_control!(game.state.object(giant), 1)
       cast(game, "Usurp Command", giant)
@@ -115,7 +115,7 @@ RSpec.describe "Control changes, combat restrictions, fight and bite (CR 613.1b,
       cast(game, "Borrowed Blade", giant)
       resolve(game)
       engine = Enjine::Engine.new(game.catalog, game.state) { nil }
-      engine.gain_control_until_end_of_turn!(game.state.object(giant), 1, Enjine::Mechanics::EffectContext.new(1))
+      engine.gain_control_for!(game.state.object(giant), 1, Enjine::Mechanics::EffectContext.new(1))
       expect(controller(game, giant)).to eq(1)
       engine.revert_temporary_control!
       expect(controller(game, giant)).to eq(1)

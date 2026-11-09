@@ -61,6 +61,22 @@ RSpec.describe "Setting and exchanging life totals and control, player counters 
     expect(game.state.object(pyro).controlled_since).to eq(3) # summoning sick for its new controller (CR 302.6)
   end
 
+  it "control for as long as the source remains on the battlefield, handed back as it leaves (CR 611.2b)" do
+    game = board(alice_hand: ["Mindbinder Siren", "Lightning Bolt"], bob: ["Grizzly Bears"], mana: { U: 5, R: 1 })
+    bears = obj_id(game, "Grizzly Bears")
+    game.submit(type: "cast", object: obj_id(game, "Mindbinder Siren", zone: :hand, player: "alice"))
+    game.submit(game.legal_options.find { it[:type] == "pay_mana" }) while game.pending_decision.kind == "pay_cost"
+    game.submit(type: "pass") until game.pending_decision.kind == "choose_target"
+    game.submit(type: "target", target: bears)
+    game.submit(type: "pass") until game.state.stack.empty?
+    expect(game.state.object(bears).controller).to eq(0)
+    skip_to(game, :upkeep, turn: 4)
+    expect(game.state.object(bears).controller).to eq(0) # not just until end of turn
+    engine(game).move!(obj_id(game, "Mindbinder Siren"), :graveyard, reason: "test")
+    expect(game.state.object(bears).controller).to eq(1)
+    expect(game.state.effects).to be_empty
+  end
+
   it "poison counters on a player; ten or more lose the game (CR 122.1f, 704.5c)" do
     game = build_game do
       turn 3, active: "alice", step: :precombat_main

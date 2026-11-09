@@ -1086,15 +1086,15 @@ Rules: CR 701.14a, CR 701.14b, CR 701.14c, CR 701.14d
 
 ## gain_control
 
-The player referenced by `gains` (default you) gains control of each referenced permanent: indefinitely (`duration: "permanent"`, default) or until end of turn. A permanent that changes control leaves combat and is newly under its controller's control (it can't attack or {T} without haste).
+The player referenced by `gains` (default you) gains control of each referenced permanent: indefinitely (`duration: "permanent"`, default), until end of turn, or for as long as this effect's source remains on the battlefield / tapped (it does nothing if that is already over). A permanent that changes control leaves combat and is newly under its controller's control (it can't attack or {T} without haste).
 
-Rules: CR 613.1b, CR 108.4, CR 506.4, CR 302.6, CR 514.2
+Rules: CR 613.1b, CR 108.4, CR 506.4, CR 302.6, CR 514.2, CR 611.2b
 
 | Parameter | Description |
 | --- | --- |
 | `to` | selector (permanents) |
 | `gains` | selector (a player; default "you") |
-| `duration` | permanent | end_of_turn |
+| `duration` | permanent | end_of_turn | while_source_on_battlefield | while_source_tapped |
 
 ```json
 {
