@@ -203,27 +203,41 @@ module Enjine
       class ExileIfDiesStatic < StaticReplacement
         primitive :ability, :exile_if_dies,
                   description: "While this permanent is on the battlefield, a permanent matching `affects` that would " \
-                               "be put into a graveyard from the battlefield is exiled instead.",
-                  rules: %w[614.1a 700.4],
-                  params: { "affects" => "{\"each\": filter, \"controller\": you|opponent|any, \"other\": bool}" },
+                               "be put into a graveyard from the battlefield is exiled instead; the card is \"exiled " \
+                               "with\" this permanent (exiled_with). `then`: effects right after (\"instead exile it " \
+                               "and you gain 2 life\"; a reflexive_trigger for \"When you do, ...\"), reading " \
+                               "{\"triggering\": \"object\"} (the exiled card) and \"player\" (who controlled it).",
+                  rules: %w[614.1a 700.4 603.12 607.2a],
+                  params: { "affects" => "{\"each\": filter, \"controller\": you|opponent|any, \"other\": bool}",
+                            "then" => "list of effects" },
                   example: { "exile_if_dies" => { "affects" => { "each" => "creature", "controller" => "opponent" } } }
 
-        attr_reader :affects
+        attr_reader :affects, :follow_up
 
         def self.build(params, errors, path, **)
-          Mechanics.check_keys(params, %w[affects], errors, path)
-          new(Affects.build(Mechanics.fetch_param(params, :affects), errors, "#{path}.affects"))
+          Mechanics.check_keys(params, %w[affects then], errors, path)
+          new(Affects.build(Mechanics.fetch_param(params, :affects), errors, "#{path}.affects"), FollowUp.build(params, errors, path))
         end
 
-        def initialize(affects)
+        def initialize(affects, follow_up = nil)
           super()
           @affects = affects
+          @follow_up = follow_up
           freeze
         end
 
         def kind = :exile_if_dies
+        def try_effects = [follow_up].compact
         def exiles_dying?(engine, obj, source) = affects.match?(engine, obj, source)
-        def to_s = "if #{affects} would die, exile it instead"
+
+        # What happens once the card is exiled: it is linked to `source` (CR 607.2a), then the follow-up.
+        def follow_up_entry(source, obj)
+          facts = { "player" => obj.controller }
+          (follow_up&.entry(source.card, source.controller, source.id, facts) || { "source" => source.id, "facts" => facts })
+            .merge("link" => true)
+        end
+
+        def to_s = "if #{affects} would die, exile it instead#{", then #{follow_up}" if follow_up}"
       end
 
       # "Lands you control enter untapped." (CR 614.1c, 614.12; applied after every "enters tapped", 616.1)

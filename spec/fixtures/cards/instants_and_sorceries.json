@@ -4329,6 +4329,177 @@
     ]
   },
   {
+    "name": "Second Path",
+    "mana_cost": "{1}{U}{R}{W}",
+    "types": [
+      "instant"
+    ],
+    "rules_text": "The next time a source of your choice would deal damage to you this turn, prevent that damage. When damage is prevented this way, this spell deals that much damage to that source's controller and you draw that many cards.",
+    "abilities": [
+      {
+        "spell": {
+          "effects": [
+            {
+              "prevent_damage": {
+                "to": "you",
+                "by": "chosen_source",
+                "next_time": true,
+                "then": [
+                  {
+                    "reflexive_trigger": {
+                      "effects": [
+                        {
+                          "deal_damage": {
+                            "amount": {
+                              "triggering": "amount"
+                            },
+                            "to": {
+                              "triggering": "player"
+                            }
+                          }
+                        },
+                        {
+                          "draw": {
+                            "amount": {
+                              "triggering": "amount"
+                            },
+                            "to": "you"
+                          }
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Shard Shelter",
+    "mana_cost": "{1}{W}",
+    "types": [
+      "instant"
+    ],
+    "rules_text": "Prevent all damage that would be dealt to creatures you control this turn.",
+    "abilities": [
+      {
+        "spell": {
+          "effects": [
+            {
+              "prevent_damage": {
+                "to_each": {
+                  "each": "creature",
+                  "controller": "you"
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Rampant Clash",
+    "mana_cost": "{R/G}",
+    "types": [
+      "sorcery"
+    ],
+    "rules_text": "Target creature you control gets +1/+0 until end of turn. It fights target creature an opponent controls. When excess damage is dealt to the creature an opponent controls this way, destroy up to one target noncreature artifact with mana value 3 or less.",
+    "abilities": [
+      {
+        "spell": {
+          "targets": [
+            {
+              "creature": {
+                "controller": "you"
+              }
+            },
+            {
+              "creature": {
+                "controller": "opponent"
+              }
+            }
+          ],
+          "effects": [
+            {
+              "pump": {
+                "power": 1,
+                "toughness": 0,
+                "to": {
+                  "target": 0
+                }
+              }
+            },
+            {
+              "fight": {
+                "to": {
+                  "target": 0
+                },
+                "with": {
+                  "target": 1
+                }
+              }
+            },
+            {
+              "reflexive_trigger": {
+                "if": {
+                  "amount": {
+                    "this_way": 1
+                  },
+                  "at_least": 1
+                },
+                "targets": [
+                  {
+                    "filter": {
+                      "artifact": {
+                        "not": [
+                          "creature"
+                        ],
+                        "mana_value": {
+                          "at_most": 3
+                        }
+                      }
+                    },
+                    "optional": true
+                  }
+                ],
+                "effects": [
+                  {
+                    "destroy": {
+                      "to": {
+                        "target": 0
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Hourglass Halt",
+    "mana_cost": "{4}{U}{U}",
+    "types": [
+      "instant"
+    ],
+    "rules_text": "End the turn.",
+    "abilities": [
+      {
+        "spell": {
+          "effects": [
+            "end_the_turn"
+          ]
+        }
+      }
+    ]
+  },
+  {
     "name": "Forked Cinders",
     "mana_cost": "{1}{R}",
     "types": [

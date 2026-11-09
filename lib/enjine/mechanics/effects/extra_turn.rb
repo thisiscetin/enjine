@@ -43,25 +43,49 @@ module Enjine
         primitive :effect, :additional_phases,
                   description: "Adds `phases` (in order; each \"combat\" or \"main\") directly after the current " \
                                "phase of this turn. Phases added after the same phase come most recently created " \
-                               "first. An added main phase is a postcombat main phase.",
-                  rules: %w[500.8 505.1],
-                  params: { "phases" => "list of \"combat\" | \"main\"" },
+                               "first. An added main phase is a postcombat main phase. `attackers`: only creatures " \
+                               "matching this filter can attack during the (first) added combat phase.",
+                  rules: %w[500.8 505.1 508.1c],
+                  params: { "phases" => "list of \"combat\" | \"main\"", "attackers" => "creature filter" },
                   example: { "additional_phases" => { "phases" => %w[combat main] } }
 
-        attr_reader :phases
+        attr_reader :phases, :attackers
 
-        def self.keys = %w[phases if]
+        def self.keys = %w[phases attackers if]
         def self.default_to = "you"
 
         def setup(params, errors, path)
+          @attackers = Mechanics.fetch_param(params, :attackers)
+          Mechanics.build_entry(:filter, @attackers, errors, "#{path}.attackers") unless @attackers.nil?
           @phases = Mechanics.list_param(params, :phases, errors, path)
           return if !@phases.empty? && @phases.all? { Engine::ADDED_PHASES.key?(it) }
 
           errors << "#{path}.phases: must be a non-empty list of \"combat\" | \"main\""
         end
 
-        def apply(engine, _ctx) = engine.add_phases!(phases.dup)
-        def to_s = "after this phase, additional #{phases.join(" and ")} phase#{"s" if phases.size > 1}"
+        def apply(engine, _ctx) = engine.add_phases!(phases.dup, attackers: attackers)
+
+        def to_s
+          only = " (only #{Mechanics.build_entry(:filter, attackers, [], "")} can attack)" if attackers
+          "after this phase, additional #{phases.join(" and ")} phase#{"s" if phases.size > 1}#{only}"
+        end
+      end
+
+      # "End the turn." (CR 725.1)
+      class EndTheTurn < Effect
+        primitive :effect, :end_the_turn,
+                  description: "Ends the turn: triggered abilities not yet on the stack cease to exist, every object on " \
+                               "the stack is exiled (this spell too, so its later effects don't happen), state-based " \
+                               "actions are checked, combat ends and the game skips to the cleanup step. Abilities " \
+                               "that trigger meanwhile go on the stack during cleanup, followed by another cleanup step.",
+                  rules: %w[725.1 725.1a 725.1b 725.1c 725.1d 725.1e 725.1f 514.3a],
+                  example: "end_the_turn"
+
+        def self.keys = %w[if]
+        def self.default_to = "you"
+
+        def apply(engine, _ctx) = engine.end_the_turn!
+        def to_s = "end the turn"
       end
     end
 

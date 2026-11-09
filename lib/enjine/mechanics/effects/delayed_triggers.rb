@@ -64,9 +64,10 @@ module Enjine
                   description: "Creates a reflexive triggered ability (\"when you do, ...\") that triggers immediately, " \
                                "with the controller and source of the resolving spell or ability. Its `targets` are " \
                                "chosen as it's put on the stack; its `effects` may name the results of earlier effects " \
-                               "of the creating list.",
+                               "of the creating list. With `if`, it triggers only when the condition holds " \
+                               "(\"when excess damage is dealt this way\").",
                   rules: %w[603.12 603.12a 603.7d 603.7e 603.3d],
-                  params: { "targets" => "list of target filters", "effects" => "list of effects",
+                  params: { "targets" => "list of target filters", "effects" => "list of effects", "if" => "condition",
                             "divide" => "amount divided among the targets as it's put on the stack (CR 601.2d)" },
                   example: { "reflexive_trigger" => { "targets" => ["any_target"],
                                                       "effects" => [{ "deal_damage" => { "amount" => 2,
@@ -79,7 +80,7 @@ module Enjine
 
         attr_reader :ref, :delayed_ability
 
-        def self.keys = %w[targets effects divide]
+        def self.keys = %w[targets effects divide if]
         def self.default_to = "you"
 
         def setup(params, errors, path)
@@ -97,9 +98,13 @@ module Enjine
         def to_s = "reflexive: #{delayed_ability}"
 
         def apply(engine, ctx)
-          source = { "id" => ctx.source, "card" => engine.object(ctx.object).card, "controller" => ctx.controller,
-                     "ability" => ref }
-          engine.queue_pending_trigger!(source, nil, { "results" => Snapshot.deep_copy(ctx.results || []) })
+          # Created by a replacement's follow-up (Engine::FollowUps), its spell may be long gone: its card is remembered.
+          memory = Selector.memory(engine, ctx)
+          card = engine.state.objects[ctx.object]&.card || memory["source_card"]
+          source = { "id" => ctx.source, "card" => card, "controller" => ctx.controller, "ability" => ref }
+          engine.queue_pending_trigger!(source, nil, { "results" => Snapshot.deep_copy(ctx.results || []),
+                                                       "amounts" => (ctx.amounts || []).dup,
+                                                       "triggering" => memory["triggering"]&.dup }.compact)
         end
       end
     end

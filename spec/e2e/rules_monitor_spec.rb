@@ -126,6 +126,21 @@ RSpec.describe Enjine::RulesMonitor do
                                                                 events: events))
     end
 
+    it "lets a permanent that keeps its damage keep it into the next turn (CR 514.2)" do
+      keeper = { "name" => "Damage Keeper", "mana_cost" => "{1}", "types" => ["creature"], "keywords" => ["keeps_damage"],
+                 "power" => 1, "toughness" => 5 }
+      game = build_game(catalog_with(*cards, keeper)) do
+        turn 3, active: "alice", step: :upkeep
+        player("alice") { battlefield "Damage Keeper", "Wall of Ranks" }
+        player("bob") { library "Forest", count: 3 }
+      end
+      game.state.object(obj_id(game, "Damage Keeper")).damage = 2
+      began = [Enjine::Events::TurnBegan.new(turn: 3, active: "alice")]
+      expect(checked_events(game, began)).to eq([])
+      game.state.object(obj_id(game, "Wall of Ranks")).damage = 1
+      expect(checked_events(game, began).map(&:rule)).to include("514.2")
+    end
+
     it "reports a static pump the engine forgot" do
       allow_any_instance_of(Enjine::Engine).to receive(:static_sources).and_return([]) # rubocop:disable RSpec/AnyInstance
       expect(checked(game).map(&:rule)).to eq(["613.4c"])

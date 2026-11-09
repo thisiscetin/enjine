@@ -20,12 +20,14 @@ module Enjine
       def eligible_attackers
         return [] if player_rule?(state.active, "cant_attack")
 
+        only = combat_attack_filter # "only land creatures can attack during that combat phase" (TurnStructure)
         state.battlefield.select do |id|
           obj = object(id)
           current = chars(obj)
           obj.controller == state.active && !obj.tapped && current.creature? &&
             (!current.keyword?(:defender) || current.keyword?(:attacks_despite_defender)) &&
-            !current.keyword?(:cant_attack) && !attackers.key?(id) && !summoning_sick_for_tap?(obj)
+            !current.keyword?(:cant_attack) && !attackers.key?(id) && !summoning_sick_for_tap?(obj) &&
+            (only.nil? || only.match?(self, id, state.active))
         end
       end
 
@@ -64,6 +66,7 @@ module Enjine
       def withdraw_attacker!(id)
         attackers.delete(id)
         state.attacks_declared -= 1
+        attack_withdrawn!(id) # Engine::TurnHistory
         state.pending_triggers.reject! { it["event"]["type"] == "attacker_declared" && it["event"]["object"] == id }
       end
 
@@ -124,6 +127,7 @@ module Enjine
         return false if chars(attacker).keyword?(:cant_be_blocked)
         return false if protected_from?(object(attacker), object(blocker))
         return false if chars(attacker).abilities.any? { it.ability.kind == :cant_be_blocked_by && it.ability.forbids?(self, blocker) }
+        return false if chars(blocker).abilities.any? { it.ability.kind == :can_block_only && !it.ability.allows?(self, blocker, attacker) }
         return true unless chars(attacker).keyword?(:flying)
 
         chars(blocker).keyword?(:flying) || chars(blocker).keyword?(:reach)
@@ -284,7 +288,7 @@ module Enjine
         end
         simultaneous_damage do # CR 510.2
           dealt = Hash.new(0)
-          lifelinked = hits.map(&:first).uniq.select { damage_source_chars(it)&.keyword?(:lifelink) }
+          lifelinked = hits.map(&:first).uniq.select { damage_source_keyword?(it, :lifelink) }
           hits.each { |source, target, amount| dealt[source] += deal_damage!(source, target, amount, combat: true, lifelink: false) }
           lifelinked.each { lifelink!(it, dealt[it]) if dealt[it].positive? } # CR 120.3f, 119.9: one gain per source
         end

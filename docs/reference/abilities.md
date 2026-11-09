@@ -116,6 +116,30 @@ Rules: CR 702.196a, CR 702.196b, CR 118.9, CR 601.2b, CR 601.2f, CR 601.2h
 }
 ```
 
+## can_block_only
+
+This creature can block only attacking creatures matching `filter` (checked as blockers are declared, with their current characteristics; controller-relative filter keys are seen from this creature's controller).
+
+Rules: CR 509.1b, CR 509.1a
+
+| Parameter | Description |
+| --- | --- |
+| `filter` | a creature filter, e.g. {"creature": {"keywords": ["flying"]}} |
+
+```json
+{
+  "can_block_only": {
+    "filter": {
+      "creature": {
+        "keywords": [
+          "flying"
+        ]
+      }
+    }
+  }
+}
+```
+
 ## cant_be_blocked_by
 
 This creature can't be blocked by creatures matching `filter` (checked as blockers are declared, with their current characteristics).
@@ -836,13 +860,14 @@ Rules: CR 702.74a, CR 118.9, CR 601.2b, CR 601.2f, CR 601.2h, CR 603.4
 
 ## exile_if_dies
 
-While this permanent is on the battlefield, a permanent matching `affects` that would be put into a graveyard from the battlefield is exiled instead.
+While this permanent is on the battlefield, a permanent matching `affects` that would be put into a graveyard from the battlefield is exiled instead; the card is "exiled with" this permanent (exiled_with). `then`: effects right after ("instead exile it and you gain 2 life"; a reflexive_trigger for "When you do, ..."), reading {"triggering": "object"} (the exiled card) and "player" (who controlled it).
 
-Rules: CR 614.1a, CR 700.4
+Rules: CR 614.1a, CR 700.4, CR 603.12, CR 607.2a
 
 | Parameter | Description |
 | --- | --- |
 | `affects` | {"each": filter, "controller": you|opponent|any, "other": bool} |
+| `then` | list of effects |
 
 ```json
 {
@@ -1175,15 +1200,16 @@ Rules: CR 702.11c, CR 115.4, CR 508.1c, CR 402.2, CR 514.1, CR 615.1, CR 615.1a,
 
 ## prevent_damage
 
-While this permanent is on the battlefield, all damage from sources in `by` to recipients in `to` (damage scopes as in damage_replacement, both optional; `combat`: combat | noncombat) is prevented. "To and by this creature" is two of them.
+While this permanent is on the battlefield, all damage from sources in `by` to recipients in `to` (damage scopes as in damage_replacement, both optional; `combat`: combat | noncombat) is prevented. "To and by this creature" is two of them. `then`: effects right after it prevents damage ("prevent that damage and put that many +1/+1 counters on him"), reading {"triggering": "amount"} (the damage prevented), "object" (the source) and "player" (its controller).
 
-Rules: CR 615.1, CR 615.1a, CR 615.6
+Rules: CR 615.1, CR 615.1a, CR 615.5, CR 615.6
 
 | Parameter | Description |
 | --- | --- |
 | `by` | damage scope |
 | `to` | damage scope |
 | `combat` | combat | noncombat |
+| `then` | list of effects |
 
 ```json
 {

@@ -77,7 +77,7 @@ RSpec.describe "Damage and combat primitives" do
       expect(errors_for(spell({ "prevent_damage" => {} }))).to include("abilities[0].spell.effects[0].prevent_damage.to: required")
       expect(errors_for(spell({ "prevent_damage" => { "to" => "you", "next" => 0, "duration" => "forever" } })))
         .to include(a_string_starting_with("abilities[0].spell.effects[0].prevent_damage.next: must be an integer >= 1"),
-                    "abilities[0].spell.effects[0].prevent_damage.duration: must be one of end_of_turn, until_your_next_turn")
+                    a_string_starting_with("abilities[0].spell.effects[0].prevent_damage.duration: must be one of end_of_turn"))
       expect(errors_for(spell({ "additional_phases" => { "phases" => ["upkeep"] } })))
         .to include("abilities[0].spell.effects[0].additional_phases.phases: must be a non-empty list of \"combat\" | \"main\"")
       expect(errors_for(spell({ "deal_damage" => { "amount" => 1, "to" => "you", "if" => { "first_combat_phase" => 1 } } })))

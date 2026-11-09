@@ -87,7 +87,10 @@ module Enjine
       @loyalty_activations.clear
       # CR 514.2: after cleanup no damage is marked and no "until end of turn" effect remains.
       state.battlefield.each do |id|
-        finding("514.2", "#{id} still has #{state.objects[id].damage} damage at the start of a turn") if state.objects[id].damage.positive?
+        obj = state.objects[id]
+        next unless obj.damage.positive? && !keyword?(obj, :keeps_damage)
+
+        finding("514.2", "#{id} still has #{obj.damage} damage at the start of a turn")
       end
       return if state.turn == 1 || state.effects.none? { it["duration"] == "end_of_turn" }
 

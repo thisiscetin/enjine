@@ -380,6 +380,20 @@ Rules: CR 702.182a
 }
 ```
 
+## keeps_damage
+
+Damage isn't removed from this permanent during cleanup steps (remove_damage still removes it).
+
+Rules: CR 514.2, CR 120.6
+
+```json
+{
+  "keywords": [
+    "keeps damage"
+  ]
+}
+```
+
 ## lifelink
 
 Damage dealt by this source also causes its controller to gain that much life.

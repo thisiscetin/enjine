@@ -98,8 +98,10 @@ module Enjine
 
       obj = engine.object(data["object"])
       this_turn = engine.state.effects.any? { it["kind"] == "exile_if_dies" && it["affected"].include?(obj.id) }
-      static = battlefield_abilities(engine, :exiles_dying?).any? { |source, ability| ability.exiles_dying?(engine, obj, source) }
+      static = battlefield_abilities(engine, :exiles_dying?).find { |source, ability| ability.exiles_dying?(engine, obj, source) }
       data["to"] = :exile if this_turn || static
+      # The one replacement that applies (CR 614.5) is the static's when there is one: its follow-up and link.
+      (data["follow_ups"] ||= []) << static[1].follow_up_entry(static[0], obj) if static
     end
 
     # Bonus counters from "until end of turn, ... that many plus one of each of those kinds" effects of

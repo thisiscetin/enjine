@@ -42,6 +42,7 @@ module Enjine
           ctx = effect_context(frame["ctx"], offset, count, index ? frame["pc"] - index : 0)
           locals = (frame["locals"][frame["pc"].to_s] ||= {})
           return :wait if recording_results(frame) { simultaneously { effect.run(self, ctx, locals) } } == :wait
+          return :done if frame["turn_ended"] # CR 725.1b: exiled mid-resolution (Engine::TurnStructure#end_the_turn!)
 
           frame["pc"] += 1
         end
@@ -65,6 +66,7 @@ module Enjine
         frame["ctx"] = { "controller" => obj.controller, "source" => obj.ability? ? obj.source : obj.id,
                          "object" => obj.id, "targets" => targets, "results" => {} }
         frame["ctx"]["linked"] = obj.memory["results"] if obj.memory.key?("results") # a delayed trigger's (CR 603.7c)
+        frame["ctx"]["linked_amounts"] = obj.memory["amounts"] if obj.memory.key?("amounts") # a reflexive trigger's
       end
 
       # CR 400.7j / 608.2c: objects an effect moves or creates, so later effects can refer to them
@@ -104,7 +106,7 @@ module Enjine
         targets = count ? data["targets"][offset, count] || [] : data["targets"]
         own = data["results"] || {}
         results = data["linked"] || Array.new([own.size - base, 0].max) { own[(base + it).to_s] || [] }
-        amounts = Array.new(results.size) { data.fetch("amounts", {})[(base + it).to_s] || 0 }
+        amounts = data["linked_amounts"] || Array.new(results.size) { data.fetch("amounts", {})[(base + it).to_s] || 0 }
         Mechanics::EffectContext.new(data["controller"], data["source"], data["object"], targets, results, amounts)
       end
 
