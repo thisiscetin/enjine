@@ -71,29 +71,7 @@ class Scenario
     names = @players.map(&:name)
     index = ->(name) { names.index(name) || raise(ArgumentError, "unknown player #{name}") }
     active = index.call(@active || names.first)
-    next_id = 1
-    objects = []
-    battlefield = []
-    exile = []
-    players = @players.each_with_index.map do |spec, owner|
-      zones = %i[library hand graveyard].to_h do |zone|
-        ids = spec.zones[zone].map do |entry|
-          id = "#{Enjine::CardDefinition.slug(entry[:card])}##{next_id}"
-          next_id += 1
-          objects << object_h(id, entry, owner, zone)
-          id
-        end
-        [zone.to_s, ids]
-      end
-      { battlefield: battlefield, exile: exile }.each do |zone, list| # shared zones: owned by this player
-        spec.zones[zone].each do |entry|
-          list << "#{Enjine::CardDefinition.slug(entry[:card])}##{next_id}"
-          next_id += 1
-          objects << object_h(list.last, entry, owner, zone)
-        end
-      end
-      player_h(spec, zones)
-    end
+    players, objects, battlefield, exile, next_id = build_zones
     priority = @priority ? index.call(@priority) : active
     pending = @pending&.merge("player" => index.call(@pending["player"])) || { "kind" => "priority", "player" => priority }
     {
@@ -111,6 +89,33 @@ class Scenario
   def game = Enjine::Game.import({ "state" => to_h }, catalog: @catalog)
 
   private
+
+  # Every player's zones with new object ids: [players, objects, battlefield, exile, next id].
+  def build_zones
+    next_id = 1
+    objects = []
+    shared = { battlefield: [], exile: [] }
+    players = @players.each_with_index.map do |spec, owner|
+      zones = %i[library hand graveyard].to_h do |zone|
+        ids = spec.zones[zone].map do |entry|
+          id = "#{Enjine::CardDefinition.slug(entry[:card])}##{next_id}"
+          next_id += 1
+          objects << object_h(id, entry, owner, zone)
+          id
+        end
+        [zone.to_s, ids]
+      end
+      shared.each do |zone, list| # shared zones: owned by this player
+        spec.zones[zone].each do |entry|
+          list << "#{Enjine::CardDefinition.slug(entry[:card])}##{next_id}"
+          next_id += 1
+          objects << object_h(list.last, entry, owner, zone)
+        end
+      end
+      player_h(spec, zones)
+    end
+    [players, objects, shared[:battlefield], shared[:exile], next_id]
+  end
 
   def object_h(id, entry, owner, zone)
     { "id" => id, "card" => id.split("#").first, "owner" => owner, "controller" => owner, "zone" => zone.to_s,

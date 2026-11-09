@@ -128,15 +128,19 @@ module Enjine
         base = own_layers(obj, copy_base(obj), effects)
         types = nil
         added = []
+        subtypes = []
         statics.each do |source, ability|
-          next unless (ability.creature_types || !ability.card_types.empty?) && ability.affects?(obj, source, facts(obj, base))
+          next unless (ability.creature_types || !ability.card_types.empty? || !ability.subtypes.empty?) &&
+                      ability.affects?(obj, source, facts(obj, base))
 
           types = ability.creature_types if ability.creature_types
           added |= ability.card_types
+          subtypes |= ability.subtypes
         end
         effects.each { types = it["types"].map(&:to_sym) if it["kind"] == "creature_types" && it["affected"].include?(obj.id) }
         base = with_added_types(base, added) unless added.empty?
         base = base.with(subtypes: ((base.subtypes & Characteristics::NON_CREATURE_SUBTYPES) | types).freeze) if types
+        base = base.with(subtypes: (base.subtypes | subtypes).freeze) unless (subtypes - base.subtypes).empty?
         base.creature? || base.power.nil? ? base : base.with(power: nil, toughness: nil)
       end
 

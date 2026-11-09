@@ -705,7 +705,7 @@ Rules: CR 701.8a
 
 ## dig
 
-Look at the top `amount` cards of your library (`reveal: "all"`: reveal them). Take `count` (default 1; "all": every matching card, no choice) cards matching `for` and put them into `put` (`tapped` onto the battlefield); `optional`: you may take fewer. `reveal: "chosen"` reveals the cards taken. The rest go to `rest`: "bottom_random" (default), "bottom_any" (in an order you choose) or "graveyard".
+Look at the top `amount` cards of your library (`reveal: "all"`: reveal them). Take `count` (default 1; "all": every matching card, no choice; "any": any number) cards matching `for` and put them into `put` (`tapped` onto the battlefield); `optional`: you may take fewer. `reveal: "chosen"` reveals the cards taken. The rest go to `rest`: "bottom_random" (default), "bottom_any" (in an order you choose) or "graveyard".
 
 Rules: CR 701.20a, CR 701.20e, CR 401.4, CR 400.7j
 
@@ -713,7 +713,7 @@ Rules: CR 701.20a, CR 701.20e, CR 401.4, CR 400.7j
 | --- | --- |
 | `amount` | amount (how many cards) |
 | `for` | card spec (default any card) |
-| `count` | integer or "all" |
+| `count` | integer, "all" or "any" |
 | `optional` | boolean |
 | `put` | hand | battlefield | graveyard |
 | `tapped` | boolean |

@@ -274,6 +274,7 @@ RSpec.describe "Layers: conditional and computed statics, type changes, granted 
     expect(errors.call([static("affects" => "self", "abilities" => [{ "spell" => { "effects" => [] } }])]))
       .to include(a_string_matching(/abilities\[0\]: only triggered and mana abilities/))
     expect(errors.call([static("affects" => "self", "creature_types" => [])])).to include(a_string_matching(/creature_types: must be/))
+    expect(errors.call([static("affects" => "self", "subtypes" => ["Wizard"])])).to include(a_string_matching(/subtypes: must be/))
     expect(errors.call([{ "activated" => { "cost" => ["tap"], "effects" => [
                          { "set_base_power_toughness" => { "power" => 1, "toughness" => 1, "duration" => "forever", "to" => "self" } },
                          { "set_creature_types" => { "types" => "doctor", "to" => "self" } }
