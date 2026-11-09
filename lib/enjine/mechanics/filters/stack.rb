@@ -3,6 +3,13 @@
 module Enjine
   module Mechanics
     module Filters
+      # A spell on the stack.
+      class Spell < Filter
+        primitive :filter, :spell, description: "A spell on the stack.", rules: %w[112.1 115.1], example: "spell"
+        def self.zone = :stack
+        def self.match_object?(_engine, object, _controller) = object.kind == "card"
+      end
+
       # An activated or triggered ability on the stack (CR 113.1b, 115.1): "counter target activated or
       # triggered ability". Mana abilities never use the stack (CR 605.3b), so they can't be targeted.
       class StackAbility < Filter

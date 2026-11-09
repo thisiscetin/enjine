@@ -33,7 +33,7 @@ way, because development dependencies go in the `Gemfile`.
 
 Follow [docs/guides/adding-a-mechanic.md](docs/guides/adding-a-mechanic.md). In short:
 
-1. Write a primitive in `lib/enjine/mechanics/<category>/` with its description,
+1. Write a primitive in `lib/enjine/mechanics/<category>/<mechanic>.rb` with its description,
    parameters, example and CR rule numbers.
 2. Change game state only through engine methods that emit events.
 3. If you add state, update `State`, `Snapshot` (build and validation) and `View`.

@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require_relative "../costs/choices"
-
 module Enjine
   module Mechanics
     module Costs

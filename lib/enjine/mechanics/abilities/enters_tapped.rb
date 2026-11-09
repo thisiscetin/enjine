@@ -64,29 +64,45 @@ module Enjine
 
         def enters_for(answer) = { "tapped" => answer[:type] != "pay_life" }
       end
-    end
 
-    module Costs
-      # "Sacrifice this permanent" as a cost (CR 701.21, 602.2b).
-      class SacrificeSelf < Primitive
-        primitive :cost, :sacrifice,
-                  description: "Sacrifice the permanent the ability belongs to (it goes to its owner's graveyard).",
-                  rules: %w[701.21a 602.2b 118.3],
-                  example: "sacrifice"
+      # "This land enters tapped unless you control two or more other lands." A self-replacement effect that
+      # checks its condition as the permanent would enter (CR 614.1c, 614.12): it isn't on the battlefield
+      # yet, so "you control" counts only the others.
+      class EntersTappedUnless < Primitive
+        primitive :ability, :enters_tapped_unless,
+                  description: "This permanent enters tapped unless `condition` is true as it would enter (checked for " \
+                               "its controller; the permanent itself isn't on the battlefield yet).",
+                  rules: %w[614.1c 614.12],
+                  params: { "condition" => "a condition, e.g. {\"controls\": {\"each\": \"land\", \"controller\": \"you\"}, " \
+                                           "\"at_least\": 2}" },
+                  example: { "enters_tapped_unless" => { "condition" => { "controls" => { "each" => "land", "controller" => "you" },
+                                                                          "at_least" => 2 } } }
 
-        INSTANCE = new.freeze
+        attr_reader :condition
 
         def self.build(params, errors, path, **)
-          Mechanics.check_keys(params, [], errors, path)
-          INSTANCE
+          Mechanics.check_keys(params, %w[condition], errors, path)
+          raw = Mechanics.fetch_param(params, :condition)
+          condition = raw.nil? ? ((errors << "#{path}.condition: required") && nil) : Condition.build(raw, errors, "#{path}.condition")
+          new(condition)
         end
 
-        def mana? = false
-        def uses_source? = true
-        # CR 701.21a, 614.17b: only a permanent on the battlefield its controller may sacrifice.
-        def payable?(engine, object) = engine.can_sacrifice?(object, object.controller)
-        def pay!(engine, object) = engine.move!(object.id, :graveyard, reason: "sacrifice")
-        def to_s = "Sacrifice this"
+        def initialize(condition)
+          super()
+          @condition = condition
+          freeze
+        end
+
+        def kind = :enters_tapped
+        def mana_ability? = false
+        def allowed_types = nil
+        def try_effects = []
+        def to_s = "enters tapped unless #{condition}"
+
+        # Called by the replacement pass for the entering object (Replacements.entering!).
+        def modify_entering_for(engine, controller, object_id, enters)
+          enters["tapped"] = true unless condition&.true?(engine, EffectContext.new(controller, object_id, nil, []))
+        end
       end
     end
   end

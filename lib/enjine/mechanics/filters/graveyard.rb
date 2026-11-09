@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require_relative "filters"
-
 module Enjine
   module Mechanics
     module Filters

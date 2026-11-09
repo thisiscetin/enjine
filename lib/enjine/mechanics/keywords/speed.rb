@@ -1,8 +1,5 @@
 # frozen_string_literal: true
 
-require_relative "../abilities/stack_abilities"
-require_relative "station"
-
 module Enjine
   module Mechanics
     module Effects

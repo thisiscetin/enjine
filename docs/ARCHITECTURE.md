@@ -20,16 +20,16 @@ lib/enjine/
   catalog.rb                      # id -> CardDefinition, conflict detection
   deck.rb  player.rb  setup.rb    # decklists, players, compiled pairings
 
-  mechanics/                      # ONE PLACE PER MECHANIC, all registered primitives
-    types/        base.rb land.rb cast_types.rb (creature artifact enchantment planeswalker instant sorcery)
-    supertypes/   basic.rb
-    subtypes/     basic_land_types.rb (intrinsic mana abilities, CR 305.6)
-    keywords/     basic.rb (flash, haste)
-    abilities/    mana_ability.rb stack_abilities.rb (spell, activated, loyalty)
-    costs/        tap.rb mana.rb
-    effects/      effects.rb (deal_damage pump add_counters gain_life lose_life draw destroy counter)
-    filters/      filters.rb (target filters: any_target creature player ...)
-    selector.rb                   # who an effect applies to: target / self / you / each ...
+  mechanics/                      # ONE PLACE PER MECHANIC: <category>/<mechanic>.rb, all registered primitives
+    types/ supertypes/ subtypes/  card types, supertypes, subtypes (permanent_types spell_types land saga auras_and_equipment ...)
+    keywords/                     keyword abilities, CR 702 (evergreen flags crew kicker ward station alternative_costs ...)
+    abilities/                    other abilities: stack_abilities (spell activated triggered loyalty), static, mana_ability,
+                                  replacement_effects, play_permissions, cost_changes, enters_tapped ...
+    triggers/                     trigger events grouped by what happens (zone_changes combat casting life ...)
+    costs/ effects/ filters/ counters/   one file per cost, effect (damage exile counters library ...), filter, counter kind
+    */base.rb                     shared base classes, loaded first; a file requires any other mechanic it extends
+    selector.rb values.rb         who an effect applies to (target / self / you / each ...); amounts and conditions
+    linked.rb card_spec.rb ...    shared helpers: linked abilities, token/copy card specs, mana spent
 
   # ---- dynamic world: a running game ----
   game.rb                         # public facade: pending_decision / submit / apply / export / views

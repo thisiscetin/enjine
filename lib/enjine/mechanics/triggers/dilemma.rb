@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require_relative "triggers"
-
 module Enjine
   module Mechanics
     module Triggers

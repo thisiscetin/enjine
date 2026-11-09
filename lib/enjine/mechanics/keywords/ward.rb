@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
-require_relative "../abilities/stack_abilities"
-require_relative "../effects/payment"
+require_relative "../effects/pay"
 
 module Enjine
   module Mechanics

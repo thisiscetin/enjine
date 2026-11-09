@@ -6,9 +6,10 @@ require_relative "enjine/rng"
 require_relative "enjine/mana"
 require_relative "enjine/primitive"
 require_relative "enjine/mechanics"
-require_relative "enjine/mechanics/selector"
-require_relative "enjine/mechanics/values"
-require_relative "enjine/mechanics/effects/effects"
+# The shared bases load first; a mechanic file requires any other mechanic it builds on.
+%w[selector values effects/base triggers/base filters/base costs/base abilities/stack_abilities].each do |f|
+  require_relative "enjine/mechanics/#{f}"
+end
 Dir[File.join(__dir__, "enjine/mechanics/**/*.rb")].each { |f| require f }
 require_relative "enjine/characteristics"
 require "json"

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-require_relative "permissions" # CastFree, which Cast extends
 require_relative "../copy_except"
+require_relative "../abilities/play_permissions"
 
 module Enjine
   module Mechanics

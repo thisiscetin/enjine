@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require_relative "entering_choices"
 require_relative "../copy_except"
 
 module Enjine

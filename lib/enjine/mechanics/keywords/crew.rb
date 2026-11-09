@@ -1,8 +1,5 @@
 # frozen_string_literal: true
 
-require_relative "../abilities/stack_abilities"
-require_relative "../triggers/triggers"
-
 module Enjine
   module Mechanics
     module Costs

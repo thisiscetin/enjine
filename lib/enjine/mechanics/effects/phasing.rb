@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
+require_relative "../abilities/turn_rules"
 require_relative "../keywords/evergreen"
-require_relative "../abilities/turn_structure"
 
 module Enjine
   module Mechanics

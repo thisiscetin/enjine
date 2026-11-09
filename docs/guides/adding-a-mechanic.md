@@ -9,7 +9,9 @@ that card data can reference. The categories are `type`, `supertype`, `subtype`,
 1. **Read the rules.** Find the CR section (pinned version in `lib/enjine/version.rb`)
    and decide which primitive category the mechanic belongs to. Check
    `docs/MECHANICS_COVERAGE.md` for its milestone and priority.
-2. **Write the primitive** in `lib/enjine/mechanics/<category>/…`:
+2. **Write the primitive** in `lib/enjine/mechanics/<category>/<mechanic>.rb`. A mechanic's file holds
+   its helper primitives too (crew's triggers sit in `keywords/crew.rb`); its base classes are in
+   `<category>/base.rb`, and it `require_relative`s any other mechanic it extends:
 
    ```ruby
    module Enjine::Mechanics::Effects

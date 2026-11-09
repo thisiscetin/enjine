@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require_relative "zones"
+require_relative "sacrifice"
 
 module Enjine
   module Mechanics
