@@ -34,19 +34,19 @@ first release is dated.
 | # | Set | Released | Leaves Standard | Status |
 | ---: | --- | --- | --- | --- |
 | 1 | Star Trek | 2026-11-13 | 2029 (est.) | supported |
-| 2 | Reality Fracture | 2026-10-02 | 2029 (est.) | 4 gaps |
-| 3 | The Hobbit | 2026-08-14 | 2029 (est.) | 9 gaps |
-| 4 | Marvel Super Heroes | 2026-06-26 | 2029 (est.) | 4 gaps |
+| 2 | Reality Fracture | 2026-10-02 | 2029 (est.) | supported |
+| 3 | The Hobbit | 2026-08-14 | 2029 (est.) | 2 gaps |
+| 4 | Marvel Super Heroes | 2026-06-26 | 2029 (est.) | 2 gaps |
 | 5 | Secrets of Strixhaven | 2026-04-24 | 2029 (est.) | 2 gaps |
-| 6 | Teenage Mutant Ninja Turtles | 2026-03-06 | 2029 (est.) | 2 gaps |
-| 7 | Lorwyn Eclipsed | 2026-01-23 | 2029 (est.) | 3 gaps |
-| 8 | Avatar: The Last Airbender | 2025-11-21 | 2028 (est.) | 5 gaps |
-| 9 | Spider-Man | 2025-09-26 | 2028 (est.) | 6 gaps |
-| 10 | Edge of Eternities | 2025-08-01 | 2028 (est.) | 6 gaps |
-| 11 | Final Fantasy | 2025-06-13 | 2028 (est.) | 9 gaps |
-| 12 | Tarkir: Dragonstorm | 2025-04-11 | 2028 (est.) | 5 gaps |
-| 13 | Aetherdrift | 2025-02-14 | 2028 (est.) | 2 gaps |
-| 14 | Foundations | 2024-11-15 | 2029 (est.) | 4 gaps |
+| 6 | Teenage Mutant Ninja Turtles | 2026-03-06 | 2029 (est.) | 1 gap |
+| 7 | Lorwyn Eclipsed | 2026-01-23 | 2029 (est.) | 1 gap |
+| 8 | Avatar: The Last Airbender | 2025-11-21 | 2028 (est.) | supported |
+| 9 | Spider-Man | 2025-09-26 | 2028 (est.) | supported |
+| 10 | Edge of Eternities | 2025-08-01 | 2028 (est.) | 1 gap |
+| 11 | Final Fantasy | 2025-06-13 | 2028 (est.) | 2 gaps |
+| 12 | Tarkir: Dragonstorm | 2025-04-11 | 2028 (est.) | 1 gap |
+| 13 | Aetherdrift | 2025-02-14 | 2028 (est.) | supported |
+| 14 | Foundations | 2024-11-15 | 2029 (est.) | 1 gap |
 
 **Out of scope:** sets that are no longer Standard-legal, or that rotate out at the
 next announced rotation, are out of scope. On 2027-02-05 Wilds of Eldraine, The
@@ -69,10 +69,10 @@ derived from card text is stored here.
   phrase classifier for recurring ability and effect shapes, calibrated by reading
   samples of each set's unflagged cards. Their counts are approximate (`~Cards` is
   how many cards show the shape), and rare one-off shapes may be missing. Seen
-  once or twice in samples and not listed below: ward with a non-mana cost,
-  controlling another player's turn (CR 724), granted loyalty abilities,
-  "attacks alone" triggers and pile splitting. (Deck-construction exceptions,
-  CR 100.2a, and odd/even choices were also seen and are now supported.)
+  once or twice in samples and not listed below: controlling another player's
+  turn (CR 724), granted loyalty abilities, "attacks alone" triggers and pile
+  splitting. (Deck-construction exceptions, CR 100.2a, odd/even choices and ward
+  with a non-mana cost were also seen and are now supported.)
 - Ability words (landfall, threshold, raid, …) are not gaps in themselves; only
   what they need is listed. Sagas, Spacecraft/station, Planets, Equipment, Auras,
   modal spells, hybrid `{R/G}` mana, planeswalkers and legendary permanents
@@ -81,20 +81,23 @@ derived from card text is stored here.
   "supported" when none is left. Gaps closed since the census are listed under
   "Closed since the census" at the end of this section.
 
-**Top gaps across all sets** (cards affected summed over the sets):
+**Gaps left across all sets** (each now needed by about one card):
 
-| Mechanic | CR | ~Cards | Sets |
-| --- | --- | ---: | ---: |
-| Optional behold with a chosen creature type; behold or pay | 701.4, 601.2b | 12 | 1 |
-| Behold or pay (choosing between costs) | 701.4, 601.2b | 8 | 2 |
-| What happened last turn ("dealt noncombat damage last turn") | 120.2b, 603.4 | 6 | 1 |
-| Divide damage among targets | 601.2d | 5 | 4 |
-| Exile-instead replacement for spells cast via an effect | 614.1a, 608.2n | 5 | 3 |
-| Paradigm | 702.192 | 5 | 1 |
-| Damage prevention with a follow-up, a chosen source or a "for as long as" duration | 615.5, 615.8, 611.2b | 3 | 3 |
-| Static that sets card types or the name ("is a black Skeleton creature", "named …") | 613.1a, 613.1d | 3 | 2 |
-| Meld | 701.42, 713 | 3 | 1 |
-| Dies-to-exile replacement with a follow-up ("When you do", "and you gain 2 life") | 614.1a, 603.12 | 2 | 2 |
+| Mechanic | CR | Sets | Example |
+| --- | --- | --- | --- |
+| Discard cost matched against your permanents ("same name as a legendary permanent you control") | 118.3, 701.9a | hob | Key to the Side-Door |
+| Casting a spell from your graveyard as an effect ("you may cast an artifact, instant, or sorcery spell from your graveyard") | 601.2a, 608.2g | hob | Bilbo, Thief in the Night |
+| Trigger on the Nth counter of a kind ("when the fourth plan counter is put on this") | 122.6, 603.2 | msh | Death to Our Enemies |
+| Exile any number of graveyard cards as a cost, by mana symbols among them, then cast copies | 118.3, 707.12 | msh | Baron Helmut Zemo |
+| Exile cards until their total mana value is N or greater | 406.1, 608.2c | sos | Improvisation Capstone |
+| Cast trigger on a spell you don't own | 603.2, 108.3 | sos | Nita, Forum Conciliator |
+| Hexproof from a color chosen on resolution | 702.11d | tmt | Mondo Gecko |
+| A creature type chosen as part of an optional behold cost | 701.4, 601.2b | ecl | Celestial Reunion |
+| Condition on a returned permanent's last known combat status ("if it was attacking") | 608.2h, 506.4 | eoe | Desculpting Blast |
+| "Repeat this process" loops | 608.2c | fin | Sin, Spira's Punishment |
+| Target filter: a card exiled with this permanent | 607.2a, 115.1 | fin | The Darkness Crystal |
+| Flash that depends on an optional cost ("as though it had flash if you behold a Dragon") | 601.3c, 702.8 | tdm | Molten Exhale |
+| A granted ability's cost that taps the granting permanent ("Tap Fishing Pole") | 602.2b, 607.1 | fdn | Fishing Pole |
 
 ### Star Trek (trk) — supported
 
@@ -102,157 +105,100 @@ derived from card text is stored here.
 
 No listed gap remains.
 
-### Reality Fracture (fra) — 4 gaps
+### Reality Fracture (fra) — supported
 
-285 cards (at the census, about 181 used no listed gap).
+285 cards. No listed gap remains: last turn's history, behold or pay, restrictions on casting
+the spell itself and type changes with a base P/T are written as in 4.24, 4.25, 4.27 and 4.28.
 
-| Missing mechanic | CR | ~Cards | Example |
-| --- | --- | ---: | --- |
-| What happened last turn ("dealt noncombat damage last turn") | 120.2b, 603.4 | 6 | Command the Stage |
-| Behold or pay (choosing between costs) | 701.4, 601.2b | 2 | Countersculpt |
-| Restriction on casting the spell itself ("can't cast this spell unless …") | 601.3 | 1 | Proft, Sinister Mastermind |
-| Static type change with a base P/T ("is a 5/5 creature in addition to its other types") | 613.1d, 205.1b | 1 | Puppet Crafting |
+### The Hobbit (hob) — 2 gaps
 
-### The Hobbit (hob) — 9 gaps
-
-193 cards (at the census, about 121 used no listed gap).
+193 cards.
 
 | Missing mechanic | CR | ~Cards | Example |
 | --- | --- | ---: | --- |
-| Attack trigger on total attacking power ("total power 12 or greater") | 508.1, 603.2 | 1 | Desert Were-Worm |
-| Damage prevention with a follow-up, a chosen source or a "for as long as" duration | 615.5, 615.8, 611.2b | 1 | Old Fat Spider Can't See Me |
-| Dies-to-exile replacement with a follow-up ("When you do", "and you gain 2 life") | 614.1a, 603.12 | 1 | Head of the Hunt |
 | Discard cost matched against your permanents ("same name as a legendary permanent you control") | 118.3, 701.9a | 1 | Key to the Side-Door |
-| Divide damage among targets | 601.2d | 1 | Gandalf, Spark Starter |
-| Exchange of targets that share a card type | 701.12b, 115.1 | 1 | Bilbo, Luckwearer |
-| Exile-instead replacement for spells cast via an effect | 614.1a, 608.2n | 1 | Bilbo, Thief in the Night |
-| Gift | 702.174 | 1 | Bilbo's Gambit |
-| Mana spent: which sources paid it ("mana from a Treasure") | 601.2h, 207.2c | 1 | Smaug, Wicked Worm |
+| Casting a spell from your graveyard as an effect (the exile-instead rider itself is supported) | 601.2a, 608.2g | 1 | Bilbo, Thief in the Night |
 
-### Marvel Super Heroes (msh) — 4 gaps
+### Marvel Super Heroes (msh) — 2 gaps
 
-281 cards (at the census, about 192 used no listed gap).
+281 cards.
 
 | Missing mechanic | CR | ~Cards | Example |
 | --- | --- | ---: | --- |
-| Choosing between costs ("sacrifice an artifact or discard a nonland card") | 118.3, 601.2b | 1 | Bullseye, Death Dealer |
-| Divide damage among targets | 601.2d | 1 | Death to Our Enemies |
-| Exile any number of graveyard cards as a cost, by mana symbols among them | 118.3, 406.1 | 1 | Baron Helmut Zemo |
-| Ward with a non-mana cost ("Ward—Get five poison counters") | 702.21a | 1 | The Serpent Society |
+| Trigger on the Nth counter of a kind (divided damage on the reflexive trigger is supported) | 122.6, 603.2 | 1 | Death to Our Enemies |
+| Exile any number of graveyard cards as a cost, by mana symbols among them, then cast copies | 118.3, 707.12 | 1 | Baron Helmut Zemo |
 
 ### Secrets of Strixhaven (sos) — 2 gaps
 
-271 cards (at the census, about 158 used no listed gap).
+271 cards.
 
 | Missing mechanic | CR | ~Cards | Example |
 | --- | --- | ---: | --- |
-| Paradigm | 702.192 | 5 | Decorum Dissertation |
-| Exile-instead replacement for spells cast via an effect | 614.1a, 608.2n | 2 | Nita, Forum Conciliator |
+| Exile cards until their total mana value is N or greater (paradigm itself is supported) | 406.1, 608.2c | 1 | Improvisation Capstone |
+| Cast trigger on a spell you don't own (the exile-instead rider is supported) | 603.2, 108.3 | 1 | Nita, Forum Conciliator |
 
-### Teenage Mutant Ninja Turtles (tmt) — 2 gaps
+### Teenage Mutant Ninja Turtles (tmt) — 1 gap
 
-195 cards (at the census, about 133 used no listed gap).
-
-| Missing mechanic | CR | ~Cards | Example |
-| --- | --- | ---: | --- |
-| Hexproof from a chosen color | 702.11d | 1 | Mondo Gecko |
-| Mana spent compared with another amount ("less than its mana value") | 601.2h, 207.2c | 1 | Tokka & Rahzar, Terrible Twos |
-
-### Lorwyn Eclipsed (ecl) — 3 gaps
-
-273 cards (at the census, about 166 used no listed gap).
+195 cards.
 
 | Missing mechanic | CR | ~Cards | Example |
 | --- | --- | ---: | --- |
-| Optional behold with a chosen creature type; behold or pay | 701.4, 601.2b | 12 | Celestial Reunion |
-| Protection from each of your opponents | 702.16 | 1 | Figure of Fable |
-| Ward with a non-mana cost ("Ward—Pay 2 life") | 702.21a | 1 | Hexing Squelcher |
+| Hexproof from a color chosen on resolution | 702.11d | 1 | Mondo Gecko |
 
-### Avatar: The Last Airbender (tla) — 5 gaps
+### Lorwyn Eclipsed (ecl) — 1 gap
 
-286 cards (at the census, about 168 used no listed gap).
+273 cards.
 
 | Missing mechanic | CR | ~Cards | Example |
 | --- | --- | ---: | --- |
-| Attack restriction for an added combat ("only land creatures can attack") | 508.1c | 1 | Bumi, Unleashed |
-| Copying the ability that triggered ("you may copy that ability") | 707.10 | 1 | Firebender Ascension |
-| Foretell | 702.143 | 1 | Sozin's Comet |
-| Granted abilities that refer to the permanent granting them | 613.1f, 607.1 | 1 | Trusty Boomerang |
-| Static that sets card types or the name ("is a black Skeleton creature", "named …") | 613.1a, 613.1d | 1 | Honest Work |
+| A creature type chosen as part of an optional behold cost (behold or pay is supported) | 701.4, 601.2b | 1 | Celestial Reunion |
 
-### Spider-Man (spm) — 6 gaps
+### Avatar: The Last Airbender (tla) — supported
 
-193 cards (at the census, about 129 used no listed gap).
+286 cards. No listed gap remains (Hama, the Bloodbender's cast permission is under "Still open" below).
 
-| Missing mechanic | CR | ~Cards | Example |
-| --- | --- | ---: | --- |
-| Playing a land from anywhere other than hand (trigger, condition) | 305.1, 603.2 | 2 | Shadow of the Goblin |
-| Amount "this way" read through a "may" | 608.2c | 1 | Mister Negative |
-| Damage prevention with a follow-up, a chosen source or a "for as long as" duration | 615.5, 615.8, 611.2b | 1 | Anti-Venom, Horrifying Healer |
-| Excess damage dealt in a fight | 120.4a, 701.14 | 1 | Rhino's Rampage |
-| Restriction on casting the spell itself ("can't cast this spell unless …") | 601.3 | 1 | Spider-Man 2099 |
-| Two "as this enters" choices on one permanent | 614.12 | 1 | Multiversal Passage |
+### Spider-Man (spm) — supported
 
-### Edge of Eternities (eoe) — 6 gaps
+193 cards. No listed gap remains (Spider-Man 2099 is written with `cast_restriction`, `turns_taken`
+and `lands_played_this_turn`).
 
-266 cards (at the census, about 188 used no listed gap).
+### Edge of Eternities (eoe) — 1 gap
+
+266 cards.
 
 | Missing mechanic | CR | ~Cards | Example |
 | --- | --- | ---: | --- |
-| Block restriction ("can block only creatures with flying") | 509.1b | 1 | Desculpting Blast |
-| Devour | 702.82 | 1 | Famished Worldsire |
-| Mana spendable only on spells cast from anywhere other than hand | 106.6, 601.2 | 1 | Mm'menon, the Right Hand |
-| Station using toughness | 702.184a | 1 | Tapestry Warden |
-| Trigger: plays a land | 305.1, 603.2 | 1 | The Endstone |
-| Ward with a non-mana cost ("Ward—Discard a card at random") | 702.21a | 1 | Alpharael, Stonechosen |
+| Condition on a returned permanent's last known combat status (`can_block_only` is supported) | 608.2h, 506.4 | 1 | Desculpting Blast |
 
-### Final Fantasy (fin) — 9 gaps
+### Final Fantasy (fin) — 2 gaps
 
-312 cards (at the census, about 203 used no listed gap).
+312 cards.
 
 | Missing mechanic | CR | ~Cards | Example |
 | --- | --- | ---: | --- |
-| Meld | 701.42, 713 | 3 | Fang, Fearless l'Cie |
-| Exile-instead replacement for spells cast via an effect | 614.1a, 608.2n | 2 | Quistis Trepe |
-| Prevention for a class of permanents decided as damage is dealt ("creatures you control") | 615.1, 611.2c | 2 | Crystal Fragments |
 | "Repeat this process" loops | 608.2c | 1 | Sin, Spira's Punishment |
-| Damage isn't removed during cleanup | 514.2 | 1 | Ancient Adamantoise |
-| Dies-to-exile replacement with a follow-up ("When you do", "and you gain 2 life") | 614.1a, 603.12 | 1 | The Darkness Crystal |
-| Ending the turn | 725 | 1 | Ultima |
-| Hideaway | 702.75 | 1 | Clive's Hideaway |
-| Protection from each of your opponents | 702.16 | 1 | Absolute Virtue |
+| Target filter: a card exiled with this permanent (the dies-to-exile replacement is supported) | 607.2a, 115.1 | 1 | The Darkness Crystal |
 
-### Tarkir: Dragonstorm (tdm) — 5 gaps
+### Tarkir: Dragonstorm (tdm) — 1 gap
 
-276 cards (at the census, about 189 used no listed gap).
+276 cards. The census listed Stalwart Successor under suspend; it has no suspend (Taigam, Master
+Opportunist is the set's suspend card, and is supported).
 
 | Missing mechanic | CR | ~Cards | Example |
 | --- | --- | ---: | --- |
-| Behold or pay (choosing between costs) | 701.4, 601.2b | 6 | Caustic Exhale |
-| Divide damage among targets | 601.2d | 2 | Twin Bolt |
-| Suspend / time counters | 702.62 | 2 | Stalwart Successor |
-| Damage modification for sources that entered this turn | 614.1a, 616 | 1 | Neriv, Heart of the Storm |
-| Damage prevention with a follow-up, a chosen source or a "for as long as" duration | 615.5, 615.8, 611.2b | 1 | New Way Forward |
+| Flash that depends on an optional cost ("as though it had flash if you behold a Dragon") | 601.3c, 702.8 | 1 | Molten Exhale |
 
-### Aetherdrift (dft) — 2 gaps
+### Aetherdrift (dft) — supported
 
-276 cards (at the census, about 139 used no listed gap).
+276 cards. No listed gap remains.
 
-| Missing mechanic | CR | ~Cards | Example |
-| --- | --- | ---: | --- |
-| Duration "for as long as you control this" | 611.2b | 1 | Possession Engine |
-| Type change depending on each object ("an artifact creature if it's a Vehicle") | 613.1d, 205.1b | 1 | Alacrian Armory |
+### Foundations (fdn) — 1 gap
 
-### Foundations (fdn) — 4 gaps
-
-517 cards (at the census, about 454 used no listed gap).
+517 cards.
 
 | Missing mechanic | CR | ~Cards | Example |
 | --- | --- | ---: | --- |
-| Ending the turn; "attacks for the first time each turn" | 725, 603.2 | 2 | Time Stop |
-| Static that sets card types or the name ("is a black Skeleton creature", "named …") | 613.1a, 613.1d | 2 | Eaten by Piranhas |
-| Divide damage among targets | 601.2d | 1 | Chandra, Flameshaper |
-| Granted abilities that refer to the permanent granting them | 613.1f, 607.1 | 1 | Fishing Pole |
+| A granted ability's cost that taps the granting permanent (the `granter` selector covers effects) | 602.2b, 607.1 | 1 | Fishing Pole |
 
 ### Closed since the census
 
@@ -319,51 +265,43 @@ closed stays under a narrower name with the cards known to need it.
 | Random choices (discard at random, a card at random from a graveyard) | 701.9b | `"random": true` on `discard` and `choose_cards` (4.23) |
 | Coin flips | 705 | effect `flip_coins` (`count`: wins \| heads), amount `{ "this_way": n }` (4.23) |
 | Proliferate | 701.34a | effect `proliferate` (`amount`) (4.23) |
+| Choosing between costs ("behold a Goblin or pay {2}"), optional additional costs, paying costs while resolving, ward with a non-mana cost, gift, "you may behold a Jace; if you don't, it enters tapped" | 601.2b, 118.8b, 118.12, 702.21a, 702.174 | cost `one_of`, decision `choose_cost_option`; `additional_cost` `optional`; `pay` / `counter_unless_pays` `cost`; `ward` `cost`; cost `get_counters`; ability `gift`; `enters_tapped_unless_behold`; `spells_have` (4.24) |
+| Divide damage among targets; "can't cast this spell unless"; which sources paid the mana ("mana from a Treasure"), mana spent compared with an amount; mana spendable only on spells not cast from hand; exile-instead replacement for spells cast via an effect; "Activate only if" on mana abilities | 601.2d, 601.3, 601.2h, 106.6, 614.1a, 602.5b | `divide` + effect `distribute_damage`; ability `cast_restriction`; amounts `turns_taken`, `mana_value`, `greatest_toughness`; `mana_spent` `from`; `spend_only` `from` / `not_from`; `exile_instead`; mana `only_if` (4.25) |
+| Block restrictions; attack triggers on total power and "for the first time each turn"; attack restriction for an added combat; damage modification for sources that entered this turn or tied to one player; damage isn't removed during cleanup; prevention with a follow-up, a chosen source or a duration; dies-to-exile with a follow-up; excess damage in a fight; ending the turn | 509.1b, 508.1c, 616, 514.2, 615.5, 615.8, 611.2b, 614.1a, 120.4a, 725 | `can_block_only`; triggers `attacks` / `player_attacks`; `additional_phases` `attackers`; filter `entered_this_turn`; effect `damage_replacement`; keyword `keeps_damage`; `prevent_damage` `then` / `chosen_source` / `next_time` / `duration`; `exile_if_dies` `then`; effect `end_the_turn` (4.26) |
+| Statics that set card types or the name; protection from each opponent; station, crew and saddle using toughness or "as though its power were 2 greater"; "for as long as you control this"; "activated abilities can't be activated" including mana abilities; granted abilities that refer to the granting permanent; two "as this enters" choices; type changes depending on each object | 205.1a, 612.8, 702.16k, 702.184a, 611.2b, 602.5, 607.1a, 614.12, 613.7e | static `set_types`, `name`; `protection_from` `"each_opponent"`; ability `tapping_power`; duration `while_you_control_source`; keyword flag `abilities_cant_be_activated`; selector `"granter"` (4.27) |
+| What happened last turn; playing a land from anywhere (trigger, amount); "enters from exile"; amount "this way" through a "may"; "those creatures"; copying the ability that triggered; boast and teamwork-tap triggers; choosing new targets; granting cascade to spells; exchange of targets that share a card type; searching for different names; coin-flip replacements; dice | 120.2b, 305.1, 608.2c, 707.10, 702.142b, 115.7d, 701.12b, 705.3, 706 | amount `noncombat_damage_last_turn`; trigger `plays_land`, `lands_played_this_turn`; selectors `{"triggering": "targets" \| "ability"}`; trigger `ability_triggers`; effect `choose_new_targets`; ability `spell_keywords`; `shares_type_with`; `different_names`; `first_flips_win`; effect `roll_dice` (4.28) |
+| Paradigm, foretell, suspend, hideaway, devour, meld, endure with a computed N, proliferate X times by planeswalker types | 702.192, 702.143, 702.62, 702.75, 702.82, 701.42, 713, 701.63 | keywords and abilities of the same names; effects `meld`, `suspend`; amount `distinct_planeswalker_types` (4.29) |
 
 Still open in these areas (not yet counted as gaps above, since the census didn't
 separate them):
-- Choosing between costs ("behold a Goblin or pay {2}", "pay 5 life or pay {2}"), optional additional
-  costs other than kicker ("you may behold two creatures of that type"), "as this enters, you may behold
-  a Jace; if you don't, it enters tapped", "exile X cards from your graveyard", "discard your hand".
-- Which sources' mana was spent ("if mana from a Treasure was spent") and "mana spent less than its
-  mana value"; "Activate only if …" on mana abilities.
-- Pilots that crew or saddle "as though [their] power were 2 greater" or with toughness (about 13
-  Aetherdrift cards), and "can't crew Vehicles" (CR 702.122d).
-- Casting a card "by waterbending {X}" rather than paying its mana cost (Hama, the Bloodbender), an optional
-  additional cost that isn't kicker ("you may waterbend {4}" is written as `kicker`), and a spell copy gaining
-  wither (Spinerock Tyrant).
-- Granting flashback, harmonize, mayhem or web-slinging to other cards; "cost {N} less"
-  for spells cast from anywhere other than your hand (the remaining "Spells cast from
-  anywhere other than hand" rows); "as though exhaust abilities haven't been activated".
-- Endure with a computed N (the Spirit token's size is fixed), amass or empower by
-  another player, optional or alternative blight costs, and triggers on blighting,
-  firebending or conniving.
-- Casting a card transformed (disturb, CR 712.8a), convert (CR 701.28), day/night
-  (CR 702.145) and the mana value of a transformed back face (CR 712.6d); meld is a
-  gap of its own.
-- A type change that replaces the other types or lasts "until your next turn".
+- Costs: "Ward—Pay life equal to its power" (a computed `pay_life`, Raubahn), "whenever a player gives a gift"
+  (CR 702.174c), more than one optional cost announced per spell (teamwork still marks the spell kicked), and
+  "change the target of target spell" (Redirect Lightning; `choose_new_targets` lets the player keep it).
+- "Can't crew Vehicles" (CR 702.122d); granting `tapping_power` through `become`.
+- Casting a card "by waterbending {X}" rather than paying its mana cost, and cast permissions that last "for as
+  long as you control" a source (Hama, the Bloodbender; Gwen Stacy).
+- Granting flashback, harmonize, mayhem, web-slinging or sneak to other cards (Ninja Teen); "cost {N} less"
+  for spells cast from anywhere other than your hand (the remaining "Spells cast from anywhere other than
+  hand" rows); "as though exhaust abilities haven't been activated".
+- Amass or empower by another player, and triggers on blighting, firebending or conniving.
+- Casting a card transformed (disturb, CR 712.8a), convert (CR 701.28), day/night (CR 702.145), the mana value
+  of a transformed back face (CR 712.6d) and of a melded permanent (CR 713.5c).
+- A type change by a resolved effect that replaces the other types or lasts "until your next turn".
 - "Whenever you cycle or discard a card" triggering only once for a cycled card
   (CR 702.29d); amounts from another leaving object's last known counters; "a card put
   into your graveyard from anywhere this turn" as a target filter.
-- Cast triggers: the targeted objects as "those creatures" (Storm, Windrider), and "you may choose new targets for
-  that spell" (Speedball). Proliferating "X times, where X is the number of planeswalker types" (Tam) has no
-  amount. Dice rolls (CR 706) aren't needed by any Standard card yet; coin-flip replacements (Edgar, CR 705.3)
-  remain.
 - A card spec (library search) matching the chosen type, and a static that grants
   keywords to creatures filtered by keywords (layer-6 dependency, CR 613.8).
-- Set mechanics: granting cascade or riot to other spells or permanents (Quandrix, the Proof;
-  Spider-Punk), "becomes tapped to pay a teamwork cost" (Agent Maria Hill), "effects that refer
-  to boasting" (CR 702.142b), a riot permanent with another "as this enters" choice, and the
-  choice of hybrid half when a power-up cost is reduced (CR 118.7e: the half the cost needs is
-  taken).
-- Rules and statics: rad counters' inherent trigger (CR 729); "can't activate" covering mana abilities
-  (Clarion Conqueror) or the abilities of an attached permanent; skipping steps or phases (only whole turns);
-  "can't draw more than one card / cast more than one spell each turn"; layer-6 timestamp shortcuts (attaching
-  doesn't give a new timestamp, CR 613.7e; dependency loops, CR 613.8b).
-- Damage and combat: dividing damage among targets as the spell is cast (CR 601.2d); blocking an
-  additional creature or any number; lure ("all creatures able to block it do so"); "becomes blocked by" a
-  filter; damage modification tied to one player (Lightning, Army of One); damage choices follow a fixed
-  order (redirect, prevent, multiply, add) instead of the affected player's choice (CR 616.1).
+- Set mechanics: granting riot to other permanents (Spider-Punk: statics that would grant an "as this enters"
+  choice are not read before it enters, CR 614.12) and the choice of hybrid half when a power-up cost is
+  reduced (CR 118.7e: the half the cost needs is taken).
+- Rules and statics: rad counters' inherent trigger (CR 729); skipping steps or phases (only whole turns);
+  "can't draw more than one card / cast more than one spell each turn"; "can't become untapped"
+  (Spider-Woman); dependency ordering and loops (CR 613.8).
+- Damage and combat: blocking an additional creature or any number; lure ("all creatures able to block it do
+  so"); "becomes blocked by" a filter; a source chosen from the command zone (CR 609.7a); damage choices
+  follow a fixed order (redirect, prevent, multiply, add; statics before resolved effects) instead of the
+  affected player's choice (CR 616.1); prevention follow-ups when the damage can't be prevented (CR 615.12).
 
 ## Card data rules
 
