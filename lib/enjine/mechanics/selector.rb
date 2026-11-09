@@ -11,8 +11,9 @@ module Enjine
 
     # Data form of "who/what does this effect apply to":
     #   {"target": 0}                               the first chosen target
-    #   "self"                                      the source permanent, or the source card in the graveyard, exile
-    #                                               or hand ("return this card from your graveyard", CR 113.6k)
+    #   "self"                                      the source permanent, or the source card while it's still in
+    #                                               the graveyard, hand or exile ("return this card from your
+    #                                               graveyard", CR 113.6m; it's a new object once it moves, CR 400.7)
     #   "you"                                       the controller
     #   "each_opponent"                             every opponent
     #   "attached"                                  what the source is attached to ("enchanted creature", CR 303.4m)
@@ -27,8 +28,7 @@ module Enjine
     class Selector
       CONTROLLERS = %w[you opponent any].freeze
       TRIGGERING = %w[object player].freeze
-      # Where "self" finds its source. A source that changed zones is a new object (CR 400.7), so an ability of
-      # a card in a graveyard, exile or a hand reaches only that card ("this card").
+      # Where "self" finds its source (CR 113.6m); a source that changed zones is a new object (CR 400.7).
       SELF_ZONES = %i[battlefield graveyard exile hand].freeze
 
       attr_reader :kind, :value, :controller

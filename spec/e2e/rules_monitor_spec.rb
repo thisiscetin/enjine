@@ -26,6 +26,28 @@ RSpec.describe Enjine::RulesMonitor do
     expect(monitor.stats["damage_dealt"]).to be_positive
   end
 
+  it "accepts a sorcery whose cast trigger is still waiting for its target (CR 307.1, 603.3d)" do
+    watcher = { "name" => "Mill Watcher", "mana_cost" => "{U}", "types" => ["creature"], "power" => 0, "toughness" => 2,
+                "abilities" => [{ "triggered" => { "when" => { "cast" => { "spell" => "instant_or_sorcery" } }, "targets" => ["player"],
+                                                   "effects" => [{ "mill" => { "amount" => 1, "to" => { "target" => 0 } } }] } }] }
+    study = { "name" => "Quiet Study", "mana_cost" => "{U}", "types" => ["sorcery"],
+              "abilities" => [{ "spell" => { "effects" => [{ "draw" => { "amount" => 1 } }] } }] }
+    game = build_game(catalog_with(watcher, study)) do
+      turn 3, active: "alice", step: :precombat_main
+      player("alice", mana_pool: { U: 1 }) do
+        hand "Quiet Study"
+        battlefield "Mill Watcher"
+        library "Island", count: 5
+      end
+      player("bob") { library "Island", count: 5 }
+    end
+    monitor = described_class.new(game)
+    monitor.check!(game.submit(type: "cast", object: ids_in(game, "alice", :hand).first))
+    monitor.check!(game.submit(type: "pay_mana", mana: "U"))
+    expect(game.pending_decision.kind).to eq("choose_target")
+    expect(monitor.findings).to eq([])
+  end
+
   it "catches wrong power/toughness (CR 613.4c)" do
     allow_any_instance_of(Enjine::Engine).to receive(:apply_layers).and_return({}) # rubocop:disable RSpec/AnyInstance
     expect(rules(play)).to include("613.4c")

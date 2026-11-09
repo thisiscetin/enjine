@@ -3,8 +3,8 @@
 require "json"
 
 # The invented cards the specs, fuzz and benchmarks play with (spec/fixtures/cards/*.json, one file per
-# mechanic family), real Standard cards written in the DSL (spec/fixtures/cards/real, one file per family), the
-# deck builder's fixture pools (spec/fixtures/pools) and the example decks (examples/decks).
+# mechanic family), real cards written by hand in the card DSL (spec/fixtures/cards/real/*.json, one file per
+# family of sets), the deck builder's fixture pools (spec/fixtures/pools) and the example decks (examples/decks).
 module CardFixtures
   ROOT = File.expand_path("../..", __dir__)
 

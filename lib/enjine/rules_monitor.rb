@@ -138,11 +138,11 @@ module Enjine
       caster = event.player
       return if sneaked?(event, caster)
 
-      # Triggered abilities put on the stack later in the same decision (e.g. "whenever you cast") don't count.
-      stack = state.stack - @entry.events.grep(Events::TriggerPutOnStack).map(&:object)
+      # The stack was empty as casting began (CR 601.2a) when the spell is at its bottom; what went on it since
+      # ("whenever you cast" triggers, even one still waiting for its targets, CR 603.3d) doesn't count.
       unless state.players[state.active].name == caster && %i[precombat_main postcombat_main].include?(state.step) &&
-             stack.size == 1
-        finding("307.1", "#{caster} cast sorcery-speed #{event.card} at #{state.step} (stack #{stack.size})")
+             state.stack.last == event.object
+        finding("307.1", "#{caster} cast sorcery-speed #{event.card} at #{state.step} (stack #{state.stack.size})")
       end
     end
 
