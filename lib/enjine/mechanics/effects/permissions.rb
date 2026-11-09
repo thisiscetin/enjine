@@ -223,7 +223,7 @@ module Enjine
         end
 
         def to_s
-          who = @to_player.is_a?(String) ? "#{"its " if @to_player == "owner"}#{@to_player}" : @to_player.to_s
+          who = { "controller" => "you", "owner" => "its owner" }.fetch(@to_player) { @to_player.to_s }
           more = @riders["cost_increase"] ? ", costs {#{@riders["cost_increase"]}} more" : ""
           "#{who} may #{@play} #{@filter} (#{@duration.tr("_", " ")}#{more}) → #{to}"
         end

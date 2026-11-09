@@ -24,5 +24,11 @@ RSpec.describe "Small units" do
   it "builds random legal decks" do
     deck = Enjine::CardPool::DeckBuilder.random(Enjine::CardPool::Core.cards, rng: Enjine::Rng.from_seed(5))
     expect(Enjine::Deck.from_h(deck)).to be_valid
+    expect(deck).not_to have_key("outside")
+    with_outside = Enjine::Deck.from_h(Enjine::CardPool::DeckBuilder.random(Enjine::CardPool::Core.cards,
+                                                                            rng: Enjine::Rng.from_seed(5), outside: 15))
+    expect(with_outside).to be_valid
+    expect([with_outside.size, with_outside.outside_size]).to eq([60, 15])
+    expect(with_outside.entries).to eq(Enjine::Deck.from_h(deck).entries) # the same main deck
   end
 end

@@ -854,9 +854,9 @@ Rules: CR 118.12, CR 118.12a, CR 118.3, CR 119.4, CR 605.3a
 
 ## play_permission
 
-The controller may play (`play: "play"`, default) or cast (`"cast"`) each referenced exiled card matching `for`/`not_types`, paying its costs and following timing rules, for `duration`: end_of_turn (default), end_of_your_next_turn or while_exiled. With `choose: "one_per_owner"` only one chosen card per owner.
+A player may play (`play: "play"`, default) or cast (`"cast"`) each referenced exiled card matching `for`/`not_types`, paying its costs and following timing rules, for `duration`: end_of_turn (default), end_of_your_next_turn or while_exiled. With `choose: "one_per_owner"` only one chosen card per owner. `to_player`: who may play it, "controller" (default, the effect's controller), "owner" (the card's owner) or a player selector. `cost_increase`: spells cast this way cost that much generic mana more.
 
-Rules: CR 611.2a, CR 601.3, CR 305.1, CR 400.7, CR 514.2
+Rules: CR 611.2a, CR 601.3, CR 305.1, CR 400.7, CR 514.2, CR 601.2f, CR 108.3
 
 | Parameter | Description |
 | --- | --- |
@@ -866,6 +866,8 @@ Rules: CR 611.2a, CR 601.3, CR 305.1, CR 400.7, CR 514.2
 | `for` | card spec |
 | `not_types` | list of card types |
 | `choose` | one_per_owner |
+| `to_player` | controller | owner | player selector |
+| `cost_increase` | integer >= 1 |
 
 ```json
 {

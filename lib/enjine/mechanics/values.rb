@@ -251,7 +251,8 @@ module Enjine
       end
 
       # {"died_this_turn" | "entered_this_turn": {"each": filter, "controller": ...}}: permanents that
-      # died (CR 700.4) or entered this turn, matched by their card and the card types they had then.
+      # died (CR 700.4) or entered this turn, matched by their card and the card types (and, for entering
+      # ones, the subtypes, e.g. "an Equipment entered") they had then.
       class Departed
         def self.build(kind, data, errors, path)
           data = data.is_a?(Hash) ? data.transform_keys(&:to_s) : {}
@@ -263,10 +264,11 @@ module Enjine
         end
 
         # Whether a card (with the card types it had, when given) matches a filter's characteristics.
-        def self.facts_match?(engine, filter, card, types)
+        def self.facts_match?(engine, filter, card, types, subtypes = nil)
           defn = engine.catalog.fetch(card)
           chars = defn.printed_characteristics
           chars = chars.with(types: types.map(&:to_sym)) if types
+          chars = chars.with(subtypes: subtypes.map(&:to_sym)) if subtypes
           filter.matches_facts?(Filters::Facts.new(chars: chars, counters: {}, token: defn.token?))
         end
 
@@ -281,7 +283,9 @@ module Enjine
           engine.state.players.each_index.sum do |index|
             next 0 unless @controller == "any" || (@controller == "you") == (index == ctx.controller)
 
-            Array(engine.turn_log(index)[@key]).count { |card, types| @filter && Departed.facts_match?(engine, @filter, card, types) }
+            Array(engine.turn_log(index)[@key]).count do |card, types, subtypes|
+              @filter && Departed.facts_match?(engine, @filter, card, types, subtypes)
+            end
           end
         end
 

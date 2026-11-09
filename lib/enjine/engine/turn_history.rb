@@ -13,7 +13,7 @@ module Enjine
     #
     # Per player (PlayerState#turn_log, reset as each turn begins; #game_log for the whole game):
     #   "spells"   card ids of spells the player cast       "life_gained" / "life_lost"  totals
-    #   "entered"  [card id, types] of permanents that entered under their control
+    #   "entered"  [card id, types, subtypes] of permanents that entered under their control
     #   "died"     [card id, types] of their permanents put into a graveyard from the battlefield
     #   "returned" permanents returned to their hand from the battlefield
     #   "dilemmas" dilemmas they faced (CR 700.17 of the 2026-11-06 rules)
@@ -86,7 +86,8 @@ module Enjine
       def zone_change_recorded!(event)
         if event.to == "battlefield"
           obj = state.objects[event.new_id] or return
-          (turn_log(obj.controller)["entered"] ||= []) << [event.card, chars(obj).types.map(&:to_s)]
+          c = chars(obj)
+          (turn_log(obj.controller)["entered"] ||= []) << [event.card, c.types.map(&:to_s), c.subtypes.map(&:to_s)]
         elsif event.from == "battlefield"
           lki = last_known(event.old_id) or return
           if event.to == "graveyard"

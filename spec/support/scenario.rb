@@ -52,6 +52,11 @@ class Scenario
     end
   end
 
+  # Cards the player owns outside the game (CR 400.11a): definition ids, not objects.
+  def outside(*cards, count: 1)
+    cards.each { |c| count.times { @current.zones[:outside] << CardDefinition_slug(c) } }
+  end
+
   def battlefield(*cards, count: 1, tapped: false, controlled_since: nil, counters: {}, damage: 0, loyalty: nil)
     cards.each do |c|
       entry = { card: c, tapped: tapped, controlled_since: controlled_since, damage: damage,
@@ -98,6 +103,7 @@ class Scenario
       "turn" => @turn, "active" => active, "step" => @step.to_s, "step_state" => "active",
       "priority" => pending["kind"] == "priority" ? pending["player"] : nil, "passes" => 0,
       "next_id" => next_id, "starting_player" => 0, "pending" => pending, "result" => nil,
+      "outside_lists" => outside_lists,
       "players" => players, "objects" => objects, "battlefield" => battlefield, "stack" => [], "exile" => exile
     }
   end
@@ -105,6 +111,8 @@ class Scenario
   def game = Enjine::Game.import({ "state" => to_h }, catalog: @catalog)
 
   private
+
+  def outside_lists = @players.map { it.zones[:outside].dup }
 
   def CardDefinition_slug(card) = Enjine::CardDefinition.slug(card) # rubocop:disable Naming/MethodName
 
@@ -127,7 +135,7 @@ class Scenario
     { "name" => spec.name, "life" => attrs.fetch(:life, 20), "poison" => attrs.fetch(:poison, 0),
       **zones, "mana_pool" => Enjine::Mana::TYPES.to_h { |t| [t.to_s, attrs.fetch(:mana_pool, {}).fetch(t, 0)] },
       "lands_played" => attrs.fetch(:lands_played, 0), "drew_from_empty" => attrs.fetch(:drew_from_empty, false),
-      "lost" => nil, "mulligans" => 0, "kept" => true, "mulligan_choice" => nil }
+      "lost" => nil, "mulligans" => 0, "kept" => true, "mulligan_choice" => nil, "outside" => spec.zones[:outside].dup }
   end
 end
 

@@ -22,7 +22,7 @@ RSpec.describe "Play permissions, beam me up, free casts: card data validation (
     expect(errors_for(creature([{ "play_from" => { "zone" => "hand", "play" => "steal", "once_each_turn" => 1,
                                                    "enters_with" => { "finality" => 0 }, "cards" => 7, "x" => 1 } }])))
       .to eq(["abilities[0].play_from: unknown parameter \"x\"",
-              "abilities[0].play_from.zone: must be one of graveyard, exile, library_top",
+              "abilities[0].play_from.zone: must be one of graveyard, exile, library_top, outside",
               "abilities[0].play_from.play: must be one of cast, play",
               "abilities[0].play_from.cards: must be \"card\" or an object (#{Enjine::Mechanics::CardSpec::KEYS.join(", ")})",
               "abilities[0].play_from.once_each_turn: must be true or false",
@@ -35,6 +35,38 @@ RSpec.describe "Play permissions, beam me up, free casts: card data validation (
               "Its controller sees the top card of their library (CR 401.5)"])
     expect(errors_for(creature(["look_at_top", { "look_at_top" => { "x" => 1 } }])))
       .to eq(["abilities[1].look_at_top: unknown parameter \"x\""])
+  end
+
+  it "checks play_from zones, including outside the game (CR 400.11a)" do
+    expect(errors_for(creature([{ "play_from" => { "zone" => "graveyard", "zones" => ["exile"], "cards" => "card" } },
+                                { "play_from" => { "zones" => %w[outside hand], "cards" => "card" } },
+                                { "play_from" => { "zones" => [], "cards" => "card" } },
+                                { "play_from" => { "zones" => ["outside"] } }])))
+      .to eq(["abilities[0].play_from: give `zone` or `zones`, not both",
+              "abilities[1].play_from.zones: must be a non-empty list of graveyard, exile, library_top, outside",
+              "abilities[2].play_from.zones: must be a non-empty list of graveyard, exile, library_top, outside",
+              "abilities[3].play_from.zones: \"outside\" needs a card spec in `cards`"])
+    expect(text(creature([{ "play_from" => { "zones" => %w[outside graveyard], "cards" => { "permanent" => true },
+                                             "play" => "play", "once_each_turn" => true } }])))
+      .to eq(["Once during each of your turns, you may play permanent cards from outside the game or from your graveyard"])
+  end
+
+  it "checks play_permission to_player and cost_increase (CR 108.3, 601.2f)" do
+    errors = spell_errors([{ "exile_top" => { "amount" => 1 } },
+                           { "play_permission" => { "to" => { "result" => 0 }, "to_player" => "nobody", "cost_increase" => 0 } }])
+    path = "abilities[0].spell.effects[1].play_permission"
+    expect(errors.first).to start_with("#{path}.to_player: must be {\"target\": n}")
+    expect(errors.drop(1)).to eq(["#{path}.cost_increase: must be an integer >= 1"])
+    card = { "name" => "Probe Card", "mana_cost" => "{R}", "types" => ["sorcery"], "abilities" => [{ "spell" => {
+      "targets" => ["opponent"], "effects" => [
+        { "exile_top" => { "amount" => 1 } },
+        { "play_permission" => { "to" => { "result" => 0 }, "to_player" => "owner", "cost_increase" => 2, "duration" => "while_exiled" } },
+        { "play_permission" => { "to" => { "result" => 0 }, "to_player" => { "target" => 0 } } }
+      ]
+    } }] }
+    expect(Enjine::CardDefinition.from_h(card).abilities.first.effects.drop(1).map(&:to_s))
+      .to eq(["its owner may play card (while exiled, costs {2} more) → the object(s) from effect #1",
+              "target #1 may play card (end of turn) → the object(s) from effect #1"])
   end
 
   it "checks beam me up: a mana cost, only on instants and sorceries (CR 702.196a)" do

@@ -60,9 +60,7 @@ module Enjine
     def errors
       errs = @reference_errors.dup
       errs << "deck has #{size} cards; at least #{MIN_SIZE} are required (CR 100.2a)" if size < MIN_SIZE
-      if outside_size > MAX_OUTSIDE
-        errs << "outside: #{outside_size} cards; at most #{MAX_OUTSIDE} are allowed (CR 100.4a)"
-      end
+      errs << "outside: #{outside_size} cards; at most #{MAX_OUTSIDE} are allowed (CR 100.4a)" if outside_size > MAX_OUTSIDE
       @entries.merge(@outside) { |_, a, b| a + b }.each do |id, n|
         next if n <= MAX_COPIES || @catalog.fetch(id).deck_limit_exempt?
 
@@ -126,9 +124,7 @@ module Enjine
       unless card.is_a?(String) && count.is_a?(Integer) && count.positive?
         return @reference_errors << "#{list}[#{index}]: must be {\"card\": name, \"count\": positive integer}"
       end
-      unless @catalog.include?(card)
-        return @reference_errors << "#{list}[#{index}].card: #{card.inspect} is not defined in cards"
-      end
+      return @reference_errors << "#{list}[#{index}].card: #{card.inspect} is not defined in cards" unless @catalog.include?(card)
 
       id = CardDefinition.slug(card)
       into[id] = into.fetch(id, 0) + count

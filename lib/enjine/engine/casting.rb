@@ -168,6 +168,8 @@ module Enjine
       # hand is cast (see Engine::Permissions); "free" casts it without paying its mana cost during
       # the resolution of a spell or ability (CR 608.2g, 118.9), after which nobody gets priority.
       def begin_cast!(index, card_id, via: nil)
+        return begin_outside_cast!(index, card_id, via) if outside_key?(card_id) # CR 400.11b
+
         card = object(card_id)
         method = via && play_method(index, card_id, via)
         origin = { "id" => card_id, "zone" => card.zone.to_s,

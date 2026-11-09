@@ -113,6 +113,18 @@ a card" to the opponent.
   on every zone change (CR 400.7).
 - `Setup` + seed reproduces a game exactly, and `restart` uses the same path.
 
+### 6a. Cards outside the game
+A game doesn't know about a match, so a deck's optional `outside` list stands for the
+cards its player owns outside the game (a constructed sideboard, CR 400.11a, 100.4a).
+At setup each player gets `PlayerState#outside`, a list of definition ids. These are not
+objects, because outside the game isn't a zone and the cards have no ids yet
+(CR 400.11). `State#outside_lists` keeps the starting lists for `restart`. Both
+round-trip through snapshots, which check every id against the catalog. Legal actions
+name such a card `outside:<card id>`, and legality checks use a detached stand-in
+object that is never stored. The real object is created only as the card enters
+the stack or the battlefield (`Engine#bring_in_from_outside!`), owned by that player
+(CR 108.3). A cancelled cast puts the id back in the list.
+
 ### 7. Atomicity
 `submit` validates against the legal options before touching anything. `apply`
 and `import` work on a Marshal copy and swap it in only on success. Events are

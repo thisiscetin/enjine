@@ -136,9 +136,10 @@ module Enjine
         end
       end
 
-      # Every method `index` has to play the card `id` now (before timing and cost checks).
+      # Every method `index` has to play the card `id` (an object, its id or an outside key) now (before
+      # timing and cost checks).
       def play_methods(index, id, sources = permission_sources(index))
-        obj = object(id)
+        obj = id.is_a?(GameObject) ? id : candidate_object(index, id)
         granted_methods(index, obj) + own_methods(index, obj) + static_methods(index, obj, sources) +
           beam_methods(index, obj, sources)
       end
@@ -153,7 +154,7 @@ module Enjine
       # CR 601.3: whether `index` may begin to cast the card this way now. Timing still applies outside
       # resolution (CR 304.1, 307.1); a card without a mana cost needs an alternative cost (CR 118.6a).
       def castable_via?(index, id, method)
-        obj = object(id)
+        obj = id.is_a?(GameObject) ? id : candidate_object(index, id)
         c = chars(obj)
         return false if c.land? || (method["alt"].nil? && c.mana_cost.nil?) # CR 305.9
         return false unless c.type?(:instant) || c.keyword?(:flash) || sorcery_timing?(index)
@@ -161,7 +162,7 @@ module Enjine
         return false unless additional_costs_payable?(obj) # CR 601.2f
 
         cost = Mana.sum_costs([method_cost(obj, method), *spell_extra_mana(obj, false)])
-        ability_targetable?(spell_ability_of(obj), index, id) && affordable?(index, total_cost(index, cost, spell: obj), nil)
+        ability_targetable?(spell_ability_of(obj), index, obj.id) && affordable?(index, total_cost(index, cost, spell: obj), nil)
       end
 
       # CR 608.2g: whether a card could be cast now during resolution without paying its mana cost
@@ -172,13 +173,16 @@ module Enjine
           ability_targetable?(spell_ability_of(obj), index, id)
       end
 
-      # The mana cost paid with a method: the card's own, nothing (CR 118.9) or the beam me up cost.
+      # The mana cost paid with a method: the card's own, nothing (CR 118.9) or the beam me up cost, plus a
+      # permission's cost increase ("spells cast this way cost {2} more", CR 601.2f).
       def method_cost(obj, method)
         alt = method && method["alt"]
-        return chars(obj).mana_cost unless alt
-        return ZERO if alt["free"]
-
-        Mana::Cost.parse(alt["beam"])
+        cost = if alt.nil? then chars(obj).mana_cost
+               elsif alt["free"] then ZERO
+               else Mana::Cost.parse(alt["beam"])
+               end
+        increase = method && method["cost_increase"]
+        increase && cost ? cost.with(generic: cost.generic + increase) : cost
       end
 
       # Costs#base_cost for a spell cast with an alternative cost (CR 118.9c: its mana cost is unchanged).
@@ -191,7 +195,7 @@ module Enjine
         state.effects.filter_map do |e|
           next unless e["kind"] == "permission" && e["controller"] == index && e["affected"].include?(obj.id)
 
-          { "via" => "effect:#{e["timestamp"]}", "play" => e["play"] } if obj.zone == :exile
+          { "via" => "effect:#{e["timestamp"]}", "play" => e["play"], **e.slice(*RIDERS) } if obj.zone == :exile
         end
       end
 
@@ -259,11 +263,13 @@ module Enjine
 
       # Permission to play exiled cards for a duration (CR 611.2): a continuous effect for the exiled
       # objects (a card that leaves exile is a new object, CR 400.7, so the permission ends with it).
-      def grant_play_permission!(index, ids, duration:, play:)
+      # `riders` (RIDERS) change how a card is played with this permission, and only then.
+      def grant_play_permission!(index, ids, duration:, play:, **riders)
         return if ids.empty?
 
         state.effects << { "kind" => "permission", "timestamp" => next_timestamp!, "controller" => index,
-                           "affected" => ids, "duration" => duration, "turn" => state.turn, "play" => play }
+                           "affected" => ids, "duration" => duration, "turn" => state.turn, "play" => play,
+                           **riders.transform_keys(&:to_s).slice(*RIDERS) }
         emit Events::EffectStarted.new(kind: "permission", affected: ids, details: { "duration" => duration, "play" => play })
       end
 
@@ -343,6 +349,8 @@ module Enjine
       # A cancelled cast (Casting#cancel_casting!): the card goes back where it came from as the same object
       # (CR 733.1), hand, graveyard, exile or library, at its old position. So a permission naming it applies.
       def restore_to_origin!(obj, origin)
+        return player(obj.owner).outside.insert(origin["index"] || 0, obj.card) if origin["zone"] == "outside"
+
         zone = origin.fetch("zone", "hand").to_sym
         state.objects[origin["id"]] = GameObject.new(
           id: origin["id"], card: obj.card, owner: obj.owner, controller: obj.owner, zone: zone, tapped: false,

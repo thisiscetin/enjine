@@ -25,7 +25,10 @@ task :fuzz, %i[games seed] do |_, args|
   decks = Enjine::CardPool::Core.deck_names
   # Even seeds pit two sample decks against each other; odd seeds use random pool decks.
   players = %w[p1 p2].map do |name|
-    deck = seed.even? ? Enjine::CardPool::Core.deck(decks[rng.rand(decks.size)]) : Enjine::CardPool::DeckBuilder.random(cards, rng: rng)
+    # Random decks own 7 cards outside the game (CR 400.11a), so play_from "outside" gets exercised.
+    deck = if seed.even? then Enjine::CardPool::Core.deck(decks[rng.rand(decks.size)])
+           else Enjine::CardPool::DeckBuilder.random(cards, rng: rng, outside: 7)
+           end
     Enjine::Player.new(name: name, deck: deck)
   end
   result = Enjine::Fuzz.run(Enjine::Setup.new(*players), games: games, seed: seed, roundtrip_every: 251)
