@@ -27,7 +27,8 @@ lib/enjine/
                                   replacement_effects, play_permissions, cost_changes, enters_tapped ...
     triggers/                     trigger events grouped by what happens (zone_changes combat casting life ...)
     costs/ effects/ filters/ counters/   one file per cost, effect (damage exile counters library ...), filter, counter kind
-    */base.rb                     shared base classes, loaded first; a file requires any other mechanic it extends
+    */base.rb                     shared bases of effects, triggers, filters, costs (abilities: stack_abilities.rb),
+                                  loaded first; a file requires any other mechanic it extends
     selector.rb values.rb         who an effect applies to (target / self / you / each ...); amounts and conditions
     linked.rb card_spec.rb ...    shared helpers: linked abilities, token/copy card specs, mana spent
 
