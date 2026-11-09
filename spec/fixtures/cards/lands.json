@@ -80,6 +80,54 @@
     "rules_text": "{T}: Add {C}."
   },
   {
+    "name": "Bloodied Crossroads",
+    "types": [
+      "land"
+    ],
+    "abilities": [
+      {
+        "mana": {
+          "cost": [
+            "tap"
+          ],
+          "produce": "{C}"
+        }
+      },
+      {
+        "mana": {
+          "cost": [
+            "tap",
+            {
+              "pay_life": 1
+            }
+          ],
+          "color": "any_one"
+        }
+      }
+    ],
+    "rules_text": "Tap: add colorless. Tap, pay 1 life: add one mana of any color."
+  },
+  {
+    "name": "Prismatic Haven",
+    "types": [
+      "land"
+    ],
+    "abilities": [
+      {
+        "choose_color": {}
+      },
+      {
+        "mana": {
+          "cost": [
+            "tap"
+          ],
+          "color": "chosen"
+        }
+      }
+    ],
+    "rules_text": "As this land enters, choose a color. Tap: add one mana of the chosen color."
+  },
+  {
     "name": "Verdant Overlook",
     "types": [
       "land"

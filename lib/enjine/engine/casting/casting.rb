@@ -107,14 +107,12 @@ module Enjine
         turn_spell_face!(obj, face) # CR 712.8b, 716.3b, 721.3b
         extra = method ? { "method" => method } : {}
         extra["no_priority"] = true if %w[free resolving].include?(via) # cast while resolving (CR 608.2g)
-        cost = method ? method_cost(obj, method) : definition(obj).mana_cost
-        start_casting!(index, obj.id, "spell", origin: origin, cost: cost, extra: extra)
+        start_casting!(index, obj.id, "spell", origin: origin, extra: extra)
       end
 
       # CR 602.2a: the ability is created on the stack.
       def begin_activation!(index, source_id, ability_ref)
         source = object(source_id)
-        ability = chars(source).ability(ability_ref)
         # CR 602.2a: activating from a hidden zone reveals the card.
         emit Events::CardRevealed.new(player: name(index), object: source_id, card: source.card) if source.zone == :hand
         card, ref = granted_origin(ability_ref) # a granted ability lives in the granting card's data
@@ -123,15 +121,15 @@ module Enjine
         obj.source = source_id
         obj.ability = ref || ability_ref
         state.stack.unshift(obj.id)
-        start_casting!(index, obj.id, "ability", source: source_id, ability: ability_ref, cost: ability.mana_cost)
+        start_casting!(index, obj.id, "ability", source: source_id, ability: ability_ref)
       end
 
       # `x` stays nil until announced (CR 601.2b); `remaining` stays nil until the total cost is
       # determined and locked in after targets are chosen (CR 601.2f).
-      def start_casting!(index, object_id, kind, cost:, origin: nil, source: nil, ability: nil, extra: {})
+      def start_casting!(index, object_id, kind, origin: nil, source: nil, ability: nil, extra: {})
         state.frames << { "type" => "cast", "player" => index, "object" => object_id, "kind" => kind,
                           "origin" => origin, "source" => source, "ability" => ability, "targets" => [], "modes" => [],
-                          "x" => cost&.x_symbols&.positive? ? nil : 0, "remaining" => nil,
+                          "x" => nil, "remaining" => nil,
                           "pool" => player(index).mana_pool.transform_keys(&:to_s), "tapped" => [],
                           "restricted" => Snapshot.deep_copy(player(index).restricted_mana),
                           "triggers_before" => state.pending_triggers.map { it["id"] } }.merge(extra)
@@ -246,6 +244,7 @@ module Enjine
 
       # A spell becomes cast (CR 601.2i) once its other costs are paid.
       def finish_spell_cast!(ctx, obj)
+        casting_costs(ctx).each { it.pay!(self, obj) unless it.respond_to?(:choices_needed) } # pay life (CR 119.4)
         pay_chosen_costs!(ctx) # e.g. the creature sacrificed for an additional cost (CR 601.2h)
         finish_cast_method!(obj, ctx) # Engine::Permissions
         cast_prepared_copy!(ctx.dig("origin", "id")) # CR 723.3c (Engine::Faces)

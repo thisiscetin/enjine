@@ -334,6 +334,84 @@
     ]
   },
   {
+    "name": "Champion of the Weird",
+    "mana_cost": "{3}{B}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "goblin",
+      "berserker"
+    ],
+    "power": 5,
+    "toughness": 5,
+    "abilities": [
+      {
+        "additional_cost": {
+          "cost": [
+            {
+              "behold": {
+                "card": {
+                  "subtypes": [
+                    "goblin"
+                  ]
+                },
+                "exile": true
+              }
+            }
+          ]
+        }
+      },
+      {
+        "activated": {
+          "cost": [
+            {
+              "pay_life": 1
+            },
+            {
+              "blight": {
+                "amount": 2
+              }
+            }
+          ],
+          "timing": "sorcery",
+          "targets": [
+            "opponent"
+          ],
+          "effects": [
+            {
+              "blight": {
+                "amount": 2,
+                "to": {
+                  "target": 0
+                }
+              }
+            }
+          ]
+        }
+      },
+      {
+        "triggered": {
+          "when": {
+            "leaves_battlefield": {}
+          },
+          "effects": [
+            {
+              "return_to_hand": {
+                "to": "exiled_with"
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "rare",
+    "printing": {
+      "set": "ecl",
+      "number": "95"
+    }
+  },
+  {
     "name": "Brigid's Command",
     "mana_cost": "{1}{G}{W}",
     "types": [

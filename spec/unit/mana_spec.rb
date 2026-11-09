@@ -15,7 +15,6 @@ RSpec.describe Enjine::Mana do
     end
 
     it "rejects unsupported symbols and junk" do
-      expect { described_class.parse("{2/B}") }.to raise_error(ArgumentError, /unsupported mana symbol/)
       expect { described_class.parse("{B/P}") }.to raise_error(ArgumentError, /unsupported mana symbol/)
       expect { described_class.parse("{G/G}") }.to raise_error(ArgumentError, /two different colors/)
       expect { described_class.parse("2R") }.to raise_error(ArgumentError, /unexpected characters/)
@@ -52,6 +51,18 @@ RSpec.describe Enjine::Mana do
 
     it "doesn't count hybrid as colorless: a hybrid-only cost renders without {0}" do
       expect(Enjine::Mana::Cost.parse("{W/U}").to_s).to eq("{W/U}")
+    end
+
+    it "parses monocolored hybrid {2/W}: mana value 2, white, payable as {W} or {2} (CR 107.4e, 202.3f, 601.2b)" do
+      cost = Enjine::Mana::Cost.parse("{1}{2/W}{2/U}")
+      expect(cost.to_s).to eq("{1}{2/W}{2/U}")
+      expect(Enjine::Mana::Cost.parse(cost.to_s)).to eq(cost)
+      expect([cost.mana_value, cost.colors, cost.requirements]).to eq([5, %i[W U], []])
+      expect(cost.equivalents.map(&:to_s)).to eq(%w[{1}{W}{U} {3}{W} {3}{U} {5}])
+      expect(Enjine::Mana::Cost.parse("{R/G}").equivalents.map(&:to_s)).to eq(["{R/G}"])
+      errors = []
+      described_class.parse_cost("{W/2}", errors, "c")
+      expect(errors).to eq(["c: unsupported mana symbol {W/2}"])
     end
   end
 

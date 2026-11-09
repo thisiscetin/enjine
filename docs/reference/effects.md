@@ -29,15 +29,15 @@ Rules: CR 122.1, CR 122.6, CR 613.4c
 
 ## add_mana
 
-You add mana to your mana pool: the fixed mana in `produce`, or `amount` mana of a color you choose as it resolves (`color: "any_one"`: all of one color; `color: "any"`: each mana's color chosen separately, "in any combination of colors"). `colors` limits the choice ("add {R} or {G}"). `spend_only` restricts how the mana can be spent (CR 106.6). `until: "end_of_combat"`: you don't lose this mana as steps end until end of combat (CR 702.189a).
+You add mana to your mana pool: the fixed mana in `produce`, or `amount` mana of a color you choose as it resolves (`color: "any_one"`: all of one color; `color: "any"`: each mana's color chosen separately, "in any combination of colors"; `"chosen"`: of the color chosen for its source or by it, CR 607.2d). `colors` limits the choice ("add {R} or {G}"). `spend_only` restricts how the mana can be spent (CR 106.6). `until: "end_of_combat"`: you don't lose this mana as steps end until end of combat (CR 702.189a).
 
-Rules: CR 106.1a, CR 106.4, CR 608.2d, CR 605.1a, CR 106.6, CR 500.5
+Rules: CR 106.1a, CR 106.4, CR 608.2d, CR 605.1a, CR 106.6, CR 500.5, CR 607.2d
 
 | Parameter | Description |
 | --- | --- |
 | `produce` | mana symbols, e.g. "{R}{R}" |
 | `amount` | amount (default 1; with produce: how many times) |
-| `color` | any_one | any |
+| `color` | any_one | any | chosen |
 | `colors` | list of colors to choose from (default all five) |
 | `spend_only` | {"spells": card spec, "abilities": card spec} |
 | `until` | "end_of_combat" (optional) |
@@ -243,6 +243,41 @@ Rules: CR 707.2, CR 707.4, CR 613.2a, CR 613.7, CR 611.2a, CR 514.2
     "of": {
       "target": 0
     }
+  }
+}
+```
+
+## behold
+
+You behold an object matching the card spec `card`: reveal such a card from your hand or choose such a permanent you control. Under `may`, "yes" is offered only when there is one.
+
+Rules: CR 701.4a, CR 701.4b, CR 118.3
+
+| Parameter | Description |
+| --- | --- |
+| `card` | card spec (required), e.g. {"subtypes": ["dragon"]} |
+
+```json
+{
+  "may": {
+    "effects": [
+      {
+        "behold": {
+          "card": {
+            "subtypes": [
+              "dragon"
+            ]
+          }
+        }
+      }
+    ],
+    "then": [
+      {
+        "create_token": {
+          "token": "Treasure"
+        }
+      }
+    ]
   }
 }
 ```

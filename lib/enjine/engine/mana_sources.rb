@@ -13,10 +13,12 @@ module Enjine
       def affordable?(index, cost, excluded_source, purpose = nil)
         return true if cost.nil? || cost.mana_value.zero?
 
-        units = mana_units(index, excluded_source, purpose)
-        return false if units.size < cost.mana_value
+        covers?(cost, mana_units(index, excluded_source, purpose))
+      end
 
-        match_colored(cost.requirements, units)
+      # Whether `units` can pay `cost`, a monocolored hybrid {2/B} as {B} or as {2} (CR 107.4e, 601.2b).
+      def covers?(cost, units)
+        cost.equivalents.any? { units.size >= it.mana_value && match_colored(it.requirements, units) }
       end
 
       # Every unit of mana the player could make: pool mana (one fixed type each), restricted pool mana
@@ -122,8 +124,7 @@ module Enjine
 
       # Whether the mana in the pool (unrestricted) can pay `cost` (a mana ability's mana cost, CR 605.3a).
       def pool_covers?(index, cost)
-        units = player(index).mana_pool.flat_map { |type, n| Array.new(n) { [type] } }
-        units.size >= cost.mana_value && match_colored(cost.requirements, units)
+        covers?(cost, player(index).mana_pool.flat_map { |type, n| Array.new(n) { [type] } })
       end
 
       # Pays a mana ability's mana cost from the pool: each colored or hybrid symbol with mana that keeps

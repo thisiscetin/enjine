@@ -34,9 +34,9 @@ module Enjine
           costs = StackAbility.parse_costs({ "cost" => raw }, errors, path)
           errors << "#{path}.cost: must be a mana cost string or a non-empty list of costs" if raw.is_a?(Array) && raw.empty?
           costs.each_with_index do |cost, i|
-            next if cost.mana? || cost.respond_to?(:choices_needed)
+            next if cost.mana? || cost.respond_to?(:choices_needed) || cost.respond_to?(:spell_cost?)
 
-            errors << "#{path}.cost[#{i}]: an alternative cost must be mana or a chosen cost (tap, sacrifice, ...)"
+            errors << "#{path}.cost[#{i}]: an alternative cost must be mana, life or a chosen cost (tap, sacrifice, ...)"
           end
           costs
         end

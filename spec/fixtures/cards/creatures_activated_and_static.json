@@ -36,6 +36,328 @@
     "rules_text": "{T}: Prodigal Pyromancer deals 1 damage to any target."
   },
   {
+    "name": "Ashen Rummager",
+    "mana_cost": "{1}{R}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "goblin"
+    ],
+    "power": 2,
+    "toughness": 1,
+    "abilities": [
+      {
+        "activated": {
+          "cost": [
+            {
+              "mana": "{1}"
+            },
+            "discard"
+          ],
+          "effects": [
+            {
+              "draw": {
+                "amount": 1
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "One mana, discard a card: draw a card."
+  },
+  {
+    "name": "Chaos Imp",
+    "mana_cost": "{R}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "imp"
+    ],
+    "power": 1,
+    "toughness": 1,
+    "abilities": [
+      {
+        "activated": {
+          "cost": [
+            {
+              "discard": {
+                "random": true
+              }
+            }
+          ],
+          "timing": "sorcery",
+          "effects": [
+            {
+              "draw": {
+                "amount": 2
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "Discard a card at random: draw two cards. Activate only as a sorcery."
+  },
+  {
+    "name": "Gravecaller Ghoul",
+    "mana_cost": "{2}{B}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "zombie"
+    ],
+    "power": 2,
+    "toughness": 2,
+    "abilities": [
+      {
+        "activated": {
+          "cost": [
+            {
+              "mana": "{1}"
+            },
+            {
+              "exile_from_graveyard": {
+                "count": 2
+              }
+            }
+          ],
+          "effects": [
+            {
+              "add_counters": {
+                "counter": "+1/+1",
+                "amount": 1,
+                "to": "self"
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "One mana, exile two cards from your graveyard: put a +1/+1 counter on this creature."
+  },
+  {
+    "name": "Bloodbound Duelist",
+    "mana_cost": "{1}{B}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "vampire"
+    ],
+    "power": 2,
+    "toughness": 1,
+    "abilities": [
+      {
+        "activated": {
+          "cost": [
+            {
+              "pay_life": 2
+            }
+          ],
+          "limit": "once_each_turn",
+          "effects": [
+            {
+              "pump": {
+                "power": 2,
+                "toughness": 2,
+                "to": "self"
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "Pay 2 life: this creature gets +2/+2 until end of turn. Activate only once each turn."
+  },
+  {
+    "name": "Bloodforge Adept",
+    "mana_cost": "{1}{B}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "human",
+      "cleric"
+    ],
+    "power": 1,
+    "toughness": 1,
+    "abilities": [
+      {
+        "activated": {
+          "cost": [
+            {
+              "mana": "{X}{B}"
+            },
+            "tap",
+            {
+              "pay_life": "X"
+            }
+          ],
+          "timing": "sorcery",
+          "effects": [
+            {
+              "add_counters": {
+                "counter": "+1/+1",
+                "amount": "x",
+                "to": "self"
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "X and black mana, tap, pay X life: put X +1/+1 counters on this creature. Activate only as a sorcery."
+  },
+  {
+    "name": "Bookish Wanderer",
+    "mana_cost": "{G}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "human"
+    ],
+    "power": 1,
+    "toughness": 1,
+    "abilities": [
+      {
+        "activated": {
+          "cost": [
+            {
+              "mana": "{3}{G}"
+            }
+          ],
+          "limit": "once",
+          "effects": [
+            {
+              "add_counters": {
+                "counter": "+1/+1",
+                "amount": 2,
+                "to": "self"
+              }
+            },
+            {
+              "draw": {
+                "amount": 1
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "Three and green mana: put two +1/+1 counters on this creature and draw a card. Activate only once."
+  },
+  {
+    "name": "Kithkin Banner-Champion",
+    "mana_cost": "{2}{W}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "kithkin",
+      "knight"
+    ],
+    "power": 4,
+    "toughness": 4,
+    "abilities": [
+      {
+        "additional_cost": {
+          "cost": [
+            {
+              "behold": {
+                "card": {
+                  "subtypes": [
+                    "kithkin"
+                  ]
+                },
+                "exile": true
+              }
+            }
+          ]
+        }
+      },
+      {
+        "triggered": {
+          "when": {
+            "leaves_battlefield": {}
+          },
+          "effects": [
+            {
+              "return_to_hand": {
+                "to": "exiled_with"
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "As an additional cost to cast this spell, behold a Kithkin and exile it. When this creature leaves the battlefield, return the exiled card to its owner's hand."
+  },
+  {
+    "name": "Kithkin Lookout",
+    "mana_cost": "{W}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "kithkin",
+      "scout"
+    ],
+    "power": 1,
+    "toughness": 2,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "enters": {}
+          },
+          "effects": [
+            {
+              "may": {
+                "effects": [
+                  {
+                    "behold": {
+                      "card": {
+                        "subtypes": [
+                          "kithkin"
+                        ]
+                      }
+                    }
+                  }
+                ],
+                "then": [
+                  {
+                    "gain_life": {
+                      "amount": 2
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "When this creature enters, you may behold a Kithkin. If you do, you gain 2 life."
+  },
+  {
+    "name": "Ember Ogre",
+    "mana_cost": "{2/R}{2/R}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "ogre"
+    ],
+    "power": 3,
+    "toughness": 3,
+    "rules_text": "Each mana symbol can be paid with one red mana or two mana of any type."
+  },
+  {
     "name": "Aegis Initiate",
     "mana_cost": "{1}{W}",
     "types": [

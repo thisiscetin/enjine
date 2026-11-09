@@ -58,7 +58,7 @@ module Enjine
       # (CR 605.3b, 106.1a): all of one color (`color: "any_one"`) or each separately (`"any"`).
       class ManaAbility < Primitive
         COLORS = Mana::COLORS.map(&:to_s).freeze
-        CHOICES = %w[any_one any].freeze
+        CHOICES = %w[any_one any chosen].freeze
 
         primitive :ability, :mana,
                   description: "An activated mana ability: pay the cost, add the mana to your mana pool " \
@@ -66,8 +66,9 @@ module Enjine
                                "have priority. `produce`: the fixed mana (`amount` times). Or `color`: " \
                                "`amount` mana (default 1) of one color you choose as you activate it " \
                                "(`\"any_one\"`) or in any combination of colors (`\"any\"`); `colors` limits " \
-                               "the choice. `spend_only` restricts how the mana can be spent.",
-                  rules: %w[605.1a 605.3a 605.3b 106.1a 106.4 106.6],
+                               "the choice. `\"chosen\"`: of the color chosen as this entered (choose_color). " \
+                               "`spend_only` restricts how the mana can be spent.",
+                  rules: %w[605.1a 605.3a 605.3b 106.1a 106.4 106.6 607.2d],
                   params: { "cost" => "list of costs (e.g. [\"tap\"])",
                             "produce" => "mana symbols added, e.g. \"{G}\" or \"{C}{C}\"",
                             "amount" => "amount (default 1; with produce: how many times)",
@@ -93,18 +94,29 @@ module Enjine
                                              amount: amount, spend_only: spend_only)
         end
 
+        # CR 605.3a: a mana ability is paid for and resolves at once, so none of its costs can wait for a
+        # choice or an announced X.
         def self.build_costs(raw, errors, path)
-          return raw.each_with_index.map { |c, i| Mechanics.build_entry(:cost, c, errors, "#{path}.cost[#{i}]") } if
-            raw.is_a?(Array) && !raw.empty?
+          unless raw.is_a?(Array) && !raw.empty?
+            errors << "#{path}.cost: must be a non-empty list"
+            return []
+          end
 
-          errors << "#{path}.cost: must be a non-empty list"
-          []
+          raw.each_with_index.map do |c, i|
+            cost = Mechanics.build_entry(:cost, c, errors, "#{path}.cost[#{i}]")
+            if cost.respond_to?(:choices_needed) || (cost.respond_to?(:x?) && cost.x?)
+              errors << "#{path}.cost[#{i}]: a mana ability's cost can't need a choice or X"
+            end
+            cost
+          end
         end
 
         def self.build_colors(params, color, errors, path)
           raw = Mechanics.fetch_param(params, :colors)
           return COLORS if raw.nil?
-          return raw.map(&:to_s).freeze if color && raw.is_a?(Array) && raw.size >= 2 && (raw - COLORS).empty? && raw.uniq == raw
+          if color && color != "chosen" && raw.is_a?(Array) && raw.size >= 2 && (raw - COLORS).empty? && raw.uniq == raw
+            return raw.map(&:to_s).freeze
+          end
 
           errors << "#{path}.colors: must list two or more colors (W U B R G), with color"
           COLORS
@@ -137,7 +149,10 @@ module Enjine
         attr_reader :mana_cost
 
         # Whether the mana is chosen as it's activated (so each activation option names it).
-        def choice? = !color.nil?
+        def choice? = !color.nil? && color != "chosen"
+
+        # CR 607.2d: "one mana of the chosen color", chosen as the source entered (choose_color); none, no mana.
+        def chosen_color(object) = object.memory["chosen_color"]&.to_sym
 
         # How much mana (or how many times `produce`) one activation adds now.
         def count(engine, object)
@@ -150,6 +165,7 @@ module Enjine
         # without a choice; with `any_one` one per color; with `any` one per combination of colors.
         def outcomes(engine, object)
           n = count(engine, object)
+          return [Array(chosen_color(object)) * n] if color == "chosen"
           return [(produce || []) * n] unless choice?
           return [[]] if n.zero?
 
@@ -161,6 +177,7 @@ module Enjine
 
         def to_s
           what = if produce then "Add #{produce.map { "{#{it}}" }.join}#{" #{amount} times" if amount}"
+                 elsif color == "chosen" then "Add #{amount || 1} mana of the chosen color"
                  else "Add #{amount || 1} mana of #{color == "any_one" ? "any one color" : "any combination of colors"}" \
                    "#{" (#{colors.join("/")})" unless colors == COLORS}"
                  end

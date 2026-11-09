@@ -268,6 +268,20 @@ Rules: CR 702.11b
 }
 ```
 
+## improvise
+
+Improvise: while paying this spell's total cost you may tap untapped artifacts you control, each paying for {1} of its generic part (pay_cost option `{type: "improvise", object: id}`). It isn't an alternative or additional cost.
+
+Rules: CR 702.126a, CR 702.126b, CR 702.126c
+
+```json
+{
+  "keywords": [
+    "improvise"
+  ]
+}
+```
+
 ## indestructible
 
 Can't be destroyed: lethal damage, deathtouch and "destroy" effects don't put it into the graveyard.

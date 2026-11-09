@@ -8,16 +8,17 @@ module Enjine
       # Activated abilities without targets that add mana are mana abilities instead (CR 605.1a).
       class AddMana < ChoiceEffect
         COLORS = Mana::COLORS.map(&:to_s).freeze
-        CHOICES = %w[any_one any].freeze
+        CHOICES = %w[any_one any chosen].freeze
 
         primitive :effect, :add_mana,
                   description: "You add mana to your mana pool: the fixed mana in `produce`, or `amount` mana of a " \
                                "color you choose as it resolves (`color: \"any_one\"`: all of one color; " \
                                "`color: \"any\"`: each mana's color chosen separately, \"in any combination of " \
-                               "colors\"). `colors` limits the choice (\"add {R} or {G}\"). `spend_only` restricts " \
+                               "colors\"; `\"chosen\"`: of the color chosen for its source or by it, CR 607.2d). " \
+                               "`colors` limits the choice (\"add {R} or {G}\"). `spend_only` restricts " \
                                "how the mana can be spent (CR 106.6). `until: \"end_of_combat\"`: you don't lose this " \
                                "mana as steps end until end of combat (CR 702.189a).",
-                  rules: %w[106.1a 106.4 608.2d 605.1a 106.6 500.5],
+                  rules: %w[106.1a 106.4 608.2d 605.1a 106.6 500.5 607.2d],
                   params: { "produce" => "mana symbols, e.g. \"{R}{R}\"", "amount" => "amount (default 1; with produce: how many times)",
                             "color" => CHOICES.join(" | "), "colors" => "list of colors to choose from (default all five)",
                             "spend_only" => "{\"spells\": card spec, \"abilities\": card spec}",
@@ -48,7 +49,8 @@ module Enjine
           raw_colors = Mechanics.fetch_param(params, :colors)
           @colors = raw_colors || COLORS
           return if raw_colors.nil?
-          return if @color && @colors.is_a?(Array) && @colors.size >= 2 && (@colors - COLORS).empty? && @colors.uniq == @colors
+          return if %w[any_one any].include?(@color) && @colors.is_a?(Array) && @colors.size >= 2 &&
+                    (@colors - COLORS).empty? && @colors.uniq == @colors
 
           errors << "#{path}.colors: must list two or more colors (W U B R G), with color"
         end
@@ -58,6 +60,7 @@ module Enjine
 
           index = ctx.controller
           return add(engine, index, @produce * amount_for(engine, ctx), ctx) unless @color # the fixed mana, `amount` times
+          return add(engine, index, Array(chosen_color(engine, ctx)) * amount_for(engine, ctx), ctx) if @color == "chosen"
 
           n = (locals["n"] ||= amount_for(engine, ctx))
           picks = answers(locals)
@@ -69,8 +72,12 @@ module Enjine
           add(engine, index, @color == "any_one" ? colors * n : colors, ctx)
         end
 
+        # CR 607.2d: the color chosen for the source, or by this spell or ability as it resolved ("choose a color").
+        def chosen_color(engine, ctx) = Filters.chosen_memory(engine, ctx.source, ctx)["chosen_color"]&.to_sym
+
         def to_s
           return "add #{produce.map { "{#{it}}" }.join}" if produce
+          return "add #{amount} mana of the chosen color" if @color == "chosen"
 
           return "add #{amount} mana: #{@colors.map { "{#{it}}" }.join(" or ")}" unless @colors == COLORS
 

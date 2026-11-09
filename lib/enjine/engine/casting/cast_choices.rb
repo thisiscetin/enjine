@@ -233,7 +233,7 @@ module Enjine
       def activation_allowed?(index, obj, ref, ability)
         return true unless ability.respond_to?(:restriction_met?)
         return false if ability.per_turn && activations_this_turn(obj, ref) >= ability.per_turn
-        return false if ability.exhaust? && obj.memory.fetch("exhausted", []).include?(ref) # CR 702.177a
+        return false if ability.once? && obj.memory.fetch("activated_once", []).include?(ref) # CR 602.5b, 702.177a
 
         ability.restriction_met?(self, index, obj.id)
       end
@@ -243,7 +243,7 @@ module Enjine
       def record_activation!(ctx)
         source = state.objects[ctx["source"]] or return
         ability = chars(source).ability(ctx["ability"])
-        (source.memory["exhausted"] ||= []) << ctx["ability"] if ability.respond_to?(:exhaust?) && ability.exhaust?
+        (source.memory["activated_once"] ||= []) << ctx["ability"] if ability.respond_to?(:once?) && ability.once?
         return unless ability.respond_to?(:per_turn) && ability.per_turn
 
         (source.memory["activations"] ||= {})[ctx["ability"]] =

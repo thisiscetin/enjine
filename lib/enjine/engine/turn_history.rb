@@ -72,7 +72,7 @@ module Enjine
         info = { "controller" => lki["controller"], "power" => lki["power"], "toughness" => lki["toughness"],
                  "counters" => lki["counters"].dup, "card" => lki["card"] }
         info["except"] = lki["except"] if lki["except"] # what a copy of it copies (CR 707.2, Engine::Copies)
-        info
+        info.merge(lki.slice(Mechanics::Linked::EXILED).transform_values(&:dup)) # CR 607.2a (Linked.exiled_with)
       end
 
       # What the resolving spell or ability remembers about an object that left the battlefield during it.
