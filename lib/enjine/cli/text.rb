@@ -150,6 +150,7 @@ module Enjine
         when "library_shuffled" then "#{ev["player"]} shuffles their library"
         when "card_revealed" then "#{ev["player"]} reveals #{card_name(ev["card"])}"
         when "die_rolled" then "#{ev["winner"]} wins the die roll"
+        when "rolled_die" then "#{ev["player"]} rolls a d#{ev["sides"]}: #{ev["result"]}"
         when "starting_player_chosen" then "#{ev["chooser"]} chooses to #{ev["choice"]}: #{ev["starting_player"]} goes first"
         when "mulligan_declared" then "#{ev["player"]} declares: #{ev["choice"]}"
         when "mulligan_taken" then "#{ev["player"]} mulligans (#{ev["mulligans"]} so far)"

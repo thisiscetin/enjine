@@ -41,20 +41,26 @@ module Enjine
       class ShareCardType
         def self.build(data, errors, path, targets_count)
           Mechanics.check_keys(data, %w[share_card_type], errors, path)
-          new(Selector.build(data["share_card_type"], errors, "#{path}.share_card_type", targets_count: targets_count))
+          raw = data["share_card_type"]
+          list = raw.is_a?(Array) ? raw : [raw]
+          new(list.each_with_index.map do |sel, i|
+            Selector.build(sel, errors, "#{path}.share_card_type#{"[#{i}]" if raw.is_a?(Array)}", targets_count: targets_count)
+          end)
         end
 
-        def initialize(selector)
-          @selector = selector
+        def initialize(selectors)
+          @selectors = selectors
           freeze
         end
 
+        # A list of selectors is "they share a card type": each must still name an object (CR 701.12a).
         def true?(engine, ctx)
-          objects = @selector.resolve(engine, ctx).filter_map { engine.state.objects[it] }
-          !objects.empty? && !objects.map { engine.chars(it).types }.reduce(:&).empty?
+          groups = @selectors.map { |sel| sel&.resolve(engine, ctx).to_a.filter_map { engine.state.objects[it] } }
+          objects = groups.flatten
+          groups.none?(&:empty?) && !objects.map { engine.chars(it).types }.reduce(:&).empty?
         end
 
-        def to_s = "#{@selector} share a card type"
+        def to_s = "#{@selectors.join(" and ")} share a card type"
       end
     end
   end

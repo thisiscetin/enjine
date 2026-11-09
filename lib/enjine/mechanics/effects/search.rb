@@ -21,17 +21,19 @@ module Enjine
                                "stated quality you may find fewer (or none); a search for just \"a card\" must find one " \
                                "if it can. `reveal` shows the found cards to every player. `searcher` names another " \
                                "player who searches their own library (e.g. {\"controller_of\": {\"target\": 0}}); " \
-                               "`may: true` lets the searcher decline (then nothing is shuffled).",
+                               "`may: true` lets the searcher decline (then nothing is shuffled). `different_names: true`: " \
+                               "the cards found must all have different names (\"basic land cards with different names\").",
                   rules: %w[701.23a 701.23b 701.23d 701.23e 701.20a 701.24a 701.24b 118.12 110.2a],
                   params: { "for" => "card spec: \"card\" (default), {\"types\"|\"subtypes\"|\"supertypes\": [...], " \
                                      "\"name\": \"...\"} or {\"any_of\": [spec, ...]}",
-                            "count" => "integer (default 1), \"any\" (any number) or an amount (\"up to that many\")",
+                            "count" => "integer (default 1), \"any\" (any number), \"x\" or an amount (\"up to that many\")",
                             "put" => "\"hand\" (default) or \"battlefield\"",
                             "tapped" => "true: the cards enter tapped (with put: battlefield)",
                             "counters" => "{counter name: n}: the cards enter with these counters (with put: battlefield)",
                             "reveal" => "true: reveal the found cards",
                             "searcher" => "selector of the searching player (default \"you\")",
-                            "may" => "true: the searcher may choose not to search" },
+                            "may" => "true: the searcher may choose not to search",
+                            "different_names" => "true: each card found has a different name" },
                   example: { "search_library" => { "for" => { "supertypes" => ["basic"], "types" => ["land"] },
                                                    "reveal" => true } }
 
@@ -39,7 +41,7 @@ module Enjine
 
         attr_reader :spec, :count, :put, :tapped, :reveal
 
-        def self.keys = %w[for count put tapped counters reveal searcher may if]
+        def self.keys = %w[for count put tapped counters reveal searcher may different_names if]
         def self.default_to = "you"
 
         def setup(params, errors, path)
@@ -50,6 +52,7 @@ module Enjine
           @tapped = Mechanics.flag_param(params, :tapped, errors, path)
           @reveal = Mechanics.flag_param(params, :reveal, errors, path)
           @may = Mechanics.flag_param(params, :may, errors, path)
+          @different_names = Mechanics.flag_param(params, :different_names, errors, path)
           errors << "#{path}.tapped: only cards put onto the battlefield can enter tapped" if @tapped && @put != "battlefield"
           @counters = parse_counters(Mechanics.fetch_param(params, :counters), errors, path)
           raw = Mechanics.fetch_param(params, :searcher) || "you"
@@ -58,7 +61,7 @@ module Enjine
 
         def parse_count(raw, errors, path)
           return raw if raw == "any" || (raw.is_a?(Integer) && raw.positive?)
-          return Linked.amount(raw, errors, "#{path}.count", @targets_count, @results_count) if raw.is_a?(Hash)
+          return Linked.amount(raw, errors, "#{path}.count", @targets_count, @results_count) if raw.is_a?(Hash) || raw == "x"
 
           errors << "#{path}.count: must be a positive integer, \"any\" or an amount"
           1
@@ -125,7 +128,10 @@ module Enjine
         # One option per distinct matching card (CR 701.23a); "done" stops looking unless the
         # search is for just a quantity of cards (CR 701.23b, 701.23d).
         def candidates(engine, index, found)
-          ids = (engine.player(index).library - found).sort.select { spec.match?(engine, engine.object(it)) }
+          names = @different_names ? found.map { engine.chars(it).name } : []
+          ids = (engine.player(index).library - found).sort.select do
+            spec.match?(engine, engine.object(it)) && !names.include?(engine.chars(it).name)
+          end
           choices = ids.uniq { engine.object(it).card }.map { { "type" => "find", "object" => it } }
           return choices if choices.empty? || (spec.any? && count != "any")
 

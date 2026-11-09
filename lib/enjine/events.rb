@@ -81,6 +81,8 @@ module Enjine
     EmblemCreated = define(:emblem_created, :player, :object, :card) # CR 114.2
     # CR 705: a coin flip; `won` is nil for a flip no one wins or loses (CR 705.2).
     CoinFlipped = define(:coin_flipped, :player, :heads, :won)
+    # CR 706.2: a die with `sides` sides rolled by an effect, and its natural result.
+    RolledDie = define(:rolled_die, :player, :sides, :result)
     # CR 707.10: a copy of a spell put on the stack (not cast).
     SpellCopied = define(:spell_copied, :player, :object, :card, :original, :targets)
     EffectStarted = define(:effect_started, :kind, :affected, :details)

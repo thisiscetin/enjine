@@ -112,8 +112,9 @@ module Enjine
       # choices, put on top of the stack by `controller` (who owns and controls it). A spell copy isn't
       # cast, an ability copy isn't activated; an ability copy has the same source (CR 707.10b) and keeps
       # what the ability knew (its trigger event, the objects paid for its costs).
-      def copy_spell!(spell, controller, targets)
-        card, except = spell.ability? ? [spell.card, {}] : copiable_values(spell)
+      def copy_spell!(spell, controller, targets, except: {})
+        card, copied = spell.ability? ? [spell.card, {}] : copiable_values(spell)
+        except = except.empty? ? copied : Copies.merge_except(copied, except) # CR 707.9a
         copy = create_object(card, controller, :stack)
         if spell.ability?
           copy.kind = "ability"

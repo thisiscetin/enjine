@@ -232,5 +232,155 @@
     ],
     "rarity": "rare",
     "printing": { "set": "tla", "number": "137" }
+  },
+  {
+    "name": "Bilbo, Luckwearer // Burglar's Plot",
+    "layout": "adventure",
+    "faces": [
+      {
+        "name": "Bilbo, Luckwearer",
+        "mana_cost": "{1}{U}",
+        "types": ["creature"],
+        "supertypes": ["legendary"],
+        "subtypes": ["halfling", "rogue"],
+        "power": 1,
+        "toughness": 1,
+        "keywords": ["cant_be_blocked"],
+        "abilities": [
+          {
+            "triggered": {
+              "when": { "deals_damage": { "combat": true, "to": "player" } },
+              "effects": [{ "draw": { "amount": 1 } }, { "discard": { "amount": 1 } }]
+            }
+          }
+        ]
+      },
+      {
+        "name": "Burglar's Plot",
+        "mana_cost": "{4}{U}",
+        "types": ["sorcery"],
+        "subtypes": ["adventure"],
+        "abilities": [
+          {
+            "spell": {
+              "targets": [{ "permanent": { "not": ["land"] } },
+                          { "filter": { "permanent": { "not": ["land"] } }, "distinct_from": [0], "shares_type_with": 0 }],
+              "effects": [{ "exchange_control": { "to": { "target": 0 }, "with": { "target": 1 },
+                                                  "if": { "share_card_type": [{ "target": 0 }, { "target": 1 }] } } }]
+            }
+          }
+        ]
+      }
+    ],
+    "rarity": "uncommon",
+    "printing": { "set": "hob", "number": "32" }
+  },
+  {
+    "name": "Fblthp, Knows the Way",
+    "mana_cost": "{X}{G}{G}",
+    "types": ["creature"],
+    "supertypes": ["legendary"],
+    "subtypes": ["homunculus", "scout"],
+    "power": { "distinct_land_types": { "each": "land", "controller": "you" } },
+    "toughness": 2,
+    "abilities": [
+      {
+        "triggered": {
+          "when": { "enters": {} },
+          "effects": [{ "search_library": { "for": { "supertypes": ["basic"], "types": ["land"] }, "count": "x",
+                                            "different_names": true, "reveal": true } }]
+        }
+      }
+    ],
+    "rarity": "uncommon",
+    "printing": { "set": "fra", "number": "258" }
+  },
+  {
+    "name": "Edgar, King of Figaro",
+    "mana_cost": "{4}{U}{U}",
+    "types": ["creature"],
+    "supertypes": ["legendary"],
+    "subtypes": ["human", "artificer", "noble"],
+    "power": 4,
+    "toughness": 5,
+    "abilities": [
+      {
+        "triggered": {
+          "when": { "enters": {} },
+          "effects": [{ "draw": { "amount": { "count": { "each": "artifact", "controller": "you" } } } }]
+        }
+      },
+      "first_flips_win"
+    ],
+    "rarity": "rare",
+    "printing": { "set": "fin", "number": "51" }
+  },
+  {
+    "name": "Spinerock Tyrant",
+    "mana_cost": "{3}{R}{R}",
+    "types": ["creature"],
+    "subtypes": ["dragon"],
+    "power": 6,
+    "toughness": 6,
+    "keywords": ["flying", "wither"],
+    "abilities": [
+      {
+        "triggered": {
+          "when": { "cast": { "spell": "instant_or_sorcery", "single_target": true } },
+          "effects": [
+            { "may": { "effects": [{ "copy_spell": { "of": { "triggering": "object" }, "new_targets": true,
+                                                     "except": { "keywords": ["wither"] } } }],
+                       "then": [{ "grant": { "keywords": ["wither"], "to": { "triggering": "object" } } }] } }
+          ]
+        }
+      }
+    ],
+    "rarity": "mythic",
+    "printing": { "set": "ecl", "number": "159" }
+  },
+  {
+    "name": "Quandrix, the Proof",
+    "mana_cost": "{4}{G}{U}",
+    "types": ["creature"],
+    "supertypes": ["legendary"],
+    "subtypes": ["elder", "dragon"],
+    "power": 6,
+    "toughness": 6,
+    "keywords": ["flying", "trample", "cascade"],
+    "abilities": [
+      { "spell_keywords": { "spells": { "spell": { "any_of": ["instant", "sorcery"] } }, "from": "hand", "keywords": ["cascade"] } }
+    ],
+    "rarity": "mythic",
+    "printing": { "set": "sos", "number": "218" }
+  },
+  {
+    "name": "Cool but Rude",
+    "mana_cost": "{1}{R}",
+    "types": ["enchantment"],
+    "subtypes": ["class"],
+    "abilities": [
+      {
+        "triggered": {
+          "when": { "player_attacks": {} },
+          "effects": [{ "may": { "effects": [{ "discard": { "amount": 1 } }], "then": [{ "draw": { "amount": 1 } }] } }]
+        }
+      },
+      {
+        "class_level": {
+          "level": 2, "cost": "{1}{R}",
+          "abilities": [{ "triggered": { "when": { "discards": {} },
+                                         "effects": [{ "deal_damage": { "amount": 2, "to": "each_opponent" } }] } }]
+        }
+      },
+      {
+        "class_level": {
+          "level": 3, "cost": "{1}{R}",
+          "abilities": [{ "triggered": { "when": { "becomes_level": { "level": 3 } },
+                                         "effects": [{ "search_library": {} }, { "discard": { "amount": 1, "random": true } }] } }]
+        }
+      }
+    ],
+    "rarity": "rare",
+    "printing": { "set": "tmt", "number": "89" }
   }
 ]

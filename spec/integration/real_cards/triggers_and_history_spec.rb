@@ -13,6 +13,10 @@ RSpec.describe "Real cards: triggers, turn history and the stack" do
        "abilities" => [{ "spell" => { "effects" => [{ "draw" => { "amount" => 1 } }] } }] },
      { "name" => "Test Recollection", "mana_cost" => "{U}", "types" => ["sorcery"],
        "abilities" => [{ "spell" => { "effects" => [{ "draw" => { "amount" => 1 } }] } }, { "flashback" => { "cost" => "{U}" } }] },
+     { "name" => "Test Coin", "mana_cost" => "{U}", "types" => ["instant"],
+       "abilities" => [{ "spell" => { "effects" => [{ "flip_coins" => {} },
+                                                    { "draw" => { "amount" => 1,
+                                                                  "if" => { "amount" => { "this_way" => 0 }, "at_least" => 1 } } }] } }] },
      { "name" => "Test Crucible", "mana_cost" => "{1}", "types" => ["artifact"],
        "abilities" => [{ "play_from" => { "zone" => "graveyard", "cards" => { "types" => ["land"] }, "play" => "play" } }] },
      { "name" => "Test Flicker", "mana_cost" => "{W}", "types" => ["instant"],
@@ -211,5 +215,72 @@ RSpec.describe "Real cards: triggers, turn history and the stack" do
       expect(events(game).count { it["type"] == "mana_added" && it["mana"] == "{R}" }).to eq(2) # the original and its copy
       expect(counters(game, "Firebender Ascension", "quest")).to eq(4)
     end
+  end
+
+  describe "Burglar's Plot: two targets that share a card type (CR 701.12b, 205.2a)" do
+    it "offers only a second target sharing a card type, then exchanges control" do
+      game = board(hand: ["Bilbo, Luckwearer // Burglar's Plot"], battlefield: ["Agent Maria Hill", "The Endstone"],
+                   theirs: ["Fire Lord Zuko"], mana: { U: 5 })
+      hill = obj_id(game, "Agent Maria Hill")
+      zuko = obj_id(game, "Fire Lord Zuko")
+      plot = obj_id(game, "Bilbo, Luckwearer // Burglar's Plot", zone: :hand, player: "alice")
+      game.submit(game.legal_options.find { it[:type] == "cast" && it[:object] == plot && it[:face] == 1 })
+      game.submit(target(hill))
+      expect(game.legal_options.select { it[:type] == "target" }.map { it[:target] }).to contain_exactly(zuko)
+      play(game, target(zuko))
+      expect([game.state.object(hill).controller, game.state.object(zuko).controller]).to eq([1, 0])
+    end
+  end
+
+  it "Fblthp finds up to X basic lands with different names (CR 701.23)" do
+    game = board(hand: ["Fblthp, Knows the Way"], library: %w[Forest Forest Island Swamp], mana: { G: 4 })
+    play(game, { type: "cast", object: obj_id(game, "Fblthp, Knows the Way", zone: :hand, player: "alice") },
+         { type: "x", value: 2 }, ->(g) { g.legal_options.find { g.state.object(it[:object]).card == "forest" } },
+         lambda { |g|
+           found = g.legal_options.select { it[:object] }
+           expect(found.map { g.state.object(it[:object]).card }).to contain_exactly("island", "swamp")
+           found.first
+         })
+    expect(ids_in(game, "alice", :hand).map { game.state.object(it).card }.uniq.size).to eq(2)
+  end
+
+  it "Edgar, King of Figaro: the first coin flips each turn come up heads and win (CR 705.3)" do
+    game = board(hand: ["Test Coin", "Test Coin"], battlefield: ["Edgar, King of Figaro"], mana: { U: 2 })
+    cast(game, "Test Coin") # no call: the flip is won
+    expect(ids_in(game, "alice", :hand).size).to eq(2)
+    cast(game, "Test Coin", { type: "call", call: "heads" }) # the second flip this turn is called as usual
+    flips = events(game).select { it["type"] == "coin_flipped" }
+    expect(flips.first).to include("heads" => true, "won" => true)
+    expect(flips.size).to eq(2)
+  end
+
+  it "Spinerock Tyrant copies a single-target spell; both spells gain wither (CR 707.10, 702.80a)" do
+    game = board(hand: ["Test Shock"], battlefield: ["Spinerock Tyrant"], theirs: ["Fire Lord Zuko", "Agent Maria Hill"],
+                 mana: { R: 1 })
+    zuko = obj_id(game, "Fire Lord Zuko")
+    hill = obj_id(game, "Agent Maria Hill")
+    cast(game, "Test Shock", target(zuko), yes, target(hill))
+    expect(game.state.object(zuko).counters["-1/-1"]).to eq(2) # the original, with wither
+    expect(game.state.object(zuko).damage).to eq(0)
+    expect(game.state.battlefield).not_to include(hill) # the copy, with wither: two -1/-1 counters on a 2/1
+  end
+
+  it "Quandrix gives instants and sorceries you cast from your hand cascade (CR 702.85a)" do
+    game = board(hand: ["Command the Stage", "Fire Lord Zuko"], battlefield: ["Quandrix, the Proof"],
+                 library: ["Test Shock"] + (["Island"] * 5), mana: { R: 4, W: 1, B: 1 })
+    cast(game, "Fire Lord Zuko") # a creature spell: no cascade
+    expect(events(game).count { it["type"] == "spell_cast" }).to eq(1)
+    cast(game, "Command the Stage", ->(g) { g.legal_options.find { it[:type] == "cast" } }, target("player:bob"))
+    expect(life(game, "bob")).to eq(18) # Test Shock, cast without paying its mana cost
+  end
+
+  it "Cool but Rude: becoming level 3 tutors, then discards at random, which deals 2 to each opponent" do
+    game = board(battlefield: [["Cool but Rude", {}]], hand: ["Island"], library: %w[Swamp Forest], mana: { R: 4 })
+    rude = obj_id(game, "Cool but Rude")
+    play(game, { type: "activate", object: rude, ability: game.legal_options.find { it[:type] == "activate" }[:ability] })
+    play(game, { type: "activate", object: rude, ability: game.legal_options.find { it[:type] == "activate" }[:ability] },
+         ->(g) { g.legal_options.first })
+    expect(ids_in(game, "alice", :hand).size).to eq(1)
+    expect(life(game, "bob")).to eq(18)
   end
 end

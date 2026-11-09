@@ -367,7 +367,7 @@ module Enjine
     #   {"attacked_this_turn": true}  the source attacked this turn
     #   {"you_attacked_this_turn": true}  you attacked with one or more creatures this turn (raid, CR 508.1)
     #   {"nth_resolution": n}      this is the nth time this turn this ability resolves (CR 608.2)
-    #   {"share_card_type": selector}  the referenced objects share a card type ("exiled_with": linked cards)
+    #   {"share_card_type": selector | [selectors]}  the referenced objects share a card type ("exiled_with": linked cards)
     #   {"chosen": word}           that word was chosen for this object (choose_option, CR 607.2f)
     #   {"not": condition}, {"all": [conditions]}, {"any": [conditions]}
     class Condition

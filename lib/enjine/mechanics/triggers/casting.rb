@@ -16,16 +16,18 @@ module Enjine
                                "this spell\" (it functions on the stack). `targets`: only a spell that targets something " \
                                "matching this filter (\"self\": this permanent), e.g. {\"creature\": {\"controller\": " \
                                "\"you\"}}. `from` / `not_from`: only a spell cast from (not from) that zone: hand | " \
-                               "graveyard | exile | library | outside.",
+                               "graveyard | exile | library | outside. `single_target: true`: only a spell with exactly " \
+                               "one target.",
                   rules: %w[603.2 601.2i 113.6 202.3e 201.4 607.2 115.1 601.2a 601.2c],
                   params: { "controller" => "you | opponent | any", "spell" => "creature | noncreature | instant_or_sorcery | filter",
                             "name" => "\"chosen\"", "mana_value" => "\"chosen\"", "self" => "true",
-                            "targets" => "\"self\" or a target filter", "from" => "zone", "not_from" => "zone" },
+                            "targets" => "\"self\" or a target filter", "from" => "zone", "not_from" => "zone",
+                            "single_target" => "true" },
                   example: { "cast" => { "controller" => "you", "spell" => "noncreature" } }
 
         SPELLS = %w[creature noncreature instant_or_sorcery].freeze
 
-        def self.keys = %w[controller spell name mana_value self targets from not_from]
+        def self.keys = %w[controller spell name mana_value self targets from not_from single_target]
         def event_class = Events::SpellCast
         def own_spell? = @self
 
@@ -41,6 +43,8 @@ module Enjine
           end
           setup_chosen(params, errors, path)
           setup_targets(params, errors, path)
+          @single = params["single_target"] == true
+          errors << "#{path}.single_target: must be true" unless params["single_target"].nil? || @single
           @zones = CastFrom.build(params, errors, path)
         end
 
@@ -70,7 +74,11 @@ module Enjine
           @targets = raw == "self" ? :self : raw && Mechanics.build_entry(:filter, raw, errors, "#{path}.targets")
         end
 
-        def targets_ok?(engine, event, source) = !@targets || matched_targets(engine, event, source).any?
+        def targets_ok?(engine, event, source)
+          return false if @single && Array(event.targets).flatten.compact.uniq.size != 1 # "with a single target"
+
+          !@targets || matched_targets(engine, event, source).any?
+        end
 
         def matched_targets(engine, event, source)
           Array(event.targets).flatten.compact.uniq.select do |ref|
@@ -101,7 +109,9 @@ module Enjine
         end
 
         def target_words
-          return "" unless @targets
+          return "" unless @targets || @single
+
+          return " with a single target" if @single && !@targets
 
           " that targets #{@targets == :self ? "this" : Triggers.filter_words(@targets)}"
         end

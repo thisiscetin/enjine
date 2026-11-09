@@ -6,13 +6,15 @@ module Enjine
       # One target of a spell or ability with options (CR 601.2c, 115.1d): {"filter": f, "optional": true}
       # is "up to one target f" (the player may choose none), and "distinct_from": [i, ...] keeps it
       # different from earlier targets of the same "target" word ("one or two target creatures").
+      # "shares_type_with": i keeps it sharing a card type with earlier target i ("two target permanents that
+      # share a card type", CR 115.1, 205.2a).
       # "count" is a variable number of targets for one "target" word (CR 601.2c, 115.3; Engine::TargetCounts):
       # an amount ("x": "X target creatures", 2: "two target creatures"; with "optional": "up to") or "any"
       # ("any number of target ..."). Its slot then holds a list, and {"target": n} means each of them.
       class TargetSpec
-        KEYS = %w[filter optional distinct_from count].freeze
+        KEYS = %w[filter optional distinct_from count shares_type_with].freeze
 
-        attr_reader :filter, :distinct_from, :count
+        attr_reader :filter, :distinct_from, :count, :shares_type_with
 
         def self.build(entry, errors, path, index)
           Mechanics.check_keys(entry, KEYS, errors, path)
@@ -20,7 +22,11 @@ module Enjine
           distinct = Array(entry["distinct_from"])
           errors << "#{path}.distinct_from: must list earlier targets" unless distinct.all? { it.is_a?(Integer) && it >= 0 && it < index }
           optional = Mechanics.flag_param(entry, :optional, errors, path)
-          filter && new(filter, optional, distinct, build_count(entry, errors, path))
+          shares = entry["shares_type_with"]
+          unless shares.nil? || (shares.is_a?(Integer) && shares >= 0 && shares < index)
+            errors << "#{path}.shares_type_with: must name an earlier target"
+          end
+          filter && new(filter, optional, distinct, build_count(entry, errors, path), shares_type_with: shares)
         end
 
         def self.build_count(entry, errors, path)
@@ -30,11 +36,12 @@ module Enjine
           Amount.build(entry["count"], errors, "#{path}.count", targets_count: 0, min: 1)
         end
 
-        def initialize(filter, optional, distinct_from, count = nil)
+        def initialize(filter, optional, distinct_from, count = nil, shares_type_with: nil)
           @filter = filter
           @optional = optional
           @distinct_from = distinct_from.freeze
           @count = count
+          @shares_type_with = shares_type_with
           freeze
         end
 

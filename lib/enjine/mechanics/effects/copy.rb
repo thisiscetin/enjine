@@ -169,13 +169,14 @@ module Enjine
                                "control (default: you) with the same modes, X, kicker and targets; they aren't cast " \
                                "or activated, and an ability's copy has the same source. With `new_targets: true` " \
                                "the controller may choose new targets for each copy. A copy of a permanent spell " \
-                               "becomes a token as it resolves.",
+                               "becomes a token as it resolves. `except`: the copies have these differences (e.g. " \
+                               "{\"keywords\": [\"wither\"]}: \"the copy gains wither\").",
                   rules: %w[707.10 707.10a 707.10b 707.10c 707.10f 608.3f],
                   params: { "of" => "selector (spells or abilities on the stack)", "amount" => "amount (default 1)",
-                            "new_targets" => "boolean", "to" => "selector (default \"you\")" },
+                            "new_targets" => "boolean", "to" => "selector (default \"you\")", "except" => CopyExcept::PARAM },
                   example: { "copy_spell" => { "of" => "self" } }
 
-        def self.keys = %w[of amount new_targets to if]
+        def self.keys = %w[of amount new_targets except to if]
         def self.default_to = "you"
 
         def initialize(to:, params:, errors:, path:, targets_count: 0, results_count: 0)
@@ -187,6 +188,7 @@ module Enjine
         def setup(params, errors, path)
           @of = setup_of(params, errors, path)
           @new_targets = Mechanics.flag_param(params, :new_targets, errors, path)
+          @except = CopyExcept.build(Mechanics.fetch_param(params, :except), errors, "#{path}.except")
         end
 
         def to_s = "copy #{@of}#{" #{amount} times" if amount != 1}#{" (new targets)" if @new_targets} → #{to}"
@@ -203,7 +205,7 @@ module Enjine
               targets = @new_targets ? choose_new_targets(engine, spell, controller, locals) : spell.targets&.dup
               return :wait if targets == :wait
 
-              engine.copy_spell!(spell, controller, targets)
+              engine.copy_spell!(spell, controller, targets, except: @except)
             end
             locals["plan"].shift
             locals.delete("answers")

@@ -241,7 +241,7 @@ module Enjine
       # "gains flying until end of turn" (CR 611.2, 613.1f): grant keywords to a locked set.
       class Grant < Effect
         primitive :effect, :grant,
-                  description: "Each referenced permanent gains the `keywords` until end of turn.",
+                  description: "Each referenced permanent (or spell on the stack) gains the `keywords` until end of turn.",
                   rules: %w[611.2a 611.2c 613.1f 514.2],
                   params: { "keywords" => "list of keywords", "to" => "selector" },
                   example: { "grant" => { "keywords" => ["flying"], "to" => { "target" => 0 } } }
@@ -256,8 +256,10 @@ module Enjine
           @keywords.each { errors << "#{path}.keywords: unknown keyword #{it.inspect}" unless Enjine.registry.fetch(:keyword, it) }
         end
 
+        # A spell on the stack can gain keywords too ("those spells gain wither", Engine::SpellGrants).
         def apply(engine, ctx)
-          engine.add_continuous_effect!("grant", ctx, objects(engine, ctx), "keywords" => keywords)
+          spells = refs(engine, ctx).select { (obj = engine.state.objects[it]) && obj.zone == :stack && !obj.ability? }
+          engine.add_continuous_effect!("grant", ctx, objects(engine, ctx) + spells, "keywords" => keywords)
         end
 
         def to_s = "gains #{keywords.join(", ")} until end of turn → #{to}"

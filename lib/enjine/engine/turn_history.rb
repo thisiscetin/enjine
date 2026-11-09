@@ -26,6 +26,7 @@ module Enjine
     #   "drawn" / "discarded"  how many cards they drew (CR 121.2) / discarded (CR 701.9a)
     #   "dilemmas" dilemmas they faced (CR 700.17)
     #   "noncombat_damage"  noncombat damage dealt to them (CR 120.2b)
+    #   "coin_flips"  coins they flipped (CR 705)
     # Per object (GameObject#memory, stamped with the turn): "attacked" and "resolved" counts.
     module TurnHistory
       def record_history!(event)
@@ -40,6 +41,7 @@ module Enjine
         when Events::AttackerDeclared then attack_recorded!(event)
         when Events::Resolved then resolution_recorded!(event)
         when Events::DamageDealt then damage_recorded!(event)
+        when Events::CoinFlipped then bump!(log_of(event.player), "coin_flips", 1) # CR 705.3 (Abilities::FirstFlipsWin)
         end
       end
 
