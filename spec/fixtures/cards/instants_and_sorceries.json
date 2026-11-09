@@ -4329,6 +4329,145 @@
     ]
   },
   {
+    "name": "Ember Thesis",
+    "mana_cost": "{2}{R}",
+    "types": [
+      "sorcery"
+    ],
+    "subtypes": [
+      "lesson"
+    ],
+    "keywords": [
+      "paradigm"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "targets": [
+            "any_target"
+          ],
+          "effects": [
+            {
+              "deal_damage": {
+                "amount": 2,
+                "to": {
+                  "target": 0
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Portent Spark",
+    "mana_cost": "{1}{R}",
+    "types": [
+      "instant"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "targets": [
+            "any_target"
+          ],
+          "effects": [
+            {
+              "deal_damage": {
+                "amount": 2,
+                "to": {
+                  "target": 0
+                },
+                "if": {
+                  "not": {
+                    "cast_with": "foretell"
+                  }
+                }
+              }
+            },
+            {
+              "deal_damage": {
+                "amount": 3,
+                "to": {
+                  "target": 0
+                },
+                "if": {
+                  "cast_with": "foretell"
+                }
+              }
+            }
+          ]
+        }
+      },
+      {
+        "foretell": {
+          "cost": "{R}"
+        }
+      }
+    ]
+  },
+  {
+    "name": "Delayed Ember",
+    "mana_cost": "{3}{R}",
+    "types": [
+      "sorcery"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "targets": [
+            "any_target"
+          ],
+          "effects": [
+            {
+              "deal_damage": {
+                "amount": 3,
+                "to": {
+                  "target": 0
+                }
+              }
+            }
+          ]
+        }
+      },
+      {
+        "suspend": {
+          "amount": 2,
+          "cost": "{R}"
+        }
+      }
+    ]
+  },
+  {
+    "name": "Timeweaver's Lesson",
+    "mana_cost": "{1}{U}",
+    "types": [
+      "instant"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "targets": [
+            {
+              "spell": {}
+            }
+          ],
+          "effects": [
+            {
+              "suspend": {
+                "to": {
+                  "target": 0
+                },
+                "amount": 2
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
     "name": "Swap Tactics",
     "mana_cost": "{3}{U}",
     "types": [

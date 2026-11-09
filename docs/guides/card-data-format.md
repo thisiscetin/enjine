@@ -921,7 +921,7 @@ power"). Keyword *actions* are effects.
 | "recruit" (CR 701.70) | `{ "recruit": {} }` |
 | "amass Orcs 2" (CR 701.47) | `{ "amass": { "subtype": "orc", "amount": 2 } }` (the amassed Army is its result: "attach this Equipment to the amassed Army" is `attach` to `{ "result": n }`) |
 | "empower Jace 2" (CR 701.71) | `{ "empower_jace": { "amount": 2 } }` |
-| "it endures 2" (CR 701.63) | `{ "endure": { "amount": 2 } }` (a fixed number) |
+| "it endures 2" (CR 701.63) | `{ "endure": { "amount": 2 } }` (any amount, see 4.24) |
 | "create two 1/1 tokens tapped and attacking" | `create_token` with `"tapped": true, "attacking": true` |
 | "add {R}{R}; until end of combat, you don't lose this mana" | `{ "add_mana": { "produce": "{R}{R}", "until": "end_of_combat" } }` |
 | "earthbend 2" (CR 701.66) | a target `{ "land": { "controller": "you" } }` and `{ "earthbend": { "amount": 2, "to": { "target": 0 } } }` (the land is its result: "that land becomes an Island" is `become` with `{ "result": n }`) |
@@ -1304,6 +1304,32 @@ grants its abilities.
     { "triggered": { "when": { "attacks": {} }, "effects": [{ "deal_damage": { "amount": 1, "to": "each_opponent" } }] } },
     { "triggered": { "when": { "ability_triggers": { "subject": { "each": "creature", "controller": "you" }, "cause": "attacks" } },
                      "effects": [{ "may": { "effects": [{ "copy_spell": { "of": { "triggering": "ability" } } }] } }] } }] }
+```
+
+### 4.29 Paradigm, foretell, suspend, hideaway, devour, meld and computed endure
+
+| Oracle text | Data |
+| --- | --- |
+| "Paradigm" (CR 702.192a) | `"keywords": ["paradigm"]` on an instant or sorcery: as it finishes resolving it's exiled; the first time a spell you control with its name resolves this game, at the beginning of each of your precombat main phases you create a copy of the card in exile and may cast it without paying its mana cost (an `effect_choice` of `{type: "cast"}` or `"done"`) |
+| "Foretell {2}{R}" (CR 702.143a) | ability `{ "foretell": { "cost": "{2}{R}" } }`: during your turn the priority option `{type: "special_action", object: id, ability: ref}` pays {2} and exiles it face down; on a later turn it's cast from exile with `via: "alt:<ref>"`; condition `{ "cast_with": "foretell" }` |
+| "Suspend 3—{2}{W}" (CR 702.62a) | ability `{ "suspend": { "amount": 3, "cost": "{2}{W}" } }`: the special action exiles it with three time counters whenever you could begin to cast it |
+| "exile it with four time counters on it. If it doesn't have suspend, it gains suspend" | effect `{ "suspend": { "to": …, "amount": 4 } }` (a spell, a card or a permanent); a card that has suspend from the start is `"keywords": ["suspend"]` |
+| suspended cards (CR 702.62b) | automatic: at the beginning of its owner's upkeep a time counter is removed; when the last is removed they may play it without paying its mana cost (`effect_choice` `{type: "cast"}` / `{type: "play_land"}`), and a creature spell cast this way has haste while they control it |
+| "Hideaway 4" (CR 702.75a) | ability `{ "hideaway": { "amount": 4 } }`: the exiled card is `"exiled_with"` the permanent, face down, and only its controller may look at it |
+| "You may play the exiled card without paying its mana cost" | `{ "cast_free": { "to": "exiled_with", "play": true } }` (`play: true` also plays a land, on your turn with a land play left, CR 305.2a, 305.3) |
+| "look at the top N cards, exile one face down" | `{ "dig": { "amount": N, "put": "exile", "face_down": true, "link": true } }` (`link`: exiled with the source) |
+| "Devour land 3" (CR 702.82c) / "Devour 2" | ability `{ "devour": { "amount": 3, "each": "land" } }` / `{ "devour": { "amount": 2 } }`: as it enters, `enter_choice` `{type: "devour", object: id}` picks permanents one at a time, then `{type: "done"}`; it enters with N +1/+1 counters for each and remembers how many it devoured |
+| Meld cards (CR 713) | `"layout": "meld"`, `"faces": [front, combined back face]`; both cards of the pair carry the same back face (e.g. Ragnarok, Divine Deliverance on Fang and on Vanille). The back face is up only on the melded permanent; when it leaves the battlefield both cards go to the new zone (CR 713.8) |
+| "if you both own and control this and a creature named Fang, …, exile them, then meld them" (CR 701.42a) | condition `{ "meld_with": "Fang, Fearless l'Cie" }`; effect `{ "meld": { "with": "Fang, Fearless l'Cie" } }` (cards that don't form a meld pair stay exiled, CR 701.42c) |
+| "endures X" / "endures X, where X is the number of counters on this creature" (CR 701.63a) | `{ "endure": { "amount": "x" } }` / `{ "endure": { "amount": { "counters": { "of": "self" } } } }`: the Spirit token is X/X |
+| "Proliferate X times, where X is the number of planeswalker types among planeswalkers you control" | `{ "proliferate": { "amount": { "distinct_planeswalker_types": { "each": "planeswalker", "controller": "you" } } } }` |
+
+```json
+{ "name": "Example Lesson of Embers", "mana_cost": "{2}{R}", "types": ["sorcery"], "subtypes": ["lesson"],
+  "keywords": ["paradigm"],
+  "abilities": [{ "spell": { "targets": ["any_target"],
+                             "effects": [{ "deal_damage": { "amount": 2, "to": { "target": 0 } } }] } },
+                { "foretell": { "cost": "{1}{R}" } }] }
 ```
 
 ---

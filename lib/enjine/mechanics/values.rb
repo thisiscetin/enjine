@@ -16,6 +16,7 @@ module Enjine
     #   {"distinct_types": selector}                  how many different creature types they have (CR 205.3m)
     #   {"distinct_colors": selector}                 how many colors among them (CR 105.2, 202.2)
     #   {"distinct_land_types": selector}             how many basic land types among them (domain, CR 305.6)
+    #   {"distinct_planeswalker_types": selector}     how many planeswalker types among them (CR 205.3j)
     #   {"counters": {"of": selector, "kind": name}}  counters on them, objects or players (any kind without "kind", CR 122)
     #   {"life_gained_this_turn" | "life_lost_this_turn" | "dilemmas_this_turn" | "returned_this_turn"
     #    | "cards_drawn_this_turn" | "cards_discarded_this_turn" | "noncombat_damage_this_turn"
@@ -33,7 +34,7 @@ module Enjine
     # A source that has left the battlefield is used as it last existed (CR 608.2h).
     class Amount
       SELECTOR_KINDS = %w[count power toughness greatest_power hand_size life graveyard_size distinct_names distinct_types
-                          distinct_colors distinct_land_types
+                          distinct_colors distinct_land_types distinct_planeswalker_types
                           life_gained_this_turn life_lost_this_turn dilemmas_this_turn returned_this_turn
                           cards_drawn_this_turn cards_discarded_this_turn spells_cast_this_game speed
                           noncombat_damage_this_turn noncombat_damage_last_turn turns_taken greatest_toughness
@@ -102,6 +103,8 @@ module Enjine
         when "distinct_types" then live(engine, refs).flat_map { Amount.creature_types(engine.chars(it)) }.uniq.size
         when "distinct_colors" then live(engine, refs).flat_map { engine.chars(it).colors }.uniq.size # CR 105.2
         when "distinct_land_types" then (live(engine, refs).flat_map { engine.chars(it).subtypes } & BASIC_LAND_TYPES).size
+        when "distinct_planeswalker_types" # CR 205.3j: a planeswalker's subtypes are planeswalker types
+          live(engine, refs).flat_map { (c = engine.chars(it)).type?(:planeswalker) ? c.subtypes : [] }.uniq.size
         else players(engine, refs).sum { player_value(engine, it) }
         end
       end
@@ -391,6 +394,7 @@ module Enjine
     #   {"nth_resolution": n}      this is the nth time this turn this ability resolves (CR 608.2)
     #   {"share_card_type": selector | [selectors]}  the referenced objects share a card type ("exiled_with": linked cards)
     #   {"chosen": word}           that word was chosen for this object (choose_option, CR 607.2f)
+    #   {"meld_with": name}        you both own and control the source and a creature named so (CR 713.1a)
     #   {"not": condition}, {"all": [conditions]}, {"any": [conditions]}
     class Condition
       FLAGS = %w[your_turn was_cast attacked attacked_this_turn max_speed
@@ -399,7 +403,7 @@ module Enjine
       # keywords/storied.rb).
       KEYED = { "targets" => :Targets, "triggering" => :TriggeringIs, "source" => :Source,
                 "nth_resolution" => :NthResolution, "chosen" => :ChosenIs, "designation" => :Designation,
-                "first_combat_phase" => :FirstCombatPhase }.freeze
+                "first_combat_phase" => :FirstCombatPhase, "meld_with" => :MeldWith }.freeze # MeldWith: effects/meld.rb
 
       def self.build(data, errors, path, targets_count: 0, results_count: 0)
         unless data.is_a?(Hash)

@@ -23,11 +23,12 @@ module Enjine
       # The cards in a hand with an alternative cost (only those can be cast from it with a method).
       def alt_cost_hand(player) = player.hand.select { |id| chars(id).abilities.any? { it.ability.kind == :alternative_cost } }
 
-      # The alternative-cost methods of `obj` (a card `index` owns) that function now.
+      # The alternative-cost methods of `obj` (a card `index` owns) that function now. A face-down card its owner
+      # may look at is seen face up (a foretold card, CR 702.143a, 406.3a).
       def alt_methods(index, obj)
-        return [] unless obj.owner == index && obj.kind == "card"
+        return [] unless obj.owner == index && obj.kind == "card" && may_look?(obj, index)
 
-        own = chars(obj).abilities.filter_map do |inst|
+        own = face_up(obj.id) { chars(obj).abilities }.filter_map do |inst|
           ability = inst.ability
           ability.method_for(inst.ref) if ability.kind == :alternative_cost && ability.functions?(self, obj, index)
         end
@@ -154,7 +155,7 @@ module Enjine
       # delayed trigger; a sneak spell's enters tapped and attacking (CR 702.190b, 506.3a). Cards its costs
       # exiled stay linked to it ("behold a Goblin and exile it", CR 607.2a).
       def alt_enters!(spell, enters)
-        how = spell.memory.slice("cast_from", "cast_with", "mana_from", Mechanics::Linked::EXILED)
+        how = spell.memory.slice("cast_from", "cast_with", "mana_from", Mechanics::Linked::EXILED, "haste_while_controlled_by")
         how["warp_spell"] = spell.id if spell.memory["cast_with"] == "warp"
         (enters["memory"] ||= {}).merge!(how) unless how.empty?
         target = spell.memory["sneak_attack"] or return

@@ -36,6 +36,10 @@ module Enjine
       # effect puts onto the battlefield, in that effect's locals (#ask_entering_choices!).
       def enter_choice!(option)
         answer = option.transform_keys(&:to_s)
+        # A choice of any number of permanents (devour): each pick asks again; "done" ends it (CR 614.12).
+        return ask!(state.pending.merge("chosen" => state.pending.fetch("chosen", []) + [answer["object"]])) if answer["type"] == "devour"
+
+        answer["objects"] = state.pending["chosen"] if state.pending.key?("chosen")
         if state.pending["effect"]
           answers = (answering_locals["entering"] ||= {})
           id = state.pending["object"]
@@ -77,15 +81,12 @@ module Enjine
         choice.respond_to?(:enters_with) ? choice.enters_with(self, answer) : choice.enters_for(answer)
       end
 
-      # What the "as this enters" answers pay as the permanent enters: life (CR 119.4), or beholding (CR 701.4a).
-      def pay_entering_cost!(controller, frame)
-        Entering.answers(frame["enter"]).each do |answer|
-          case answer["type"]
-          when "pay_life" then change_life!(controller, -answer["life"])
-          when "behold"
-            id = answer["object"]
-            Mechanics::Beholding.behold!(self, controller, id) if state.objects.key?(id)
-          end
+      # What the "as this enters" answers cost, paid as the permanent enters: life (CR 119.4), the card
+      # beheld (CR 701.4a), the permanents it devours (CR 702.82a).
+      def pay_entering_costs!(controller, frame)
+        choices = entering_choices(frame["object"])
+        Entering.answers(frame["enter"]).each_with_index do |answer, i|
+          choices[i].pay!(self, controller, answer) if choices[i].respond_to?(:pay!)
         end
       end
 
@@ -119,7 +120,7 @@ module Enjine
       # a life payment chosen is paid now, as it enters (CR 119.4).
       def with_entering_answer(locals, id, controller, enters)
         answers = locals.fetch("entering", {})[id] or return enters
-        pay_entering_cost!(controller, "enter" => answers)
+        pay_entering_costs!(controller, "enter" => answers, "object" => id)
         extra = entering_statuses(id, Entering.answers(answers)) or return enters
         (enters || {}).merge(extra) do |key, mine, theirs|
           next mine || theirs if key == "tapped" # "enters tapped" from the effect stays
@@ -132,7 +133,10 @@ module Enjine
       # once can't be given choices whose combined life payments are more than the player has (CR 614.12b).
       def entering_options(pending)
         given = pending["effect"] ? answering_locals.fetch("entering", {})[pending["object"]] : state.frames.last["enter"]
-        options = entering_choices(pending["object"])[Entering.answers(given).size].options(self, pending["player"])
+        choice = entering_choices(pending["object"])[Entering.answers(given).size]
+        return choice.pick_options(self, pending["player"], pending.fetch("chosen", [])) if choice.respond_to?(:pick_options)
+
+        options = choice.options(self, pending["player"])
         return options unless pending["effect"]
 
         spent = answering_locals.fetch("entering", {}).values.flat_map { Entering.answers(it) }.sum do

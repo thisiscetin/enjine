@@ -1,0 +1,825 @@
+[
+  {
+    "name": "Krumar Initiate",
+    "mana_cost": "{1}{B}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "human",
+      "cleric"
+    ],
+    "power": 2,
+    "toughness": 2,
+    "abilities": [
+      {
+        "activated": {
+          "cost": [
+            {
+              "mana": "{X}{B}"
+            },
+            "tap",
+            {
+              "pay_life": "X"
+            }
+          ],
+          "timing": "sorcery",
+          "effects": [
+            {
+              "endure": {
+                "amount": "x"
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "uncommon",
+    "printing": {
+      "set": "tdm",
+      "number": "84"
+    }
+  },
+  {
+    "name": "Warden of the Grove",
+    "mana_cost": "{2}{G}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "hydra"
+    ],
+    "power": 2,
+    "toughness": 2,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "step_begins": {
+              "step": "end",
+              "whose": "your"
+            }
+          },
+          "effects": [
+            {
+              "add_counters": {
+                "counter": "+1/+1",
+                "amount": 1,
+                "to": "self"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "triggered": {
+          "when": {
+            "enters": {
+              "subject": {
+                "each": {
+                  "creature": {
+                    "token": false
+                  }
+                },
+                "controller": "you",
+                "other": true
+              }
+            }
+          },
+          "effects": [
+            {
+              "endure": {
+                "amount": {
+                  "counters": {
+                    "of": "self"
+                  }
+                },
+                "to": {
+                  "triggering": "object"
+                }
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "rare",
+    "printing": {
+      "set": "tdm",
+      "number": "166"
+    }
+  },
+  {
+    "name": "Tam, the Possibility",
+    "mana_cost": "{1}{G}{U}",
+    "types": [
+      "creature"
+    ],
+    "supertypes": [
+      "legendary"
+    ],
+    "subtypes": [
+      "gorgon",
+      "wizard"
+    ],
+    "power": 2,
+    "toughness": 4,
+    "abilities": [
+      {
+        "cost_modifier": {
+          "spells": {
+            "any_of": [
+              "planeswalker"
+            ]
+          },
+          "reduce": 1
+        }
+      },
+      {
+        "activated": {
+          "cost": [
+            {
+              "mana": "{W}{U}{B}{R}{G}"
+            },
+            "tap"
+          ],
+          "effects": [
+            {
+              "proliferate": {
+                "amount": {
+                  "distinct_planeswalker_types": {
+                    "each": "planeswalker",
+                    "controller": "you"
+                  }
+                }
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "rare",
+    "printing": {
+      "set": "fra",
+      "number": "276"
+    }
+  },
+  {
+    "name": "Decorum Dissertation",
+    "mana_cost": "{3}{B}{B}",
+    "types": [
+      "sorcery"
+    ],
+    "subtypes": [
+      "lesson"
+    ],
+    "keywords": [
+      "paradigm"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "targets": [
+            "player"
+          ],
+          "effects": [
+            {
+              "draw": {
+                "amount": 2,
+                "to": {
+                  "target": 0
+                }
+              }
+            },
+            {
+              "lose_life": {
+                "amount": 2,
+                "to": {
+                  "target": 0
+                }
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "mythic",
+    "printing": {
+      "set": "sos",
+      "number": "78"
+    }
+  },
+  {
+    "name": "Echocasting Symposium",
+    "mana_cost": "{4}{U}{U}",
+    "types": [
+      "sorcery"
+    ],
+    "subtypes": [
+      "lesson"
+    ],
+    "keywords": [
+      "paradigm"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "targets": [
+            "player",
+            {
+              "creature": {
+                "controller": "you"
+              }
+            }
+          ],
+          "effects": [
+            {
+              "create_token_copy": {
+                "of": {
+                  "target": 1
+                },
+                "to": {
+                  "target": 0
+                }
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "mythic",
+    "printing": {
+      "set": "sos",
+      "number": "44"
+    }
+  },
+  {
+    "name": "Germination Practicum",
+    "mana_cost": "{3}{G}{G}",
+    "types": [
+      "sorcery"
+    ],
+    "subtypes": [
+      "lesson"
+    ],
+    "keywords": [
+      "paradigm"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "effects": [
+            {
+              "add_counters": {
+                "counter": "+1/+1",
+                "amount": 2,
+                "to": {
+                  "each": "creature",
+                  "controller": "you"
+                }
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "mythic",
+    "printing": {
+      "set": "sos",
+      "number": "149"
+    }
+  },
+  {
+    "name": "Restoration Seminar",
+    "mana_cost": "{5}{W}{W}",
+    "types": [
+      "sorcery"
+    ],
+    "subtypes": [
+      "lesson"
+    ],
+    "keywords": [
+      "paradigm"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "targets": [
+            {
+              "graveyard_card": {
+                "controller": "you",
+                "any_of": [
+                  "artifact",
+                  "creature",
+                  "enchantment",
+                  "planeswalker"
+                ]
+              }
+            }
+          ],
+          "effects": [
+            {
+              "return_to_battlefield": {
+                "to": {
+                  "target": 0
+                }
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "mythic",
+    "printing": {
+      "set": "sos",
+      "number": "30"
+    }
+  },
+  {
+    "name": "Clive's Hideaway",
+    "types": [
+      "land"
+    ],
+    "subtypes": [
+      "town"
+    ],
+    "abilities": [
+      {
+        "hideaway": {
+          "amount": 4
+        }
+      },
+      {
+        "mana": {
+          "cost": [
+            "tap"
+          ],
+          "produce": "{C}"
+        }
+      },
+      {
+        "activated": {
+          "cost": [
+            {
+              "mana": "{2}"
+            },
+            "tap"
+          ],
+          "effects": [
+            {
+              "cast_free": {
+                "to": "exiled_with",
+                "play": true,
+                "if": {
+                  "controls": {
+                    "each": {
+                      "creature": {
+                        "supertypes": [
+                          "legendary"
+                        ]
+                      }
+                    },
+                    "controller": "you"
+                  },
+                  "at_least": 4
+                }
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "rare",
+    "printing": {
+      "set": "fin",
+      "number": "275"
+    }
+  },
+  {
+    "name": "Sozin's Comet",
+    "mana_cost": "{3}{R}{R}",
+    "types": [
+      "sorcery"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "effects": [
+            {
+              "grant_ability": {
+                "to": {
+                  "each": "creature",
+                  "controller": "you"
+                },
+                "ability": {
+                  "firebending": {
+                    "amount": 5
+                  }
+                },
+                "duration": "end_of_turn"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "foretell": {
+          "cost": "{2}{R}"
+        }
+      }
+    ],
+    "rarity": "mythic",
+    "printing": {
+      "set": "tla",
+      "number": "154"
+    }
+  },
+  {
+    "name": "Taigam, Master Opportunist",
+    "mana_cost": "{1}{U}",
+    "types": [
+      "creature"
+    ],
+    "supertypes": [
+      "legendary"
+    ],
+    "subtypes": [
+      "human",
+      "monk"
+    ],
+    "power": 2,
+    "toughness": 2,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "cast": {
+              "controller": "you"
+            }
+          },
+          "if": {
+            "amount": {
+              "spells_cast_this_turn": {
+                "by": "you"
+              }
+            },
+            "at_least": 2,
+            "at_most": 2
+          },
+          "effects": [
+            {
+              "copy_spell": {
+                "of": {
+                  "triggering": "object"
+                }
+              }
+            },
+            {
+              "suspend": {
+                "to": {
+                  "triggering": "object"
+                },
+                "amount": 4
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "mythic",
+    "printing": {
+      "set": "tdm",
+      "number": "60"
+    }
+  },
+  {
+    "name": "Famished Worldsire",
+    "mana_cost": "{5}{G}{G}{G}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "leviathan"
+    ],
+    "power": 0,
+    "toughness": 0,
+    "abilities": [
+      {
+        "ward": {
+          "cost": "{3}"
+        }
+      },
+      {
+        "devour": {
+          "amount": 3,
+          "each": "land"
+        }
+      },
+      {
+        "triggered": {
+          "when": {
+            "enters": {}
+          },
+          "effects": [
+            {
+              "dig": {
+                "amount": {
+                  "power": "self"
+                },
+                "for": {
+                  "types": [
+                    "land"
+                  ]
+                },
+                "count": "any",
+                "put": "battlefield",
+                "tapped": true
+              }
+            },
+            {
+              "shuffle_library": {}
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "mythic",
+    "printing": {
+      "set": "eoe",
+      "number": "182"
+    }
+  },
+  {
+    "name": "Fang, Fearless l'Cie // Ragnarok, Divine Deliverance",
+    "layout": "meld",
+    "faces": [
+      {
+        "name": "Fang, Fearless l'Cie",
+        "mana_cost": "{2}{B}",
+        "types": [
+          "creature"
+        ],
+        "supertypes": [
+          "legendary"
+        ],
+        "subtypes": [
+          "human",
+          "warrior"
+        ],
+        "power": 2,
+        "toughness": 3,
+        "abilities": [
+          {
+            "triggered": {
+              "when": {
+                "leaves_graveyard": {
+                  "controller": "you",
+                  "batched": true
+                }
+              },
+              "limit": "once_each_turn",
+              "effects": [
+                {
+                  "draw": {
+                    "amount": 1
+                  }
+                },
+                {
+                  "lose_life": {
+                    "amount": 1,
+                    "to": "you"
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "name": "Ragnarok, Divine Deliverance",
+        "types": [
+          "creature"
+        ],
+        "supertypes": [
+          "legendary"
+        ],
+        "subtypes": [
+          "beast",
+          "avatar"
+        ],
+        "colors": [
+          "B",
+          "G"
+        ],
+        "power": 7,
+        "toughness": 6,
+        "keywords": [
+          "reach",
+          "vigilance",
+          "menace",
+          "trample",
+          "haste"
+        ],
+        "abilities": [
+          {
+            "triggered": {
+              "when": {
+                "dies": {}
+              },
+              "targets": [
+                "permanent",
+                {
+                  "graveyard_card": {
+                    "controller": "you",
+                    "any_of": [
+                      "artifact",
+                      "creature",
+                      "enchantment",
+                      "land",
+                      "planeswalker"
+                    ],
+                    "not_supertypes": [
+                      "legendary"
+                    ]
+                  }
+                }
+              ],
+              "effects": [
+                {
+                  "destroy": {
+                    "to": {
+                      "target": 0
+                    }
+                  }
+                },
+                {
+                  "return_to_battlefield": {
+                    "to": {
+                      "target": 1
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    ],
+    "rarity": "uncommon",
+    "printing": {
+      "set": "fin",
+      "number": "99"
+    }
+  },
+  {
+    "name": "Vanille, Cheerful l'Cie // Ragnarok, Divine Deliverance",
+    "layout": "meld",
+    "faces": [
+      {
+        "name": "Vanille, Cheerful l'Cie",
+        "mana_cost": "{3}{G}",
+        "types": [
+          "creature"
+        ],
+        "supertypes": [
+          "legendary"
+        ],
+        "subtypes": [
+          "human",
+          "cleric"
+        ],
+        "power": 3,
+        "toughness": 2,
+        "abilities": [
+          {
+            "triggered": {
+              "when": {
+                "enters": {}
+              },
+              "effects": [
+                {
+                  "mill": {
+                    "amount": 2,
+                    "to": "you"
+                  }
+                },
+                {
+                  "choose_cards": {
+                    "from": {
+                      "graveyard": "you"
+                    },
+                    "for": {
+                      "permanent": true
+                    },
+                    "put": "hand"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "triggered": {
+              "when": {
+                "step_begins": {
+                  "step": "precombat_main",
+                  "whose": "your"
+                }
+              },
+              "if": {
+                "meld_with": "Fang, Fearless l'Cie"
+              },
+              "effects": [
+                {
+                  "pay": {
+                    "mana": "{3}{B}{G}",
+                    "then": [
+                      {
+                        "meld": {
+                          "with": "Fang, Fearless l'Cie"
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "name": "Ragnarok, Divine Deliverance",
+        "types": [
+          "creature"
+        ],
+        "supertypes": [
+          "legendary"
+        ],
+        "subtypes": [
+          "beast",
+          "avatar"
+        ],
+        "colors": [
+          "B",
+          "G"
+        ],
+        "power": 7,
+        "toughness": 6,
+        "keywords": [
+          "reach",
+          "vigilance",
+          "menace",
+          "trample",
+          "haste"
+        ],
+        "abilities": [
+          {
+            "triggered": {
+              "when": {
+                "dies": {}
+              },
+              "targets": [
+                "permanent",
+                {
+                  "graveyard_card": {
+                    "controller": "you",
+                    "any_of": [
+                      "artifact",
+                      "creature",
+                      "enchantment",
+                      "land",
+                      "planeswalker"
+                    ],
+                    "not_supertypes": [
+                      "legendary"
+                    ]
+                  }
+                }
+              ],
+              "effects": [
+                {
+                  "destroy": {
+                    "to": {
+                      "target": 0
+                    }
+                  }
+                },
+                {
+                  "return_to_battlefield": {
+                    "to": {
+                      "target": 1
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    ],
+    "rarity": "uncommon",
+    "printing": {
+      "set": "fin",
+      "number": "211"
+    }
+  }
+]

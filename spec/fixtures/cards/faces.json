@@ -468,5 +468,106 @@
         "rules_text": "Quick Riposte deals 1 damage to any target."
       }
     ]
+  },
+  {
+    "name": "Dawn Twin // Twin Sun Colossus",
+    "layout": "meld",
+    "faces": [
+      {
+        "name": "Dawn Twin",
+        "mana_cost": "{1}{W}",
+        "types": [
+          "creature"
+        ],
+        "subtypes": [
+          "human",
+          "cleric"
+        ],
+        "power": 2,
+        "toughness": 2,
+        "abilities": [
+          {
+            "triggered": {
+              "when": {
+                "step_begins": {
+                  "step": "precombat_main",
+                  "whose": "your"
+                }
+              },
+              "if": {
+                "meld_with": "Dusk Twin"
+              },
+              "effects": [
+                {
+                  "pay": {
+                    "mana": "{2}",
+                    "then": [
+                      {
+                        "meld": {
+                          "with": "Dusk Twin"
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "name": "Twin Sun Colossus",
+        "types": [
+          "creature"
+        ],
+        "subtypes": [
+          "giant"
+        ],
+        "colors": [
+          "W"
+        ],
+        "power": 6,
+        "toughness": 6,
+        "keywords": [
+          "vigilance"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Dusk Twin // Twin Sun Colossus",
+    "layout": "meld",
+    "faces": [
+      {
+        "name": "Dusk Twin",
+        "mana_cost": "{2}{W}",
+        "types": [
+          "creature"
+        ],
+        "subtypes": [
+          "human",
+          "warrior"
+        ],
+        "power": 3,
+        "toughness": 2
+      },
+      {
+        "name": "Twin Sun Colossus",
+        "types": [
+          "creature"
+        ],
+        "subtypes": [
+          "giant"
+        ],
+        "colors": [
+          "W"
+        ],
+        "power": 6,
+        "toughness": 6,
+        "keywords": [
+          "vigilance"
+        ]
+      }
+    ]
   }
 ]

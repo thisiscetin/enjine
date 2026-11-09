@@ -16,6 +16,8 @@ module Enjine
       def ability_layers(obj, base, statics, effects)
         base = color_layer(obj, base, statics, effects)
         changes = Mechanics::Counters.keywords(obj.counters).map { |kw| [counter_timestamp(obj, kw.to_s), 0, [:keywords, [kw]]] }
+        # A creature cast with suspend has haste while its caster controls it (CR 702.62a); since it was cast.
+        changes << [0, 0, [:keywords, [:haste]]] if obj.memory["haste_while_controlled_by"] == obj.controller
         statics.each do |source, ability|
           next unless ability.ability_changes? && ability.affects?(obj, source, facts(obj, base))
 

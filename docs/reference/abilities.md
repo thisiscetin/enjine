@@ -569,6 +569,26 @@ Rules: CR 614.1a, CR 614.8, CR 701.8a, CR 701.21a, CR 704.5f, CR 704.5g, CR 704.
 }
 ```
 
+## devour
+
+Devour `amount`: as this permanent enters, you may sacrifice any number of permanents matching `each` (default "creature"; "land" for devour land) that you control, one at a time; it enters with `amount` +1/+1 counters for each.
+
+Rules: CR 702.82a, CR 702.82b, CR 702.82c, CR 614.12, CR 701.21a
+
+| Parameter | Description |
+| --- | --- |
+| `amount` | integer >= 1 |
+| `each` | permanent filter (default "creature") |
+
+```json
+{
+  "devour": {
+    "amount": 3,
+    "each": "land"
+  }
+}
+```
+
 ## double_counters
 
 While this permanent is on the battlefield, if its controller would put one or more counters (only `counter`, if given) on a permanent matching `affects` ({"each": filter, "controller": you|opponent|any}, relative to this permanent's controller), the number put is doubled. This includes counters a permanent enters with.
@@ -926,6 +946,24 @@ Rules: CR 702.34a, CR 118.9, CR 601.2b, CR 601.2f, CR 601.2h
 }
 ```
 
+## foretell
+
+Foretell: during your turn, you may pay {2} and exile this card from your hand face down (special action `{type: "special_action"}`). After that turn you may cast it from exile by paying `cost` rather than its mana cost (cast option `via: "alt:<ref>"`). `{"cast_with": "foretell"}` reads it.
+
+Rules: CR 702.143a, CR 702.143b, CR 702.143c, CR 116.2h, CR 406.3, CR 118.9, CR 601.2b, CR 601.2f, CR 601.2h
+
+| Parameter | Description |
+| --- | --- |
+| `cost` | mana cost string, or a list of costs |
+
+```json
+{
+  "foretell": {
+    "cost": "{2}{R}"
+  }
+}
+```
+
 ## gift
 
 Gift: as you cast this spell you may promise a gift to an opponent you choose (the `choose_kicker` decision, then `choose_cost` for the opponent). `{"cast_with": "gift"}` holds if you did, and the selector "gift_recipient" is that player; write the gift as the spell's first effect (or an enters trigger) under that condition.
@@ -980,6 +1018,24 @@ Rules: CR 702.11d, CR 702.11f, CR 702.11g, CR 115.4
     "colors": [
       "B"
     ]
+  }
+}
+```
+
+## hideaway
+
+Hideaway `amount`: when this permanent enters, look at the top N cards of your library, exile one face down (linked: "exiled_with") and put the rest on the bottom in a random order.
+
+Rules: CR 702.75a, CR 406.3, CR 607.2a
+
+| Parameter | Description |
+| --- | --- |
+| `amount` | amount |
+
+```json
+{
+  "hideaway": {
+    "amount": 4
   }
 }
 ```
@@ -1440,6 +1496,26 @@ Rules: CR 722.2a, CR 722.2b, CR 722.2c, CR 613.1d, CR 613.4b
     "keywords": [
       "flying"
     ]
+  }
+}
+```
+
+## suspend
+
+Suspend `amount`—`cost`: whenever you could begin to cast this card from your hand, you may pay `cost` and exile it with `amount` time counters (special action `{type: "special_action"}`); then it works as the keyword `suspend`.
+
+Rules: CR 702.62a, CR 702.62c, CR 116.2f
+
+| Parameter | Description |
+| --- | --- |
+| `amount` | integer >= 1 (time counters) |
+| `cost` | mana cost string |
+
+```json
+{
+  "suspend": {
+    "amount": 3,
+    "cost": "{2}{W}"
   }
 }
 ```

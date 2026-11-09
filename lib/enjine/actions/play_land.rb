@@ -41,7 +41,7 @@ module Enjine
         return engine.ask_enter_choice!(frame["object"], frame["player"]) if engine.entering_choice_pending?(land, frame["enter"])
 
         enters = engine.enters_from_answer(land, frame)
-        engine.pay_entering_cost!(frame["player"], frame)
+        engine.pay_entering_costs!(frame["player"], frame)
         engine.put_played_land!(frame["player"], frame["object"], enters: enters)
         engine.action_taken!(frame["player"])
         :done

@@ -323,16 +323,18 @@ module Enjine
                                "resolves. `to` names the cards ({\"result\": n}), or a player for the cards in their " \
                                "hand (default: your hand). Only cards matching `for`/`not_types` with mana value up to " \
                                "`max_mana_value` (optional amount) that could be cast now (legal targets). `count`: 1 " \
-                               "(default) or \"any\" (any number, one at a time). X is 0 (CR 107.3b).",
-                  rules: %w[608.2g 118.9 601.2a 107.3b 118.6a],
+                               "(default) or \"any\" (any number, one at a time). X is 0 (CR 107.3b). `play: true` " \
+                               "(\"you may play\"): a land among them may be played, on your turn with a land play " \
+                               "left (`{type: \"play_land\"}`). A face-down card is judged face up.",
+                  rules: %w[608.2g 118.9 601.2a 107.3b 118.6a 305.2a 305.3 406.3a],
                   params: { "to" => "selector", "for" => "card spec", "not_types" => "list of card types",
-                            "max_mana_value" => "amount", "count" => "1 or \"any\"",
+                            "max_mana_value" => "amount", "count" => "1 or \"any\"", "play" => "boolean",
                             "exile_instead" => "true or a card spec: if a spell cast this way (matching it) would be put " \
                                                "into a graveyard, it's exiled instead (CR 614.1a)",
                             "any_mana_type" => "boolean: mana of any type can be spent to cast it (CR 609.4b)" },
                   example: { "cast_free" => { "to" => { "result" => 0 }, "max_mana_value" => 3, "count" => "any" } }
 
-        def self.keys = %w[to for not_types max_mana_value count exile_instead any_mana_type if]
+        def self.keys = %w[to for not_types max_mana_value count play exile_instead any_mana_type if]
         def self.default_to = "you"
 
         def setup(params, errors, path)
@@ -343,6 +345,7 @@ module Enjine
           @max = raw.nil? ? nil : Amount.build(raw, errors, "#{path}.max_mana_value", targets_count: @targets_count)
           @count = Mechanics.fetch_param(params, :count) || 1
           errors << "#{path}.count: must be 1 or \"any\"" unless [1, "any"].include?(@count)
+          @play = Mechanics.flag_param(params, :play, errors, path)
         end
 
         def to_s
@@ -355,19 +358,22 @@ module Enjine
           return :done unless locals["asked"] || condition.nil? || condition.true?(engine, ctx)
 
           index = ctx.controller
+          return :wait if locals["playing"] && play_land!(engine, index, locals) == :wait
+
           settle_cast!(engine, locals)
           answer = answers(locals)[locals.fetch("seen", 0)]
           if answer
             locals["seen"] = locals.fetch("seen", 0) + 1
             return :done if answer["type"] == "done"
+            return start_cast!(engine, index, answer["object"], locals) unless answer["type"] == "play_land"
 
-            locals["casting"] = answer["object"]
-            engine.begin_cast!(index, answer["object"], via: via, riders: @riders)
-            return :wait
+            engine.object(answer["object"]).memory.delete("face_down") # turned face up to be played (CR 406.3a)
+            locals["playing"] = answer["object"]
+            return :wait if play_land!(engine, index, locals) == :wait
           end
           return :done if @count == 1 && locals["cast"].to_i >= 1
 
-          choices = candidates(engine, ctx, locals).map { { "type" => "cast", "object" => it } }
+          choices = candidates(engine, ctx, locals)
           return :done if choices.empty?
 
           ask(engine, locals, index, prompt, choices + [{ "type" => "done" }])
@@ -386,13 +392,44 @@ module Enjine
           engine.state.objects.key?(id) ? (locals["declined"] ||= []) << id : locals["cast"] = locals["cast"].to_i + 1
         end
 
+        # `{"type" => "cast" | "play", "object" => id}` for each card that may be cast (or, with `play`, a land
+        # played) now; a face-down card is judged face up (CR 406.3a).
         def candidates(engine, ctx, locals)
           limit = @max&.value(engine, ctx)
-          cards(engine, ctx).select do |id|
-            obj = engine.object(id)
-            !locals.fetch("declined", []).include?(id) && @filter.match?(engine, obj) &&
-              (limit.nil? || engine.chars(obj).mana_cost&.mana_value.to_i <= limit) && castable_now?(engine, ctx.controller, id)
+          index = ctx.controller
+          cards(engine, ctx).filter_map do |id|
+            next if locals.fetch("declined", []).include?(id)
+
+            engine.face_up(id) do
+              obj = engine.object(id)
+              next unless @filter.match?(engine, obj) && (limit.nil? || engine.chars(obj).mana_cost&.mana_value.to_i <= limit)
+
+              if engine.chars(obj).land? then { "type" => "play_land", "object" => id } if @play && land_play?(engine, index)
+              elsif castable_now?(engine, index, id) then { "type" => "cast", "object" => id }
+              end
+            end
           end
+        end
+
+        def start_cast!(engine, index, id, locals)
+          locals["casting"] = id
+          engine.begin_cast!(index, id, via: via, riders: @riders)
+          :wait
+        end
+
+        # CR 305.2a, 305.3: a land is played during resolution only on your turn, with a land play left.
+        def land_play?(engine, index) = engine.state.active == index && engine.land_play_available?(index)
+
+        # Plays the land (CR 305.1) after its "as this enters" choice (CR 614.12); it counts as a played card.
+        def play_land!(engine, index, locals)
+          id = locals["playing"]
+          return :wait if engine.ask_entering_choices!(locals, [[id, index]]) == :wait
+
+          locals.delete("playing")
+          locals["cast"] = locals["cast"].to_i + 1
+          engine.player(index).lands_played += 1
+          engine.put_played_land!(index, id, enters: engine.with_entering_answer(locals, id, index, nil))
+          :done
         end
 
         # Referenced cards still in the zone they were put in; a player stands for their hand.

@@ -63,6 +63,11 @@ module Enjine
         end
 
         def enters_for(answer) = { "tapped" => answer[:type] != "pay_life" }
+
+        # Paid as it enters (CR 119.4).
+        def pay!(engine, controller, answer)
+          engine.change_life!(controller, -answer["life"]) if answer["type"] == "pay_life"
+        end
       end
 
       # "As this land enters, you may behold a Jace. If you don't, this land enters tapped." (CR 614.12,
@@ -102,6 +107,12 @@ module Enjine
         end
 
         def enters_for(answer) = { "tapped" => answer[:type] != "behold" }
+
+        # The card is revealed as it enters (CR 701.4a).
+        def pay!(engine, controller, answer)
+          id = answer["object"]
+          Beholding.behold!(engine, controller, id) if answer["type"] == "behold" && engine.state.objects.key?(id)
+        end
       end
 
       # "This land enters tapped unless you control two or more other lands." A self-replacement effect that

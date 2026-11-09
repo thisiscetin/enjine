@@ -58,7 +58,7 @@ module Enjine
         include RestOfCards
         include EntersBattlefield
 
-        PUT = %w[hand battlefield graveyard].freeze
+        PUT = %w[hand battlefield graveyard exile].freeze
         REVEAL = %w[none chosen all].freeze
 
         primitive :effect, :dig,
@@ -66,17 +66,20 @@ module Enjine
                                "`count` (default 1; \"all\": every matching card, no choice; \"any\": any number) " \
                                "cards matching `for` and put them into `put` (`tapped` onto the battlefield); " \
                                "`optional`: you may take fewer. `reveal: \"chosen\"` reveals the cards taken. The rest go " \
-                               "to `rest`: \"bottom_random\" (default), \"bottom_any\" (in an order you choose) or \"graveyard\".",
-                  rules: %w[701.20a 701.20e 401.4 400.7j],
+                               "to `rest`: \"bottom_random\" (default), \"bottom_any\" (in an order you choose) or \"graveyard\". " \
+                               "`put: \"exile\"` takes `face_down: true` (only you may look at them) and `link: true` " \
+                               "(exiled with the source, CR 607.2a: hideaway).",
+                  rules: %w[701.20a 701.20e 401.4 400.7j 406.3 607.2a],
                   params: { "amount" => "amount (how many cards)", "for" => "card spec (default any card)",
                             "count" => "integer, \"all\" or \"any\"", "optional" => "boolean", "put" => PUT.join(" | "),
-                            "tapped" => "boolean", "reveal" => REVEAL.join(" | "), "rest" => RestOfCards::REST.join(" | ") },
+                            "tapped" => "boolean", "reveal" => REVEAL.join(" | "), "rest" => RestOfCards::REST.join(" | "),
+                            "face_down" => "boolean (put exile)", "link" => "boolean (put exile)" },
                   example: { "dig" => { "amount" => 6, "for" => { "types" => ["artifact"] }, "optional" => true,
                                         "reveal" => "chosen", "put" => "hand" } }
 
         attr_reader :spec, :count, :put
 
-        def self.keys = %w[amount for count optional put tapped reveal rest if]
+        def self.keys = %w[amount for count optional put tapped reveal rest face_down link if]
         def self.default_to = "you"
 
         def setup(params, errors, path)
@@ -92,6 +95,8 @@ module Enjine
           @reveal = (Mechanics.fetch_param(params, :reveal) || "none").to_s
           errors << "#{path}.reveal: must be one of #{REVEAL.join(", ")}" unless REVEAL.include?(@reveal)
           @rest = parse_rest(params, errors, path)
+          @face_down, @link = %i[face_down link].map { Mechanics.flag_param(params, it, errors, path) }
+          errors << "#{path}: face_down and link need put: \"exile\"" if (@face_down || @link) && @put != "exile"
         end
 
         def to_s
@@ -138,7 +143,17 @@ module Enjine
 
         def take!(engine, ctx, index, taken, locals)
           engine.reveal!(index, taken) if @reveal == "chosen"
+          return exile!(engine, ctx, index, taken) if @put == "exile"
+
           put_cards!(engine, locals, taken, ctx.controller, reason: "put", enters: @tapped ? { "tapped" => true } : nil)
+        end
+
+        # CR 406.3, 607.2a: face down (only you may look), linked to the source.
+        def exile!(engine, ctx, index, taken)
+          taken.each do |id|
+            fresh = engine.move!(id, :exile, reason: "exile", face_down: @face_down ? [index] : nil)
+            engine.link_exiled!(ctx.source, fresh.id) if fresh && @link
+          end
         end
       end
 

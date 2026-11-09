@@ -16,13 +16,15 @@ module Enjine
     #   adventure  an adventurer card (CR 716): faces[1] is the Adventure, an instant or sorcery
     #   omen       an omen card (CR 721): faces[1] is the Omen, an instant or sorcery
     #   prepare    a preparation card (CR 723): faces[1] is the prepare spell, an instant or sorcery
+    #   meld       a meld card (CR 713): faces[1] is the combined back face of its meld pair, the same on both
+    #              cards; it's up only on the melded permanent (CR 713.1b, 713.5c; effect `meld`)
     #
     # The definition itself has the front face's (faces[0]'s) characteristics, which are the card's in
     # every zone where no other face is up (CR 712.6a, 716.4, 721.4, 723.4). Every other face is a
     # CardDefinition with the id "<card id>/<index>"; a game object whose `card` names a face has that
     # face up (see Engine::Faces).
     module Faces
-      LAYOUTS = %w[transform modal adventure omen prepare].freeze
+      LAYOUTS = %w[transform modal adventure omen prepare meld].freeze
       DOUBLE_FACED = %w[transform modal].freeze
       # Layouts whose faces[1] is a spell the card can be (CR 716.2, 721.2, 723.2).
       SPELL_FACE = { "adventure" => "adventure", "omen" => "omen", "prepare" => nil }.freeze
@@ -96,6 +98,7 @@ module Enjine
       def validate_faces(card, errors)
         name = card["name"]
         errors << "name: must be #{full_name.inspect} (the faces' names joined by \" // \")" unless name.nil? || name == full_name
+        errors << "faces[1].types: a melded permanent is a permanent (CR 713.1a)" if @layout == "meld" && !@faces[1].permanent?
         return unless SPELL_FACE.key?(@layout)
 
         spell = @faces[1]

@@ -134,6 +134,7 @@ module Enjine
         when "play_land" then "Play land #{name_of(opt[:object])}"
         when "cast" then "Cast #{name_of(opt[:object])} #{cost_of(opt[:object])}".rstrip
         when "activate" then "Activate #{name_of(opt[:object])}: #{ability_text(opt[:object], opt[:ability])}"
+        when "special_action" then "#{ability_text(opt[:object], opt[:ability])}: #{name_of(opt[:object])} (special action)"
         when "activate_mana"
           "Tap #{name_of(opt[:object])} for #{opt[:mana] || "mana"} (#{ability_text(opt[:object], opt[:ability])})"
         when "pay_mana"
@@ -149,6 +150,7 @@ module Enjine
         when "assign" then "Assign 1 damage to #{name_of(opt[:object])}"
         when "done" then "Done"
         when "source" then "Choose #{name_of(opt[:object])} as the source"
+        when "devour" then "Devour #{name_of(opt[:object])}"
         when "discard", "bottom", "find" then "#{opt[:type].capitalize} #{name_of(opt[:object])}"
         when "keep" then "Keep hand"
         when "call" then "Call #{opt[:call]}"

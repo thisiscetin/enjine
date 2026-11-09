@@ -278,13 +278,14 @@ module Enjine
       # Starts paying `cost` for an effect that is resolving; Effects::Payment learns the outcome as an
       # answer ("paid" or "declined") when the pay frame is done.
       # `waterbend`: the generic mana of a waterbend cost that tapping may pay (CR 701.67a, Engine::Waterbending).
-      def begin_payment!(index, cost, object, waterbend: nil)
+      # `special`: the cost of a special action ({"object", "ability"}, Actions::SpecialAction), taken once paid.
+      def begin_payment!(index, cost, object, waterbend: nil, special: nil)
         state.frames << { "type" => "pay", "player" => index, "object" => object, "remaining" => remaining_hash(cost),
                           "pool" => player(index).mana_pool.transform_keys(&:to_s), "tapped" => [],
                           "restricted" => Snapshot.deep_copy(player(index).restricted_mana),
                           "pool_sources" => Snapshot.deep_copy(player(index).pool_sources),
                           "triggers_before" => state.pending_triggers.map { it["id"] },
-                          "waterbend" => waterbend }.compact
+                          "waterbend" => waterbend, "special" => special }.compact
         ask!(nil)
       end
 
@@ -299,18 +300,33 @@ module Enjine
       def decline_payment!
         frame = payment
         rewind_payment!(frame)
-        finish_payment!(frame, "declined")
         state.frames.delete(frame)
         ask!(nil)
+        finish_payment!(frame, "declined")
       end
 
       def finish_payment!(frame, outcome)
         waterbent!(frame) if outcome == "paid" # CR 701.67c (Engine::Waterbending)
         emit Events::PaymentFinished.new(player: name(frame["player"]), object: frame["object"], outcome: outcome)
+        return finish_special_action!(frame, outcome) if frame["special"]
+
         resolving = state.frames.rfind { it["type"] == "resolve" }
         locals = resolving["locals"][resolving["pc"].to_s]
         locals = locals["child"] while locals["child"]
         (locals["answers"] ||= []) << { "type" => outcome }
+        :done
+      end
+
+      # CR 116.2f, 116.2h, 116.3: the special action is taken once its cost is paid; either way the player
+      # receives priority again.
+      def finish_special_action!(frame, outcome)
+        index = frame["player"]
+        special = frame["special"]
+        if outcome == "paid" && state.objects.key?(special["object"])
+          obj = object(special["object"])
+          chars(obj).ability(special["ability"]).special!(self, obj, index)
+        end
+        action_taken!(index)
         :done
       end
     end

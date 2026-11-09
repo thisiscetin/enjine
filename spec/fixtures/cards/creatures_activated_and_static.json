@@ -2552,6 +2552,81 @@
     ]
   },
   {
+    "name": "Ashen Postulant",
+    "mana_cost": "{1}{B}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "human",
+      "cleric"
+    ],
+    "power": 2,
+    "toughness": 2,
+    "abilities": [
+      {
+        "activated": {
+          "cost": [
+            {
+              "mana": "{X}{B}"
+            },
+            "tap"
+          ],
+          "timing": "sorcery",
+          "effects": [
+            {
+              "endure": {
+                "amount": "x"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Loom of Tallies",
+    "mana_cost": "{2}{G}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "elf",
+      "druid"
+    ],
+    "power": 1,
+    "toughness": 3,
+    "abilities": [
+      {
+        "activated": {
+          "cost": [
+            {
+              "mana": "{1}"
+            },
+            "tap"
+          ],
+          "effects": [
+            {
+              "proliferate": {
+                "amount": {
+                  "plus": [
+                    1,
+                    {
+                      "distinct_planeswalker_types": {
+                        "each": "planeswalker",
+                        "controller": "you"
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
     "name": "Oathsworn Paladin",
     "mana_cost": "{2}{W}{W}",
     "types": [

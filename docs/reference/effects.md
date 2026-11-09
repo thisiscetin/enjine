@@ -416,9 +416,9 @@ Rules: CR 608.2g, CR 707.12, CR 707.12a, CR 601.2a, CR 601.2f
 
 ## cast_free
 
-The controller may cast referenced cards without paying their mana costs while this resolves. `to` names the cards ({"result": n}), or a player for the cards in their hand (default: your hand). Only cards matching `for`/`not_types` with mana value up to `max_mana_value` (optional amount) that could be cast now (legal targets). `count`: 1 (default) or "any" (any number, one at a time). X is 0 (CR 107.3b).
+The controller may cast referenced cards without paying their mana costs while this resolves. `to` names the cards ({"result": n}), or a player for the cards in their hand (default: your hand). Only cards matching `for`/`not_types` with mana value up to `max_mana_value` (optional amount) that could be cast now (legal targets). `count`: 1 (default) or "any" (any number, one at a time). X is 0 (CR 107.3b). `play: true` ("you may play"): a land among them may be played, on your turn with a land play left (`{type: "play_land"}`). A face-down card is judged face up.
 
-Rules: CR 608.2g, CR 118.9, CR 601.2a, CR 107.3b, CR 118.6a
+Rules: CR 608.2g, CR 118.9, CR 601.2a, CR 107.3b, CR 118.6a, CR 305.2a, CR 305.3, CR 406.3a
 
 | Parameter | Description |
 | --- | --- |
@@ -427,6 +427,7 @@ Rules: CR 608.2g, CR 118.9, CR 601.2a, CR 107.3b, CR 118.6a
 | `not_types` | list of card types |
 | `max_mana_value` | amount |
 | `count` | 1 or "any" |
+| `play` | boolean |
 | `exile_instead` | true or a card spec: if a spell cast this way (matching it) would be put into a graveyard, it's exiled instead (CR 614.1a) |
 | `any_mana_type` | boolean: mana of any type can be spent to cast it (CR 609.4b) |
 
@@ -905,9 +906,9 @@ Rules: CR 701.8a
 
 ## dig
 
-Look at the top `amount` cards of your library (`reveal: "all"`: reveal them). Take `count` (default 1; "all": every matching card, no choice; "any": any number) cards matching `for` and put them into `put` (`tapped` onto the battlefield); `optional`: you may take fewer. `reveal: "chosen"` reveals the cards taken. The rest go to `rest`: "bottom_random" (default), "bottom_any" (in an order you choose) or "graveyard".
+Look at the top `amount` cards of your library (`reveal: "all"`: reveal them). Take `count` (default 1; "all": every matching card, no choice; "any": any number) cards matching `for` and put them into `put` (`tapped` onto the battlefield); `optional`: you may take fewer. `reveal: "chosen"` reveals the cards taken. The rest go to `rest`: "bottom_random" (default), "bottom_any" (in an order you choose) or "graveyard". `put: "exile"` takes `face_down: true` (only you may look at them) and `link: true` (exiled with the source, CR 607.2a: hideaway).
 
-Rules: CR 701.20a, CR 701.20e, CR 401.4, CR 400.7j
+Rules: CR 701.20a, CR 701.20e, CR 401.4, CR 400.7j, CR 406.3, CR 607.2a
 
 | Parameter | Description |
 | --- | --- |
@@ -915,10 +916,12 @@ Rules: CR 701.20a, CR 701.20e, CR 401.4, CR 400.7j
 | `for` | card spec (default any card) |
 | `count` | integer, "all" or "any" |
 | `optional` | boolean |
-| `put` | hand | battlefield | graveyard |
+| `put` | hand | battlefield | graveyard | exile |
 | `tapped` | boolean |
 | `reveal` | none | chosen | all |
 | `rest` | bottom_random | bottom_any | graveyard |
+| `face_down` | boolean (put exile) |
+| `link` | boolean (put exile) |
 
 ```json
 {
@@ -1079,11 +1082,11 @@ Rules: CR 725.1, CR 725.1a, CR 725.1b, CR 725.1c, CR 725.1d, CR 725.1e, CR 725.1
 
 Each referenced permanent (default: this one) endures `amount`: its controller puts that many +1/+1 counters on it, or creates an N/N white Spirit creature token.
 
-Rules: CR 701.63a, CR 701.63b
+Rules: CR 701.63a, CR 701.63b, CR 707.2, CR 111.4
 
 | Parameter | Description |
 | --- | --- |
-| `amount` | integer >= 0 |
+| `amount` | amount (2, "x", {"counters": ...}) |
 | `to` | selector of permanents (default self) |
 
 ```json
@@ -1504,6 +1507,24 @@ Rules: CR 118.12, CR 118.3, CR 608.2d, CR 608.2e
         }
       }
     ]
+  }
+}
+```
+
+## meld
+
+Exile this permanent and a creature named `with` that you both own and control, then meld them: a meld pair (cards with layout "meld" sharing a back face) enters the battlefield as one permanent with that back face up. When it leaves the battlefield, both cards go to the new zone.
+
+Rules: CR 701.42a, CR 701.42b, CR 701.42c, CR 713.1a, CR 713.6, CR 713.8
+
+| Parameter | Description |
+| --- | --- |
+| `with` | the name of the other card of the pair |
+
+```json
+{
+  "meld": {
+    "with": "Fang, Fearless l'Cie"
   }
 }
 ```
@@ -2204,6 +2225,28 @@ Rules: CR 701.25a
 {
   "surveil": {
     "amount": 2
+  }
+}
+```
+
+## suspend
+
+Exile each referenced card or spell with `amount` time counters on it; if it doesn't have suspend, it gains suspend (keyword `suspend`) while it stays exiled.
+
+Rules: CR 702.62a, CR 702.62b, CR 406.1
+
+| Parameter | Description |
+| --- | --- |
+| `amount` | amount (time counters) |
+| `to` | selector (a spell, a card or a permanent) |
+
+```json
+{
+  "suspend": {
+    "to": {
+      "triggering": "object"
+    },
+    "amount": 4
   }
 }
 ```

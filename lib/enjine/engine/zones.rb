@@ -134,6 +134,7 @@ module Enjine
                                         lookers: face_down&.map { name(it) })
         lki ? with_last_known(id, lki) { emit event } : emit(event)
         return_exiled_until_leaves!(old) if lki # CR 610.3
+        unmeld!(old, to, data) if old.memory["melded"] # CR 713.8 (Engine::Faces)
         prepare!(fresh) if to == :battlefield && data["enters"]["prepared"] # "enters prepared" (CR 723.3a)
         run_follow_ups!(data, "object" => fresh.id) # "exile it instead. When you do, ..." (Engine::FollowUps)
         fresh

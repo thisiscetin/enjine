@@ -169,7 +169,8 @@ module Enjine
       return granted_keywords(obj.id).include?(keyword.to_sym) if stripped?(obj)
 
       defn(obj.card).keyword?(keyword) || unlocked(obj).any? { it.keywords.include?(keyword) } ||
-        granted_keywords(obj.id).include?(keyword.to_sym) || static_keyword?(obj, keyword)
+        granted_keywords(obj.id).include?(keyword.to_sym) || static_keyword?(obj, keyword) ||
+        (keyword.to_sym == :haste && obj.memory["haste_while_controlled_by"] == obj.controller) # cast with suspend, CR 702.62a
     end
 
     # Whether an effect or an applying static ability makes it lose all abilities (CR 613.1f).
@@ -268,7 +269,7 @@ module Enjine
         net = obj.counters.fetch("+1/+1", 0) - obj.counters.fetch("-1/-1", 0)
         pumps = state.effects.select { it["kind"] == "pump" && it["affected"].include?(id) } + attached_grants(id) +
                 static_bonuses(obj, card, statics)
-        base = base_power_toughness(id, card)
+        base = base_power_toughness(obj, card)
         expected = [base[0] + net + pumps.sum { it["power"] }, base[1] + net + pumps.sum { it["toughness"] }]
         actual = view.fetch(id).values_at("power", "toughness")
         finding("613.4c", "#{id} is #{actual.join("/")}, expected #{expected.join("/")}") if actual != expected
@@ -283,10 +284,14 @@ module Enjine
         state.effects.none? { %w[creature_types assimilate].include?(it["kind"]) && Array(it["affected"]).include?(obj.id) }
     end
 
-    # CR 613.4b: the latest setting effect, else as printed.
-    def base_power_toughness(id, card)
-      setting = state.effects.select { it["kind"] == "base_power_toughness" && it["affected"].include?(id) }.last
-      setting ? setting.values_at("power", "toughness") : [card.power, card.toughness]
+    # CR 613.4b: the latest setting effect, else as printed, or as a copy's exceptions or a token's creating
+    # effect set them (CR 707.9b, 707.2: "copy_except").
+    def base_power_toughness(obj, card)
+      setting = state.effects.select { it["kind"] == "base_power_toughness" && it["affected"].include?(obj.id) }.last
+      return setting.values_at("power", "toughness") if setting
+
+      except = obj.memory["copy_effects"]&.last&.[]("except") || obj.memory["copy_except"] || {}
+      [except.fetch("power", card.power), except.fetch("toughness", card.toughness)]
     end
 
     # Static abilities printed on permanents that give a bonus to more than the attached permanent and
