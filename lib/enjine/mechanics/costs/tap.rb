@@ -31,14 +31,26 @@ module Enjine
       # {T}: tap this permanent (CR 107.5, 602.5a).
       class Tap < Primitive
         primitive :cost, :tap,
-                  description: "{T} — tap the permanent the ability belongs to. Requires it to be untapped.",
-                  rules: %w[107.5 602.5a],
+                  description: "{T} — tap the permanent the ability belongs to. Requires it to be untapped. " \
+                               "`{\"tap\": \"granter\"}` instead taps the permanent whose static ability granted this " \
+                               "ability (\"Tap Fishing Pole\"; not {T}, so summoning sickness doesn't matter).",
+                  rules: %w[107.5 602.5a 602.2b 607.1a 302.6],
+                  params: { "(value)" => "\"granter\": tap the granting permanent instead" },
                   example: "tap"
 
         INSTANCE = new.freeze
 
+        # Its value may be the string "granter".
+        def self.scalar_params? = true
+
         def self.build(params, errors, path, **)
-          Mechanics.check_keys(params, [], errors, path)
+          return TapGranter::UNBOUND if params == "granter"
+
+          if params.is_a?(Hash)
+            Mechanics.check_keys(params, [], errors, path)
+          else
+            errors << "#{path}: must be \"tap\" or {\"tap\": \"granter\"}"
+          end
           INSTANCE
         end
 
@@ -50,6 +62,35 @@ module Enjine
 
         def mana? = false
         def to_s = "{T}"
+      end
+
+      # "Tap Fishing Pole" in an ability Fishing Pole grants (CR 602.2b, 607.1a): taps the granting permanent.
+      # The data names no permanent; the engine binds the cost to the granter of the ability being activated
+      # (Engine#granter_costs). Unbound (an ability printed on the permanent itself) it taps its source.
+      class TapGranter
+        attr_reader :granter
+
+        def initialize(granter = nil)
+          @granter = granter
+          freeze
+        end
+
+        UNBOUND = new
+
+        def for_granter(id) = id ? TapGranter.new(id) : self
+
+        def payable?(engine, object)
+          perm = permanent(engine, object)
+          !perm.nil? && perm.zone == :battlefield && !perm.tapped
+        end
+
+        def pay!(engine, object) = engine.tap!(permanent(engine, object))
+        def mana? = false
+        def to_s = "Tap the granting permanent"
+
+        private
+
+        def permanent(engine, object) = granter ? engine.state.objects[granter] : object
       end
     end
   end

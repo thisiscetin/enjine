@@ -44,6 +44,7 @@ module Enjine
           obj = object(id)
           current = chars(obj)
           obj.tapped && obj.controller == index && !current.keyword?(:doesnt_untap) && !obj.memory["exerted"] &&
+            !current.keyword?(:cant_become_untapped) &&
             current.abilities.any? { it.ability.kind == :may_not_untap }
         end
       end

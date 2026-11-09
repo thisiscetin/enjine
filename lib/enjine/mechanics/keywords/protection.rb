@@ -11,13 +11,15 @@ module Enjine
       # the ability: "each_opponent" (protection from each of your opponents: from everything they control, or own
       # and nobody controls, CR 702.16i, 702.16k) and "its_colors" ("hexproof from each of its colors": anything
       # sharing a color with it, CR 702.11g, 702.16h). The engine asks for them by kind
-      # (Engine::Rules#protected_from?).
+      # (Engine::Rules#protected_from?). "chosen_color" is "from the chosen color" (CR 607.2d): the color the
+      # holder chose as it entered, or, granted by an effect, the color chosen as that effect resolved (bound
+      # by #with_chosen: Mondo Gecko's "hexproof from that color").
       class QualityAbility < Primitive
-        HOLDER_QUALITIES = %w[each_opponent its_colors].freeze
+        HOLDER_QUALITIES = %w[each_opponent its_colors chosen_color].freeze
 
         attr_reader :quality
 
-        # Its value may be the string "everything", "each_opponent" or "its_colors".
+        # Its value may be the string "everything", "each_opponent", "its_colors" or "chosen_color".
         def self.scalar_params? = true
 
         def self.build(params, errors, path, **)
@@ -25,7 +27,7 @@ module Enjine
           return new(params.to_sym) if HOLDER_QUALITIES.include?(params)
 
           if params.is_a?(String)
-            errors << "#{path}: must be a card spec, \"everything\", \"each_opponent\" or \"its_colors\""
+            errors << "#{path}: must be a card spec, \"everything\", \"each_opponent\", \"its_colors\" or \"chosen_color\""
             return new(CardSpec::ANY)
           end
           new(CardSpec.build(params, errors, path))
@@ -50,8 +52,19 @@ module Enjine
           case quality
           when :each_opponent then QualityAbility.opponents?(object, holder)
           when :its_colors then holder.is_a?(GameObject) && engine.chars(object).colors.intersect?(engine.chars(holder).colors)
+          when :chosen_color
+            color = holder.is_a?(GameObject) && holder.memory["chosen_color"]
+            color ? engine.chars(object).colors.include?(color.to_sym) : false
           else quality.match?(engine, object)
           end
+        end
+
+        # The same ability with "the chosen color" fixed to the color in `memory` (chosen_* values, CR 607.2d).
+        def with_chosen(memory)
+          color = memory["chosen_color"]
+          return self unless quality == :chosen_color && color
+
+          self.class.new(CardSpec.build({ "colors" => [color] }, [], "chosen"))
         end
 
         # CR 702.16k: the object's controller (or its owner, if nobody controls it) is an opponent of the holder's
@@ -66,6 +79,7 @@ module Enjine
           case quality
           when :each_opponent then "each of your opponents"
           when :its_colors then "each of its colors"
+          when :chosen_color then "the chosen color"
           else everything? ? "everything" : quality.to_s.delete_suffix(" card")
           end
         end
@@ -79,9 +93,10 @@ module Enjine
                                "quality, or abilities from sources with it, that its controller's opponents control. " \
                                "The quality is a card spec (`{\"colors\": [\"B\"]}`, `{\"types\": [\"instant\"]}`, " \
                                "`{\"color_count\": {\"equal\": 1}}` for monocolored), or \"its_colors\" (hexproof " \
-                               "from each of its colors: whatever shares a color with it).",
-                  rules: %w[702.11d 702.11f 702.11g 115.4],
-                  params: { "(value)" => "card spec of the quality, or \"its_colors\"" },
+                               "from each of its colors: whatever shares a color with it), or \"chosen_color\" " \
+                               "(the chosen color; granted by `become`, the color chosen as it resolved).",
+                  rules: %w[702.11d 702.11f 702.11g 115.4 607.2d],
+                  params: { "(value)" => "card spec of the quality, \"its_colors\" or \"chosen_color\"" },
                   example: { "hexproof_from" => { "colors" => ["B"] } }
 
         def kind = :hexproof_from
@@ -100,7 +115,8 @@ module Enjine
                                "already attached fall off as a state-based action).",
                   rules: %w[702.16a 702.16b 702.16c 702.16d 702.16e 702.16f 702.16g 702.16h 702.16i 702.16j 702.16k
                             704.5m 704.5n],
-                  params: { "(value)" => "card spec of the quality, \"everything\", \"each_opponent\" or \"its_colors\"" },
+                  params: { "(value)" => "card spec of the quality, \"everything\", \"each_opponent\", \"its_colors\" or " \
+                                         "\"chosen_color\"" },
                   example: { "protection_from" => { "colors" => ["W"] } }
 
         def kind = :protection_from

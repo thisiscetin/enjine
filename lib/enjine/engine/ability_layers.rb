@@ -94,9 +94,12 @@ module Enjine
       end
 
       # Abilities a resolved effect grants (layer 6, CR 613.1f): the effect's card holds them under its ref.
+      # What was chosen as the effect resolved is bound into them ("hexproof from that color", CR 607.2d).
       def effect_granted_instances(effect)
+        chosen = effect["chosen"]
         catalog.fetch(effect["card"]).effect_granted(effect["ref"]).map do |inst|
-          AbilityInstance.new(ref: "granted:#{effect["card"]}:#{inst.ref}", ability: inst.ability)
+          ability = chosen && inst.ability.respond_to?(:with_chosen) ? inst.ability.with_chosen(chosen) : inst.ability
+          AbilityInstance.new(ref: "granted:#{effect["card"]}:#{inst.ref}", ability: ability)
         end
       end
 

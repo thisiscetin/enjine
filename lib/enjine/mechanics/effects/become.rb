@@ -39,7 +39,9 @@ module Enjine
                             "supertypes" => "supertypes it also has (\"legendary\")",
                             "subtypes" => "subtypes it also has (\"in addition to its other types\")",
                             "creature_types" => "list of creature types (replaces the others)",
-                            "colors" => "list of W, U, B, R, G (replaces its colors)",
+                            "colors" => "list of W, U, B, R, G (replaces its colors), or \"chosen\": the color chosen " \
+                                        "earlier while this resolved (choose_color); abilities it grants that say " \
+                                        "\"chosen_color\" keep that color",
                             "loses_abilities" => "true: it loses all abilities (\"loses all abilities\")",
                             "keywords" => "list of keywords it gains",
                             "base_power_toughness" => "{\"power\": n, \"toughness\": n}",
@@ -76,7 +78,7 @@ module Enjine
           @subtypes = parse_types(Mechanics.fetch_param(params, :subtypes), errors, "#{path}.subtypes", "subtypes") || []
           @creature_types = parse_types(Mechanics.fetch_param(params, :creature_types), errors, "#{path}.creature_types",
                                         "creature types")
-          @colors = Become.parse_colors(Mechanics.fetch_param(params, :colors), errors, path)
+          @colors = Become.parse_colors(Mechanics.fetch_param(params, :colors), errors, path, chosen: true)
           @loses_abilities = Mechanics.fetch_param(params, :loses_abilities)
           errors << "#{path}.loses_abilities: must be true (or absent)" unless [nil, true].include?(@loses_abilities)
           @keywords = Become.names_param(params, :keywords, :keyword, errors, path)
@@ -114,12 +116,17 @@ module Enjine
           end
           creatures = affected.select { engine.chars(it).creature? } # after the types above are added
           engine.add_continuous_effect!("creature_types", ctx, creatures, { "types" => creature_types }.merge(lasting)) if creature_types
-          add.call("colors", "colors" => colors) if colors
+          chosen = Filters.chosen_memory(engine, ctx.source, ctx).select { |k, _| k.start_with?("chosen_") }
+          color_list = colors == "chosen" ? chosen["chosen_color"]&.then { [it] } : colors # "the color of your choice"
+          add.call("colors", "colors" => color_list) if color_list
           add.call("grant", "keywords" => keywords.map(&:to_s)) unless keywords.empty?
           engine.add_continuous_effect!("base_power_toughness", ctx, creatures, base_power_toughness.merge(lasting)) if base_power_toughness
           return if granted_abilities.empty?
 
-          add.call("abilities", "card" => engine.object(ctx.object).card, "ref" => ref)
+          # What was chosen while this resolved is bound into the abilities it grants (CR 607.2d: "hexproof from
+          # that color"), so a later choice doesn't change them.
+          granted = { "card" => engine.object(ctx.object).card, "ref" => ref }
+          add.call("abilities", chosen.empty? ? granted : granted.merge("chosen" => chosen))
         end
 
         def nested_effects = granted_abilities.flat_map(&:try_effects)
@@ -135,8 +142,9 @@ module Enjine
           "becomes #{bits.join(", ")}#{" until end of turn" if duration == "end_of_turn"} → #{to}"
         end
 
-        def self.parse_colors(raw, errors, path)
+        def self.parse_colors(raw, errors, path, chosen: false)
           return nil if raw.nil?
+          return raw if chosen && raw == "chosen"
 
           ok = raw.is_a?(Array) && raw.all? { Mana::COLORS.include?(it.to_s.upcase.to_sym) }
           errors << "#{path}.colors: must be a list of W, U, B, R, G ([] for colorless)" unless ok

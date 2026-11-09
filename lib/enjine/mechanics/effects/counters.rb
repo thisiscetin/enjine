@@ -36,7 +36,8 @@ module Enjine
       # "Remove two +1/+1 counters from target creature." (CR 122.8)
       class RemoveCounters < Effect
         primitive :effect, :remove_counters,
-                  description: "Remove up to `amount` counters named `counter` from each referenced permanent.",
+                  description: "Remove up to `amount` counters named `counter` from each referenced permanent. How " \
+                               "many were removed is {\"this_way\": n} (\"remove a bait counter ... If you do, ...\").",
                   rules: %w[122.8],
                   params: { "counter" => "counter name", "amount" => "amount", "to" => "selector" },
                   example: { "remove_counters" => { "counter" => "+1/+1", "amount" => 2, "to" => { "target" => 0 } } }
@@ -51,7 +52,12 @@ module Enjine
 
         def apply(engine, ctx)
           n = amount_for(engine, ctx)
-          objects(engine, ctx).each { engine.remove_counters!(engine.object(it), counter, n) }
+          objects(engine, ctx).each do
+            perm = engine.object(it)
+            before = perm.counters.fetch(counter, 0)
+            engine.remove_counters!(perm, counter, n)
+            engine.record_amount!(before - perm.counters.fetch(counter, 0)) # CR 608.2c: "if you do"
+          end
         end
 
         def to_s = "remove #{amount} #{counter} counter(s) → #{to}"

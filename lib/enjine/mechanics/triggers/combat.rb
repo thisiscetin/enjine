@@ -3,31 +3,51 @@
 module Enjine
   module Mechanics
     module Triggers
-      # "Whenever ~ attacks" / "Whenever ~ attacks for the first time each turn".
+      # "Whenever ~ attacks" / "Whenever ~ attacks for the first time each turn". "Whenever a creature you control
+      # attacks alone" (CR 506.5) is known only once the declaration is complete, so it watches that event.
       class Attacks < Trigger
         primitive :trigger, :attacks,
                   description: "The subject is declared as an attacker. `first_time_this_turn: true`: only the first " \
-                               "time that creature attacks this turn (later combats of the turn don't trigger it).",
-                  rules: %w[508.3a 603.2],
-                  params: { "subject" => "\"self\" (default) or {\"each\": filter, ...}", "first_time_this_turn" => "boolean" },
+                               "time that creature attacks this turn (later combats of the turn don't trigger it). " \
+                               "`alone: true`: only when it is the only creature declared as an attacker (it triggers " \
+                               "as the declaration is complete).",
+                  rules: %w[508.3a 603.2 506.5],
+                  params: { "subject" => "\"self\" (default) or {\"each\": filter, ...}", "first_time_this_turn" => "boolean",
+                            "alone" => "boolean" },
                   example: { "attacks" => { "subject" => "self", "first_time_this_turn" => true } }
 
-        def self.keys = %w[subject first_time_this_turn]
-        def event_class = Events::AttackerDeclared
+        def self.keys = %w[subject first_time_this_turn alone]
+        def event_class = @alone ? Events::AttacksDeclared : Events::AttackerDeclared
 
         def setup(params, errors, path)
-          @first_time = params["first_time_this_turn"] == true
-          errors << "#{path}.first_time_this_turn: must be true or false" unless [nil, true, false].include?(params["first_time_this_turn"])
+          @first_time = Mechanics.flag_param(params, "first_time_this_turn", errors, path)
+          @alone = Mechanics.flag_param(params, "alone", errors, path)
         end
 
         def match?(engine, event, source)
-          obj = engine.state.objects[event.object] or return false
-          return false if @first_time && engine.attacks_this_turn(event.object) != 1
+          id = attacker(event) or return false
+          obj = engine.state.objects[id] or return false
+          return false if @first_time && engine.attacks_this_turn(id) != 1
 
-          @subject.match?(engine, event.object, obj.controller, obj.card, source, types: engine.chars(obj).types)
+          @subject.match?(engine, id, obj.controller, obj.card, source, types: engine.chars(obj).types)
         end
 
-        def to_s = "Whenever #{@subject} attacks#{" for the first time each turn" if @first_time}"
+        # "It" is the creature attacking alone.
+        def occurrences(engine, event, source)
+          return super unless @alone && match?(engine, event, source)
+
+          [Triggers.event_facts(engine, event).merge("object" => attacker(event), "card" => engine.object(attacker(event)).card)]
+        end
+
+        def to_s = "Whenever #{@subject} attacks#{" alone" if @alone}#{" for the first time each turn" if @first_time}"
+
+        private
+
+        def attacker(event)
+          return event.object unless @alone
+
+          event.attackers.first if event.attackers.size == 1
+        end
       end
 
       # "Whenever you attack" (CR 508.3d): once per combat, if one or more creatures attack.
