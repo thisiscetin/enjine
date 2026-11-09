@@ -50,8 +50,9 @@ module Enjine
           Restricted.build(self, params.transform_keys(&:to_s), errors, path)
         end
 
-        def self.candidates_for(engine, controller, _source, ctx: nil) = candidates(engine, controller)
-        def self.match_for?(engine, ref, controller, _source, ctx: nil) = match?(engine, ref, controller)
+        def self.candidates_for(engine, controller, _source, **) = candidates(engine, controller)
+
+        def self.match_for?(engine, ref, controller, _source, **) = match?(engine, ref, controller)
 
         def self.type?(engine, object, type) = object.kind == "card" && engine.chars(object).type?(type)
 
@@ -194,9 +195,10 @@ module Enjine
           words.compact.join(" ")
         end
 
-        private
-
         RANGE_WORDS = { "at_least" => "%s or greater", "at_most" => "%s or less", "equal" => "equal to %s" }.freeze
+        private_constant :RANGE_WORDS
+
+        private
 
         def range_words(range) = range.map { |k, n| format(RANGE_WORDS.fetch(k), n) }.join(" and ")
 
@@ -392,6 +394,7 @@ module Enjine
         def live_keys = filters.flat_map(&:live_keys).uniq
         def to_s = filters.map { it.is_a?(Class) ? it.primitive_name.tr("_", " ") : it.to_s }.join(" or ")
         def candidates(engine, controller) = candidates_for(engine, controller, nil)
+
         def candidates_for(engine, controller, source, ctx: nil)
           filters.flat_map { it.candidates_for(engine, controller, source, ctx: ctx) }.uniq
         end
@@ -401,6 +404,7 @@ module Enjine
         def match_for?(engine, ref, controller, source, ctx: nil)
           filters.any? { it.match_for?(engine, ref, controller, source, ctx: ctx) }
         end
+
         def matches_types?(types) = filters.any? { it.matches_types?(types) }
         def matches_facts?(facts) = filters.any? { it.matches_facts?(facts) }
       end

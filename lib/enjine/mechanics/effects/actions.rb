@@ -46,7 +46,8 @@ module Enjine
 
         def self.keys = %w[to link until_source_leaves if]
         def self.zone = :exile
-        def self.from_zones = %i[battlefield graveyard hand stack] # a spell too ("exile target spell", CR 701.13a)
+        # A spell too ("exile target spell", CR 701.13a).
+        def self.from_zones = %i[battlefield graveyard hand stack]
 
         def setup(params, errors, path)
           @link = Linked.flag(params, "link", errors, path)

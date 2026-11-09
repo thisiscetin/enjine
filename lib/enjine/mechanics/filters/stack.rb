@@ -37,9 +37,13 @@ module Enjine
           def primitive_name = "stack_ability"
           def to_s = "#{@kind} ability"
           def candidates(engine, controller) = StackAbility.candidates(engine, controller).select { kind?(engine, it) }
-          def candidates_for(engine, controller, _source, ctx: nil) = candidates(engine, controller)
+
+          def candidates_for(engine, controller, _source, **) = candidates(engine, controller)
+
           def match?(engine, ref, controller) = StackAbility.match?(engine, ref, controller) && kind?(engine, ref)
-          def match_for?(engine, ref, controller, _source, ctx: nil) = match?(engine, ref, controller)
+
+          def match_for?(engine, ref, controller, _source, **) = match?(engine, ref, controller)
+
           def matches_types?(_types) = false
           def matches_facts?(_facts) = false
           def live_keys = []
