@@ -907,7 +907,7 @@ power"). Keyword *actions* are effects.
                 { "triggered": { "when": { "enters": {} }, "effects": [{ "connive": {} }] } }] }
 ```
 
-### 4.20 Set mechanics: power-up, teamwork, tiered, Class cards, increment, extort, storm, cascade, boast, storied, colors among, domain
+### 4.20 Set mechanics: power-up, teamwork, tiered, Class cards, increment, extort, riot, storm, cascade, boast, storied, colors among, domain
 
 | Oracle text | Data |
 | --- | --- |
@@ -916,6 +916,7 @@ power"). Keyword *actions* are effects.
 | "Teamwork 4" (CR 702.194) | ability `{ "teamwork": { "power": 4 } }`: announced like kicker (`choose_kicker`), then one `choose_cost` per creature tapped until their total power is 4 or more |
 | "if this spell was cast using teamwork" | condition `{ "cast_with": "teamwork" }`; "choose both instead" is `"choose_if": { "if": { "cast_with": "teamwork" }, "choose": 2 }`; targets only with teamwork are `kicked_targets` |
 | "Increment" (CR 702.191) | `"keywords": ["increment"]` |
+| "Riot" (CR 702.136) | `"keywords": ["riot"]`: an `enter_choice` of `{type: "option", option: "counter"}` (an additional +1/+1 counter) or `"haste"` (it can't have another "as this enters" choice) |
 | "Storm" (CR 702.40), "Cascade" (CR 702.85) | `"keywords": ["storm"]`, `"keywords": ["cascade"]`; a cast trigger's "that many" (`{ "triggering": "amount" }`) is the number of spells cast before that spell this turn |
 | "Extort" (CR 702.101) | `"keywords": ["extort"]` (a `pay` {W/B} choice as it resolves) |
 | "the number of colors among permanents you control" (CR 105.2) | amount `{ "distinct_colors": { "each": "permanent", "controller": "you" } }` |

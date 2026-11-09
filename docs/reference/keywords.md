@@ -408,6 +408,20 @@ Rules: CR 702.17b
 }
 ```
 
+## riot
+
+As this permanent enters, its controller chooses an additional +1/+1 counter or haste (an enter_choice: `{type: "option", option: "counter" | "haste"}`).
+
+Rules: CR 702.136a, CR 614.12
+
+```json
+{
+  "keywords": [
+    "riot"
+  ]
+}
+```
+
 ## start_your_engines
 
 If you control this permanent and have no speed, your speed becomes 1. Once you have speed, it increases by 1 (to at most 4) once on each of your turns when one or more opponents lose life. Pair with `max_speed` abilities and the `speed` amount.

@@ -34,17 +34,17 @@ first release is dated.
 | # | Set | Released | Leaves Standard | Status |
 | ---: | --- | --- | --- | --- |
 | 1 | Star Trek | 2026-11-13 | 2029 (est.) | supported |
-| 2 | Reality Fracture | 2026-10-02 | 2029 (est.) | 19 gaps |
-| 3 | The Hobbit | 2026-08-14 | 2029 (est.) | 17 gaps |
-| 4 | Marvel Super Heroes | 2026-06-26 | 2029 (est.) | 22 gaps |
-| 5 | Secrets of Strixhaven | 2026-04-24 | 2029 (est.) | 13 gaps |
-| 6 | Teenage Mutant Ninja Turtles | 2026-03-06 | 2029 (est.) | 11 gaps |
-| 7 | Lorwyn Eclipsed | 2026-01-23 | 2029 (est.) | 15 gaps |
+| 2 | Reality Fracture | 2026-10-02 | 2029 (est.) | 18 gaps |
+| 3 | The Hobbit | 2026-08-14 | 2029 (est.) | 16 gaps |
+| 4 | Marvel Super Heroes | 2026-06-26 | 2029 (est.) | 18 gaps |
+| 5 | Secrets of Strixhaven | 2026-04-24 | 2029 (est.) | 11 gaps |
+| 6 | Teenage Mutant Ninja Turtles | 2026-03-06 | 2029 (est.) | 10 gaps |
+| 7 | Lorwyn Eclipsed | 2026-01-23 | 2029 (est.) | 14 gaps |
 | 8 | Avatar: The Last Airbender | 2025-11-21 | 2028 (est.) | 14 gaps |
-| 9 | Spider-Man | 2025-09-26 | 2028 (est.) | 13 gaps |
+| 9 | Spider-Man | 2025-09-26 | 2028 (est.) | 12 gaps |
 | 10 | Edge of Eternities | 2025-08-01 | 2028 (est.) | 17 gaps |
-| 11 | Final Fantasy | 2025-06-13 | 2028 (est.) | 15 gaps |
-| 12 | Tarkir: Dragonstorm | 2025-04-11 | 2028 (est.) | 17 gaps |
+| 11 | Final Fantasy | 2025-06-13 | 2028 (est.) | 14 gaps |
+| 12 | Tarkir: Dragonstorm | 2025-04-11 | 2028 (est.) | 16 gaps |
 | 13 | Aetherdrift | 2025-02-14 | 2028 (est.) | 14 gaps |
 | 14 | Foundations | 2024-11-15 | 2029 (est.) | 17 gaps |
 
@@ -86,7 +86,6 @@ derived from card text is stored here.
 | Mechanic | CR | ~Cards | Sets |
 | --- | --- | ---: | ---: |
 | Earthbend | 701.66 | 27 | 1 |
-| Power-up | 702.193 | 24 | 1 |
 | Waterbend | 701.67 | 24 | 1 |
 | Behold | 701.4 | 21 | 4 |
 | Cast trigger filtered on the spell's targets | 603.2, 115.1 | 21 | 4 |
@@ -97,8 +96,6 @@ derived from card text is stored here.
 | Pay life as a cost | 119.4, 118.3 | 13 | 9 |
 | Monocolored hybrid mana {2/W} | 107.4e | 13 | 3 |
 | Saddle (Mounts) | 702.171 | 13 | 1 |
-| Colors among permanents (amount) | 105.2, 202.2 | 12 | 1 |
-| Teamwork | 702.194 | 12 | 1 |
 | Additional combat / ending the turn | 500.8, 725 | 11 | 8 |
 
 ### Star Trek (trk) — supported
@@ -107,7 +104,7 @@ derived from card text is stored here.
 
 No listed gap remains.
 
-### Reality Fracture (fra) — 19 gaps
+### Reality Fracture (fra) — 18 gaps
 
 285 cards (at the census, about 181 used no listed gap).
 
@@ -122,7 +119,6 @@ No listed gap remains.
 | Combat damage assignment changes | 510.1 | 2 | Ghalta the Immovable |
 | More player/game restrictions (can't cast, can't gain life, spells can't be countered, ...) | 101.2, 604.1 | 2 | Proft, Sinister Mastermind |
 | Damage modification / redirection replacement | 614.1a, 616 | 1 | Tomik, Izzet Sparkmage |
-| Domain (basic land types among lands you control) | 305.6, 207.2c | 1 | Fblthp, Knows the Way |
 | Excess damage | 120.4a | 1 | Violent Echoes |
 | Exile cards from graveyard as a cost (not the card itself) | 118.3, 406.1 | 1 | Gallia, Tragic Host |
 | Monocolored hybrid mana {2/W} | 107.4e | 1 | Karn, Gilded Guardian |
@@ -133,13 +129,12 @@ No listed gap remains.
 | Trigger: is dealt damage | 120.3, 603.2 | 1 | Hexhaven Invigorator |
 | Static type change with a base P/T ("is a 5/5 creature in addition to its other types") | 613.1d, 205.1b | 1 | Puppet Crafting |
 
-### The Hobbit (hob) — 17 gaps
+### The Hobbit (hob) — 16 gaps
 
 193 cards (at the census, about 121 used no listed gap).
 
 | Missing mechanic | CR | ~Cards | Example |
 | --- | --- | ---: | --- |
-| Storied (enduring story designation) | 702.195 | 9 | Balin, Loremaster |
 | Discard a card as a cost | 118.3, 701.9a | 2 | Key to the Side-Door |
 | Mana spent: which sources paid it ("mana from a Treasure") | 601.2h, 207.2c | 1 | Smaug, Wicked Worm |
 | More player/game restrictions (can't cast, can't gain life, spells can't be countered, ...) | 101.2, 604.1 | 2 | Bilbo's Gambit |
@@ -157,14 +152,12 @@ No listed gap remains.
 | Static dies-to-exile replacement (not a one-turn effect) | 614.1a | 1 | Head of the Hunt |
 | Token doubling replacement | 614.1a, 111.1 | 1 | Bard, King of Dale |
 
-### Marvel Super Heroes (msh) — 22 gaps
+### Marvel Super Heroes (msh) — 18 gaps
 
 281 cards (at the census, about 192 used no listed gap).
 
 | Missing mechanic | CR | ~Cards | Example |
 | --- | --- | ---: | --- |
-| Power-up | 702.193 | 24 | Abomination, Terrifying Titan |
-| Teamwork | 702.194 | 12 | Atlantis Attacks |
 | Cast trigger filtered on the spell's targets | 603.2, 115.1 | 6 | Colleen Wing, Street Samurai |
 | Ability removal (loses all abilities) | 613.1f | 3 | Frozen in Ice |
 | Pay life as a cost | 119.4, 118.3 | 3 | M.O.D.O.K. |
@@ -173,46 +166,41 @@ No listed gap remains.
 | Improvise | 702.126 | 2 | Arc Reactor |
 | More player/game restrictions (can't cast, can't gain life, spells can't be countered, ...) | 101.2, 604.1 | 2 | Jennifer Walters |
 | Additional combat / ending the turn | 500.8, 725 | 1 | Bruce Banner |
-| Boast | 702.142 | 1 | Baron Helmut Zemo |
 | Combat damage assignment changes | 510.1 | 1 | The Kingpin of Crime |
 | Continuous control duration "for as long as" | 611.2b, 613.1b | 1 | The Super Hero Civil War |
 | Damage modification / redirection replacement | 614.1a, 616 | 1 | Hawkeye, Young Avenger |
 | Damage prevention (beyond prevent all damage to you) | 615 | 1 | King T'Challa |
 | Divide damage among targets | 601.2d | 1 | Death to Our Enemies |
 | Exile cards from graveyard as a cost (not the card itself) | 118.3, 406.1 | 1 | Baron Helmut Zemo |
-| Extort | 702.101 | 1 | The Kingpin of Crime |
 | Granting activated abilities | 613.1f, 602.1 | 1 | Iron Fist, Living Weapon |
 | Noncombat damage trigger condition | 120.2b, 603.2 | 1 | Hawkeye, Young Avenger |
 | Player counters (poison, rad, experience) | 122.1f, 729 | 1 | The Serpent Society |
 | Trigger: blocks | 509.3a, 603.2 | 1 | Super-Soldier Serum |
 
-### Secrets of Strixhaven (sos) — 13 gaps
+### Secrets of Strixhaven (sos) — 11 gaps
 
 271 cards (at the census, about 158 used no listed gap).
 
 | Missing mechanic | CR | ~Cards | Example |
 | --- | --- | ---: | --- |
 | Cast trigger filtered on the spell's targets | 603.2, 115.1 | 12 | Conciliator's Duelist |
-| Increment | 702.191 | 9 | Ambitious Augmenter |
 | Paradigm | 702.192 | 5 | Decorum Dissertation |
 | Discard a card as a cost | 118.3, 701.9a | 3 | Charging Strifeknight |
 | Exile cards from graveyard as a cost (not the card itself) | 118.3, 406.1 | 3 | Lluwen, Exchange Student |
 | Exile-instead replacement for spells cast via an effect | 614.1a, 608.2n | 2 | Nita, Forum Conciliator |
 | Monocolored hybrid mana {2/W} | 107.4e | 2 | Magmablood Archaic |
-| Cascade | 702.85 | 1 | Quandrix, the Proof |
 | Emblems | 114 | 1 | Professor Dellian Fel |
 | Excess damage | 120.4a | 1 | Archaic's Agony |
 | More player/game restrictions (can't cast, can't gain life, spells can't be countered, ...) | 101.2, 604.1 | 1 | Impractical Joke |
 | Pay life as a cost | 119.4, 118.3 | 1 | Great Hall of the Biblioplex |
 | Skip steps or turns | 614.10 | 1 | Ral Zarek, Guest Lecturer |
 
-### Teenage Mutant Ninja Turtles (tmt) — 11 gaps
+### Teenage Mutant Ninja Turtles (tmt) — 10 gaps
 
 195 cards (at the census, about 133 used no listed gap).
 
 | Missing mechanic | CR | ~Cards | Example |
 | --- | --- | ---: | --- |
-| Class cards | 717 | 5 | Cool but Rude |
 | Random choices (discard at random) | 701.9b | 2 | Casey Jones, Vigilante |
 | Trigger: is dealt damage | 120.3, 603.2 | 2 | Raphael, Ninja Destroyer |
 | Ability removal (loses all abilities) | 613.1f | 1 | Retro-Mutation |
@@ -224,14 +212,13 @@ No listed gap remains.
 | Mana spent compared with another amount ("less than its mana value") | 601.2h, 207.2c | 1 | Tokka & Rahzar, Terrible Twos |
 | Trigger: blocks | 509.3a, 603.2 | 1 | Bebop & Rocksteady |
 
-### Lorwyn Eclipsed (ecl) — 15 gaps
+### Lorwyn Eclipsed (ecl) — 14 gaps
 
 273 cards (at the census, about 166 used no listed gap).
 
 | Missing mechanic | CR | ~Cards | Example |
 | --- | --- | ---: | --- |
 | Behold | 701.4 | 12 | Celestial Reunion |
-| Colors among permanents (amount) | 105.2, 202.2 | 12 | Aurora Awakener |
 | Ability removal (loses all abilities) | 613.1f | 4 | Abigale, Eloquent First-Year |
 | Hexproof from / protection from | 702.11d, 702.16 | 3 | Figure of Fable |
 | Discard a card as a cost | 118.3, 701.9a | 2 | Iron-Shield Elf |
@@ -267,7 +254,7 @@ No listed gap remains.
 | Pay life as a cost | 119.4, 118.3 | 1 | Koh, the Face Stealer |
 | Spells cast from anywhere other than hand (trigger / cost filter) | 601.2, 603.2 | 1 | Avatar's Wrath |
 
-### Spider-Man (spm) — 13 gaps
+### Spider-Man (spm) — 12 gaps
 
 193 cards (at the census, about 129 used no listed gap).
 
@@ -283,7 +270,6 @@ No listed gap remains.
 | Excess damage | 120.4a | 1 | Rhino's Rampage |
 | Exchange (control, life totals, P/T) | 701.12, 613.4d | 1 | Mister Negative |
 | Granting activated abilities | 613.1f, 602.1 | 1 | Friendly Neighborhood |
-| Riot | 702.136 | 1 | Spider-Punk |
 | Trigger: blocks | 509.3a, 603.2 | 1 | Spider-Mobile |
 | Trigger: is dealt damage | 120.3, 603.2 | 1 | Strength of Will |
 
@@ -311,13 +297,12 @@ No listed gap remains.
 | Token doubling replacement | 614.1a, 111.1 | 1 | Exalted Sunborn |
 | Trigger: blocks | 509.3a, 603.2 | 1 | Skystinger |
 
-### Final Fantasy (fin) — 15 gaps
+### Final Fantasy (fin) — 14 gaps
 
 312 cards (at the census, about 203 used no listed gap).
 
 | Missing mechanic | CR | ~Cards | Example |
 | --- | --- | ---: | --- |
-| Tiered | 702.183 | 6 | Fire Magic |
 | Damage modification / redirection replacement | 614.1a, 616 | 4 | Ancient Adamantoise |
 | Additional combat / ending the turn | 500.8, 725 | 3 | Balthier and Fran |
 | Blocking rules (block additional creatures, must be blocked, lure) | 509.1a, 509.1c | 3 | Magitek Scythe |
@@ -333,7 +318,7 @@ No listed gap remains.
 | Random choices (discard at random) | 701.9b | 1 | Sin, Spira's Punishment |
 | Static dies-to-exile replacement (not a one-turn effect) | 614.1a | 1 | The Darkness Crystal |
 
-### Tarkir: Dragonstorm (tdm) — 17 gaps
+### Tarkir: Dragonstorm (tdm) — 16 gaps
 
 276 cards (at the census, about 189 used no listed gap).
 
@@ -354,7 +339,6 @@ No listed gap remains.
 | More player/game restrictions (can't cast, can't gain life, spells can't be countered, ...) | 101.2, 604.1 | 1 | Voice of Victory |
 | Pay life as a cost | 119.4, 118.3 | 1 | Krumar Initiate |
 | Random choices (discard at random) | 701.9b | 1 | Tersa Lightshatter |
-| Storm | 702.40 | 1 | Stormscale Scion |
 | Token doubling replacement | 614.1a, 111.1 | 1 | Elspeth, Storm Slayer |
 
 ### Aetherdrift (dft) — 14 gaps
@@ -430,6 +414,13 @@ closed stays under a narrower name with the cards known to need it.
 | Mobilize, firebending | 702.181, 702.189 | abilities `mobilize`, `firebending` (4.19) |
 | Blight, connive, recruit, amass, empower Jace, endure | 701.68, 701.50, 701.70, 701.47, 701.71, 701.63 | effects of the same names; cost `blight` (4.19) |
 | Kindred card type | 308 | `"types": ["kindred", …]` (4.19) |
+| Power-up, boast | 702.193, 702.142 | `"power_up": true` / `"boast": true` on an activated ability (4.20) |
+| Teamwork | 702.194 | ability `teamwork`; condition `{"cast_with": "teamwork"}` (4.20) |
+| Tiered | 702.183 | a `cost` on each mode of a modal spell (4.20) |
+| Class cards | 717 | ability `class_level`; trigger `becomes_level` (4.20) |
+| Increment, extort, riot, storm, cascade | 702.191, 702.101, 702.136, 702.40, 702.85 | keywords of the same names (4.20) |
+| Storied (enduring story designation) | 702.195 | keyword `storied`; condition `{"designation": "enduring_story"}` (4.20) |
+| Colors among permanents, domain | 105.2, 305.6 | amounts `distinct_colors`, `distinct_land_types` (4.20) |
 
 Still open in these areas (not yet counted as gaps above, since the census didn't
 separate them):
@@ -450,6 +441,11 @@ separate them):
   into your graveyard from anywhere this turn" as a target filter.
 - A card spec (library search) matching the chosen type, and a static that grants
   keywords to creatures filtered by keywords (layer-6 dependency, CR 613.8).
+- Set mechanics: granting cascade or riot to other spells or permanents (Quandrix, the Proof;
+  Spider-Punk), "becomes tapped to pay a teamwork cost" (Agent Maria Hill), "effects that refer
+  to boasting" (CR 702.142b), a riot permanent with another "as this enters" choice, and the
+  choice of hybrid half when a power-up cost is reduced (CR 118.7e: the half the cost needs is
+  taken).
 
 ## Card data rules
 

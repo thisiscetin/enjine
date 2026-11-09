@@ -321,6 +321,39 @@ RSpec.describe "Set mechanics: power-up, teamwork, increment, extort, boast, col
     end
   end
 
+  describe "riot (CR 702.136a)" do
+    let(:rioter) do
+      { "name" => "Spec Rioter", "mana_cost" => "{R}", "types" => ["creature"], "power" => 1, "toughness" => 1,
+        "keywords" => ["riot"] }
+    end
+    let(:catalog) { catalog_with(rioter) }
+
+    def riot(choice)
+      game = build_game(catalog) do
+        turn 3, active: "alice", step: :precombat_main
+        player("alice", mana_pool: { R: 1 }) do
+          hand "Spec Rioter"
+          library "Forest", count: 3
+        end
+        player("bob") { library "Forest", count: 3 }
+      end
+      game.submit(type: "cast", object: ids_in(game, "alice", :hand).first)
+      game.submit(type: "pay_mana", mana: "R")
+      game.submit(type: "pass")
+      game.submit(type: "pass")
+      expect(game.pending_decision.kind).to eq("enter_choice")
+      game.submit(type: "option", option: choice)
+      [game, engine(game).object(obj_id(game, "Spec Rioter"))]
+    end
+
+    it "enters with a +1/+1 counter, or with haste" do
+      game, rioter = riot("counter")
+      expect([rioter.counters["+1/+1"], engine(game).chars(rioter).keyword?(:haste)]).to eq([1, false])
+      game, rioter = riot("haste")
+      expect([rioter.counters["+1/+1"], engine(game).chars(rioter).keyword?(:haste)]).to eq([nil, true])
+    end
+  end
+
   describe "Class cards (CR 717)" do
     let(:dojo) do
       { "name" => "Spec Dojo Class", "mana_cost" => "{R}", "types" => ["enchantment"], "subtypes" => ["class"],
