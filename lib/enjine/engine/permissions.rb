@@ -14,31 +14,45 @@ module Enjine
     #    "play" => "cast" | "play",              # "play" also allows a land to be played (CR 305.1)
     #    "alt" => nil | {"free" => true} | {"beam" => "{3}{W}", "not" => id},  # alternative cost (CR 118.9)
     #    "enters_with" => {counter => n},         # "if you cast it this way, it enters with ..."
-    #    "once" => {"source" => id, "ref" => ref}} # "once during each of your turns"
+    #    "once" => {"source" => id, "ref" => ref}, # "once during each of your turns"
+    #    "cost_increase" => n}                     # riders of a permission effect (PlayPermission), e.g. 601.2f
     #
     # Permissions granted by resolved effects are `state.effects` entries of kind "permission"
     # (see #grant_play_permission!); the others come from abilities (Abilities::PlayFrom, BeamMeUp).
+    #
+    # Cards outside the game (CR 400.11) aren't objects: a player's are definition ids in
+    # PlayerState#outside. Options name one as `"outside:<card id>"` (#outside_key); legality checks use a
+    # detached GameObject in the pseudo-zone :outside that is never stored (#outside_object), and the
+    # object is created only when the card is brought into the game (#bring_in_from_outside!).
     module Permissions
       FREE = { "free" => true }.freeze
       ZERO = Mana::Cost.new(generic: 0, colored: {}.freeze)
       BEAM_COST_TEXT = "Return a creature you control to its owner's hand"
+      OUTSIDE = "outside:"
+      # Permission effect fields copied into the play method (see Effects::PlayPermission).
+      RIDERS = %w[cost_increase any_mana_type].freeze
 
       # ---- legal actions --------------------------------------------------------------------
 
       # Cards outside the hand `index` might play: their graveyard, every exiled card and their library's
-      # top card (deterministic order: graveyard, exile, library).
-      def permission_candidates(index)
+      # top card (deterministic order: graveyard, exile, library), then the cards they own outside the game
+      # (one key per distinct card) while something lets them play those.
+      def permission_candidates(index, sources = permission_sources(index))
         pl = player(index)
         ids = pl.graveyard + state.exile
-        pl.library.empty? ? ids : ids + [pl.library.first]
+        ids += [pl.library.first] unless pl.library.empty?
+        return ids unless sources.any? { |_, inst| inst.ability.kind == :play_from && inst.ability.outside? }
+
+        ids + pl.outside.uniq.map { outside_key(it) }
       end
 
       # Priority options: `{type: "cast", object: id, via: method}` for every castable card and method.
       def permission_cast_options(index)
         sources = permission_sources(index)
-        permission_candidates(index).flat_map do |id|
-          play_methods(index, id, sources).filter_map do |method|
-            { type: "cast", object: id, via: method["via"] } if castable_via?(index, id, method)
+        permission_candidates(index, sources).flat_map do |ref|
+          obj = candidate_object(index, ref)
+          play_methods(index, obj, sources).filter_map do |method|
+            { type: "cast", object: ref, via: method["via"] } if castable_via?(index, obj, method)
           end
         end
       end
@@ -46,13 +60,67 @@ module Enjine
       # Priority options: lands `index` may play from outside their hand (CR 305.1, 305.2).
       def permission_land_options(index)
         sources = permission_sources(index)
-        permission_candidates(index).flat_map do |id|
-          next [] unless chars(id).land?
+        permission_candidates(index, sources).flat_map do |ref|
+          obj = candidate_object(index, ref)
+          next [] unless chars(obj).land?
 
-          play_methods(index, id, sources).filter_map do |method|
-            { type: "play_land", object: id, via: method["via"] } if method["play"] == "play"
+          play_methods(index, obj, sources).filter_map do |method|
+            { type: "play_land", object: ref, via: method["via"] } if method["play"] == "play"
           end
         end
+      end
+
+      # ---- cards outside the game (CR 400.11, 400.11b, 108.3) -------------------------------------
+
+      def outside_key(card) = "#{OUTSIDE}#{card}"
+      def outside_key?(ref) = ref.is_a?(String) && ref.start_with?(OUTSIDE)
+      def outside_card(ref) = ref.delete_prefix(OUTSIDE)
+
+      # A detached object standing for a card `index` owns outside the game, for legality checks only.
+      def outside_object(index, card)
+        GameObject.new(id: outside_key(card), card: card, owner: index, controller: index, zone: :outside, tapped: false,
+                       controlled_since: nil, kind: "card", counters: {}, damage: 0, source: nil, ability: nil,
+                       targets: nil, loyalty_turn: nil, deathtouched: false, modes: nil, memory: {}, attached_to: nil)
+      end
+
+      # The object an option names: a game object, or the detached stand-in of a card outside the game.
+      def candidate_object(index, ref) = outside_key?(ref) ? outside_object(index, outside_card(ref)) : object(ref)
+
+      # CR 400.11b, 108.3: one copy of `card` leaves `index`'s outside list and enters the game in `to` as a
+      # new object they own, through the usual entering replacements (CR 614.12) when it's the battlefield.
+      def bring_in_from_outside!(index, card, to, reason:, enters: nil)
+        list = player(index).outside
+        at = list.index(card) or raise ArgumentError, "#{name(index)} has no #{card} outside the game"
+        list.delete_at(at)
+        obj = create_object(card, index, to)
+        data = { "object" => obj.id, "to" => to, "controller" => index, "reason" => reason }
+        if to == :battlefield
+          data["enters"] = { "tapped" => enters&.fetch("tapped", false) == true, "counters" => {} }
+          data = propose("zone_change", data).data
+          merge_enters!(data["enters"], enters.except("tapped")) if enters
+        end
+        arrive!(obj, obj, data)
+        state.zone_list(to, index).unshift(obj.id)
+        record_result!(obj.id)
+        emit Events::ZoneChanged.new(card: card, old_id: nil, new_id: obj.id, owner: name(index), from: "outside",
+                                     to: to.to_s, reason: reason)
+        obj
+      end
+
+      # CR 601.2a: a spell cast from outside the game is brought into the game onto the stack.
+      def begin_outside_cast!(index, ref, via)
+        method = play_method(index, ref, via)
+        card = outside_card(ref)
+        origin = { "zone" => "outside", "card" => card, "index" => player(index).outside.index(card) }
+        obj = bring_in_from_outside!(index, card, :stack, reason: "cast")
+        start_casting!(index, obj.id, "spell", origin: origin, cost: method_cost(obj, method), extra: { "method" => method })
+      end
+
+      # CR 305.1: a land played (from a zone or from outside the game) is put onto the battlefield.
+      def put_played_land!(index, ref, enters: nil)
+        return bring_in_from_outside!(index, outside_card(ref), :battlefield, reason: "play_land", enters: enters) if outside_key?(ref)
+
+        move!(ref, :battlefield, controller: index, reason: "play_land", enters: enters)
       end
 
       # Permanents `index` controls whose static abilities let them play cards from other zones:

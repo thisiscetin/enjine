@@ -34,41 +34,60 @@ module Enjine
       # permanent's static permission for its controller's cards in a zone, possibly limited to once per
       # turn (CR 604.1). Offered as cast / play_land options with a `via`.
       class PlayFrom < Primitive
-        ZONES = %w[graveyard exile library_top].freeze
+        ZONES = %w[graveyard exile library_top outside].freeze
         PLAYS = %w[cast play].freeze
 
         primitive :ability, :play_from,
                   description: "With `cards: \"self\"` (default): its owner may cast this card from `zone` (the " \
                                "ability functions there). With a card spec: while this permanent is on the " \
-                               "battlefield, its controller may play their own matching cards from `zone`. `play`: " \
-                               "\"cast\" (spells only, default) or \"play\" (lands too). `once_each_turn`: once " \
-                               "during each of your turns. `enters_with`: a permanent spell cast this way enters " \
-                               "with these counters. Timing and costs are the usual ones.",
-                  rules: %w[601.3 113.6e 113.6f 305.1 401.5 122.1 614.12],
-                  params: { "zone" => ZONES.join(" | "), "cards" => "\"self\" or a card spec", "play" => PLAYS.join(" | "),
+                               "battlefield, its controller may play their own matching cards from `zone`, or from " \
+                               "any of `zones` (\"outside\": cards they own outside the game, the deck's `outside` " \
+                               "list, CR 400.11a). `play`: \"cast\" (spells only, default) or \"play\" (lands too, " \
+                               "using a land play). `once_each_turn`: once during each of your turns, one use shared " \
+                               "by all its zones. `enters_with`: a permanent spell cast this way enters with these " \
+                               "counters. Timing and costs are the usual ones.",
+                  rules: %w[601.3 113.6e 113.6f 305.1 401.5 122.1 614.12 400.11a 400.11b 108.3],
+                  params: { "zone" => ZONES.join(" | "), "zones" => "list of zones (instead of `zone`)",
+                            "cards" => "\"self\" or a card spec", "play" => PLAYS.join(" | "),
                             "once_each_turn" => "boolean", "enters_with" => "{counter name: n}" },
                   example: { "play_from" => { "zone" => "graveyard", "enters_with" => { "finality" => 1 } } }
 
-        attr_reader :zone, :cards, :play, :once, :enters_with
+        attr_reader :zones, :cards, :play, :once, :enters_with
 
         def self.build(params, errors, path, **)
-          Mechanics.check_keys(params, %w[zone cards play once_each_turn enters_with], errors, path)
-          zone = Mechanics.fetch_param(params, :zone)
-          errors << "#{path}.zone: must be one of #{ZONES.join(", ")}" unless ZONES.include?(zone)
+          Mechanics.check_keys(params, %w[zone zones cards play once_each_turn enters_with], errors, path)
+          zones = zones_param(params, errors, path)
           play = Mechanics.fetch_param(params, :play) || "cast"
           errors << "#{path}.play: must be one of #{PLAYS.join(", ")}" unless PLAYS.include?(play)
           raw = Mechanics.fetch_param(params, :cards) || "self"
           cards = raw == "self" ? :self : CardSpec.build(raw, errors, "#{path}.cards")
+          # CR 400.11c: a card outside the game has no abilities that work there; a permanent brings cards in.
+          errors << "#{path}.zones: \"outside\" needs a card spec in `cards`" if cards == :self && zones.include?("outside")
           once = Mechanics.fetch_param(params, :once_each_turn)
           errors << "#{path}.once_each_turn: must be true or false" unless [nil, true, false].include?(once)
           extra = Mechanics.fetch_param(params, :enters_with)
           extra &&= EntersWithCounters.read_counters(extra, errors, "#{path}.enters_with")
-          new(zone, cards, play, once == true, extra)
+          new(zones, cards, play, once == true, extra)
         end
 
-        def initialize(zone, cards, play, once, enters_with)
+        # `zone: "graveyard"` or `zones: ["outside", "graveyard"]`, one of the two.
+        def self.zones_param(params, errors, path)
+          one = Mechanics.fetch_param(params, :zone)
+          many = Mechanics.fetch_param(params, :zones)
+          if many.nil?
+            errors << "#{path}.zone: must be one of #{ZONES.join(", ")}" unless ZONES.include?(one)
+            return [one]
+          end
+          errors << "#{path}: give `zone` or `zones`, not both" if one
+          return many.uniq if many.is_a?(Array) && !many.empty? && many.all? { ZONES.include?(it) }
+
+          errors << "#{path}.zones: must be a non-empty list of #{ZONES.join(", ")}"
+          []
+        end
+
+        def initialize(zones, cards, play, once, enters_with)
           super()
-          @zone = zone
+          @zones = zones.freeze
           @cards = cards
           @play = play
           @once = once
@@ -82,16 +101,23 @@ module Enjine
         def allowed_types = nil
         def try_effects = []
 
-        # Whether the card is in the zone this permission names.
-        def holds?(engine, obj)
-          return obj.zone == :library && engine.player(obj.owner).library.first == obj.id if zone == "library_top"
+        def outside? = zones.include?("outside")
 
-          obj.zone.to_s == zone
+        # Whether the card is in a zone this permission names. A card outside the game is a detached object
+        # in the pseudo-zone :outside (Engine::Permissions#outside_object; outside the game isn't a zone).
+        def holds?(engine, obj)
+          zones.any? do |zone|
+            next obj.zone == :library && engine.player(obj.owner).library.first == obj.id if zone == "library_top"
+
+            obj.zone.to_s == zone
+          end
         end
+
+        WHERE = { "library_top" => "the top of your library", "outside" => "outside the game" }.freeze
 
         def to_s
           what = self? ? "this card" : "#{cards}s"
-          where = zone == "library_top" ? "the top of your library" : "your #{zone}"
+          where = zones.map { WHERE.fetch(it) { |zone| "your #{zone}" } }.join(" or from ")
           text = "#{"Once during each of your turns, " if once}you may #{play} #{what} from #{where}"
           enters_with ? "#{text}; it enters with #{enters_with.map { |k, n| "#{n} #{k}" }.join(", ")} counter(s)" : text
         end
@@ -155,21 +181,33 @@ module Enjine
 
       # Permission to play exiled cards for a duration (CR 611.2, 601.3; see Engine::Permissions). With
       # `choose`, the controller first chooses one matching card per owner among them.
+      #
+      # Who may play them and how (field names shared with the mana capability):
+      #   `to_player`      "controller" (default), "owner" (each card's owner, CR 108.3) or a player selector
+      #   `cost_increase`  generic mana added to the total cost of a spell cast with this permission (601.2f)
+      #   `any_mana_type`  reserved: mana of any type may be spent to cast it (set by the mana capability)
+      # Riders like these are stored on the permission (`state.effects` entry) and copied into the play
+      # method, so only casts that use this permission (`via: "effect:<timestamp>"`) see them.
       class PlayPermission < ChoiceEffect
         DURATIONS = %w[end_of_turn end_of_your_next_turn while_exiled].freeze
+        PLAYERS = %w[controller owner].freeze
 
         primitive :effect, :play_permission,
-                  description: "The controller may play (`play: \"play\"`, default) or cast (`\"cast\"`) each referenced " \
+                  description: "A player may play (`play: \"play\"`, default) or cast (`\"cast\"`) each referenced " \
                                "exiled card matching `for`/`not_types`, paying its costs and following timing rules, " \
                                "for `duration`: end_of_turn (default), end_of_your_next_turn or while_exiled. With " \
-                               "`choose: \"one_per_owner\"` only one chosen card per owner.",
-                  rules: %w[611.2a 601.3 305.1 400.7 514.2],
+                               "`choose: \"one_per_owner\"` only one chosen card per owner. `to_player`: who may " \
+                               "play it, \"controller\" (default, the effect's controller), \"owner\" (the card's " \
+                               "owner) or a player selector. `cost_increase`: spells cast this way cost that much " \
+                               "generic mana more.",
+                  rules: %w[611.2a 601.3 305.1 400.7 514.2 601.2f 108.3],
                   params: { "to" => "selector (usually {\"result\": n})", "duration" => DURATIONS.join(" | "),
                             "play" => "play | cast", "for" => "card spec", "not_types" => "list of card types",
-                            "choose" => "one_per_owner" },
+                            "choose" => "one_per_owner", "to_player" => "controller | owner | player selector",
+                            "cost_increase" => "integer >= 1" },
                   example: { "play_permission" => { "to" => { "result" => 0 }, "duration" => "end_of_your_next_turn" } }
 
-        def self.keys = %w[to duration play for not_types choose if]
+        def self.keys = %w[to duration play for not_types choose to_player cost_increase if]
 
         def setup(params, errors, path)
           @duration = Mechanics.fetch_param(params, :duration) || "end_of_turn"
@@ -180,9 +218,15 @@ module Enjine
           @choose = Mechanics.fetch_param(params, :choose)
           errors << "#{path}.choose: must be one_per_owner" unless [nil, "one_per_owner"].include?(@choose)
           @filter = CardFilter.build(params, errors, path)
+          @to_player = player_param(Mechanics.fetch_param(params, :to_player) || "controller", errors, path)
+          @riders = riders(params, errors, path)
         end
 
-        def to_s = "you may #{@play} #{@filter} (#{@duration.tr("_", " ")}) → #{to}"
+        def to_s
+          who = @to_player.is_a?(String) ? "#{"its " if @to_player == "owner"}#{@to_player}" : @to_player.to_s
+          more = @riders["cost_increase"] ? ", costs {#{@riders["cost_increase"]}} more" : ""
+          "#{who} may #{@play} #{@filter} (#{@duration.tr("_", " ")}#{more}) → #{to}"
+        end
 
         def run(engine, ctx, locals)
           return :done unless locals["cards"] || condition.nil? || condition.true?(engine, ctx)
@@ -191,11 +235,36 @@ module Enjine
           picks = @choose ? choose(engine, ctx, locals, cards) : cards
           return :wait if picks == :wait
 
-          engine.grant_play_permission!(ctx.controller, picks, duration: @duration, play: @play)
+          picks.group_by { player_for(engine, ctx, it) }.each do |index, ids|
+            engine.grant_play_permission!(index, ids, duration: @duration, play: @play, **@riders) if index
+          end
           :done
         end
 
         private
+
+        def player_param(raw, errors, path)
+          return raw if PLAYERS.include?(raw)
+
+          Selector.build(raw, errors, "#{path}.to_player", targets_count: @targets_count, results_count: @results_count)
+        end
+
+        def riders(params, errors, path)
+          increase = Mechanics.fetch_param(params, :cost_increase)
+          return {} if increase.nil?
+
+          errors << "#{path}.cost_increase: must be an integer >= 1" unless increase.is_a?(Integer) && increase.positive?
+          { "cost_increase" => increase }
+        end
+
+        # The player who may play `id`: the effect's controller, the card's owner, or the selected player.
+        def player_for(engine, ctx, id)
+          case @to_player
+          when "controller" then ctx.controller
+          when "owner" then engine.object(id).owner
+          else @to_player.resolve(engine, ctx).filter_map { Filters.player_index(engine, it) }.first
+          end
+        end
 
         def exiled_match?(engine, id)
           obj = engine.state.objects[id]
