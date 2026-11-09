@@ -15,6 +15,9 @@ module Enjine
     #   cant_gain_life      the player can't gain life (119.7)
     #   cant_activate       the player can't activate abilities of sources matching `filter`, except mana
     #                       abilities (602.5)
+    #   protection_from_opponents  the player has protection from each of their opponents: opponents' spells
+    #                       and abilities can't target them and damage from opponents' sources is prevented
+    #                       (702.16b, 702.16e, 702.16k)
     #   damage_cant_be_prevented / combat_damage_cant_be_prevented  game rules: while any player has one, (combat)
     #                       damage can't be prevented (615.12)
     module PlayerRules
@@ -24,7 +27,8 @@ module Enjine
         "cant_sacrifice" => %w[701.21a 614.17b], "cant_cast" => %w[101.2 601.3],
         "cant_cast_except_from_hand" => %w[101.2 601.3], "spells_cant_be_countered" => %w[101.2 701.6a],
         "cant_gain_life" => %w[119.7], "cant_activate" => %w[101.2 602.5],
-        "damage_cant_be_prevented" => %w[615.12], "combat_damage_cant_be_prevented" => %w[615.12]
+        "damage_cant_be_prevented" => %w[615.12], "combat_damage_cant_be_prevented" => %w[615.12],
+        "protection_from_opponents" => %w[702.16b 702.16e 702.16k]
       }.freeze
       # Rules that take a `filter` of permanents (required for cant_sacrifice) or a card spec of `spells`.
       FILTERED = %w[cant_sacrifice cant_activate].freeze

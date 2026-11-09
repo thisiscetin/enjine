@@ -88,7 +88,8 @@ module Enjine
       # protection and hexproof from a quality look at (CR 702.16b, 702.11d).
       def targeting_forbidden?(ref, index, source = nil, targeter: source)
         player = Mechanics::Filters.player_index(self, ref)
-        return player != index && player_rule?(player, "hexproof") if player
+        # CR 702.11c, 702.16k: a player with hexproof or protection from each of their opponents
+        return player != index && (player_rule?(player, "hexproof") || player_rule?(player, "protection_from_opponents")) if player
 
         obj = state.objects[ref]
         return false unless obj && obj.zone == :battlefield
@@ -109,7 +110,7 @@ module Enjine
       def protected_from?(obj, other, kind = :protection_from)
         return false if other.nil?
 
-        chars(obj).abilities.any? { it.ability.kind == kind && it.ability.from?(self, other) }
+        chars(obj).abilities.any? { it.ability.kind == kind && it.ability.from?(self, other, obj) }
       end
 
       # ---- winning and losing by an effect (CR 104.2b, 104.3e) ------------------------------

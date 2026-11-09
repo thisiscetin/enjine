@@ -1537,13 +1537,13 @@ Rules: CR 611.2a, CR 601.3, CR 305.1, CR 400.7, CR 514.2, CR 601.2f, CR 108.3, C
 
 ## player_rule
 
-Each referenced player (default you) gets `rule` for the `duration`: end_of_turn (default) or until_your_next_turn (until the controller's next turn begins). Rules: hexproof, cant_attack, no_max_hand_size, prevent_all_damage, cant_lose_for_life, cant_cast, cant_cast_except_from_hand, spells_cant_be_countered, cant_gain_life, cant_activate, damage_cant_be_prevented, combat_damage_cant_be_prevented.
+Each referenced player (default you) gets `rule` for the `duration`: end_of_turn (default) or until_your_next_turn (until the controller's next turn begins). Rules: hexproof, cant_attack, no_max_hand_size, prevent_all_damage, cant_lose_for_life, cant_cast, cant_cast_except_from_hand, spells_cant_be_countered, cant_gain_life, cant_activate, damage_cant_be_prevented, combat_damage_cant_be_prevented, protection_from_opponents.
 
-Rules: CR 702.11c, CR 115.4, CR 508.1c, CR 402.2, CR 514.1, CR 615.1, CR 615.1a, CR 704.5a, CR 104.3b, CR 701.21a, CR 614.17b, CR 101.2, CR 601.3, CR 701.6a, CR 119.7, CR 602.5, CR 615.12, CR 611.2a, CR 514.2
+Rules: CR 702.11c, CR 115.4, CR 508.1c, CR 402.2, CR 514.1, CR 615.1, CR 615.1a, CR 704.5a, CR 104.3b, CR 701.21a, CR 614.17b, CR 101.2, CR 601.3, CR 701.6a, CR 119.7, CR 602.5, CR 615.12, CR 702.16b, CR 702.16e, CR 702.16k, CR 611.2a, CR 514.2
 
 | Parameter | Description |
 | --- | --- |
-| `rule` | hexproof | cant_attack | no_max_hand_size | prevent_all_damage | cant_lose_for_life | cant_cast | cant_cast_except_from_hand | spells_cant_be_countered | cant_gain_life | cant_activate | damage_cant_be_prevented | combat_damage_cant_be_prevented |
+| `rule` | hexproof | cant_attack | no_max_hand_size | prevent_all_damage | cant_lose_for_life | cant_cast | cant_cast_except_from_hand | spells_cant_be_countered | cant_gain_life | cant_activate | damage_cant_be_prevented | combat_damage_cant_be_prevented | protection_from_opponents |
 | `to` | selector |
 | `duration` | end_of_turn | until_your_next_turn |
 

@@ -116,6 +116,7 @@ module Enjine
     def permanent_view(engine, obj, defn, view)
       view["controller"] = engine.name(obj.controller)
       view["tapped"] = obj.tapped
+      view["name"] = engine.chars(obj).name # "named Humble Merchant" (CR 612.8)
       keywords = engine.chars(obj).keywords # printed plus granted (CR 613.1f), minus removed
       keywords.empty? ? view.delete("keywords") : view["keywords"] = keywords.map(&:to_s)
       if engine.chars(obj).creature? # e.g. a Spacecraft with enough charge counters (CR 722.2b)

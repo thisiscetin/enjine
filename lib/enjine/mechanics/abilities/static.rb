@@ -24,7 +24,7 @@ module Enjine
                                "{\"each\": filter, " \
                                "\"controller\": you|opponent|any, \"other\": true} (relative to the source's " \
                                "controller), \"self\", or \"attached\" (\"equipped/enchanted creature\").",
-                  rules: %w[604.1 604.2 611.3a 613.1d 613.1e 613.1f 613.4b 613.4c 613.7a 613.8a 205.1a 205.1b 301.5f 303.4m],
+                  rules: %w[604.1 604.2 611.3a 612.8 613.1c 205.1a 613.1d 613.1e 613.1f 613.4b 613.4c 613.7a 613.8a 205.1a 205.1b 301.5f 303.4m],
                   params: { "affects" => "{\"each\": filter, \"controller\": ..., \"other\": bool}, \"self\" or \"attached\"",
                             "if" => "condition (\"as long as ...\", \"during your turn\")",
                             "pump" => "{\"power\": amount, \"toughness\": amount} (\"gets +1/+1 for each ...\")",
@@ -35,7 +35,9 @@ module Enjine
                             "abilities" => "list of triggered, activated or mana abilities the affected permanents have",
                             "loses_abilities" => "true: it loses all abilities (\"loses all abilities\")",
                             "colors" => "list of W, U, B, R, G: its colors are exactly these ([] for colorless)",
-                            "base_power_toughness" => "{\"power\": n, \"toughness\": n}" },
+                            "base_power_toughness" => "{\"power\": n, \"toughness\": n}",
+                            "set_types" => "list of card types: its card types are exactly these",
+                            "name" => "its name (\"named Humble Merchant\")" },
                   example: { "static" => { "affects" => { "each" => "creature", "controller" => "you" },
                                            "pump" => { "power" => 1, "toughness" => 1 } } }
 
@@ -43,10 +45,10 @@ module Enjine
         # Data that would make the layer pass depend on its own result (CR 613.8).
         LIVE = %w[power toughness greatest_power attacking blocking tapped].freeze
         KEYS = %w[affects if pump keywords creature_types abilities types subtypes loses_abilities colors
-                  base_power_toughness].freeze
+                  base_power_toughness set_types name].freeze
 
         attr_reader :filter, :controller, :other, :keywords, :creature_types, :condition, :granted, :card_types, :subtypes,
-                    :colors, :base_power_toughness
+                    :colors, :base_power_toughness, :set_types, :name
 
         def self.build(params, errors, path, **)
           Mechanics.check_keys(params, KEYS, errors, path)
@@ -77,8 +79,20 @@ module Enjine
           errors << "#{path}.loses_abilities: must be true (or absent)" unless [nil, true].include?(loses)
           { loses_abilities: loses == true,
             colors: Effects::Become.parse_colors(Mechanics.fetch_param(params, :colors), errors, path),
+            set_types: params.key?("set_types") ? Effects::Become.names_param(params, :set_types, :type, errors, path,
+                                                                             allowed: Effects::Become::ADDABLE_TYPES) : nil,
+            name: parse_name(params, errors, path),
             base_power_toughness: Effects::Become.parse_power_toughness(Mechanics.fetch_param(params, :base_power_toughness),
                                                                         errors, path) }
+        end
+
+        # "named Legitimate Businessperson" (CR 612.8): a non-empty string.
+        def self.parse_name(params, errors, path)
+          name = Mechanics.fetch_param(params, :name)
+          return nil if name.nil?
+
+          errors << "#{path}.name: must be a non-empty string" unless name.is_a?(String) && !name.strip.empty?
+          name.is_a?(String) ? name.freeze : nil
         end
 
         def self.parse_affects(affects, errors, path)
@@ -146,8 +160,11 @@ module Enjine
         end
 
         def initialize(filter:, controller:, other:, pump:, keywords:, creature_types:, condition:, granted:, card_types: [],
-                       subtypes: [], loses_abilities: false, colors: nil, base_power_toughness: nil, chosen_subtype: false)
+                       subtypes: [], loses_abilities: false, colors: nil, base_power_toughness: nil, chosen_subtype: false,
+                       set_types: nil, name: nil)
           super()
+          @set_types = set_types
+          @name = name
           @chosen_subtype = chosen_subtype
           @card_types = card_types.freeze
           @subtypes = subtypes.freeze
@@ -174,6 +191,8 @@ module Enjine
         def pump? = !@pump.empty?
         def loses_abilities? = @loses_abilities
         def adds_subtypes? = @chosen_subtype || !@subtypes.empty?
+        # Whether it changes layers 3-4: the name, card types or subtypes.
+        def type_changes? = !@creature_types.nil? || !@card_types.empty? || adds_subtypes? || !@set_types.nil? || !@name.nil?
 
         # The subtypes it adds: its own, or the type its source chose as it entered (CR 607.2d, 614.12).
         def added_subtypes(source) = @chosen_subtype ? [source.memory["chosen_type"]].compact.map(&:to_sym) : @subtypes
@@ -210,6 +229,8 @@ module Enjine
         def to_s
           bits = []
           bits << "loses all abilities" if loses_abilities?
+          bits << "named #{name}" if name
+          bits << "card types exactly #{set_types.join(" ")}" if set_types
           bits << "colors #{colors.empty? ? "colorless" : colors.join}" if colors
           bits << "base #{base_power_toughness.values.join("/")}" if base_power_toughness
           bits << "#{Effects::Pump.signed_text(@pump["power"] || ZERO)}/#{Effects::Pump.signed_text(@pump["toughness"] || ZERO)}" if pump?

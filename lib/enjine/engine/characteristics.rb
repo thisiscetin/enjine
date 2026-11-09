@@ -139,18 +139,17 @@ module Enjine
       def type_layers(obj, statics, effects)
         base = own_layers(obj, copy_base(obj), effects)
         types = nil
-        added = []
         subtypes = []
-        statics.each do |source, ability|
-          next unless (ability.creature_types || !ability.card_types.empty? || ability.adds_subtypes?) &&
-                      ability.affects?(obj, source, facts(obj, base))
-
+        matching = statics.select { |source, ability| ability.type_changes? && ability.affects?(obj, source, facts(obj, base)) }
+        # Layers 3-4 in timestamp order (CR 613.7a): a name or card types set later win (CR 612.8, 205.1a).
+        matching.each_with_index.sort_by { |(source, _), i| [timestamp_of(source), i] }.each do |(source, ability), _|
+          base = base.with(name: ability.name) if ability.name
+          base = with_set_types(base, ability.set_types) if ability.set_types
           types = ability.creature_types if ability.creature_types
-          added |= ability.card_types
+          base = with_added_types(base, ability.card_types) unless ability.card_types.empty?
           subtypes |= ability.added_subtypes(source)
         end
         effects.each { types = it["types"].map(&:to_sym) if it["kind"] == "creature_types" && it["affected"].include?(obj.id) }
-        base = with_added_types(base, added) unless added.empty?
         base = base.with(subtypes: ((base.subtypes & Characteristics::NON_CREATURE_SUBTYPES) | types).freeze) if types
         base = with_gained_subtypes(base, subtypes - base.subtypes) unless (subtypes - base.subtypes).empty?
         base.creature? || base.power.nil? ? base : base.with(power: nil, toughness: nil)
@@ -170,6 +169,17 @@ module Enjine
         return base if (added - base.types).empty?
 
         base = base.with(types: (base.types | added).freeze)
+        base.creature? && base.power.nil? ? base.with(power: 0, toughness: 0) : base
+      end
+
+      # "Is a black Skeleton creature" (CR 205.1a): the card types are exactly these, and subtypes correlated with
+      # a card type it no longer has are lost (creature types without creature, an Equipment without artifact).
+      def with_set_types(base, set)
+        kept = base.subtypes.select do |sub|
+          correlated = CORRELATED_SUBTYPES.find { |_, list| list.include?(sub) }&.first || :creature
+          set.include?(correlated)
+        end
+        base = base.with(types: set, subtypes: kept.freeze)
         base.creature? && base.power.nil? ? base.with(power: 0, toughness: 0) : base
       end
 
@@ -271,12 +281,16 @@ module Enjine
       end
       # Subtypes that aren't creature types (CR 205.3g-i). "Becomes a Borg artifact creature"
       # replaces creature types only (CR 205.1b).
-      NON_CREATURE_SUBTYPES = %i[
-        attraction blood bobblehead book clue communicator contraption equipment food fortification gold heartwood
-        incubator infinity junk lander map mutagen powerstone spacecraft stone treasure vehicle vibranium
-        aura background cartouche case class curse plan role room rune saga shard shrine
-        cave desert forest gate island lair locus mine mountain plains planet power_plant sphere swamp tower town urzas
-      ].freeze
+      # The card type each of them is correlated with (CR 205.1a).
+      CORRELATED_SUBTYPES = {
+        artifact: %i[attraction blood bobblehead book clue communicator contraption equipment food fortification gold
+                     heartwood incubator infinity junk lander map mutagen powerstone spacecraft stone treasure vehicle
+                     vibranium],
+        enchantment: %i[aura background cartouche case class curse plan role room rune saga shard shrine],
+        land: %i[cave desert forest gate island lair locus mine mountain plains planet power_plant sphere swamp tower town
+                 urzas]
+      }.freeze
+      NON_CREATURE_SUBTYPES = CORRELATED_SUBTYPES.values.flatten.freeze
 
       # ---- layers 4 and 7b from the object's own state ------------------------------------
 
