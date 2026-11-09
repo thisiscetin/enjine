@@ -7,8 +7,9 @@ module Enjine
       # sacrificing, poison counters, a choice between costs). The payer is asked whether to pay — one choice per
       # way the costs could be paid now (CR 118.3), so a `one_of` is chosen with it — then makes the cost's choices
       # (which card to discard) one `effect_choice` at a time, then pays the mana in a "pay" frame (mana abilities
-      # allowed, CR 605.3a); declining or cancelling that payment counts as not paying, and nothing is paid. The
-      # rest is paid once the mana is.
+      # allowed, CR 605.3a); declining or cancelling that payment counts as not paying, and nothing is paid (a card
+      # revealed to behold stays revealed, a permanent tapped for a cost stays tapped). The rest is paid once the
+      # mana is.
       module PaysCosts
         # The costs given as `cost` (a list), or as the shorthands `mana`, `life` and `waterbend`.
         def parse_payment(params, errors, path)
