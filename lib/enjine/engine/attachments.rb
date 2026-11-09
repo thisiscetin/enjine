@@ -49,6 +49,7 @@ module Enjine
         return false if attachment.attached_to == target_id || !can_attach?(attachment, target_id)
 
         attachment.attached_to = target_id
+        attachment.memory["attached_at"] = next_timestamp! # CR 613.7e: a new timestamp (AbilityLayers#timestamp_of)
         emit Events::Attached.new(object: attachment.id, to: target_id)
         true
       end

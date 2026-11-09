@@ -11,7 +11,8 @@ module Enjine
       # what is granted later stays. A static ability's timestamp is its source's (CR 613.7a), an effect's is
       # its own (613.7b) and a keyword counter's is when it was put on (613.7c, see #counter_timestamp). A
       # granted ability is referenced "granted:<card>:<ref>" (the granting card's data holds it, see
-      # #granted_origin).
+      # #granted_origin); one a static ability grants ends with "@<granting permanent>", so it can refer to that
+      # permanent ("Return Trusty Boomerang to its owner's hand", CR 607.1a, Selector "granter").
       def ability_layers(obj, base, statics, effects)
         base = color_layer(obj, base, statics, effects)
         changes = Mechanics::Counters.keywords(obj.counters).map { |kw| [counter_timestamp(obj, kw.to_s), 0, [:keywords, [kw]]] }
@@ -70,8 +71,9 @@ module Enjine
       end
 
       # CR 613.7a, 613.7d: a permanent's timestamp is when it entered the battlefield; its id carries the
-      # counter it was created with, which is the timestamp sequence (#next_timestamp!).
-      def timestamp_of(obj) = obj.id[/\d+\z/].to_i
+      # counter it was created with, which is the timestamp sequence (#next_timestamp!). An Aura or Equipment gets
+      # a new one each time it becomes attached (CR 613.7e) and a permanent each time it transforms (CR 613.7g).
+      def timestamp_of(obj) = [obj.id[/\d+\z/].to_i, obj.memory["attached_at"].to_i, obj.memory["transformed_at"].to_i].max
 
       # CR 613.7c: a keyword counter's timestamp is when it was last put on (Engine#add_counters! records it);
       # one it had as it entered (or from a test board) counts as earliest.
@@ -86,7 +88,7 @@ module Enjine
       def granted_instances(source, ability)
         defn = definition(source)
         ref = own_ability_instances(source).find { it.ability.equal?(ability) }&.ref or return []
-        defn.nested_instances(ref).map { AbilityInstance.new(ref: "granted:#{defn.id}:#{it.ref}", ability: it.ability) }
+        defn.nested_instances(ref).map { AbilityInstance.new(ref: "granted:#{defn.id}:#{it.ref}@#{source.id}", ability: it.ability) }
       end
 
       # Abilities a resolved effect grants (layer 6, CR 613.1f): the effect's card holds them under its ref.
@@ -97,10 +99,15 @@ module Enjine
       end
 
       # For a granted ability's reference: [granting card id, its ref in that card], else nil.
-      def granted_origin(ref)
+      def granted_origin(ref) = AbilityLayers.granted_parts(ref)&.first(2)
+
+      # [granting card id, its ref in that card, granting permanent id or nil] of a granted ability's reference.
+      def self.granted_parts(ref)
         return nil unless ref.start_with?("granted:")
 
-        ref.delete_prefix("granted:").split(":", 2)
+        card, inner = ref.delete_prefix("granted:").split(":", 2)
+        inner, granter = inner.split("@", 2)
+        [card, inner, granter]
       end
     end
 

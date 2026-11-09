@@ -1243,6 +1243,36 @@ A source that left the zone it was in still deals damage with the deathtouch, li
                                  "effects": [{ "additional_phases": { "phases": ["combat"] } }] } }] }
 ```
 
+### 4.27 Names and card types set by statics, protection from opponents, crewing power, "for as long as you control"
+
+| Oracle text | Data |
+| --- | --- |
+| "Enchanted creature loses all abilities and is a black Skeleton creature with base power and toughness 1/1" (it loses its other card types, CR 205.1a) | `static` with `"affects": "attached"`, `"loses_abilities": true`, `"colors": ["B"]`, `"set_types": ["creature"]`, `"creature_types": ["skeleton"]`, `"base_power_toughness": { "power": 1, "toughness": 1 }` |
+| "… named Legitimate Businessperson" (CR 612.8, layer 3) | `"name": "Legitimate Businessperson"` on the same `static` (the legend rule and name filters see it) |
+| "Enchanted permanent is a Construct creature with base power and toughness 5/5 in addition to its other types" | `static` with `"types": ["creature"]`, `"subtypes": ["construct"]`, `"base_power_toughness"` |
+| "You have protection from each of your opponents" (CR 702.16k) | `{ "player_rule": { "rule": "protection_from_opponents" } }` (opponents' spells and abilities can't target you; damage from their sources is prevented) |
+| "Protection from each of your opponents" on a permanent | `{ "protection_from": "each_opponent" }` (also grantable by `static` and `become`) |
+| "Each other creature you control has hexproof from each of its colors" (CR 702.11g) | `static` granting `{ "hexproof_from": "its_colors" }` |
+| "This creature saddles Mounts and crews Vehicles as though its power were 2 greater" | `{ "tapping_power": { "for": ["crew", "saddle"], "plus": 2 } }` |
+| "… crews Vehicles using its toughness rather than its power" / "stations permanents using its toughness" when greater (CR 702.184c) | `"use": "toughness"` / `"use": "toughness_if_greater"` with `"for": ["station"]` (a `static` can grant it) |
+| "Activated abilities of artifacts and creatures can't be activated" (mana abilities included) / "its activated abilities can't be activated" | `static` handing out the keyword `abilities_cant_be_activated` (`"affects": "attached"` for an Aura); `player_rule` `cant_activate` still exempts mana abilities |
+| "Spells and abilities can't be countered" | two `player_rule`s, `spells_cant_be_countered` and `abilities_cant_be_countered`, with `"affects": "each"` |
+| "Gain control of target creature for as long as you control this Vehicle" (CR 611.2b) | `gain_control` or `become` with `"duration": "while_you_control_source"` (ends when this leaves or changes control, and never starts if that has already happened) |
+| "Equipped creature has '{1}, {T}: Tap target creature. Return Trusty Boomerang to its owner's hand.'" (CR 607.1a) | selector `"granter"`: the permanent whose `static` granted the ability (`{ "return_to_hand": { "to": "granter" } }`) |
+| "As this land enters, choose a basic land type. Then you may pay 2 life. If you don't, it enters tapped." | `choose_basic_land_type` then `enters_tapped_unless_pay_life`: several "as this enters" choices are asked in printed order (CR 614.12) |
+
+An Aura or Equipment gets a new timestamp each time it becomes attached, and a permanent each time it
+transforms (CR 613.7e, 613.7g), so a static of an Equipment attached after "loses all abilities" still
+grants its abilities.
+
+```json
+{ "name": "Example Witness Shroud", "mana_cost": "{U}", "types": ["enchantment"], "subtypes": ["aura"],
+  "abilities": [{ "enchant": "creature" },
+                { "static": { "affects": "attached", "loses_abilities": true, "set_types": ["creature"],
+                              "creature_types": ["citizen"], "base_power_toughness": { "power": 1, "toughness": 1 },
+                              "name": "Nobody in Particular" } }] }
+```
+
 ---
 
 ## 5. Worked examples

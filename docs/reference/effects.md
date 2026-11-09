@@ -224,7 +224,7 @@ Rules: CR 701.3a, CR 701.3b, CR 701.3c, CR 301.5c
 
 ## become
 
-Each referenced permanent becomes what the parameters say, for `duration` (end_of_turn, default; indefinite: as long as it stays on the battlefield; while_source_on_battlefield: for as long as this effect's source remains on the battlefield): it has the card `types`, `supertypes` and `subtypes` in addition to its other types (layer 4, "becomes an artifact creature"), its creature types are exactly `creature_types` (layer 4), its colors are `colors` (layer 5), with `loses_abilities: true` it loses all the abilities it had (layer 6; abilities granted later, keyword counters put on it later and this effect's own `keywords` and `abilities` stay, CR 613.7), it has the `keywords` and `abilities` (layer 6: triggered, activated, mana, play_from or additional_land_plays abilities) and its base power and toughness are `base_power_toughness` (layer 7b). A permanent that becomes a creature has its printed power and toughness (a Vehicle's), or 0/0.
+Each referenced permanent becomes what the parameters say, for `duration` (end_of_turn, default; indefinite: as long as it stays on the battlefield; while_source_on_battlefield: for as long as this effect's source remains on the battlefield; while_you_control_source: for as long as you control it): it has the card `types`, `supertypes` and `subtypes` in addition to its other types (layer 4, "becomes an artifact creature"), its creature types are exactly `creature_types` (layer 4), its colors are `colors` (layer 5), with `loses_abilities: true` it loses all the abilities it had (layer 6; abilities granted later, keyword counters put on it later and this effect's own `keywords` and `abilities` stay, CR 613.7), it has the `keywords` and `abilities` (layer 6: triggered, activated, mana, play_from or additional_land_plays abilities) and its base power and toughness are `base_power_toughness` (layer 7b). A permanent that becomes a creature has its printed power and toughness (a Vehicle's), or 0/0.
 
 Rules: CR 611.2a, CR 611.2b, CR 611.2c, CR 613.1d, CR 613.1e, CR 613.1f, CR 613.4b, CR 613.7b, CR 205.1a, CR 205.1b, CR 301.7b, CR 514.2
 
@@ -239,7 +239,7 @@ Rules: CR 611.2a, CR 611.2b, CR 611.2c, CR 613.1d, CR 613.1e, CR 613.1f, CR 613.
 | `keywords` | list of keywords it gains |
 | `base_power_toughness` | {"power": n, "toughness": n} |
 | `abilities` | list of abilities it gains |
-| `duration` | end_of_turn | indefinite | while_source_on_battlefield |
+| `duration` | end_of_turn | indefinite | while_source_on_battlefield | while_you_control_source |
 | `to` | selector |
 
 ```json
@@ -1295,7 +1295,7 @@ Rules: CR 705.1, CR 705.2, CR 608.2c
 
 ## gain_control
 
-The player referenced by `gains` (default you) gains control of each referenced permanent: indefinitely (`duration: "permanent"`, default), until end of turn, or for as long as this effect's source remains on the battlefield / tapped (it does nothing if that is already over). A permanent that changes control leaves combat and is newly under its controller's control (it can't attack or {T} without haste).
+The player referenced by `gains` (default you) gains control of each referenced permanent: indefinitely (`duration: "permanent"`, default), until end of turn, or for as long as this effect's source remains on the battlefield / tapped / under your control (it does nothing if that is already over). A permanent that changes control leaves combat and is newly under its controller's control (it can't attack or {T} without haste).
 
 Rules: CR 613.1b, CR 108.4, CR 506.4, CR 302.6, CR 514.2, CR 611.2b
 
@@ -1303,7 +1303,7 @@ Rules: CR 613.1b, CR 108.4, CR 506.4, CR 302.6, CR 514.2, CR 611.2b
 | --- | --- |
 | `to` | selector (permanents) |
 | `gains` | selector (a player; default "you") |
-| `duration` | permanent | end_of_turn | while_source_on_battlefield | while_source_tapped |
+| `duration` | permanent | end_of_turn | while_source_on_battlefield | while_source_tapped | while_you_control_source |
 
 ```json
 {
@@ -1596,13 +1596,13 @@ Rules: CR 611.2a, CR 601.3, CR 305.1, CR 400.7, CR 514.2, CR 601.2f, CR 108.3, C
 
 ## player_rule
 
-Each referenced player (default you) gets `rule` for the `duration`: end_of_turn (default) or until_your_next_turn (until the controller's next turn begins). Rules: hexproof, cant_attack, no_max_hand_size, prevent_all_damage, cant_lose_for_life, cant_cast, cant_cast_except_from_hand, spells_cant_be_countered, cant_gain_life, cant_activate, damage_cant_be_prevented, combat_damage_cant_be_prevented.
+Each referenced player (default you) gets `rule` for the `duration`: end_of_turn (default) or until_your_next_turn (until the controller's next turn begins). Rules: hexproof, cant_attack, no_max_hand_size, prevent_all_damage, cant_lose_for_life, cant_cast, cant_cast_except_from_hand, spells_cant_be_countered, abilities_cant_be_countered, cant_gain_life, cant_activate, damage_cant_be_prevented, combat_damage_cant_be_prevented, protection_from_opponents.
 
-Rules: CR 702.11c, CR 115.4, CR 508.1c, CR 402.2, CR 514.1, CR 615.1, CR 615.1a, CR 704.5a, CR 104.3b, CR 701.21a, CR 614.17b, CR 101.2, CR 601.3, CR 701.6a, CR 119.7, CR 602.5, CR 615.12, CR 611.2a, CR 514.2
+Rules: CR 702.11c, CR 115.4, CR 508.1c, CR 402.2, CR 514.1, CR 615.1, CR 615.1a, CR 704.5a, CR 104.3b, CR 701.21a, CR 614.17b, CR 101.2, CR 601.3, CR 701.6a, CR 119.7, CR 602.5, CR 615.12, CR 702.16b, CR 702.16e, CR 702.16k, CR 611.2a, CR 514.2
 
 | Parameter | Description |
 | --- | --- |
-| `rule` | hexproof | cant_attack | no_max_hand_size | prevent_all_damage | cant_lose_for_life | cant_cast | cant_cast_except_from_hand | spells_cant_be_countered | cant_gain_life | cant_activate | damage_cant_be_prevented | combat_damage_cant_be_prevented |
+| `rule` | hexproof | cant_attack | no_max_hand_size | prevent_all_damage | cant_lose_for_life | cant_cast | cant_cast_except_from_hand | spells_cant_be_countered | abilities_cant_be_countered | cant_gain_life | cant_activate | damage_cant_be_prevented | combat_damage_cant_be_prevented | protection_from_opponents |
 | `to` | selector |
 | `duration` | end_of_turn | until_your_next_turn |
 

@@ -1,0 +1,981 @@
+[
+  {
+    "name": "Island",
+    "types": [
+      "land"
+    ],
+    "supertypes": [
+      "basic"
+    ],
+    "subtypes": [
+      "island"
+    ],
+    "rarity": "common",
+    "printing": {
+      "set": "sos",
+      "number": "274"
+    }
+  },
+  {
+    "name": "Eaten by Piranhas",
+    "mana_cost": "{1}{U}",
+    "types": [
+      "enchantment"
+    ],
+    "subtypes": [
+      "aura"
+    ],
+    "keywords": [
+      "flash"
+    ],
+    "abilities": [
+      {
+        "enchant": "creature"
+      },
+      {
+        "static": {
+          "affects": "attached",
+          "loses_abilities": true,
+          "colors": [
+            "B"
+          ],
+          "set_types": [
+            "creature"
+          ],
+          "creature_types": [
+            "skeleton"
+          ],
+          "base_power_toughness": {
+            "power": 1,
+            "toughness": 1
+          }
+        }
+      }
+    ],
+    "rarity": "uncommon",
+    "printing": {
+      "set": "fdn",
+      "number": "507"
+    }
+  },
+  {
+    "name": "Witness Protection",
+    "mana_cost": "{U}",
+    "types": [
+      "enchantment"
+    ],
+    "subtypes": [
+      "aura"
+    ],
+    "abilities": [
+      {
+        "enchant": "creature"
+      },
+      {
+        "static": {
+          "affects": "attached",
+          "loses_abilities": true,
+          "colors": [
+            "G",
+            "W"
+          ],
+          "set_types": [
+            "creature"
+          ],
+          "creature_types": [
+            "citizen"
+          ],
+          "base_power_toughness": {
+            "power": 1,
+            "toughness": 1
+          },
+          "name": "Legitimate Businessperson"
+        }
+      }
+    ],
+    "rarity": "common",
+    "printing": {
+      "set": "fdn",
+      "number": "168"
+    }
+  },
+  {
+    "name": "Honest Work",
+    "mana_cost": "{U}",
+    "types": [
+      "enchantment"
+    ],
+    "subtypes": [
+      "aura"
+    ],
+    "abilities": [
+      {
+        "enchant": {
+          "creature": {
+            "controller": "opponent"
+          }
+        }
+      },
+      {
+        "triggered": {
+          "when": {
+            "enters": {}
+          },
+          "effects": [
+            {
+              "tap": {
+                "to": "attached"
+              }
+            },
+            {
+              "remove_all_counters": {
+                "to": "attached"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "static": {
+          "affects": "attached",
+          "loses_abilities": true,
+          "creature_types": [
+            "citizen"
+          ],
+          "base_power_toughness": {
+            "power": 1,
+            "toughness": 1
+          },
+          "abilities": [
+            {
+              "mana": {
+                "cost": [
+                  "tap"
+                ],
+                "produce": "{C}"
+              }
+            }
+          ],
+          "name": "Humble Merchant"
+        }
+      }
+    ],
+    "rarity": "uncommon",
+    "printing": {
+      "set": "tla",
+      "number": "55"
+    }
+  },
+  {
+    "name": "Puppet Crafting",
+    "mana_cost": "{1}{G}",
+    "types": [
+      "enchantment"
+    ],
+    "subtypes": [
+      "aura"
+    ],
+    "abilities": [
+      {
+        "enchant": {
+          "permanent": {
+            "any_of": [
+              "artifact",
+              "enchantment"
+            ],
+            "not_subtypes": [
+              "aura"
+            ]
+          }
+        }
+      },
+      {
+        "static": {
+          "affects": "attached",
+          "types": [
+            "creature"
+          ],
+          "subtypes": [
+            "construct"
+          ],
+          "base_power_toughness": {
+            "power": 5,
+            "toughness": 5
+          }
+        }
+      },
+      {
+        "activated": {
+          "cost": [
+            {
+              "mana": "{4}{G}"
+            }
+          ],
+          "zone": "graveyard",
+          "effects": [
+            {
+              "return_to_hand": {
+                "to": "self"
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "rare",
+    "printing": {
+      "set": "fra",
+      "number": "111"
+    }
+  },
+  {
+    "name": "Alacrian Armory",
+    "mana_cost": "{3}{W}",
+    "types": [
+      "artifact"
+    ],
+    "abilities": [
+      {
+        "static": {
+          "affects": {
+            "each": "creature",
+            "controller": "you"
+          },
+          "pump": {
+            "power": 0,
+            "toughness": 1
+          },
+          "keywords": [
+            "vigilance"
+          ]
+        }
+      },
+      {
+        "triggered": {
+          "when": {
+            "step_begins": {
+              "step": "beginning_of_combat",
+              "whose": "your"
+            }
+          },
+          "targets": [
+            {
+              "filter": {
+                "permanent": {
+                  "controller": "you",
+                  "subtypes": [
+                    "mount",
+                    "vehicle"
+                  ]
+                }
+              },
+              "optional": true
+            }
+          ],
+          "effects": [
+            {
+              "become_saddled": {
+                "to": {
+                  "target": 0
+                },
+                "if": {
+                  "targets": {
+                    "permanent": {
+                      "subtypes": [
+                        "mount"
+                      ]
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "become": {
+                "types": [
+                  "artifact",
+                  "creature"
+                ],
+                "to": {
+                  "target": 0
+                },
+                "if": {
+                  "targets": {
+                    "permanent": {
+                      "subtypes": [
+                        "vehicle"
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "uncommon",
+    "printing": {
+      "set": "dft",
+      "number": "2"
+    }
+  },
+  {
+    "name": "Absolute Virtue",
+    "mana_cost": "{6}{W}{U}",
+    "types": [
+      "creature"
+    ],
+    "supertypes": [
+      "legendary"
+    ],
+    "subtypes": [
+      "avatar",
+      "warrior"
+    ],
+    "power": 8,
+    "toughness": 8,
+    "keywords": [
+      "cant_be_countered",
+      "flying"
+    ],
+    "abilities": [
+      {
+        "player_rule": {
+          "rule": "protection_from_opponents"
+        }
+      }
+    ],
+    "rarity": "mythic",
+    "printing": {
+      "set": "fin",
+      "number": "212"
+    }
+  },
+  {
+    "name": "Figure of Fable",
+    "mana_cost": "{G/W}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "kithkin"
+    ],
+    "power": 1,
+    "toughness": 1,
+    "abilities": [
+      {
+        "activated": {
+          "cost": [
+            {
+              "mana": "{G/W}"
+            }
+          ],
+          "effects": [
+            {
+              "become": {
+                "creature_types": [
+                  "kithkin",
+                  "scout"
+                ],
+                "base_power_toughness": {
+                  "power": 2,
+                  "toughness": 3
+                },
+                "duration": "indefinite",
+                "to": "self"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "activated": {
+          "cost": [
+            {
+              "mana": "{1}{G/W}{G/W}"
+            }
+          ],
+          "effects": [
+            {
+              "become": {
+                "creature_types": [
+                  "kithkin",
+                  "soldier"
+                ],
+                "base_power_toughness": {
+                  "power": 4,
+                  "toughness": 5
+                },
+                "duration": "indefinite",
+                "to": "self",
+                "if": {
+                  "source": {
+                    "creature": {
+                      "subtypes": [
+                        "scout"
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          ]
+        }
+      },
+      {
+        "activated": {
+          "cost": [
+            {
+              "mana": "{3}{G/W}{G/W}{G/W}"
+            }
+          ],
+          "effects": [
+            {
+              "become": {
+                "creature_types": [
+                  "kithkin",
+                  "avatar"
+                ],
+                "base_power_toughness": {
+                  "power": 7,
+                  "toughness": 8
+                },
+                "abilities": [
+                  {
+                    "protection_from": "each_opponent"
+                  }
+                ],
+                "duration": "indefinite",
+                "to": "self",
+                "if": {
+                  "source": {
+                    "creature": {
+                      "subtypes": [
+                        "soldier"
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "rare",
+    "printing": {
+      "set": "ecl",
+      "number": "224"
+    }
+  },
+  {
+    "name": "Tam, Mindful First-Year",
+    "mana_cost": "{1}{G/U}",
+    "types": [
+      "creature"
+    ],
+    "supertypes": [
+      "legendary"
+    ],
+    "subtypes": [
+      "gorgon",
+      "wizard"
+    ],
+    "power": 2,
+    "toughness": 2,
+    "abilities": [
+      {
+        "static": {
+          "affects": {
+            "each": "creature",
+            "controller": "you",
+            "other": true
+          },
+          "abilities": [
+            {
+              "hexproof_from": "its_colors"
+            }
+          ]
+        }
+      },
+      {
+        "activated": {
+          "cost": [
+            "tap"
+          ],
+          "targets": [
+            {
+              "creature": {
+                "controller": "you"
+              }
+            }
+          ],
+          "effects": [
+            {
+              "become": {
+                "colors": [
+                  "W",
+                  "U",
+                  "B",
+                  "R",
+                  "G"
+                ],
+                "to": {
+                  "target": 0
+                }
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "rare",
+    "printing": {
+      "set": "ecl",
+      "number": "245"
+    }
+  },
+  {
+    "name": "Dynamite Diver",
+    "mana_cost": "{R}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "goblin",
+      "pilot"
+    ],
+    "power": 1,
+    "toughness": 1,
+    "abilities": [
+      {
+        "tapping_power": {
+          "for": [
+            "crew",
+            "saddle"
+          ],
+          "plus": 2
+        }
+      },
+      {
+        "triggered": {
+          "when": {
+            "dies": {}
+          },
+          "targets": [
+            "any_target"
+          ],
+          "effects": [
+            {
+              "deal_damage": {
+                "amount": 1,
+                "to": {
+                  "target": 0
+                }
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "common",
+    "printing": {
+      "set": "dft",
+      "number": "123"
+    }
+  },
+  {
+    "name": "Cloudspire Captain",
+    "mana_cost": "{2}{W}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "human",
+      "pilot"
+    ],
+    "power": 2,
+    "toughness": 3,
+    "abilities": [
+      {
+        "static": {
+          "affects": {
+            "each": {
+              "permanent": {
+                "subtypes": [
+                  "mount",
+                  "vehicle"
+                ]
+              }
+            },
+            "controller": "you"
+          },
+          "pump": {
+            "power": 1,
+            "toughness": 1
+          }
+        }
+      },
+      {
+        "tapping_power": {
+          "for": [
+            "crew",
+            "saddle"
+          ],
+          "plus": 2
+        }
+      }
+    ],
+    "rarity": "uncommon",
+    "printing": {
+      "set": "dft",
+      "number": "9"
+    }
+  },
+  {
+    "name": "Tapestry Warden",
+    "mana_cost": "{3}{G}",
+    "types": [
+      "artifact",
+      "creature"
+    ],
+    "subtypes": [
+      "robot",
+      "soldier"
+    ],
+    "power": 3,
+    "toughness": 4,
+    "keywords": [
+      "vigilance"
+    ],
+    "abilities": [
+      {
+        "static": {
+          "affects": {
+            "each": "creature",
+            "controller": "you"
+          },
+          "keywords": [
+            "assigns_damage_by_toughness"
+          ],
+          "abilities": [
+            {
+              "tapping_power": {
+                "for": [
+                  "station"
+                ],
+                "use": "toughness_if_greater"
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "uncommon",
+    "printing": {
+      "set": "eoe",
+      "number": "209"
+    }
+  },
+  {
+    "name": "Possession Engine",
+    "mana_cost": "{3}{U}{U}",
+    "types": [
+      "artifact"
+    ],
+    "subtypes": [
+      "vehicle"
+    ],
+    "power": 5,
+    "toughness": 5,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "enters": {}
+          },
+          "targets": [
+            {
+              "creature": {
+                "controller": "opponent"
+              }
+            }
+          ],
+          "effects": [
+            {
+              "gain_control": {
+                "to": {
+                  "target": 0
+                },
+                "duration": "while_you_control_source"
+              }
+            },
+            {
+              "become": {
+                "keywords": [
+                  "cant_attack",
+                  "cant_block"
+                ],
+                "duration": "while_you_control_source",
+                "to": {
+                  "target": 0
+                }
+              }
+            }
+          ]
+        }
+      },
+      {
+        "crew": {
+          "power": 3
+        }
+      }
+    ],
+    "rarity": "rare",
+    "printing": {
+      "set": "dft",
+      "number": "54"
+    }
+  },
+  {
+    "name": "Ty Lee, Chi Blocker",
+    "mana_cost": "{2}{U}",
+    "types": [
+      "creature"
+    ],
+    "supertypes": [
+      "legendary"
+    ],
+    "subtypes": [
+      "human",
+      "performer",
+      "ally"
+    ],
+    "power": 2,
+    "toughness": 1,
+    "keywords": [
+      "flash",
+      "prowess"
+    ],
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "enters": {}
+          },
+          "targets": [
+            {
+              "filter": "creature",
+              "optional": true
+            }
+          ],
+          "effects": [
+            {
+              "tap": {
+                "to": {
+                  "target": 0
+                }
+              }
+            },
+            {
+              "become": {
+                "keywords": [
+                  "doesnt_untap"
+                ],
+                "duration": "while_you_control_source",
+                "to": {
+                  "target": 0
+                }
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "rare",
+    "printing": {
+      "set": "tla",
+      "number": "76"
+    }
+  },
+  {
+    "name": "Clarion Conqueror",
+    "mana_cost": "{2}{W}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "dragon"
+    ],
+    "power": 3,
+    "toughness": 3,
+    "keywords": [
+      "flying"
+    ],
+    "abilities": [
+      {
+        "static": {
+          "affects": {
+            "each": {
+              "permanent": {
+                "any_of": [
+                  "artifact",
+                  "creature",
+                  "planeswalker"
+                ]
+              }
+            }
+          },
+          "keywords": [
+            "abilities_cant_be_activated"
+          ]
+        }
+      }
+    ],
+    "rarity": "rare",
+    "printing": {
+      "set": "tdm",
+      "number": "5"
+    }
+  },
+  {
+    "name": "Stuck in Summoner's Sanctum",
+    "mana_cost": "{2}{U}",
+    "types": [
+      "enchantment"
+    ],
+    "subtypes": [
+      "aura"
+    ],
+    "keywords": [
+      "flash"
+    ],
+    "abilities": [
+      {
+        "enchant": {
+          "permanent": {
+            "any_of": [
+              "artifact",
+              "creature"
+            ]
+          }
+        }
+      },
+      {
+        "triggered": {
+          "when": {
+            "enters": {}
+          },
+          "effects": [
+            {
+              "tap": {
+                "to": "attached"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "static": {
+          "affects": "attached",
+          "keywords": [
+            "doesnt_untap",
+            "abilities_cant_be_activated"
+          ]
+        }
+      }
+    ],
+    "rarity": "common",
+    "printing": {
+      "set": "fin",
+      "number": "76"
+    }
+  },
+  {
+    "name": "Trusty Boomerang",
+    "mana_cost": "{1}",
+    "types": [
+      "artifact"
+    ],
+    "subtypes": [
+      "equipment"
+    ],
+    "abilities": [
+      {
+        "static": {
+          "affects": "attached",
+          "abilities": [
+            {
+              "activated": {
+                "cost": [
+                  {
+                    "mana": "{1}"
+                  },
+                  "tap"
+                ],
+                "targets": [
+                  "creature"
+                ],
+                "effects": [
+                  {
+                    "tap": {
+                      "to": {
+                        "target": 0
+                      }
+                    }
+                  },
+                  {
+                    "return_to_hand": {
+                      "to": "granter"
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      },
+      {
+        "equip": {
+          "cost": [
+            {
+              "mana": "{1}"
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "uncommon",
+    "printing": {
+      "set": "tla",
+      "number": "260"
+    }
+  },
+  {
+    "name": "Multiversal Passage",
+    "types": [
+      "land"
+    ],
+    "abilities": [
+      {
+        "choose_basic_land_type": {}
+      },
+      {
+        "enters_tapped_unless_pay_life": {
+          "life": 2
+        }
+      },
+      {
+        "static": {
+          "affects": "self",
+          "subtypes": "chosen"
+        }
+      }
+    ],
+    "rarity": "rare",
+    "printing": {
+      "set": "spm",
+      "number": "180"
+    }
+  }
+]

@@ -141,10 +141,17 @@ module Enjine
         (data["follow_ups"] ||= []) << entry.merge("facts" => facts.compact)
       end
 
-      # Protection from the source's quality prevents the damage (CR 702.16e).
+      # Protection from the source's quality prevents the damage (CR 702.16e), also a player's protection from each
+      # of their opponents (CR 702.16k).
       def protected?(engine, data)
+        source = engine.state.objects[data["source"]]
+        player = Filters.player_index(engine, data["target"])
+        if player
+          return !source.nil? && engine.player_rule?(player, "protection_from_opponents") &&
+                 Abilities::QualityAbility.opponents?(source, player)
+        end
         target = engine.state.objects[data["target"]]
-        target&.zone == :battlefield && engine.protected_from?(target, engine.state.objects[data["source"]])
+        target&.zone == :battlefield && engine.protected_from?(target, source)
       end
 
       # CR 615.12: a game rule (Engine::Rules#unpreventable?), a static ability or a resolved effect.

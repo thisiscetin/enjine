@@ -12,7 +12,7 @@ module Enjine
       # on the battlefield. Granted abilities are part of this card's data, referenced "<this effect's ref>:<j>"
       # (CardDefinition#effect_granted); on the permanent they are "granted:<card>:<ref>:<j>".
       class Become < Effect
-        DURATIONS = %w[end_of_turn indefinite while_source_on_battlefield].freeze
+        DURATIONS = %w[end_of_turn indefinite while_source_on_battlefield while_you_control_source].freeze
         GRANTABLE = %i[triggered mana activated play_from additional_land_plays hexproof_from protection_from].freeze
         # Card types an effect can add (CR 205.1b); instants, sorceries and planeswalkers aren't permanents it makes.
         ADDABLE_TYPES = %w[artifact creature enchantment land].freeze
@@ -23,7 +23,7 @@ module Enjine
                   description: "Each referenced permanent becomes what the parameters say, for `duration` " \
                                "(end_of_turn, default; indefinite: as long as it stays on the battlefield; " \
                                "while_source_on_battlefield: for as long as this effect's source remains on the " \
-                               "battlefield): it has " \
+                               "battlefield; while_you_control_source: for as long as you control it): it has " \
                                "the card `types`, `supertypes` and `subtypes` in addition to its other types (layer 4, " \
                                "\"becomes an artifact creature\"), its creature types are exactly `creature_types` " \
                                "(layer 4), its colors are `colors` (layer 5), with `loses_abilities: true` it loses all " \
@@ -97,7 +97,9 @@ module Enjine
           case @duration
           when "indefinite" then { "duration" => "permanent" }
           when "end_of_turn" then { "duration" => "end_of_turn" }
-          else engine.state.battlefield.include?(ctx.source) ? { "duration" => @duration, "source" => ctx.source } : nil
+          else
+            holds = engine.source_duration_holds?(@duration, ctx.source, ctx.controller)
+            holds ? { "duration" => @duration, "source" => ctx.source } : nil
           end
         end
 

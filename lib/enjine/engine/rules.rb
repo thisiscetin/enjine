@@ -35,8 +35,14 @@ module Enjine
           chars(obj).abilities.any? { it.ability.kind == :cast_restriction && !it.ability.allows?(self, index, obj) }
       end
 
-      # CR 602.5, 101.2: abilities of a permanent matching a `cant_activate` filter can't be activated.
-      def activation_forbidden?(index, obj) = obj.zone == :battlefield && player_rule?(index, "cant_activate", obj)
+      # CR 602.5, 101.2: abilities of a permanent matching a `cant_activate` filter can't be activated, nor any of a
+      # permanent whose activated abilities can't be activated (#mana_abilities_forbidden?).
+      def activation_forbidden?(index, obj)
+        obj.zone == :battlefield && (mana_abilities_forbidden?(obj) || player_rule?(index, "cant_activate", obj))
+      end
+
+      # CR 602.5, 605.3a: "its activated abilities can't be activated" covers its mana abilities too.
+      def mana_abilities_forbidden?(obj) = chars(obj).keyword?(:abilities_cant_be_activated)
 
       # CR 615.12: damage that can't be prevented.
       def unpreventable?(combat) = game_rule?("damage_cant_be_prevented") || (combat && game_rule?("combat_damage_cant_be_prevented"))
@@ -90,7 +96,8 @@ module Enjine
       # protection and hexproof from a quality look at (CR 702.16b, 702.11d).
       def targeting_forbidden?(ref, index, source = nil, targeter: source)
         player = Mechanics::Filters.player_index(self, ref)
-        return player != index && player_rule?(player, "hexproof") if player
+        # CR 702.11c, 702.16k: a player with hexproof or protection from each of their opponents
+        return player != index && (player_rule?(player, "hexproof") || player_rule?(player, "protection_from_opponents")) if player
 
         obj = state.objects[ref]
         return false unless obj && obj.zone == :battlefield
@@ -111,7 +118,7 @@ module Enjine
       def protected_from?(obj, other, kind = :protection_from)
         return false if other.nil?
 
-        chars(obj).abilities.any? { it.ability.kind == kind && it.ability.from?(self, other) }
+        chars(obj).abilities.any? { it.ability.kind == kind && it.ability.from?(self, other, obj) }
       end
 
       # ---- winning and losing by an effect (CR 104.2b, 104.3e) ------------------------------
@@ -177,6 +184,7 @@ module Enjine
         obj.controller = controller
         obj.controlled_since = state.turn
         emit Events::ControlChanged.new(object: obj.id, controller: name(controller))
+        end_while_source_effects!(obj.id, %w[while_you_control_source]) # CR 611.2b: "for as long as you control"
       end
 
       # Control of `obj` for a while: until end of turn, an effect that ends in the cleanup step (CR 514.2), handing
@@ -242,8 +250,21 @@ module Enjine
         state.battlefield.include?(source) && object(source).tapped
       end
 
-      # "For as long as [source] remains tapped / on the battlefield" (CR 611.2b).
-      WHILE_SOURCE = %w[while_source_tapped while_source_on_battlefield].freeze
+      # "For as long as [source] remains tapped / on the battlefield", "for as long as you control [source]" (CR 611.2b).
+      WHILE_SOURCE = %w[while_source_tapped while_source_on_battlefield while_you_control_source].freeze
+
+      # Whether a "for as long as" duration about `source` holds now for an effect controlled by `controller`; one
+      # that has already ended never starts (CR 611.2b). Other durations always hold.
+      def source_duration_holds?(duration, source, controller)
+        return true unless WHILE_SOURCE.include?(duration)
+        return false unless state.battlefield.include?(source)
+
+        case duration
+        when "while_source_tapped" then object(source).tapped
+        when "while_you_control_source" then object(source).controller == controller
+        else true
+        end
+      end
 
       # CR 611.2b: once the duration ends (the source untaps, leaves or phases out, CR 702.26f), the effect
       # is over for good, even if the source becomes tapped again. Untapping ends only `while_source_tapped`.

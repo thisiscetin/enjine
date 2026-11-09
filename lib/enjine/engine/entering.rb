@@ -12,25 +12,37 @@ module Enjine
         end
       end
 
-      # An "as this enters" choice the controller must make before `id` enters (CR 614.12). `id` may also
-      # be an object (a stand-in), name a land played from outside the game, or a token an effect is about
-      # to create (see #token_key).
-      def entering_choice(id)
+      # The "as this enters" choices the controller must make before `id` enters (CR 614.12), in printed order
+      # (Multiversal Passage: a basic land type, then pay 2 life or enter tapped). `id` may also be an object (a
+      # stand-in), name a land played from outside the game, or a token an effect is about to create (see
+      # #token_key).
+      def entering_choices(id)
         id = outside_object(nil, outside_card(id)) if outside_key?(id)
         abilities = if id.is_a?(GameObject) || state.objects.key?(id) then chars(id).abilities
                     else token_to_create(id).printed_characteristics.abilities
                     end
-        abilities.map(&:ability).find { it.kind == :entering_choice }
+        abilities.map(&:ability).select { it.kind == :entering_choice }
       end
+
+      def entering_choice(id) = entering_choices(id).first
+
+      # The answers given so far, one per choice in order (a single answer from an older snapshot counts as one).
+      def self.answers(given) = given.is_a?(Hash) ? [given] : Array(given)
+
+      # Whether `id` still has an "as this enters" choice to make, given the answers so far.
+      def entering_choice_pending?(id, given) = entering_choices(id).size > Entering.answers(given).size
 
       # Records the answer to an enter_choice decision on the frame that asked, or, for a permanent an
       # effect puts onto the battlefield, in that effect's locals (#ask_entering_choices!).
       def enter_choice!(option)
         answer = option.transform_keys(&:to_s)
         if state.pending["effect"]
-          (answering_locals["entering"] ||= {})[state.pending["object"]] = answer.merge("player" => state.pending["player"])
+          answers = (answering_locals["entering"] ||= {})
+          id = state.pending["object"]
+          answers[id] = Entering.answers(answers[id]) + [answer.merge("player" => state.pending["player"])]
         else
-          state.frames.last["enter"] = answer
+          frame = state.frames.last
+          frame["enter"] = Entering.answers(frame["enter"]) + [answer]
         end
         ask!(nil)
       end
@@ -40,26 +52,40 @@ module Enjine
         :wait
       end
 
-      def enters_from_answer(id, frame)
-        choice = entering_choice(id)
-        return nil unless choice && frame["enter"]
+      def enters_from_answer(id, frame) = entering_statuses(id, Entering.answers(frame["enter"]))
 
-        entering_status(choice, frame["enter"])
+      # What a permanent enters with given its "as this enters" answers, combined (memories merged, counters
+      # added, tapped if any says so), or nil.
+      def entering_statuses(id, answers)
+        choices = entering_choices(id)
+        answers.each_with_index.reduce(nil) do |status, (answer, i)|
+          extra = choices[i] && entering_status(choices[i], answer)
+          next status || extra unless status && extra
+
+          status.merge(extra) do |key, mine, theirs|
+            next mine || theirs if key == "tapped"
+            next mine.merge(theirs) { |_, a, b| a + b } if key == "counters"
+
+            mine.is_a?(Hash) ? mine.merge(theirs) : theirs
+          end
+        end
       end
 
-      # What a permanent enters with given its "as this enters" answer (a memory, tapped, a copy, CR 707.5).
+      # What a permanent enters with given one "as this enters" answer (a memory, tapped, a copy, CR 707.5).
       def entering_status(choice, answer)
         answer = answer.except("player").transform_keys(&:to_sym)
         choice.respond_to?(:enters_with) ? choice.enters_with(self, answer) : choice.enters_for(answer)
       end
 
-      # What an "as this enters" answer pays as the permanent enters: life (CR 119.4), or beholding (CR 701.4a).
+      # What the "as this enters" answers pay as the permanent enters: life (CR 119.4), or beholding (CR 701.4a).
       def pay_entering_cost!(controller, frame)
-        case frame["enter"] && frame["enter"]["type"]
-        when "pay_life" then change_life!(controller, -frame["enter"]["life"])
-        when "behold"
-          id = frame["enter"]["object"]
-          Mechanics::Beholding.behold!(self, controller, id) if state.objects.key?(id)
+        Entering.answers(frame["enter"]).each do |answer|
+          case answer["type"]
+          when "pay_life" then change_life!(controller, -answer["life"])
+          when "behold"
+            id = answer["object"]
+            Mechanics::Beholding.behold!(self, controller, id) if state.objects.key?(id)
+          end
         end
       end
 
@@ -70,7 +96,7 @@ module Enjine
       # stay in the effect's locals (Engine#enter_choice!), so the effect resumes after each. :wait while asking.
       def ask_entering_choices!(locals, entries)
         answers = locals["entering"] ||= {}
-        id, controller = entries.find { |ref, _| !answers.key?(ref) && entering_choice(ref) }
+        id, controller = entries.find { |ref, _| entering_choice_pending?(ref, answers[ref]) }
         return nil unless id
 
         token = state.objects.key?(id) ? {} : { "card" => token_to_create(id).id }
@@ -92,9 +118,9 @@ module Enjine
       # The entering status `enters` plus what the "as this enters" answer for `id` adds (a memory, tapped);
       # a life payment chosen is paid now, as it enters (CR 119.4).
       def with_entering_answer(locals, id, controller, enters)
-        answer = locals.fetch("entering", {})[id] or return enters
-        pay_entering_cost!(controller, "enter" => answer)
-        extra = entering_status(entering_choice(id), answer) or return enters
+        answers = locals.fetch("entering", {})[id] or return enters
+        pay_entering_cost!(controller, "enter" => answers)
+        extra = entering_statuses(id, Entering.answers(answers)) or return enters
         (enters || {}).merge(extra) do |key, mine, theirs|
           next mine || theirs if key == "tapped" # "enters tapped" from the effect stays
 
@@ -102,13 +128,14 @@ module Enjine
         end
       end
 
-      # The options of a pending enter_choice. Several permanents entering at once can't be given choices
-      # whose combined life payments are more than the player has (CR 614.12b).
+      # The options of a pending enter_choice: the first choice not answered yet. Several permanents entering at
+      # once can't be given choices whose combined life payments are more than the player has (CR 614.12b).
       def entering_options(pending)
-        options = entering_choice(pending["object"]).options(self, pending["player"])
+        given = pending["effect"] ? answering_locals.fetch("entering", {})[pending["object"]] : state.frames.last["enter"]
+        options = entering_choices(pending["object"])[Entering.answers(given).size].options(self, pending["player"])
         return options unless pending["effect"]
 
-        spent = answering_locals.fetch("entering", {}).values.sum do
+        spent = answering_locals.fetch("entering", {}).values.flat_map { Entering.answers(it) }.sum do
           it["player"] == pending["player"] && it["type"] == "pay_life" ? it["life"] : 0
         end
         options.reject { it[:type] == "pay_life" && it[:life] > player(pending["player"]).life - spent }

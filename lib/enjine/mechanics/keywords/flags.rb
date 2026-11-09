@@ -14,7 +14,10 @@ module Enjine
         assigns_damage_by_toughness: ["If this creature's toughness is greater than its power, it assigns combat damage " \
                                       "equal to its toughness rather than its power.", %w[510.1a]],
         keeps_damage: ["Damage isn't removed from this permanent during cleanup steps (remove_damage still removes it).",
-                       %w[514.2 120.6]]
+                       %w[514.2 120.6]],
+        abilities_cant_be_activated: ["Its activated abilities, mana abilities included, can't be activated (\"Activated " \
+                                      "abilities of artifacts can't be activated\" is a static handing it out).",
+                                      %w[602.5 605.3a 101.2]]
       }.each { |name, (description, rules)| Evergreen.define(name, description, rules) }
 
       # Combat restrictions and requirements (CR 508.1c-d, 509.1b). They aren't keyword abilities

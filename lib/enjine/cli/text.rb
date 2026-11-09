@@ -281,7 +281,7 @@ module Enjine
 
       # A granted ability ("granted:<card>:<ref>") lives in the granting card's data.
       def ability_text(id, ref)
-        card, inner = ref.start_with?("granted:") ? ref.delete_prefix("granted:").split(":", 2) : [@game.state.object(id).card, ref]
+        card, inner = Engine::AbilityLayers.granted_parts(ref) || [@game.state.object(id).card, ref]
         @game.catalog.fetch(card).ability(inner).to_s
       end
 

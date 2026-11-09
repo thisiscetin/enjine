@@ -21,8 +21,10 @@ module Enjine
         def choices_needed = power
         def to_s = "Tap any number of other untapped creatures you control with total power #{power} or greater"
 
-        # The power a creature crews with (the place for "crews Vehicles as though its power were 2 greater").
-        def crew_power(engine, creature) = engine.power(creature)
+        # The power a creature crews with: its power, unless it "crews Vehicles as though its power were 2 greater"
+        # or "using its toughness" (Abilities::TappingPower).
+        def crew_power(engine, creature) = Abilities::TappingPower.of(engine, creature, action)
+        def action = :crew
 
         def candidates(engine, object)
           engine.state.battlefield.select do |id|

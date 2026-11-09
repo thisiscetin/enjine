@@ -92,7 +92,7 @@ module Enjine
         out = []
         state.battlefield.each do |id|
           obj = object(id)
-          next unless obj.controller == index
+          next unless obj.controller == index && !mana_abilities_forbidden?(obj) # Engine::Rules
 
           chars(obj).mana_abilities.each { |inst| out << [id, inst.ref] if inst.ability.activatable?(self, obj) }
         end

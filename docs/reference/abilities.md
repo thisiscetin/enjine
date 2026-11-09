@@ -956,13 +956,13 @@ Rules: CR 702.180a, CR 702.180b, CR 118.9, CR 601.2b, CR 601.2f, CR 601.2h
 
 ## hexproof_from
 
-Hexproof from the quality: this permanent can't be the target of spells with the quality, or abilities from sources with it, that its controller's opponents control. The quality is a card spec (`{"colors": ["B"]}`, `{"types": ["instant"]}`, `{"color_count": {"equal": 1}}` for monocolored).
+Hexproof from the quality: this permanent can't be the target of spells with the quality, or abilities from sources with it, that its controller's opponents control. The quality is a card spec (`{"colors": ["B"]}`, `{"types": ["instant"]}`, `{"color_count": {"equal": 1}}` for monocolored), or "its_colors" (hexproof from each of its colors: whatever shares a color with it).
 
-Rules: CR 702.11d, CR 702.11f, CR 115.4
+Rules: CR 702.11d, CR 702.11f, CR 702.11g, CR 115.4
 
 | Parameter | Description |
 | --- | --- |
-| `(value)` | card spec of the quality |
+| `(value)` | card spec of the quality, or "its_colors" |
 
 ```json
 {
@@ -1174,13 +1174,13 @@ Rules: CR 601.3, CR 113.6e, CR 113.6f, CR 305.1, CR 401.5, CR 122.1, CR 614.12, 
 
 ## player_rule
 
-While this permanent is on the battlefield (and its `if` condition holds), `rule` applies to the players in `affects` (you | opponents | each; default you). Rules: hexproof, cant_attack, no_max_hand_size, prevent_all_damage, cant_lose_for_life, cant_sacrifice, cant_cast, cant_cast_except_from_hand, spells_cant_be_countered, cant_gain_life, cant_activate, damage_cant_be_prevented, combat_damage_cant_be_prevented. `cant_sacrifice` takes a `filter` of the permanents that can't be sacrificed, `cant_activate` may take a `filter` of the sources whose abilities can't be activated (mana abilities still can), and `cant_cast` and `spells_cant_be_countered` may take a card spec of the `spells`. The damage rules apply to all damage whichever players they name.
+While this permanent is on the battlefield (and its `if` condition holds), `rule` applies to the players in `affects` (you | opponents | each; default you). Rules: hexproof, cant_attack, no_max_hand_size, prevent_all_damage, cant_lose_for_life, cant_sacrifice, cant_cast, cant_cast_except_from_hand, spells_cant_be_countered, abilities_cant_be_countered, cant_gain_life, cant_activate, damage_cant_be_prevented, combat_damage_cant_be_prevented, protection_from_opponents. `cant_sacrifice` takes a `filter` of the permanents that can't be sacrificed, `cant_activate` may take a `filter` of the sources whose abilities can't be activated (mana abilities still can), and `cant_cast` and `spells_cant_be_countered` may take a card spec of the `spells`. The damage rules apply to all damage whichever players they name.
 
-Rules: CR 702.11c, CR 115.4, CR 508.1c, CR 402.2, CR 514.1, CR 615.1, CR 615.1a, CR 704.5a, CR 104.3b, CR 701.21a, CR 614.17b, CR 101.2, CR 601.3, CR 701.6a, CR 119.7, CR 602.5, CR 615.12, CR 604.1, CR 604.2, CR 611.3a
+Rules: CR 702.11c, CR 115.4, CR 508.1c, CR 402.2, CR 514.1, CR 615.1, CR 615.1a, CR 704.5a, CR 104.3b, CR 701.21a, CR 614.17b, CR 101.2, CR 601.3, CR 701.6a, CR 119.7, CR 602.5, CR 615.12, CR 702.16b, CR 702.16e, CR 702.16k, CR 604.1, CR 604.2, CR 611.3a
 
 | Parameter | Description |
 | --- | --- |
-| `rule` | hexproof | cant_attack | no_max_hand_size | prevent_all_damage | cant_lose_for_life | cant_sacrifice | cant_cast | cant_cast_except_from_hand | spells_cant_be_countered | cant_gain_life | cant_activate | damage_cant_be_prevented | combat_damage_cant_be_prevented |
+| `rule` | hexproof | cant_attack | no_max_hand_size | prevent_all_damage | cant_lose_for_life | cant_sacrifice | cant_cast | cant_cast_except_from_hand | spells_cant_be_countered | abilities_cant_be_countered | cant_gain_life | cant_activate | damage_cant_be_prevented | combat_damage_cant_be_prevented | protection_from_opponents |
 | `affects` | you | opponents | each |
 | `filter` | permanent filter (cant_sacrifice, cant_activate) |
 | `spells` | card spec of the spells (cant_cast, spells_cant_be_countered) |
@@ -1226,13 +1226,13 @@ Rules: CR 615.1, CR 615.1a, CR 615.5, CR 615.6
 
 ## protection_from
 
-Protection from the quality (a card spec, or "everything"): damage from sources with the quality is prevented, and this permanent can't be enchanted or equipped by, blocked by or targeted by anything with the quality (Auras and Equipment already attached fall off as a state-based action).
+Protection from the quality (a card spec, "everything", "each_opponent": from each of your opponents, or "its_colors"): damage from sources with the quality is prevented, and this permanent can't be enchanted or equipped by, blocked by or targeted by anything with the quality (Auras and Equipment already attached fall off as a state-based action).
 
-Rules: CR 702.16a, CR 702.16b, CR 702.16c, CR 702.16d, CR 702.16e, CR 702.16f, CR 702.16g, CR 702.16j, CR 704.5m, CR 704.5n
+Rules: CR 702.16a, CR 702.16b, CR 702.16c, CR 702.16d, CR 702.16e, CR 702.16f, CR 702.16g, CR 702.16h, CR 702.16i, CR 702.16j, CR 702.16k, CR 704.5m, CR 704.5n
 
 | Parameter | Description |
 | --- | --- |
-| `(value)` | card spec of the quality, or "everything" |
+| `(value)` | card spec of the quality, "everything", "each_opponent" or "its_colors" |
 
 ```json
 {
@@ -1342,7 +1342,7 @@ Rules: CR 702.126a, CR 702.51a, CR 611.3a, CR 604.1
 
 While its source is on the battlefield (and its `if` condition holds), every permanent it `affects` gets `pump` (fixed or computed amounts, layer 7c), the `keywords` and granted `abilities` (layer 6, triggered, activated or mana abilities), and with `creature_types` has exactly those creature types (layer 4); `loses_abilities: true` removes the abilities it had before (layer 6, in timestamp order: later grants and keyword counters stay, CR 613.7), `colors` sets its colors (layer 5) and `base_power_toughness` its base power and toughness (layer 7b); `types` are card types it has in addition to its other types ("this Vehicle is an artifact creature", layer 4) and `subtypes` subtypes it has in addition to its other types ("is a Wizard in addition to its other types", layer 4). `affects` is {"each": filter, "controller": you|opponent|any, "other": true} (relative to the source's controller), "self", or "attached" ("equipped/enchanted creature").
 
-Rules: CR 604.1, CR 604.2, CR 611.3a, CR 613.1d, CR 613.1e, CR 613.1f, CR 613.4b, CR 613.4c, CR 613.7a, CR 613.8a, CR 205.1a, CR 205.1b, CR 301.5f, CR 303.4m
+Rules: CR 604.1, CR 604.2, CR 611.3a, CR 612.8, CR 613.1c, CR 613.1d, CR 613.1e, CR 613.1f, CR 613.4b, CR 613.4c, CR 613.7a, CR 613.8a, CR 205.1a, CR 205.1b, CR 301.5f, CR 303.4m
 
 | Parameter | Description |
 | --- | --- |
@@ -1357,6 +1357,8 @@ Rules: CR 604.1, CR 604.2, CR 611.3a, CR 613.1d, CR 613.1e, CR 613.1f, CR 613.4b
 | `loses_abilities` | true: it loses all abilities ("loses all abilities") |
 | `colors` | list of W, U, B, R, G: its colors are exactly these ([] for colorless) |
 | `base_power_toughness` | {"power": n, "toughness": n} |
+| `set_types` | list of card types: its card types are exactly these |
+| `name` | its name ("named Humble Merchant") |
 
 ```json
 {
@@ -1396,6 +1398,30 @@ Rules: CR 722.2a, CR 722.2b, CR 722.2c, CR 613.1d, CR 613.4b
     "keywords": [
       "flying"
     ]
+  }
+}
+```
+
+## tapping_power
+
+When this creature is tapped to pay the cost of the abilities in `for` (crew, saddle, station), it counts its `use` (power, default; toughness; toughness_if_greater: its toughness when that's greater than its power) plus `plus`. Several of them add up their `plus`. A `static` can grant it.
+
+Rules: CR 702.122a, CR 702.171a, CR 702.184a, CR 702.184c
+
+| Parameter | Description |
+| --- | --- |
+| `for` | list of crew, saddle, station |
+| `use` | power | toughness | toughness_if_greater |
+| `plus` | integer (default 0) |
+
+```json
+{
+  "tapping_power": {
+    "for": [
+      "crew",
+      "saddle"
+    ],
+    "plus": 2
   }
 }
 ```
