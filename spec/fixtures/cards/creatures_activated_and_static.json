@@ -36,6 +36,48 @@
     "rules_text": "{T}: Prodigal Pyromancer deals 1 damage to any target."
   },
   {
+    "name": "Kindred Construct",
+    "mana_cost": "{3}",
+    "types": [
+      "artifact",
+      "creature"
+    ],
+    "subtypes": [
+      "construct"
+    ],
+    "power": 2,
+    "toughness": 2,
+    "abilities": [
+      {
+        "choose_creature_type": {}
+      },
+      {
+        "static": {
+          "affects": "self",
+          "subtypes": "chosen"
+        }
+      },
+      {
+        "static": {
+          "affects": {
+            "each": {
+              "creature": {
+                "subtypes": "chosen"
+              }
+            },
+            "controller": "you",
+            "other": true
+          },
+          "pump": {
+            "power": 1,
+            "toughness": 1
+          }
+        }
+      }
+    ],
+    "rules_text": "As this creature enters, choose a creature type.\nThis creature is the chosen type in addition to its other types.\nOther creatures you control of the chosen type get +1/+1."
+  },
+  {
     "name": "Unbroken Herald",
     "mana_cost": "{G}{G}",
     "types": [

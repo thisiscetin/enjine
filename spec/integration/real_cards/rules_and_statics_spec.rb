@@ -140,6 +140,14 @@ RSpec.describe "Real cards: losing abilities, restrictions and other rules effec
     expect(chars(game, obj_id(game, "Giant Cindermaw")).power).to eq(6)
   end
 
+  it "Adaptive Automaton: the chosen creature type in addition to its own, and a lord of it (CR 205.1b, 607.2d)" do
+    game = board(hand: ["Adaptive Automaton"], mine: ["Vampire Nighthawk"], mana: { C: 3 })
+    cast(game, "Adaptive Automaton", { type: "creature_type", creature_type: "vampire" })
+    automaton = obj_id(game, "Adaptive Automaton")
+    expect(chars(game, automaton).subtypes).to contain_exactly(:construct, :vampire)
+    expect(chars(game, obj_id(game, "Vampire Nighthawk")).power).to eq(3)
+  end
+
   it "The Wondrous Wasp: the target loses all abilities only while the Wasp remains (CR 611.2b)" do
     game = board(hand: ["The Wondrous Wasp"], theirs: ["Vampire Nighthawk"], mana: { U: 2 })
     hawk = obj_id(game, "Vampire Nighthawk")

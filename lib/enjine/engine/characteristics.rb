@@ -141,18 +141,26 @@ module Enjine
         added = []
         subtypes = []
         statics.each do |source, ability|
-          next unless (ability.creature_types || !ability.card_types.empty? || !ability.subtypes.empty?) &&
+          next unless (ability.creature_types || !ability.card_types.empty? || ability.adds_subtypes?) &&
                       ability.affects?(obj, source, facts(obj, base))
 
           types = ability.creature_types if ability.creature_types
           added |= ability.card_types
-          subtypes |= ability.subtypes
+          subtypes |= ability.added_subtypes(source)
         end
         effects.each { types = it["types"].map(&:to_sym) if it["kind"] == "creature_types" && it["affected"].include?(obj.id) }
         base = with_added_types(base, added) unless added.empty?
         base = base.with(subtypes: ((base.subtypes & Characteristics::NON_CREATURE_SUBTYPES) | types).freeze) if types
-        base = base.with(subtypes: (base.subtypes | subtypes).freeze) unless (subtypes - base.subtypes).empty?
+        base = with_gained_subtypes(base, subtypes - base.subtypes) unless (subtypes - base.subtypes).empty?
         base.creature? || base.power.nil? ? base : base.with(power: nil, toughness: nil)
+      end
+
+      # Subtypes it has in addition to its others; a land that gains a basic land type has that type's mana
+      # ability (CR 305.6).
+      def with_gained_subtypes(base, gained)
+        intrinsic = base.land? ? gained.flat_map { CardDefinition.intrinsic_instances(it) } : []
+        base.with(subtypes: (base.subtypes | gained).freeze,
+                  abilities: intrinsic.empty? ? base.abilities : (base.abilities + intrinsic).freeze)
       end
 
       # Card types added "in addition to its other types" (CR 205.1b). A permanent that becomes a creature has

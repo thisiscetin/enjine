@@ -12,6 +12,24 @@
     ]
   },
   {
+    "name": "Wayfarer's Crossing",
+    "types": [
+      "land"
+    ],
+    "abilities": [
+      {
+        "choose_basic_land_type": {}
+      },
+      {
+        "static": {
+          "affects": "self",
+          "subtypes": "chosen"
+        }
+      }
+    ],
+    "rules_text": "As this land enters, choose a basic land type.\nThis land is the chosen type."
+  },
+  {
     "name": "Island",
     "types": [
       "land"

@@ -30,7 +30,8 @@ module Enjine
                             "pump" => "{\"power\": amount, \"toughness\": amount} (\"gets +1/+1 for each ...\")",
                             "keywords" => "list of keywords", "creature_types" => "list of creature types (replaces the others)",
                             "types" => "list of card types it also has (in addition to its other types)",
-                            "subtypes" => "list of subtypes it also has (in addition to its other types)",
+                            "subtypes" => "list of subtypes it also has (in addition to its other types), or \"chosen\": " \
+                                          "the type chosen as its source entered",
                             "abilities" => "list of triggered, activated or mana abilities the affected permanents have",
                             "loses_abilities" => "true: it loses all abilities (\"loses all abilities\")",
                             "colors" => "list of W, U, B, R, G: its colors are exactly these ([] for colorless)",
@@ -59,8 +60,9 @@ module Enjine
           types = parse_subtypes(params, :creature_types, errors, path)
           granted = parse_granted(params, errors, path)
           card_types = Effects::Become.names_param(params, :types, :type, errors, path, allowed: Effects::Become::ADDABLE_TYPES)
-          subtypes = parse_subtypes(params, :subtypes, errors, path) || []
-          sets = parse_sets(params, errors, path)
+          chosen = Mechanics.fetch_param(params, :subtypes) == "chosen" # "is the chosen type in addition" (CR 607.2d)
+          subtypes = chosen ? [] : parse_subtypes(params, :subtypes, errors, path) || []
+          sets = parse_sets(params, errors, path).merge(chosen_subtype: chosen)
           if pump.empty? && keywords.empty? && types.nil? && granted.empty? && card_types.empty? && subtypes.empty? &&
              sets.values.none?
             errors << "#{path}: needs at least one of #{(KEYS - %w[affects if]).join(", ")}"
@@ -144,8 +146,9 @@ module Enjine
         end
 
         def initialize(filter:, controller:, other:, pump:, keywords:, creature_types:, condition:, granted:, card_types: [],
-                       subtypes: [], loses_abilities: false, colors: nil, base_power_toughness: nil)
+                       subtypes: [], loses_abilities: false, colors: nil, base_power_toughness: nil, chosen_subtype: false)
           super()
+          @chosen_subtype = chosen_subtype
           @card_types = card_types.freeze
           @subtypes = subtypes.freeze
           @loses_abilities = loses_abilities
@@ -170,6 +173,10 @@ module Enjine
         def nested_abilities = @granted
         def pump? = !@pump.empty?
         def loses_abilities? = @loses_abilities
+        def adds_subtypes? = @chosen_subtype || !@subtypes.empty?
+
+        # The subtypes it adds: its own, or the type its source chose as it entered (CR 607.2d, 614.12).
+        def added_subtypes(source) = @chosen_subtype ? [source.memory["chosen_type"]].compact.map(&:to_sym) : @subtypes
         # Whether it changes layer 6: abilities removed or added.
         def ability_changes? = @loses_abilities || !@keywords.empty? || !@granted.empty?
         def computed? = @pump.values.any? { !it.is_a?(Amount::Fixed) }
@@ -209,7 +216,7 @@ module Enjine
           bits << keywords.join(", ") unless keywords.empty?
           bits << "creature type #{creature_types.join(" ")}" if creature_types
           bits << "types #{card_types.join(" ")}" unless card_types.empty?
-          bits << "subtypes #{subtypes.join(" ")}" unless subtypes.empty?
+          bits << "subtypes #{@chosen_subtype ? "the chosen type" : subtypes.join(" ")}" if adds_subtypes?
           bits << "\"#{granted.join("; ")}\"" unless granted.empty?
           "#{who} get#{"s" if %i[attached self].include?(@filter)} #{bits.join(" and ")}#{" as long as #{condition}" if condition}"
         end

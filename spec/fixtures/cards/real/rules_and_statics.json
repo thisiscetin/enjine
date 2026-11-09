@@ -17,6 +17,52 @@
     }
   },
   {
+    "name": "Adaptive Automaton",
+    "mana_cost": "{3}",
+    "types": [
+      "artifact",
+      "creature"
+    ],
+    "subtypes": [
+      "construct"
+    ],
+    "power": 2,
+    "toughness": 2,
+    "abilities": [
+      {
+        "choose_creature_type": {}
+      },
+      {
+        "static": {
+          "affects": "self",
+          "subtypes": "chosen"
+        }
+      },
+      {
+        "static": {
+          "affects": {
+            "each": {
+              "creature": {
+                "subtypes": "chosen"
+              }
+            },
+            "controller": "you",
+            "other": true
+          },
+          "pump": {
+            "power": 1,
+            "toughness": 1
+          }
+        }
+      }
+    ],
+    "rarity": "rare",
+    "printing": {
+      "set": "fdn",
+      "number": "723"
+    }
+  },
+  {
     "name": "Ajani Resolute",
     "mana_cost": "{1}{W}",
     "types": [

@@ -197,6 +197,18 @@ Rules: CR 715.2, CR 715.2b, CR 715.2c, CR 715.2d, CR 122.6
 }
 ```
 
+## choose_basic_land_type
+
+As this permanent enters, its controller chooses a basic land type; filters with "subtypes": "chosen" and a static ability's `"subtypes": "chosen"` use it ("this land is the chosen type").
+
+Rules: CR 614.12, CR 305.6, CR 607.2d
+
+```json
+{
+  "choose_basic_land_type": {}
+}
+```
+
 ## choose_card_name
 
 As this permanent enters, its controller chooses a card name among the cards in the game (`not`: card types the named card mustn't have, e.g. ["land"]); abilities of it that say "the chosen name" use it.
@@ -1064,7 +1076,7 @@ Rules: CR 604.1, CR 604.2, CR 611.3a, CR 613.1d, CR 613.1e, CR 613.1f, CR 613.4b
 | `keywords` | list of keywords |
 | `creature_types` | list of creature types (replaces the others) |
 | `types` | list of card types it also has (in addition to its other types) |
-| `subtypes` | list of subtypes it also has (in addition to its other types) |
+| `subtypes` | list of subtypes it also has (in addition to its other types), or "chosen": the type chosen as its source entered |
 | `abilities` | list of triggered, activated or mana abilities the affected permanents have |
 | `loses_abilities` | true: it loses all abilities ("loses all abilities") |
 | `colors` | list of W, U, B, R, G: its colors are exactly these ([] for colorless) |

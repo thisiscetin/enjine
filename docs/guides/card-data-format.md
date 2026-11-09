@@ -922,6 +922,8 @@ and `base_power_toughness` (layer 7b); its `abilities` may be activated abilitie
 | "… loses all abilities for as long as this creature remains on the battlefield" | `become` with `"duration": "while_source_on_battlefield"` (does nothing if this has already left, CR 611.2b) |
 | "Enchanted creature loses all abilities and is a black Skeleton with base power and toughness 1/1" | `{ "static": { "affects": "attached", "loses_abilities": true, "colors": ["B"], "creature_types": ["skeleton"], "base_power_toughness": { "power": 1, "toughness": 1 } } }` |
 | "Other creatures you control have '{1}: This creature gets +1/+0 until end of turn'" | `static` with `"abilities": [{ "activated": … }]` (`self` is the creature that has it) |
+| "This creature is the chosen type in addition to its other types" | `{ "choose_creature_type": {} }` and `{ "static": { "affects": "self", "subtypes": "chosen" } }` |
+| "As this land enters, choose a basic land type. This land is the chosen type." | `{ "choose_basic_land_type": {} }` and the same `static` (a land with a basic land type has its mana ability, CR 305.6) |
 
 ```json
 { "name": "Example Fishbowl", "mana_cost": "{1}{U}", "types": ["enchantment"], "subtypes": ["aura"],
