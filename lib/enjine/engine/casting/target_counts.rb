@@ -100,11 +100,22 @@ module Enjine
         template.map { it.is_a?(Array) ? flat.shift(it.size) : flat.shift }
       end
 
-      # CR 115.7d: `player` chose new targets for the spell or ability `spell` (shaped like its old ones).
-      def change_targets!(spell, targets, player)
+      # CR 115.7d: new targets for the spell or ability `spell` (shaped like its old ones). Each new target becomes a
+      # target of it (ward, "becomes the target", CR 702.21a, 603.2); a division keeps its amounts (CR 115.7f).
+      def change_targets!(spell, targets)
         added = targets.flatten.compact - Array(spell.targets).flatten
+        redivide!(spell.memory, spell.targets, targets)
         spell.targets = targets
-        added.each { emit Events::TargetChosen.new(player: name(player), object: spell.id, target: it) }
+        added.each { became_target!(spell.controller, spell.id, it) }
+        emit Events::TargetsChanged.new(player: name(spell.controller), object: spell.id, targets: added) unless added.empty?
+      end
+
+      # CR 115.7f, 601.2d: the amount divided to each target goes to the target that replaced it (a copy with new
+      # targets, or new targets chosen for the spell).
+      def redivide!(memory, old, new)
+        division = memory["division"] or return
+        pairs = Array(old).flatten.zip(Array(new).flatten).select { |was, _| division.key?(was) }
+        memory["division"] = pairs.to_h { |was, now| [now, division[was]] }
       end
     end
 

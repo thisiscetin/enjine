@@ -145,7 +145,7 @@ module Enjine
         when "pay" then opt[:cost] ? "Pay: #{opt[:cost]}" : "Pay"
         when "cost_option" then @game.pending_decision.details["costs"][opt[:option]]
         when "cancel" then "Cancel (rewind this cast/activation)"
-        when "attack" then "Attack #{name_of(opt[:target])} with #{name_of(opt[:object])}"
+        when "attack" then "Attack #{name_of(opt[:target])}#{" with #{name_of(opt[:object])}" if opt[:object]}"
         when "block" then "Block #{name_of(opt[:attacker])} with #{name_of(opt[:object])}"
         when "assign" then "Assign 1 damage to #{name_of(opt[:object])}"
         when "done" then "Done"
@@ -213,6 +213,7 @@ module Enjine
         when "trigger_removed" then "#{card_name(ev["card"])}'s triggered ability is removed (#{ev["reason"]})"
         when "ability_countered" then "#{card_name(ev["card"])}'s ability is countered"
         when "spell_copied" then "#{ev["player"]} copies #{card_name(ev["card"])}#{targets(ev["targets"])}"
+        when "targets_changed" then "#{name_of(ev["object"])} has new targets: #{ev["targets"].map { name_of(it) }.join(", ")}"
         when "x_announced" then "#{ev["player"]} announces X = #{ev["value"]}"
         when "payment_finished" then "#{ev["player"]} #{ev["outcome"]}"
         when "attached" then "#{name_of(ev["object"])} is attached to #{name_of(ev["to"])}"

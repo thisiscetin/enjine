@@ -125,6 +125,7 @@ module Enjine
           copy.memory = Marshal.load(Marshal.dump(spell.memory.slice("kicked", "kicked_with", "gift", "division"))).merge("copy" => "spell")
         end
         copy.memory["copy_except"] = except unless except.empty?
+        redivide!(copy.memory, spell.targets, targets) # CR 115.7f (Engine::TargetCounts)
         copy.targets = targets
         copy.modes = spell.modes&.dup
         copy.x = spell.x
@@ -134,6 +135,7 @@ module Enjine
         record_result!(copy.id)
         emit Events::SpellCopied.new(player: name(controller), object: copy.id, card: card, original: spell.id,
                                      targets: targets)
+        Array(targets).flatten.compact.uniq.each { became_target!(controller, copy.id, it) } # ward (CR 702.21a)
         copy
       end
 

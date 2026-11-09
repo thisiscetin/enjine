@@ -70,9 +70,10 @@ module Enjine
         state.pending_triggers.reject! { it["event"]["type"] == "attacker_declared" && it["event"]["object"] == id }
       end
 
-      # CR 508.4: a creature put onto the battlefield attacking attacks the defending player. (Choosing one
-      # of their planeswalkers instead isn't offered yet.) It was never declared, so it never "attacked".
-      # Only called while its controller controls an attacking creature (see Abilities::EntersAttacking).
+      # CR 508.4: a creature put onto the battlefield attacking attacks `target` when one was chosen (a token's
+      # controller picks a planeswalker in Effects::CreateToken; ninjutsu keeps the attacker's), else the defending
+      # player. It was never declared, so it never "attacked". A permanent made to enter attacking by
+      # Abilities::EntersAttacking attacks the defending player (no choice can be asked mid-move).
       def enter_attacking!(obj, target = nil)
         target = Mechanics::Filters.player_ref(self, state.opponent(obj.controller)) unless target.is_a?(String) # CR 506.3a
         attackers[obj.id] = { "target" => target, "blocked" => false }

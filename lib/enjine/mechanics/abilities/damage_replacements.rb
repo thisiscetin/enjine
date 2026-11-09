@@ -460,7 +460,7 @@ module Enjine
 
         def nested_effects = [follow_up].compact
 
-        # A source of the controller's choice (CR 609.7a): a permanent or a spell on the stack, chosen as it resolves.
+        # A source of the controller's choice, chosen as it resolves (CR 609.7a).
         def run(engine, ctx, locals)
           return :done unless locals["asked"] || condition.nil? || condition.true?(engine, ctx)
           return start(engine, ctx, nil) unless @chosen_source
@@ -468,10 +468,21 @@ module Enjine
           answer = answers(locals).first
           return start(engine, ctx, [answer["object"]]) if answer
 
-          sources = engine.state.battlefield + engine.state.stack.reject { it == ctx.object }
+          sources = self.class.sources(engine, ctx.object)
           return :done if sources.empty?
 
           ask(engine, locals, ctx.controller, "Choose a source of damage", sources.map { { "type" => "source", "object" => it } })
+        end
+
+        # CR 609.7a: a permanent, a spell on the stack, an object a spell or ability on the stack refers to (its
+        # targets, an ability's source; even one that has left its zone) or a face-up object in the command zone.
+        def self.sources(engine, resolving)
+          stack = engine.state.stack.reject { it == resolving }
+          referred = stack.flat_map do |id|
+            obj = engine.object(id)
+            Array(obj.targets).flatten.compact.reject { Filters.player_index(engine, it) } + (obj.ability? ? [obj.source] : [])
+          end
+          (engine.state.battlefield + stack + referred.compact + engine.state.command).uniq - [resolving]
         end
 
         def start(engine, ctx, chosen)

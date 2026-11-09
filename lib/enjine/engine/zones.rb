@@ -167,6 +167,8 @@ module Enjine
         fresh.x = old.x
         fresh.memory.merge!(old.memory.slice("kicked", "kicked_with", "gift")) # gift: CR 702.174b
         fresh.mana_spent = old.mana_spent&.dup
+        # CR 609.7b: a prevention effect for a chosen permanent spell also applies to the permanent it becomes.
+        state.effects.each { it["by"] << fresh.id if it["kind"] == "prevent_damage" && it["by"]&.include?(old.id) }
       end
 
       # CR 111.1: a token enters the battlefield under its creator's control. Entering replacement
@@ -191,7 +193,7 @@ module Enjine
         obj.counters.merge!(enters["counters"])
         enter_as_copy!(obj, enters["copy"]) if enters["copy"] # CR 707.5 (Engine::Copies)
         state.battlefield.unshift(obj.id)
-        enter_attacking!(obj) if enters["attacking"] # CR 508.4
+        enter_attacking!(obj, enters["attacking"]) if enters["attacking"] # CR 508.4
         record_result!(obj.id)
         emit Events::ZoneChanged.new(card: definition.id, old_id: nil, new_id: obj.id, owner: name(controller),
                                      from: "none", to: "battlefield", reason: "create_token")

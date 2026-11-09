@@ -6,12 +6,14 @@ module Enjine
   module Mechanics
     module Effects
       # Create token permanents (CR 111.1, 701.7).
-      class CreateToken < Effect
+      class CreateToken < ChoiceEffect
         primitive :effect, :create_token,
                   description: "Create `amount` tokens under the referenced player's control (default: you). `token` is " \
                                "a predefined token name (Treasure, Clue, Food) or an inline card definition. " \
                                "`tapped: true` creates them tapped; `attacking: true` attacking (only for the attacking " \
-                               "player during combat, CR 506.3b).",
+                               "player during combat, CR 506.3b); when the defending player controls a planeswalker, " \
+                               "the controller chooses for each token whether it attacks that player or one of their " \
+                               "planeswalkers (CR 508.4).",
                   rules: %w[111.1 111.10 701.7a 704.5d 508.4 506.3b],
                   params: { "token" => "\"Treasure\" | \"Clue\" | \"Food\" | {card data}", "amount" => "integer (default 1)",
                             "tapped" => "boolean", "attacking" => "boolean", "to" => "selector (default \"you\")" },
@@ -54,10 +56,11 @@ module Enjine
             Array.new(n) { [engine.token_key(definition, "#{index}.#{it}"), index] }
           end
           return :wait if engine.ask_entering_choices!(locals, entries) == :wait
+          return :wait if ask_attack_targets(engine, locals, entries) == :wait
 
           entries.each do |key, index|
             enters = engine.with_entering_answer(locals, key, index, nil)
-            enters = (enters || {}).merge("attacking" => true) if attacks?(engine, index)
+            enters = (enters || {}).merge("attacking" => locals.dig("attacks", key) || true) if attacks?(engine, index)
             engine.create_token!(definition, index, tapped: tapped, enters: enters)
           end
           :done
@@ -70,6 +73,21 @@ module Enjine
 
         # CR 508.4, 506.3b: tokens enter attacking only under the attacking player's control, in combat.
         def attacks?(engine, index) = attacking && engine.state.active == index && ATTACK_STEPS.include?(engine.state.step)
+
+        # CR 508.4: for each token entering attacking, its controller chooses the defending player or a planeswalker
+        # they control, before any is created (kept in locals["attacks"], token key => target).
+        def ask_attack_targets(engine, locals, entries)
+          targets = engine.attack_targets
+          return if targets.size < 2
+
+          keys = entries.select { |_, index| attacks?(engine, index) }.map(&:first)
+          locals["attacks"] = keys.zip(answers(locals).map { it["target"] }).to_h.compact
+          entry = entries.find { |key, _| keys.include?(key) && !locals["attacks"].key?(key) }
+          return unless entry
+
+          ask(engine, locals, entry[1], "Choose what the #{definition.name} token attacks",
+              targets.map { { "type" => "attack", "target" => it } })
+        end
       end
     end
   end

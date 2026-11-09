@@ -229,12 +229,17 @@ module Enjine
       def choose_target!(ref)
         ctx = casting
         add_chosen_target!(ctx, ref)
-        if ref
-          queued = state.pending_triggers.size
-          emit Events::TargetChosen.new(player: name(ctx["player"]), object: ctx["object"], target: ref)
-          state.pending_triggers.drop(queued).each { it["memory"] = it["memory"].merge("targeted_by" => ctx["object"]) }
-        end
+        became_target!(ctx["player"], ctx["object"], ref) if ref
         ask!(nil)
+      end
+
+      # `ref` becomes a target of the spell or ability `object` controlled by `player`: as it's cast or put on the
+      # stack, when its targets change (CR 115.7) and when a copy is put on the stack with it (CR 707.10).
+      # Abilities that trigger then (ward, CR 702.21a) learn which spell or ability targeted it.
+      def became_target!(player, object, ref)
+        queued = state.pending_triggers.size
+        emit Events::TargetChosen.new(player: name(player), object: object, target: ref)
+        state.pending_triggers.drop(queued).each { it["memory"] = it["memory"].merge("targeted_by" => object) }
       end
 
       # CR 601.2h-i / 602.2b: remaining costs are paid, the spell becomes cast.

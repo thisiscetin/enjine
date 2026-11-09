@@ -158,8 +158,26 @@ module Enjine
 
       # Abilities on the stack aren't cards; they simply cease to exist.
       def remove_stack_object!(id)
+        remember_ability!(object(id))
         state.stack.delete(id)
         state.objects.delete(id)
+      end
+
+      # "Copy that ability" (CR 707.10) after it has left the stack: the abilities that refer to it ({"triggering":
+      # "ability"}) remember it as it last existed on the stack, with its choices (CR 608.2h), to copy that.
+      def remember_ability!(obj)
+        refs = [obj.id, obj.memory["trigger_id"]].compact
+        holders = state.stack.map { object(it).memory } + state.pending_triggers.filter_map { it["memory"] }
+        holders.each do |memory|
+          triggering = memory["triggering"]
+          memory["ability_lki"] = obj.to_h if triggering.is_a?(Hash) && refs.include?(triggering["ability"]) && !memory.equal?(obj.memory)
+        end
+      end
+
+      # The ability `memory` remembers (see #remember_ability!), as a detached object that is never stored.
+      def remembered_ability(memory)
+        lki = memory["ability_lki"]
+        lki && Snapshot.build_object(lki)
       end
     end
 
