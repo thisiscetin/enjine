@@ -39,7 +39,22 @@ RSpec.describe "Bending, mounts and body keywords" do
             cost: "{U}"),
       { "name" => "Spec Trinket", "mana_cost" => "{1}", "types" => ["artifact"] },
       creature("Spec Water Watcher", [{ "triggered" => { "when" => { "waterbends" => {} },
-                                                         "effects" => [{ "gain_life" => { "amount" => 1 } }] } }])
+                                                         "effects" => [{ "gain_life" => { "amount" => 1 } }] } }]),
+      creature("Spec Trail Lynx", [{ "saddle" => { "power" => 3 } },
+                                   { "triggered" => { "when" => { "attacks" => {} },
+                                                      "while" => { "source" => { "creature" => { "saddled" => true } } },
+                                                      "effects" => [draw] } },
+                                   { "triggered" => { "when" => { "becomes_saddled" => {} },
+                                                      "effects" => [{ "gain_life" => { "amount" => { "triggering" => "amount" } } }] } }],
+               subtypes: ["cat", "mount"]),
+      creature("Spec Eager Rider", [{ "triggered" => { "when" => { "saddles_mount" => {} },
+                                                       "effects" => [{ "pump" => { "power" => 2, "toughness" => 0,
+                                                                                   "to" => { "triggering" => "object" } } }] } }],
+               power: 1, toughness: 1, subtypes: ["pilot"]),
+      { "name" => "Spec Saddle Rack", "mana_cost" => "{2}", "types" => ["artifact"],
+        "abilities" => [{ "activated" => { "cost" => ["tap"], "timing" => "sorcery",
+                                           "targets" => [{ "creature" => { "subtypes" => ["mount"], "controller" => "you" } }],
+                                           "effects" => [{ "become_saddled" => { "to" => { "target" => 0 } } }] } }] }
     ]
   end
   let(:catalog) { catalog_with(*cards) }
@@ -191,6 +206,63 @@ RSpec.describe "Bending, mounts and body keywords" do
       game.submit(type: "waterbend", object: obj_id(game, "Grizzly Bears"))
       expect(ids_in(game, "alice", :hand).size).to eq(2)
       expect(game.state.stack).to be_empty
+    end
+  end
+
+  describe "saddle (CR 702.171)" do
+    def saddle(game, *riders)
+      lynx = obj_id(game, "Spec Trail Lynx")
+      game.submit(game.legal_options.find { it[:type] == "activate" && it[:object] == lynx })
+      riders.each { game.submit(type: "cost", object: obj_id(game, it)) }
+      game.submit(type: "done") if game.legal_options.include?({ type: "done" })
+    end
+
+    def attack(game, *cards)
+      skip_to(game, :beginning_of_combat)
+      pass_both(game) # -> declare attackers
+      cards.each { game.submit(type: "attack", object: obj_id(game, it), target: "player:bob") }
+      game.submit(type: "done") if game.pending_decision.kind == "declare_attackers"
+    end
+
+    def saddled?(game, card) = game.instance_variable_get(:@engine).saddled?(game.state.object(obj_id(game, card)))
+
+    it "taps other creatures with total power N or more; the Mount becomes saddled until end of turn (CR 702.171a-c)" do
+      game = board(field: ["Spec Trail Lynx", "Spec Eager Rider", "Grizzly Bears"], pool: {})
+      lynx = obj_id(game, "Spec Trail Lynx")
+      saddle(game, "Spec Eager Rider")
+      expect(game.legal_options).not_to include(a_hash_including(type: "done"))
+      expect(game.legal_options.map { it[:object] }).not_to include(lynx)
+      game.submit(type: "cost", object: obj_id(game, "Grizzly Bears"))
+      game.submit(type: "done") if game.legal_options.include?({ type: "done" })
+      pass_both(game) # the rider's saddles trigger
+      expect(chars(game, lynx).power).to eq(4)
+      pass_both(game) # the saddle ability
+      expect(saddled?(game, "Spec Trail Lynx")).to be(true)
+      pass_both(game) # becomes saddled: gain 2 (two riders)
+      expect(game.state.players[0].life).to eq(22)
+      copy = Enjine::Game.import(game.export, catalog: catalog)
+      expect(saddled?(copy, "Spec Trail Lynx")).to be(true)
+      attack(game, "Spec Trail Lynx")
+      pass_both(game)
+      expect(ids_in(game, "alice", :hand).size).to eq(1)
+      skip_to(game, :upkeep, turn: 4)
+      expect(saddled?(game, "Spec Trail Lynx")).to be(false)
+    end
+
+    it "is sorcery speed, and an unsaddled Mount's attack doesn't trigger" do
+      game = board(field: ["Spec Trail Lynx", "Hill Giant"], pool: {}, step: :beginning_of_combat)
+      expect(game.legal_options).not_to include(a_hash_including(type: "activate"))
+      attack(game, "Spec Trail Lynx")
+      expect(game.state.stack).to be_empty
+    end
+
+    it "other effects saddle a Mount; the filter sees it" do
+      game = board(field: ["Spec Trail Lynx", "Spec Saddle Rack"], pool: {})
+      rack = obj_id(game, "Spec Saddle Rack")
+      game.submit(game.legal_options.find { it[:type] == "activate" && it[:object] == rack })
+      game.submit(type: "target", target: obj_id(game, "Spec Trail Lynx")) if game.pending_decision.kind == "choose_target"
+      pass_both(game)
+      expect(saddled?(game, "Spec Trail Lynx")).to be(true)
     end
   end
 end

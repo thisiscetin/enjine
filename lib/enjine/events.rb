@@ -111,13 +111,18 @@ module Enjine
     # becomes crewed as its crew ability resolves (702.122e), by the creatures in `crew`.
     CrewedVehicle = define(:crewed_vehicle, :object, :vehicle)
     BecameCrewed = define(:became_crewed, :object, :crew)
+    # Saddle (CR 702.171): a creature tapped to pay a saddle cost saddles that Mount (702.171c); the Mount
+    # becomes saddled (702.171b), by the creatures in `riders` when its saddle ability did it.
+    SaddledMount = define(:saddled_mount, :object, :mount)
+    BecameSaddled = define(:became_saddled, :object, :riders)
     # A player's speed changed (CR 702.179); `from` nil: they had no speed.
     SpeedChanged = define(:speed_changed, :player, :from, :to)
     # CR 701.27a: a double-faced permanent turned over; `card` names the face now up (CR 712).
     Transformed = define(:transformed, :object, :card)
     # CR 723.3a-c: a permanent gained (`prepared` true) or lost the prepared designation.
     PreparedChanged = define(:prepared_changed, :object, :prepared)
-    # A keyword action that abilities trigger on, once it's complete: "scry" / "surveil" N (CR 701.22, 701.25).
+    # A keyword action that abilities trigger on, once it's complete: "scry" / "surveil" N (CR 701.22, 701.25);
+    # earthbend, waterbend, airbend and firebend (CR 701.66b, 701.67c, 701.65b, 702.189b).
     KeywordAction = define(:keyword_action, :player, :action, :amount)
 
     # A card moved between zones; old_id stops existing and new_id is born (CR 400.7). `lookers`: the card

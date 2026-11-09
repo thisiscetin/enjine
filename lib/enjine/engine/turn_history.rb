@@ -78,6 +78,11 @@ module Enjine
       # What the resolving spell or ability remembers about an object that left the battlefield during it.
       def resolving_last_known(id) = state.frames.rfind { it["type"] == "resolve" && it["ctx"] }&.dig("ctx", "lki", id)
 
+      # CR 702.171b: a permanent becomes saddled until the end of the turn; leaving the battlefield ends it (the
+      # card is a new object, CR 400.7), and it isn't copiable (it lives on the object, not its characteristics).
+      def saddle!(id) = object_memory!(id, "saddled")
+      def saddled?(obj) = obj.zone == :battlefield && !turned_memory(obj, "saddled").nil?
+
       private
 
       def log_of(player_name) = turn_log(names.index(player_name))

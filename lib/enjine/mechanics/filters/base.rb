@@ -90,9 +90,10 @@ module Enjine
       #   {"creature": {"subtypes": "chosen"}}           of the chosen creature type; also "colors", "types", "not",
       #                                                  "not_subtypes": "chosen" (CR 607.2d, see Filters.chosen_memory)
       #   {"creature": {"transformed": true}}            back face up (CR 701.27h); {"prepared": true} (CR 723.3a)
+      #   {"creature": {"saddled": true}}                saddled this turn (CR 702.171b)
       class Restricted
         TYPES = %w[artifact creature enchantment land planeswalker instant sorcery].freeze
-        BOOLEANS = %w[other attacking blocking tapped token modified transformed prepared].freeze
+        BOOLEANS = %w[other attacking blocking tapped token modified transformed prepared saddled].freeze
         RANGES = %w[power toughness mana_value].freeze
         TYPE_LISTS = %w[not any_of types].freeze
         NAME_LISTS = %w[subtypes not_subtypes supertypes not_supertypes attached_subtypes].freeze
@@ -102,7 +103,7 @@ module Enjine
         CHOSEN = { "colors" => "chosen_color", "types" => "chosen_card_type", "not" => "chosen_card_type",
                    "subtypes" => "chosen_type", "not_subtypes" => "chosen_type" }.freeze
         # Keys that need current characteristics or combat/tapped status: not usable in the layer pass.
-        LIVE = %w[power toughness attacking blocking tapped attached_subtypes transformed prepared].freeze
+        LIVE = %w[power toughness attacking blocking tapped attached_subtypes transformed prepared saddled].freeze
 
         attr_reader :base
 
@@ -245,7 +246,7 @@ module Enjine
         # "modified"; "transformed" / "untransformed", "prepared" / "unprepared" (CR 701.27h, 723.3a).
         def status_words
           words = @params["modified"] ? ["modified"] : []
-          words + %w[transformed prepared].reject { @params[it].nil? }.map { @params[it] ? it : "un#{it}" }
+          words + %w[transformed prepared saddled].reject { @params[it].nil? }.map { @params[it] ? it : "un#{it}" }
         end
 
         def range_words(range) = range.map { |k, n| format(RANGE_WORDS.fetch(k), n) }.join(" and ")
@@ -345,6 +346,7 @@ module Enjine
           return false if !@params["blocking"].nil? && engine.state.blockers.key?(obj.id) != @params["blocking"]
           return false if !@params["transformed"].nil? && engine.transformed?(obj) != @params["transformed"] # CR 701.27h
           return false if !@params["prepared"].nil? && engine.prepared?(obj) != @params["prepared"] # CR 723.3a
+          return false if !@params["saddled"].nil? && engine.saddled?(obj) != @params["saddled"] # CR 702.171b
 
           @params["tapped"].nil? || obj.tapped == @params["tapped"]
         end
