@@ -153,9 +153,9 @@ RSpec.describe "Costs, kicker, targets and payments: card data (unit)" do
     expect(errors_for(activated("cost" => [{ "behold" => { "exile" => 1 } }])))
       .to eq(["abilities[0].activated.cost[0].behold.card: required", "abilities[0].activated.cost[0].behold.exile: must be true or false"])
     expect(errors_for(spell("effects" => [{ "behold" => {} }]))).to eq(["abilities[0].spell.effects[0].behold.card: required"])
-    expect(errors_for(creature([{ "mana" => { "cost" => ["tap", "discard", { "pay_life" => "X" }], "produce" => "{C}" } }])))
-      .to eq(["abilities[0].mana.cost[1]: a mana ability's cost can't need a choice or X",
-              "abilities[0].mana.cost[2]: a mana ability's cost can't need a choice or X"])
+    mana_costs = ["tap", "discard", { "pay_life" => "X" }, { "mana" => "{2/W}" }]
+    expect(errors_for(creature([{ "mana" => { "cost" => mana_costs, "produce" => "{C}" } }])))
+      .to eq((1..3).map { "abilities[0].mana.cost[#{it}]: a mana ability's cost can't need a choice, X or {2/B}" })
     expect(errors_for(creature([{ "mana" => { "cost" => ["tap"], "color" => "chosen", "colors" => %w[W U] } }])))
       .to eq(["abilities[0].mana.colors: must list two or more colors (W U B R G), with color"])
     costs = Enjine::CardDefinition.from_h(activated("cost" => [

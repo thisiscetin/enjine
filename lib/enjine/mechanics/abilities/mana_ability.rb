@@ -95,7 +95,7 @@ module Enjine
         end
 
         # CR 605.3a: a mana ability is paid for and resolves at once, so none of its costs can wait for a
-        # choice or an announced X.
+        # choice, an announced X or a {2/B} paid one way or the other.
         def self.build_costs(raw, errors, path)
           unless raw.is_a?(Array) && !raw.empty?
             errors << "#{path}.cost: must be a non-empty list"
@@ -104,11 +104,14 @@ module Enjine
 
           raw.each_with_index.map do |c, i|
             cost = Mechanics.build_entry(:cost, c, errors, "#{path}.cost[#{i}]")
-            if cost.respond_to?(:choices_needed) || (cost.respond_to?(:x?) && cost.x?)
-              errors << "#{path}.cost[#{i}]: a mana ability's cost can't need a choice or X"
-            end
+            errors << "#{path}.cost[#{i}]: a mana ability's cost can't need a choice, X or {2/B}" if choosing_cost?(cost)
             cost
           end
+        end
+
+        def self.choosing_cost?(cost)
+          cost.respond_to?(:choices_needed) || (cost.respond_to?(:x?) && cost.x?) ||
+            (cost.respond_to?(:mana_cost) && cost.mana_cost.hybrid.any? { Mana.mono_hybrid?(it) })
         end
 
         def self.build_colors(params, color, errors, path)
