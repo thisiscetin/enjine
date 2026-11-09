@@ -86,6 +86,30 @@ RSpec.describe "Turn and game history (CR 601.2i, 700.4, 119.9, 608.2h)" do
     expect(amount({ "spells_cast_this_game" => "you" })).to eq(1) # the game log stays
   end
 
+  it "matches entered permanents by the subtypes they had as they entered" do
+    catalog = Enjine::CardPool::Core.catalog
+    game = build_game(catalog) do
+      turn 3, active: "alice", step: :precombat_main
+      player("alice") do
+        hand "Brasswork Cudgel"
+        battlefield "Gearwatch Smith"
+        library "Forest", count: 5
+      end
+      player("bob") { library "Forest", count: 5 }
+    end
+    engine = game.instance_variable_get(:@engine)
+    equipment = { "entered_this_turn" => { "each" => { "artifact" => { "subtypes" => ["equipment"] } }, "controller" => "you" } }
+    built = Enjine::Mechanics::Amount.build(equipment, [], "a", targets_count: 0)
+    ctx = Enjine::Mechanics::EffectContext.new(0, nil, nil, [])
+    expect(built.value(engine, ctx)).to eq(0)
+    engine.move!(ids_in(game, "alice", :hand).first, :battlefield, reason: "test")
+    expect(built.value(engine, ctx)).to eq(1)
+    hand = game.state.players[0].hand.size
+    skip_to(game, :end)
+    pass_both(game) # Gearwatch Smith's end step trigger: an Equipment entered this turn, so draw
+    expect(game.state.players[0].hand.size).to eq(hand + 1)
+  end
+
   it "counts dilemmas faced this turn (CR 700.17 of the 2026-11-06 rules)" do
     game.submit(type: "cast", object: card_in_hand("Forked Ember"))
     game.submit(type: "mode", mode: 0)

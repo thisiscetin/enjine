@@ -1112,9 +1112,9 @@ Rules: CR 702.26a, CR 702.26b, CR 702.26d, CR 702.26g, CR 702.26h, CR 502.1, CR 
 
 ## play_permission
 
-The controller may play (`play: "play"`, default) or cast (`"cast"`) each referenced exiled card matching `for`/`not_types`, paying its costs and following timing rules, for `duration`: end_of_turn (default), end_of_your_next_turn or while_exiled. With `choose: "one_per_owner"` only one chosen card per owner. `player`: who gets the permission instead of the controller (a face-down card: only someone who may look at it). `any_mana_type: true`: mana of any type can be spent to cast those spells.
+A player may play (`play: "play"`, default) or cast (`"cast"`) each referenced exiled card matching `for`/`not_types`, paying its costs and following timing rules, for `duration`: end_of_turn (default), end_of_your_next_turn or while_exiled. With `choose: "one_per_owner"` only one chosen card per owner. `to_player`: who may play it, "controller" (default, the effect's controller), "owner" (the card's owner) or a player selector (a face-down card: only someone who may look at it). `cost_increase`: spells cast this way cost that much generic mana more. `any_mana_type: true`: mana of any type can be spent to cast those spells.
 
-Rules: CR 611.2a, CR 601.3, CR 305.1, CR 400.7, CR 514.2, CR 406.3b, CR 609.4b
+Rules: CR 611.2a, CR 601.3, CR 305.1, CR 400.7, CR 514.2, CR 601.2f, CR 108.3, CR 406.3b, CR 609.4b
 
 | Parameter | Description |
 | --- | --- |
@@ -1124,7 +1124,8 @@ Rules: CR 611.2a, CR 601.3, CR 305.1, CR 400.7, CR 514.2, CR 406.3b, CR 609.4b
 | `for` | card spec |
 | `not_types` | list of card types |
 | `choose` | one_per_owner |
-| `player` | selector of players (default "you") |
+| `to_player` | controller | owner | player selector |
+| `cost_increase` | integer >= 1 |
 | `any_mana_type` | boolean |
 
 ```json

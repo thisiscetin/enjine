@@ -6911,6 +6911,131 @@
     ]
   },
   {
+    "name": "Dream Forge",
+    "mana_cost": "{3}",
+    "types": [
+      "artifact"
+    ],
+    "abilities": [
+      {
+        "play_from": {
+          "zones": [
+            "outside",
+            "graveyard"
+          ],
+          "cards": {
+            "permanent": true
+          },
+          "play": "play",
+          "once_each_turn": true
+        }
+      }
+    ]
+  },
+  {
+    "name": "Echo Pilferer",
+    "mana_cost": "{1}{U}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "rogue"
+    ],
+    "power": 1,
+    "toughness": 1,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "enters": {}
+          },
+          "targets": [
+            "opponent"
+          ],
+          "effects": [
+            {
+              "look_at_hand": {
+                "to": {
+                  "target": 0
+                }
+              }
+            },
+            {
+              "choose_cards": {
+                "from": {
+                  "hand": {
+                    "target": 0
+                  }
+                },
+                "for": {
+                  "not_types": [
+                    "land"
+                  ]
+                },
+                "put": "exile"
+              }
+            },
+            {
+              "play_permission": {
+                "to": {
+                  "result": 1
+                },
+                "to_player": "owner",
+                "duration": "while_exiled",
+                "cost_increase": 2
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Gearwatch Smith",
+    "mana_cost": "{1}{W}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "dwarf"
+    ],
+    "power": 2,
+    "toughness": 2,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "step_begins": {
+              "step": "end"
+            }
+          },
+          "if": {
+            "amount": {
+              "entered_this_turn": {
+                "each": {
+                  "artifact": {
+                    "subtypes": [
+                      "equipment"
+                    ]
+                  }
+                },
+                "controller": "you"
+              }
+            },
+            "at_least": 1
+          },
+          "effects": [
+            {
+              "draw": {
+                "amount": 1
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
     "name": "Lyceum of Many Hands",
     "types": [
       "land"
@@ -7182,7 +7307,7 @@
                 "to": {
                   "result": 0
                 },
-                "player": {
+                "to_player": {
                   "target": 0
                 },
                 "duration": "while_exiled",

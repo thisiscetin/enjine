@@ -39,7 +39,8 @@ module Enjine
         return false if purpose.nil?
 
         spec = purpose.key?("spell") ? @specs["spells"] : @specs["abilities"]
-        obj = engine.state.objects[purpose["spell"] || purpose["ability"]]
+        ref = purpose["spell"] || purpose["ability"]
+        obj = ref.is_a?(GameObject) ? ref : engine.state.objects[ref] # a card outside the game is its stand-in
         !spec.nil? && !obj.nil? && spec.match?(engine, obj)
       end
 

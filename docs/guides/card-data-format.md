@@ -372,6 +372,16 @@ Rule numbers are from the 2026-11-06 Comprehensive Rules.
   ["artifact"] }, "once_each_turn": true } }`; playing lands from the top uses
   `"cards": { "types": ["land"] }, "play": "play"`. Seeing the top card of your library
   at all times (CR 401.5) is the ability `"look_at_top"`.
+- **Several zones, and outside the game** (CR 400.11a): `zones` lists the zones
+  instead of `zone`, and `"outside"` means the cards the player owns outside the game
+  (the deck's `outside` list, see [Decks](#6-decks)). With `once_each_turn`, all the
+  zones share one use per turn. "Once during each of your turns, you may play a
+  permanent card you own from outside the game or from your graveyard":
+  ```json
+  { "play_from": { "zones": ["outside", "graveyard"], "cards": { "permanent": true },
+                   "play": "play", "once_each_turn": true } }
+  ```
+  A land played this way uses the turn's land play (CR 305.2).
 - **Impulse draw**: `exile_top` (or `exile_until` with `"until": "nonland"`) followed by
   `{ "play_permission": { "to": { "result": 0 }, "duration": "end_of_your_next_turn" } }`
   (`end_of_turn` for the current turn only, `while_exiled` for as long as the cards stay
@@ -381,9 +391,8 @@ Rule numbers are from the 2026-11-06 Comprehensive Rules.
 - **Exiled face down** (CR 406.3): `"face_down": true` on `exile_top`; `looker` names the
   players who may look at the cards (default: you). A face-down card has no
   characteristics, its id doesn't name it (`face_down#12`), and views and events show
-  it only to the lookers. `play_permission` takes `player` (who may play the cards,
-  instead of you; a face-down card needs a player who may look at it, CR 406.3b) and
-  `any_mana_type: true` ("mana of any type can be spent to cast those spells", CR 609.4b).
+  it only to the lookers. `play_permission` takes `to_player` (see below; a face-down
+  card needs a player who may look at it, CR 406.3b) and `any_mana_type: true` ("mana of any type can be spent to cast those spells", CR 609.4b).
   The card is turned face up as it's played. "Target opponent exiles the top card of your
   library face down; you exile the top two cards of theirs face down; each card's exiler
   may play it while it stays exiled, spending mana as though it were mana of any type":
@@ -392,8 +401,21 @@ Rule numbers are from the 2026-11-06 Comprehensive Rules.
   { "spell": { "targets": ["opponent"], "effects": [
     { "exile_top": { "amount": 1, "face_down": true, "looker": { "target": 0 } } },
     { "exile_top": { "amount": 2, "to": { "target": 0 }, "face_down": true } },
-    { "play_permission": { "to": { "result": 0 }, "player": { "target": 0 }, "duration": "while_exiled", "any_mana_type": true } },
+    { "play_permission": { "to": { "result": 0 }, "to_player": { "target": 0 }, "duration": "while_exiled", "any_mana_type": true } },
     { "play_permission": { "to": { "result": 1 }, "duration": "while_exiled", "any_mana_type": true } } ] } }
+  ```
+- **Who may play it, and for how much** (CR 108.3, 601.2f): `play_permission` takes
+  `to_player`, which is `"controller"` (the default), `"owner"` (each card's owner) or a
+  player selector such as `{ "target": 0 }`. It also takes `cost_increase`: a spell
+  cast with this permission costs that much more generic mana. This applies only when
+  the permission is the one used to cast it. "Look at target opponent's hand and exile
+  a nonland card from it. For as long as that card remains exiled, its owner may play
+  it. A spell cast this way costs {2} more":
+  ```json
+  [{ "look_at_hand": { "to": { "target": 0 } } },
+   { "choose_cards": { "from": { "hand": { "target": 0 } }, "for": { "not_types": ["land"] }, "put": "exile" } },
+   { "play_permission": { "to": { "result": 1 }, "to_player": "owner", "duration": "while_exiled",
+                          "cost_increase": 2 } }]
   ```
 - **Casting while resolving without paying mana costs** (CR 608.2g):
   `{ "cast_free": { "to": { "result": 0 }, "max_mana_value": 3, "count": "any" } }`;
@@ -582,6 +604,24 @@ A deck document references cards by name (or id) and carries the definitions it 
 A deck is valid with at least 60 cards and at most 4 copies of each non-basic card
 (CR 100.2a). `Enjine::Player.new(name:, deck:)` takes this document directly;
 `player.ready?` reports validity and `player.deck.errors` explains it.
+
+**Cards outside the game** (CR 400.11a). The engine plays single games, so a deck may
+list the cards its player owns outside the game, a constructed sideboard, as
+`outside`. These cards don't count toward the 60. There can be at most 15 of them,
+and the four-copy limit counts the deck and the outside list together (CR 100.4a).
+Errors carry a path, for example `outside[2].card: "Black Lotus" is not defined in cards`.
+
+```json
+{ "cards": [ ... ],
+  "main":    [ { "card": "Forest", "count": 24 }, { "card": "Grizzly Bears", "count": 4 } ],
+  "outside": [ { "card": "Hill Giant", "count": 2 } ] }
+```
+
+During a game these cards aren't objects (CR 400.11). Each player's list is
+`state.players[i].outside`, a list of card ids that only that player sees in their
+view. A `play_from` ability with `"outside"` among its zones offers them as
+`{ "type": "cast", "object": "outside:hill_giant", "via": ... }` (or `play_land`). The
+object is created as the card enters the game, and that player owns it (CR 108.3).
 
 ---
 

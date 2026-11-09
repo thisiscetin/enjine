@@ -9,7 +9,7 @@ module Enjine
   # The catalog and decklists are captured at compile time and shared by every game,
   # so later deck edits never affect an existing Setup.
   class Setup
-    attr_reader :players, :catalog, :decklists
+    attr_reader :players, :catalog, :decklists, :outside
 
     def initialize(*players)
       players = players.flatten
@@ -23,13 +23,14 @@ module Enjine
       players.each { |p| @catalog.merge(p.deck.catalog) }
       @catalog.freeze
       @decklists = players.map { |p| p.deck.card_ids.freeze }.freeze
+      @outside = players.map { |p| p.deck.outside_ids.freeze }.freeze # CR 400.11a: the cards they own outside the game
       freeze
     end
 
     def names = @players.map(&:name)
 
     def new_game(seed:)
-      Game.start(catalog: @catalog, names: names, decklists: @decklists, seed: seed).tap do |game|
+      Game.start(catalog: @catalog, names: names, decklists: @decklists, seed: seed, outside: @outside).tap do |game|
         @players.each { |p| p.seat(game) }
       end
     end

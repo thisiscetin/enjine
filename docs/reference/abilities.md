@@ -683,13 +683,14 @@ Rules: CR 502.3, CR 604.1
 
 ## play_from
 
-With `cards: "self"` (default): its owner may cast this card from `zone` (the ability functions there). With a card spec: while this permanent is on the battlefield, its controller may play their own matching cards from `zone`. `play`: "cast" (spells only, default) or "play" (lands too). `once_each_turn`: once during each of your turns. `enters_with`: a permanent spell cast this way enters with these counters. Timing and costs are the usual ones.
+With `cards: "self"` (default): its owner may cast this card from `zone` (the ability functions there). With a card spec: while this permanent is on the battlefield, its controller may play their own matching cards from `zone`, or from any of `zones` ("outside": cards they own outside the game, the deck's `outside` list, CR 400.11a). `play`: "cast" (spells only, default) or "play" (lands too, using a land play). `once_each_turn`: once during each of your turns, one use shared by all its zones. `enters_with`: a permanent spell cast this way enters with these counters. Timing and costs are the usual ones.
 
-Rules: CR 601.3, CR 113.6e, CR 113.6f, CR 305.1, CR 401.5, CR 122.1, CR 614.12
+Rules: CR 601.3, CR 113.6e, CR 113.6f, CR 305.1, CR 401.5, CR 122.1, CR 614.12, CR 400.11a, CR 400.11b, CR 108.3
 
 | Parameter | Description |
 | --- | --- |
-| `zone` | graveyard | exile | library_top |
+| `zone` | graveyard | exile | library_top | outside |
+| `zones` | list of zones (instead of `zone`) |
 | `cards` | "self" or a card spec |
 | `play` | cast | play |
 | `once_each_turn` | boolean |

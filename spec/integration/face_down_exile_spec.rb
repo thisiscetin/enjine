@@ -9,7 +9,7 @@ RSpec.describe "Face-down exile, look permission and mana of any type (CR 406.3,
       "abilities" => [{ "spell" => { "targets" => ["opponent"], "effects" => [
         { "exile_top" => { "amount" => 1, "face_down" => true, "looker" => { "target" => 0 } } },
         { "exile_top" => { "amount" => 2, "to" => { "target" => 0 }, "face_down" => true } },
-        { "play_permission" => { "to" => { "result" => 0 }, "player" => { "target" => 0 }, "duration" => "while_exiled",
+        { "play_permission" => { "to" => { "result" => 0 }, "to_player" => { "target" => 0 }, "duration" => "while_exiled",
                                  "any_mana_type" => true } },
         { "play_permission" => { "to" => { "result" => 1 }, "duration" => "while_exiled", "any_mana_type" => true } }
       ] } }] }

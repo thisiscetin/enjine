@@ -25,7 +25,8 @@ module Enjine
   PlayerState = Struct.new(:name, :life, :poison, :library, :hand, :graveyard, :mana_pool, :lands_played,
                            :drew_from_empty, :lost, :mulligans, :kept, :mulligan_choice,
                            :turn_log, :game_log, # what happened this turn / this game (see Engine::History)
-                           :restricted_mana) do # mana with a spending restriction (CR 106.6), see Engine#add_mana!
+                           :restricted_mana, # mana with a spending restriction (CR 106.6), see Engine#add_mana!
+                           :outside) do # definition ids of the cards they own outside the game (CR 400.11a)
     def zone(name)
       case name
       when :library then library
@@ -40,7 +41,8 @@ module Enjine
         "lands_played" => lands_played, "drew_from_empty" => drew_from_empty, "lost" => lost,
         "mulligans" => mulligans, "kept" => kept, "mulligan_choice" => mulligan_choice,
         "turn_log" => Marshal.load(Marshal.dump(turn_log || {})), "game_log" => Marshal.load(Marshal.dump(game_log || {})),
-        "restricted_mana" => Marshal.load(Marshal.dump(restricted_mana || [])) }
+        "restricted_mana" => Marshal.load(Marshal.dump(restricted_mana || [])),
+        "outside" => (outside || []).dup }
     end
   end
 
@@ -60,13 +62,17 @@ module Enjine
                   :attackers, :blockers, :effects, :frames, :attacks_declared,
                   :pending_triggers, :repeat_cleanup, :combat_damage_pass, :delayed_triggers,
                   :extra_turns
+    # The definition ids each player started the game with outside it (CR 400.11a, 100.4), like
+    # `decklists`: a restart begins from these again. What is still outside is PlayerState#outside.
+    attr_accessor :outside_lists
 
-    def self.initial(names:, decklists:, seed:)
+    def self.initial(names:, decklists:, seed:, outside: nil)
       state = new
       state.seed = seed
       state.rng = Rng.from_seed(seed)
       state.decklists = decklists.map { |l| l.dup.freeze }.freeze
-      state.players = names.map { |name| new_player(name) }
+      state.outside_lists = (outside || names.map { [] }).map { |l| l.dup.freeze }.freeze
+      state.players = names.each_with_index.map { |name, i| new_player(name, state.outside_lists[i]) }
       state.objects = {}
       state.battlefield = []
       state.stack = []
@@ -89,10 +95,11 @@ module Enjine
       state
     end
 
-    def self.new_player(name)
+    def self.new_player(name, outside = [])
       PlayerState.new(name: name, life: STARTING_LIFE, poison: 0, library: [], hand: [], graveyard: [],
                       mana_pool: Mana.empty_pool, lands_played: 0, drew_from_empty: false, lost: nil,
-                      mulligans: 0, kept: false, mulligan_choice: nil, turn_log: {}, game_log: {}, restricted_mana: [])
+                      mulligans: 0, kept: false, mulligan_choice: nil, turn_log: {}, game_log: {}, restricted_mana: [],
+                      outside: outside.dup)
     end
 
     def zone_list(zone, owner)
@@ -114,7 +121,7 @@ module Enjine
         "frames" => deep_dup(frames), "pending_triggers" => deep_dup(pending_triggers),
         "delayed_triggers" => deep_dup(delayed_triggers), "extra_turns" => deep_dup(extra_turns),
         "repeat_cleanup" => repeat_cleanup, "combat_damage_pass" => combat_damage_pass,
-        "attacks_declared" => attacks_declared }
+        "attacks_declared" => attacks_declared }.merge("outside_lists" => (outside_lists || []).map(&:dup))
     end
 
     # An independent deep copy, about 10x faster than a Marshal round trip. It walks every

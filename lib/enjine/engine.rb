@@ -277,7 +277,10 @@ module Enjine
     end
 
     # An "as this enters" choice the controller must make before `id` enters (CR 614.12).
-    def entering_choice(id) = chars(id).abilities.map(&:ability).find { it.kind == :entering_choice }
+    def entering_choice(id)
+      id = outside_object(nil, outside_card(id)) if outside_key?(id) # a land played from outside the game
+      chars(id).abilities.map(&:ability).find { it.kind == :entering_choice }
+    end
 
     # Records the answer to an enter_choice decision on the frame that asked.
     def enter_choice!(option)

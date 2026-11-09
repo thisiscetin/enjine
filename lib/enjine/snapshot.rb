@@ -26,6 +26,7 @@ module Enjine
       validate_turn(data, errors) if errors.empty?
       validate_delayed_triggers(data, catalog, errors) if errors.empty?
       validate_extra_turns(data, errors)
+      validate_outside(data, catalog, errors)
       errors
     end
 
@@ -54,6 +55,7 @@ module Enjine
       state.pending_triggers = deep_copy(data.fetch("pending_triggers", []))
       state.delayed_triggers = deep_copy(data.fetch("delayed_triggers", []))
       state.extra_turns = deep_copy(data.fetch("extra_turns", { "queue" => [], "begun" => [] }))
+      state.outside_lists = data.fetch("outside_lists", [[], []]).map { |l| l.dup.freeze }.freeze
       state.repeat_cleanup = data.fetch("repeat_cleanup", false)
       state.combat_damage_pass = data["combat_damage_pass"]
       state.attacks_declared = data.fetch("attacks_declared", 0)
@@ -89,6 +91,26 @@ module Enjine
         pl.turn_log = deep_copy(hash.fetch("turn_log", {}))
         pl.game_log = deep_copy(hash.fetch("game_log", {}))
         pl.restricted_mana = deep_copy(hash.fetch("restricted_mana", []))
+        pl.outside = hash.fetch("outside", []).dup
+      end
+    end
+
+    # Cards outside the game (CR 400.11a): definition ids only (they aren't objects, CR 400.11), each in the
+    # catalog; absent in older snapshots. `outside_lists` holds what each player started with.
+    def validate_outside(data, catalog, errors)
+      check = lambda do |list, path|
+        next errors << "#{path}: must be a list of card ids" unless list.is_a?(Array)
+
+        list.each_with_index do |id, j|
+          errors << "#{path}[#{j}]: #{id.inspect} is not in the catalog" unless id.is_a?(String) && catalog[id]&.id == id
+        end
+      end
+      lists = data.fetch("outside_lists", [[], []])
+      shaped = lists.is_a?(Array) && lists.size == 2
+      errors << "outside_lists: must be a list of 2 card id lists" unless shaped
+      lists.each_with_index { |list, i| check.call(list, "outside_lists[#{i}]") } if shaped
+      Array(data["players"]).each_with_index do |pl, i|
+        check.call(pl.fetch("outside", []), "players[#{i}].outside") if pl.is_a?(Hash)
       end
     end
 

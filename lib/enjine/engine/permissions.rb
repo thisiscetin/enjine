@@ -14,31 +14,45 @@ module Enjine
     #    "play" => "cast" | "play",              # "play" also allows a land to be played (CR 305.1)
     #    "alt" => nil | {"free" => true} | {"beam" => "{3}{W}", "not" => id},  # alternative cost (CR 118.9)
     #    "enters_with" => {counter => n},         # "if you cast it this way, it enters with ..."
-    #    "once" => {"source" => id, "ref" => ref}} # "once during each of your turns"
+    #    "once" => {"source" => id, "ref" => ref}, # "once during each of your turns"
+    #    "cost_increase" => n}                     # riders of a permission effect (PlayPermission), e.g. 601.2f
     #
     # Permissions granted by resolved effects are `state.effects` entries of kind "permission"
     # (see #grant_play_permission!); the others come from abilities (Abilities::PlayFrom, BeamMeUp).
+    #
+    # Cards outside the game (CR 400.11) aren't objects: a player's are definition ids in
+    # PlayerState#outside. Options name one as `"outside:<card id>"` (#outside_key); legality checks use a
+    # detached GameObject in the pseudo-zone :outside that is never stored (#outside_object), and the
+    # object is created only when the card is brought into the game (#bring_in_from_outside!).
     module Permissions
       FREE = { "free" => true }.freeze
       ZERO = Mana::Cost.new(generic: 0, colored: {}.freeze)
       BEAM_COST_TEXT = "Return a creature you control to its owner's hand"
+      OUTSIDE = "outside:"
+      # Permission effect fields copied into the play method (see Effects::PlayPermission).
+      RIDERS = %w[cost_increase any_mana_type].freeze
 
       # ---- legal actions --------------------------------------------------------------------
 
       # Cards outside the hand `index` might play: their graveyard, every exiled card and their library's
-      # top card (deterministic order: graveyard, exile, library).
-      def permission_candidates(index)
+      # top card (deterministic order: graveyard, exile, library), then the cards they own outside the game
+      # (one key per distinct card) while something lets them play those.
+      def permission_candidates(index, sources = permission_sources(index))
         pl = player(index)
         ids = pl.graveyard + state.exile
-        pl.library.empty? ? ids : ids + [pl.library.first]
+        ids += [pl.library.first] unless pl.library.empty?
+        return ids unless sources.any? { |_, inst| inst.ability.kind == :play_from && inst.ability.outside? }
+
+        ids + pl.outside.uniq.map { outside_key(it) }
       end
 
       # Priority options: `{type: "cast", object: id, via: method}` for every castable card and method.
       def permission_cast_options(index)
         sources = permission_sources(index)
-        permission_candidates(index).flat_map do |id|
-          play_methods(index, id, sources).filter_map do |method|
-            { type: "cast", object: id, via: method["via"] } if castable_via?(index, id, method)
+        permission_candidates(index, sources).flat_map do |ref|
+          obj = candidate_object(index, ref)
+          play_methods(index, obj, sources).filter_map do |method|
+            { type: "cast", object: ref, via: method["via"] } if castable_via?(index, obj, method)
           end
         end
       end
@@ -46,13 +60,67 @@ module Enjine
       # Priority options: lands `index` may play from outside their hand (CR 305.1, 305.2).
       def permission_land_options(index)
         sources = permission_sources(index)
-        permission_candidates(index).flat_map do |id|
-          next [] unless face_up(id) { chars(id).land? } # a face-down card is played face up (CR 406.3a)
+        permission_candidates(index, sources).flat_map do |ref|
+          obj = candidate_object(index, ref)
+          next [] unless face_up(obj.id) { chars(obj).land? } # a face-down card is played face up (CR 406.3a)
 
-          play_methods(index, id, sources).filter_map do |method|
-            { type: "play_land", object: id, via: method["via"] } if method["play"] == "play"
+          play_methods(index, obj, sources).filter_map do |method|
+            { type: "play_land", object: ref, via: method["via"] } if method["play"] == "play"
           end
         end
+      end
+
+      # ---- cards outside the game (CR 400.11, 400.11b, 108.3) -------------------------------------
+
+      def outside_key(card) = "#{OUTSIDE}#{card}"
+      def outside_key?(ref) = ref.is_a?(String) && ref.start_with?(OUTSIDE)
+      def outside_card(ref) = ref.delete_prefix(OUTSIDE)
+
+      # A detached object standing for a card `index` owns outside the game, for legality checks only.
+      def outside_object(index, card)
+        GameObject.new(id: outside_key(card), card: card, owner: index, controller: index, zone: :outside, tapped: false,
+                       controlled_since: nil, kind: "card", counters: {}, damage: 0, source: nil, ability: nil,
+                       targets: nil, loyalty_turn: nil, deathtouched: false, modes: nil, memory: {}, attached_to: nil)
+      end
+
+      # The object an option names: a game object, or the detached stand-in of a card outside the game.
+      def candidate_object(index, ref) = outside_key?(ref) ? outside_object(index, outside_card(ref)) : object(ref)
+
+      # CR 400.11b, 108.3: one copy of `card` leaves `index`'s outside list and enters the game in `to` as a
+      # new object they own, through the usual entering replacements (CR 614.12) when it's the battlefield.
+      def bring_in_from_outside!(index, card, to, reason:, enters: nil)
+        list = player(index).outside
+        at = list.index(card) or raise ArgumentError, "#{name(index)} has no #{card} outside the game"
+        list.delete_at(at)
+        obj = create_object(card, index, to)
+        data = { "object" => obj.id, "to" => to, "controller" => index, "reason" => reason }
+        if to == :battlefield
+          data["enters"] = { "tapped" => enters&.fetch("tapped", false) == true, "counters" => {} }
+          data = propose("zone_change", data).data
+          merge_enters!(data["enters"], enters.except("tapped")) if enters
+        end
+        arrive!(obj, obj, data)
+        state.zone_list(to, index).unshift(obj.id)
+        record_result!(obj.id)
+        emit Events::ZoneChanged.new(card: card, old_id: nil, new_id: obj.id, owner: name(index), from: "outside",
+                                     to: to.to_s, reason: reason)
+        obj
+      end
+
+      # CR 601.2a: a spell cast from outside the game is brought into the game onto the stack.
+      def begin_outside_cast!(index, ref, via)
+        method = play_method(index, ref, via)
+        card = outside_card(ref)
+        origin = { "zone" => "outside", "card" => card, "index" => player(index).outside.index(card) }
+        obj = bring_in_from_outside!(index, card, :stack, reason: "cast")
+        start_casting!(index, obj.id, "spell", origin: origin, cost: method_cost(obj, method), extra: { "method" => method })
+      end
+
+      # CR 305.1: a land played (from a zone or from outside the game) is put onto the battlefield.
+      def put_played_land!(index, ref, enters: nil)
+        return bring_in_from_outside!(index, outside_card(ref), :battlefield, reason: "play_land", enters: enters) if outside_key?(ref)
+
+        move!(ref, :battlefield, controller: index, reason: "play_land", enters: enters)
       end
 
       # Permanents `index` controls whose static abilities let them play cards from other zones:
@@ -68,9 +136,10 @@ module Enjine
         end
       end
 
-      # Every method `index` has to play the card `id` now (before timing and cost checks).
+      # Every method `index` has to play the card `id` (an object, its id or an outside key) now (before
+      # timing and cost checks).
       def play_methods(index, id, sources = permission_sources(index))
-        obj = object(id)
+        obj = id.is_a?(GameObject) ? id : candidate_object(index, id)
         granted_methods(index, obj) + own_methods(index, obj) + static_methods(index, obj, sources) +
           beam_methods(index, obj, sources)
       end
@@ -86,8 +155,8 @@ module Enjine
       # CR 601.3: whether `index` may begin to cast the card this way now. Timing still applies outside
       # resolution (CR 304.1, 307.1); a card without a mana cost needs an alternative cost (CR 118.6a).
       def castable_via?(index, id, method)
-        obj = object(id)
-        return face_up(id) { castable_via?(index, id, method) } if face_down?(obj) && @face_up != id # CR 406.3a
+        obj = id.is_a?(GameObject) ? id : candidate_object(index, id)
+        return face_up(obj.id) { castable_via?(index, obj, method) } if face_down?(obj) && @face_up != obj.id # CR 406.3a
 
         c = chars(obj)
         return false if c.land? || (method["alt"].nil? && c.mana_cost.nil?) # CR 305.9
@@ -96,8 +165,10 @@ module Enjine
         return false unless additional_costs_payable?(obj) # CR 601.2f
 
         cost = Mana.sum_costs([method_cost(obj, method), *spell_extra_mana(obj, false)])
-        purpose = { "spell" => id, "any_type" => method["any_mana_type"] }.compact # CR 609.4b
-        ability_targetable?(spell_ability_of(obj), index, id) && affordable?(index, total_cost(index, cost, spell: obj), nil, purpose)
+        # CR 609.4b; a stand-in for a card outside the game is passed itself (it isn't in state.objects).
+        purpose = { "spell" => state.objects.key?(obj.id) ? obj.id : obj, "any_type" => method["any_mana_type"] }.compact
+        ability_targetable?(spell_ability_of(obj), index, obj.id) &&
+          affordable?(index, total_cost(index, cost, spell: obj), nil, purpose)
       end
 
       # CR 608.2g: whether a card could be cast now during resolution without paying its mana cost
@@ -116,13 +187,16 @@ module Enjine
         free_castable?(index, id) && affordable?(index, total_cost(index, cost, spell: obj), nil)
       end
 
-      # The mana cost paid with a method: the card's own, nothing (CR 118.9) or the beam me up cost.
+      # The mana cost paid with a method: the card's own, nothing (CR 118.9) or the beam me up cost, plus a
+      # permission's cost increase ("spells cast this way cost {2} more", CR 601.2f).
       def method_cost(obj, method)
         alt = method && method["alt"]
-        return chars(obj).mana_cost unless alt
-        return ZERO if alt["free"]
-
-        Mana::Cost.parse(alt["beam"])
+        cost = if alt.nil? then chars(obj).mana_cost
+               elsif alt["free"] then ZERO
+               else Mana::Cost.parse(alt["beam"])
+               end
+        increase = method && method["cost_increase"]
+        increase && cost ? cost.with(generic: cost.generic + increase) : cost
       end
 
       # Costs#base_cost for a spell cast with an alternative cost (CR 118.9c: its mana cost is unchanged).
@@ -138,7 +212,7 @@ module Enjine
           next unless e["kind"] == "permission" && e["controller"] == index && e["affected"].include?(obj.id)
           next unless obj.zone == :exile && may_look?(obj, index)
 
-          { "via" => "effect:#{e["timestamp"]}", "play" => e["play"], "any_mana_type" => e["any_mana_type"] }.compact
+          { "via" => "effect:#{e["timestamp"]}", "play" => e["play"], **e.slice(*RIDERS) }
         end
       end
 
@@ -206,12 +280,13 @@ module Enjine
 
       # Permission to play exiled cards for a duration (CR 611.2): a continuous effect for the exiled
       # objects (a card that leaves exile is a new object, CR 400.7, so the permission ends with it).
-      def grant_play_permission!(index, ids, duration:, play:, any_mana_type: false)
+      # `riders` (RIDERS) change how a card is played with this permission, and only then.
+      def grant_play_permission!(index, ids, duration:, play:, **riders)
         return if ids.empty?
 
         state.effects << { "kind" => "permission", "timestamp" => next_timestamp!, "controller" => index,
-                           "affected" => ids, "duration" => duration, "turn" => state.turn, "play" => play }
-        state.effects.last["any_mana_type"] = true if any_mana_type
+                           "affected" => ids, "duration" => duration, "turn" => state.turn, "play" => play,
+                           **riders.transform_keys(&:to_s).slice(*RIDERS) }
         emit Events::EffectStarted.new(kind: "permission", affected: ids, details: { "duration" => duration, "play" => play })
       end
 
@@ -291,6 +366,8 @@ module Enjine
       # A cancelled cast (Casting#cancel_casting!): the card goes back where it came from as the same object
       # (CR 733.1), hand, graveyard, exile or library, at its old position. So a permission naming it applies.
       def restore_to_origin!(obj, origin)
+        return player(obj.owner).outside.insert(origin["index"] || 0, obj.card) if origin["zone"] == "outside"
+
         zone = origin.fetch("zone", "hand").to_sym
         state.objects[origin["id"]] = GameObject.new(
           id: origin["id"], card: obj.card, owner: obj.owner, controller: obj.owner, zone: zone, tapped: false,

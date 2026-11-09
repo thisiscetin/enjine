@@ -9,7 +9,8 @@ module Enjine
         '`{type: "cast", object: id}` — start casting a card from your hand (CR 601.2). ' \
           '`{type: "cast", object: id, via: method}` casts a card from another zone (graveyard, exile, the top ' \
           "of your library) by the permission or alternative cost `via` names, e.g. beam me up (CR 601.3, " \
-          "702.196). Offered only when timing allows, targets exist and enough mana is available."
+          "702.196). A card outside the game is named `\"outside:<card id>\"` (CR 400.11b). Offered only when timing " \
+          "allows, targets exist and enough mana is available."
       end
 
       def self.options(engine, index)
