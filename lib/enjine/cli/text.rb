@@ -58,6 +58,7 @@ module Enjine
         parts = [obj["name"]]
         parts << "#{obj["power"]}/#{obj["toughness"]}" if obj.key?("power")
         parts << "loyalty #{obj["loyalty"]}" if obj.key?("loyalty")
+        parts << obj["keywords"].map { it.tr("_", " ") }.join(", ") if obj["keywords"]
         parts << "damage #{obj["damage"]}" if obj["damage"].to_i.positive?
         obj.fetch("counters", {}).except("loyalty").each { |kind, n| parts << "#{n}×#{kind}" }
         parts << "tapped" if obj["tapped"]
@@ -155,6 +156,38 @@ module Enjine
         when "mulligan_taken" then "#{ev["player"]} mulligans (#{ev["mulligans"]} so far)"
         when "hand_kept" then "#{ev["player"]} keeps#{" after #{ev["mulligans"]} mulligan(s)" if ev["mulligans"].positive?}"
         when "game_started" then "Game started: #{ev["players"].join(" vs ")} (seed #{ev["seed"]})"
+        else mechanic_event(ev)
+        end
+      end
+
+      # Events of particular mechanics; attacks_declared is told by its attacker_declared events.
+      def mechanic_event(ev)
+        case ev["type"]
+        when "attacks_declared" then nil
+        when "ability_triggered" then "#{card_name(ev["card"])}'s ability triggers"
+        when "trigger_put_on_stack" then "#{card_name(ev["card"])}'s triggered ability goes on the stack#{targets(ev["targets"])}"
+        when "trigger_removed" then "#{card_name(ev["card"])}'s triggered ability is removed (#{ev["reason"]})"
+        when "ability_countered" then "#{card_name(ev["card"])}'s ability is countered"
+        when "spell_copied" then "#{ev["player"]} copies #{card_name(ev["card"])}#{targets(ev["targets"])}"
+        when "x_announced" then "#{ev["player"]} announces X = #{ev["value"]}"
+        when "payment_finished" then "#{ev["player"]} #{ev["outcome"]}"
+        when "attached" then "#{name_of(ev["object"])} is attached to #{name_of(ev["to"])}"
+        when "unattached" then "#{name_of(ev["object"])} becomes unattached from #{name_of(ev["from"])}"
+        when "control_changed" then "#{ev["controller"]} gains control of #{name_of(ev["object"])}"
+        when "became_blocked" then "#{name_of(ev["object"])} is blocked"
+        when "crewed_vehicle" then "#{name_of(ev["object"])} crews #{name_of(ev["vehicle"])}"
+        when "became_crewed" then "#{name_of(ev["object"])} becomes crewed"
+        when "transformed" then "#{name_of(ev["object"])} transforms into #{card_name(ev["card"])}"
+        when "prepared_changed" then "#{name_of(ev["object"])} #{ev["prepared"] ? "becomes prepared" : "is no longer prepared"}"
+        when "phased_out" then "#{name_of(ev["object"])} phases out"
+        when "phased_in" then "#{name_of(ev["object"])} phases in"
+        when "token_ceased" then "#{card_name(ev["card"])} token ceases to exist"
+        when "library_reordered" then "#{ev["player"]} puts #{Array(ev["top"]).size} on top and #{Array(ev["bottom"]).size} on the bottom"
+        when "looked_at" then "#{ev["player"]} looks at #{Array(ev["objects"]).size} of #{ev["owner"]}'s cards"
+        when "dilemma_faced" then "#{ev["player"]} faces a dilemma"
+        when "extra_turn_added" then "#{ev["player"]} will take an extra turn"
+        when "speed_changed" then "#{ev["player"]}: speed #{ev["from"]} → #{ev["to"]}"
+        when "keyword_action" then "#{ev["player"]} #{ev["action"].to_s.tr("_", " ")}#{" #{ev["amount"]}" if ev["amount"]}"
         else "#{ev["type"]}: #{ev.except("type")}"
         end
       end

@@ -54,7 +54,7 @@ RSpec.describe "Static abilities and keyword grants (CR 604, 611, 613)" do
 
   it "grants keywords to other creatures you control, which changes how they can be blocked" do
     game = board(["Sky Captain", "Grizzly Bears"])
-    expect(view_of(game, obj_id(game, "Grizzly Bears"))["keywords"]).to be_nil # view shows printed keywords
+    expect(view_of(game, obj_id(game, "Grizzly Bears"))["keywords"]).to eq(["flying"]) # current keywords, granted too
     engine = game.instance_variable_get(:@engine)
     expect(engine.chars(obj_id(game, "Grizzly Bears")).keyword?(:flying)).to be(true)
     expect(engine.chars(obj_id(game, "Sky Captain")).keyword?(:flying)).to be(false) # "other"

@@ -135,6 +135,18 @@ RSpec.describe Enjine::CLI do
     expect(described_class::Text.new(game).option(option)).to eq("Tap Grizzly Bears for mana ({T}: Add {G}.)")
   end
 
+  it "shows a permanent's keywords as it has them now, granted ones included (CR 613.1f)" do
+    banner = { "name" => "Twin Banner", "mana_cost" => "{2}", "types" => ["artifact"],
+               "abilities" => [{ "static" => { "affects" => { "each" => "creature", "controller" => "you" },
+                                               "keywords" => %w[double_strike] } }] }
+    game = build_game(catalog_with(banner)) do
+      turn 2, active: "alice", step: :precombat_main
+      player("alice") { battlefield "Twin Banner", "Grizzly Bears" }
+      player("bob")
+    end
+    expect(described_class::Text.new(game).board(game.view_for("alice"))).to include("Grizzly Bears · 2/2 · double strike")
+  end
+
   it "describes every option and event type in plain text" do
     game = build_game do
       turn 2, active: "alice", step: :precombat_main
