@@ -12,33 +12,43 @@ module Enjine
         primitive :ability, :static,
                   description: "While its source is on the battlefield (and its `if` condition holds), every permanent " \
                                "it `affects` gets `pump` (fixed or computed amounts, layer 7c), the `keywords` and " \
-                               "granted `abilities` (layer 6, triggered or mana abilities), and with `creature_types` " \
-                               "has exactly those creature types (layer 4); `types` are card types it has in addition " \
+                               "granted `abilities` (layer 6, triggered, activated or mana abilities), and with " \
+                               "`creature_types` has exactly those creature types (layer 4); `loses_abilities: true` " \
+                               "removes the abilities it had before (layer 6, in timestamp order: later grants and " \
+                               "keyword counters stay, CR 613.7), `colors` sets its colors (layer 5) and " \
+                               "`base_power_toughness` its base power and toughness (layer 7b); `types` are card " \
+                               "types it has in addition " \
                                "to its other types (\"this Vehicle is an artifact creature\", layer 4) and `subtypes` subtypes it has in " \
                                "addition to its other types (\"is a Wizard in addition to its other types\", layer 4). " \
                                "`affects` is " \
                                "{\"each\": filter, " \
                                "\"controller\": you|opponent|any, \"other\": true} (relative to the source's " \
                                "controller), \"self\", or \"attached\" (\"equipped/enchanted creature\").",
-                  rules: %w[604.1 604.2 611.3a 613.1d 613.1f 613.4c 205.1a 205.1b 301.5f 303.4m],
+                  rules: %w[604.1 604.2 611.3a 613.1d 613.1e 613.1f 613.4b 613.4c 613.7a 613.8a 205.1a 205.1b 301.5f 303.4m],
                   params: { "affects" => "{\"each\": filter, \"controller\": ..., \"other\": bool}, \"self\" or \"attached\"",
                             "if" => "condition (\"as long as ...\", \"during your turn\")",
                             "pump" => "{\"power\": amount, \"toughness\": amount} (\"gets +1/+1 for each ...\")",
                             "keywords" => "list of keywords", "creature_types" => "list of creature types (replaces the others)",
                             "types" => "list of card types it also has (in addition to its other types)",
                             "subtypes" => "list of subtypes it also has (in addition to its other types)",
-                            "abilities" => "list of triggered or mana abilities the affected permanents have" },
+                            "abilities" => "list of triggered, activated or mana abilities the affected permanents have",
+                            "loses_abilities" => "true: it loses all abilities (\"loses all abilities\")",
+                            "colors" => "list of W, U, B, R, G: its colors are exactly these ([] for colorless)",
+                            "base_power_toughness" => "{\"power\": n, \"toughness\": n}" },
                   example: { "static" => { "affects" => { "each" => "creature", "controller" => "you" },
                                            "pump" => { "power" => 1, "toughness" => 1 } } }
 
-        GRANTABLE = %i[triggered mana].freeze
+        GRANTABLE = %i[triggered mana activated].freeze
         # Data that would make the layer pass depend on its own result (CR 613.8).
         LIVE = %w[power toughness greatest_power attacking blocking tapped].freeze
+        KEYS = %w[affects if pump keywords creature_types abilities types subtypes loses_abilities colors
+                  base_power_toughness].freeze
 
-        attr_reader :filter, :controller, :other, :keywords, :creature_types, :condition, :granted, :card_types, :subtypes
+        attr_reader :filter, :controller, :other, :keywords, :creature_types, :condition, :granted, :card_types, :subtypes,
+                    :colors, :base_power_toughness
 
         def self.build(params, errors, path, **)
-          Mechanics.check_keys(params, %w[affects if pump keywords creature_types abilities types subtypes], errors, path)
+          Mechanics.check_keys(params, KEYS, errors, path)
           affects = Mechanics.fetch_param(params, :affects)
           filter, controller, other = parse_affects(affects, errors, path)
           raw_if = Mechanics.fetch_param(params, :if)
@@ -50,11 +60,23 @@ module Enjine
           granted = parse_granted(params, errors, path)
           card_types = Effects::Become.names_param(params, :types, :type, errors, path, allowed: Effects::Become::ADDABLE_TYPES)
           subtypes = parse_subtypes(params, :subtypes, errors, path) || []
-          if pump.empty? && keywords.empty? && types.nil? && granted.empty? && card_types.empty? && subtypes.empty?
-            errors << "#{path}: needs pump and/or keywords (or creature_types, types, subtypes, abilities)"
+          sets = parse_sets(params, errors, path)
+          if pump.empty? && keywords.empty? && types.nil? && granted.empty? && card_types.empty? && subtypes.empty? &&
+             sets.values.none?
+            errors << "#{path}: needs at least one of #{(KEYS - %w[affects if]).join(", ")}"
           end
           new(filter: filter, controller: controller, other: other, pump: pump, keywords: keywords, creature_types: types,
-              condition: condition, granted: granted, card_types: card_types, subtypes: subtypes)
+              condition: condition, granted: granted, card_types: card_types, subtypes: subtypes, **sets)
+        end
+
+        # "loses all abilities and is a black 1/1" (layers 5, 6 and 7b): the same shapes as Effects::Become.
+        def self.parse_sets(params, errors, path)
+          loses = Mechanics.fetch_param(params, :loses_abilities)
+          errors << "#{path}.loses_abilities: must be true (or absent)" unless [nil, true].include?(loses)
+          { loses_abilities: loses == true,
+            colors: Effects::Become.parse_colors(Mechanics.fetch_param(params, :colors), errors, path),
+            base_power_toughness: Effects::Become.parse_power_toughness(Mechanics.fetch_param(params, :base_power_toughness),
+                                                                        errors, path) }
         end
 
         def self.parse_affects(affects, errors, path)
@@ -116,16 +138,19 @@ module Enjine
             ability = Mechanics.build_entry(:ability, entry, errors, "#{path}.abilities[#{j}]")
             next ability if ability.nil? || GRANTABLE.include?(ability.kind)
 
-            errors << "#{path}.abilities[#{j}]: only triggered and mana abilities can be granted yet"
+            errors << "#{path}.abilities[#{j}]: only triggered, activated and mana abilities can be granted yet"
             nil
           end.freeze
         end
 
         def initialize(filter:, controller:, other:, pump:, keywords:, creature_types:, condition:, granted:, card_types: [],
-                       subtypes: [])
+                       subtypes: [], loses_abilities: false, colors: nil, base_power_toughness: nil)
           super()
           @card_types = card_types.freeze
           @subtypes = subtypes.freeze
+          @loses_abilities = loses_abilities
+          @colors = colors
+          @base_power_toughness = base_power_toughness
           @filter = filter
           @controller = controller
           @other = other
@@ -144,6 +169,9 @@ module Enjine
         def try_effects = []
         def nested_abilities = @granted
         def pump? = !@pump.empty?
+        def loses_abilities? = @loses_abilities
+        # Whether it changes layer 6: abilities removed or added.
+        def ability_changes? = @loses_abilities || !@keywords.empty? || !@granted.empty?
         def computed? = @pump.values.any? { !it.is_a?(Amount::Fixed) }
 
         # The fixed bonus, for display and for data readers (computed bonuses are Amounts).
@@ -174,6 +202,9 @@ module Enjine
 
         def to_s
           bits = []
+          bits << "loses all abilities" if loses_abilities?
+          bits << "colors #{colors.empty? ? "colorless" : colors.join}" if colors
+          bits << "base #{base_power_toughness.values.join("/")}" if base_power_toughness
           bits << "#{Effects::Pump.signed_text(@pump["power"] || ZERO)}/#{Effects::Pump.signed_text(@pump["toughness"] || ZERO)}" if pump?
           bits << keywords.join(", ") unless keywords.empty?
           bits << "creature type #{creature_types.join(" ")}" if creature_types

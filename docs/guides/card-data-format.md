@@ -907,6 +907,30 @@ power"). Keyword *actions* are effects.
                 { "triggered": { "when": { "enters": {} }, "effects": [{ "connive": {} }] } }] }
 ```
 
+### 4.20 Rules-changing effects: losing abilities, restrictions, protection
+
+**Losing all abilities** (CR 613.1f). `"loses_abilities": true` on a `become` effect or a `static`
+ability. Layer 6 applies in timestamp order (CR 613.7): the permanent loses what it had, and
+keeps abilities granted later and keyword counters put on it later. A permanent that loses its
+abilities loses its static abilities' effects on others too (CR 613.8a), its characteristic-defining
+power and toughness, and its "when this dies" abilities. A `static` can also set `colors` (layer 5)
+and `base_power_toughness` (layer 7b); its `abilities` may be activated abilities, as `become`'s may.
+
+| Oracle words | Data |
+| --- | --- |
+| "Target creature loses all abilities until end of turn" | `{ "become": { "loses_abilities": true, "to": { "target": 0 } } }` |
+| "… loses all abilities for as long as this creature remains on the battlefield" | `become` with `"duration": "while_source_on_battlefield"` (does nothing if this has already left, CR 611.2b) |
+| "Enchanted creature loses all abilities and is a black Skeleton with base power and toughness 1/1" | `{ "static": { "affects": "attached", "loses_abilities": true, "colors": ["B"], "creature_types": ["skeleton"], "base_power_toughness": { "power": 1, "toughness": 1 } } }` |
+| "Other creatures you control have '{1}: This creature gets +1/+0 until end of turn'" | `static` with `"abilities": [{ "activated": … }]` (`self` is the creature that has it) |
+
+```json
+{ "name": "Example Fishbowl", "mana_cost": "{1}{U}", "types": ["enchantment"], "subtypes": ["aura"],
+  "keywords": ["flash"],
+  "abilities": [{ "enchant": "creature" },
+                { "static": { "affects": "attached", "loses_abilities": true, "colors": ["U"],
+                              "creature_types": ["fish"], "base_power_toughness": { "power": 1, "toughness": 1 } } }] }
+```
+
 ---
 
 ## 5. Worked examples

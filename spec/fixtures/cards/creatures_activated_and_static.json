@@ -36,6 +36,51 @@
     "rules_text": "{T}: Prodigal Pyromancer deals 1 damage to any target."
   },
   {
+    "name": "Wrenchwright",
+    "mana_cost": "{2}{R}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "dwarf",
+      "artificer"
+    ],
+    "power": 2,
+    "toughness": 2,
+    "abilities": [
+      {
+        "static": {
+          "affects": {
+            "each": "creature",
+            "controller": "you",
+            "other": true
+          },
+          "abilities": [
+            {
+              "activated": {
+                "cost": [
+                  {
+                    "mana": "{1}"
+                  }
+                ],
+                "effects": [
+                  {
+                    "pump": {
+                      "power": 1,
+                      "toughness": 0,
+                      "to": "self"
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "Other creatures you control have \"{1}: This creature gets +1/+0 until end of turn.\""
+  },
+  {
     "name": "Aegis Initiate",
     "mana_cost": "{1}{W}",
     "types": [

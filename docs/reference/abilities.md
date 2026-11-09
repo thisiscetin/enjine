@@ -1014,9 +1014,9 @@ Rules: CR 113.3a, CR 601.2c, CR 608.2b, CR 608.2c
 
 ## static
 
-While its source is on the battlefield (and its `if` condition holds), every permanent it `affects` gets `pump` (fixed or computed amounts, layer 7c), the `keywords` and granted `abilities` (layer 6, triggered or mana abilities), and with `creature_types` has exactly those creature types (layer 4); `types` are card types it has in addition to its other types ("this Vehicle is an artifact creature", layer 4) and `subtypes` subtypes it has in addition to its other types ("is a Wizard in addition to its other types", layer 4). `affects` is {"each": filter, "controller": you|opponent|any, "other": true} (relative to the source's controller), "self", or "attached" ("equipped/enchanted creature").
+While its source is on the battlefield (and its `if` condition holds), every permanent it `affects` gets `pump` (fixed or computed amounts, layer 7c), the `keywords` and granted `abilities` (layer 6, triggered, activated or mana abilities), and with `creature_types` has exactly those creature types (layer 4); `loses_abilities: true` removes the abilities it had before (layer 6, in timestamp order: later grants and keyword counters stay, CR 613.7), `colors` sets its colors (layer 5) and `base_power_toughness` its base power and toughness (layer 7b); `types` are card types it has in addition to its other types ("this Vehicle is an artifact creature", layer 4) and `subtypes` subtypes it has in addition to its other types ("is a Wizard in addition to its other types", layer 4). `affects` is {"each": filter, "controller": you|opponent|any, "other": true} (relative to the source's controller), "self", or "attached" ("equipped/enchanted creature").
 
-Rules: CR 604.1, CR 604.2, CR 611.3a, CR 613.1d, CR 613.1f, CR 613.4c, CR 205.1a, CR 205.1b, CR 301.5f, CR 303.4m
+Rules: CR 604.1, CR 604.2, CR 611.3a, CR 613.1d, CR 613.1e, CR 613.1f, CR 613.4b, CR 613.4c, CR 613.7a, CR 613.8a, CR 205.1a, CR 205.1b, CR 301.5f, CR 303.4m
 
 | Parameter | Description |
 | --- | --- |
@@ -1027,7 +1027,10 @@ Rules: CR 604.1, CR 604.2, CR 611.3a, CR 613.1d, CR 613.1f, CR 613.4c, CR 205.1a
 | `creature_types` | list of creature types (replaces the others) |
 | `types` | list of card types it also has (in addition to its other types) |
 | `subtypes` | list of subtypes it also has (in addition to its other types) |
-| `abilities` | list of triggered or mana abilities the affected permanents have |
+| `abilities` | list of triggered, activated or mana abilities the affected permanents have |
+| `loses_abilities` | true: it loses all abilities ("loses all abilities") |
+| `colors` | list of W, U, B, R, G: its colors are exactly these ([] for colorless) |
+| `base_power_toughness` | {"power": n, "toughness": n} |
 
 ```json
 {

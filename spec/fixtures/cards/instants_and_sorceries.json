@@ -27,6 +27,42 @@
     "rules_text": "Lightning Bolt deals 3 damage to any target."
   },
   {
+    "name": "Quieting Word",
+    "mana_cost": "{U}",
+    "types": [
+      "instant"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "targets": [
+            "creature"
+          ],
+          "effects": [
+            {
+              "become": {
+                "loses_abilities": true,
+                "to": {
+                  "target": 0
+                }
+              }
+            },
+            {
+              "add_counters": {
+                "counter": "flying",
+                "amount": 1,
+                "to": {
+                  "target": 0
+                }
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "Target creature loses all abilities until end of turn. Put a flying counter on it."
+  },
+  {
     "name": "Giant Growth",
     "mana_cost": "{G}",
     "types": [

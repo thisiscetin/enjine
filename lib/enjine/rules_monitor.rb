@@ -152,10 +152,32 @@ module Enjine
         state.players[state.active].name == caster
     end
 
-    # Printed keywords plus those of unlocked symbols, keywords granted and those of statics.
+    # Printed keywords plus those of unlocked symbols, keywords granted and those of statics. A permanent that
+    # loses all abilities (CR 613.1f) has only the keywords granted to it (timestamps are the engine's specs').
     def keyword?(obj, keyword)
+      return granted_keywords(obj.id).include?(keyword.to_sym) if stripped?(obj)
+
       defn(obj.card).keyword?(keyword) || unlocked(obj).any? { it.keywords.include?(keyword) } ||
         granted_keywords(obj.id).include?(keyword.to_sym) || static_keyword?(obj, keyword)
+    end
+
+    # Whether an effect or an applying static ability makes it lose all abilities (CR 613.1f).
+    def stripped?(obj)
+      return true if state.effects.any? { it["kind"] == "lose_abilities" && it["affected"].include?(obj.id) }
+
+      applying_statics(obj).any?(&:loses_abilities?)
+    end
+
+    # The static abilities of permanents on the battlefield that apply to `obj` now, matched on printed types.
+    def applying_statics(obj)
+      engine = @game.instance_variable_get(:@engine)
+      facts = facts(obj, defn(obj.card))
+      state.battlefield.flat_map do |id|
+        source = state.objects[id]
+        abilities_of(source).select do |ability|
+          ability.kind == :static && ability.affects?(obj, source, facts) && ability.active?(engine, source)
+        end
+      end
     end
 
     # Keywords granted until end of turn or by an attached Aura or Equipment (CR 301.5f, 303.4m).
@@ -196,17 +218,7 @@ module Enjine
     end
 
     # A keyword from an applying static ability of a permanent (CR 604.2), matched on printed types.
-    def static_keyword?(obj, keyword)
-      engine = @game.instance_variable_get(:@engine)
-      facts = facts(obj, defn(obj.card))
-      state.battlefield.any? do |id|
-        source = state.objects[id]
-        abilities_of(source).any? do |ability|
-          ability.kind == :static && ability.keywords.include?(keyword) && ability.affects?(obj, source, facts) &&
-            ability.active?(engine, source)
-        end
-      end
-    end
+    def static_keyword?(obj, keyword) = applying_statics(obj).any? { it.keywords.include?(keyword) }
 
     # CR 702.9b: a creature with flying can be blocked only by creatures with flying or reach.
     def blocker_declared!(event)
@@ -230,12 +242,14 @@ module Enjine
     # CR 613.4, recomputed independently: printed (or a 7b setting effect) + counters + active pump effects
     # + static ability bonuses. Characteristic-defining power/toughness (7a) is left to the engine's specs.
     def check_power_toughness!
+      return if state.battlefield.any? { stripped?(state.objects[it]) } # CR 613.1f, 613.8a: the engine's specs
+
       view = @game.view_for(:observer)["battlefield"].to_h { [it["id"], it] }
       statics = static_pumps
       state.battlefield.each do |id|
         obj = state.objects[id]
         card = defn(obj.card)
-        next unless card.creature? && !card.defined_pt?
+        next unless recomputable?(obj, card)
 
         net = obj.counters.fetch("+1/+1", 0) - obj.counters.fetch("-1/-1", 0)
         pumps = state.effects.select { it["kind"] == "pump" && it["affected"].include?(id) } + attached_grants(id) +
@@ -246,6 +260,9 @@ module Enjine
         finding("613.4c", "#{id} is #{actual.join("/")}, expected #{expected.join("/")}") if actual != expected
       end
     end
+
+    # A creature whose power/toughness isn't characteristic-defining (7a) or set by a static ability (7b).
+    def recomputable?(obj, card) = card.creature? && !card.defined_pt? && applying_statics(obj).none?(&:base_power_toughness)
 
     # CR 613.4b: the latest setting effect, else as printed.
     def base_power_toughness(id, card)

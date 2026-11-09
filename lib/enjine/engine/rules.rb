@@ -188,14 +188,18 @@ module Enjine
         state.battlefield.include?(source) && object(source).tapped
       end
 
-      # CR 611.2b: once the duration ends (the source untaps, leaves or phases out), the effect is over
-      # for good, even if the source becomes tapped again.
-      def end_while_source_effects!(id)
-        ending = state.effects.count { it["duration"] == "while_source_tapped" && it["source"] == id }
-        return if ending.zero?
+      # "For as long as [source] remains tapped / on the battlefield" (CR 611.2b).
+      WHILE_SOURCE = %w[while_source_tapped while_source_on_battlefield].freeze
 
-        state.effects.reject! { it["duration"] == "while_source_tapped" && it["source"] == id }
-        emit Events::EffectsEnded.new(count: ending)
+      # CR 611.2b: once the duration ends (the source untaps, leaves or phases out, CR 702.26f), the effect
+      # is over for good, even if the source becomes tapped again. Untapping ends only `while_source_tapped`.
+      def end_while_source_effects!(id, durations = WHILE_SOURCE)
+        ending = ->(effect) { durations.include?(effect["duration"]) && effect["source"] == id }
+        count = state.effects.count(&ending)
+        return if count.zero?
+
+        state.effects.reject!(&ending)
+        emit Events::EffectsEnded.new(count: count)
       end
     end
 

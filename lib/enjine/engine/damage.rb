@@ -80,6 +80,9 @@ module Enjine
 
         before = object.counters.fetch(kind, 0)
         object.counters[kind] = before + amount
+        # CR 613.7c: keyword counters of this kind get the new counter's timestamp (Engine::Characteristics#ability_layers).
+        # The next timestamp isn't taken: an effect created later gets this number too and sorts after it.
+        (object.memory["counter_timestamps"] ||= {})[kind] = state.next_id if Mechanics::Counters.keyword?(kind)
         emit Events::CountersChanged.new(object: object.id, counter: kind, from: before, to: before + amount)
       end
 

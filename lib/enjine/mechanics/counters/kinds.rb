@@ -62,6 +62,9 @@ module Enjine
 
       def any?(counters) = counters.any? { |_, n| n.positive? }
 
+      # Whether `name` is a keyword counter (CR 122.1b).
+      def keyword?(name) = KEYWORDS.include?(name.to_s.to_sym)
+
       # Replacement / prevention effects created by the counters on the object a proposal affects.
       def replace!(engine, proposal)
         id = proposal.data[proposal.kind == "damage" ? "target" : "object"]

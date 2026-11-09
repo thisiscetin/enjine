@@ -12,27 +12,35 @@ module Enjine
       # on the battlefield. Granted abilities are part of this card's data, referenced "<this effect's ref>:<j>"
       # (CardDefinition#effect_granted); on the permanent they are "granted:<card>:<ref>:<j>".
       class Become < Effect
-        DURATIONS = %w[end_of_turn indefinite].freeze
-        GRANTABLE = %i[triggered mana play_from additional_land_plays].freeze
+        DURATIONS = %w[end_of_turn indefinite while_source_on_battlefield].freeze
+        GRANTABLE = %i[triggered mana activated play_from additional_land_plays].freeze
         # Card types an effect can add (CR 205.1b); instants, sorceries and planeswalkers aren't permanents it makes.
         ADDABLE_TYPES = %w[artifact creature enchantment land].freeze
-        CHANGES = %w[types supertypes subtypes creature_types colors keywords base_power_toughness abilities].freeze
+        CHANGES = %w[types supertypes subtypes creature_types colors loses_abilities keywords base_power_toughness
+                     abilities].freeze
 
         primitive :effect, :become,
                   description: "Each referenced permanent becomes what the parameters say, for `duration` " \
-                               "(end_of_turn, default, or indefinite: as long as it stays on the battlefield): it has " \
+                               "(end_of_turn, default; indefinite: as long as it stays on the battlefield; " \
+                               "while_source_on_battlefield: for as long as this effect's source remains on the " \
+                               "battlefield): it has " \
                                "the card `types`, `supertypes` and `subtypes` in addition to its other types (layer 4, " \
                                "\"becomes an artifact creature\"), its creature types are exactly `creature_types` " \
-                               "(layer 4), its colors are `colors` (layer 5), it has the `keywords` and `abilities` " \
-                               "(layer 6: triggered, mana, play_from or additional_land_plays abilities) and its base " \
+                               "(layer 4), its colors are `colors` (layer 5), with `loses_abilities: true` it loses all " \
+                               "the abilities it had (layer 6; abilities granted later, keyword counters put on it " \
+                               "later and this effect's own `keywords` and `abilities` stay, CR 613.7), it has the " \
+                               "`keywords` and `abilities` " \
+                               "(layer 6: triggered, activated, mana, play_from or additional_land_plays abilities) and " \
+                               "its base " \
                                "power and toughness are `base_power_toughness` (layer 7b). A permanent that becomes a " \
                                "creature has its printed power and toughness (a Vehicle's), or 0/0.",
-                  rules: %w[611.2a 611.2b 611.2c 613.1d 613.1e 613.1f 613.4b 205.1a 205.1b 301.7b 514.2],
+                  rules: %w[611.2a 611.2b 611.2c 613.1d 613.1e 613.1f 613.4b 613.7b 205.1a 205.1b 301.7b 514.2],
                   params: { "types" => "card types it also has: #{ADDABLE_TYPES.join(", ")}",
                             "supertypes" => "supertypes it also has (\"legendary\")",
                             "subtypes" => "subtypes it also has (\"in addition to its other types\")",
                             "creature_types" => "list of creature types (replaces the others)",
                             "colors" => "list of W, U, B, R, G (replaces its colors)",
+                            "loses_abilities" => "true: it loses all abilities (\"loses all abilities\")",
                             "keywords" => "list of keywords it gains",
                             "base_power_toughness" => "{\"power\": n, \"toughness\": n}",
                             "abilities" => "list of abilities it gains", "duration" => DURATIONS.join(" | "),
@@ -68,9 +76,11 @@ module Enjine
           @subtypes = parse_types(Mechanics.fetch_param(params, :subtypes), errors, "#{path}.subtypes", "subtypes") || []
           @creature_types = parse_types(Mechanics.fetch_param(params, :creature_types), errors, "#{path}.creature_types",
                                         "creature types")
-          @colors = parse_colors(Mechanics.fetch_param(params, :colors), errors, path)
+          @colors = Become.parse_colors(Mechanics.fetch_param(params, :colors), errors, path)
+          @loses_abilities = Mechanics.fetch_param(params, :loses_abilities)
+          errors << "#{path}.loses_abilities: must be true (or absent)" unless [nil, true].include?(@loses_abilities)
           @keywords = Become.names_param(params, :keywords, :keyword, errors, path)
-          @base_power_toughness = parse_power_toughness(Mechanics.fetch_param(params, :base_power_toughness), errors, path)
+          @base_power_toughness = Become.parse_power_toughness(Mechanics.fetch_param(params, :base_power_toughness), errors, path)
           @granted_abilities = parse_abilities(params, errors, path)
           @duration = Mechanics.fetch_param(params, :duration) || "end_of_turn"
           errors << "#{path}.duration: must be one of #{DURATIONS.join(", ")}" unless DURATIONS.include?(@duration)
@@ -79,22 +89,32 @@ module Enjine
           errors << "#{path}: needs at least one of #{CHANGES.join(", ")}"
         end
 
+        def loses_abilities? = @loses_abilities == true
+
+        # The state.effects duration and the details it needs. "For as long as [source] remains on the
+        # battlefield" does nothing if the source has already left as this resolves (CR 611.2b).
+        def duration_details(engine, ctx)
+          case @duration
+          when "indefinite" then { "duration" => "permanent" }
+          when "end_of_turn" then { "duration" => "end_of_turn" }
+          else engine.state.battlefield.include?(ctx.source) ? { "duration" => @duration, "source" => ctx.source } : nil
+          end
+        end
+
         def apply(engine, ctx)
           affected = objects(engine, ctx)
-          duration = @duration == "indefinite" ? "permanent" : "end_of_turn"
-          add = ->(kind, details) { engine.add_continuous_effect!(kind, ctx, affected, details.merge("duration" => duration)) }
+          lasting = duration_details(engine, ctx) or return
+          add = ->(kind, details) { engine.add_continuous_effect!(kind, ctx, affected, details.merge(lasting)) }
+          # Removal first: this effect's own keywords and abilities come after it (CR 613.7b).
+          add.call("lose_abilities", {}) if loses_abilities?
           unless card_types.empty? && supertypes.empty? && subtypes.empty?
             add.call("add_types", "types" => card_types.map(&:to_s), "supertypes" => supertypes.map(&:to_s), "subtypes" => subtypes)
           end
           creatures = affected.select { engine.chars(it).creature? } # after the types above are added
-          if creature_types
-            engine.add_continuous_effect!("creature_types", ctx, creatures, "types" => creature_types, "duration" => duration)
-          end
+          engine.add_continuous_effect!("creature_types", ctx, creatures, { "types" => creature_types }.merge(lasting)) if creature_types
           add.call("colors", "colors" => colors) if colors
           add.call("grant", "keywords" => keywords.map(&:to_s)) unless keywords.empty?
-          if base_power_toughness
-            engine.add_continuous_effect!("base_power_toughness", ctx, creatures, base_power_toughness.merge("duration" => duration))
-          end
+          engine.add_continuous_effect!("base_power_toughness", ctx, creatures, base_power_toughness.merge(lasting)) if base_power_toughness
           return if granted_abilities.empty?
 
           add.call("abilities", "card" => engine.object(ctx.object).card, "ref" => ref)
@@ -104,6 +124,7 @@ module Enjine
 
         def to_s
           bits = []
+          bits << "loses all abilities" if loses_abilities?
           bits << [*supertypes, *colors, *subtypes, *card_types].join(" ") unless (card_types + supertypes + subtypes).empty?
           bits << creature_types.join(" ") if creature_types
           bits << "base #{base_power_toughness.values.join("/")}" if base_power_toughness
@@ -112,17 +133,7 @@ module Enjine
           "becomes #{bits.join(", ")}#{" until end of turn" if duration == "end_of_turn"} → #{to}"
         end
 
-        private
-
-        def parse_types(raw, errors, path, noun)
-          return nil if raw.nil?
-
-          ok = raw.is_a?(Array) && !raw.empty? && raw.all? { CardDefinition::SUBTYPE_FORMAT.match?(it.to_s) }
-          errors << "#{path}: must be a non-empty list of lowercase #{noun}" unless ok
-          ok ? raw.map(&:to_s).freeze : nil
-        end
-
-        def parse_colors(raw, errors, path)
+        def self.parse_colors(raw, errors, path)
           return nil if raw.nil?
 
           ok = raw.is_a?(Array) && raw.all? { Mana::COLORS.include?(it.to_s.upcase.to_sym) }
@@ -130,7 +141,7 @@ module Enjine
           ok ? raw.map { it.to_s.upcase }.uniq.freeze : nil
         end
 
-        def parse_power_toughness(raw, errors, path)
+        def self.parse_power_toughness(raw, errors, path)
           return nil if raw.nil?
 
           unless raw.is_a?(Hash)
@@ -143,12 +154,22 @@ module Enjine
             "toughness" => Mechanics.integer_param(raw, :toughness, errors, sub, min: 0) }.freeze
         end
 
+        private
+
+        def parse_types(raw, errors, path, noun)
+          return nil if raw.nil?
+
+          ok = raw.is_a?(Array) && !raw.empty? && raw.all? { CardDefinition::SUBTYPE_FORMAT.match?(it.to_s) }
+          errors << "#{path}: must be a non-empty list of lowercase #{noun}" unless ok
+          ok ? raw.map(&:to_s).freeze : nil
+        end
+
         def parse_abilities(params, errors, path)
           Mechanics.list_param(params, :abilities, errors, path).each_with_index.filter_map do |entry, j|
             ability = Mechanics.build_entry(:ability, entry, errors, "#{path}.abilities[#{j}]")
             next ability if ability.nil? || (GRANTABLE.include?(ability.kind) && !(ability.kind == :play_from && ability.self?))
 
-            errors << "#{path}.abilities[#{j}]: only triggered, mana, play_from (for other cards) and " \
+            errors << "#{path}.abilities[#{j}]: only triggered, activated, mana, play_from (for other cards) and " \
                       "additional_land_plays abilities can be gained"
             nil
           end.freeze

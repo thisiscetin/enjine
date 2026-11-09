@@ -67,14 +67,24 @@ module Enjine
         ids = state.battlefield
         active = statics.select { |source, ability| ability.active?(self, source) }
         ids.each { @layering[it] = type_layers(object(it), active, effects) }
-        active = statics.select { |source, ability| ability.active?(self, source) }
-        ids.each { @layering[it] = ability_layers(object(it), @layering[it], active, effects) }
-        active = statics.select { |source, ability| ability.active?(self, source) }
-        bonuses = active.to_h { |source, ability| [[source.id, ability], ability.bonus(self, source)] }
-        ids.each { @layering[it] = power_toughness_layers(object(it), @layering[it], active, bonuses, effects) }
+        later_layers(ids, statics, ids.select { losing_abilities?(object(it), active, effects) }, effects)
         @layering.reject { |id, c| c.equal?(definition(object(id)).printed_characteristics) }
       ensure
         @layering = nil
+      end
+
+      # Layers 5-7. CR 613.8a: a static ability of a permanent that loses all abilities in layer 6 no longer
+      # exists there, so its layer 5-7 effects depend on the removal and don't apply (its layer 1-4 effects
+      # already have). `stripped`: the ids of those permanents.
+      def later_layers(ids, statics, stripped, effects)
+        live = proc { |source, ability| !stripped.include?(source.id) && ability.active?(self, source) }
+        active = statics.select(&live)
+        ids.each { @layering[it] = ability_layers(object(it), @layering[it], active, effects) }
+        active = statics.select(&live)
+        bonuses = active.to_h { |source, ability| [[source.id, ability], ability.bonus(self, source)] }
+        ids.each do |id|
+          @layering[id] = power_toughness_layers(object(id), @layering[id], active, bonuses, effects, stripped: stripped.include?(id))
+        end
       end
 
       # Without effects, every permanent is as printed: none has counters or is a noncreature with printed
@@ -155,47 +165,19 @@ module Enjine
 
       def printed_noncreature_pt?(obj) = definition(obj).then { !it.creature? && !it.power.nil? }
 
-      # Layer 5 (CR 613.1e): effects that set colors. Layer 6 (CR 613.1f): keyword counters (CR 122.1b),
-      # keywords and abilities from static abilities,
-      # keywords gained until end of turn. A granted ability is referenced "granted:<card>:<ref>" (the
-      # granting card's data holds it, see #granted_origin).
-      def ability_layers(obj, base, statics, effects)
-        keywords = base.keywords | Mechanics::Counters.keywords(obj.counters)
-        abilities = base.abilities
-        statics.each do |source, ability|
-          next unless (!ability.keywords.empty? || !ability.granted.empty?) && ability.affects?(obj, source, facts(obj, base))
-
-          keywords |= ability.keywords
-          abilities += granted_instances(source, ability) unless ability.granted.empty?
-        end
-        effects.each do |effect|
-          next unless effect["affected"].include?(obj.id)
-
-          keywords |= effect["keywords"].map(&:to_sym) if effect["kind"] == "grant"
-          base = base.with(colors: Mana::COLORS & effect["colors"].map(&:to_sym)) if effect["kind"] == "colors" # layer 5
-          abilities += effect_granted_instances(effect) if effect["kind"] == "abilities" # e.g. Effects::Become
-        end
-        return base if keywords == base.keywords && abilities.equal?(base.abilities)
-
-        abilities += (keywords - base.keywords).flat_map { CardDefinition.keyword_instances(it) } # e.g. gains prowess
-        base.with(keywords: keywords.freeze, abilities: abilities.freeze)
-      end
-
-      # Layer 7 (CR 613.4): 7a defined power/toughness, 7b setting effects, 7c counters, static bonuses
-      # and pumps (CR 613.4c). Objects without power and toughness are unchanged.
-      def power_toughness_layers(obj, base, statics, bonuses, effects)
+      # Layer 7 (CR 613.4): 7a defined power/toughness (not once the ability defining them is lost in layer 6,
+      # CR 613.1f), 7b setting effects (statics by their source's timestamp and resolved effects, the latest
+      # last), 7c counters, static bonuses and pumps (CR 613.4c). Objects without power and toughness are
+      # unchanged.
+      def power_toughness_layers(obj, base, statics, bonuses, effects, stripped: false)
         defn = definition(obj)
-        base = defined_power_toughness(obj, base, defn) if base.creature? && defined_pt_copied?(obj)
+        if base.creature? && defined_pt_copied?(obj)
+          # without the ability defining it, an undefined power or toughness is 0 (CR 107.2)
+          base = stripped ? base.with(power: base.power || 0, toughness: base.toughness || 0) : defined_power_toughness(obj, base, defn)
+        end
         return base if base.power.nil?
 
-        power = base.power
-        toughness = base.toughness
-        effects.each do |effect|
-          if effect["kind"] == "base_power_toughness" && effect["affected"].include?(obj.id)
-            power, toughness = effect.values_at("power",
-                                                "toughness")
-          end
-        end
+        power, toughness = base_setting(obj, base, statics, effects) || [base.power, base.toughness]
         delta = Mechanics::Counters.power_toughness(obj.counters)
         statics.each do |source, ability|
           next unless ability.pump? && ability.affects?(obj, source, facts(obj, base))
@@ -213,31 +195,26 @@ module Enjine
         base.with(power: power, toughness: toughness)
       end
 
+      # Layer 7b (CR 613.4b): the latest base power/toughness setting, or nil.
+      def base_setting(obj, base, statics, effects)
+        sets = statics.filter_map do |source, ability|
+          next unless ability.base_power_toughness && ability.affects?(obj, source, facts(obj, base))
+
+          [timestamp_of(source), ability.base_power_toughness.values_at("power", "toughness")]
+        end
+        effects.each do |effect|
+          next unless effect["kind"] == "base_power_toughness" && effect["affected"].include?(obj.id)
+
+          sets << [effect["timestamp"], effect.values_at("power", "toughness")]
+        end
+        sets.max_by(&:first)&.last
+      end
+
       # CR 604.3, 613.4a: power/toughness from a characteristic-defining ability, in every zone.
       def defined_power_toughness(obj, base, defn)
         ctx = Mechanics::EffectContext.new(obj.controller, obj.id, obj.id, [], [])
         base.with(power: defn.power_amount ? defn.power_amount.value(self, ctx) : base.power,
                   toughness: defn.toughness_amount ? defn.toughness_amount.value(self, ctx) : base.toughness)
-      end
-
-      def granted_instances(source, ability)
-        defn = definition(source)
-        ref = own_ability_instances(source).find { it.ability.equal?(ability) }&.ref or return []
-        defn.nested_instances(ref).map { AbilityInstance.new(ref: "granted:#{defn.id}:#{it.ref}", ability: it.ability) }
-      end
-
-      # Abilities a resolved effect grants (layer 6, CR 613.1f): the effect's card holds them under its ref.
-      def effect_granted_instances(effect)
-        catalog.fetch(effect["card"]).effect_granted(effect["ref"]).map do |inst|
-          AbilityInstance.new(ref: "granted:#{effect["card"]}:#{inst.ref}", ability: inst.ability)
-        end
-      end
-
-      # For a granted ability's reference: [granting card id, its ref in that card], else nil.
-      def granted_origin(ref)
-        return nil unless ref.start_with?("granted:")
-
-        ref.delete_prefix("granted:").split(":", 2)
       end
 
       # [[source object, StaticAbility], ...] for permanents on the battlefield (printed abilities:
