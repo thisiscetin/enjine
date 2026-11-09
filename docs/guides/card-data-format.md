@@ -233,7 +233,7 @@ once-per-turn are automatic.
 | `{ "target": 0 }` | "target …" (the 1st declared target; `1` is the 2nd, …) |
 | `"you"` | "you" ("you gain 3 life", "draw a card") |
 | `"each_opponent"` | "each opponent" |
-| `"self"` | "this creature" / the card's own name, on a permanent |
+| `"self"` | "this creature" / the card's own name, on a permanent; "this card" for an ability that works from a graveyard, exile or a hand ("{4}{B}: Return this card from your graveyard to the battlefield tapped") |
 | `"attached"` | "equipped creature" / "enchanted creature", on an Equipment or Aura |
 | `{ "each": "creature", "controller": "you" }` | "creatures you control", "each creature you control" |
 | `{ "each": "creature", "controller": "opponent" }` | "creatures your opponents control" |

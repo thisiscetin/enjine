@@ -11,9 +11,8 @@ module Enjine
 
     # Data form of "who/what does this effect apply to":
     #   {"target": 0}                               the first chosen target
-    #   "self"                                      the source permanent, or the card whose ability works from its
-    #                                               graveyard, exile or hand ("return this card", CR 113.6k); still
-    #                                               the same object (CR 400.7), never a spell on the stack
+    #   "self"                                      the source permanent, or the source card in the graveyard, exile
+    #                                               or hand ("return this card from your graveyard", CR 113.6k)
     #   "you"                                       the controller
     #   "each_opponent"                             every opponent
     #   "attached"                                  what the source is attached to ("enchanted creature", CR 303.4m)
@@ -28,6 +27,9 @@ module Enjine
     class Selector
       CONTROLLERS = %w[you opponent any].freeze
       TRIGGERING = %w[object player].freeze
+      # Where "self" finds its source. A source that changed zones is a new object (CR 400.7), so an ability of
+      # a card in a graveyard, exile or a hand reaches only that card ("this card").
+      SELF_ZONES = %i[battlefield graveyard exile hand].freeze
 
       attr_reader :kind, :value, :controller
 
@@ -120,7 +122,7 @@ module Enjine
         case kind
         when :target then Array(ctx.targets[value]).compact # a counted target's slot holds a list (CR 601.2c)
         when :result then Array(ctx.results&.[](value))
-        when :self then [ctx.source].select { [nil, :stack].none?(engine.state.objects[it]&.zone) }
+        when :self then SELF_ZONES.include?(engine.state.objects[ctx.source]&.zone) ? [ctx.source] : []
         when :attached then attached(engine, ctx)
         when :triggering then triggering(engine, ctx)
         when :watched then Array(Selector.memory(engine, ctx)["watched"])

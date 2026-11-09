@@ -1,0 +1,5769 @@
+[
+  {
+    "name": "Electro's Bolt",
+    "mana_cost": "{2}{R}",
+    "types": [
+      "sorcery"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "targets": [
+            "creature"
+          ],
+          "effects": [
+            {
+              "deal_damage": {
+                "amount": 4,
+                "to": {
+                  "target": 0
+                }
+              }
+            }
+          ]
+        }
+      },
+      {
+        "mayhem": {
+          "cost": "{1}{R}"
+        }
+      }
+    ],
+    "rarity": "common",
+    "printing": {
+      "set": "spm",
+      "number": "77"
+    }
+  },
+  {
+    "name": "Spider-Man, Web-Slinger",
+    "mana_cost": "{2}{W}",
+    "types": [
+      "creature"
+    ],
+    "supertypes": [
+      "legendary"
+    ],
+    "subtypes": [
+      "spider",
+      "human",
+      "hero"
+    ],
+    "power": 3,
+    "toughness": 3,
+    "abilities": [
+      {
+        "web_slinging": {
+          "cost": "{W}"
+        }
+      }
+    ],
+    "rarity": "common",
+    "printing": {
+      "set": "spm",
+      "number": "16"
+    }
+  },
+  {
+    "name": "Spider-Sense",
+    "mana_cost": "{1}{U}",
+    "types": [
+      "instant"
+    ],
+    "abilities": [
+      {
+        "web_slinging": {
+          "cost": "{U}"
+        }
+      },
+      {
+        "spell": {
+          "targets": [
+            {
+              "one_of": [
+                {
+                  "spell": {
+                    "any_of": [
+                      "instant",
+                      "sorcery"
+                    ]
+                  }
+                },
+                {
+                  "stack_ability": {
+                    "kind": "triggered"
+                  }
+                }
+              ]
+            }
+          ],
+          "effects": [
+            {
+              "counter": {
+                "to": {
+                  "target": 0
+                }
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "rare",
+    "printing": {
+      "set": "spm",
+      "number": "46"
+    }
+  },
+  {
+    "name": "Amazing Acrobatics",
+    "mana_cost": "{1}{U}{U}",
+    "types": [
+      "instant"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "modes": [
+            {
+              "targets": [
+                "spell"
+              ],
+              "effects": [
+                {
+                  "counter": {
+                    "to": {
+                      "target": 0
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              "targets": [
+                "creature",
+                {
+                  "filter": "creature",
+                  "optional": true,
+                  "distinct_from": [
+                    0
+                  ]
+                }
+              ],
+              "effects": [
+                {
+                  "tap": {
+                    "to": {
+                      "target": 0
+                    }
+                  }
+                },
+                {
+                  "tap": {
+                    "to": {
+                      "target": 1
+                    }
+                  }
+                }
+              ]
+            }
+          ],
+          "choose": {
+            "min": 1,
+            "max": 2
+          }
+        }
+      }
+    ],
+    "rarity": "common",
+    "printing": {
+      "set": "spm",
+      "number": "25"
+    }
+  },
+  {
+    "name": "Common Crook",
+    "mana_cost": "{1}{B}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "human",
+      "rogue",
+      "villain"
+    ],
+    "power": 2,
+    "toughness": 2,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "dies": {}
+          },
+          "effects": [
+            {
+              "create_token": {
+                "token": "Treasure",
+                "amount": 1
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "common",
+    "printing": {
+      "set": "spm",
+      "number": "53"
+    }
+  },
+  {
+    "name": "City Pigeon",
+    "mana_cost": "{W}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "bird"
+    ],
+    "keywords": [
+      "flying"
+    ],
+    "power": 1,
+    "toughness": 1,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "leaves_battlefield": {}
+          },
+          "effects": [
+            {
+              "create_token": {
+                "token": "Food",
+                "amount": 1
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "common",
+    "printing": {
+      "set": "spm",
+      "number": "4"
+    }
+  },
+  {
+    "name": "Doc Ock's Henchmen",
+    "mana_cost": "{2}{U}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "human",
+      "villain"
+    ],
+    "keywords": [
+      "flash"
+    ],
+    "power": 2,
+    "toughness": 1,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "attacks": {}
+          },
+          "effects": [
+            {
+              "connive": {}
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "common",
+    "printing": {
+      "set": "spm",
+      "number": "30"
+    }
+  },
+  {
+    "name": "Swarm, Being of Bees",
+    "mana_cost": "{2}{B}",
+    "types": [
+      "creature"
+    ],
+    "supertypes": [
+      "legendary"
+    ],
+    "subtypes": [
+      "insect",
+      "villain"
+    ],
+    "keywords": [
+      "flash",
+      "flying"
+    ],
+    "power": 2,
+    "toughness": 2,
+    "abilities": [
+      {
+        "mayhem": {
+          "cost": "{B}"
+        }
+      }
+    ],
+    "rarity": "common",
+    "printing": {
+      "set": "spm",
+      "number": "69"
+    }
+  },
+  {
+    "name": "Kapow!",
+    "mana_cost": "{2}{G}",
+    "types": [
+      "sorcery"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "targets": [
+            {
+              "creature": {
+                "controller": "you"
+              }
+            },
+            {
+              "creature": {
+                "controller": "opponent"
+              }
+            }
+          ],
+          "effects": [
+            {
+              "add_counters": {
+                "counter": "+1/+1",
+                "amount": 1,
+                "to": {
+                  "target": 0
+                }
+              }
+            },
+            {
+              "fight": {
+                "to": {
+                  "target": 0
+                },
+                "with": {
+                  "target": 1
+                }
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "common",
+    "printing": {
+      "set": "spm",
+      "number": "103"
+    }
+  },
+  {
+    "name": "Daily Bugle Reporters",
+    "mana_cost": "{3}{W}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "human",
+      "citizen"
+    ],
+    "power": 2,
+    "toughness": 3,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "enters": {}
+          },
+          "modes": [
+            {
+              "targets": [
+                {
+                  "filter": "creature",
+                  "count": 2,
+                  "optional": true
+                }
+              ],
+              "effects": [
+                {
+                  "add_counters": {
+                    "counter": "+1/+1",
+                    "amount": 1,
+                    "to": {
+                      "target": 0
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              "targets": [
+                {
+                  "graveyard_card": {
+                    "controller": "you",
+                    "any_of": [
+                      "creature"
+                    ],
+                    "mana_value": {
+                      "at_most": 2
+                    }
+                  }
+                }
+              ],
+              "effects": [
+                {
+                  "return_to_hand": {
+                    "to": {
+                      "target": 0
+                    }
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "common",
+    "printing": {
+      "set": "spm",
+      "number": "6"
+    }
+  },
+  {
+    "name": "News Helicopter",
+    "mana_cost": "{3}",
+    "types": [
+      "artifact",
+      "creature"
+    ],
+    "subtypes": [
+      "construct"
+    ],
+    "keywords": [
+      "flying"
+    ],
+    "power": 1,
+    "toughness": 1,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "enters": {}
+          },
+          "effects": [
+            {
+              "create_token": {
+                "token": {
+                  "name": "Human Citizen",
+                  "types": [
+                    "creature"
+                  ],
+                  "subtypes": [
+                    "human",
+                    "citizen"
+                  ],
+                  "colors": [
+                    "G",
+                    "W"
+                  ],
+                  "power": 1,
+                  "toughness": 1
+                },
+                "amount": 1
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "common",
+    "printing": {
+      "set": "spm",
+      "number": "169"
+    }
+  },
+  {
+    "name": "Web-Shooters",
+    "mana_cost": "{1}{W}",
+    "types": [
+      "artifact"
+    ],
+    "subtypes": [
+      "equipment"
+    ],
+    "abilities": [
+      {
+        "static": {
+          "affects": "attached",
+          "pump": {
+            "power": 1,
+            "toughness": 1
+          },
+          "keywords": [
+            "reach"
+          ],
+          "abilities": [
+            {
+              "triggered": {
+                "when": {
+                  "attacks": {}
+                },
+                "targets": [
+                  {
+                    "creature": {
+                      "controller": "opponent"
+                    }
+                  }
+                ],
+                "effects": [
+                  {
+                    "tap": {
+                      "to": {
+                        "target": 0
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      },
+      {
+        "equip": {
+          "cost": [
+            {
+              "mana": "{2}"
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "uncommon",
+    "printing": {
+      "set": "spm",
+      "number": "22"
+    }
+  },
+  {
+    "name": "Web Up",
+    "mana_cost": "{2}{W}",
+    "types": [
+      "enchantment"
+    ],
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "enters": {}
+          },
+          "targets": [
+            {
+              "permanent": {
+                "not": [
+                  "land"
+                ],
+                "controller": "opponent"
+              }
+            }
+          ],
+          "effects": [
+            {
+              "exile": {
+                "to": {
+                  "target": 0
+                },
+                "until_source_leaves": true
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "common",
+    "printing": {
+      "set": "spm",
+      "number": "21"
+    }
+  },
+  {
+    "name": "Origin of Spider-Man",
+    "mana_cost": "{1}{W}",
+    "types": [
+      "enchantment"
+    ],
+    "subtypes": [
+      "saga"
+    ],
+    "abilities": [
+      {
+        "chapter": {
+          "chapter": 1,
+          "effects": [
+            {
+              "create_token": {
+                "token": {
+                  "name": "Spider",
+                  "types": [
+                    "creature"
+                  ],
+                  "subtypes": [
+                    "spider"
+                  ],
+                  "colors": [
+                    "G"
+                  ],
+                  "power": 2,
+                  "toughness": 1,
+                  "keywords": [
+                    "reach"
+                  ]
+                },
+                "amount": 1
+              }
+            }
+          ]
+        }
+      },
+      {
+        "chapter": {
+          "chapter": 2,
+          "targets": [
+            {
+              "creature": {
+                "controller": "you"
+              }
+            }
+          ],
+          "effects": [
+            {
+              "add_counters": {
+                "counter": "+1/+1",
+                "amount": 1,
+                "to": {
+                  "target": 0
+                }
+              }
+            },
+            {
+              "become": {
+                "supertypes": [
+                  "legendary"
+                ],
+                "subtypes": [
+                  "spider",
+                  "hero"
+                ],
+                "duration": "indefinite",
+                "to": {
+                  "target": 0
+                }
+              }
+            }
+          ]
+        }
+      },
+      {
+        "chapter": {
+          "chapter": 3,
+          "targets": [
+            {
+              "creature": {
+                "controller": "you"
+              }
+            }
+          ],
+          "effects": [
+            {
+              "grant": {
+                "keywords": [
+                  "double_strike"
+                ],
+                "to": {
+                  "target": 0
+                }
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "rare",
+    "printing": {
+      "set": "spm",
+      "number": "9"
+    }
+  },
+  {
+    "name": "Ominous Asylum",
+    "types": [
+      "land"
+    ],
+    "abilities": [
+      "enters_tapped",
+      {
+        "mana": {
+          "cost": [
+            "tap"
+          ],
+          "color": "any_one",
+          "colors": [
+            "B",
+            "R"
+          ]
+        }
+      },
+      {
+        "activated": {
+          "cost": [
+            {
+              "mana": "{4}"
+            },
+            "tap"
+          ],
+          "effects": [
+            {
+              "surveil": {
+                "amount": 1
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "common",
+    "printing": {
+      "set": "spm",
+      "number": "181"
+    }
+  },
+  {
+    "name": "Vibrant Cityscape",
+    "types": [
+      "land"
+    ],
+    "abilities": [
+      {
+        "activated": {
+          "cost": [
+            "tap",
+            "sacrifice"
+          ],
+          "effects": [
+            {
+              "search_library": {
+                "for": {
+                  "types": [
+                    "land"
+                  ],
+                  "supertypes": [
+                    "basic"
+                  ]
+                },
+                "put": "battlefield",
+                "tapped": true
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "common",
+    "printing": {
+      "set": "spm",
+      "number": "188"
+    }
+  },
+  {
+    "name": "Romantic Rendezvous",
+    "mana_cost": "{1}{R}",
+    "types": [
+      "sorcery"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "effects": [
+            {
+              "discard": {
+                "amount": 1
+              }
+            },
+            {
+              "draw": {
+                "amount": 2
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "common",
+    "printing": {
+      "set": "spm",
+      "number": "86"
+    }
+  },
+  {
+    "name": "Whoosh!",
+    "mana_cost": "{1}{U}",
+    "types": [
+      "instant"
+    ],
+    "abilities": [
+      {
+        "kicker": {
+          "cost": [
+            {
+              "mana": "{1}{U}"
+            }
+          ]
+        }
+      },
+      {
+        "spell": {
+          "targets": [
+            {
+              "permanent": {
+                "not": [
+                  "land"
+                ]
+              }
+            }
+          ],
+          "effects": [
+            {
+              "return_to_hand": {
+                "to": {
+                  "target": 0
+                }
+              }
+            },
+            {
+              "draw": {
+                "amount": 1,
+                "if": {
+                  "kicked": true
+                }
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "common",
+    "printing": {
+      "set": "spm",
+      "number": "48"
+    }
+  },
+  {
+    "name": "Steel Wrecking Ball",
+    "mana_cost": "{5}",
+    "types": [
+      "artifact"
+    ],
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "enters": {}
+          },
+          "targets": [
+            "creature"
+          ],
+          "effects": [
+            {
+              "deal_damage": {
+                "amount": 5,
+                "to": {
+                  "target": 0
+                }
+              }
+            }
+          ]
+        }
+      },
+      {
+        "activated": {
+          "cost": [
+            {
+              "mana": "{1}{R}"
+            },
+            "discard_self"
+          ],
+          "targets": [
+            "artifact"
+          ],
+          "effects": [
+            {
+              "destroy": {
+                "to": {
+                  "target": 0
+                }
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "common",
+    "printing": {
+      "set": "spm",
+      "number": "177"
+    }
+  },
+  {
+    "name": "Passenger Ferry",
+    "mana_cost": "{3}",
+    "types": [
+      "artifact"
+    ],
+    "subtypes": [
+      "vehicle"
+    ],
+    "power": 4,
+    "toughness": 3,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "attacks": {}
+          },
+          "effects": [
+            {
+              "pay": {
+                "mana": "{U}",
+                "then": [
+                  {
+                    "reflexive_trigger": {
+                      "targets": [
+                        {
+                          "creature": {
+                            "attacking": true,
+                            "other": true
+                          }
+                        }
+                      ],
+                      "effects": [
+                        {
+                          "grant": {
+                            "keywords": [
+                              "cant_be_blocked"
+                            ],
+                            "to": {
+                              "target": 0
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      },
+      {
+        "crew": {
+          "power": 2
+        }
+      }
+    ],
+    "rarity": "common",
+    "printing": {
+      "set": "spm",
+      "number": "170"
+    }
+  },
+  {
+    "name": "Scarlet Spider, Kaine",
+    "mana_cost": "{B}{R}",
+    "types": [
+      "creature"
+    ],
+    "supertypes": [
+      "legendary"
+    ],
+    "subtypes": [
+      "spider",
+      "human",
+      "hero"
+    ],
+    "keywords": [
+      "menace"
+    ],
+    "power": 2,
+    "toughness": 1,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "enters": {}
+          },
+          "effects": [
+            {
+              "may": {
+                "effects": [
+                  {
+                    "discard": {
+                      "amount": 1
+                    }
+                  }
+                ],
+                "then": [
+                  {
+                    "add_counters": {
+                      "counter": "+1/+1",
+                      "amount": 1,
+                      "to": "self"
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      },
+      {
+        "mayhem": {
+          "cost": "{B/R}"
+        }
+      }
+    ],
+    "rarity": "uncommon",
+    "printing": {
+      "set": "spm",
+      "number": "143"
+    }
+  },
+  {
+    "name": "Merciless Enforcers",
+    "mana_cost": "{1}{B}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "human",
+      "mercenary",
+      "villain"
+    ],
+    "keywords": [
+      "lifelink"
+    ],
+    "power": 2,
+    "toughness": 1,
+    "abilities": [
+      {
+        "activated": {
+          "cost": [
+            {
+              "mana": "{3}{B}"
+            }
+          ],
+          "effects": [
+            {
+              "deal_damage": {
+                "amount": 1,
+                "to": "each_opponent"
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "common",
+    "printing": {
+      "set": "spm",
+      "number": "58"
+    }
+  },
+  {
+    "name": "Thwip!",
+    "mana_cost": "{W}",
+    "types": [
+      "instant"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "targets": [
+            "creature"
+          ],
+          "effects": [
+            {
+              "pump": {
+                "power": 2,
+                "toughness": 2,
+                "to": {
+                  "target": 0
+                }
+              }
+            },
+            {
+              "grant": {
+                "keywords": [
+                  "flying"
+                ],
+                "to": {
+                  "target": 0
+                }
+              }
+            },
+            {
+              "gain_life": {
+                "amount": 2,
+                "if": {
+                  "targets": {
+                    "creature": {
+                      "subtypes": [
+                        "spider"
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "common",
+    "printing": {
+      "set": "spm",
+      "number": "20"
+    }
+  },
+  {
+    "name": "Firebending Student",
+    "mana_cost": "{1}{R}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "human",
+      "monk"
+    ],
+    "keywords": [
+      "prowess"
+    ],
+    "power": 1,
+    "toughness": 2,
+    "abilities": [
+      {
+        "firebending": {
+          "amount": {
+            "power": "self"
+          }
+        }
+      }
+    ],
+    "rarity": "rare",
+    "printing": {
+      "set": "tla",
+      "number": "139"
+    }
+  },
+  {
+    "name": "Fire Sages",
+    "mana_cost": "{1}{R}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "human",
+      "cleric"
+    ],
+    "power": 2,
+    "toughness": 2,
+    "abilities": [
+      {
+        "firebending": {
+          "amount": 1
+        }
+      },
+      {
+        "activated": {
+          "cost": [
+            {
+              "mana": "{1}{R}{R}"
+            }
+          ],
+          "effects": [
+            {
+              "add_counters": {
+                "counter": "+1/+1",
+                "amount": 1,
+                "to": "self"
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "uncommon",
+    "printing": {
+      "set": "tla",
+      "number": "136"
+    }
+  },
+  {
+    "name": "Lightning Strike",
+    "mana_cost": "{1}{R}",
+    "types": [
+      "instant"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "targets": [
+            "any_target"
+          ],
+          "effects": [
+            {
+              "deal_damage": {
+                "amount": 3,
+                "to": {
+                  "target": 0
+                }
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "common",
+    "printing": {
+      "set": "tla",
+      "number": "146"
+    }
+  },
+  {
+    "name": "Firebending Lesson",
+    "mana_cost": "{R}",
+    "types": [
+      "instant"
+    ],
+    "subtypes": [
+      "lesson"
+    ],
+    "abilities": [
+      {
+        "kicker": {
+          "cost": [
+            {
+              "mana": "{4}"
+            }
+          ]
+        }
+      },
+      {
+        "spell": {
+          "targets": [
+            "creature"
+          ],
+          "effects": [
+            {
+              "deal_damage": {
+                "amount": 2,
+                "to": {
+                  "target": 0
+                },
+                "if": {
+                  "not": {
+                    "kicked": true
+                  }
+                }
+              }
+            },
+            {
+              "deal_damage": {
+                "amount": 5,
+                "to": {
+                  "target": 0
+                },
+                "if": {
+                  "kicked": true
+                }
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "common",
+    "printing": {
+      "set": "tla",
+      "number": "138"
+    }
+  },
+  {
+    "name": "Iroh's Demonstration",
+    "mana_cost": "{1}{R}",
+    "types": [
+      "sorcery"
+    ],
+    "subtypes": [
+      "lesson"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "modes": [
+            {
+              "effects": [
+                {
+                  "deal_damage": {
+                    "amount": 1,
+                    "to": {
+                      "each": "creature",
+                      "controller": "opponent"
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              "targets": [
+                "creature"
+              ],
+              "effects": [
+                {
+                  "deal_damage": {
+                    "amount": 4,
+                    "to": {
+                      "target": 0
+                    }
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "uncommon",
+    "printing": {
+      "set": "tla",
+      "number": "141"
+    }
+  },
+  {
+    "name": "Kyoshi Warriors",
+    "mana_cost": "{3}{W}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "human",
+      "warrior",
+      "ally"
+    ],
+    "power": 3,
+    "toughness": 3,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "enters": {}
+          },
+          "effects": [
+            {
+              "create_token": {
+                "token": {
+                  "name": "Ally",
+                  "types": [
+                    "creature"
+                  ],
+                  "subtypes": [
+                    "ally"
+                  ],
+                  "colors": [
+                    "W"
+                  ],
+                  "power": 1,
+                  "toughness": 1
+                },
+                "amount": 1
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "common",
+    "printing": {
+      "set": "tla",
+      "number": "26"
+    }
+  },
+  {
+    "name": "Compassionate Healer",
+    "mana_cost": "{1}{W}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "human",
+      "cleric",
+      "ally"
+    ],
+    "power": 2,
+    "toughness": 2,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "becomes_tapped": {}
+          },
+          "effects": [
+            {
+              "gain_life": {
+                "amount": 1
+              }
+            },
+            {
+              "scry": {
+                "amount": 1
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "common",
+    "printing": {
+      "set": "tla",
+      "number": "13"
+    }
+  },
+  {
+    "name": "Callous Inspector",
+    "mana_cost": "{B}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "human",
+      "soldier"
+    ],
+    "keywords": [
+      "menace"
+    ],
+    "power": 1,
+    "toughness": 1,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "dies": {}
+          },
+          "effects": [
+            {
+              "deal_damage": {
+                "amount": 1,
+                "to": "you"
+              }
+            },
+            {
+              "create_token": {
+                "token": "Clue",
+                "amount": 1
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "common",
+    "printing": {
+      "set": "tla",
+      "number": "89"
+    }
+  },
+  {
+    "name": "Canyon Crawler",
+    "mana_cost": "{4}{B}{B}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "spider",
+      "beast"
+    ],
+    "keywords": [
+      "deathtouch"
+    ],
+    "power": 6,
+    "toughness": 6,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "enters": {}
+          },
+          "effects": [
+            {
+              "create_token": {
+                "token": "Food",
+                "amount": 1
+              }
+            }
+          ]
+        }
+      },
+      {
+        "cycling": {
+          "cost": "{2}",
+          "for": {
+            "subtypes": [
+              "swamp"
+            ]
+          }
+        }
+      }
+    ],
+    "rarity": "common",
+    "printing": {
+      "set": "tla",
+      "number": "90"
+    }
+  },
+  {
+    "name": "Mongoose Lizard",
+    "mana_cost": "{4}{R}{R}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "mongoose",
+      "lizard"
+    ],
+    "keywords": [
+      "menace"
+    ],
+    "power": 5,
+    "toughness": 6,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "enters": {}
+          },
+          "targets": [
+            "any_target"
+          ],
+          "effects": [
+            {
+              "deal_damage": {
+                "amount": 1,
+                "to": {
+                  "target": 0
+                }
+              }
+            }
+          ]
+        }
+      },
+      {
+        "cycling": {
+          "cost": "{2}",
+          "for": {
+            "subtypes": [
+              "mountain"
+            ]
+          }
+        }
+      }
+    ],
+    "rarity": "common",
+    "printing": {
+      "set": "tla",
+      "number": "148"
+    }
+  },
+  {
+    "name": "Mai, Jaded Edge",
+    "mana_cost": "{1}{R}",
+    "types": [
+      "creature"
+    ],
+    "supertypes": [
+      "legendary"
+    ],
+    "subtypes": [
+      "human",
+      "noble"
+    ],
+    "keywords": [
+      "prowess"
+    ],
+    "power": 1,
+    "toughness": 3,
+    "abilities": [
+      {
+        "activated": {
+          "cost": [
+            {
+              "mana": "{3}"
+            }
+          ],
+          "effects": [
+            {
+              "add_counters": {
+                "counter": "double_strike",
+                "amount": 1,
+                "to": "self"
+              }
+            }
+          ],
+          "exhaust": true
+        }
+      }
+    ],
+    "rarity": "uncommon",
+    "printing": {
+      "set": "tla",
+      "number": "147"
+    }
+  },
+  {
+    "name": "Kyoshi Battle Fan",
+    "mana_cost": "{2}",
+    "types": [
+      "artifact"
+    ],
+    "subtypes": [
+      "equipment"
+    ],
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "enters": {}
+          },
+          "effects": [
+            {
+              "create_token": {
+                "token": {
+                  "name": "Ally",
+                  "types": [
+                    "creature"
+                  ],
+                  "subtypes": [
+                    "ally"
+                  ],
+                  "colors": [
+                    "W"
+                  ],
+                  "power": 1,
+                  "toughness": 1
+                },
+                "amount": 1
+              }
+            },
+            {
+              "attach": {
+                "to": {
+                  "result": 0
+                }
+              }
+            }
+          ]
+        }
+      },
+      {
+        "static": {
+          "affects": "attached",
+          "pump": {
+            "power": 1,
+            "toughness": 0
+          }
+        }
+      },
+      {
+        "equip": {
+          "cost": [
+            {
+              "mana": "{2}"
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "common",
+    "printing": {
+      "set": "tla",
+      "number": "257"
+    }
+  },
+  {
+    "name": "Fire Nation Warship",
+    "mana_cost": "{3}",
+    "types": [
+      "artifact"
+    ],
+    "subtypes": [
+      "vehicle"
+    ],
+    "keywords": [
+      "reach"
+    ],
+    "power": 4,
+    "toughness": 4,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "dies": {}
+          },
+          "effects": [
+            {
+              "create_token": {
+                "token": "Clue",
+                "amount": 1
+              }
+            }
+          ]
+        }
+      },
+      {
+        "crew": {
+          "power": 2
+        }
+      }
+    ],
+    "rarity": "uncommon",
+    "printing": {
+      "set": "tla",
+      "number": "256"
+    }
+  },
+  {
+    "name": "Meteor Sword",
+    "mana_cost": "{7}",
+    "types": [
+      "artifact"
+    ],
+    "subtypes": [
+      "equipment"
+    ],
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "enters": {}
+          },
+          "targets": [
+            "permanent"
+          ],
+          "effects": [
+            {
+              "destroy": {
+                "to": {
+                  "target": 0
+                }
+              }
+            }
+          ]
+        }
+      },
+      {
+        "static": {
+          "affects": "attached",
+          "pump": {
+            "power": 3,
+            "toughness": 3
+          }
+        }
+      },
+      {
+        "equip": {
+          "cost": [
+            {
+              "mana": "{3}"
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "uncommon",
+    "printing": {
+      "set": "tla",
+      "number": "258"
+    }
+  },
+  {
+    "name": "Airship Engine Room",
+    "types": [
+      "land"
+    ],
+    "abilities": [
+      "enters_tapped",
+      {
+        "mana": {
+          "cost": [
+            "tap"
+          ],
+          "color": "any_one",
+          "colors": [
+            "U",
+            "R"
+          ]
+        }
+      },
+      {
+        "activated": {
+          "cost": [
+            {
+              "mana": "{4}"
+            },
+            "tap",
+            "sacrifice"
+          ],
+          "effects": [
+            {
+              "draw": {
+                "amount": 1
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "common",
+    "printing": {
+      "set": "tla",
+      "number": "265"
+    }
+  },
+  {
+    "name": "Abandoned Air Temple",
+    "types": [
+      "land"
+    ],
+    "abilities": [
+      {
+        "enters_tapped_unless": {
+          "condition": {
+            "controls": {
+              "each": {
+                "land": {
+                  "supertypes": [
+                    "basic"
+                  ]
+                }
+              },
+              "controller": "you"
+            },
+            "at_least": 1
+          }
+        }
+      },
+      {
+        "mana": {
+          "cost": [
+            "tap"
+          ],
+          "produce": "{W}"
+        }
+      },
+      {
+        "activated": {
+          "cost": [
+            {
+              "mana": "{3}{W}"
+            },
+            "tap"
+          ],
+          "effects": [
+            {
+              "add_counters": {
+                "counter": "+1/+1",
+                "amount": 1,
+                "to": {
+                  "each": "creature",
+                  "controller": "you"
+                }
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "rare",
+    "printing": {
+      "set": "tla",
+      "number": "263"
+    }
+  },
+  {
+    "name": "Leaves from the Vine",
+    "mana_cost": "{1}{G}",
+    "types": [
+      "enchantment"
+    ],
+    "subtypes": [
+      "saga"
+    ],
+    "abilities": [
+      {
+        "chapter": {
+          "chapter": 1,
+          "effects": [
+            {
+              "mill": {
+                "amount": 3
+              }
+            },
+            {
+              "create_token": {
+                "token": "Food",
+                "amount": 1
+              }
+            }
+          ]
+        }
+      },
+      {
+        "chapter": {
+          "chapter": 2,
+          "targets": [
+            {
+              "filter": {
+                "creature": {
+                  "controller": "you"
+                }
+              },
+              "count": 2,
+              "optional": true
+            }
+          ],
+          "effects": [
+            {
+              "add_counters": {
+                "counter": "+1/+1",
+                "amount": 1,
+                "to": {
+                  "target": 0
+                }
+              }
+            }
+          ]
+        }
+      },
+      {
+        "chapter": {
+          "chapter": 3,
+          "effects": [
+            {
+              "draw": {
+                "amount": 1,
+                "if": {
+                  "any": [
+                    {
+                      "amount": {
+                        "count": {
+                          "each": {
+                            "graveyard_card": {
+                              "controller": "you",
+                              "any_of": [
+                                "creature"
+                              ]
+                            }
+                          }
+                        }
+                      },
+                      "at_least": 1
+                    },
+                    {
+                      "amount": {
+                        "count": {
+                          "each": {
+                            "graveyard_card": {
+                              "controller": "you",
+                              "subtypes": [
+                                "lesson"
+                              ]
+                            }
+                          }
+                        }
+                      },
+                      "at_least": 1
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "uncommon",
+    "printing": {
+      "set": "tla",
+      "number": "185"
+    }
+  },
+  {
+    "name": "Azula Always Lies",
+    "mana_cost": "{1}{B}",
+    "types": [
+      "instant"
+    ],
+    "subtypes": [
+      "lesson"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "modes": [
+            {
+              "targets": [
+                "creature"
+              ],
+              "effects": [
+                {
+                  "pump": {
+                    "power": -1,
+                    "toughness": -1,
+                    "to": {
+                      "target": 0
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              "targets": [
+                "creature"
+              ],
+              "effects": [
+                {
+                  "add_counters": {
+                    "counter": "+1/+1",
+                    "amount": 1,
+                    "to": {
+                      "target": 0
+                    }
+                  }
+                }
+              ]
+            }
+          ],
+          "choose": {
+            "min": 1,
+            "max": 2
+          }
+        }
+      }
+    ],
+    "rarity": "common",
+    "printing": {
+      "set": "tla",
+      "number": "84"
+    }
+  },
+  {
+    "name": "Octopus Form",
+    "mana_cost": "{U}",
+    "types": [
+      "instant"
+    ],
+    "subtypes": [
+      "lesson"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "targets": [
+            {
+              "creature": {
+                "controller": "you"
+              }
+            }
+          ],
+          "effects": [
+            {
+              "pump": {
+                "power": 1,
+                "toughness": 1,
+                "to": {
+                  "target": 0
+                }
+              }
+            },
+            {
+              "grant": {
+                "keywords": [
+                  "hexproof"
+                ],
+                "to": {
+                  "target": 0
+                }
+              }
+            },
+            {
+              "untap": {
+                "to": {
+                  "target": 0
+                }
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "common",
+    "printing": {
+      "set": "tla",
+      "number": "66"
+    }
+  },
+  {
+    "name": "Fire Nation Attacks",
+    "mana_cost": "{4}{R}",
+    "types": [
+      "instant"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "effects": [
+            {
+              "create_token": {
+                "token": {
+                  "name": "Soldier",
+                  "types": [
+                    "creature"
+                  ],
+                  "subtypes": [
+                    "soldier"
+                  ],
+                  "colors": [
+                    "R"
+                  ],
+                  "power": 2,
+                  "toughness": 2,
+                  "abilities": [
+                    {
+                      "firebending": {
+                        "amount": 1
+                      }
+                    }
+                  ]
+                },
+                "amount": 2
+              }
+            }
+          ]
+        }
+      },
+      {
+        "flashback": {
+          "cost": "{8}{R}"
+        }
+      }
+    ],
+    "rarity": "uncommon",
+    "printing": {
+      "set": "tla",
+      "number": "133"
+    }
+  },
+  {
+    "name": "Air Nomad Legacy",
+    "mana_cost": "{W}{U}",
+    "types": [
+      "enchantment"
+    ],
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "enters": {}
+          },
+          "effects": [
+            {
+              "create_token": {
+                "token": "Clue",
+                "amount": 1
+              }
+            }
+          ]
+        }
+      },
+      {
+        "static": {
+          "affects": {
+            "each": {
+              "creature": {
+                "keywords": [
+                  "flying"
+                ]
+              }
+            },
+            "controller": "you"
+          },
+          "pump": {
+            "power": 1,
+            "toughness": 1
+          }
+        }
+      }
+    ],
+    "rarity": "uncommon",
+    "printing": {
+      "set": "tla",
+      "number": "206"
+    }
+  },
+  {
+    "name": "Epic Downfall",
+    "mana_cost": "{1}{B}",
+    "types": [
+      "sorcery"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "targets": [
+            {
+              "creature": {
+                "mana_value": {
+                  "at_least": 3
+                }
+              }
+            }
+          ],
+          "effects": [
+            {
+              "exile": {
+                "to": {
+                  "target": 0
+                }
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "uncommon",
+    "printing": {
+      "set": "tla",
+      "number": "96"
+    }
+  },
+  {
+    "name": "The Legend of Roku // Avatar Roku",
+    "layout": "transform",
+    "faces": [
+      {
+        "name": "The Legend of Roku",
+        "mana_cost": "{2}{R}{R}",
+        "types": [
+          "enchantment"
+        ],
+        "subtypes": [
+          "saga"
+        ],
+        "abilities": [
+          {
+            "chapter": {
+              "chapter": 1,
+              "effects": [
+                {
+                  "exile_top": {
+                    "amount": 3
+                  }
+                },
+                {
+                  "play_permission": {
+                    "to": {
+                      "result": 0
+                    },
+                    "duration": "end_of_your_next_turn"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "chapter": {
+              "chapter": 2,
+              "effects": [
+                {
+                  "add_mana": {
+                    "amount": 1,
+                    "color": "any_one"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "chapter": {
+              "chapter": 3,
+              "effects": [
+                {
+                  "exile": {
+                    "to": "self"
+                  }
+                },
+                {
+                  "return_to_battlefield": {
+                    "to": {
+                      "result": 0
+                    },
+                    "transformed": true,
+                    "under": "you"
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "name": "Avatar Roku",
+        "colors": [
+          "R"
+        ],
+        "types": [
+          "creature"
+        ],
+        "supertypes": [
+          "legendary"
+        ],
+        "subtypes": [
+          "avatar"
+        ],
+        "power": 4,
+        "toughness": 4,
+        "abilities": [
+          {
+            "firebending": {
+              "amount": 4
+            }
+          },
+          {
+            "activated": {
+              "cost": [
+                {
+                  "mana": "{8}"
+                }
+              ],
+              "effects": [
+                {
+                  "create_token": {
+                    "token": {
+                      "name": "Dragon",
+                      "types": [
+                        "creature"
+                      ],
+                      "subtypes": [
+                        "dragon"
+                      ],
+                      "colors": [
+                        "R"
+                      ],
+                      "power": 4,
+                      "toughness": 4,
+                      "keywords": [
+                        "flying"
+                      ],
+                      "abilities": [
+                        {
+                          "firebending": {
+                            "amount": 4
+                          }
+                        }
+                      ]
+                    },
+                    "amount": 1
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    ],
+    "rarity": "mythic",
+    "printing": {
+      "set": "tla",
+      "number": "145"
+    }
+  },
+  {
+    "name": "Earth Kingdom Jailer",
+    "mana_cost": "{2}{W}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "human",
+      "soldier",
+      "ally"
+    ],
+    "power": 3,
+    "toughness": 3,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "enters": {}
+          },
+          "targets": [
+            {
+              "filter": {
+                "permanent": {
+                  "any_of": [
+                    "artifact",
+                    "creature",
+                    "enchantment"
+                  ],
+                  "controller": "opponent",
+                  "mana_value": {
+                    "at_least": 3
+                  }
+                }
+              },
+              "optional": true
+            }
+          ],
+          "effects": [
+            {
+              "exile": {
+                "to": {
+                  "target": 0
+                },
+                "until_source_leaves": true
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "uncommon",
+    "printing": {
+      "set": "tla",
+      "number": "16"
+    }
+  },
+  {
+    "name": "Plains",
+    "types": [
+      "land"
+    ],
+    "supertypes": [
+      "basic"
+    ],
+    "subtypes": [
+      "plains"
+    ],
+    "rarity": "common",
+    "printing": {
+      "set": "tla",
+      "number": "282"
+    }
+  },
+  {
+    "name": "Island",
+    "types": [
+      "land"
+    ],
+    "supertypes": [
+      "basic"
+    ],
+    "subtypes": [
+      "island"
+    ],
+    "rarity": "common",
+    "printing": {
+      "set": "tla",
+      "number": "283"
+    }
+  },
+  {
+    "name": "Swamp",
+    "types": [
+      "land"
+    ],
+    "supertypes": [
+      "basic"
+    ],
+    "subtypes": [
+      "swamp"
+    ],
+    "rarity": "common",
+    "printing": {
+      "set": "tla",
+      "number": "284"
+    }
+  },
+  {
+    "name": "Mountain",
+    "types": [
+      "land"
+    ],
+    "supertypes": [
+      "basic"
+    ],
+    "subtypes": [
+      "mountain"
+    ],
+    "rarity": "common",
+    "printing": {
+      "set": "tla",
+      "number": "285"
+    }
+  },
+  {
+    "name": "Forest",
+    "types": [
+      "land"
+    ],
+    "supertypes": [
+      "basic"
+    ],
+    "subtypes": [
+      "forest"
+    ],
+    "rarity": "common",
+    "printing": {
+      "set": "tla",
+      "number": "286"
+    }
+  },
+  {
+    "name": "Bilbo's Deadly Slice",
+    "mana_cost": "{1}{B}{B}",
+    "types": [
+      "instant"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "targets": [
+            "creature"
+          ],
+          "effects": [
+            {
+              "destroy": {
+                "to": {
+                  "target": 0
+                }
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "common",
+    "printing": {
+      "set": "hob",
+      "number": "62"
+    }
+  },
+  {
+    "name": "Rage into the Valley",
+    "mana_cost": "{2}{B}",
+    "types": [
+      "sorcery"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "effects": [
+            {
+              "draw": {
+                "amount": 1
+              }
+            },
+            {
+              "lose_life": {
+                "amount": 1,
+                "to": "you"
+              }
+            },
+            {
+              "amass": {
+                "subtype": "goblin",
+                "amount": 2
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "common",
+    "printing": {
+      "set": "hob",
+      "number": "79"
+    }
+  },
+  {
+    "name": "Goblin-town Flunkies",
+    "mana_cost": "{1}{R}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "goblin",
+      "soldier"
+    ],
+    "keywords": [
+      "haste"
+    ],
+    "power": 1,
+    "toughness": 1,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "enters": {}
+          },
+          "effects": [
+            {
+              "amass": {
+                "subtype": "goblin",
+                "amount": 1
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "common",
+    "printing": {
+      "set": "hob",
+      "number": "100"
+    }
+  },
+  {
+    "name": "Goblin Plate Mail",
+    "mana_cost": "{1}{B/R}",
+    "types": [
+      "artifact"
+    ],
+    "subtypes": [
+      "equipment"
+    ],
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "enters": {}
+          },
+          "effects": [
+            {
+              "amass": {
+                "subtype": "goblin",
+                "amount": 1
+              }
+            },
+            {
+              "attach": {
+                "to": {
+                  "result": 0
+                }
+              }
+            }
+          ]
+        }
+      },
+      {
+        "static": {
+          "affects": "attached",
+          "pump": {
+            "power": 1,
+            "toughness": 0
+          },
+          "keywords": [
+            "menace"
+          ]
+        }
+      },
+      {
+        "equip": {
+          "cost": [
+            {
+              "mana": "{4}"
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "common",
+    "printing": {
+      "set": "hob",
+      "number": "157"
+    }
+  },
+  {
+    "name": "Long Lake Nuisance",
+    "mana_cost": "{3}{U}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "bird"
+    ],
+    "keywords": [
+      "flying"
+    ],
+    "power": 3,
+    "toughness": 1,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "enters": {}
+          },
+          "effects": [
+            {
+              "recruit": {}
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "common",
+    "printing": {
+      "set": "hob",
+      "number": "45"
+    }
+  },
+  {
+    "name": "Plunder the Trollshaws",
+    "mana_cost": "{1}{U}",
+    "types": [
+      "instant"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "effects": [
+            {
+              "draw": {
+                "amount": 1,
+                "if": {
+                  "not": {
+                    "cast_from": "graveyard"
+                  }
+                }
+              }
+            },
+            {
+              "draw": {
+                "amount": 2,
+                "if": {
+                  "cast_from": "graveyard"
+                }
+              }
+            }
+          ]
+        }
+      },
+      {
+        "flashback": {
+          "cost": "{3}{U}"
+        }
+      }
+    ],
+    "rarity": "common",
+    "printing": {
+      "set": "hob",
+      "number": "51"
+    }
+  },
+  {
+    "name": "Tidings of War",
+    "mana_cost": "{R}",
+    "types": [
+      "sorcery"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "effects": [
+            {
+              "amass": {
+                "subtype": "goblin",
+                "amount": 1,
+                "if": {
+                  "not": {
+                    "cast_from": "graveyard"
+                  }
+                }
+              }
+            },
+            {
+              "amass": {
+                "subtype": "goblin",
+                "amount": 3,
+                "if": {
+                  "cast_from": "graveyard"
+                }
+              }
+            }
+          ]
+        }
+      },
+      {
+        "flashback": {
+          "cost": "{3}{R}"
+        }
+      }
+    ],
+    "rarity": "common",
+    "printing": {
+      "set": "hob",
+      "number": "115"
+    }
+  },
+  {
+    "name": "Attercop",
+    "mana_cost": "{1}{G}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "spider"
+    ],
+    "keywords": [
+      "reach",
+      "deathtouch"
+    ],
+    "power": 2,
+    "toughness": 1,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "enters": {
+              "subject": {
+                "each": "land",
+                "controller": "you"
+              }
+            }
+          },
+          "effects": [
+            {
+              "pump": {
+                "power": 1,
+                "toughness": 1,
+                "to": "self"
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "common",
+    "printing": {
+      "set": "hob",
+      "number": "116"
+    }
+  },
+  {
+    "name": "Gigantic Big Bear",
+    "mana_cost": "{5}{G}{G}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "bear"
+    ],
+    "keywords": [
+      "cant_be_countered",
+      "hexproof",
+      "haste"
+    ],
+    "power": 10,
+    "toughness": 7,
+    "rarity": "rare",
+    "printing": {
+      "set": "hob",
+      "number": "126"
+    }
+  },
+  {
+    "name": "Wood Elves",
+    "mana_cost": "{2}{G}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "elf",
+      "scout"
+    ],
+    "power": 1,
+    "toughness": 1,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "enters": {}
+          },
+          "effects": [
+            {
+              "search_library": {
+                "for": {
+                  "subtypes": [
+                    "forest"
+                  ]
+                },
+                "put": "battlefield"
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "common",
+    "printing": {
+      "set": "hob",
+      "number": "142"
+    }
+  },
+  {
+    "name": "Long-Bodied Grey Dog",
+    "mana_cost": "{3}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "dog"
+    ],
+    "keywords": [
+      "flash",
+      "reach"
+    ],
+    "power": 2,
+    "toughness": 2,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "enters": {}
+          },
+          "effects": [
+            {
+              "create_token": {
+                "token": "Treasure",
+                "amount": 1,
+                "tapped": true
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "common",
+    "printing": {
+      "set": "hob",
+      "number": "1"
+    }
+  },
+  {
+    "name": "Mirkwood Pathmaker",
+    "mana_cost": "{2}{G}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "elf",
+      "ranger"
+    ],
+    "power": {
+      "count": {
+        "each": "land",
+        "controller": "you"
+      }
+    },
+    "toughness": {
+      "count": {
+        "each": "land",
+        "controller": "you"
+      }
+    },
+    "rarity": "uncommon",
+    "printing": {
+      "set": "hob",
+      "number": "129"
+    }
+  },
+  {
+    "name": "Well-Worn Spatula",
+    "mana_cost": "{1}",
+    "types": [
+      "artifact"
+    ],
+    "subtypes": [
+      "equipment"
+    ],
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "enters": {}
+          },
+          "effects": [
+            {
+              "gain_life": {
+                "amount": 2
+              }
+            }
+          ]
+        }
+      },
+      {
+        "static": {
+          "affects": "attached",
+          "pump": {
+            "power": 1,
+            "toughness": 1
+          }
+        }
+      },
+      {
+        "equip": {
+          "cost": [
+            {
+              "mana": "{1}"
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "common",
+    "printing": {
+      "set": "hob",
+      "number": "180"
+    }
+  },
+  {
+    "name": "Thrór's Map",
+    "mana_cost": "{2}",
+    "types": [
+      "artifact"
+    ],
+    "supertypes": [
+      "legendary"
+    ],
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "enters": {}
+          },
+          "effects": [
+            {
+              "search_library": {
+                "for": {
+                  "types": [
+                    "land"
+                  ],
+                  "supertypes": [
+                    "basic"
+                  ]
+                },
+                "reveal": true
+              }
+            }
+          ]
+        }
+      },
+      {
+        "activated": {
+          "cost": [
+            {
+              "mana": "{2}"
+            },
+            "tap"
+          ],
+          "effects": [
+            {
+              "draw": {
+                "amount": 1
+              }
+            },
+            {
+              "discard": {
+                "amount": 1
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "uncommon",
+    "printing": {
+      "set": "hob",
+      "number": "179"
+    }
+  },
+  {
+    "name": "Giant's Boulder",
+    "mana_cost": "{1}",
+    "types": [
+      "artifact"
+    ],
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "enters": {}
+          },
+          "effects": [
+            {
+              "scry": {
+                "amount": 2
+              }
+            }
+          ]
+        }
+      },
+      {
+        "mana": {
+          "cost": [
+            {
+              "mana": "{1}"
+            },
+            "tap"
+          ],
+          "color": "any_one"
+        }
+      },
+      {
+        "activated": {
+          "cost": [
+            {
+              "mana": "{7}"
+            },
+            "tap",
+            "sacrifice"
+          ],
+          "targets": [
+            "permanent"
+          ],
+          "effects": [
+            {
+              "destroy": {
+                "to": {
+                  "target": 0
+                }
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "common",
+    "printing": {
+      "set": "hob",
+      "number": "173"
+    }
+  },
+  {
+    "name": "Hobbit Hole",
+    "types": [
+      "land"
+    ],
+    "abilities": [
+      {
+        "activated": {
+          "cost": [
+            "tap",
+            "sacrifice"
+          ],
+          "effects": [
+            {
+              "search_library": {
+                "for": {
+                  "types": [
+                    "land"
+                  ],
+                  "supertypes": [
+                    "basic"
+                  ]
+                },
+                "put": "battlefield",
+                "tapped": true
+              }
+            }
+          ]
+        }
+      },
+      {
+        "cycling": {
+          "cost": "{4}",
+          "for": {
+            "subtypes": [
+              "halfling"
+            ]
+          }
+        }
+      }
+    ],
+    "rarity": "common",
+    "printing": {
+      "set": "hob",
+      "number": "184"
+    }
+  },
+  {
+    "name": "Velvetwing Butterflies // Gaze in Wonder",
+    "layout": "adventure",
+    "faces": [
+      {
+        "name": "Velvetwing Butterflies",
+        "mana_cost": "{2}{W}",
+        "types": [
+          "creature"
+        ],
+        "subtypes": [
+          "insect"
+        ],
+        "keywords": [
+          "flying"
+        ],
+        "power": 2,
+        "toughness": 2
+      },
+      {
+        "name": "Gaze in Wonder",
+        "mana_cost": "{1}{W}",
+        "types": [
+          "instant"
+        ],
+        "subtypes": [
+          "adventure"
+        ],
+        "abilities": [
+          {
+            "spell": {
+              "targets": [
+                "creature",
+                {
+                  "filter": "creature",
+                  "optional": true,
+                  "distinct_from": [
+                    0
+                  ]
+                }
+              ],
+              "effects": [
+                {
+                  "tap": {
+                    "to": {
+                      "target": 0
+                    }
+                  }
+                },
+                {
+                  "tap": {
+                    "to": {
+                      "target": 1
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    ],
+    "rarity": "common",
+    "printing": {
+      "set": "hob",
+      "number": "30"
+    }
+  },
+  {
+    "name": "Smaug, the Great Calamity // Spew Flame",
+    "layout": "adventure",
+    "faces": [
+      {
+        "name": "Smaug, the Great Calamity",
+        "mana_cost": "{5}{R}{R}",
+        "types": [
+          "creature"
+        ],
+        "supertypes": [
+          "legendary"
+        ],
+        "subtypes": [
+          "dragon"
+        ],
+        "keywords": [
+          "flying"
+        ],
+        "power": 5,
+        "toughness": 5
+      },
+      {
+        "name": "Spew Flame",
+        "mana_cost": "{4}{R}",
+        "types": [
+          "sorcery"
+        ],
+        "subtypes": [
+          "adventure"
+        ],
+        "abilities": [
+          {
+            "spell": {
+              "targets": [
+                "creature"
+              ],
+              "effects": [
+                {
+                  "deal_damage": {
+                    "amount": 5,
+                    "to": {
+                      "target": 0
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    ],
+    "rarity": "common",
+    "printing": {
+      "set": "hob",
+      "number": "109"
+    }
+  },
+  {
+    "name": "Burn, Burn, Tree and Fern",
+    "mana_cost": "{3}{R}",
+    "types": [
+      "enchantment"
+    ],
+    "subtypes": [
+      "saga"
+    ],
+    "abilities": [
+      {
+        "chapter": {
+          "chapter": 1,
+          "targets": [
+            {
+              "creature": {
+                "controller": "opponent"
+              }
+            }
+          ],
+          "effects": [
+            {
+              "deal_damage": {
+                "amount": 6,
+                "to": {
+                  "target": 0
+                }
+              }
+            }
+          ]
+        }
+      },
+      {
+        "chapter": {
+          "chapter": 2,
+          "targets": [
+            {
+              "artifact": {
+                "controller": "opponent"
+              }
+            }
+          ],
+          "effects": [
+            {
+              "destroy": {
+                "to": {
+                  "target": 0
+                }
+              }
+            }
+          ]
+        }
+      },
+      {
+        "chapter": {
+          "chapter": 3,
+          "effects": [
+            {
+              "add_mana": {
+                "produce": "{R}"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "chapter": {
+          "chapter": 4,
+          "effects": [
+            {
+              "add_mana": {
+                "produce": "{R}"
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "uncommon",
+    "printing": {
+      "set": "hob",
+      "number": "90"
+    }
+  },
+  {
+    "name": "Quarrel",
+    "mana_cost": "{1}{G}",
+    "types": [
+      "instant"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "targets": [
+            {
+              "creature": {
+                "controller": "you"
+              }
+            },
+            {
+              "creature": {
+                "controller": "opponent"
+              }
+            }
+          ],
+          "effects": [
+            {
+              "bite": {
+                "from": {
+                  "target": 0
+                },
+                "to": {
+                  "target": 1
+                }
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "common",
+    "printing": {
+      "set": "hob",
+      "number": "135"
+    }
+  },
+  {
+    "name": "Magnificent End",
+    "mana_cost": "{4}{W}",
+    "types": [
+      "instant"
+    ],
+    "abilities": [
+      {
+        "cost_reduction": {
+          "amount": 3,
+          "if": {
+            "targets": {
+              "creature": {
+                "tapped": true
+              }
+            }
+          }
+        }
+      },
+      {
+        "spell": {
+          "targets": [
+            "creature"
+          ],
+          "effects": [
+            {
+              "deal_damage": {
+                "amount": 5,
+                "to": {
+                  "target": 0
+                }
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "common",
+    "printing": {
+      "set": "hob",
+      "number": "20"
+    }
+  },
+  {
+    "name": "Nasty Little Rabbit",
+    "mana_cost": "{G}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "rabbit"
+    ],
+    "power": 1,
+    "toughness": 2,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "step_begins": {
+              "step": "beginning_of_combat"
+            }
+          },
+          "effects": [
+            {
+              "add_counters": {
+                "counter": "+1/+1",
+                "amount": 1,
+                "to": "self"
+              }
+            }
+          ],
+          "if": {
+            "controls": {
+              "each": {
+                "creature": {
+                  "power": {
+                    "at_least": 4
+                  }
+                }
+              },
+              "controller": "you"
+            },
+            "at_least": 1
+          }
+        }
+      }
+    ],
+    "rarity": "uncommon",
+    "printing": {
+      "set": "hob",
+      "number": "130"
+    }
+  },
+  {
+    "name": "Ravening Warg",
+    "mana_cost": "{1}{B}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "wolf"
+    ],
+    "keywords": [
+      "deathtouch"
+    ],
+    "power": 2,
+    "toughness": 2,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "attacks": {}
+          },
+          "effects": [
+            {
+              "gain_life": {
+                "amount": 2
+              }
+            }
+          ],
+          "while": {
+            "controls": {
+              "each": {
+                "creature": {
+                  "power": {
+                    "at_least": 4
+                  }
+                }
+              },
+              "controller": "you"
+            },
+            "at_least": 1
+          }
+        }
+      }
+    ],
+    "rarity": "common",
+    "printing": {
+      "set": "hob",
+      "number": "80"
+    }
+  },
+  {
+    "name": "Stony-Voiced Goblins",
+    "mana_cost": "{1}{B}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "goblin",
+      "bard"
+    ],
+    "power": 1,
+    "toughness": 1,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "enters": {}
+          },
+          "effects": [
+            {
+              "discard": {
+                "amount": 1,
+                "to": "each_opponent"
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "common",
+    "printing": {
+      "set": "hob",
+      "number": "85"
+    }
+  },
+  {
+    "name": "Squirrelanoids",
+    "mana_cost": "{B}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "squirrel",
+      "mutant"
+    ],
+    "keywords": [
+      "deathtouch"
+    ],
+    "power": 1,
+    "toughness": 1,
+    "rarity": "common",
+    "printing": {
+      "set": "tmt",
+      "number": "81"
+    }
+  },
+  {
+    "name": "Donatello's Technique",
+    "mana_cost": "{2}{U}",
+    "types": [
+      "sorcery"
+    ],
+    "abilities": [
+      {
+        "sneak": {
+          "cost": "{U}"
+        }
+      },
+      {
+        "spell": {
+          "effects": [
+            {
+              "draw": {
+                "amount": 2
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "uncommon",
+    "printing": {
+      "set": "tmt",
+      "number": "39"
+    }
+  },
+  {
+    "name": "Foot Ninjas",
+    "mana_cost": "{4}{W/B}{W/B}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "human",
+      "ninja"
+    ],
+    "power": 5,
+    "toughness": 5,
+    "abilities": [
+      {
+        "sneak": {
+          "cost": "{3}{W/B}"
+        }
+      },
+      {
+        "triggered": {
+          "when": {
+            "enters": {}
+          },
+          "effects": [
+            {
+              "gain_life": {
+                "amount": 3
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "common",
+    "printing": {
+      "set": "tmt",
+      "number": "147"
+    }
+  },
+  {
+    "name": "Leonardo, Big Brother",
+    "mana_cost": "{2}{W}",
+    "types": [
+      "creature"
+    ],
+    "supertypes": [
+      "legendary"
+    ],
+    "subtypes": [
+      "mutant",
+      "ninja",
+      "turtle"
+    ],
+    "power": 1,
+    "toughness": 3,
+    "abilities": [
+      {
+        "sneak": {
+          "cost": "{W}"
+        }
+      },
+      {
+        "static": {
+          "affects": "self",
+          "pump": {
+            "power": {
+              "count": {
+                "each": {
+                  "creature": {
+                    "other": true
+                  }
+                },
+                "controller": "you"
+              }
+            },
+            "toughness": 0
+          }
+        }
+      }
+    ],
+    "rarity": "common",
+    "printing": {
+      "set": "tmt",
+      "number": "14"
+    }
+  },
+  {
+    "name": "Splinter, Hamato Yoshi",
+    "mana_cost": "{1}{B}",
+    "types": [
+      "creature"
+    ],
+    "supertypes": [
+      "legendary"
+    ],
+    "subtypes": [
+      "mutant",
+      "ninja",
+      "rat"
+    ],
+    "keywords": [
+      "menace"
+    ],
+    "power": 1,
+    "toughness": 3,
+    "abilities": [
+      {
+        "sneak": {
+          "cost": "{B}"
+        }
+      },
+      {
+        "static": {
+          "affects": {
+            "each": {
+              "creature": {
+                "subtypes": [
+                  "ninja"
+                ]
+              }
+            },
+            "controller": "you",
+            "other": true
+          },
+          "pump": {
+            "power": 1,
+            "toughness": 1
+          }
+        }
+      }
+    ],
+    "rarity": "uncommon",
+    "printing": {
+      "set": "tmt",
+      "number": "79"
+    }
+  },
+  {
+    "name": "EPF Point Squad",
+    "mana_cost": "{1}{R/W}{R/W}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "human",
+      "soldier"
+    ],
+    "power": 2,
+    "toughness": 1,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "enters": {
+              "subject": {
+                "each": "creature",
+                "controller": "you",
+                "other": true
+              }
+            }
+          },
+          "effects": [
+            {
+              "add_counters": {
+                "counter": "+1/+1",
+                "amount": 1,
+                "to": "self"
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "common",
+    "printing": {
+      "set": "tmt",
+      "number": "145"
+    }
+  },
+  {
+    "name": "East Wind Avatar",
+    "mana_cost": "{3}{W}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "bird",
+      "spirit",
+      "avatar"
+    ],
+    "keywords": [
+      "flying",
+      "vigilance"
+    ],
+    "power": 2,
+    "toughness": 4,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "enters": {
+              "subject": {
+                "each": "creature",
+                "controller": "you",
+                "other": true
+              }
+            }
+          },
+          "effects": [
+            {
+              "pump": {
+                "power": 1,
+                "toughness": 0,
+                "to": "self"
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "common",
+    "printing": {
+      "set": "tmt",
+      "number": "5"
+    }
+  },
+  {
+    "name": "Raphael, Tough Turtle",
+    "mana_cost": "{1}{R}",
+    "types": [
+      "creature"
+    ],
+    "supertypes": [
+      "legendary"
+    ],
+    "subtypes": [
+      "mutant",
+      "ninja",
+      "turtle"
+    ],
+    "power": 1,
+    "toughness": 3,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "enters": {
+              "subject": {
+                "each": "creature",
+                "controller": "you",
+                "other": true
+              }
+            }
+          },
+          "targets": [
+            "opponent"
+          ],
+          "effects": [
+            {
+              "deal_damage": {
+                "amount": 1,
+                "to": {
+                  "target": 0
+                }
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "common",
+    "printing": {
+      "set": "tmt",
+      "number": "104"
+    }
+  },
+  {
+    "name": "Mouser Foundry",
+    "mana_cost": "{1}{R}",
+    "types": [
+      "artifact"
+    ],
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "any_of": [
+              {
+                "enters": {}
+              },
+              {
+                "leaves_battlefield": {}
+              }
+            ]
+          },
+          "effects": [
+            {
+              "create_token": {
+                "token": {
+                  "name": "Robot",
+                  "types": [
+                    "artifact",
+                    "creature"
+                  ],
+                  "subtypes": [
+                    "robot"
+                  ],
+                  "power": 1,
+                  "toughness": 1
+                },
+                "amount": 1
+              }
+            }
+          ]
+        }
+      },
+      {
+        "activated": {
+          "cost": [
+            {
+              "mana": "{4}{R}"
+            },
+            "sacrifice"
+          ],
+          "targets": [
+            "creature"
+          ],
+          "effects": [
+            {
+              "deal_damage": {
+                "amount": 3,
+                "to": {
+                  "target": 0
+                }
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "common",
+    "printing": {
+      "set": "tmt",
+      "number": "96"
+    }
+  },
+  {
+    "name": "Anchovy & Banana Pizza",
+    "mana_cost": "{2}{B}{B}",
+    "types": [
+      "artifact"
+    ],
+    "subtypes": [
+      "food"
+    ],
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "enters": {}
+          },
+          "targets": [
+            "creature"
+          ],
+          "effects": [
+            {
+              "destroy": {
+                "to": {
+                  "target": 0
+                }
+              }
+            }
+          ]
+        }
+      },
+      {
+        "activated": {
+          "cost": [
+            {
+              "mana": "{2}"
+            },
+            "tap",
+            "sacrifice"
+          ],
+          "effects": [
+            {
+              "gain_life": {
+                "amount": 3
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "common",
+    "printing": {
+      "set": "tmt",
+      "number": "57"
+    }
+  },
+  {
+    "name": "Guac & Marshmallow Pizza",
+    "mana_cost": "{G}",
+    "types": [
+      "artifact"
+    ],
+    "subtypes": [
+      "food"
+    ],
+    "keywords": [
+      "flash"
+    ],
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "enters": {}
+          },
+          "targets": [
+            "creature"
+          ],
+          "effects": [
+            {
+              "pump": {
+                "power": 2,
+                "toughness": 2,
+                "to": {
+                  "target": 0
+                }
+              }
+            },
+            {
+              "untap": {
+                "to": {
+                  "target": 0
+                }
+              }
+            }
+          ]
+        }
+      },
+      {
+        "activated": {
+          "cost": [
+            {
+              "mana": "{2}"
+            },
+            "tap",
+            "sacrifice"
+          ],
+          "effects": [
+            {
+              "gain_life": {
+                "amount": 3
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "common",
+    "printing": {
+      "set": "tmt",
+      "number": "116"
+    }
+  },
+  {
+    "name": "Omni-Cheese Pizza",
+    "mana_cost": "{2}",
+    "types": [
+      "artifact"
+    ],
+    "subtypes": [
+      "food"
+    ],
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "enters": {}
+          },
+          "effects": [
+            {
+              "draw": {
+                "amount": 1
+              }
+            }
+          ]
+        }
+      },
+      {
+        "mana": {
+          "cost": [
+            {
+              "mana": "{1}"
+            },
+            "tap",
+            "sacrifice"
+          ],
+          "color": "any_one"
+        }
+      },
+      {
+        "activated": {
+          "cost": [
+            {
+              "mana": "{2}"
+            },
+            "tap",
+            "sacrifice"
+          ],
+          "effects": [
+            {
+              "gain_life": {
+                "amount": 3
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "common",
+    "printing": {
+      "set": "tmt",
+      "number": "176"
+    }
+  },
+  {
+    "name": "Negate",
+    "mana_cost": "{1}{U}",
+    "types": [
+      "instant"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "targets": [
+            {
+              "spell": {
+                "not": [
+                  "creature"
+                ]
+              }
+            }
+          ],
+          "effects": [
+            {
+              "counter": {
+                "to": {
+                  "target": 0
+                }
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "common",
+    "printing": {
+      "set": "tmt",
+      "number": "47"
+    }
+  },
+  {
+    "name": "Mouser Attack!",
+    "mana_cost": "{1}{R}",
+    "types": [
+      "instant"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "modes": [
+            {
+              "effects": [
+                {
+                  "create_token": {
+                    "token": {
+                      "name": "Robot",
+                      "types": [
+                        "artifact",
+                        "creature"
+                      ],
+                      "subtypes": [
+                        "robot"
+                      ],
+                      "power": 1,
+                      "toughness": 1
+                    },
+                    "amount": 1
+                  }
+                }
+              ]
+            },
+            {
+              "targets": [
+                "creature"
+              ],
+              "effects": [
+                {
+                  "pump": {
+                    "power": 3,
+                    "toughness": 0,
+                    "to": {
+                      "target": 0
+                    }
+                  }
+                },
+                {
+                  "grant": {
+                    "keywords": [
+                      "first_strike"
+                    ],
+                    "to": {
+                      "target": 0
+                    }
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "common",
+    "printing": {
+      "set": "tmt",
+      "number": "95"
+    }
+  },
+  {
+    "name": "Dimension X",
+    "types": [
+      "land"
+    ],
+    "abilities": [
+      "enters_tapped",
+      {
+        "triggered": {
+          "when": {
+            "enters": {}
+          },
+          "effects": [
+            {
+              "gain_life": {
+                "amount": 1
+              }
+            }
+          ]
+        }
+      },
+      {
+        "mana": {
+          "cost": [
+            "tap"
+          ],
+          "color": "any_one",
+          "colors": [
+            "R",
+            "W"
+          ]
+        }
+      }
+    ],
+    "rarity": "common",
+    "printing": {
+      "set": "tmt",
+      "number": "183"
+    }
+  },
+  {
+    "name": "Escape Tunnel",
+    "types": [
+      "land"
+    ],
+    "abilities": [
+      {
+        "activated": {
+          "cost": [
+            "tap",
+            "sacrifice"
+          ],
+          "effects": [
+            {
+              "search_library": {
+                "for": {
+                  "types": [
+                    "land"
+                  ],
+                  "supertypes": [
+                    "basic"
+                  ]
+                },
+                "put": "battlefield",
+                "tapped": true
+              }
+            }
+          ]
+        }
+      },
+      {
+        "activated": {
+          "cost": [
+            "tap",
+            "sacrifice"
+          ],
+          "targets": [
+            {
+              "creature": {
+                "power": {
+                  "at_most": 2
+                }
+              }
+            }
+          ],
+          "effects": [
+            {
+              "grant": {
+                "keywords": [
+                  "cant_be_blocked"
+                ],
+                "to": {
+                  "target": 0
+                }
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "common",
+    "printing": {
+      "set": "tmt",
+      "number": "184"
+    }
+  },
+  {
+    "name": "Turtle Power!",
+    "mana_cost": "{2}{G}",
+    "types": [
+      "enchantment"
+    ],
+    "keywords": [
+      "flash"
+    ],
+    "abilities": [
+      {
+        "static": {
+          "affects": {
+            "each": {
+              "creature": {
+                "subtypes": [
+                  "turtle"
+                ]
+              }
+            },
+            "controller": "you"
+          },
+          "pump": {
+            "power": 2,
+            "toughness": 2
+          }
+        }
+      }
+    ],
+    "rarity": "rare",
+    "printing": {
+      "set": "tmt",
+      "number": "135"
+    }
+  },
+  {
+    "name": "Insectoid Exterminator",
+    "mana_cost": "{2}{B}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "insect",
+      "mutant"
+    ],
+    "keywords": [
+      "flying"
+    ],
+    "power": 2,
+    "toughness": 2,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "step_begins": {
+              "step": "end"
+            }
+          },
+          "effects": [
+            {
+              "scry": {
+                "amount": 1
+              }
+            }
+          ],
+          "if": {
+            "amount": {
+              "left_this_turn": {
+                "controller": "you"
+              }
+            },
+            "at_least": 1
+          }
+        }
+      }
+    ],
+    "rarity": "common",
+    "printing": {
+      "set": "tmt",
+      "number": "64"
+    }
+  },
+  {
+    "name": "Tunnel Rats",
+    "mana_cost": "{1}{B}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "rat"
+    ],
+    "power": 2,
+    "toughness": 2,
+    "abilities": [
+      {
+        "activated": {
+          "cost": [
+            {
+              "mana": "{4}{B}"
+            }
+          ],
+          "effects": [
+            {
+              "return_to_battlefield": {
+                "to": "self",
+                "tapped": true
+              }
+            }
+          ],
+          "zone": "graveyard"
+        }
+      }
+    ],
+    "rarity": "common",
+    "printing": {
+      "set": "tmt",
+      "number": "84"
+    }
+  },
+  {
+    "name": "Utrom Scientists",
+    "mana_cost": "{2}{U}",
+    "types": [
+      "artifact",
+      "creature"
+    ],
+    "subtypes": [
+      "utrom",
+      "robot",
+      "scientist"
+    ],
+    "power": 2,
+    "toughness": 2,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "enters": {}
+          },
+          "targets": [
+            {
+              "filter": "creature",
+              "optional": true
+            }
+          ],
+          "effects": [
+            {
+              "tap": {
+                "to": {
+                  "target": 0
+                }
+              }
+            },
+            {
+              "add_counters": {
+                "counter": "stun",
+                "amount": 1,
+                "to": {
+                  "target": 0
+                }
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "common",
+    "printing": {
+      "set": "tmt",
+      "number": "56"
+    }
+  },
+  {
+    "name": "Turtle Blimp",
+    "mana_cost": "{5}",
+    "types": [
+      "artifact"
+    ],
+    "subtypes": [
+      "vehicle"
+    ],
+    "keywords": [
+      "flying"
+    ],
+    "power": 3,
+    "toughness": 4,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "enters": {}
+          },
+          "effects": [
+            {
+              "create_token": {
+                "token": {
+                  "name": "Mutant",
+                  "types": [
+                    "creature"
+                  ],
+                  "subtypes": [
+                    "mutant"
+                  ],
+                  "colors": [
+                    "R"
+                  ],
+                  "power": 2,
+                  "toughness": 2
+                },
+                "amount": 1
+              }
+            }
+          ]
+        }
+      },
+      {
+        "crew": {
+          "power": 2
+        }
+      }
+    ],
+    "rarity": "uncommon",
+    "printing": {
+      "set": "tmt",
+      "number": "180"
+    }
+  },
+  {
+    "name": "Skateboard",
+    "mana_cost": "{1}",
+    "types": [
+      "artifact"
+    ],
+    "subtypes": [
+      "equipment"
+    ],
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "enters": {}
+          },
+          "targets": [
+            "permanent"
+          ],
+          "effects": [
+            {
+              "tap": {
+                "to": {
+                  "target": 0
+                }
+              }
+            }
+          ]
+        }
+      },
+      {
+        "static": {
+          "affects": "attached",
+          "pump": {
+            "power": 1,
+            "toughness": 0
+          },
+          "keywords": [
+            "haste"
+          ]
+        }
+      },
+      {
+        "equip": {
+          "cost": [
+            {
+              "mana": "{1}"
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "uncommon",
+    "printing": {
+      "set": "tmt",
+      "number": "178"
+    }
+  },
+  {
+    "name": "Agents of HYDRA",
+    "mana_cost": "{1}{B}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "human",
+      "spy",
+      "villain"
+    ],
+    "power": 1,
+    "toughness": 1,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "dies": {}
+          },
+          "effects": [
+            {
+              "create_token": {
+                "token": {
+                  "name": "Villain",
+                  "types": [
+                    "creature"
+                  ],
+                  "subtypes": [
+                    "villain"
+                  ],
+                  "colors": [
+                    "B"
+                  ],
+                  "power": 2,
+                  "toughness": 1,
+                  "keywords": [
+                    "menace"
+                  ]
+                },
+                "amount": 1
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "common",
+    "printing": {
+      "set": "msh",
+      "number": "85"
+    }
+  },
+  {
+    "name": "A.I.M. Scientists",
+    "mana_cost": "{3}{U}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "human",
+      "scientist",
+      "villain"
+    ],
+    "power": 3,
+    "toughness": 3,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "enters": {}
+          },
+          "effects": [
+            {
+              "connive": {}
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "common",
+    "printing": {
+      "set": "msh",
+      "number": "44"
+    }
+  },
+  {
+    "name": "A.I.M. Synthoids",
+    "mana_cost": "{2}",
+    "types": [
+      "artifact",
+      "creature"
+    ],
+    "subtypes": [
+      "robot",
+      "villain"
+    ],
+    "power": 1,
+    "toughness": 3,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "enters": {}
+          },
+          "effects": [
+            {
+              "surveil": {
+                "amount": 2
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "common",
+    "printing": {
+      "set": "msh",
+      "number": "242"
+    }
+  },
+  {
+    "name": "Dark Deed",
+    "mana_cost": "{1}{B}",
+    "types": [
+      "instant"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "targets": [
+            "creature"
+          ],
+          "effects": [
+            {
+              "pump": {
+                "power": -4,
+                "toughness": -4,
+                "to": {
+                  "target": 0
+                }
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "uncommon",
+    "printing": {
+      "set": "msh",
+      "number": "93"
+    }
+  },
+  {
+    "name": "Giant Growth",
+    "mana_cost": "{G}",
+    "types": [
+      "instant"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "targets": [
+            "creature"
+          ],
+          "effects": [
+            {
+              "pump": {
+                "power": 3,
+                "toughness": 3,
+                "to": {
+                  "target": 0
+                }
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "common",
+    "printing": {
+      "set": "msh",
+      "number": "167"
+    }
+  },
+  {
+    "name": "Hire a Crew",
+    "mana_cost": "{2}{R}",
+    "types": [
+      "instant"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "effects": [
+            {
+              "create_token": {
+                "token": {
+                  "name": "Villain",
+                  "types": [
+                    "creature"
+                  ],
+                  "subtypes": [
+                    "villain"
+                  ],
+                  "colors": [
+                    "B"
+                  ],
+                  "power": 2,
+                  "toughness": 1,
+                  "keywords": [
+                    "menace"
+                  ]
+                },
+                "amount": 1
+              }
+            },
+            {
+              "pump": {
+                "power": 1,
+                "toughness": 0,
+                "to": {
+                  "each": "creature",
+                  "controller": "you"
+                }
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "common",
+    "printing": {
+      "set": "msh",
+      "number": "134"
+    }
+  },
+  {
+    "name": "Kree Sentinel",
+    "mana_cost": "{4}{R}",
+    "types": [
+      "artifact",
+      "creature"
+    ],
+    "subtypes": [
+      "kree",
+      "robot",
+      "villain"
+    ],
+    "keywords": [
+      "reach"
+    ],
+    "power": 5,
+    "toughness": 5,
+    "abilities": [
+      {
+        "cycling": {
+          "cost": "{2}",
+          "for": {
+            "types": [
+              "land"
+            ],
+            "supertypes": [
+              "basic"
+            ]
+          }
+        }
+      }
+    ],
+    "rarity": "common",
+    "printing": {
+      "set": "msh",
+      "number": "141"
+    }
+  },
+  {
+    "name": "Stark Industries Executive",
+    "mana_cost": "{R}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "human",
+      "advisor"
+    ],
+    "power": 1,
+    "toughness": 2,
+    "abilities": [
+      {
+        "activated": {
+          "cost": [
+            {
+              "mana": "{2}"
+            },
+            "tap"
+          ],
+          "effects": [
+            {
+              "create_token": {
+                "token": "Treasure",
+                "amount": 1
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "common",
+    "printing": {
+      "set": "msh",
+      "number": "153"
+    }
+  },
+  {
+    "name": "Futurist Forge",
+    "mana_cost": "{1}{U}",
+    "types": [
+      "artifact"
+    ],
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "enters": {}
+          },
+          "effects": [
+            {
+              "draw": {
+                "amount": 1
+              }
+            }
+          ]
+        }
+      },
+      {
+        "activated": {
+          "cost": [
+            {
+              "mana": "{3}{U}"
+            },
+            "sacrifice"
+          ],
+          "effects": [
+            {
+              "draw": {
+                "amount": 2
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "common",
+    "printing": {
+      "set": "msh",
+      "number": "55"
+    }
+  },
+  {
+    "name": "Super Villain Lockup",
+    "mana_cost": "{1}{W}",
+    "types": [
+      "enchantment"
+    ],
+    "keywords": [
+      "flash"
+    ],
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "enters": {}
+          },
+          "targets": [
+            {
+              "creature": {
+                "tapped": true,
+                "controller": "opponent"
+              }
+            }
+          ],
+          "effects": [
+            {
+              "exile": {
+                "to": {
+                  "target": 0
+                },
+                "until_source_leaves": true
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "uncommon",
+    "printing": {
+      "set": "msh",
+      "number": "37"
+    }
+  },
+  {
+    "name": "Super Speed",
+    "mana_cost": "{R}",
+    "types": [
+      "enchantment"
+    ],
+    "subtypes": [
+      "aura"
+    ],
+    "keywords": [
+      "flash"
+    ],
+    "abilities": [
+      {
+        "enchant": "creature"
+      },
+      {
+        "triggered": {
+          "when": {
+            "enters": {}
+          },
+          "effects": [
+            {
+              "grant": {
+                "keywords": [
+                  "first_strike"
+                ],
+                "to": "attached"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "static": {
+          "affects": "attached",
+          "pump": {
+            "power": 1,
+            "toughness": 0
+          },
+          "keywords": [
+            "haste"
+          ]
+        }
+      }
+    ],
+    "rarity": "common",
+    "printing": {
+      "set": "msh",
+      "number": "154"
+    }
+  },
+  {
+    "name": "Vibranium Energy Daggers",
+    "mana_cost": "{1}",
+    "types": [
+      "artifact"
+    ],
+    "subtypes": [
+      "equipment"
+    ],
+    "keywords": [
+      "indestructible"
+    ],
+    "abilities": [
+      {
+        "static": {
+          "affects": "attached",
+          "pump": {
+            "power": 2,
+            "toughness": 2
+          }
+        }
+      },
+      {
+        "equip": {
+          "cost": [
+            {
+              "mana": "{3}"
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "common",
+    "printing": {
+      "set": "msh",
+      "number": "254"
+    }
+  },
+  {
+    "name": "Dependable Quinjet",
+    "mana_cost": "{3}",
+    "types": [
+      "artifact"
+    ],
+    "subtypes": [
+      "vehicle"
+    ],
+    "keywords": [
+      "flying"
+    ],
+    "power": 3,
+    "toughness": 3,
+    "abilities": [
+      {
+        "mana": {
+          "cost": [
+            "tap"
+          ],
+          "color": "any_one"
+        }
+      },
+      {
+        "crew": {
+          "power": 4
+        }
+      }
+    ],
+    "rarity": "common",
+    "printing": {
+      "set": "msh",
+      "number": "246"
+    }
+  },
+  {
+    "name": "S.H.I.E.L.D. Helicarrier",
+    "mana_cost": "{4}",
+    "types": [
+      "artifact"
+    ],
+    "subtypes": [
+      "vehicle"
+    ],
+    "keywords": [
+      "flying"
+    ],
+    "power": 4,
+    "toughness": 5,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "enters": {}
+          },
+          "effects": [
+            {
+              "create_token": {
+                "token": {
+                  "name": "Soldier",
+                  "types": [
+                    "creature"
+                  ],
+                  "subtypes": [
+                    "soldier"
+                  ],
+                  "colors": [
+                    "W"
+                  ],
+                  "power": 1,
+                  "toughness": 1
+                },
+                "amount": 2
+              }
+            }
+          ]
+        }
+      },
+      {
+        "crew": {
+          "power": 6
+        }
+      }
+    ],
+    "rarity": "uncommon",
+    "printing": {
+      "set": "msh",
+      "number": "249"
+    }
+  },
+  {
+    "name": "Visions of Villainy",
+    "mana_cost": "{2}{B}",
+    "types": [
+      "instant"
+    ],
+    "abilities": [
+      {
+        "cost_reduction": {
+          "amount": 1,
+          "if": {
+            "controls": {
+              "each": {
+                "permanent": {
+                  "subtypes": [
+                    "villain"
+                  ]
+                }
+              },
+              "controller": "you"
+            },
+            "at_least": 1
+          }
+        }
+      },
+      {
+        "spell": {
+          "effects": [
+            {
+              "draw": {
+                "amount": 2
+              }
+            },
+            {
+              "lose_life": {
+                "amount": 2,
+                "to": "you"
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "common",
+    "printing": {
+      "set": "msh",
+      "number": "120"
+    }
+  },
+  {
+    "name": "Take Up the Shield",
+    "mana_cost": "{1}{W}",
+    "types": [
+      "instant"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "targets": [
+            "creature"
+          ],
+          "effects": [
+            {
+              "add_counters": {
+                "counter": "+1/+1",
+                "amount": 1,
+                "to": {
+                  "target": 0
+                }
+              }
+            },
+            {
+              "grant": {
+                "keywords": [
+                  "lifelink",
+                  "indestructible"
+                ],
+                "to": {
+                  "target": 0
+                }
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "common",
+    "printing": {
+      "set": "msh",
+      "number": "39"
+    }
+  },
+  {
+    "name": "Pym Particles",
+    "mana_cost": "{U}",
+    "types": [
+      "sorcery"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "targets": [
+            "creature"
+          ],
+          "effects": [
+            {
+              "grant": {
+                "keywords": [
+                  "vigilance",
+                  "cant_be_blocked"
+                ],
+                "to": {
+                  "target": 0
+                }
+              }
+            },
+            {
+              "draw": {
+                "amount": 1
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "uncommon",
+    "printing": {
+      "set": "msh",
+      "number": "70"
+    }
+  },
+  {
+    "name": "Truck Toss",
+    "mana_cost": "{2}{R}{R}",
+    "types": [
+      "instant"
+    ],
+    "abilities": [
+      {
+        "cost_reduction": {
+          "amount": 2,
+          "if": {
+            "controls": {
+              "each": {
+                "artifact": {
+                  "subtypes": [
+                    "vehicle"
+                  ]
+                }
+              },
+              "controller": "you"
+            },
+            "at_least": 1
+          }
+        }
+      },
+      {
+        "spell": {
+          "targets": [
+            "any_target"
+          ],
+          "effects": [
+            {
+              "deal_damage": {
+                "amount": 4,
+                "to": {
+                  "target": 0
+                }
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "uncommon",
+    "printing": {
+      "set": "msh",
+      "number": "157"
+    }
+  },
+  {
+    "name": "Machinesmith Automaton",
+    "mana_cost": "{2}{R}",
+    "types": [
+      "artifact",
+      "creature"
+    ],
+    "subtypes": [
+      "robot",
+      "villain"
+    ],
+    "keywords": [
+      "trample"
+    ],
+    "power": 2,
+    "toughness": 2,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "enters": {
+              "subject": {
+                "each": "artifact",
+                "controller": "you",
+                "other": true
+              }
+            }
+          },
+          "effects": [
+            {
+              "add_counters": {
+                "counter": "+1/+1",
+                "amount": 1,
+                "to": "self"
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "common",
+    "printing": {
+      "set": "msh",
+      "number": "144"
+    }
+  },
+  {
+    "name": "Guerrilla Gorilla",
+    "mana_cost": "{1}{G}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "ape",
+      "soldier",
+      "hero"
+    ],
+    "keywords": [
+      "reach"
+    ],
+    "power": 2,
+    "toughness": 2,
+    "abilities": [
+      {
+        "activated": {
+          "cost": [
+            "sacrifice"
+          ],
+          "targets": [
+            {
+              "permanent": {
+                "any_of": [
+                  "artifact",
+                  "enchantment"
+                ],
+                "not": [
+                  "creature"
+                ]
+              }
+            }
+          ],
+          "effects": [
+            {
+              "destroy": {
+                "to": {
+                  "target": 0
+                }
+              }
+            }
+          ],
+          "timing": "sorcery"
+        }
+      }
+    ],
+    "rarity": "common",
+    "printing": {
+      "set": "msh",
+      "number": "169"
+    }
+  },
+  {
+    "name": "Origin of the Avengers",
+    "mana_cost": "{1}{W}",
+    "types": [
+      "enchantment"
+    ],
+    "subtypes": [
+      "saga"
+    ],
+    "abilities": [
+      {
+        "chapter": {
+          "chapter": 1,
+          "effects": [
+            {
+              "scry": {
+                "amount": 2
+              }
+            }
+          ]
+        }
+      },
+      {
+        "chapter": {
+          "chapter": 2,
+          "effects": [
+            {
+              "choose_cards": {
+                "from": {
+                  "hand": "you"
+                },
+                "optional": true,
+                "put": "battlefield",
+                "for": {
+                  "types": [
+                    "creature"
+                  ],
+                  "subtypes": [
+                    "hero"
+                  ],
+                  "mana_value": {
+                    "at_most": 3
+                  }
+                },
+                "otherwise": [
+                  {
+                    "draw": {
+                      "amount": 1
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      },
+      {
+        "chapter": {
+          "chapter": 3,
+          "effects": [
+            {
+              "add_counters": {
+                "counter": "+1/+1",
+                "amount": 1,
+                "to": {
+                  "each": "creature",
+                  "controller": "you"
+                }
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "rare",
+    "printing": {
+      "set": "msh",
+      "number": "28"
+    }
+  },
+  {
+    "name": "Monica Rambeau // Photon, Living Light",
+    "layout": "modal",
+    "faces": [
+      {
+        "name": "Monica Rambeau",
+        "mana_cost": "{2}{W}",
+        "types": [
+          "creature"
+        ],
+        "supertypes": [
+          "legendary"
+        ],
+        "subtypes": [
+          "human",
+          "hero"
+        ],
+        "keywords": [
+          "flying",
+          "prowess"
+        ],
+        "power": 3,
+        "toughness": 3,
+        "abilities": [
+          {
+            "activated": {
+              "cost": [
+                {
+                  "mana": "{2}{R}{W}{W}"
+                }
+              ],
+              "effects": [
+                {
+                  "transform": {}
+                }
+              ],
+              "timing": "sorcery"
+            }
+          }
+        ]
+      },
+      {
+        "name": "Photon, Living Light",
+        "mana_cost": "{2}{R}{W}{W}",
+        "types": [
+          "creature"
+        ],
+        "supertypes": [
+          "legendary"
+        ],
+        "subtypes": [
+          "elemental",
+          "hero"
+        ],
+        "keywords": [
+          "flying",
+          "hexproof",
+          "prowess"
+        ],
+        "power": 4,
+        "toughness": 4,
+        "abilities": [
+          {
+            "triggered": {
+              "when": {
+                "cast": {
+                  "spell": "noncreature"
+                }
+              },
+              "effects": [
+                {
+                  "add_counters": {
+                    "counter": "+1/+1",
+                    "amount": 1,
+                    "to": {
+                      "each": {
+                        "creature": {
+                          "other": true
+                        }
+                      },
+                      "controller": "you"
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    ],
+    "rarity": "mythic",
+    "printing": {
+      "set": "msh",
+      "number": "23"
+    }
+  }
+]
