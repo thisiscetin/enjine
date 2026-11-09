@@ -70,8 +70,9 @@ module Enjine
       # CR 508.4: a creature put onto the battlefield attacking attacks the defending player. (Choosing one
       # of their planeswalkers instead isn't offered yet.) It was never declared, so it never "attacked".
       # Only called while its controller controls an attacking creature (see Abilities::EntersAttacking).
-      def enter_attacking!(obj)
-        attackers[obj.id] = { "target" => Mechanics::Filters.player_ref(self, state.opponent(obj.controller)), "blocked" => false }
+      def enter_attacking!(obj, target = nil)
+        target = Mechanics::Filters.player_ref(self, state.opponent(obj.controller)) unless target.is_a?(String) # CR 506.3a
+        attackers[obj.id] = { "target" => target, "blocked" => false }
       end
 
       # CR 508.1f: attacking creatures become tapped. CR 508.3d: "whenever you attack" triggers

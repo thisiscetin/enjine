@@ -303,7 +303,9 @@ module Enjine
     #   {"controls": selector, "at_least": 3} / {"life": "you", ...} / {"hand_size": "you", ...}  (short forms)
     #   {"your_turn": true}
     #   {"max_speed": true}        you have max speed: your speed is 4 (CR 702.179e)
-    #   {"was_cast": true}                         "if you cast it": the source permanent was cast (CR 400.7d)
+    #   {"was_cast": true}                          "if you cast it": the source permanent was cast (CR 400.7d)
+    #   {"cast_with": "warp"} / {"cast_from": "graveyard"}   how this spell (or the spell this permanent was) was
+    #                              cast; {"cast_with_this_turn": "warp"}: a spell was cast with it this turn
     #   {"targets": filter}        one of the chosen targets matches (e.g. "if it targets a tapped creature")
     #   {"attacked": true}         a creature is attacking you (CR 508.1b)
     #   {"source": filter}         the source is on the battlefield and matches ("if this isn't a creature":
@@ -337,8 +339,14 @@ module Enjine
         elsif data.key?("began_extra_turn") then BeganExtraTurn.new(data["began_extra_turn"] != false) # CR 500.7
         elsif data.key?("share_card_type") then ShareCardType.build(data, errors, path, targets_count) # effects/zones.rb
         elsif (key = KEYED.keys.find { data.key?(it) }) then const_get(KEYED[key]).build(data, errors, path)
-        else Compare.build(data, errors, path, **context)
+        else build_more(data, errors, path, context)
         end
+      end
+
+      # How a spell was cast (CastHow, keywords/alternative_costs.rb), or a comparison.
+      def self.build_more(data, errors, path, context)
+        key = CastHow::KEYS.find { data.key?(it) }
+        key ? CastHow.build(key, data, errors, path) : Compare.build(data, errors, path, **context)
       end
 
       # An Amount compared with bounds: {"amount": amount, "at_least": n, "at_most": n}, or a short form
@@ -350,7 +358,8 @@ module Enjine
           subject = (data.keys & (SUBJECTS.keys + ["amount"])).first
           unless subject
             errors << "#{path}: unknown condition (use amount, controls, life, hand_size, your_turn, was_cast, targets, " \
-                      "attacked, source, attacked_this_turn, nth_resolution, kicked, sacrificed, not, all, any)"
+                      "attacked, source, attacked_this_turn, nth_resolution, kicked, sacrificed, cast_with, cast_from, " \
+                      "cast_with_this_turn, not, all, any)"
             return nil
           end
           Mechanics.check_keys(data, [subject, "at_least", "at_most"], errors, path)

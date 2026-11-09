@@ -656,6 +656,42 @@ Rules: CR 702.6a, CR 301.5b, CR 301.5c, CR 701.3a
 }
 ```
 
+## evoke
+
+Evoke: you may cast this card by paying `cost` rather than its mana cost. When the permanent enters, if its evoke cost was paid, its controller sacrifices it (a triggered ability that comes with the keyword). Cast option `via: "alt:<ref>"`.
+
+Rules: CR 702.74a, CR 118.9, CR 601.2b, CR 601.2f, CR 601.2h, CR 603.4
+
+| Parameter | Description |
+| --- | --- |
+| `cost` | mana cost string, or a list of costs |
+
+```json
+{
+  "evoke": {
+    "cost": "{R/W}{R/W}"
+  }
+}
+```
+
+## flashback
+
+Flashback: you may cast this instant or sorcery card from your graveyard by paying `cost` rather than its mana cost; then it's exiled whenever it would leave the stack. `cost` is a mana cost string or a list of costs (`[{"mana": "{1}{U}"}, {"tap_permanents": {"count": 3}}]`). Cast option `via: "alt:<ref>"`.
+
+Rules: CR 702.34a, CR 118.9, CR 601.2b, CR 601.2f, CR 601.2h
+
+| Parameter | Description |
+| --- | --- |
+| `cost` | mana cost string, or a list of costs |
+
+```json
+{
+  "flashback": {
+    "cost": "{2}{R}"
+  }
+}
+```
+
 ## grants_beam_me_up
 
 While this permanent is on the battlefield, during your main phase each instant and sorcery card in your graveyard has beam me up with its mana cost as the beam me up cost; this permanent can't be the creature returned to cast a spell this way. Offered as a cast option with `via: "beam_granted:<permanent>:<ref>"`.
@@ -664,6 +700,24 @@ Rules: CR 702.196a, CR 702.196b, CR 604.1, CR 611.3a
 
 ```json
 "grants_beam_me_up"
+```
+
+## harmonize
+
+Harmonize: you may cast this card from your graveyard by paying `cost` and tapping up to one untapped creature you control rather than its mana cost; the total cost is reduced by generic mana equal to that creature's power. Then it's exiled whenever it would leave the stack. The creature is a `choose_cost` decision (`{type: "cost"}` without an object taps none). Cast option `via: "alt:<ref>"`.
+
+Rules: CR 702.180a, CR 702.180b, CR 118.9, CR 601.2b, CR 601.2f, CR 601.2h
+
+| Parameter | Description |
+| --- | --- |
+| `cost` | mana cost string, or a list of costs |
+
+```json
+{
+  "harmonize": {
+    "cost": "{4}{G}"
+  }
+}
 ```
 
 ## kicker
@@ -801,6 +855,24 @@ Rules: CR 502.3, CR 604.1
 "may_not_untap"
 ```
 
+## mayhem
+
+Mayhem: as long as you discarded this card this turn, you may cast it from your graveyard by paying `cost` rather than its mana cost. Without `cost` (`"mayhem"`), you may play it from your graveyard (a land too) if you discarded it this turn. Cast option `via: "alt:<ref>"`.
+
+Rules: CR 702.187a, CR 702.187b, CR 702.187c, CR 118.9, CR 601.2b, CR 601.2f, CR 601.2h, CR 305.1
+
+| Parameter | Description |
+| --- | --- |
+| `cost` | mana cost string, or a list of costs (optional) |
+
+```json
+{
+  "mayhem": {
+    "cost": "{1}{R}"
+  }
+}
+```
+
 ## play_from
 
 With `cards: "self"` (default): its owner may cast this card from `zone` (the ability functions there). With a card spec: while this permanent is on the battlefield, its controller may play their own matching cards from `zone`, or from any of `zones` ("outside": cards they own outside the game, the deck's `outside` list, CR 400.11a). `play`: "cast" (spells only, default) or "play" (lands too, using a land play). `once_each_turn`: once during each of your turns, one use shared by all its zones. `enters_with`: a permanent spell cast this way enters with these counters. Timing and costs are the usual ones.
@@ -851,6 +923,24 @@ Rules: CR 702.11c, CR 115.4, CR 508.1c, CR 402.2, CR 514.1, CR 615.1, CR 615.1a,
         ]
       }
     }
+  }
+}
+```
+
+## sneak
+
+Sneak: any time you could cast an instant during your declare blockers step, you may cast this spell by paying `cost` and returning an unblocked attacking creature you control to its owner's hand rather than its mana cost. A permanent spell cast this way enters tapped and attacking what that creature was attacking. Cast option `via: "alt:<ref>"`.
+
+Rules: CR 702.190a, CR 702.190b, CR 506.3a, CR 118.9, CR 601.2b, CR 601.2f, CR 601.2h
+
+| Parameter | Description |
+| --- | --- |
+| `cost` | mana cost string, or a list of costs |
+
+```json
+{
+  "sneak": {
+    "cost": "{1}{B}"
   }
 }
 ```
@@ -1020,6 +1110,42 @@ Rules: CR 702.21a, CR 601.2c, CR 603.2, CR 701.6a
 {
   "ward": {
     "cost": "{2}"
+  }
+}
+```
+
+## warp
+
+Warp: you may cast this card from your hand by paying `cost` rather than its mana cost. If you do, the permanent it becomes is exiled at the beginning of the next end step (a delayed triggered ability), and its owner may cast it from exile after this turn has ended for as long as it remains exiled (cast option `via: "warped"`). Conditions `{"cast_with": "warp"}` and `{"cast_with_this_turn": "warp"}` read it.
+
+Rules: CR 702.185a, CR 702.185b, CR 702.185c, CR 603.7, CR 118.9, CR 601.2b, CR 601.2f, CR 601.2h
+
+| Parameter | Description |
+| --- | --- |
+| `cost` | mana cost string, or a list of costs |
+
+```json
+{
+  "warp": {
+    "cost": "{1}{R}"
+  }
+}
+```
+
+## web_slinging
+
+Web-slinging: you may cast this spell by paying `cost` and returning a tapped creature you control to its owner's hand rather than its mana cost. The creature is a `choose_cost` decision, returned as the spell becomes cast. Cast option `via: "alt:<ref>"`.
+
+Rules: CR 702.188a, CR 118.9, CR 601.2b, CR 601.2f, CR 601.2h
+
+| Parameter | Description |
+| --- | --- |
+| `cost` | mana cost string, or a list of costs |
+
+```json
+{
+  "web_slinging": {
+    "cost": "{2}{G}"
   }
 }
 ```

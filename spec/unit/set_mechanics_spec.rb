@@ -43,8 +43,8 @@ RSpec.describe "Set mechanics validation" do
                                                            "abilities" => [{ "station_symbol" => { "at" => 3,
                                                                                                    "keywords" => ["flying"] } }] } })))
         .to include(a_string_matching(/abilities\[0\]: station symbols can't be nested/))
-      expect(errors_for(spacecraft({ "station_symbol" => { "at" => 2, "abilities" => [{ "warp" => {} }] } })))
-        .to include(a_string_matching(/station_symbol.abilities\[0\]: unknown ability "warp"/))
+      expect(errors_for(spacecraft({ "station_symbol" => { "at" => 2, "abilities" => [{ "teleport" => {} }] } })))
+        .to include(a_string_matching(/station_symbol.abilities\[0\]: unknown ability "teleport"/))
     end
 
     it "station cards keep power/toughness off the card itself (CR 722.2c)" do

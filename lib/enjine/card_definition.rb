@@ -328,9 +328,18 @@ module Enjine
         abilities = rule.respond_to?(:intrinsic_abilities) ? rule.intrinsic_abilities : []
         abilities.each_with_index.map { |a, i| AbilityInstance.new(ref: "intrinsic:#{sub}#{":#{i}" if i.positive?}", ability: a) }
       end
-      @ability_instances = (explicit + intrinsic + keyword_abilities).freeze
+      @ability_instances = (explicit + linked_instances(explicit) + intrinsic + keyword_abilities).freeze
       read_nested_abilities(explicit)
       @ability_instances.map(&:ability).freeze
+    end
+
+    # Abilities that come with another one ("When this permanent enters, if its evoke cost was paid, ...",
+    # Abilities::Evoke), referenced as "<ref>:linked:<j>".
+    def linked_instances(explicit)
+      explicit.flat_map do |inst|
+        linked = inst.ability.respond_to?(:linked_abilities) ? inst.ability.linked_abilities : EMPTY
+        linked.each_with_index.map { |a, j| AbilityInstance.new(ref: "#{inst.ref}:linked:#{j}", ability: a) }
+      end
     end
 
     # Keyword abilities that stand for an ability ("Station" is an activated ability, CR 702.184a).

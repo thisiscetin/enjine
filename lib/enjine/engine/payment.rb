@@ -196,7 +196,8 @@ module Enjine
 
         index = frame["player"]
         purpose = payment_purpose(frame)
-        units = pool_units(index, pool, purpose, restricted) + source_units(index, excluded, purpose)
+        units = pool_units(index, pool, purpose, restricted) + source_units(index, excluded, purpose) +
+                convoke_units(index, purpose, excluded) # CR 702.51a (Engine::AltCasting)
         units.size >= cost.mana_value && match_colored(cost.requirements, units)
       end
 

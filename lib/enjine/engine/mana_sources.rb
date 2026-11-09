@@ -22,7 +22,8 @@ module Enjine
       # that may be spent on `purpose`, and one unit per untapped source, with the set of types it could
       # produce (a Treasure: any color).
       def mana_units(index, excluded_source, purpose = nil)
-        pool_units(index, player(index).mana_pool, purpose) + source_units(index, [excluded_source], purpose)
+        pool_units(index, player(index).mana_pool, purpose) + source_units(index, [excluded_source], purpose) +
+          convoke_units(index, purpose) # CR 702.51a (Engine::AltCasting)
       end
 
       def pool_units(index, pool, purpose, restricted = player(index).restricted_mana)

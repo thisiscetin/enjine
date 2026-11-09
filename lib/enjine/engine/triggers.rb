@@ -178,6 +178,7 @@ module Enjine
         source_memory = state.objects[source["id"]]&.memory || {}
         memory = source_memory["cast"] ? { "source_cast" => true } : {}
         memory["kicked"] = true if source_memory["kicked"] # CR 702.33d: a kicked permanent's "if it was kicked"
+        memory.merge!(source_memory.slice("cast_from", "cast_with")) # "if its evoke cost was paid" (Engine::AltCasting)
         batch = trigger.respond_to?(:batched?) && trigger.batched? ? event_batch : nil
         times = 1 + additional_triggers(event, source)
         card, ref = granted_origin(inst.ref) # a granted ability lives in the granting card's data (CR 613.1f)

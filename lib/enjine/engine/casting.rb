@@ -170,6 +170,8 @@ module Enjine
         return :wait if ask_targets!(ctx, specs) # Engine::TargetCounts
         return :wait if ask_distribution!(ctx, ability)
 
+        return ask_harmonize!(ctx) if harmonize_pending?(ctx) # CR 702.180b (Engine::AltCasting)
+
         lock_total_cost!(ctx) unless ctx["remaining"]
         if beam_choice_pending?(ctx) then ask_beam_choice!(ctx) # CR 702.196a (Engine::Permissions)
         elsif (cost = next_cost_choice(ctx)) then ask_cost_choice!(ctx, casting_costs(ctx)[cost])
