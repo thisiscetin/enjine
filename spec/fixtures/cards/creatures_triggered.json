@@ -5205,5 +5205,49 @@
         }
       }
     ]
+  },
+  {
+    "name": "Rallying Bannerman",
+    "mana_cost": "{2}{R}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "human",
+      "soldier"
+    ],
+    "power": 2,
+    "toughness": 2,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "attacks": {}
+          },
+          "effects": [
+            {
+              "create_token": {
+                "tapped": true,
+                "attacking": true,
+                "token": {
+                  "name": "Soldier",
+                  "colors": [
+                    "R"
+                  ],
+                  "types": [
+                    "creature"
+                  ],
+                  "subtypes": [
+                    "soldier"
+                  ],
+                  "power": 1,
+                  "toughness": 1
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
   }
 ]

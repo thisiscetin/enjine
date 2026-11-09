@@ -1332,6 +1332,20 @@ grants its abilities.
                 { "foretell": { "cost": "{1}{R}" } }] }
 ```
 
+### 4.30 Rules correctness: ordering damage effects, new targets, chosen sources, entering attacking
+
+These need no new data: the shapes above play by these rules.
+
+| Rule | How the engine applies it |
+| --- | --- |
+| Several replacement and prevention effects apply to one damage event (CR 616.1, 616.1e-f) | Redirections (`redirect`) apply first. When the order of the others changes the result (the damage dealt, a shield left, a `then` amount), the affected player (the player dealt damage, or the permanent's controller) gets a `damage_order` decision before the damage is dealt: options `{type: "order", order: [keys], steps: [labels], amount: n}`, one per distinct result, asked in APNAP order for combat damage. Otherwise nothing is asked and the order is prevention, multiplying, adding (statics before resolved effects). Each effect applies once; after each, the others are rechecked |
+| "Damage can't be prevented" against a prevention effect with `then` (CR 615.12) | The prevention effect still applies once: nothing is prevented, a shield (`next`, `next_time`) isn't used up, and its `then` happens with `{"triggering": "amount"}` 0, except a `reflexive_trigger` ("when damage is prevented this way") |
+| `choose_new_targets`, `copy_spell` (CR 115.7, 707.10, 702.21a) | Each new target, and each target of a copy, becomes a target of that spell or ability: ward and `becomes_target` trigger (for the spell's controller) |
+| New targets for a divided spell (CR 115.7f, 601.2d) | Each target's share of the division goes to the target that replaced it; a new target can't be another target of the same spell |
+| `prevent_damage` with `"by": "chosen_source"` (CR 609.7a-b) | The choice includes permanents, spells and abilities on the stack, objects they refer to (targets, an ability's source) and objects in the command zone. A chosen permanent spell's damage is prevented also once it is a permanent |
+| `create_token` with `attacking: true` (CR 508.4) | When the defending player controls a planeswalker, the controller chooses for each token what it attacks: an `effect_choice` of `{type: "attack", target: ref}` |
+| `copy_spell` of `{"triggering": "ability"}` after that ability left the stack (CR 707.10, 608.2h) | The engine's reading for "copy that ability" (Firebender Ascension): it is copied as it last existed on the stack, with its targets, modes and X |
+
 ---
 
 ## 5. Worked examples

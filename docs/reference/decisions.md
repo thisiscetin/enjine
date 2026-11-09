@@ -40,6 +40,10 @@ While casting/activating: `{type: "count", count: n}` announces how many targets
 
 While casting/activating a spell or ability with {X} in its cost: `{type: "x", value: n}` announces X (0 up to `max`, the most the available mana could pay for); `{type: "cancel"}` rewinds.
 
+## damage_order
+
+Order the effects that apply to damage dealt to you or a permanent you control (CR 616.1): submit one of `{type: "order", order: [effect keys], steps: [labels], amount: final damage}` exactly as listed.
+
 ## declare_attackers
 
 Declare one attacker: `{type: "attack", object: id, target: ref}` (the defending player or one of their planeswalkers), or `{type: "done"}` (withheld while a creature that attacks each combat if able could still attack, CR 508.1d, or while a creature that can't attack alone attacks alone, CR 506.5; then `{type: "withdraw", object: id}` undoes an attack).

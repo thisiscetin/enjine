@@ -2008,5 +2008,49 @@
         }
       }
     ]
+  },
+  {
+    "name": "Shrine of Mending Wards",
+    "mana_cost": "{2}{W}",
+    "types": [
+      "enchantment"
+    ],
+    "abilities": [
+      {
+        "prevent_damage": {
+          "to": {
+            "controller": "you"
+          },
+          "combat": "noncombat",
+          "then": [
+            {
+              "gain_life": {
+                "amount": 1
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Twinned Cruelty",
+    "mana_cost": "{3}{R}",
+    "types": [
+      "enchantment"
+    ],
+    "abilities": [
+      {
+        "damage_replacement": {
+          "by": {
+            "controller": "you"
+          },
+          "to": {
+            "controller": "opponent"
+          },
+          "multiply": 2
+        }
+      }
+    ]
   }
 ]

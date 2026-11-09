@@ -728,7 +728,7 @@ Rules: CR 114.1, CR 114.2, CR 114.3, CR 114.4, CR 113.6p
 
 ## create_token
 
-Create `amount` tokens under the referenced player's control (default: you). `token` is a predefined token name (Treasure, Clue, Food) or an inline card definition. `tapped: true` creates them tapped; `attacking: true` attacking (only for the attacking player during combat, CR 506.3b).
+Create `amount` tokens under the referenced player's control (default: you). `token` is a predefined token name (Treasure, Clue, Food) or an inline card definition. `tapped: true` creates them tapped; `attacking: true` attacking (only for the attacking player during combat, CR 506.3b); when the defending player controls a planeswalker, the controller chooses for each token whether it attacks that player or one of their planeswalkers (CR 508.4).
 
 Rules: CR 111.1, CR 111.10, CR 701.7a, CR 704.5d, CR 508.4, CR 506.3b
 

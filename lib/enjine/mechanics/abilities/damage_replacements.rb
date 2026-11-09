@@ -355,8 +355,9 @@ module Enjine
                                "to instead). A scope is \"self\", \"attached\" or {\"each\": filter, \"controller\": " \
                                "you|opponent|any, \"other\": bool}; `each` is optional and players match too, so " \
                                "{\"controller\": \"opponent\"} is \"an opponent or a permanent an opponent controls\". " \
-                               "Several apply in the order the affected player would pick: redirections, then " \
-                               "prevention, then multiplying, then adding.",
+                               "Redirections apply first; when the order of the others changes the result, the " \
+                               "affected player chooses it (a damage_order decision), else prevention, then " \
+                               "multiplying, then adding.",
                   rules: %w[614.1a 614.5 614.9 616.1 616.1e 616.1f 120.2b],
                   params: { "by" => "damage scope", "to" => "damage scope", "combat" => "combat | noncombat",
                             "multiply" => "integer >= 2", "plus" => "amount", "redirect" => "\"self\" | \"attached\"" },
