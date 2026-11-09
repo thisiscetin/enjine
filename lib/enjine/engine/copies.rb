@@ -142,13 +142,16 @@ module Enjine
 
       # CR 704.5d, 111.7, 707.10a: tokens outside the battlefield, spell copies outside the stack and card
       # copies outside the stack and battlefield cease to exist (state-based actions).
+      # Zones a token or card copy can be in (a phased-out permanent is still on the battlefield, CR 702.26d).
+      STAYING = %i[battlefield stack phased_out].freeze
+
       def ceases_to_exist?(obj)
         return false if obj.ability?
 
         case obj.memory["copy"]
         when "spell" then obj.zone != :stack
-        when "card" then !%i[stack battlefield].include?(obj.zone)
-        else obj.zone != :battlefield && obj.zone != :stack && token?(obj)
+        when "card" then !STAYING.include?(obj.zone)
+        else !STAYING.include?(obj.zone) && token?(obj)
         end
       end
 

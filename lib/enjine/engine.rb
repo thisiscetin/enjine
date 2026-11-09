@@ -311,7 +311,10 @@ module Enjine
       state.objects.delete(id)
       fresh = create_object(own_card(old), old.owner, to)
       carry_copy_status!(fresh, old, to) # a token or copy stays one (Engine::Copies)
-      leave_combat!(id) if old.zone == :battlefield
+      if old.zone == :battlefield
+        leave_combat!(id)
+        end_while_source_effects!(id) # CR 611.2b
+      end
       arrive!(fresh, old, data)
       list = state.zone_list(to, old.owner)
       data["position"] == :bottom ? list.push(fresh.id) : list.unshift(fresh.id)
@@ -396,13 +399,15 @@ module Enjine
 
       object.tapped = false
       emit Events::Untapped.new(object: object.id)
+      end_while_source_effects!(object.id) # CR 611.2b: "for as long as it remains tapped" ends
     end
 
-    # CR 502.3: the active player's permanents untap, except those effects keep from untapping.
-    def untap_all!(index)
+    # CR 502.3: the active player's permanents untap, except those effects keep from untapping and those
+    # they chose to keep tapped (`keep`, see Engine::TurnStructure).
+    def untap_all!(index, keep: [])
       state.battlefield.each do |id|
         obj = object(id)
-        untap!(obj) if obj.controller == index && !chars(obj).keyword?(:doesnt_untap)
+        untap!(obj) if obj.controller == index && !keep.include?(id) && !chars(obj).keyword?(:doesnt_untap)
       end
     end
 

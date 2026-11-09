@@ -155,6 +155,7 @@ Rules: CR 122.6, CR 603.2, CR 603.2c
 | --- | --- |
 | `subject` | "self" (default) or {"each": filter, ...} |
 | `counter` | counter name |
+| `first_time_this_turn` | true: only the first time each turn such counters are put on that permanent (an earlier placement counts even if nothing could trigger then) |
 
 ```json
 {

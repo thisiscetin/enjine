@@ -408,6 +408,42 @@ Generic shapes (N, [quality] and [zone] stand for whatever the card says):
 | cards exiled with this; exile until this leaves the battlefield | `exile` with `"link": true` / `"until_source_leaves": true`; the selector `"exiled_with"` |
 | that permanent's controller may search their library | `search_library` with `"searcher": { "controller_of": { "target": 0 } }, "may": true` |
 | a permanent explores | `{ "explore": { "to": … } }` |
+| you return a [quality] permanent you control to its owner's hand (chosen, not targeted) | `{ "return_choice": { "filter": { "permanent": { "any_of": ["land"], "controller": "you" } } } }` (same `count` and `to` as `sacrifice_choice`) |
+
+### 4.13 Turn structure: untap step, land plays and phasing
+
+Rule numbers are from the 2026-11-06 Comprehensive Rules.
+
+| Shape | Data |
+| --- | --- |
+| "You may play an additional land on each of your turns" (CR 305.2) | ability `"additional_land_plays"` (each instance is one more land play; lands put onto the battlefield by effects don't count) |
+| "You may choose not to untap this during your untap step" (CR 502.3) | ability `"may_not_untap"` (its controller answers an `untap_choice` decision in their untap step while it's tapped) |
+| phasing (CR 702.26a) | keyword `"phasing"` |
+| "[permanents] phase out" (CR 702.26) | `{ "phase_out": { "to": { "each": { "permanent": { "any_of": ["artifact", "creature"] } } } } }` |
+| "Permanents can't phase in" | ability `"cant_phase_in"` |
+| "for as long as this remains tapped, … triggered abilities trigger an additional time" (CR 603.2d, 611.2b) | `{ "additional_triggers": { "to": { "target": 0 }, "duration": "while_source_tapped" } }` |
+| "when one or more [kind] counters are put on this for the first time each turn" | `{ "counters_placed": { "counter": "charge", "first_time_this_turn": true } }` |
+| "it becomes a [type] with base power and toughness N/M and gains '…'" (layers 4, 6, 7b) | `become`, below |
+
+A phased-out permanent keeps its id, counters and attachments but is treated as though it
+doesn't exist (the view lists it under `phased_out`). It phases in during the untap step of
+the player who controlled it as it phased out; Auras and Equipment attached to it phase out and
+back in with it.
+
+```json
+{ "become": { "creature_types": ["goblin", "scout"],
+              "base_power_toughness": { "power": 3, "toughness": 4 },
+              "abilities": ["additional_land_plays",
+                            { "triggered": { "when": { "becomes_tapped": {} },
+                                             "effects": [{ "surveil": { "amount": 1 } }] } }],
+              "duration": "indefinite", "to": "self" } }
+```
+
+`creature_types` replaces the creature types, `abilities` may hold triggered, mana,
+`play_from` (for other cards) and `additional_land_plays` abilities, and `duration` is
+`end_of_turn` (default) or `indefinite` (for as long as it stays on the battlefield). An
+activated ability that only works while it has a subtype uses
+`"only_if": { "source": { "creature": { "subtypes": ["rogue"] } } }`.
 
 ### 4.13 Copies (CR 707)
 

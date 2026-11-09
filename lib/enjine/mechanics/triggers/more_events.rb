@@ -33,21 +33,27 @@ module Enjine
                   description: "One or more counters (only `counter`, if given) are put on the subject, including the " \
                                "counters it enters the battlefield with. Triggers once per event, however many counters.",
                   rules: %w[122.6 603.2 603.2c],
-                  params: { "subject" => "\"self\" (default) or {\"each\": filter, ...}", "counter" => "counter name" },
+                  params: { "subject" => "\"self\" (default) or {\"each\": filter, ...}", "counter" => "counter name",
+                            "first_time_this_turn" => "true: only the first time each turn such counters are put on " \
+                                                      "that permanent (an earlier placement counts even if nothing " \
+                                                      "could trigger then)" },
                   example: { "counters_placed" => { "counter" => "+1/+1" } }
 
-        def self.keys = %w[subject counter]
+        def self.keys = %w[subject counter first_time_this_turn]
         def watches?(event) = event.is_a?(Events::CountersChanged) || event.is_a?(Events::ZoneChanged)
 
         def setup(params, errors, path)
           @counter = params["counter"] && Counters.normalize(params["counter"])
           message = @counter && Counters.error(@counter)
           errors << "#{path}.counter: #{message}" if message
+          @first_time = params["first_time_this_turn"]
+          errors << "#{path}.first_time_this_turn: must be true or false" unless [nil, true, false].include?(@first_time)
         end
 
         def occurrences(engine, event, source)
           id, amount = placed(engine, event)
           return [] unless amount&.positive?
+          return [] if @first_time && engine.counter_placements_this_turn(id, @counter) != 1
 
           obj = engine.object(id)
           return [] unless @subject.match?(engine, id, obj.controller, obj.card, source, types: engine.chars(obj).types)
@@ -57,7 +63,10 @@ module Enjine
 
         def match?(engine, event, source) = !occurrences(engine, event, source).empty?
 
-        def to_s = "Whenever one or more #{"#{@counter} " if @counter}counters are put on #{@subject}"
+        def to_s
+          first = " for the first time each turn" if @first_time
+          "Whenever one or more #{"#{@counter} " if @counter}counters are put on #{@subject}#{first}"
+        end
 
         private
 

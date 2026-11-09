@@ -22,6 +22,7 @@ module Enjine
           facts.merge!("object" => event.source, "amount" => event.amount, "player" => Filters.player_index(engine, event.target))
         when Events::LifeChanged then facts["amount"] = [event.gain, event.loss].max
         when Events::CountersChanged then facts.merge!("object" => event.object, "amount" => event.to - event.from)
+        when Events::StepBegan then facts["player"] = engine.state.active # "that player": whose step it is
         end
         facts["player"] ||= engine.names.index(event.player) if event.respond_to?(:player)
         facts["card"] = event.respond_to?(:card) ? event.card : engine.state.objects[facts["object"]]&.card

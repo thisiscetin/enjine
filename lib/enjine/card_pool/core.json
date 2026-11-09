@@ -6911,6 +6911,339 @@
     ]
   },
   {
+    "name": "Flickerwing Drake",
+    "mana_cost": "{1}{U}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "drake"
+    ],
+    "power": 2,
+    "toughness": 2,
+    "keywords": [
+      "flying",
+      "phasing"
+    ]
+  },
+  {
+    "name": "Temporal Fold",
+    "mana_cost": "{2}{U}",
+    "types": [
+      "sorcery"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "effects": [
+            {
+              "phase_out": {
+                "to": {
+                  "each": {
+                    "permanent": {
+                      "any_of": [
+                        "artifact",
+                        "creature"
+                      ]
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "create_token": {
+                "token": {
+                  "name": "Stasis Warden",
+                  "types": [
+                    "creature"
+                  ],
+                  "subtypes": [
+                    "human"
+                  ],
+                  "colors": [
+                    "W"
+                  ],
+                  "power": 0,
+                  "toughness": 1,
+                  "abilities": [
+                    "cant_phase_in"
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Grim Accounting",
+    "mana_cost": "{B}",
+    "types": [
+      "sorcery"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "effects": [
+            {
+              "sacrifice_choice": {
+                "filter": {
+                  "creature": {
+                    "token": true
+                  }
+                }
+              }
+            },
+            {
+              "gain_life": {
+                "amount": 5,
+                "if": {
+                  "amount": {
+                    "count": {
+                      "result": 0
+                    }
+                  },
+                  "at_least": 1
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Drowsy Sentinel",
+    "mana_cost": "{2}{W}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "human"
+    ],
+    "power": 1,
+    "toughness": 3,
+    "abilities": [
+      "may_not_untap",
+      {
+        "activated": {
+          "cost": [
+            "tap"
+          ],
+          "targets": [
+            {
+              "creature": {
+                "other": true
+              }
+            }
+          ],
+          "effects": [
+            {
+              "additional_triggers": {
+                "to": {
+                  "target": 0
+                },
+                "duration": "while_source_tapped"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Wandering Surveyor",
+    "mana_cost": "{1}{G}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "human",
+      "scout"
+    ],
+    "power": 1,
+    "toughness": 1,
+    "abilities": [
+      "additional_land_plays"
+    ]
+  },
+  {
+    "name": "Shifting Cadet",
+    "mana_cost": "{1}{R}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "goblin",
+      "rogue"
+    ],
+    "power": 1,
+    "toughness": 1,
+    "abilities": [
+      {
+        "activated": {
+          "cost": [
+            {
+              "mana": "{1}"
+            }
+          ],
+          "timing": "sorcery",
+          "only_if": {
+            "source": {
+              "creature": {
+                "subtypes": [
+                  "rogue"
+                ]
+              }
+            }
+          },
+          "effects": [
+            {
+              "become": {
+                "creature_types": [
+                  "goblin",
+                  "scout"
+                ],
+                "base_power_toughness": {
+                  "power": 3,
+                  "toughness": 4
+                },
+                "abilities": [
+                  "additional_land_plays",
+                  {
+                    "triggered": {
+                      "when": {
+                        "becomes_tapped": {}
+                      },
+                      "effects": [
+                        {
+                          "gain_life": {
+                            "amount": 1
+                          }
+                        }
+                      ]
+                    }
+                  }
+                ],
+                "duration": "indefinite",
+                "to": "self"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Charged Relay",
+    "mana_cost": "{2}",
+    "types": [
+      "artifact"
+    ],
+    "abilities": [
+      {
+        "activated": {
+          "cost": [
+            {
+              "mana": "{1}"
+            }
+          ],
+          "effects": [
+            {
+              "add_counters": {
+                "counter": "charge",
+                "amount": 1,
+                "to": "self"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "triggered": {
+          "when": {
+            "counters_placed": {
+              "counter": "charge",
+              "first_time_this_turn": true
+            }
+          },
+          "effects": [
+            {
+              "draw": {
+                "amount": 1
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Ferry Pilot",
+    "mana_cost": "{1}{R}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "human",
+      "pilot"
+    ],
+    "power": 2,
+    "toughness": 1,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "becomes_tapped": {}
+          },
+          "effects": [
+            {
+              "choose_cards": {
+                "from": {
+                  "hand": "you"
+                },
+                "for": {
+                  "types": [
+                    "land"
+                  ]
+                },
+                "optional": true,
+                "put": "battlefield",
+                "then": [
+                  {
+                    "delayed_trigger": {
+                      "when": {
+                        "step_begins": {
+                          "step": "end",
+                          "whose": "each"
+                        }
+                      },
+                      "effects": [
+                        {
+                          "return_choice": {
+                            "filter": {
+                              "permanent": {
+                                "any_of": [
+                                  "land"
+                                ],
+                                "controller": "you"
+                              }
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
     "name": "Mirrorbrood Larva",
     "mana_cost": "{2}{W}",
     "types": [

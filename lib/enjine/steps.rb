@@ -25,14 +25,11 @@ module Enjine
       end
     end
 
-    # CR 502: phasing (later), untap the active player's permanents; no priority.
+    # CR 502: phasing (502.1), then the active player's permanents untap (502.3), some by their choice
+    # (Engine::TurnStructure); no priority (502.4).
     class Untap < Step
       def priority? = false
-
-      def begin(engine)
-        engine.untap_all!(engine.state.active)
-        engine.turn_based_actions_done!
-      end
+      def begin(engine) = engine.begin_untap_step!
     end
 
     # CR 504: the active player draws, except the starting player on turn 1 (CR 103.8a).

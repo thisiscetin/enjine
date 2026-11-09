@@ -49,6 +49,9 @@ module Enjine
     PriorityPassed = define(:priority_passed, :player)
     Tapped = define(:tapped, :object)
     Untapped = define(:untapped, :object)
+    # CR 702.26: phasing isn't a zone change; `indirectly`: it phased out attached to another permanent.
+    PhasedOut = define(:phased_out, :object, :indirectly)
+    PhasedIn = define(:phased_in, :object)
     ManaAdded = define(:mana_added, :player, :mana, :source)
     ManaEmptied = define(:mana_emptied, :player, :mana)
     PlayerLost = define(:player_lost, :player, :reason)

@@ -129,7 +129,8 @@ module Enjine
         !hit.empty?
       end
 
-      # CR 704.5d / 111.7: a token in a zone other than the battlefield ceases to exist.
+      # CR 704.5d / 111.7: a token in a zone other than the battlefield ceases to exist. Phased-out tokens are
+      # still on the battlefield (CR 702.26d), see Engine::Copies#ceases_to_exist?.
       def remove_tokens_outside_battlefield!
         gone = state.objects.values.select { ceases_to_exist?(it) } # and copies, CR 707.10a (Engine::Copies)
         gone.each do |obj|
