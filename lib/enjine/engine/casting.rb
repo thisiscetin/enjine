@@ -61,7 +61,8 @@ module Enjine
       # "Up to one target" needs no candidate (CR 601.2c).
       def targets_available?(specs, index, exclude, source = nil)
         specs.all? do |spec|
-          optional_target?(spec) || spec.candidates_for(self, index, source).any? { it != exclude && targetable?(it, index, source) }
+          need = target_minimum(spec, index, source) # Engine::TargetCounts
+          need.zero? || spec.candidates_for(self, index, source).count { it != exclude && targetable?(it, index, source) } >= need
         end
       end
 
@@ -163,10 +164,7 @@ module Enjine
         return :wait if ask_x!(ctx)
 
         specs = casting_targets
-        if ctx["targets"].size < specs.size
-          ask!("kind" => "choose_target", "player" => ctx["player"], "index" => ctx["targets"].size)
-          return :wait
-        end
+        return :wait if ask_targets!(ctx, specs) # Engine::TargetCounts
         return :wait if ask_distribution!(ctx, ability)
 
         lock_total_cost!(ctx) unless ctx["remaining"]
@@ -187,8 +185,9 @@ module Enjine
       # object can't be chosen twice for one instance of the word "target" (`distinct_from`).
       def target_candidates
         ctx = casting
-        spec = casting_targets[ctx["targets"].size]
-        taken = spec.respond_to?(:distinct_from) ? spec.distinct_from.map { ctx["targets"][it] } : []
+        spec = casting_targets[target_slot(ctx)] # Engine::TargetCounts: a counted slot's list may be open
+        taken = spec.respond_to?(:distinct_from) ? spec.distinct_from.flat_map { Array(ctx["targets"][it]) } : []
+        taken += open_target_group(ctx)
         spec.candidates_for(self, ctx["player"], ctx["source"]).reject do
           it == ctx["object"] || taken.include?(it) || !targetable?(it, ctx["player"], ctx["source"])
         end
@@ -197,14 +196,14 @@ module Enjine
       # The target options; an "up to one" target may be left unchosen (`done`).
       def target_options
         options = target_candidates.map { { type: "target", target: it } }
-        optional_target?(casting_targets[casting["targets"].size]) ? options + [{ type: "done" }] : options
+        optional_target?(casting_targets[casting["targets"].size]) && !casting["counting"] ? options + [{ type: "done" }] : options
       end
 
       # `ref` nil: no target chosen for an optional ("up to one") target. Abilities that trigger when
       # something becomes a target (ward, CR 702.21a) learn which spell or ability targeted it.
       def choose_target!(ref)
         ctx = casting
-        ctx["targets"] << ref
+        add_chosen_target!(ctx, ref)
         if ref
           queued = state.pending_triggers.size
           emit Events::TargetChosen.new(player: name(ctx["player"]), object: ctx["object"], target: ref)
@@ -225,17 +224,17 @@ module Enjine
         record_cast_choices!(obj, ctx) # cost choices; facing a dilemma (CR 700.17)
         if ctx["kind"] == "trigger"
           emit Events::TriggerPutOnStack.new(player: name(index), object: obj.id, source: ctx["source"], card: obj.card,
-                                             ability: ctx["ability"], targets: obj.targets)
+                                             ability: ctx["ability"], targets: obj.targets.flatten)
           return # placing continues in the put_triggers frame; no priority yet
         elsif ctx["kind"] == "ability"
           pay_ability_costs!(ctx, obj)
           record_activation!(ctx) # CR 602.5b
           emit Events::AbilityActivated.new(player: name(index), object: obj.id, card: obj.card, source: ctx["source"],
-                                            ability: ctx["ability"], targets: obj.targets)
+                                            ability: ctx["ability"], targets: obj.targets.flatten)
         else
           pay_chosen_costs!(ctx) # e.g. the creature sacrificed for an additional cost (CR 601.2h)
           finish_cast_method!(obj, ctx) # Engine::Permissions
-          emit Events::SpellCast.new(player: name(index), object: obj.id, card: obj.card, targets: obj.targets,
+          emit Events::SpellCast.new(player: name(index), object: obj.id, card: obj.card, targets: obj.targets.flatten,
                                      during_resolution: ctx["no_priority"] == true)
         end
         return if ctx["no_priority"] # CR 608.2g: no priority; the resolving spell or ability continues

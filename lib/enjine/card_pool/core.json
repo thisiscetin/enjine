@@ -8754,5 +8754,212 @@
         }
       }
     ]
+  },
+  {
+    "name": "Tidal Lockdown",
+    "mana_cost": "{X}{U}",
+    "types": [
+      "sorcery"
+    ],
+    "rules_text": "Tap X target creatures.",
+    "abilities": [
+      {
+        "spell": {
+          "targets": [
+            {
+              "filter": "creature",
+              "count": "x"
+            }
+          ],
+          "effects": [
+            {
+              "tap": {
+                "to": {
+                  "target": 0
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Homeward Tide",
+    "mana_cost": "{1}{U}",
+    "types": [
+      "instant"
+    ],
+    "rules_text": "Return any number of target creatures you control to their owner's hand.",
+    "abilities": [
+      {
+        "spell": {
+          "targets": [
+            {
+              "filter": {
+                "creature": {
+                  "controller": "you"
+                }
+              },
+              "count": "any"
+            }
+          ],
+          "effects": [
+            {
+              "return_to_hand": {
+                "to": {
+                  "target": 0
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Grove Rallier",
+    "mana_cost": "{2}{G}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "elf",
+      "warrior"
+    ],
+    "power": 2,
+    "toughness": 2,
+    "rules_text": "When this creature enters, up to X target creatures you control each get +1/+1 until end of turn, where X is the number of lands you control.",
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "enters": {}
+          },
+          "targets": [
+            {
+              "filter": {
+                "creature": {
+                  "controller": "you"
+                }
+              },
+              "optional": true,
+              "count": {
+                "count": {
+                  "each": "land",
+                  "controller": "you"
+                }
+              }
+            }
+          ],
+          "effects": [
+            {
+              "pump": {
+                "power": 1,
+                "toughness": 1,
+                "to": {
+                  "target": 0
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Bloomscatter",
+    "mana_cost": "{2}{G}",
+    "types": [
+      "sorcery"
+    ],
+    "rules_text": "Distribute three +1/+1 counters among any number of target creatures.",
+    "abilities": [
+      {
+        "spell": {
+          "targets": [
+            {
+              "filter": "creature",
+              "count": "any"
+            }
+          ],
+          "divide": 3,
+          "effects": [
+            {
+              "distribute_counters": {
+                "counter": "+1/+1"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Mimic Raid",
+    "mana_cost": "{X}{U}{B}",
+    "types": [
+      "sorcery"
+    ],
+    "rules_text": "Choose X target creatures your opponents control. For each of them, create a token that's a copy of that creature, except it has changeling. Those tokens gain haste. Exile those tokens at the beginning of the next end step.",
+    "abilities": [
+      {
+        "spell": {
+          "targets": [
+            {
+              "filter": {
+                "creature": {
+                  "controller": "opponent"
+                }
+              },
+              "count": "x"
+            }
+          ],
+          "effects": [
+            {
+              "create_token_copy": {
+                "of": {
+                  "target": 0
+                },
+                "except": {
+                  "keywords": [
+                    "changeling"
+                  ]
+                }
+              }
+            },
+            {
+              "grant": {
+                "keywords": [
+                  "haste"
+                ],
+                "to": {
+                  "result": 0
+                }
+              }
+            },
+            {
+              "delayed_trigger": {
+                "when": {
+                  "step_begins": {
+                    "step": "end",
+                    "whose": "each"
+                  }
+                },
+                "effects": [
+                  {
+                    "exile": {
+                      "to": {
+                        "result": 0
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    ]
   }
 ]

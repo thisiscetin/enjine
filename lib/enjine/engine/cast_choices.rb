@@ -126,10 +126,10 @@ module Enjine
       # Each chosen target gets one; the rest is assigned one at a time when there's a choice.
       def ask_distribution!(ctx, ability)
         amount = ability&.extras&.divide or return false
-        chosen = ctx["targets"].compact
+        chosen = ctx["targets"].flatten.compact
         ctx["division"] ||= chosen.to_h { [it, 1] }
         left = amount - ctx["division"].values.sum
-        return false unless left.positive?
+        return false unless left.positive? && chosen.any?
 
         if chosen.size == 1
           ctx["division"][chosen.first] += left

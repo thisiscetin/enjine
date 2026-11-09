@@ -431,7 +431,7 @@ module Enjine
         def true?(engine, ctx)
           return true if ctx.targets.nil?
 
-          ctx.targets.compact.any? { @filter&.match?(engine, it, ctx.controller) }
+          ctx.targets.flatten.compact.any? { @filter&.match?(engine, it, ctx.controller) }
         end
 
         def to_s = "it targets a #{@filter.respond_to?(:primitive_name) ? @filter.primitive_name : @filter}"

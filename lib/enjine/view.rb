@@ -88,7 +88,7 @@ module Enjine
       view["rules_text"] = defn.rules_text if defn.rules_text
       case obj.zone
       when :battlefield then permanent_view(engine, obj, defn, view)
-      when :stack then view.merge!("controller" => engine.name(obj.controller), "targets" => obj.targets || [])
+      when :stack then view.merge!("controller" => engine.name(obj.controller), "targets" => (obj.targets || []).flatten)
       when :phased_out # public: still on the battlefield, treated as though it doesn't exist (CR 702.26b)
         view.merge!("controller" => engine.name(obj.controller), "tapped" => obj.tapped, "phased_out" => true)
         view["attached_to"] = obj.attached_to if obj.attached_to
@@ -117,7 +117,7 @@ module Enjine
       ability = defn.ability(obj.ability)
       { "id" => obj.id, "card" => obj.card, "name" => "#{defn.name} ability", "kind" => "ability",
         "ability" => obj.ability, "loyalty_cost" => ability.loyalty_cost, "source" => obj.source,
-        "controller" => engine.name(obj.controller), "targets" => obj.targets || [] }.compact
+        "controller" => engine.name(obj.controller), "targets" => (obj.targets || []).flatten }.compact
     end
 
     def pending_view(engine, viewer)

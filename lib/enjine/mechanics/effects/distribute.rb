@@ -29,7 +29,7 @@ module Enjine
 
         def apply(engine, ctx)
           engine.object(ctx.object).memory.fetch("division", {}).each do |ref, n|
-            next unless ctx.targets.include?(ref) # still a legal target (CR 608.2b)
+            next unless ctx.targets.flatten.include?(ref) # still a legal target (CR 608.2b)
 
             engine.add_counters!(engine.object(ref), counter, n, by_player: ctx.controller)
           end

@@ -84,6 +84,7 @@ module Enjine
                 when "bottom" then " — put #{decision.details["count"]} more on the bottom"
                 when "assign_damage" then " — #{name_of(decision.details["attacker"])}: #{decision.details["remaining"]} damage left"
                 when "choose_target" then " — target ##{decision.details["index"] + 1}"
+                when "choose_target_count" then " — how many for target ##{decision.details["index"] + 1}"
                 else ""
                 end
         "▶ #{decision.player.upcase} must act: #{decision.kind.tr("_", " ")}#{extra}"

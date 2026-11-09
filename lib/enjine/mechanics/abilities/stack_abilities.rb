@@ -6,10 +6,13 @@ module Enjine
       # One target of a spell or ability with options (CR 601.2c, 115.1d): {"filter": f, "optional": true}
       # is "up to one target f" (the player may choose none), and "distinct_from": [i, ...] keeps it
       # different from earlier targets of the same "target" word ("one or two target creatures").
+      # "count" is a variable number of targets for one "target" word (CR 601.2c, 115.3; Engine::TargetCounts):
+      # an amount ("x": "X target creatures", 2: "two target creatures"; with "optional": "up to") or "any"
+      # ("any number of target ..."). Its slot then holds a list, and {"target": n} means each of them.
       class TargetSpec
-        KEYS = %w[filter optional distinct_from].freeze
+        KEYS = %w[filter optional distinct_from count].freeze
 
-        attr_reader :filter, :distinct_from
+        attr_reader :filter, :distinct_from, :count
 
         def self.build(entry, errors, path, index)
           Mechanics.check_keys(entry, KEYS, errors, path)
@@ -18,23 +21,50 @@ module Enjine
           errors << "#{path}.distinct_from: must list earlier targets" unless distinct.all? { it.is_a?(Integer) && it >= 0 && it < index }
           optional = entry["optional"]
           errors << "#{path}.optional: must be true or false" unless [nil, true, false].include?(optional)
-          filter && new(filter, optional == true, distinct)
+          filter && new(filter, optional == true, distinct, build_count(entry, errors, path))
         end
 
-        def initialize(filter, optional, distinct_from)
+        def self.build_count(entry, errors, path)
+          return nil unless entry.key?("count")
+          return :any if entry["count"] == "any"
+
+          Amount.build(entry["count"], errors, "#{path}.count", targets_count: 0, min: 1)
+        end
+
+        def initialize(filter, optional, distinct_from, count = nil)
           @filter = filter
           @optional = optional
           @distinct_from = distinct_from.freeze
+          @count = count
           freeze
         end
 
         def optional? = @optional
+        def counted? = !@count.nil?
+
+        # [min, max] objects to choose (max nil: any number).
+        def count_range(engine, ctx)
+          return [0, nil] if @count == :any
+
+          n = [@count.value(engine, ctx), 0].max
+          [optional? ? 0 : n, n]
+        end
+
         def candidates_for(...) = filter.candidates_for(...)
         def match_for?(...) = filter.match_for?(...)
         def candidates(...) = filter.candidates(...)
         def match?(...) = filter.match?(...)
         def primitive_name = filter.primitive_name
-        def to_s = "#{"up to one " if optional?}#{filter.is_a?(Class) ? primitive_name : filter}"
+        def to_s = "#{count_words}#{filter.is_a?(Class) ? primitive_name : filter}"
+
+        private
+
+        def count_words
+          return "any number of " if @count == :any
+          return "#{"up to " if optional?}#{@count.is_a?(Amount::Fixed) ? @count.n : "X"} " if counted?
+
+          "up to one " if optional?
+        end
       end
 
       # Shared parsing for abilities that use the stack: targets and effects.

@@ -167,6 +167,30 @@ Spells: `{ "kicker": { "cost": [...] } }` (condition `{ "kicked": true }`, spell
 `distribute_counters` divides counters among them. "Counter … unless its controller pays {N}" is
 `counter_unless_pays`; "you may pay {1}. If you do, …" is `pay`; ward is `{ "ward": { "cost": "{2}" } }`.
 
+**A variable number of targets** (CR 601.2c, 115.3) is one target spec with a `count`: an amount
+(`"x"`, a number, or a computed amount) or `"any"`. With `"optional": true` the count is a maximum
+("up to"). The player announces how many (decision `choose_target_count`, skipped when the number
+is fixed) and then chooses that many different objects; `{ "target": n }` then means each of them.
+
+| Oracle words | Target spec |
+| --- | --- |
+| "X target creatures" | `{ "filter": "creature", "count": "x" }` |
+| "two target creatures" | `{ "filter": "creature", "count": 2 }` |
+| "up to X target creatures you control, where X is the number of lands you control" | `{ "filter": { "creature": { "controller": "you" } }, "count": { "count": { "each": "land", "controller": "you" } }, "optional": true }` |
+| "any number of target players" | `{ "filter": "player", "count": "any" }` |
+| "divided as you choose among any number of target creatures" | `{ "filter": "creature", "count": "any" }` with `"divide": N` (at least one, at most N targets) |
+
+```json
+{ "name": "Example Mimic Raid", "mana_cost": "{X}{U}{B}", "types": ["sorcery"],
+  "abilities": [{ "spell": {
+    "targets": [{ "filter": { "creature": { "controller": "opponent" } }, "count": "x" }],
+    "effects": [
+      { "create_token_copy": { "of": { "target": 0 }, "except": { "keywords": ["changeling"] } } },
+      { "grant": { "keywords": ["haste"], "to": { "result": 0 } } },
+      { "delayed_trigger": { "when": { "step_begins": { "step": "end", "whose": "each" } },
+                             "effects": [{ "exile": { "to": { "result": 0 } } }] } }] } }] }
+```
+
 ### 4.3 Loyalty ability
 
 ```json

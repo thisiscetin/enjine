@@ -538,6 +538,20 @@ derived from card text is stored here.
 | Token doubling replacement | 614.1a, 111.1 | 1 | Doubling Season |
 | Vehicles / crew | 702.122, 301.7 | 1 | Cultivator's Caravan |
 
+### Closed since the census
+
+| Gap | Rules | Now written as |
+| --- | --- | --- |
+| Variable number of targets (X targets, any number of targets) | 601.2c, 115.3 | target spec `"count": "x" \| n \| amount \| "any"` (+ `"optional"` for "up to"); decision `choose_target_count` |
+| Filters on keyword abilities ("creature with flying") | 702.1, 115.1 | filter `"keywords"` / `"not_keywords"` |
+| Choosing a color, creature type or named option (as it enters or on resolution) | 614.12, 607.2d, 607.2f | `choose_color` / `choose_creature_type` / `choose_card_type` / `choose_option` (abilities and effects); filters `"…": "chosen"`; condition `{"chosen": word}` |
+| "A deck can have any number of cards named ~" | 100.2a | card field `"deck_limit": "any"` (or a number) |
+
+Still open in this area: "is the chosen type in addition to its other types" (a static that adds
+the chosen creature type), "add one mana of the chosen color", a card spec (library search) matching
+the chosen type, and a static that grants keywords to creatures filtered by keywords (layer-6
+dependency, CR 613.8: the filter sees keywords from before layer 6).
+
 ## Card data rules
 
 - Cards are authored by hand in the DSL. Nothing in the repository derives card

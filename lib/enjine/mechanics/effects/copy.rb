@@ -191,12 +191,14 @@ module Enjine
         def choose_targets(engine, spell, controller, locals)
           old = spell.targets || []
           specs = engine.resolving_ability(spell)&.targets_for(spell.modes || [], kicked: spell.memory["kicked"]) || []
+          slots = engine.target_slots(old, specs) # each target of a counted slot in turn; same number (CR 707.10c)
           chosen = answers(locals).map { it["target"] }
-          return chosen if chosen.size >= old.size
+          return engine.regroup_targets(chosen, old) if chosen.size >= slots.size
 
           i = chosen.size
-          keep = [{ "type" => "target", "target" => old[i] }]
-          others = specs[i] ? new_choices(engine, specs[i], controller, spell, old[i]) : []
+          current, spec = slots[i]
+          keep = [{ "type" => "target", "target" => current }]
+          others = spec ? new_choices(engine, spec, controller, spell, current) : []
           ask(engine, locals, controller, "Choose target ##{i + 1} for the copy", keep + others)
         end
 

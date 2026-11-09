@@ -116,7 +116,8 @@ module Enjine
         targets = legal_targets(obj, specs)
         frame["pc"] = 0
         # An "up to one" target left unchosen doesn't count: only chosen targets can all be illegal.
-        frame["fizzled"] = (!specs.empty? && obj.targets.to_a.any? && targets.none?) || !intervening_if_holds?(obj, ability)
+        frame["fizzled"] = (!specs.empty? && obj.targets.to_a.flatten.any? && targets.flatten.none?) ||
+                           !intervening_if_holds?(obj, ability)
         frame["ctx"] = { "controller" => obj.controller, "source" => obj.ability? ? obj.source : obj.id,
                          "object" => obj.id, "targets" => targets, "results" => {} }
         frame["ctx"]["linked"] = obj.memory["results"] if obj.memory.key?("results") # a delayed trigger's (CR 603.7c)
@@ -177,8 +178,9 @@ module Enjine
 
       # Targets that are still legal; illegal ones become nil and are ignored (CR 608.2b).
       def legal_targets(obj, specs)
+        legal = ->(ref, spec) { spec&.match_for?(self, ref, obj.controller, obj.source) && targetable?(ref, obj.controller, obj.source) }
         (obj.targets || []).each_with_index.map do |ref, i|
-          ref if specs[i]&.match_for?(self, ref, obj.controller, obj.source) && targetable?(ref, obj.controller, obj.source)
+          ref.is_a?(Array) ? ref.select { legal.call(it, specs[i]) } : (ref if legal.call(ref, specs[i])) # a counted slot's list
         end
       end
 

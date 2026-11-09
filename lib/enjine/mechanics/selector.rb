@@ -115,7 +115,7 @@ module Enjine
       # Resolves to a list of references (object ids / "player:<name>") at resolution time.
       def resolve(engine, ctx)
         case kind
-        when :target then [ctx.targets[value]].compact
+        when :target then Array(ctx.targets[value]).compact # a counted target's slot holds a list (CR 601.2c)
         when :result then Array(ctx.results&.[](value))
         when :self then engine.state.battlefield.include?(ctx.source) ? [ctx.source] : []
         when :attached then attached(engine, ctx)

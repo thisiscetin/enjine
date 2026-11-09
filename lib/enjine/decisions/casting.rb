@@ -58,6 +58,22 @@ module Enjine
     end
     register("choose_x", ChooseX)
 
+    # CR 601.2c: a variable number of targets ("X target", "any number of target", "up to N") is announced
+    # before the targets are chosen.
+    class ChooseTargetCount < Base
+      def self.doc
+        'While casting/activating: `{type: "count", count: n}` announces how many targets (from `min` to ' \
+          '`max`, at most as many as there are legal ones) target ##`index` + 1 will have; `{type: "cancel"}` rewinds.'
+      end
+
+      def self.options(engine, _pending) = Decisions.with_cancel(engine, engine.target_count_options)
+
+      def self.submit(engine, _pending, option)
+        option[:type] == "cancel" ? engine.cancel_casting! : engine.choose_target_count!(option[:count])
+      end
+    end
+    register("choose_target_count", ChooseTargetCount)
+
     # CR 601.2c: choose the next target of the spell or ability being cast.
     class ChooseTarget < Base
       def self.doc
