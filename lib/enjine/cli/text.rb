@@ -141,7 +141,7 @@ module Enjine
         when "counters_changed" then "#{name_of(ev["object"])}: #{ev["counter"]} counters #{ev["from"]} → #{ev["to"]}"
         when "effect_started" then "#{ev["affected"].map do
           name_of(it)
-        end.join(", ")} get +#{ev["details"]["power"]}/+#{ev["details"]["toughness"]} until end of turn"
+        end.join(", ")} #{ev["affected"].size == 1 ? "gets" : "get"} +#{ev["details"]["power"]}/+#{ev["details"]["toughness"]} until end of turn"
         when "effects_ended" then "#{ev["count"]} until-end-of-turn effect(s) end"
         when "attacker_declared" then "#{name_of(ev["object"])} attacks #{name_of(ev["target"])}"
         when "blocker_declared" then "#{name_of(ev["object"])} blocks #{name_of(ev["attacker"])}"
