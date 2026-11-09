@@ -6,7 +6,8 @@ module Enjine
     # size", "can't attack", "prevent all damage that would be dealt to you", "you don't lose the
     # game for having 0 or less life", "you can't sacrifice ..." (static abilities of permanents and
     # resolved effects with a duration), winning and losing by an effect (CR 104.2b, 104.3e), extra
-    # turns (CR 500.7), temporary control changes (CR 613.1b) and targeting restrictions (CR 115.4).
+    # turns (CR 500.7), control changes (CR 613.1b), assimilate (CR 701.72), "for as long as" effects
+    # (CR 611.2b) and targeting restrictions (CR 115.4).
     module Rules
       # ---- player rules -------------------------------------------------------------------
 
@@ -116,6 +117,19 @@ module Enjine
 
       # ---- control changes (CR 613.1b, 108.4) -----------------------------------------------
 
+      # A control change with indefinite duration (CR 613.1b): it becomes a new controller's
+      # permanent, newly under their control (CR 302.6), and leaves combat (CR 506.4). The newest
+      # control change is remembered, so an older "until end of turn" one doesn't undo it as it ends.
+      def gain_control!(obj, controller, timestamp = next_timestamp!)
+        obj.memory["control_timestamp"] = timestamp
+        return if obj.controller == controller
+
+        leave_combat!(obj.id)
+        obj.controller = controller
+        obj.controlled_since = state.turn
+        emit Events::ControlChanged.new(object: obj.id, controller: name(controller))
+      end
+
       # Control of `obj` until end of turn: an effect that ends in the cleanup step (CR 514.2), handing
       # it back unless a newer control change has happened since.
       def gain_control_until_end_of_turn!(obj, controller, ctx)
@@ -141,30 +155,50 @@ module Enjine
         end
       end
 
-      # ---- damage and counters --------------------------------------------------------------
+      # ---- assimilate (CR 701.72) -------------------------------------------------------------
 
-      # All damage marked on a permanent is removed ("healed", CR 120.6, 514.2).
-      def remove_damage!(obj)
-        obj.damage = 0
-        obj.deathtouched = false
+      # CR 701.72a: a permanent: gain control of it, put a +1/+1 counter on it, it becomes a Borg artifact creature.
+      # CR 701.72b: a permanent card elsewhere: put it onto the battlefield under your control with a +1/+1
+      # counter; it's a Borg artifact creature. Returns the assimilated permanent's id (or nil).
+      # `enters`: what an "as this enters" choice adds for a card put onto the battlefield (CR 614.12a).
+      def assimilate!(ref, controller, ctx, enters: nil)
+        obj = state.objects[ref] or return nil
+        if obj.zone == :battlefield
+          gain_control!(obj, controller)
+          add_counters!(obj, "+1/+1", 1)
+        else
+          return nil unless obj.kind == "card" && catalog.fetch(obj.card).permanent? && %i[graveyard exile hand library].include?(obj.zone)
+
+          status = (enters || {}).merge("counters" => (enters || {}).fetch("counters", {}).merge("+1/+1" => 1) { |_, a, b| a + b })
+          obj = move!(ref, :battlefield, controller: controller, reason: "assimilate", enters: status) or return nil
+        end
+        # The type change lasts while it stays on the battlefield; ones about objects that left are dropped.
+        state.effects.reject! { it["kind"] == "assimilate" && !state.battlefield.include?(it["affected"].first) }
+        state.effects << { "kind" => "assimilate", "timestamp" => next_timestamp!, "controller" => ctx.controller,
+                           "affected" => [obj.id], "duration" => "permanent" }
+        emit Events::EffectStarted.new(kind: "assimilate", affected: [obj.id], details: {})
+        obj.id
       end
 
-      def remove_all_counters!(obj, kind = nil)
-        (kind ? [kind] : obj.counters.keys).each { remove_counters!(obj, it, obj.counters.fetch(it, 0)) }
+      # ---- "for as long as [source] remains tapped" (CR 611.2b) ------------------------------
+
+      # Whether a `while_source_tapped` effect still applies: its source is on the battlefield and tapped.
+      def while_source_holds?(effect)
+        source = effect["source"]
+        state.battlefield.include?(source) && object(source).tapped
       end
 
-      # CR 701.14a-d: each creature deals damage equal to its power to the other, at the same time; not
-      # combat damage. Neither deals damage unless both are still creatures on the battlefield (701.14b).
-      # A creature fighting itself deals twice its power to itself (701.14c).
-      def fight!(one, other)
-        return unless [one, other].all? { state.battlefield.include?(it) && chars(it).creature? }
-        return deal_damage!(one, one, 2 * power(object(one))) if one == other
+      # CR 611.2b: once the duration ends (the source untaps, leaves or phases out), the effect is over
+      # for good, even if the source becomes tapped again.
+      def end_while_source_effects!(id)
+        ending = state.effects.count { it["duration"] == "while_source_tapped" && it["source"] == id }
+        return if ending.zero?
 
-        powers = [power(object(one)), power(object(other))]
-        deal_damage!(one, other, powers[0])
-        deal_damage!(other, one, powers[1])
+        state.effects.reject! { it["duration"] == "while_source_tapped" && it["source"] == id }
+        emit Events::EffectsEnded.new(count: ending)
       end
     end
+
     include Rules
   end
 end

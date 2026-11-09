@@ -57,4 +57,4 @@ that card data can reference. The categories are `type`, `supertype`, `subtype`,
 | A new kind of question for a player | `lib/enjine/decisions/` + `Decisions.register` |
 | Turn-structure hooks | `lib/enjine/steps.rb` |
 | P/T and other characteristics (layers) | `lib/enjine/engine/characteristics.rb` |
-| State-based actions | `lib/enjine/engine/damage.rb` (`check_permanent_state_based_actions!`) |
+| State-based actions | `lib/enjine/engine/state_based_actions.rb` (`check_permanent_state_based_actions!`) |

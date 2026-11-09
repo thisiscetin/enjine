@@ -29,7 +29,7 @@ require_relative "enjine/actions"
 %w[pass play_land activate_mana_ability cast].each { |f| require_relative "enjine/actions/#{f}" }
 require_relative "enjine/replacements"
 require_relative "enjine/engine"
-Dir[File.join(__dir__, "enjine/engine/*.rb")].each { |f| require f }
+Dir[File.join(__dir__, "enjine/engine/**/*.rb")].each { |f| require f }
 require_relative "enjine/snapshot"
 require_relative "enjine/history"
 require_relative "enjine/view"

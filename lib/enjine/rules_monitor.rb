@@ -74,7 +74,7 @@ module Enjine
       # CR 500.5: mana pools, restricted mana included, empty between steps.
       state.players.each do |pl|
         # CR 702.189a: "until end of combat" mana is still there as each combat step begins
-        next if pl.mana_pool.values.all?(&:zero?) && pl.restricted_mana.all? { Engine.mana_held?(it, state.step) }
+        next if pl.mana_pool.values.all?(&:zero?) && pl.restricted_mana.all? { Engine::ManaSources.mana_held?(it, state.step) }
 
         finding("500.5", "#{pl.name}'s mana pool isn't empty at #{state.step}")
       end

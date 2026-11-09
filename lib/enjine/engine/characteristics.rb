@@ -120,7 +120,7 @@ module Enjine
         definition(obj).defined_pt? && !(except&.key?("power") || except&.key?("toughness"))
       end
 
-      # Layers 1-4: the object's own changes and resolved effects that add types (Engine::SetMechanics#own_layers),
+      # Layers 1-4: the object's own changes and resolved effects that add types (#own_layers),
       # then static abilities that add card types ("this Vehicle is an artifact creature", CR 205.1b), then effects
       # that set its creature types (CR 205.1a, 613.1d), statics before resolved effects, each in timestamp order.
       # A noncreature permanent has no power or toughness, even a Vehicle with them printed (CR 208.3, 301.7a).
@@ -136,7 +136,7 @@ module Enjine
         end
         effects.each { types = it["types"].map(&:to_sym) if it["kind"] == "creature_types" && it["affected"].include?(obj.id) }
         base = with_added_types(base, added) unless added.empty?
-        base = base.with(subtypes: ((base.subtypes & SetMechanics::NON_CREATURE_SUBTYPES) | types).freeze) if types
+        base = base.with(subtypes: ((base.subtypes & Characteristics::NON_CREATURE_SUBTYPES) | types).freeze) if types
         base.creature? || base.power.nil? ? base : base.with(power: nil, toughness: nil)
       end
 
@@ -278,7 +278,90 @@ module Enjine
         state.effects.reject! { it["duration"] == "end_of_turn" }
         emit Events::EffectsEnded.new(count: ending)
       end
+      # Subtypes that aren't creature types (CR 205.3g-i). "Becomes a Borg artifact creature"
+      # replaces creature types only (CR 205.1b).
+      NON_CREATURE_SUBTYPES = %i[
+        attraction blood bobblehead book clue communicator contraption equipment food fortification gold heartwood
+        incubator infinity junk lander map mutagen powerstone spacecraft stone treasure vehicle vibranium
+        aura background cartouche case class curse plan role room rune saga shard shrine
+        cave desert forest gate island lair locus mine mountain plains planet power_plant sphere swamp tower town urzas
+      ].freeze
+
+      # ---- layers 4 and 7b from the object's own state ------------------------------------
+
+      # Station symbols that apply: "as long as this permanent has N or more charge counters" (CR 722.2a).
+      def active_station_symbols(obj)
+        charge = obj.counters.fetch("charge", 0)
+        defn = catalog.fetch(obj.card)
+        defn.ability_instances.select { it.ability.kind == :station_symbol && charge >= it.ability.threshold }
+      end
+
+      # The abilities the object has from its own card: printed ones plus those of applying station symbols
+      # and max speed abilities (Engine::Speed).
+      def own_ability_instances(obj)
+        printed = catalog.fetch(obj.card).ability_instances
+        symbols = active_max_speed(obj, obj.controller)
+        symbols += active_station_symbols(obj) if obj.counters.fetch("charge", 0).positive?
+        return printed if symbols.empty?
+
+        printed + symbols.flat_map { catalog.fetch(obj.card).nested_instances(it.ref) }
+      end
+
+      # The printed characteristics changed by the object's own station symbols (CR 722.2a-b: abilities,
+      # layer 4 "is a creature in addition to its other types", layer 7b base power/toughness) and by
+      # assimilation (CR 701.72, 205.1b: an artifact creature whose creature types are replaced by Borg).
+      def own_layers(obj, printed, effects)
+        symbols = obj.counters.fetch("charge", 0).positive? ? active_station_symbols(obj) : []
+        symbols += active_max_speed(obj, obj.controller) # same shape: keywords and nested abilities (CR 702.178a)
+        assimilated = !effects.empty? && effects.any? { it["kind"] == "assimilate" && it["affected"].include?(obj.id) }
+        added = effects.empty? ? [] : added_subtypes(obj, effects)
+        becomes = effects.empty? ? [] : effects.select { it["kind"] == "add_types" && it["affected"].include?(obj.id) }
+        return printed if symbols.empty? && !assimilated && added.empty? && becomes.empty?
+
+        attrs = printed.to_h
+        symbols.each { station_symbol_layers(attrs, it, catalog.fetch(obj.card)) }
+        assimilated_layers(attrs) if assimilated
+        attrs[:subtypes] = attrs[:subtypes] | added
+        becomes.each { added_type_layers(attrs, it) }
+        Enjine::Characteristics.new(**attrs.transform_values { it.is_a?(Array) ? it.freeze : it })
+      end
+
+      # "Becomes an artifact creature", "becomes a legendary Spider Hero in addition to its other types" (CR 205.1b):
+      # card types, supertypes and subtypes are added, none lost. Power/toughness: see Characteristics#with_added_types.
+      def added_type_layers(attrs, effect)
+        attrs[:types] = attrs[:types] | effect["types"].map(&:to_sym)
+        attrs[:supertypes] = attrs[:supertypes] | effect["supertypes"].map(&:to_sym)
+        attrs[:subtypes] = attrs[:subtypes] | effect["subtypes"].map(&:to_sym)
+        return unless attrs[:types].include?(:creature) && attrs[:power].nil?
+
+        attrs[:power] = 0
+        attrs[:toughness] = 0
+      end
+
+      def station_symbol_layers(attrs, inst, defn)
+        symbol = inst.ability
+        attrs[:abilities] = attrs[:abilities] + defn.nested_instances(inst.ref)
+        attrs[:keywords] = attrs[:keywords] | symbol.keywords
+        return unless symbol.power
+
+        attrs[:types] = attrs[:types] | [:creature] # CR 722.2b
+        attrs[:power] = symbol.power
+        attrs[:toughness] = symbol.toughness
+      end
+
+      def assimilated_layers(attrs)
+        attrs[:types] = attrs[:types] | %i[artifact creature]
+        attrs[:subtypes] = (attrs[:subtypes] & NON_CREATURE_SUBTYPES) | [:borg]
+        attrs[:power] ||= 0 # a card without printed P/T that becomes a creature is 0/0 before counters
+        attrs[:toughness] ||= 0
+      end
+
+      # Layer 4 (CR 613.1d, 205.1b): "becomes a [subtype] in addition to its other types" until end of turn.
+      def added_subtypes(obj, effects)
+        effects.flat_map { it["kind"] == "add_subtypes" && it["affected"].include?(obj.id) ? it["subtypes"].map(&:to_sym) : [] }
+      end
     end
+
     include Characteristics
   end
 end

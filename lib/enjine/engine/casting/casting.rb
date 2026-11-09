@@ -286,7 +286,18 @@ module Enjine
 
         give_priority!(index)
       end
+
+      # (Costs that need a choice, e.g. tapping another creature: see Engine::CastChoices.)
+
+      # As a spell or ability becomes cast, activated or put on the stack: it keeps the cost choices
+      # (CR 702.184a uses the tapped creature's power), and chosen modes mean its controller faced a
+      # dilemma (CR 700.17). Recording it here, not as modes are chosen, keeps a cancelled cast from counting.
+      def record_cast_choices!(obj, ctx)
+        obj.paid = ctx["paid"].map(&:dup) if ctx["paid"]
+        emit Events::DilemmaFaced.new(player: name(ctx["player"]), object: obj.id, modes: obj.modes.dup) if obj.modes
+      end
     end
+
     include Casting
   end
 end

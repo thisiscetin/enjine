@@ -265,6 +265,7 @@ module Enjine
         ((source.memory["chosen_modes"] ||= {})[ctx["ability"]] ||= []).concat(ctx["modes"])
       end
     end
+
     include CastChoices
   end
 end

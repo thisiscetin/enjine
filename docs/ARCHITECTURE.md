@@ -34,13 +34,21 @@ lib/enjine/
   # ---- dynamic world: a running game ----
   game.rb                         # public facade: pending_decision / submit / apply / export / views
   state.rb                        # State, PlayerState, GameObject (plain mutable structs)
-  engine.rb                       # the state machine: advance!, turn flow, priority, zones, SBAs
+  engine.rb                       # the state machine: accessors, emit, options/submit!; one module per area below
   engine/
-    casting.rb                    # CR 601/602: announce, targets, manual payment, cancel/rewind
-    resolution.rb                 # CR 608: resolve top of stack, fizzle
+    pregame.rb priority.rb        # CR 103 start and mulligans; CR 117 priority
+    turn_structure.rb             # CR 500-502: advance!, steps, untap step, land plays
+    zones.rb                      # CR 400: create/move objects (through replacements), tokens, draw, tap
+    casting/                      # CR 601/602: casting.rb (announce, targets, cancel/rewind), payment.rb,
+                                  #   cast_choices.rb, costs.rb, target_counts.rb, alt_casting.rb, permissions.rb
+    mana_sources.rb               # CR 106/605: affordability, mana abilities, mana pools
+    resolution.rb entering.rb     # CR 608: resolve top of stack, fizzle; "as this enters" choices
+    triggers.rb                   # CR 603: matching events, pending triggers
     combat.rb                     # CR 506-511: attackers, blockers, damage assignment
-    damage.rb                     # damage, life, counters, permanent SBAs
+    damage.rb                     # damage, life, counters
+    state_based_actions.rb        # CR 704 and game end (CR 104)
     characteristics.rb            # CR 613 layer pipeline for P/T, continuous effects, cleanup
+    rules.rb copies.rb faces.rb ...   # player rules and control; copies (CR 707); faces; sagas, phasing, speed ...
   steps.rb                        # 12 step objects with turn-based actions
   events.rb                       # typed, serializable events + per-viewer redaction
   decisions/                      # one class per decision kind

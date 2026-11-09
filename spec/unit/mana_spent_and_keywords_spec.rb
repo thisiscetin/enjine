@@ -176,9 +176,9 @@ RSpec.describe "Mana spent and keyword primitives: validation" do
       entry = { "mana" => "C", "spend_only" => { "spells" => "card" }, "until" => "end_of_combat" }
       expect(Enjine::View.pool_entry_text(entry))
         .to eq("spend this mana only to cast card spells; you don't lose this mana until end of combat")
-      expect(Enjine::Engine.mana_kept?(entry, :declare_attackers)).to be(true)
-      expect(Enjine::Engine.mana_kept?(entry, :end_of_combat)).to be(false)
-      expect(Enjine::Engine.mana_kept?(entry.except("until"), :declare_attackers)).to be(false)
+      expect(Enjine::Engine::ManaSources.mana_kept?(entry, :declare_attackers)).to be(true)
+      expect(Enjine::Engine::ManaSources.mana_kept?(entry, :end_of_combat)).to be(false)
+      expect(Enjine::Engine::ManaSources.mana_kept?(entry.except("until"), :declare_attackers)).to be(false)
     end
   end
 end

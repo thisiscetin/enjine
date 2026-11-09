@@ -97,6 +97,7 @@ module Enjine
         ask!(nil)
       end
     end
+
     include Costs
   end
 end

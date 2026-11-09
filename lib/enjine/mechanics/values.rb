@@ -91,7 +91,7 @@ module Enjine
 
       # CR 205.3m: a creature's or kindred's subtypes are creature types, except those of its other card types.
       def self.creature_types(chars)
-        chars.creature? || chars.type?(:kindred) ? chars.subtypes - Engine::SetMechanics::NON_CREATURE_SUBTYPES : []
+        chars.creature? || chars.type?(:kindred) ? chars.subtypes - Engine::Characteristics::NON_CREATURE_SUBTYPES : []
       end
 
       # CR 608.2h: "its power" of a source that has left the battlefield is its last known value.

@@ -274,6 +274,7 @@ module Enjine
         :done
       end
     end
+
     include Payment
   end
 

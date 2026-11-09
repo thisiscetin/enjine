@@ -396,6 +396,7 @@ module Enjine
         end
       end
     end
+
     include Permissions
   end
 end

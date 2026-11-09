@@ -219,6 +219,7 @@ module Enjine
       # Whether any player cast a spell with `keyword`'s cost this turn (CR 702.185c: "a spell was warped").
       def cast_with_this_turn?(keyword) = state.players.each_index.any? { Array(turn_log(it)["cast_with"]).include?(keyword) }
     end
+
     include AltCasting
   end
 end

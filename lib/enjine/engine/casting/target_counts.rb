@@ -99,6 +99,7 @@ module Enjine
         template.map { it.is_a?(Array) ? flat.shift(it.size) : flat.shift }
       end
     end
+
     include TargetCounts
   end
 end
