@@ -29,8 +29,9 @@ module Enjine
       ZERO = Mana::Cost.new(generic: 0, colored: {}.freeze)
       BEAM_COST_TEXT = "Return a creature you control to its owner's hand"
       OUTSIDE = "outside:"
-      # Permission effect fields copied into the play method (see Effects::PlayPermission).
-      RIDERS = %w[cost_increase any_mana_type].freeze
+      # Permission effect fields copied into the play method (see Effects::PlayPermission); "alt" is an
+      # alternative cost, {"cost" => "{2}"} (airbend, CR 701.65a, 118.9).
+      RIDERS = %w[cost_increase any_mana_type alt].freeze
 
       # ---- legal actions --------------------------------------------------------------------
 

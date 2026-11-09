@@ -54,7 +54,13 @@ RSpec.describe "Bending, mounts and body keywords" do
       { "name" => "Spec Saddle Rack", "mana_cost" => "{2}", "types" => ["artifact"],
         "abilities" => [{ "activated" => { "cost" => ["tap"], "timing" => "sorcery",
                                            "targets" => [{ "creature" => { "subtypes" => ["mount"], "controller" => "you" } }],
-                                           "effects" => [{ "become_saddled" => { "to" => { "target" => 0 } } }] } }] }
+                                           "effects" => [{ "become_saddled" => { "to" => { "target" => 0 } } }] } }] },
+      spell("Spec Air Lesson", [{ "airbend" => { "to" => { "target" => 0 } } }, draw],
+            targets: [{ "permanent" => { "not" => ["land"] } }], types: ["instant"], cost: "{W}"),
+      spell("Spec Gust Rebuke", [{ "airbend" => { "to" => { "target" => 0 } } }],
+            targets: [{ "one_of" => ["creature", "spell"] }], types: ["instant"], cost: "{W}"),
+      creature("Spec Air Watcher", [{ "triggered" => { "when" => { "airbends" => { "controller" => "any" } },
+                                                       "effects" => [{ "gain_life" => { "amount" => 1 } }] } }])
     ]
   end
   let(:catalog) { catalog_with(*cards) }
@@ -263,6 +269,51 @@ RSpec.describe "Bending, mounts and body keywords" do
       game.submit(type: "target", target: obj_id(game, "Spec Trail Lynx")) if game.pending_decision.kind == "choose_target"
       pass_both(game)
       expect(saddled?(game, "Spec Trail Lynx")).to be(true)
+    end
+  end
+
+  describe "airbend (CR 701.65)" do
+    it "exiles the permanent; its owner may cast it for {2} rather than its mana cost (CR 701.65a, 118.9)" do
+      game = board(hand: ["Spec Air Lesson"], bob_field: ["Hill Giant", "Forest", "Forest"], field: ["Spec Air Watcher"],
+                   pool: { W: 1 })
+      giant = obj_id(game, "Hill Giant")
+      cast(game, "Spec Air Lesson", target: giant)
+      pay(game)
+      pass_both(game)
+      exiled = game.state.exile.find { game.state.object(it).card == "hill_giant" }
+      expect(exiled).not_to be_nil
+      expect(ids_in(game, "alice", :hand).size).to eq(1) # drew
+      pass_both(game) # the airbends trigger
+      expect(game.state.players[0].life).to eq(21)
+      skip_to(game, :precombat_main, turn: 4)
+      option = game.legal_options.find { it[:type] == "cast" && it[:object] == exiled }
+      expect(option).not_to be_nil
+      game.submit(option)
+      expect(game.pending_decision.kind).to eq("pay_cost")
+      game.state.battlefield.select { game.state.object(it).card == "forest" }.each do |land|
+        game.submit(type: "activate_mana", object: land, ability: mana_ref(game, land))
+      end
+      pay(game)
+      expect(game.state.stack.size).to eq(1)
+      pass_both(game)
+      expect(game.state.battlefield.map { game.state.object(it).card }).to include("hill_giant")
+    end
+
+    it "exiles a spell from the stack, which its owner may cast again for {2}" do
+      game = board(hand: ["Lightning Bolt", "Spec Gust Rebuke"], pool: { R: 1, W: 1, C: 2 })
+      cast(game, "Lightning Bolt", target: "player:bob")
+      game.submit(type: "pay_mana", mana: "R")
+      bolt = game.state.stack.first
+      cast(game, "Spec Gust Rebuke", target: bolt)
+      game.submit(type: "pay_mana", mana: "W")
+      pass_both(game)
+      exiled = game.state.exile.find { game.state.object(it).card == "lightning_bolt" }
+      expect(game.state.stack).to be_empty
+      game.submit(type: "cast", object: exiled, via: game.legal_options.find { it[:object] == exiled }[:via])
+      game.submit(type: "target", target: "player:bob")
+      pay(game)
+      pass_both(game)
+      expect(game.state.players[1].life).to eq(17)
     end
   end
 end
