@@ -183,7 +183,8 @@ RSpec.describe Enjine::CLI do
       text.event(klass.new(**sample).to_h)
     end
     expect(events.compact).not_to be_empty
-    %w[draw play_land cast resolve mulligan sba_lethal_damage sba_toughness sba_loyalty destroy].each do |reason|
+    %w[draw play_land cast resolve mulligan sba_lethal_damage sba_toughness sba_loyalty destroy countered
+       mulligan_bottom].each do |reason|
       text.zone_changed("type" => "zone_changed", "card" => "forest", "owner" => "alice", "from" => "hand",
                         "to" => "battlefield", "reason" => reason)
     end

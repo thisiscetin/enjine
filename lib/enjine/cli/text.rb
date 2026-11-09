@@ -202,6 +202,8 @@ module Enjine
         when "sba_lethal_damage" then "#{what} dies (lethal damage)"
         when "sba_toughness" then "#{what} dies (0 toughness)"
         when "sba_loyalty" then "#{what} is put into the graveyard (0 loyalty)"
+        when "countered" then "#{what} is countered"
+        when "mulligan_bottom" then "#{ev["owner"]} puts #{what} on the bottom of their library (mulligan)"
         else "#{ev["owner"]}'s #{what}: #{ev["from"]} → #{ev["to"]} (#{ev["reason"]})"
         end
       end
