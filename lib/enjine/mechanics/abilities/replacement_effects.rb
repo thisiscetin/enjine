@@ -108,9 +108,7 @@ module Enjine
           Mechanics.check_keys(params, %w[affects remove_counters remove_damage], errors, path)
           affects = Affects.build(Mechanics.fetch_param(params, :affects), errors, "#{path}.affects")
           counter = Mechanics.fetch_param(params, :remove_counters)
-          counter = Counters.normalize(counter) if counter
-          message = counter && Counters.error(counter)
-          errors << "#{path}.remove_counters: #{message}" if message
+          counter &&= Counters.parse(counter, errors, "#{path}.remove_counters")
           damage = Mechanics.fetch_param(params, :remove_damage) == true
           errors << "#{path}: needs remove_counters and/or remove_damage" unless counter || damage
           new(affects, counter, damage)

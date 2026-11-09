@@ -18,7 +18,6 @@ module Enjine
                                                                                                "to" => { "target" => 0 } } }] } }] }
 
         def self.permanent? = false
-        def self.playable_as_land? = false
         def self.instant_speed? = false
 
         # CR 308.1: each kindred card has another card type.

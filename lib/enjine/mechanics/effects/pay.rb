@@ -8,6 +8,8 @@ module Enjine
       # paid, CR 118.3), then pays mana one decision at a time in a "pay" frame (mana abilities allowed,
       # CR 605.3a); declining or cancelling that payment counts as not paying.
       class Pay < ChoiceEffect
+        include NestedList
+
         LISTS = %w[then otherwise].freeze
 
         primitive :effect, :pay,
@@ -32,10 +34,7 @@ module Enjine
           errors << "#{path}: needs exactly one of mana, life" unless raw.nil? ^ @life.nil?
           errors << "#{path}.life: must be an integer >= 1" unless @life.nil? || (@life.is_a?(Integer) && @life >= 1)
           @cost = raw && Mana.parse_cost(raw, errors, "#{path}.mana")
-          @lists = LISTS.to_h do |key|
-            [key, Abilities::StackAbility.parse_effects(params, errors, path, @targets_count, key: key.to_sym,
-                                                                                              results_count: @results_count)]
-          end.freeze
+          @lists = parse_lists(params, errors, path, LISTS)
         end
 
         def nested_effects = @lists.values.flatten
@@ -85,16 +84,6 @@ module Enjine
         def pay_life(engine, index, locals)
           engine.change_life!(index, -life)
           locals["outcome"] = "paid"
-        end
-
-        def run_list(engine, ctx, locals, list)
-          while locals["next"] < list.size
-            return :wait if list[locals["next"]].run(engine, ctx, locals["child"] ||= {}) == :wait
-
-            locals.delete("child")
-            locals["next"] += 1
-          end
-          :done
         end
       end
 

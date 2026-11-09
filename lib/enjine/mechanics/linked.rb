@@ -11,12 +11,6 @@ module Enjine
       UNTIL_LEAVES = "until_leaves"
       LKI = "lki"
 
-      def self.flag(params, key, errors, path)
-        value = Mechanics.fetch_param(params, key)
-        errors << "#{path}.#{key}: must be true or false" unless [nil, true, false].include?(value)
-        value == true
-      end
-
       # Cards still in exile that an ability of `source` exiled (CR 607.2a).
       def self.exiled_with(engine, source)
         obj = engine.state.objects[source] or return []

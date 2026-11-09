@@ -23,8 +23,8 @@ module Enjine
         def self.from_zones = %i[battlefield graveyard hand stack]
 
         def setup(params, errors, path)
-          @link = Linked.flag(params, "link", errors, path)
-          @until_leaves = Linked.flag(params, "until_source_leaves", errors, path)
+          @link = Mechanics.flag_param(params, "link", errors, path)
+          @until_leaves = Mechanics.flag_param(params, "until_source_leaves", errors, path)
         end
 
         def to_s = "exile#{" until the source leaves" if until_leaves}#{" (linked)" if link} → #{to}"

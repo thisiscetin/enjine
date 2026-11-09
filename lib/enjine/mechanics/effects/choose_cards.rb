@@ -43,10 +43,10 @@ module Enjine
           unless @count == "any" || (@count.is_a?(Integer) && @count.positive?)
             errors << "#{path}.count: must be a positive integer or \"any\""
           end
-          @optional = Linked.flag(params, "optional", errors, path)
+          @optional = Mechanics.flag_param(params, "optional", errors, path)
           @put = Mechanics.fetch_param(params, :put).to_s
           errors << "#{path}.put: must be one of #{PUT.join(", ")}" unless PUT.include?(@put)
-          @flags = %w[tapped link look].to_h { [it, Linked.flag(params, it, errors, path)] }
+          @flags = %w[tapped link look].to_h { [it, Mechanics.flag_param(params, it, errors, path)] }
           @reveal = Mechanics.fetch_param(params, :reveal)
           errors << "#{path}.reveal: must be one of #{REVEAL.join(", ")}" unless @reveal.nil? || REVEAL.include?(@reveal)
           @lists = parse_lists(params, errors, path, LISTS)

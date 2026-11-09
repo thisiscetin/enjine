@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # Validation of the Star Trek set mechanics and Sagas.
-RSpec.describe "Set mechanics validation" do
+RSpec.describe "Station, Saga, dilemma and assimilate validation" do
   def errors_for(card)
     Enjine::CardDefinition.from_h(card)
     []

@@ -28,7 +28,7 @@ numbered (or lacked) each rule.
 How they work:
 
 - **Station symbols** apply in the layer pass from the permanent's own charge
-  counters (`Engine::SetMechanics#own_layers`): layer 4 adds the creature type,
+  counters (`Engine::Characteristics#own_layers`): layer 4 adds the creature type,
   layer 7b sets base P/T, then counters and pumps apply (7c). Abilities a symbol
   grants are part of the object's characteristics only while it applies; they
   have refs `printed:<i>:<j>` so triggers and stack objects resolve after the

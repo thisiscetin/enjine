@@ -63,11 +63,10 @@ module Enjine
           cards = raw == "self" ? :self : CardSpec.build(raw, errors, "#{path}.cards")
           # CR 400.11c: a card outside the game has no abilities that work there; a permanent brings cards in.
           errors << "#{path}.zones: \"outside\" needs a card spec in `cards`" if cards == :self && zones.include?("outside")
-          once = Mechanics.fetch_param(params, :once_each_turn)
-          errors << "#{path}.once_each_turn: must be true or false" unless [nil, true, false].include?(once)
+          once = Mechanics.flag_param(params, :once_each_turn, errors, path)
           extra = Mechanics.fetch_param(params, :enters_with)
           extra &&= EntersWithCounters.read_counters(extra, errors, "#{path}.enters_with")
-          new(zones, cards, play, once == true, extra)
+          new(zones, cards, play, once, extra)
         end
 
         # `zone: "graveyard"` or `zones: ["outside", "graveyard"]`, one of the two.
@@ -253,11 +252,10 @@ module Enjine
 
         def riders(params, errors, path)
           increase = Mechanics.fetch_param(params, :cost_increase)
-          any_type = Mechanics.fetch_param(params, :any_mana_type)
           ok = increase.nil? || (increase.is_a?(Integer) && increase.positive?)
           errors << "#{path}.cost_increase: must be an integer >= 1" unless ok
-          errors << "#{path}.any_mana_type: must be true or false" unless [nil, true, false].include?(any_type)
-          { "cost_increase" => increase, "any_mana_type" => (true if any_type == true) }.compact
+          any_type = Mechanics.flag_param(params, :any_mana_type, errors, path)
+          { "cost_increase" => increase, "any_mana_type" => (true if any_type) }.compact
         end
 
         # The players who may play `id`: the effect's controller, the card's owner, or the selected players.

@@ -19,9 +19,8 @@ module Enjine
           filter = Mechanics.build_entry(:filter, entry["filter"], errors, "#{path}.filter")
           distinct = Array(entry["distinct_from"])
           errors << "#{path}.distinct_from: must list earlier targets" unless distinct.all? { it.is_a?(Integer) && it >= 0 && it < index }
-          optional = entry["optional"]
-          errors << "#{path}.optional: must be true or false" unless [nil, true, false].include?(optional)
-          filter && new(filter, optional == true, distinct, build_count(entry, errors, path))
+          optional = Mechanics.flag_param(entry, :optional, errors, path)
+          filter && new(filter, optional, distinct, build_count(entry, errors, path))
         end
 
         def self.build_count(entry, errors, path)
@@ -131,9 +130,7 @@ module Enjine
           if (raw = Mechanics.fetch_param(params, :choose_if))
             extras[:choose_if] = parse_choose_if(raw, errors, "#{path}.choose_if", params)
           end
-          unchosen = Mechanics.fetch_param(params, :unchosen)
-          errors << "#{path}.unchosen: must be true or false" unless [nil, true, false].include?(unchosen)
-          extras[:unchosen] = unchosen == true
+          extras[:unchosen] = Mechanics.flag_param(params, :unchosen, errors, path)
           raw = Mechanics.fetch_param(params, :kicked_targets)
           extras[:kicked_targets] = parse_targets(params, errors, path, key: :kicked_targets) unless raw.nil?
           extras[:divide] = Mechanics.integer_param(params, :divide, errors, path, min: 1) if params.key?("divide")
@@ -340,9 +337,8 @@ module Enjine
           limit = Mechanics.fetch_param(params, :limit)
           errors << "#{path}.limit: must be one of #{LIMITS.keys.join(", ")}" unless limit.nil? || LIMITS.key?(limit)
           raw = Mechanics.fetch_param(params, :only_if)
-          exhaust = Mechanics.fetch_param(params, :exhaust)
-          errors << "#{path}.exhaust: must be true or false" unless [nil, true, false].include?(exhaust)
-          { per_turn: LIMITS[limit], only_if: raw && Condition.build(raw, errors, "#{path}.only_if"), exhaust: exhaust == true }
+          { per_turn: LIMITS[limit], only_if: raw && Condition.build(raw, errors, "#{path}.only_if"),
+            exhaust: Mechanics.flag_param(params, :exhaust, errors, path) }
         end
 
         # CR 605.1a: an activated ability without targets that could add mana is a mana ability,

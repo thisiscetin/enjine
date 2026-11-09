@@ -77,11 +77,6 @@ module Enjine
         end
       end
 
-      def mana_sources(index, excluded_source)
-        list = all_mana_sources(index)
-        excluded_source ? list.reject { it[0] == excluded_source } : list
-      end
-
       # Every activatable mana ability [id, ability_index] the player controls. Memoized only
       # while legal options are being computed (state can't change then); recomputed otherwise.
       def all_mana_sources(index)

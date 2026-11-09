@@ -8,6 +8,8 @@ module Enjine
       # in `effects` can be done fully, as for any cost (CR 118.3). `then` follows a yes and
       # `otherwise` a no, whatever the effects actually did.
       class May < ChoiceEffect
+        include NestedList
+
         LISTS = %w[effects then otherwise].freeze
 
         primitive :effect, :may,
@@ -28,10 +30,7 @@ module Enjine
         def self.default_to = "you"
 
         def setup(params, errors, path)
-          @lists = LISTS.to_h do |key|
-            [key, Abilities::StackAbility.parse_effects(params, errors, path, @targets_count, key: key.to_sym,
-                                                                                              results_count: @results_count)]
-          end.freeze
+          @lists = parse_lists(params, errors, path, LISTS)
           errors << "#{path}.effects: needs at least one effect" if @lists["effects"].empty?
           raw = Mechanics.fetch_param(params, :chooser)
           @chooser = if raw.nil? || raw == "active_player" then raw
@@ -76,18 +75,6 @@ module Enjine
           choices = [{ "type" => "no" }]
           choices.unshift({ "type" => "yes" }) if effects.all? { it.possible?(engine, ctx) }
           ask(engine, locals, chooser_index(engine, ctx), "You may: #{effects.join("; ")}", choices)
-        end
-
-        # The chosen list, one effect at a time; a waiting effect keeps its locals under "child"
-        # (Engine#effect_answer! delivers answers there).
-        def run_list(engine, ctx, locals, list)
-          while locals["next"] < list.size
-            return :wait if list[locals["next"]].run(engine, ctx, locals["child"] ||= {}) == :wait
-
-            locals.delete("child")
-            locals["next"] += 1
-          end
-          :done
         end
       end
     end

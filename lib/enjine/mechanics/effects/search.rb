@@ -47,9 +47,9 @@ module Enjine
           @count = parse_count(Mechanics.fetch_param(params, :count) || 1, errors, path)
           @put = (Mechanics.fetch_param(params, :put) || "hand").to_s
           errors << "#{path}.put: must be one of #{ZONES.join(", ")}" unless ZONES.include?(@put)
-          @tapped = flag(params, :tapped, errors, path)
-          @reveal = flag(params, :reveal, errors, path)
-          @may = flag(params, :may, errors, path)
+          @tapped = Mechanics.flag_param(params, :tapped, errors, path)
+          @reveal = Mechanics.flag_param(params, :reveal, errors, path)
+          @may = Mechanics.flag_param(params, :may, errors, path)
           errors << "#{path}.tapped: only cards put onto the battlefield can enter tapped" if @tapped && @put != "battlefield"
           @counters = parse_counters(Mechanics.fetch_param(params, :counters), errors, path)
           raw = Mechanics.fetch_param(params, :searcher) || "you"
@@ -73,12 +73,6 @@ module Enjine
           end
           errors << "#{path}.counters: only cards put onto the battlefield enter with counters" if @put != "battlefield"
           raw.to_h { |name, n| [Counters.normalize(name.to_s), n] }
-        end
-
-        def flag(params, key, errors, path)
-          value = Mechanics.fetch_param(params, key)
-          errors << "#{path}.#{key}: must be true or false" unless [nil, true, false].include?(value)
-          value == true
         end
 
         def to_s

@@ -216,8 +216,7 @@ module Enjine
           data = data.is_a?(Hash) ? data.transform_keys(&:to_s) : {}
           Mechanics.check_keys(data, %w[of kind], errors, path)
           errors << "#{path}.of: required" unless data.key?("of")
-          kind = data["kind"] && Mechanics::Counters.normalize(data["kind"])
-          errors << "#{path}.kind: #{Mechanics::Counters.error(kind)}" if kind && Mechanics::Counters.error(kind)
+          kind = data["kind"] && Mechanics::Counters.parse(data["kind"], errors, "#{path}.kind")
           new(Selector.build(data.fetch("of", "self"), errors, "#{path}.of", **context), kind)
         end
 
@@ -358,7 +357,7 @@ module Enjine
         elsif data.key?("sacrificed") then Sacrificed.build(data, errors, path)
         elsif (flag = FLAGS.find { data.key?(it) }) then Flag.new(flag, data[flag] != false)
         elsif data.key?("began_extra_turn") then BeganExtraTurn.new(data["began_extra_turn"] != false) # CR 500.7
-        elsif data.key?("share_card_type") then ShareCardType.build(data, errors, path, targets_count) # effects/zones.rb
+        elsif data.key?("share_card_type") then ShareCardType.build(data, errors, path, targets_count) # linked.rb
         elsif (key = KEYED.keys.find { data.key?(it) }) then const_get(KEYED[key]).build(data, errors, path)
         else build_more(data, errors, path, context)
         end

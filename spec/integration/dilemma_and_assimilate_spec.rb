@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # Face a dilemma (CR 700.17), assimilate (CR 701.72) and the strange new worlds count.
-RSpec.describe "Star Trek set mechanics" do
+RSpec.describe "Dilemmas, assimilate and differently named lands" do
   let(:herald) do
     { "name" => "Dilemma Herald", "mana_cost" => "{R}", "types" => ["creature"], "power" => 1, "toughness" => 1,
       "abilities" => [{ "triggered" => { "when" => { "enters" => {} }, "modes" => [

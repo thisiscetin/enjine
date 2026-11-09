@@ -55,6 +55,13 @@ module Enjine
       value
     end
 
+    # An optional true/false parameter; absent is false.
+    def flag_param(params, key, errors, path)
+      value = fetch_param(params, key)
+      errors << "#{path}.#{key}: must be true or false" unless [nil, true, false].include?(value)
+      value == true
+    end
+
     def list_param(params, key, errors, path)
       value = fetch_param(params, key)
       return [] if value.nil?

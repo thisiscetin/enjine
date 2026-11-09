@@ -120,7 +120,7 @@ module Enjine
         def answers(locals) = locals["answers"] ||= []
       end
 
-      # Runs a nested effect list one effect at a time (as `may` does); a waiting effect keeps its locals
+      # Runs a nested effect list one effect at a time (`may`, `pay`, `choose_cards`); a waiting effect keeps its locals
       # under "child", where Engine#effect_answer! delivers answers.
       module NestedList
         def run_list(engine, ctx, locals, list)

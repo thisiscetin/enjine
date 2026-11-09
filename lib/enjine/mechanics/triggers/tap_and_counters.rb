@@ -59,9 +59,7 @@ module Enjine
         def watches?(event) = event.is_a?(Events::CountersChanged) || event.is_a?(Events::ZoneChanged)
 
         def setup(params, errors, path)
-          @counter = params["counter"] && Counters.normalize(params["counter"])
-          message = @counter && Counters.error(@counter)
-          errors << "#{path}.counter: #{message}" if message
+          @counter = params["counter"] && Counters.parse(params["counter"], errors, "#{path}.counter")
           @first_time = params["first_time_this_turn"]
           errors << "#{path}.first_time_this_turn: must be true or false" unless [nil, true, false].include?(@first_time)
         end

@@ -51,8 +51,7 @@ module Enjine
           end
           raw.to_h do |name, n|
             name = Counters.normalize(name)
-            message = Counters.error(name)
-            errors << "#{path}.#{name}: #{message}" if message
+            Counters.parse(name, errors, "#{path}.#{name}")
             next [name, Amount.build(n, errors, "#{path}.#{name}", targets_count: 0)] if amounts && !n.is_a?(Integer)
 
             errors << "#{path}.#{name}: must be an integer >= 1" unless n.is_a?(Integer) && n >= 1

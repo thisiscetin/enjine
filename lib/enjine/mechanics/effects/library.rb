@@ -85,10 +85,10 @@ module Enjine
           unless @count == "all" || (@count.is_a?(Integer) && @count.positive?)
             errors << "#{path}.count: must be a positive integer or \"all\""
           end
-          @optional = Linked.flag(params, "optional", errors, path)
+          @optional = Mechanics.flag_param(params, "optional", errors, path)
           @put = (Mechanics.fetch_param(params, :put) || "hand").to_s
           errors << "#{path}.put: must be one of #{PUT.join(", ")}" unless PUT.include?(@put)
-          @tapped = Linked.flag(params, "tapped", errors, path)
+          @tapped = Mechanics.flag_param(params, "tapped", errors, path)
           @reveal = (Mechanics.fetch_param(params, :reveal) || "none").to_s
           errors << "#{path}.reveal: must be one of #{REVEAL.join(", ")}" unless REVEAL.include?(@reveal)
           @rest = parse_rest(params, errors, path)
@@ -169,7 +169,7 @@ module Enjine
           @count = Amount.build(Mechanics.fetch_param(params, :count) || 1, errors, "#{path}.count", targets_count: @targets_count)
           @put = (Mechanics.fetch_param(params, :put) || "hand").to_s
           errors << "#{path}.put: must be one of #{PUT.join(", ")}" unless PUT.include?(@put)
-          @tapped = Linked.flag(params, "tapped", errors, path)
+          @tapped = Mechanics.flag_param(params, "tapped", errors, path)
           @rest = parse_rest(params, errors, path)
         end
 
@@ -228,11 +228,10 @@ module Enjine
         def self.default_to = "you"
 
         def setup(params, errors, path)
-          @link = Linked.flag(params, "link", errors, path)
-          @face_down = Mechanics.fetch_param(params, :face_down)
-          errors << "#{path}.face_down: must be true or false" unless [nil, true, false].include?(@face_down)
+          @link = Mechanics.flag_param(params, "link", errors, path)
+          @face_down = Mechanics.flag_param(params, :face_down, errors, path)
           raw = Mechanics.fetch_param(params, :looker)
-          errors << "#{path}.looker: needs face_down: true" if raw && @face_down != true
+          errors << "#{path}.looker: needs face_down: true" if raw && !@face_down
           @looker = Selector.build(raw || "you", errors, "#{path}.looker", targets_count: @targets_count,
                                                                            results_count: @results_count)
         end

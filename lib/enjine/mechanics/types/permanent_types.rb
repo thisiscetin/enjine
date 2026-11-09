@@ -7,7 +7,6 @@ module Enjine
       # enchantment, planeswalker): sorcery timing unless something grants flash (CR 307.1 analogues).
       class PermanentType < Primitive
         def self.permanent? = true
-        def self.playable_as_land? = false
         def self.instant_speed? = false
         def self.validate(_card, _errors) = nil
       end

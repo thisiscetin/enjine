@@ -70,8 +70,7 @@ module Enjine
 
         def setup(params, errors, path)
           @of = setup_of(params, errors, path)
-          @tapped = Mechanics.fetch_param(params, :tapped)
-          errors << "#{path}.tapped: must be true or false" unless [nil, true, false].include?(@tapped)
+          @tapped = Mechanics.flag_param(params, :tapped, errors, path)
           @except = CopyExcept.build(Mechanics.fetch_param(params, :except), errors, "#{path}.except")
         end
 
@@ -86,7 +85,7 @@ module Enjine
           players(engine, ctx).each do |index|
             values.each do |card, except|
               merged = [card, Engine::Copies.merge_except(except, @except)]
-              n.times { engine.create_token_copy!(merged, index, tapped: @tapped == true) }
+              n.times { engine.create_token_copy!(merged, index, tapped: @tapped) }
             end
           end
         end
@@ -153,8 +152,7 @@ module Enjine
 
         def setup(params, errors, path)
           @of = setup_of(params, errors, path)
-          @new_targets = Mechanics.fetch_param(params, :new_targets)
-          errors << "#{path}.new_targets: must be true or false" unless [nil, true, false].include?(@new_targets)
+          @new_targets = Mechanics.flag_param(params, :new_targets, errors, path)
         end
 
         def to_s = "copy #{@of}#{" #{amount} times" if amount != 1}#{" (new targets)" if @new_targets} → #{to}"

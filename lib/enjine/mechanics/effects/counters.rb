@@ -20,9 +20,7 @@ module Enjine
         def self.keys = %w[counter amount to if]
 
         def setup(params, errors, path)
-          @counter = Counters.normalize(Mechanics.fetch_param(params, :counter))
-          message = Counters.error(@counter)
-          errors << "#{path}.counter: #{message}" if message
+          @counter = Counters.parse(Mechanics.fetch_param(params, :counter), errors, "#{path}.counter")
         end
 
         def to_s = "#{amount} #{counter} counter(s) → #{to}"
@@ -46,9 +44,7 @@ module Enjine
         def self.keys = %w[counter amount to if]
 
         def setup(params, errors, path)
-          @counter = Counters.normalize(Mechanics.fetch_param(params, :counter))
-          message = Counters.error(@counter)
-          errors << "#{path}.counter: #{message}" if message
+          @counter = Counters.parse(Mechanics.fetch_param(params, :counter), errors, "#{path}.counter")
         end
 
         def apply(engine, ctx)
@@ -74,9 +70,7 @@ module Enjine
 
         def setup(params, errors, path)
           raw = Mechanics.fetch_param(params, :counter)
-          @counter = raw && Counters.normalize(raw)
-          message = @counter && Counters.error(@counter)
-          errors << "#{path}.counter: #{message}" if message
+          @counter = raw && Counters.parse(raw, errors, "#{path}.counter")
         end
 
         def apply(engine, ctx) = objects(engine, ctx).each { engine.remove_all_counters!(engine.object(it), counter) }
@@ -147,9 +141,7 @@ module Enjine
         def self.default_to = "you"
 
         def setup(params, errors, path)
-          @counter = Counters.normalize(Mechanics.fetch_param(params, :counter))
-          message = Counters.error(@counter)
-          errors << "#{path}.counter: #{message}" if message
+          @counter = Counters.parse(Mechanics.fetch_param(params, :counter), errors, "#{path}.counter")
         end
 
         def to_s = "distribute #{counter} counters among the targets"

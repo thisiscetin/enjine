@@ -399,23 +399,14 @@ module Enjine
       out["keywords"] = @keywords.map(&:to_s) unless @keywords.empty?
       %w[power toughness].each { |key| out[key] = normalized_stat(card, key) unless instance_variable_get("@#{key}").nil? }
       out["loyalty"] = @loyalty unless @loyalty.nil?
-      out["abilities"] = deep_stringify(card["abilities"]) if card["abilities"].is_a?(Array) && !card["abilities"].empty?
+      out["abilities"] = Snapshot.deep_stringify(card["abilities"]) if card["abilities"].is_a?(Array) && !card["abilities"].empty?
       out["rules_text"] = @rules_text if @rules_text
       out["deck_limit"] = @deck_limit if @deck_limit
       deep_freeze(out)
     end
 
     # An integer, or the amount of a characteristic-defining ability as given.
-    def normalized_stat(card, key) = card[key].is_a?(Hash) ? deep_stringify(card[key]) : instance_variable_get("@#{key}")
-
-    def deep_stringify(value)
-      case value
-      when Hash then value.to_h { |k, v| [k.to_s, deep_stringify(v)] }
-      when Array then value.map { deep_stringify(it) }
-      when Symbol then value.to_s
-      else value
-      end
-    end
+    def normalized_stat(card, key) = card[key].is_a?(Hash) ? Snapshot.deep_stringify(card[key]) : instance_variable_get("@#{key}")
 
     def deep_freeze(value)
       case value

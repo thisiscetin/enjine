@@ -34,9 +34,7 @@ module Enjine
           controller = affects.fetch("controller", "any")
           errors << "#{path}.affects.controller: must be one of you, opponent, any" unless %w[you opponent any].include?(controller)
           counter = Mechanics.fetch_param(params, :counter)
-          counter = Counters.normalize(counter) if counter
-          message = counter && Counters.error(counter)
-          errors << "#{path}.counter: #{message}" if message
+          counter &&= Counters.parse(counter, errors, "#{path}.counter")
           new(filter, controller, counter)
         end
 

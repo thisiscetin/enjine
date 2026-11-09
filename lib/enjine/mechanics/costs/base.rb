@@ -16,9 +16,7 @@ module Enjine
           raw = Mechanics.fetch_param(params, :filter) || default_filter
           filter = Mechanics.build_entry(:filter, raw, errors, "#{path}.filter")
           count = Mechanics.integer_param(params, :count, errors, path, default: 1, min: 1)
-          other = Mechanics.fetch_param(params, :other)
-          errors << "#{path}.other: must be true or false" unless [nil, true, false].include?(other)
-          new(filter, count, other == true, params, errors, path)
+          new(filter, count, Mechanics.flag_param(params, :other, errors, path), params, errors, path)
         end
 
         def self.keys = %w[filter count other]

@@ -26,21 +26,16 @@ Layout/LineLength:
 # A rules engine has a few long, linear methods that mirror the rules text.
 Metrics/MethodLength:
   Max: 40
-  Exclude:
-    - "script/convert_set.rb"
 Metrics/ClassLength:
   Max: 400
 Metrics/ModuleLength:
   Max: 250
-  Exclude:
-    - "script/convert_set.rb"
 Metrics/ParameterLists:
   Max: 7
   # Keyword arguments name themselves; the deck builder's options are all keywords.
   CountKeywordArgs: false
 Metrics/BlockLength:
   Exclude:
-    - "script/convert_set.rb"
     - "spec/**/*"
     - "*.gemspec"
     - "Rakefile"
@@ -64,13 +59,11 @@ RSpec/InstanceVariable:
 Metrics/AbcSize:
   Max: 55
   Exclude:
-    - "script/convert_set.rb"
     - "lib/enjine/cli/text.rb"
     - "lib/enjine/snapshot.rb"
 Metrics/CyclomaticComplexity:
   Max: 18
   Exclude:
-    - "script/convert_set.rb"
     - "lib/enjine/cli/text.rb"
     - "lib/enjine/cli.rb"
 Naming/PredicateMethod:
@@ -82,8 +75,5 @@ Style/ItBlockParameter:
 Style/FormatStringToken:
   Enabled: false
 
-# The set converter's line translator is a long dispatch over card-text shapes.
 Metrics/PerceivedComplexity:
   Max: 18
-  Exclude:
-    - "script/convert_set.rb"

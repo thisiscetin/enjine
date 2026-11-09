@@ -6,7 +6,6 @@ module Enjine
       # Instants and sorceries: never permanents; they go to the graveyard on resolution (CR 608.2n).
       class SpellType < Primitive
         def self.permanent? = false
-        def self.playable_as_land? = false
         def self.validate(_card, _errors) = nil
       end
 

@@ -29,6 +29,14 @@ module Enjine
 
       def valid?(name) = name.is_a?(String) && NAME.match?(name)
 
+      # A counter name from card data, normalized; an invalid one is reported at `path`.
+      def parse(raw, errors, path)
+        name = normalize(raw)
+        message = error(name)
+        errors << "#{path}: #{message}" if message
+        name
+      end
+
       # Error message for an invalid counter name, or nil.
       def error(name)
         return nil if valid?(name)

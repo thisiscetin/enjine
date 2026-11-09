@@ -27,7 +27,7 @@ module Enjine
         def setup(params, errors, path)
           raw = Mechanics.fetch_param(params, :for)
           @spec = raw && CardSpec.build(raw, errors, "#{path}.for")
-          @choose = Linked.flag(params, "choose", errors, path)
+          @choose = Mechanics.flag_param(params, "choose", errors, path)
         end
 
         def to_s = "assimilate#{" one" if @choose}#{" #{@spec}" if @spec} → #{to}"

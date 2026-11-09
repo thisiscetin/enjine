@@ -38,9 +38,7 @@ module Enjine
           return (errors << "#{path}: must be an object of counter name => count") && {} unless raw.is_a?(Hash)
 
           raw.to_h do |name, n|
-            kind = Counters.normalize(name.to_s)
-            message = Counters.error(kind)
-            errors << "#{path}.#{name}: #{message}" if message
+            kind = Counters.parse(name.to_s, errors, "#{path}.#{name}")
             errors << "#{path}.#{name}: must be a positive integer" unless n.is_a?(Integer) && n.positive?
             [kind, n]
           end.freeze

@@ -281,6 +281,7 @@ module Enjine
       case value
       when Hash then value.to_h { |k, v| [k.to_s, deep_stringify(v)] }
       when Array then value.map { deep_stringify(it) }
+      when Symbol then value.to_s
       else value
       end
     end

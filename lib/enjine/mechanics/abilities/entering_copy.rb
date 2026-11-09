@@ -30,9 +30,7 @@ module Enjine
           raw = Mechanics.fetch_param(params, :of)
           filter = raw.nil? ? (errors << "#{path}.of: required") && nil : Mechanics.build_entry(:filter, raw, errors, "#{path}.of")
           except = Mechanics::CopyExcept.build(Mechanics.fetch_param(params, :except), errors, "#{path}.except")
-          counters = Mechanics.fetch_param(params, :with_counters)
-          errors << "#{path}.with_counters: must be true or false" unless [nil, true, false].include?(counters)
-          new(filter, except, counters == true)
+          new(filter, except, Mechanics.flag_param(params, :with_counters, errors, path))
         end
 
         def initialize(filter, except, with_counters)

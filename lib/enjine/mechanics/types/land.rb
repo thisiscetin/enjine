@@ -13,7 +13,6 @@ module Enjine
                              "subtypes" => ["forest"] }
 
         def self.permanent? = true
-        def self.playable_as_land? = true
         def self.instant_speed? = false
 
         def self.validate(card, errors)
