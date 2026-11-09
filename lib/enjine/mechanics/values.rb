@@ -34,7 +34,7 @@ module Enjine
                    "sacrificed_this_turn" => "sacrificed", "attackers_this_turn" => "attackers",
                    "exiled_this_turn" => "exiled" }.freeze
       KINDS = (SELECTOR_KINDS + ARITHMETIC + DEPARTED.keys + %w[counters spells_cast_this_turn this_way
-                                                                  mana_spent]).freeze
+                                                                mana_spent]).freeze
       # Player history counters: kind -> turn_log/game_log key.
       HISTORY = { "life_gained_this_turn" => "life_gained", "life_lost_this_turn" => "life_lost",
                   "dilemmas_this_turn" => "dilemmas", "returned_this_turn" => "returned",
@@ -424,7 +424,6 @@ module Enjine
                   "attacked_this_turn" => ["it attacked this turn", "it didn't attack this turn"],
                   "max_speed" => ["you have max speed", "you don't have max speed"],
                   "you_attacked_this_turn" => ["you attacked this turn", "you didn't attack this turn"] }.freeze
-
 
         def to_s = WORDS.fetch(@flag)[@wanted ? 0 : 1]
 

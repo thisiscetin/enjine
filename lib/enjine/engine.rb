@@ -325,14 +325,20 @@ module Enjine
         enter_as_copy!(fresh, data["enters"]["copy"]) if data["enters"]["copy"] # CR 707.5 (Engine::Copies)
         fresh.tapped = data["enters"]["tapped"]
         fresh.counters.merge!(data["enters"]["counters"])
-        fresh.x = old.x if old.zone == :stack # CR 107.3m: its ETB abilities use the spell's X
-        fresh.memory["kicked"] = true if old.zone == :stack && old.memory["kicked"] # CR 702.33d, 400.7d
-        fresh.mana_spent = old.mana_spent&.dup if old.zone == :stack # CR 601.2h, 400.7d: "mana spent to cast it"
+        carry_from_stack!(fresh, old) if old.zone == :stack
         fresh.attached_to = data["enters"]["attached_to"] # CR 608.3c: an Aura enters attached
         enter_attacking!(fresh, data["enters"]["attacking"]) if data["enters"]["attacking"] # CR 508.4, 506.3a
       when :stack
         fresh.controller = data["controller"] || old.owner
       end
+    end
+
+    # A permanent spell becoming a permanent remembers how it was cast (CR 400.7d): its X (its ETB abilities
+    # use the spell's X, CR 107.3m), that it was kicked (CR 702.33d) and the mana spent to cast it (CR 601.2h).
+    def carry_from_stack!(fresh, old)
+      fresh.x = old.x
+      fresh.memory["kicked"] = true if old.memory["kicked"]
+      fresh.mana_spent = old.mana_spent&.dup
     end
 
     # CR 111.1: a token enters the battlefield under its creator's control. Entering replacement

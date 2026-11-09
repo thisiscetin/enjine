@@ -237,15 +237,20 @@ module Enjine
           emit Events::AbilityActivated.new(player: name(index), object: obj.id, card: obj.card, source: ctx["source"],
                                             ability: ctx["ability"], targets: obj.targets.flatten)
         else
-          pay_chosen_costs!(ctx) # e.g. the creature sacrificed for an additional cost (CR 601.2h)
-          finish_cast_method!(obj, ctx) # Engine::Permissions
-          cast_prepared_copy!(ctx.dig("origin", "id")) # CR 723.3c (Engine::Faces)
-          emit Events::SpellCast.new(player: name(index), object: obj.id, card: obj.card, targets: obj.targets.flatten,
-                                     during_resolution: ctx["no_priority"] == true)
+          finish_spell_cast!(ctx, obj)
         end
         return if ctx["no_priority"] # CR 608.2g: no priority; the resolving spell or ability continues
 
         action_taken!(index) # CR 117.3c (the frame is popped by advance!)
+      end
+
+      # A spell becomes cast (CR 601.2i) once its other costs are paid.
+      def finish_spell_cast!(ctx, obj)
+        pay_chosen_costs!(ctx) # e.g. the creature sacrificed for an additional cost (CR 601.2h)
+        finish_cast_method!(obj, ctx) # Engine::Permissions
+        cast_prepared_copy!(ctx.dig("origin", "id")) # CR 723.3c (Engine::Faces)
+        emit Events::SpellCast.new(player: name(ctx["player"]), object: obj.id, card: obj.card,
+                                   targets: obj.targets.flatten, during_resolution: ctx["no_priority"] == true)
       end
 
       # The non-mana costs (CR 602.2b): its own ({T}, sacrifice it, exile it from the graveyard), then
