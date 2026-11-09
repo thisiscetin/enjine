@@ -132,8 +132,8 @@ RSpec.describe Enjine::RulesMonitor do
     end
   end
 
-  context "with conditional Equipment and max speed abilities (CR 604.2, 702.178a)" do
-    let(:catalog) { Enjine::Catalog.from_definitions(CardFixtures.real("creatures-combat-keywords")) }
+  context "with conditional Equipment, max speed, station symbols and changelings (CR 604.2, 702.178a, 722.2a, 702.73a)" do
+    let(:catalog) { Enjine::Catalog.from_definitions(CardFixtures.real_cards) }
 
     def findings_after(game) = described_class.new(game).check!(game.history.last)
 
@@ -155,6 +155,35 @@ RSpec.describe Enjine::RulesMonitor do
       expect(findings_after(game)).to eq([])
       skip_to(game, :upkeep, turn: 4)
       expect(view_of(game, sarcophagus)).to include("power" => 3, "toughness" => 3)
+      expect(findings_after(game)).to eq([])
+    end
+
+    it "expects the statics of a station symbol once the permanent has enough charge counters" do
+      game = build_game(catalog) do
+        turn 3, active: "alice", step: :precombat_main
+        player("alice") do
+          battlefield "Lumen-Class Frigate", counters: { "charge" => 2 }
+          battlefield "Walking Sarcophagus"
+          library "Forest", count: 3
+        end
+        player("bob") { library "Forest", count: 3 }
+      end
+      game.submit(type: "pass")
+      expect(view_of(game, obj_id(game, "Walking Sarcophagus"))).to include("power" => 3, "toughness" => 2)
+      expect(findings_after(game)).to eq([])
+    end
+
+    it "expects a lord's bonus on a changeling, which has every creature type" do
+      game = build_game(catalog) do
+        turn 3, active: "alice", step: :precombat_main
+        player("alice") do
+          battlefield "Dwynen, Gilt-Leaf Daen", "Chitinous Graspling"
+          library "Forest", count: 3
+        end
+        player("bob") { library "Forest", count: 3 }
+      end
+      game.submit(type: "pass")
+      expect(view_of(game, obj_id(game, "Chitinous Graspling"))).to include("power" => 4, "toughness" => 5)
       expect(findings_after(game)).to eq([])
     end
   end

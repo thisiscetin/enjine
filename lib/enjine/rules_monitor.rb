@@ -11,6 +11,7 @@ module Enjine
   #   monitor.findings  # => [] when everything matched
   #   monitor.stats     # mechanics observed, e.g. {"counters_added" => 12, ...}
   class RulesMonitor
+    UNLOCKABLE = %i[station_symbol max_speed].freeze # abilities whose own abilities apply only once unlocked
     Finding = Data.define(:rule, :message, :turn, :step, :seq)
 
     attr_reader :findings, :stats
@@ -42,20 +43,19 @@ module Enjine
 
     def defn(card) = catalog.fetch(card)
 
-    # A permanent's printed abilities, with those of its max speed abilities while its controller's speed
-    # is 4 (CR 702.178a, 702.179e) in their place.
+    # A permanent's printed abilities, the abilities of its unlocked symbols in their place.
     def abilities_of(obj)
-      fast = state.players[obj.controller].speed == 4
-      defn(obj.card).abilities.flat_map do |ability|
-        next [ability] unless ability.kind == :max_speed
-
-        fast ? ability.nested_abilities : []
-      end
+      defn(obj.card).abilities.reject { UNLOCKABLE.include?(it.kind) } + unlocked(obj).flat_map(&:nested_abilities)
     end
 
-    def max_speed_keyword?(obj, keyword)
-      state.players[obj.controller].speed == 4 &&
-        defn(obj.card).abilities.any? { it.kind == :max_speed && it.keywords.include?(keyword) }
+    # Its station symbols it has enough charge counters for (CR 722.2a), recomputed from the raw counters, and
+    # its max speed abilities while its controller's speed is 4 (CR 702.178a, 702.179e).
+    def unlocked(obj)
+      charge = obj.counters.fetch("charge", 0)
+      fast = state.players[obj.controller].speed == 4
+      defn(obj.card).abilities.select do |ability|
+        ability.kind == :station_symbol ? charge >= ability.threshold : ability.kind == :max_speed && fast
+      end
     end
 
     # ---- per-event checks -------------------------------------------------------
@@ -152,18 +152,10 @@ module Enjine
         state.players[state.active].name == caster
     end
 
-    # Printed keywords plus those of station symbols with enough charge counters (CR 722.2a), recomputed
-    # from the raw counters, and keywords granted until end of turn.
+    # Printed keywords plus those of unlocked symbols, keywords granted and those of statics.
     def keyword?(obj, keyword)
-      card = defn(obj.card)
-      return true if card.keyword?(keyword)
-
-      charge = obj.counters.fetch("charge", 0)
-      stationed = card.ability_instances.any? do |inst|
-        inst.ability.kind == :station_symbol && charge >= inst.ability.threshold && inst.ability.keywords.include?(keyword)
-      end
-      stationed || max_speed_keyword?(obj, keyword) || granted_keywords(obj.id).include?(keyword.to_sym) ||
-        static_keyword?(obj, keyword)
+      defn(obj.card).keyword?(keyword) || unlocked(obj).any? { it.keywords.include?(keyword) } ||
+        granted_keywords(obj.id).include?(keyword.to_sym) || static_keyword?(obj, keyword)
     end
 
     # Keywords granted until end of turn or by an attached Aura or Equipment (CR 301.5f, 303.4m).
@@ -206,8 +198,7 @@ module Enjine
     # A keyword from an applying static ability of a permanent (CR 604.2), matched on printed types.
     def static_keyword?(obj, keyword)
       engine = @game.instance_variable_get(:@engine)
-      card = defn(obj.card)
-      facts = Mechanics::Filters::Facts.new(chars: card.printed_characteristics, counters: obj.counters, token: card.token?)
+      facts = facts(obj, defn(obj.card))
       state.battlefield.any? do |id|
         source = state.objects[id]
         abilities_of(source).any? do |ability|
@@ -277,14 +268,19 @@ module Enjine
       end
     end
 
-    # A bonus to creatures "with flying" also counts flying the creature was granted (CR 702.1).
     def static_bonuses(obj, card, statics)
-      chars = card.printed_characteristics
-      chars = chars.with(keywords: chars.keywords | granted_keywords(obj.id))
-      facts = Mechanics::Filters::Facts.new(chars: chars, counters: obj.counters, token: card.token?)
+      facts = facts(obj, card)
       statics.filter_map do |source, ability, (power, toughness)|
         { "power" => power, "toughness" => toughness } if ability.affects?(obj, source, facts)
       end
+    end
+
+    # What statics match a permanent on: its printed characteristics, every creature type for a changeling
+    # (CR 702.73a) and the keywords it was granted (a bonus to creatures "with flying", CR 702.1).
+    def facts(obj, card)
+      chars = Mechanics::Keywords::Changeling.apply(card.printed_characteristics)
+      chars = chars.with(keywords: chars.keywords | granted_keywords(obj.id))
+      Mechanics::Filters::Facts.new(chars: chars, counters: obj.counters, token: card.token?)
     end
 
     # "Equipped/enchanted creature gets/has ..." of every permanent attached to `id` whose condition holds

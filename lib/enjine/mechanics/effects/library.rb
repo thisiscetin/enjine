@@ -63,10 +63,10 @@ module Enjine
 
         primitive :effect, :dig,
                   description: "Look at the top `amount` cards of your library (`reveal: \"all\"`: reveal them). Take " \
-                               "`count` (default 1; \"all\": every matching card, no choice; \"any\": any number) cards matching `for` and put " \
-                               "them into `put` (`tapped` onto the battlefield); `optional`: you may take fewer. " \
-                               "`reveal: \"chosen\"` reveals the cards taken. The rest go to `rest`: \"bottom_random\" " \
-                               "(default), \"bottom_any\" (in an order you choose) or \"graveyard\".",
+                               "`count` (default 1; \"all\": every matching card, no choice; \"any\": any number) " \
+                               "cards matching `for` and put them into `put` (`tapped` onto the battlefield); " \
+                               "`optional`: you may take fewer. `reveal: \"chosen\"` reveals the cards taken. The rest go " \
+                               "to `rest`: \"bottom_random\" (default), \"bottom_any\" (in an order you choose) or \"graveyard\".",
                   rules: %w[701.20a 701.20e 401.4 400.7j],
                   params: { "amount" => "amount (how many cards)", "for" => "card spec (default any card)",
                             "count" => "integer, \"all\" or \"any\"", "optional" => "boolean", "put" => PUT.join(" | "),

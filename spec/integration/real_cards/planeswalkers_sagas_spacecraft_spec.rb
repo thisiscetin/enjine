@@ -4,7 +4,7 @@
 # Planets, warp, double-faced cards, job select, blight, kindred, copies and the Star Trek mechanics. Every card
 # is cast, played or activated here and its effect checked.
 RSpec.describe "Real cards: planeswalkers, Sagas and Spacecraft" do
-  let(:catalog) { Enjine::Catalog.from_definitions(CardFixtures.cards + CardFixtures.real("planeswalkers-sagas-spacecraft")) }
+  let(:catalog) { Enjine::Catalog.from_definitions(CardFixtures.cards + CardFixtures.real("planeswalkers_sagas_spacecraft")) }
 
   # Alice's precombat main phase of turn 3, with nine mana of each type in the active player's pool. Zones
   # take card names; a battlefield entry may be [name, options] (tapped:, counters:, controlled_since:).

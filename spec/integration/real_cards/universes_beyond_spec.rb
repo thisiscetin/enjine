@@ -4,10 +4,10 @@ require "enjine/deck_builder"
 
 # Real Standard cards from the Universes Beyond sets (Avatar: The Last Airbender, Spider-Man, Marvel Super
 # Heroes, Teenage Mutant Ninja Turtles, The Hobbit), written by hand in the card DSL
-# (spec/fixtures/cards/real/universes-beyond.json). Every card is cast or played and its own effect is
+# (spec/fixtures/cards/real/universes_beyond.json). Every card is cast or played and its own effect is
 # checked; random decks the DeckBuilder makes from the pool are then fuzzed with the rules monitor.
 RSpec.describe "Real cards: Universes Beyond" do
-  let(:cards) { CardFixtures.real("universes-beyond") }
+  let(:cards) { CardFixtures.real("universes_beyond") }
   let(:catalog) { Enjine::Catalog.from_definitions(cards) }
   let(:plenty) { Enjine::Mana::TYPES.to_h { [it, 9] } }
   let(:yes) { { type: "yes" } }
@@ -185,8 +185,8 @@ RSpec.describe "Real cards: Universes Beyond" do
       end
       game = board(hand: ["Giant Growth", "Amazing Acrobatics"], mine: ["Squirrelanoids"], theirs: ["A.I.M. Scientists", "Canyon Crawler"])
       cast_only(game, "Giant Growth", id(game, "Squirrelanoids"))
-      cast(game, "Amazing Acrobatics", { type: "mode", mode: 0 }, { type: "mode", mode: 1 }, { type: "target", target: game.state.stack.first },
-           target(game, "A.I.M. Scientists"), target(game, "Canyon Crawler"))
+      cast(game, "Amazing Acrobatics", { type: "mode", mode: 0 }, { type: "mode", mode: 1 },
+           { type: "target", target: game.state.stack.first }, target(game, "A.I.M. Scientists"), target(game, "Canyon Crawler"))
       expect(pt(game, "Squirrelanoids")).to eq([1, 1])
       expect([perm(game, "A.I.M. Scientists"), perm(game, "Canyon Crawler")].map { it["tapped"] }).to eq([true, true])
     end
@@ -262,7 +262,7 @@ RSpec.describe "Real cards: Universes Beyond" do
       expect(perm(game, "Spider")).to include("power" => 2, "toughness" => 1, "keywords" => ["reach"])
       next_main(game, target(game, "Squirrelanoids", "alice"))
       expect(perm(game, "Squirrelanoids")["counters"]).to eq("+1/+1" => 1)
-      expect([chars(game, "Squirrelanoids").supertypes, chars(game, "Squirrelanoids").subtypes]).to eq([[:legendary], %i[squirrel mutant spider hero]])
+      expect(chars(game, "Squirrelanoids")).to have_attributes(supertypes: [:legendary], subtypes: %i[squirrel mutant spider hero])
       next_main(game, target(game, "Squirrelanoids", "alice"))
       expect(keywords(game, "Squirrelanoids")).to include("double_strike")
     end
@@ -483,7 +483,8 @@ RSpec.describe "Real cards: Universes Beyond" do
       game = board(hand: ["The Legend of Roku"])
       cast(game, "The Legend of Roku")
       expect(game.state.exile.size).to eq(3)
-      expect(game.legal_options.count { it[:type] == "play_land" || (it[:type] == "cast" && game.state.exile.include?(it[:object])) }).to be_positive
+      playable = game.legal_options.select { it[:type] == "play_land" || (it[:type] == "cast" && game.state.exile.include?(it[:object])) }
+      expect(playable).not_to be_empty
       next_main(game)
       next_main(game)
       expect(pt(game, "Avatar Roku")).to eq([4, 4])

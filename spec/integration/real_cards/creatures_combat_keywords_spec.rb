@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
-# Real Standard cards (fdn, dft, tdm) written in the card DSL (spec/fixtures/cards/real/creatures-combat-keywords.json):
+# Real Standard cards (fdn, dft, tdm) written in the card DSL (spec/fixtures/cards/real/creatures_combat_keywords.json):
 # each one is cast, played or activated and its effect checked.
 RSpec.describe "Real cards: creatures, combat and keywords" do
-  let(:pool) { CardFixtures.real("creatures-combat-keywords") }
+  let(:pool) { CardFixtures.real("creatures_combat_keywords") }
   let(:catalog) { Enjine::Catalog.from_definitions(pool) }
 
   def engine(game) = game.instance_variable_get(:@engine)
@@ -982,5 +982,4 @@ RSpec.describe "Real cards: creatures, combat and keywords" do
     expect(result.outcomes.values.sum).to eq(2)
     expect(result.casts).not_to be_empty
   end
-
 end

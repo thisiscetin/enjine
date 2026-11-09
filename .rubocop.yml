@@ -23,11 +23,6 @@ Style/MultilineBlockChain:
 Layout/LineLength:
   Max: 140
 
-# Real-card specs are named after their fixture family (spec/fixtures/cards/real/<family>.json).
-Naming/FileName:
-  Exclude:
-    - "spec/integration/real_cards/*"
-
 # A rules engine has a few long, linear methods that mirror the rules text.
 Metrics/MethodLength:
   Max: 40
@@ -71,10 +66,6 @@ Metrics/CyclomaticComplexity:
   Exclude:
     - "lib/enjine/cli/text.rb"
     - "lib/enjine/cli.rb"
-# Real-card specs are named after their fixture family (spec/fixtures/cards/real/<family>.json).
-Naming/FileName:
-  Exclude:
-    - "spec/integration/real_cards/*_spec.rb"
 Naming/PredicateMethod:
   Enabled: false
 Naming/MethodParameterName:

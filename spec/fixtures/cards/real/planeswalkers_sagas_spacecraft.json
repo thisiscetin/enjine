@@ -4317,11 +4317,6 @@
     "types": [
       "instant"
     ],
-    "rarity": "common",
-    "printing": {
-      "set": "trk",
-      "number": "111"
-    },
     "abilities": [
       {
         "spell": {
@@ -4348,7 +4343,7 @@
                 "watch": {
                   "target": 0
                 },
-                "this_turn": true,
+                "this_turn": "once",
                 "effects": [
                   {
                     "draw": {
@@ -4361,7 +4356,12 @@
           ]
         }
       }
-    ]
+    ],
+    "rarity": "common",
+    "printing": {
+      "set": "trk",
+      "number": "111"
+    }
   },
   {
     "name": "Amok Time",
@@ -5043,11 +5043,6 @@
     "types": [
       "instant"
     ],
-    "rarity": "uncommon",
-    "printing": {
-      "set": "trk",
-      "number": "154"
-    },
     "abilities": [
       {
         "spell": {
@@ -5055,13 +5050,6 @@
             "creature"
           ],
           "effects": [
-            {
-              "exile_if_dies": {
-                "to": {
-                  "target": 0
-                }
-              }
-            },
             {
               "deal_damage": {
                 "amount": {
@@ -5074,11 +5062,23 @@
                   "target": 0
                 }
               }
+            },
+            {
+              "exile_if_dies": {
+                "to": {
+                  "target": 0
+                }
+              }
             }
           ]
         }
       }
-    ]
+    ],
+    "rarity": "uncommon",
+    "printing": {
+      "set": "trk",
+      "number": "154"
+    }
   },
   {
     "name": "Dominion Saboteur",

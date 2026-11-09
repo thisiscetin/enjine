@@ -1,10 +1,10 @@
 # frozen_string_literal: true
 
 # Real cards from Secrets of Strixhaven (sos), Reality Fracture (fra) and Star Trek (trk), written by hand in
-# the card DSL (spec/fixtures/cards/real/newest-sets.json): each one is cast, played or activated and its
+# the card DSL (spec/fixtures/cards/real/newest_sets.json): each one is cast, played or activated and its
 # effect checked. Pet Sehlat (a vanilla 4/3) and Stone Docent (a 3/1) stand in as plain creatures.
 RSpec.describe "Real cards: Secrets of Strixhaven, Reality Fracture, Star Trek" do
-  let(:cards) { CardFixtures.real("newest-sets") }
+  let(:cards) { CardFixtures.real("newest_sets") }
   let(:catalog) { Enjine::Catalog.from_definitions(cards) }
 
   # Alice's turn 3 (precombat main unless `step`). Permanents are names or [name, options]; `mana` and
