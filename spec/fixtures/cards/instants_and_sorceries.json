@@ -5069,5 +5069,199 @@
         }
       }
     ]
+  },
+  {
+    "name": "Tidal Recursion",
+    "mana_cost": "{2}{U}",
+    "types": [
+      "sorcery"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "effects": [
+            {
+              "repeat": {
+                "effects": [
+                  {
+                    "mill": {
+                      "amount": 1,
+                      "to": "you"
+                    }
+                  },
+                  {
+                    "return_to_battlefield": {
+                      "to": {
+                        "result": 0,
+                        "for": {
+                          "types": [
+                            "land"
+                          ]
+                        }
+                      },
+                      "tapped": true
+                    }
+                  }
+                ],
+                "while": {
+                  "amount": {
+                    "count": {
+                      "result": 0,
+                      "for": {
+                        "types": [
+                          "land"
+                        ]
+                      }
+                    }
+                  },
+                  "at_least": 1
+                }
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "Mill a card. If it's a land card, return it to the battlefield tapped and repeat this process."
+  },
+  {
+    "name": "Hoard Glimpse",
+    "mana_cost": "{3}{R}",
+    "types": [
+      "sorcery"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "effects": [
+            {
+              "exile_top": {
+                "until": {
+                  "total_mana_value": 3
+                }
+              }
+            },
+            {
+              "cast_free": {
+                "to": {
+                  "result": 0
+                },
+                "count": "any"
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "Exile cards from the top of your library until you exile cards with total mana value 3 or greater. You may cast any number of spells from among them without paying their mana costs."
+  },
+  {
+    "name": "Unearthed Secrets",
+    "mana_cost": "{1}{U}",
+    "types": [
+      "sorcery"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "effects": [
+            {
+              "exile_top": {
+                "to": "each_opponent",
+                "link": true,
+                "until": {
+                  "card": {
+                    "not_types": [
+                      "land"
+                    ]
+                  }
+                }
+              }
+            },
+            {
+              "draw": {
+                "amount": 1
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "Each opponent exiles cards from the top of their library until they exile a nonland card. Draw a card."
+  },
+  {
+    "name": "Bending Ricochet",
+    "mana_cost": "{1}{R}",
+    "types": [
+      "instant"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "targets": [
+            {
+              "one_of": [
+                {
+                  "spell": {
+                    "single_target": true
+                  }
+                },
+                {
+                  "stack_ability": {
+                    "single_target": true
+                  }
+                }
+              ]
+            }
+          ],
+          "effects": [
+            {
+              "change_target": {
+                "of": {
+                  "target": 0
+                }
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "Change the target of target spell or ability with a single target."
+  },
+  {
+    "name": "Recall the Charge",
+    "mana_cost": "{1}{U}",
+    "types": [
+      "instant"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "targets": [
+            "creature"
+          ],
+          "effects": [
+            {
+              "return_to_hand": {
+                "to": {
+                  "target": 0
+                }
+              }
+            },
+            {
+              "draw": {
+                "amount": 1,
+                "if": {
+                  "attacking": {
+                    "target": 0
+                  }
+                }
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "Return target creature to its owner's hand. If it was attacking, draw a card."
   }
 ]

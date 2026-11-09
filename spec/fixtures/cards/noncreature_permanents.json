@@ -2008,5 +2008,137 @@
         }
       }
     ]
+  },
+  {
+    "name": "Vault of Lost Souls",
+    "mana_cost": "{3}",
+    "types": [
+      "artifact"
+    ],
+    "abilities": [
+      {
+        "cost_modifier": {
+          "spells": {
+            "colors": [
+              "B"
+            ]
+          },
+          "reduce": 1
+        }
+      },
+      {
+        "exile_if_dies": {
+          "affects": {
+            "each": {
+              "creature": {
+                "token": false
+              }
+            },
+            "controller": "opponent"
+          }
+        }
+      },
+      {
+        "activated": {
+          "cost": [
+            {
+              "mana": "{3}"
+            },
+            "tap"
+          ],
+          "targets": [
+            {
+              "exiled_with": {
+                "any_of": [
+                  "creature"
+                ]
+              }
+            }
+          ],
+          "effects": [
+            {
+              "return_to_battlefield": {
+                "to": {
+                  "target": 0
+                },
+                "under": "you",
+                "tapped": true
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "Black spells you cast cost {1} less to cast. If a nontoken creature an opponent controls would die, exile it instead. {3}, {T}: Put target creature card exiled with this artifact onto the battlefield tapped under your control."
+  },
+  {
+    "name": "Siege Plan",
+    "mana_cost": "{1}{R}",
+    "types": [
+      "enchantment"
+    ],
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "cast": {
+              "spell": "noncreature"
+            }
+          },
+          "effects": [
+            {
+              "add_counters": {
+                "counter": "plan",
+                "amount": 1,
+                "to": "self"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "triggered": {
+          "when": {
+            "counters_placed": {
+              "counter": "plan",
+              "nth": 3
+            }
+          },
+          "effects": [
+            {
+              "sacrifice": {
+                "to": "self"
+              }
+            },
+            {
+              "reflexive_trigger": {
+                "if": {
+                  "amount": {
+                    "count": {
+                      "result": 0
+                    }
+                  },
+                  "at_least": 1
+                },
+                "targets": [
+                  "any_target"
+                ],
+                "effects": [
+                  {
+                    "deal_damage": {
+                      "amount": 4,
+                      "to": {
+                        "target": 0
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "Whenever you cast a noncreature spell, put a plan counter on this enchantment. When the third plan counter is put on this enchantment, sacrifice it. When you do, it deals 4 damage to any target."
   }
 ]
