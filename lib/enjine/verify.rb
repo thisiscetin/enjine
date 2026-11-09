@@ -174,7 +174,7 @@ module Enjine
     rescue Fuzz::Failure => e
       @results[:decisions] += e.decisions
       failure(e, decks)
-    rescue Error => e
+    rescue StandardError => e # setting the game up, before Fuzz.play wraps errors
       @results[:errors] << { "seed" => seed, "message" => "#{e.class}: #{e.message}" }
     end
 
