@@ -43,7 +43,7 @@ module Enjine
         state.battlefield.select do |id|
           obj = object(id)
           current = chars(obj)
-          obj.tapped && obj.controller == index && !current.keyword?(:doesnt_untap) &&
+          obj.tapped && obj.controller == index && !current.keyword?(:doesnt_untap) && !obj.memory["exerted"] &&
             current.abilities.any? { it.ability.kind == :may_not_untap }
         end
       end

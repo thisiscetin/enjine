@@ -13,8 +13,12 @@ module Enjine
           errors << "#{path}.amount: required" if amount.nil?
           data = expansion(amount || 0)
           trigger = Mechanics.build_entry(:trigger, data["when"], errors, "#{path}.when")
-          new(**parse_body(data.except("when"), errors, path), trigger: trigger, amount: amount)
+          body = parse_body(data.except("when"), errors, path)
+          new(**body, effects: (body[:effects] + extra_effects).freeze, trigger: trigger, amount: amount)
         end
+
+        # Effects the keyword adds after its printed ones (none by default).
+        def self.extra_effects = []
 
         def initialize(amount: nil, **)
           @amount = amount
@@ -58,6 +62,21 @@ module Enjine
         def self.expansion(amount)
           { "when" => { "attacks" => {} },
             "effects" => [{ "add_mana" => { "produce" => "{R}", "amount" => amount, "until" => "end_of_combat" } }] }
+        end
+
+        # CR 702.189b: the ability resolving is firebending ("whenever you firebend").
+        def self.extra_effects = @extra_effects ||= [Effects::Firebent.new(to: nil, params: {}, errors: [], path: "firebending")].freeze
+      end
+    end
+
+    module Effects
+      # The last step of a firebending ability: it has resolved, so its controller firebended (CR 702.189b).
+      class Firebent < Effect
+        def self.keys = []
+        def to_s = "(you firebend)"
+
+        def apply(engine, ctx)
+          engine.emit Events::KeywordAction.new(player: engine.name(ctx.controller), action: "firebend", amount: nil)
         end
       end
     end

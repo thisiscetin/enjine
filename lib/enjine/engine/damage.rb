@@ -26,13 +26,21 @@ module Enjine
           defn = chars(obj)
           emit Events::DamageDealt.new(source: source, target: ref, amount: amount, combat: combat)
           if defn.creature?
-            obj.damage += amount # CR 120.3e
+            mark_creature_damage!(obj, source, source_chars, amount)
             obj.deathtouched = true if source_chars&.keyword?(:deathtouch) # CR 702.2b
           end
           remove_counters!(obj, "loyalty", amount) if defn.planeswalker? # CR 120.3c
         end
         lifelink!(source, amount) if lifelink && source_chars&.keyword?(:lifelink)
         amount
+      end
+
+      # CR 120.3d-e: damage to a creature is marked on it; from a source with wither it's -1/-1 counters
+      # put by the source's controller instead (CR 702.80a).
+      def mark_creature_damage!(obj, source, source_chars, amount)
+        return obj.damage += amount unless source_chars&.keyword?(:wither)
+
+        add_counters!(obj, "-1/-1", amount, by_player: object(source).controller)
       end
 
       # Damage dealt at the same time (combat damage, CR 510.2) is one event for prevention effects

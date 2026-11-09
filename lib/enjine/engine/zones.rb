@@ -230,12 +230,19 @@ module Enjine
 
       # CR 502.3: the active player's permanents untap, except those effects keep from untapping and those
       # they chose to keep tapped (`keep`, see Engine::TurnStructure).
+      # An exerted permanent skips this one untap step (CR 701.43a).
       def untap_all!(index, keep: [])
         state.battlefield.each do |id|
           obj = object(id)
-          untap!(obj) if obj.controller == index && !keep.include?(id) && !chars(obj).keyword?(:doesnt_untap)
+          next unless obj.controller == index
+
+          exerted = obj.memory.delete("exerted")
+          untap!(obj) unless keep.include?(id) || exerted || chars(obj).keyword?(:doesnt_untap)
         end
       end
+
+      # CR 701.43a-b: exerting it (again) means it won't untap during its controller's next untap step.
+      def exert!(obj) = obj.memory["exerted"] = true
 
       # CR 302.6: a creature's {T} abilities need it under continuous control since
       # the start of its controller's most recent turn.

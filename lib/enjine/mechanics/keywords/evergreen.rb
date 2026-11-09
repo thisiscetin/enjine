@@ -30,7 +30,9 @@ module Enjine
         lifelink: ["Damage dealt by this source also causes its controller to gain that much life.", %w[702.15b]],
         indestructible: ["Can't be destroyed: lethal damage, deathtouch and \"destroy\" effects don't put it into " \
                          "the graveyard.", %w[702.12b]],
-        hexproof: ["Can't be the target of spells or abilities your opponents control.", %w[702.11b]]
+        hexproof: ["Can't be the target of spells or abilities your opponents control.", %w[702.11b]],
+        wither: ["Damage this source deals to creatures is dealt as that many -1/-1 counters instead of marked " \
+                 "damage, put by its controller.", %w[702.80a 702.80c 702.80d 120.3d]]
       }.each { |name, (description, rules)| Evergreen.define(name, description, rules) }
 
       # Flash (CR 702.8): may be cast any time its controller could cast an instant.

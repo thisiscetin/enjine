@@ -15,8 +15,8 @@ module Enjine
       POWER_TOUGHNESS = %r{\A([+-]\d+)/([+-]\d+)\z}
 
       # CR 122.1b: the keywords a keyword counter can be (those the engine implements).
-      KEYWORDS = %i[flying first_strike double_strike deathtouch haste hexproof indestructible lifelink menace reach
-                    trample vigilance].freeze
+      KEYWORDS = %i[flying first_strike double_strike deathtouch decayed haste hexproof indestructible lifelink menace
+                    reach trample vigilance].freeze
 
       module_function
 

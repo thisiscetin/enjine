@@ -96,7 +96,7 @@ module Enjine
         state.battlefield.select do |id|
           obj = object(id)
           obj.controller == defending_player && !obj.tapped && chars(obj).creature? && !state.blockers.key?(id) &&
-            !chars(obj).keyword?(:cant_block)
+            !chars(obj).keyword?(:cant_block) && !chars(obj).keyword?(:decayed) # CR 702.147a
         end
       end
 

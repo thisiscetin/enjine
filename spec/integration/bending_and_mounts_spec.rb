@@ -60,6 +60,17 @@ RSpec.describe "Bending, mounts and body keywords" do
       spell("Spec Gust Rebuke", [{ "airbend" => { "to" => { "target" => 0 } } }],
             targets: [{ "one_of" => ["creature", "spell"] }], types: ["instant"], cost: "{W}"),
       creature("Spec Air Watcher", [{ "triggered" => { "when" => { "airbends" => { "controller" => "any" } },
+                                                       "effects" => [{ "gain_life" => { "amount" => 1 } }] } }]),
+      creature("Spec Thorn Wyrm", [], power: 2, toughness: 4, keywords: ["wither"]),
+      spell("Spec Thorn Burst", [{ "deal_damage" => { "amount" => 2, "to" => { "target" => 0 } } }],
+            targets: ["any_target"], types: ["instant"], cost: "{R}").merge("keywords" => ["wither"]),
+      creature("Spec Rot Hulk", [], power: 5, toughness: 5, keywords: ["decayed", "trample"]),
+      spell("Spec Rot Renewal", [{ "add_counters" => { "counter" => "decayed", "amount" => 1, "to" => { "target" => 0 } } }],
+            targets: ["creature"]),
+      creature("Spec Weary Knight", [{ "activated" => { "cost" => ["tap", "exert"], "effects" => [draw] } }],
+               power: 2, toughness: 1),
+      creature("Spec Ember Pupil", [{ "firebending" => { "amount" => 1 } },
+                                    { "triggered" => { "when" => { "firebends" => {} },
                                                        "effects" => [{ "gain_life" => { "amount" => 1 } }] } }])
     ]
   end
@@ -314,6 +325,87 @@ RSpec.describe "Bending, mounts and body keywords" do
       pay(game)
       pass_both(game)
       expect(game.state.players[1].life).to eq(17)
+    end
+  end
+
+  describe "wither (CR 702.80)" do
+    it "deals damage to creatures as -1/-1 counters, and to players as usual (CR 702.80a, 120.3d)" do
+      game = board(hand: ["Spec Thorn Burst", "Spec Thorn Burst"], bob_field: ["Hill Giant"], pool: { R: 2 })
+      giant = obj_id(game, "Hill Giant")
+      cast(game, "Spec Thorn Burst", target: giant)
+      pay(game)
+      pass_both(game)
+      expect(game.state.object(giant).counters).to eq("-1/-1" => 2)
+      expect(game.state.object(giant).damage).to eq(0)
+      cast(game, "Spec Thorn Burst", target: "player:bob")
+      pay(game)
+      pass_both(game)
+      expect(game.state.players[1].life).to eq(18)
+    end
+
+    it "in combat: the blocker gets -1/-1 counters (CR 510.2, 702.80c)" do
+      game = board(field: ["Spec Thorn Wyrm"], bob_field: ["Hill Giant"], pool: {}, step: :beginning_of_combat)
+      giant = obj_id(game, "Hill Giant")
+      pass_both(game)
+      game.submit(type: "attack", object: obj_id(game, "Spec Thorn Wyrm"), target: "player:bob")
+      game.submit(type: "done") if game.pending_decision.kind == "declare_attackers"
+      pass_both(game)
+      game.submit(type: "block", object: giant, attacker: obj_id(game, "Spec Thorn Wyrm"))
+      game.submit(type: "done") if game.pending_decision.kind == "declare_blockers"
+      pass_both(game)
+      expect(game.state.object(giant).counters).to eq("-1/-1" => 2)
+    end
+  end
+
+  describe "decayed (CR 702.147)" do
+    it "can't block, and is sacrificed at end of combat after it attacks (CR 702.147a)" do
+      game = board(field: ["Spec Rot Hulk"], bob_field: ["Spec Rot Hulk"], pool: {}, step: :beginning_of_combat)
+      mine = mine(game, "spec_rot_hulk").first
+      pass_both(game)
+      game.submit(type: "attack", object: mine, target: "player:bob")
+      game.submit(type: "done") if game.pending_decision.kind == "declare_attackers"
+      pass_both(game) # the attack trigger resolves
+      expect(game.pending_decision.kind).to eq("priority") # bob's Hulk can't block: no declare_blockers decision
+      skip_to(game, :end_of_combat)
+      pass_both(game)
+      expect(game.state.players[1].life).to eq(15)
+      expect(game.state.battlefield).not_to include(mine)
+      expect(ids_in(game, "alice", :graveyard).map { game.state.object(it).card }).to include("spec_rot_hulk")
+    end
+
+    it "a decayed counter gives it decayed (CR 122.1b)" do
+      game = board(hand: ["Spec Rot Renewal"], field: ["Grizzly Bears"], pool: { C: 1 })
+      bears = obj_id(game, "Grizzly Bears")
+      cast(game, "Spec Rot Renewal", target: bears)
+      pay(game)
+      pass_both(game)
+      expect(chars(game, bears).keyword?(:decayed)).to be(true)
+    end
+  end
+
+  describe "exert (CR 701.43)" do
+    it "as a cost: it doesn't untap during its controller's next untap step only (CR 701.43a)" do
+      game = board(field: ["Spec Weary Knight"], pool: {})
+      knight = obj_id(game, "Spec Weary Knight")
+      game.submit(game.legal_options.find { it[:type] == "activate" && it[:object] == knight })
+      pass_both(game)
+      expect(game.state.object(knight).tapped).to be(true)
+      skip_to(game, :upkeep, turn: 5)
+      expect(game.state.object(knight).tapped).to be(true)
+      skip_to(game, :upkeep, turn: 7)
+      expect(game.state.object(knight).tapped).to be(false)
+    end
+  end
+
+  describe "firebending (CR 702.189b)" do
+    it "its ability resolving is firebending" do
+      game = board(field: ["Spec Ember Pupil"], pool: {}, step: :beginning_of_combat)
+      pass_both(game)
+      game.submit(type: "attack", object: obj_id(game, "Spec Ember Pupil"), target: "player:bob")
+      game.submit(type: "done") if game.pending_decision.kind == "declare_attackers"
+      pass_both(game) # firebending
+      pass_both(game) # the firebends trigger
+      expect(game.state.players[0].life).to eq(21)
     end
   end
 end

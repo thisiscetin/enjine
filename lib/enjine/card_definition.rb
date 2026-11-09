@@ -108,7 +108,17 @@ module Enjine
     def ability(ref)
       (@ability_instances.find { it.ref == ref } || @nested_instances.find { it.ref == ref })&.ability ||
         @delayed_abilities[ref] || @effect_granted.values.flatten.find { it.ref == ref }&.ability ||
-        (ref.to_s.start_with?("keyword:") && CardDefinition.keyword_instances(ref.delete_prefix("keyword:")).first&.ability) || nil
+        (ref.to_s.start_with?("keyword:") && CardDefinition.keyword_instances(ref.delete_prefix("keyword:")).first&.ability) ||
+        CardDefinition.keyword_delayed(ref)
+    end
+
+    # A delayed triggered ability created by a keyword's ability (decayed's "sacrifice it at end of combat"):
+    # it's part of the keyword's data, referenced "delayed:keyword:<name>...".
+    def self.keyword_delayed(ref)
+      keyword = ref.to_s[/\Adelayed:keyword:([a-z_]+)/, 1] or return nil
+      every = ->(effects) { effects.flat_map { [it, *every.call(it.nested_effects)] } }
+      every.call(keyword_instances(keyword).flat_map { it.ability.try_effects })
+           .find { it.respond_to?(:delayed_ability) && it.ref == ref }&.delayed_ability
     end
 
     # The abilities a keyword stands for ("Prowess" is a triggered ability, CR 702.108a), as instances
