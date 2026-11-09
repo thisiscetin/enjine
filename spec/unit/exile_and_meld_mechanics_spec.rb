@@ -37,10 +37,12 @@ RSpec.describe "Exile, suspend and meld primitives: validation" do
       .to include("abilities[1].suspend.amount: must be an integer >= 1")
     expect(errors_for(spell(abilities: [{ "suspend" => { "amount" => 1, "cost" => "{W}", "time" => 2 } }])))
       .to include("abilities[1].suspend: unknown parameter \"time\"")
-    expect(errors_for(spell(effects: [{ "suspend" => { "to" => "self" } }]))).to include("abilities[0].spell.effects[0].suspend.amount: required")
+    expect(errors_for(spell(effects: [{ "suspend" => { "to" => "self" } }])))
+      .to include("abilities[0].spell.effects[0].suspend.amount: required")
     expect(errors_for(spell(effects: [{ "cast_free" => { "play" => "yes" } }])))
       .to include("abilities[0].spell.effects[0].cast_free.play: must be true or false")
-    expect(errors_for(creature([{ "devour" => { "amount" => 2, "each" => 3 } }]))).to include(a_string_starting_with("abilities[0].devour.each"))
+    expect(errors_for(creature([{ "devour" => { "amount" => 2,
+                                                "each" => 3 } }]))).to include(a_string_starting_with("abilities[0].devour.each"))
   end
 
   it "describes them" do
