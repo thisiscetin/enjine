@@ -6909,5 +6909,637 @@
         }
       }
     ]
+  },
+  {
+    "name": "Mirrorbrood Larva",
+    "mana_cost": "{2}{W}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "insect"
+    ],
+    "power": 1,
+    "toughness": 1,
+    "abilities": [
+      {
+        "activated": {
+          "cost": [
+            {
+              "mana": "{4}"
+            },
+            "tap"
+          ],
+          "timing": "sorcery",
+          "effects": [
+            {
+              "create_token_copy": {
+                "of": "self"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Echo Forger",
+    "mana_cost": "{2}",
+    "types": [
+      "artifact"
+    ],
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "enters": {}
+          },
+          "effects": [
+            {
+              "create_token": {
+                "token": "Food"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "activated": {
+          "cost": [
+            {
+              "mana": "{2}"
+            },
+            "tap"
+          ],
+          "targets": [
+            {
+              "permanent": {
+                "token": true,
+                "controller": "you"
+              }
+            }
+          ],
+          "effects": [
+            {
+              "create_token_copy": {
+                "of": {
+                  "target": 0
+                },
+                "tapped": true
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Shapeshift Infiltrator",
+    "mana_cost": "{3}{U}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "shapeshifter"
+    ],
+    "power": 0,
+    "toughness": 0,
+    "abilities": [
+      {
+        "enter_as_copy": {
+          "of": {
+            "permanent": {
+              "any_of": [
+                "artifact",
+                "creature"
+              ]
+            }
+          },
+          "except": {
+            "legendary": false
+          },
+          "with_counters": true
+        }
+      }
+    ]
+  },
+  {
+    "name": "Facet Mimic Rite",
+    "mana_cost": "{2}{U}",
+    "types": [
+      "sorcery"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "targets": [
+            {
+              "creature": {
+                "controller": "you"
+              }
+            }
+          ],
+          "effects": [
+            {
+              "create_token_copy": {
+                "of": {
+                  "target": 0
+                },
+                "except": {
+                  "legendary": false
+                }
+              }
+            },
+            {
+              "grant": {
+                "keywords": [
+                  "haste"
+                ],
+                "to": {
+                  "result": 0
+                }
+              }
+            },
+            {
+              "delayed_trigger": {
+                "when": {
+                  "step_begins": {
+                    "step": "end",
+                    "whose": "each"
+                  }
+                },
+                "effects": [
+                  {
+                    "sacrifice": {
+                      "to": {
+                        "result": 0
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Shadow Twin Raid",
+    "mana_cost": "{2}{U}{B}",
+    "types": [
+      "sorcery"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "targets": [
+            {
+              "creature": {
+                "controller": "opponent"
+              }
+            }
+          ],
+          "effects": [
+            {
+              "create_token_copy": {
+                "of": {
+                  "target": 0
+                },
+                "except": {
+                  "keywords": [
+                    "menace",
+                    "changeling"
+                  ]
+                }
+              }
+            },
+            {
+              "delayed_trigger": {
+                "when": {
+                  "step_begins": {
+                    "step": "end",
+                    "whose": "each"
+                  }
+                },
+                "effects": [
+                  {
+                    "exile": {
+                      "to": {
+                        "result": 0
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Signal Pin",
+    "mana_cost": "{3}",
+    "types": [
+      "artifact"
+    ],
+    "subtypes": [
+      "communicator",
+      "equipment"
+    ],
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "cast": {
+              "self": true
+            }
+          },
+          "effects": [
+            {
+              "copy_spell": {
+                "of": "self"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "static": {
+          "affects": "attached",
+          "abilities": [
+            {
+              "triggered": {
+                "when": {
+                  "attacks": {
+                    "subject": "self"
+                  }
+                },
+                "while": {
+                  "at_least": 1,
+                  "controls": {
+                    "each": {
+                      "creature": {
+                        "other": true,
+                        "attached_subtypes": [
+                          "communicator"
+                        ]
+                      }
+                    },
+                    "controller": "you"
+                  }
+                },
+                "effects": [
+                  {
+                    "grant": {
+                      "keywords": [
+                        "cant_be_blocked"
+                      ],
+                      "to": "self"
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      },
+      {
+        "equip": {
+          "cost": [
+            {
+              "mana": "{2}"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Doubled Retort",
+    "mana_cost": "{1}{U}{R}",
+    "types": [
+      "instant"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "targets": [
+            {
+              "spell": {
+                "controller": "you"
+              }
+            }
+          ],
+          "effects": [
+            {
+              "copy_spell": {
+                "of": {
+                  "target": 0
+                },
+                "new_targets": true
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Echoing Recall",
+    "mana_cost": "{3}{R}",
+    "types": [
+      "sorcery"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "targets": [
+            {
+              "graveyard_card": {
+                "controller": "you",
+                "any_of": [
+                  "instant",
+                  "sorcery"
+                ]
+              }
+            }
+          ],
+          "effects": [
+            {
+              "exile": {
+                "to": {
+                  "target": 0
+                }
+              }
+            },
+            {
+              "copy_card": {
+                "of": {
+                  "result": 0
+                },
+                "amount": 2
+              }
+            },
+            {
+              "cast_free": {
+                "to": {
+                  "result": 1
+                },
+                "count": "any"
+              }
+            },
+            {
+              "exile_this_spell": {}
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Stackwise Trickster",
+    "mana_cost": "{2}{R}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "shapeshifter"
+    ],
+    "power": 2,
+    "toughness": 2,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "enters": {}
+          },
+          "effects": [
+            {
+              "shuffle_library": {}
+            },
+            {
+              "exile_until": {
+                "until": "nonland"
+              }
+            },
+            {
+              "grant_ability": {
+                "to": {
+                  "result": 1
+                },
+                "for": {
+                  "not_types": [
+                    "land"
+                  ]
+                },
+                "ability": {
+                  "activated": {
+                    "cost": [
+                      {
+                        "exile_from_hand": {}
+                      }
+                    ],
+                    "timing": "your_turn",
+                    "zone": "exile",
+                    "effects": [
+                      {
+                        "copy_card": {
+                          "of": "self"
+                        }
+                      },
+                      {
+                        "cast": {
+                          "to": {
+                            "result": 0
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Many-Faced Wanderer",
+    "mana_cost": "{2}{U}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "shapeshifter"
+    ],
+    "keywords": [
+      "changeling"
+    ],
+    "power": 2,
+    "toughness": 2
+  },
+  {
+    "name": "Heirloom Smith",
+    "mana_cost": "{1}{U}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "artificer"
+    ],
+    "power": 1,
+    "toughness": 1,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "enters": {}
+          },
+          "effects": [
+            {
+              "create_token": {
+                "token": {
+                  "name": "Smith's Charm",
+                  "colors": [],
+                  "types": [
+                    "artifact"
+                  ],
+                  "subtypes": [
+                    "equipment"
+                  ],
+                  "abilities": [
+                    {
+                      "static": {
+                        "affects": "attached",
+                        "pump": {
+                          "power": 1,
+                          "toughness": 1
+                        }
+                      }
+                    },
+                    {
+                      "equip": {
+                        "cost": [
+                          {
+                            "mana": "{2}"
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "attach": {
+                "to": "self",
+                "attachment": {
+                  "result": 0
+                }
+              }
+            }
+          ]
+        }
+      },
+      {
+        "activated": {
+          "cost": [
+            {
+              "mana": "{2}"
+            }
+          ],
+          "targets": [
+            {
+              "permanent": {
+                "subtypes": [
+                  "equipment"
+                ],
+                "controller": "you"
+              }
+            }
+          ],
+          "effects": [
+            {
+              "become_copy": {
+                "to": {
+                  "each": {
+                    "permanent": {
+                      "subtypes": [
+                        "equipment"
+                      ],
+                      "token": true
+                    }
+                  },
+                  "controller": "you"
+                },
+                "of": {
+                  "target": 0
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Ashen Ensign",
+    "mana_cost": "{1}{R}",
+    "types": [
+      "creature"
+    ],
+    "supertypes": [
+      "legendary"
+    ],
+    "subtypes": [
+      "soldier"
+    ],
+    "keywords": [
+      "haste"
+    ],
+    "power": 2,
+    "toughness": 1,
+    "abilities": [
+      {
+        "activated": {
+          "cost": [
+            {
+              "mana": "{2}{R}"
+            },
+            "exile_self_from_graveyard"
+          ],
+          "timing": "sorcery",
+          "effects": [
+            {
+              "create_token_copy": {
+                "of": "self"
+              }
+            },
+            {
+              "delayed_trigger": {
+                "when": {
+                  "step_begins": {
+                    "step": "end",
+                    "whose": "each"
+                  }
+                },
+                "effects": [
+                  {
+                    "sacrifice": {
+                      "to": {
+                        "result": 0
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    ]
   }
 ]

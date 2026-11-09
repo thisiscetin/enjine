@@ -62,7 +62,7 @@ module Enjine
         def cards(engine, ctx)
           refs(engine, ctx).select do |id|
             obj = engine.state.objects[id]
-            obj && ZONES.include?(obj.zone) && !engine.catalog.fetch(obj.card).token? &&
+            obj && ZONES.include?(obj.zone) && !engine.token?(obj) &&
               !(engine.chars(obj).types - %i[instant sorcery]).empty?
           end
         end

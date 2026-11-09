@@ -150,10 +150,16 @@ module Enjine
       @all_effects = nested(every.flat_map do |ability|
         ability.respond_to?(:modes) && ability.modal? ? ability.modes.flat_map(&:effects) : ability.try_effects
       end).freeze
-      @delayed_abilities = @all_effects.select { it.respond_to?(:delayed_ability) }.to_h { [it.ref, it.delayed_ability] }.freeze
+      @delayed_abilities = @all_effects.select { it.respond_to?(:delayed_ability) }.to_h { [it.ref, it.delayed_ability] }
+                                       .merge(granted_by_effects).freeze
     end
 
     def nested(effects) = effects.flat_map { [it, *nested(it.nested_effects)] }
+
+    # Abilities effects grant ("that card gains ...", Effects::GrantAbility), referenced by the effect's path.
+    def granted_by_effects
+      @all_effects.select { it.respond_to?(:granted_ability) && it.granted_ability }.to_h { [it.ref, it.granted_ability] }
+    end
 
     def validate_type_specific(errors)
       errors << "power/toughness: only creatures have power and toughness" if !creature? && (@power || @toughness)

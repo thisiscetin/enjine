@@ -148,7 +148,9 @@ module Enjine
     def validate_object(obj, path, catalog, next_id, errors)
       id = obj["id"]
       match = /\A([a-z0-9_]+)#(\d+)\z/.match(id.to_s)
-      errors << "#{path}.id: malformed #{id.inspect}" unless match && match[1] == obj["card"]
+      own = (obj["memory"].is_a?(Hash) && obj["memory"]["own_card"]) || obj["card"] # a copy (Engine::Copies)
+      errors << "#{path}.id: malformed #{id.inspect}" unless match && match[1] == own
+      errors << "#{path}.memory.own_card: #{own.inspect} is not in the catalog" unless catalog.include?(own.to_s)
       errors << "#{path}.id: #{id} is not below next_id #{next_id}" if match && match[2].to_i >= next_id.to_i
       errors << "#{path}.card: #{obj["card"].inspect} is not in the catalog" unless catalog.include?(obj["card"].to_s)
       %w[owner controller].each { |k| errors << "#{path}.#{k}: must be 0 or 1" unless [0, 1].include?(obj[k]) }

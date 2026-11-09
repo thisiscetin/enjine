@@ -115,18 +115,43 @@ Rules: CR 701.72a, CR 701.72b, CR 205.1b, CR 613.1b, CR 613.1d
 
 ## attach
 
-Attach this Aura or Equipment (the ability's source) to the referenced permanent. Nothing happens if it can't legally be attached to it, if it's already attached to it, or if the source has left the battlefield.
+Attach this Aura or Equipment (the ability's source), or the `attachment` (e.g. a token an earlier effect created, {"result": n}), to the referenced permanent. Nothing happens if it can't legally be attached to it, if it's already attached to it, or if the attachment has left the battlefield.
 
 Rules: CR 701.3a, CR 701.3b, CR 701.3c, CR 301.5c
 
 | Parameter | Description |
 | --- | --- |
-| `to` | selector (a single target) |
+| `to` | selector naming one permanent: {"target": n}, "self" or {"result": n} |
+| `attachment` | selector (default: the source) |
 
 ```json
 {
   "attach": {
     "to": {
+      "target": 0
+    }
+  }
+}
+```
+
+## become_copy
+
+Each referenced permanent becomes a copy of the (first) object `of` refers to, with the `except` modifications, until end of turn (default) or for as long as it stays on the battlefield (`duration: "permanent"`). It keeps its counters, status and other effects; nothing enters or leaves, so no enter or leave abilities trigger. Several copy effects apply in timestamp order.
+
+Rules: CR 707.2, CR 707.4, CR 613.2a, CR 613.7, CR 611.2a, CR 514.2
+
+| Parameter | Description |
+| --- | --- |
+| `to` | selector (the permanents that become copies) |
+| `of` | selector (what they copy) |
+| `except` | {"legendary": false, "keywords": [...], "types": [...], "subtypes": [...], "supertypes": [...], "name": ..., "power": n, "toughness": n, "colors": [...]} |
+| `duration` | end_of_turn | permanent |
+
+```json
+{
+  "become_copy": {
+    "to": "self",
+    "of": {
       "target": 0
     }
   }
@@ -152,6 +177,30 @@ Rules: CR 120.3, CR 120.4, CR 608.2b
     },
     "to": {
       "target": 1
+    }
+  }
+}
+```
+
+## cast
+
+The controller may cast referenced cards (or card copies) now, while this resolves, paying their costs; timing restrictions don't apply. `to`, `for`, `not_types`, `max_mana_value` and `count` work as for `cast_free`.
+
+Rules: CR 608.2g, CR 707.12, CR 707.12a, CR 601.2a, CR 601.2f
+
+| Parameter | Description |
+| --- | --- |
+| `to` | selector |
+| `for` | card spec |
+| `not_types` | list of card types |
+| `max_mana_value` | amount |
+| `count` | 1 or "any" |
+
+```json
+{
+  "cast": {
+    "to": {
+      "result": 0
     }
   }
 }
@@ -214,6 +263,49 @@ Rules: CR 701.20a, CR 701.20e, CR 400.7j, CR 608.2c, CR 607.2a, CR 118.12
     },
     "optional": true,
     "put": "hand"
+  }
+}
+```
+
+## copy_card
+
+Create `amount` copies of each card `of` refers to ("self": the source card), in the zone that card is in, owned by you. They are the effect's result, e.g. for `cast_free` or `cast`. A card copy ceases to exist if it is anywhere but the stack or the battlefield (so one that isn't cast now is gone at the next state-based-action check).
+
+Rules: CR 707.12, CR 707.12a, CR 707.10a, CR 704.5d
+
+| Parameter | Description |
+| --- | --- |
+| `of` | selector (cards) |
+| `amount` | amount (default 1) |
+
+```json
+{
+  "copy_card": {
+    "of": {
+      "result": 0
+    },
+    "amount": 2
+  }
+}
+```
+
+## copy_spell
+
+Copy each spell `of` refers to ("self": the spell this ability or spell belongs to) `amount` times. The copies are put on the stack under the referenced player's control (default: you) with the same modes, X, kicker and targets; they aren't cast. With `new_targets: true` the controller may choose new targets for each copy. A copy of a permanent spell becomes a token as it resolves.
+
+Rules: CR 707.10, CR 707.10a, CR 707.10c, CR 707.10f, CR 608.3f
+
+| Parameter | Description |
+| --- | --- |
+| `of` | selector (spells on the stack) |
+| `amount` | amount (default 1) |
+| `new_targets` | boolean |
+| `to` | selector (default "you") |
+
+```json
+{
+  "copy_spell": {
+    "of": "self"
   }
 }
 ```
@@ -304,6 +396,33 @@ Rules: CR 111.1, CR 111.10, CR 701.7a, CR 704.5d
       ],
       "power": 1,
       "toughness": 1
+    }
+  }
+}
+```
+
+## create_token_copy
+
+For each object `of` refers to (a permanent, a card in any zone, or the source with "self"), the referenced players (default: you) each create `amount` tokens that are copies of it: its copiable values (its card as modified by other copy effects, not counters, status or other effects), with the `except` modifications. The tokens are the effect's result, for later effects such as granting haste or a delayed sacrifice.
+
+Rules: CR 707.2, CR 707.8, CR 707.9a, CR 707.9b, CR 111.1, CR 614.1c
+
+| Parameter | Description |
+| --- | --- |
+| `of` | selector (what to copy) |
+| `amount` | amount (default 1) |
+| `tapped` | boolean |
+| `except` | {"legendary": false, "keywords": [...], "types": [...], "subtypes": [...], "supertypes": [...], "name": ..., "power": n, "toughness": n, "colors": [...]} |
+| `to` | selector (default "you") |
+
+```json
+{
+  "create_token_copy": {
+    "of": {
+      "target": 0
+    },
+    "except": {
+      "legendary": false
     }
   }
 }
@@ -711,6 +830,46 @@ Rules: CR 611.2a, CR 611.2c, CR 613.1f, CR 514.2
     ],
     "to": {
       "target": 0
+    }
+  }
+}
+```
+
+## grant_ability
+
+Each referenced object (a permanent, or a card in any zone, e.g. an exiled card) gains `ability` (any ability entry) for as long as it stays in its zone (default) or until end of turn. `for` (a card spec) keeps only matching objects ("that nonland card"). An activated ability with `zone` works from that zone ("activate only if this card is exiled").
+
+Rules: CR 113.6b, CR 611.2a, CR 613.1f
+
+| Parameter | Description |
+| --- | --- |
+| `ability` | an ability |
+| `to` | selector |
+| `for` | card spec |
+| `duration` | permanent | end_of_turn |
+
+```json
+{
+  "grant_ability": {
+    "to": {
+      "result": 0
+    },
+    "ability": {
+      "activated": {
+        "cost": [
+          {
+            "mana": "{1}"
+          }
+        ],
+        "zone": "exile",
+        "effects": [
+          {
+            "draw": {
+              "amount": 1
+            }
+          }
+        ]
+      }
     }
   }
 }

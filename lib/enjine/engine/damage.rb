@@ -131,7 +131,7 @@ module Enjine
 
       # CR 704.5d / 111.7: a token in a zone other than the battlefield ceases to exist.
       def remove_tokens_outside_battlefield!
-        gone = state.objects.values.select { it.zone != :battlefield && it.zone != :stack && catalog.fetch(it.card).token? }
+        gone = state.objects.values.select { ceases_to_exist?(it) } # and copies, CR 707.10a (Engine::Copies)
         gone.each do |obj|
           state.zone_list(obj.zone, obj.owner).delete(obj.id)
           state.objects.delete(obj.id)

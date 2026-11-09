@@ -287,10 +287,12 @@ Give the card the subtype `aura` (enchantments only) or `equipment` (artifacts o
 | "Whenever equipped creature attacks, …" | `{ "triggered": { "when": { "attacks": { "subject": "attached" } }, … } }` |
 | "When this Aura enters, enchanted creature gains … until end of turn." | an `enters` trigger with `{ "grant": { …, "to": "attached" } }` |
 | "attach it to target creature you control" | `{ "attach": { "to": { "target": 0 } } }` |
+| "create an Equipment token …, then attach it to this creature" | `create_token`, then `{ "attach": { "to": "self", "attachment": { "result": 0 } } }` |
+| "… with a Communicator attached to it" | the filter restriction `{ "creature": { "attached_subtypes": ["communicator"] } }` |
 
 Not supported yet: Auras that enchant players, Equipment that enters attached or
-equips for a non-mana cost, and granted triggered or activated abilities ("equipped
-creature has 'Whenever …'").
+equips for a non-mana cost, and granted activated abilities ("equipped creature has
+'{T}: …'"). Granted triggered abilities are the static `abilities` list (4.11).
 
 ### 4.9 Station cards, Sagas and other set mechanics
 
@@ -406,6 +408,46 @@ Generic shapes (N, [quality] and [zone] stand for whatever the card says):
 | cards exiled with this; exile until this leaves the battlefield | `exile` with `"link": true` / `"until_source_leaves": true`; the selector `"exiled_with"` |
 | that permanent's controller may search their library | `search_library` with `"searcher": { "controller_of": { "target": 0 } }, "may": true` |
 | a permanent explores | `{ "explore": { "to": … } }` |
+
+### 4.13 Copies (CR 707)
+
+A copy has the **copiable values** of what it copies: the values printed on its card,
+as changed by other copy effects and their exceptions, and nothing else: no counters,
+tapped status, damage or other effects (CR 707.2). Every copy primitive names what it
+copies with `of` (a selector; `"self"` is the source in any zone, even a card that
+exiled itself from a graveyard to pay the cost) and takes the same `except` object for
+"except …" (CR 707.9a-b), which a copy of the copy keeps:
+`{ "legendary": false, "keywords": ["menace"], "types": [...], "subtypes": [...],
+"supertypes": [...], "name": "…", "power": 1, "toughness": 1, "colors": [] }`.
+
+| Oracle words | Data |
+| --- | --- |
+| "create a token that's a copy of target creature, except it isn't legendary" | `{ "create_token_copy": { "of": { "target": 0 }, "except": { "legendary": false } } }` (`amount`, `tapped`, `to`: the players who create them) |
+| "That token gains haste. Sacrifice it at the beginning of the next end step." | `grant` and `delayed_trigger` with `{ "result": n }` (the tokens are the effect's result) |
+| "exile target creature card from your graveyard, create a token that's a copy of it" | `exile`, then `{ "create_token_copy": { "of": { "result": 0 } } }` |
+| "you may have this creature enter as a copy of any artifact or creature on the battlefield …, with the same counters" | `{ "enter_as_copy": { "of": { "permanent": { "any_of": ["artifact", "creature"] } }, "except": { "legendary": false }, "with_counters": true } }` |
+| "… becomes a copy of target Equipment until end of turn" | `{ "become_copy": { "to": …, "of": { "target": 0 } } }` (`"duration": "permanent"` while it stays) |
+| "When you cast this spell, copy it." | a `{ "cast": { "self": true } }` trigger with `{ "copy_spell": { "of": "self" } }` |
+| "copy target instant or sorcery spell; you may choose new targets for the copy" | `{ "copy_spell": { "of": { "target": 0 }, "new_targets": true } }` |
+| "copy that card X times; you may cast the copies without paying their mana costs" | `{ "copy_card": { "of": { "result": 0 }, "amount": "x" } }`, then `cast_free` with `"to": { "result": 1 }, "count": "any"` |
+| "create a copy of this card; you may cast the copy" (paying its costs) | `{ "copy_card": { "of": "self" } }`, then `{ "cast": { "to": { "result": 0 } } }` |
+| "that card gains '…'" (also an exiled card) | `{ "grant_ability": { "to": { "result": 0 }, "ability": { … } } }` |
+| "Exile a card from your hand: …" (a cost) | `{ "exile_from_hand": {} }` (`count`, `card`: a card spec) |
+| "activate only if this card is exiled" | `"zone": "exile"` on the activated ability |
+| "Changeling (This object is every creature type.)" | `"keywords": ["changeling"]` |
+
+A token copy is a token (the filter `"token": true` matches it). A copy of a permanent
+spell becomes a token as it resolves (CR 608.3f). A spell copy that leaves the stack, or
+a card copy outside the stack and battlefield, ceases to exist (CR 707.10a).
+
+```json
+{ "name": "Example Duplicant", "mana_cost": "{3}{U}", "types": ["creature"], "subtypes": ["shapeshifter"],
+  "power": 0, "toughness": 0,
+  "abilities": [{ "enter_as_copy": { "of": "creature", "except": { "legendary": false } } },
+                { "activated": { "cost": [{ "mana": "{2}" }], "targets": [{ "creature": { "controller": "you" } }],
+                                 "effects": [{ "create_token_copy": { "of": { "target": 0 } } },
+                                             { "grant": { "keywords": ["haste"], "to": { "result": 0 } } }] } }] }
+```
 
 ---
 

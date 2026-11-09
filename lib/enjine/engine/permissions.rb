@@ -78,6 +78,7 @@ module Enjine
       # The method named `via`, or an error (the option was offered from this list).
       def play_method(index, id, via)
         return { "via" => "free", "play" => "cast", "alt" => FREE } if via == "free"
+        return { "via" => "resolving", "play" => "cast" } if via == "resolving" # CR 608.2g, 707.12: costs paid
 
         play_methods(index, id).find { it["via"] == via } or raise ArgumentError, "#{id} can't be played via #{via}"
       end
@@ -102,6 +103,14 @@ module Enjine
         obj = object(id)
         obj.kind == "card" && !chars(obj).land? && additional_costs_payable?(obj) &&
           ability_targetable?(spell_ability_of(obj), index, id)
+      end
+
+      # CR 608.2g, 707.12: whether a card could be cast now during resolution, paying its costs.
+      def castable_while_resolving?(index, id)
+        obj = object(id)
+        own = chars(obj).mana_cost or return false # CR 118.6a: no mana cost, can't be cast paying it
+        cost = Mana.sum_costs([own, *spell_extra_mana(obj, false)])
+        free_castable?(index, id) && affordable?(index, total_cost(index, cost, spell: obj), nil)
       end
 
       # The mana cost paid with a method: the card's own, nothing (CR 118.9) or the beam me up cost.
@@ -281,6 +290,7 @@ module Enjine
           controlled_since: nil, kind: "card", counters: {}, damage: 0, source: nil, ability: nil, targets: nil,
           loyalty_turn: nil, deathtouched: false, modes: nil, memory: {}, attached_to: nil
         )
+        carry_copy_status!(state.objects[origin["id"]], obj, zone) # a card copy stays one (Engine::Copies)
         list = state.zone_list(zone, obj.owner)
         list.insert([origin["index"], list.size].min, origin["id"])
       end

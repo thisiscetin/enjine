@@ -289,7 +289,10 @@ module Enjine
 
     def enters_from_answer(id, frame)
       choice = entering_choice(id)
-      choice && frame["enter"] ? choice.enters_for(frame["enter"].transform_keys(&:to_sym)) : nil
+      return nil unless choice && frame["enter"]
+
+      answer = frame["enter"].transform_keys(&:to_sym)
+      choice.respond_to?(:enters_with) ? choice.enters_with(self, answer) : choice.enters_for(answer)
     end
 
     def pay_entering_life!(controller, frame)
@@ -306,7 +309,8 @@ module Enjine
       remember_last_known!(id, lki) if lki # CR 608.2h (see Engine::TurnHistory)
       state.zone_list(old.zone, old.owner).delete(id)
       state.objects.delete(id)
-      fresh = create_object(old.card, old.owner, to)
+      fresh = create_object(own_card(old), old.owner, to)
+      carry_copy_status!(fresh, old, to) # a token or copy stays one (Engine::Copies)
       leave_combat!(id) if old.zone == :battlefield
       arrive!(fresh, old, data)
       list = state.zone_list(to, old.owner)
@@ -327,6 +331,7 @@ module Enjine
         fresh.controlled_since = state.turn
         fresh.memory["cast"] = true if data["enters"]["cast"] # CR 400.7d: it remembers it was cast
         fresh.memory.merge!(data["enters"]["memory"]) if data["enters"]["memory"] # CR 614.12: an "as this enters" choice
+        enter_as_copy!(fresh, data["enters"]["copy"]) if data["enters"]["copy"] # CR 707.5 (Engine::Copies)
         fresh.tapped = data["enters"]["tapped"]
         fresh.counters.merge!(data["enters"]["counters"])
         fresh.x = old.x if old.zone == :stack # CR 107.3m: its ETB abilities use the spell's X
@@ -339,9 +344,11 @@ module Enjine
 
     # CR 111.1: a token enters the battlefield under its creator's control. Entering replacement
     # effects apply to it like to any permanent (CR 614.1c, 614.12).
-    def create_token!(definition, controller, tapped: false)
+    # `memory`: a token that's a copy (Engine::Copies#create_token_copy!).
+    def create_token!(definition, controller, tapped: false, memory: nil)
       definition = catalog.fetch(propose("create_token", { "player" => controller, "token" => definition.id }).data["token"])
       obj = create_object(definition.id, controller, :battlefield)
+      obj.memory.merge!(memory) if memory
       enters = propose("zone_change", { "object" => obj.id, "to" => :battlefield, "controller" => controller,
                                         "reason" => "create_token",
                                         "enters" => { "tapped" => tapped, "counters" => {} } }).data["enters"]

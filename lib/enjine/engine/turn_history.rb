@@ -51,7 +51,8 @@ module Enjine
       # their memory) and by the spell or ability resolving now ("its controller" of a destroyed target).
       def remember_last_known!(id, lki)
         info = { "controller" => lki["controller"], "power" => lki["power"], "toughness" => lki["toughness"],
-                 "counters" => lki["counters"].dup }
+                 "counters" => lki["counters"].dup, "card" => lki["card"] }
+        info["except"] = lki["except"] if lki["except"] # what a copy of it copies (CR 707.2, Engine::Copies)
         state.stack.each do |sid|
           obj = object(sid)
           obj.memory["source_lki"] = info.dup if obj.ability? && obj.source == id

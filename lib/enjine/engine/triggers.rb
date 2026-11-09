@@ -15,7 +15,8 @@ module Enjine
       def last_known_info(obj)
         current = chars(obj)
         { "controller" => obj.controller, "card" => obj.card, "types" => current.types,
-          "power" => current.power, "toughness" => current.toughness, "counters" => obj.counters.dup }
+          "power" => current.power, "toughness" => current.toughness, "counters" => obj.counters.dup,
+          "token" => token?(obj), "except" => copy_exceptions(obj) }
       end
 
       def with_last_known(id, info)

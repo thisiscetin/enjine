@@ -55,7 +55,7 @@ module Enjine
         unrecorded do
           ids.each do |id|
             card = state.objects[id]
-            next unless card && card.zone == :exile && !catalog.fetch(card.card).token?
+            next unless card && card.zone == :exile && !token?(card)
 
             move!(id, :battlefield, reason: "return")
           end

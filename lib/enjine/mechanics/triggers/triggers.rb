@@ -86,8 +86,9 @@ module Enjine
           # Left the battlefield: as it last existed (CR 603.10a), from its card, last known types and counters.
           defn = engine.catalog.fetch(card)
           chars = types ? defn.printed_characteristics.with(types: types) : defn.printed_characteristics
-          counters = engine.last_known(object_id)&.fetch("counters", nil) || {}
-          @filter.matches_facts?(Filters::Facts.new(chars: chars, counters: counters, token: defn.token?))
+          lki = engine.last_known(object_id) || {}
+          token = lki.fetch("token") { defn.token? } # a token copy of a card (CR 111.1)
+          @filter.matches_facts?(Filters::Facts.new(chars: chars, counters: lki.fetch("counters", nil) || {}, token: token))
         end
 
         def controller_ok?(object_controller, you)

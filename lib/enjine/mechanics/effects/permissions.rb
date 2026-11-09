@@ -257,7 +257,7 @@ module Enjine
             return :done if answer["type"] == "done"
 
             locals["casting"] = answer["object"]
-            engine.begin_cast!(index, answer["object"], via: "free")
+            engine.begin_cast!(index, answer["object"], via: via)
             return :wait
           end
           return :done if @count == 1 && locals["cast"].to_i >= 1
@@ -265,8 +265,13 @@ module Enjine
           choices = candidates(engine, ctx, locals).map { { "type" => "cast", "object" => it } }
           return :done if choices.empty?
 
-          ask(engine, locals, index, "You may cast a spell without paying its mana cost", choices + [{ "type" => "done" }])
+          ask(engine, locals, index, prompt, choices + [{ "type" => "done" }])
         end
+
+        # How the cards are cast (Engine::Permissions#play_method); Effects::Cast pays the costs instead.
+        def via = "free"
+        def prompt = "You may cast a spell without paying its mana cost"
+        def castable_now?(engine, index, id) = engine.free_castable?(index, id)
 
         private
 
@@ -281,7 +286,7 @@ module Enjine
           cards(engine, ctx).select do |id|
             obj = engine.object(id)
             !locals.fetch("declined", []).include?(id) && @filter.match?(engine, obj) &&
-              (limit.nil? || engine.chars(obj).mana_cost&.mana_value.to_i <= limit) && engine.free_castable?(ctx.controller, id)
+              (limit.nil? || engine.chars(obj).mana_cost&.mana_value.to_i <= limit) && castable_now?(engine, ctx.controller, id)
           end
         end
 

@@ -74,6 +74,8 @@ module Enjine
       def loss = [from - to, 0].max
     end
     CountersChanged = define(:counters_changed, :object, :counter, :from, :to)
+    # CR 707.10: a copy of a spell put on the stack (not cast).
+    SpellCopied = define(:spell_copied, :player, :object, :card, :original, :targets)
     EffectStarted = define(:effect_started, :kind, :affected, :details)
     EffectsEnded = define(:effects_ended, :count)
     AttackerDeclared = define(:attacker_declared, :object, :target)

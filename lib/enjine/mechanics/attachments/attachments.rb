@@ -132,23 +132,35 @@ module Enjine
       # Attach the source Aura or Equipment to a permanent (CR 701.3).
       class Attach < Effect
         primitive :effect, :attach,
-                  description: "Attach this Aura or Equipment (the ability's source) to the referenced permanent. " \
-                               "Nothing happens if it can't legally be attached to it, if it's already attached " \
-                               "to it, or if the source has left the battlefield.",
+                  description: "Attach this Aura or Equipment (the ability's source), or the `attachment` (e.g. a token " \
+                               "an earlier effect created, {\"result\": n}), to the referenced permanent. Nothing " \
+                               "happens if it can't legally be attached to it, if it's already attached to it, or if " \
+                               "the attachment has left the battlefield.",
                   rules: %w[701.3a 701.3b 701.3c 301.5c],
-                  params: { "to" => "selector (a single target)" },
+                  params: { "to" => "selector naming one permanent: {\"target\": n}, \"self\" or {\"result\": n}",
+                            "attachment" => "selector (default: the source)" },
                   example: { "attach" => { "to" => { "target" => 0 } } }
 
-        def self.keys = %w[to if]
+        SINGLE = %i[target self result].freeze
 
-        def setup(_params, errors, path)
-          errors << "#{path}.to: must be {\"target\": n} (an attachment equips one object, CR 301.5c)" if to && to.kind != :target
+        def self.keys = %w[to attachment if]
+
+        def setup(params, errors, path)
+          if to && !SINGLE.include?(to.kind)
+            errors << "#{path}.to: must be {\"target\": n}, \"self\" or {\"result\": n} (an attachment equips one object, CR 301.5c)"
+          end
+          raw = Mechanics.fetch_param(params, :attachment)
+          @attachment = raw && Selector.build(raw, errors, "#{path}.attachment", targets_count: @targets_count,
+                                                                                 results_count: @results_count)
         end
 
         def apply(engine, ctx)
           target = objects(engine, ctx).first or return
-          source = engine.state.objects[ctx.source]
-          engine.attach!(source, target) if source && engine.state.battlefield.include?(source.id)
+          ids = @attachment ? @attachment.resolve(engine, ctx) : [ctx.source]
+          ids.each do |id|
+            source = engine.state.objects[id]
+            engine.attach!(source, target) if source && engine.state.battlefield.include?(id)
+          end
         end
 
         def to_s = "attach to #{to}"

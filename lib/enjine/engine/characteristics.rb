@@ -23,7 +23,7 @@ module Enjine
         base = copy_base(object) # layer 1 (CR 613.2a-c): its copiable values
         return board_characteristics.fetch(object.id, base) if object.zone == :battlefield
 
-        defn.defined_pt? ? defined_power_toughness(object, base, defn) : base
+        defined_pt_copied?(object) ? defined_power_toughness(object, base, defn) : base
       end
 
       def power(object) = chars(object).power.to_i
@@ -78,14 +78,13 @@ module Enjine
 
       # ---- layer 1 (CR 613.2a-c, 707.2) ---------------------------------------------------------
 
-      # The object's copiable values: the printed characteristics of its card, which is the copied card
-      # while a copy effect applies (Engine::Copies keeps GameObject#card on it), with the exceptions of the
-      # copy effect (CR 707.9a-b: "except it isn't legendary", "except it has menace", kept in
-      # memory["copy_of"]["except"]). Then the characteristic-defining changeling (CR 702.73a, all zones)
-      # and abilities effects grant to a card outside the battlefield (Q's exiled card, CR 113.6b).
+      # The object's copiable values (CR 707.2): the printed characteristics of its card, which is the
+      # copied card while a copy effect applies (see Engine::Copies), with the exceptions of the copy effect
+      # (CR 707.9a-b: "except it isn't legendary", "except it has menace"). Then the characteristic-defining
+      # changeling (CR 702.73a, all zones) and abilities a card outside the battlefield gained (CR 113.6b).
       def copy_base(obj)
         defn = definition(obj)
-        except = obj.memory["copy_of"]&.[]("except")
+        except = copy_exceptions(obj)
         base = if except && !except.empty?
                  Mechanics::Keywords::Changeling.apply(Copies.apply_exceptions(defn.printed_characteristics, except))
                elsif defn.keywords.include?(:changeling)
@@ -93,10 +92,16 @@ module Enjine
                else
                  defn.printed_characteristics
                end
-        return base if obj.zone == :battlefield || state.effects.none? { it["kind"] == "grant_ability" }
+        return base if state.effects.none? { it["kind"] == "card_ability" }
 
         granted = card_granted_abilities(obj)
         granted.empty? ? base : base.with(abilities: (base.abilities + granted).freeze)
+      end
+
+      # CR 604.3, 707.9d: a characteristic-defining power/toughness, unless a copy exception sets them.
+      def defined_pt_copied?(obj)
+        except = copy_exceptions(obj)
+        definition(obj).defined_pt? && !(except&.key?("power") || except&.key?("toughness"))
       end
 
       # Layers 1-4: the object's own changes (Engine::SetMechanics#own_layers), then effects that set its
@@ -135,7 +140,7 @@ module Enjine
       # and pumps (CR 613.4c). Objects without power and toughness are unchanged.
       def power_toughness_layers(obj, base, statics, bonuses, effects)
         defn = definition(obj)
-        base = defined_power_toughness(obj, base, defn) if defn.defined_pt? && base.creature?
+        base = defined_power_toughness(obj, base, defn) if base.creature? && defined_pt_copied?(obj)
         return base if base.power.nil?
 
         power = base.power
@@ -212,6 +217,7 @@ module Enjine
       # CR 514.2: damage wears off and "until end of turn" effects end.
       def cleanup_turn!
         expire_permissions! # Engine::Permissions
+        end_copy_effects! # Engine::Copies
         state.battlefield.each do |id|
           object(id).damage = 0
           object(id).deathtouched = false

@@ -174,7 +174,7 @@ module Enjine
                    "index" => state.zone_list(card.zone, card.owner).index(card_id) }
         obj = move!(card_id, :stack, controller: index, reason: "cast")
         extra = method ? { "method" => method } : {}
-        extra["no_priority"] = true if via == "free"
+        extra["no_priority"] = true if %w[free resolving].include?(via) # cast while resolving (CR 608.2g)
         cost = method ? method_cost(obj, method) : definition(obj).mana_cost
         start_casting!(index, obj.id, "spell", origin: origin, cost: cost, extra: extra)
       end
@@ -185,10 +185,11 @@ module Enjine
         ability = chars(source).ability(ability_ref)
         # CR 602.2a: activating from a hidden zone reveals the card.
         emit Events::CardRevealed.new(player: name(index), object: source_id, card: source.card) if source.zone == :hand
-        obj = create_object(source.card, index, :stack)
+        card, ref = granted_origin(ability_ref) # a granted ability lives in the granting card's data
+        obj = create_object(card || source.card, index, :stack)
         obj.kind = "ability"
         obj.source = source_id
-        obj.ability = ability_ref
+        obj.ability = ref || ability_ref
         state.stack.unshift(obj.id)
         start_casting!(index, obj.id, "ability", source: source_id, ability: ability_ref, cost: ability.mana_cost)
       end

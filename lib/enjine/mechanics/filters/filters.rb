@@ -72,15 +72,16 @@ module Enjine
       #   {"creature": {"supertypes": ["legendary"]}}    {"creature": {"not_supertypes": ["legendary"]}}
       #   {"creature": {"token": false}}                 {"permanent": {"counters": true}} / {"counters": "+1/+1"}
       #   {"creature": {"modified": true}}               {"spell": {"not": ["creature"]}}
+      #   {"creature": {"attached_subtypes": ["communicator"]}}  with a Communicator attached to it (CR 301.5, 303.4)
       class Restricted
         TYPES = %w[artifact creature enchantment land planeswalker instant sorcery].freeze
         BOOLEANS = %w[other attacking blocking tapped token modified].freeze
         RANGES = %w[power toughness mana_value].freeze
         TYPE_LISTS = %w[not any_of types].freeze
-        NAME_LISTS = %w[subtypes not_subtypes supertypes not_supertypes].freeze
+        NAME_LISTS = %w[subtypes not_subtypes supertypes not_supertypes attached_subtypes].freeze
         KEYS = (%w[controller counters colors] + BOOLEANS + RANGES + TYPE_LISTS + NAME_LISTS).freeze
         # Keys that need current characteristics or combat/tapped status: not usable in the layer pass.
-        LIVE = %w[power toughness attacking blocking tapped].freeze
+        LIVE = %w[power toughness attacking blocking tapped attached_subtypes].freeze
 
         attr_reader :base
 
@@ -173,6 +174,7 @@ module Enjine
           words << (@lists["any_of"].empty? ? base.primitive_name.tr("_", " ") : @lists["any_of"].join(" or "))
           words << { "you" => "you control", "opponent" => "an opponent controls" }[@controller]
           words.concat(@ranges.map { |key, range| "with #{key.tr("_", " ")} #{range_words(range)}" })
+          words << "with a #{@lists["attached_subtypes"].join(" or ")} attached" unless @lists["attached_subtypes"].empty?
           words << counter_words
           words.compact.join(" ")
         end
@@ -203,9 +205,10 @@ module Enjine
         def object_allowed?(engine, ref)
           obj = engine.object(ref)
           current = engine.chars(ref)
-          facts = Facts.new(chars: current, counters: obj.counters, token: engine.catalog.fetch(obj.card).token?)
+          facts = Facts.new(chars: current, counters: obj.counters, token: engine.token?(obj))
           return false unless characteristics_ok?(facts) && status_ok?(engine, obj)
           return false if @params["modified"] == true && !modified?(engine, obj)
+          return false unless attached_ok?(engine, obj)
 
           @ranges.all? { |key, range| in_range?(stat(engine, obj, current, key), range) }
         end
@@ -236,6 +239,12 @@ module Enjine
           return false if !@params["blocking"].nil? && engine.state.blockers.key?(obj.id) != @params["blocking"]
 
           @params["tapped"].nil? || obj.tapped == @params["tapped"]
+        end
+
+        # "With a [subtype] attached to it": an Aura, Equipment or other permanent attached to it has one.
+        def attached_ok?(engine, obj)
+          wanted = @lists["attached_subtypes"]
+          wanted.empty? || engine.attachments_of(obj.id).any? { engine.chars(it).subtypes.intersect?(wanted) }
         end
 
         # CR 700.9: a permanent is modified if it has counters, is equipped, or is enchanted by an Aura

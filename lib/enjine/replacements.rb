@@ -121,7 +121,7 @@ module Enjine
     def putting_counters!(engine, proposal)
       obj = engine.object(proposal.data["object"])
       facts = Mechanics::Filters::Facts.new(chars: engine.chars(obj), counters: obj.counters,
-                                            token: engine.catalog.fetch(obj.card).token?)
+                                            token: engine.token?(obj))
       proposal.data["amount"] += counter_bonus(engine, obj.controller) # "that many plus one" first (CR 616.1)
       battlefield_abilities(engine, :doubles?).each do |source, ability|
         next unless ability.doubles?(source, proposal.data["player"], obj.controller, proposal.data["counter"], facts)
@@ -151,8 +151,7 @@ module Enjine
     # Entering replacements of permanents already on the battlefield (CR 614.1c, 614.12).
     def others_entering!(engine, obj, proposal)
       controller = proposal.data["controller"] || obj.owner
-      defn = engine.definition(obj)
-      facts = Mechanics::Filters::Facts.new(chars: defn.printed_characteristics, counters: {}, token: defn.token?)
+      facts = Mechanics::Filters::Facts.new(chars: engine.chars(obj), counters: {}, token: engine.token?(obj))
       enters = proposal.data["enters"]
       battlefield_abilities(engine, :modify_other_entering).each do |source, ability|
         ability.modify_other_entering(enters) if source.id != obj.id && ability.affects_entering?(source, controller, facts)

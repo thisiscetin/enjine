@@ -114,6 +114,20 @@ Rules: CR 509.1b
 }
 ```
 
+## changeling
+
+This object is every creature type (a characteristic-defining ability that works in all zones).
+
+Rules: CR 702.73a, CR 604.3, CR 205.3m, CR 113.6a
+
+```json
+{
+  "keywords": [
+    "changeling"
+  ]
+}
+```
+
 ## deathtouch
 
 Any damage it deals to a creature is enough to destroy it; 1 damage counts as lethal when assigning combat damage.

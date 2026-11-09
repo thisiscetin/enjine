@@ -16,7 +16,7 @@ module Enjine
 
         # CR 205.3m (2026-11-06): every creature type, written as card data subtypes (lowercase, "-" and
         # spaces become "_", apostrophes dropped).
-        CREATURE_TYPES = %w[
+        CREATURE_TYPES = <<~TYPES.split.map(&:to_sym).freeze
           time_lord advisor aenar aetherborn alien ally andorian android angel antelope ape archer archon armadillo
           army artificer assassin assembly_worker astartes atog aurochs avatar azra badger bajoran balloon barbarian
           bard basilisk bat bear beast beaver beeble beholder berserker betazoid bird bison blinkmoth boar bolian
@@ -44,7 +44,7 @@ module Enjine
           triskelavite troll turtle tyranid unicorn utrom vampire varmint vau_nakat vedalken villain volver vorta
           vulcan wall walrus warlock warrior weasel weird werewolf whale wizard wolf wolverine wombat worm wraith
           wurm xindi yeti zombie zubera
-        ].map(&:to_sym).freeze
+        TYPES
 
         # The characteristics with every creature type added, if the object has changeling.
         def self.apply(chars)

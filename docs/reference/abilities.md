@@ -4,7 +4,7 @@
 
 ## activated
 
-An activated ability: announce it, choose targets, pay its costs, then it goes on the stack. `timing: "sorcery"` restricts it to sorcery speed, `"your_turn"` to your turns; `limit: "once_each_turn"` to one activation per turn; `only_if` to when a condition holds.
+An activated ability: announce it, choose targets, pay its costs, then it goes on the stack. `timing: "sorcery"` restricts it to sorcery speed, `"your_turn"` to your turns; `limit: "once_each_turn"` to one activation per turn; `only_if` to when a condition holds. `zone` ("exile", "graveyard" or "hand") makes it function only while its card is in that zone ("activate only if this card is exiled").
 
 Rules: CR 602.1, CR 602.2, CR 602.5b, CR 602.5d
 
@@ -16,6 +16,7 @@ Rules: CR 602.1, CR 602.2, CR 602.5b, CR 602.5d
 | `timing` | "instant" (default), "sorcery" or "your_turn" |
 | `limit` | "once_each_turn" (CR 602.5b) |
 | `only_if` | condition ("activate only if ...") |
+| `zone` | "exile" | "graveyard" | "hand" (CR 113.6b; default: the battlefield, or the zone a cost moves the card from) |
 | `cost_reduction` | {"amount": amount, "if": condition}: "this ability costs {N} less to activate" (CR 601.2f, 602.2b) |
 
 ```json
@@ -373,6 +374,37 @@ Rules: CR 702.5a, CR 115.1b, CR 303.4a
 ```json
 {
   "enchant": "creature"
+}
+```
+
+## enter_as_copy
+
+As this permanent enters, its controller may choose a permanent on the battlefield matching `of`; it enters as a copy of that permanent (its copiable values, with the `except` modifications) and its enter abilities trigger. `with_counters: true`: it also enters with the counters the copied permanent has. Choosing none: it enters as itself.
+
+Rules: CR 707.5, CR 707.9b, CR 614.1c, CR 614.12
+
+| Parameter | Description |
+| --- | --- |
+| `of` | filter (the permanents it may copy) |
+| `except` | {"legendary": false, "keywords": [...], "types": [...], "subtypes": [...], "supertypes": [...], "name": ..., "power": n, "toughness": n, "colors": [...]} |
+| `with_counters` | boolean |
+
+```json
+{
+  "enter_as_copy": {
+    "of": {
+      "permanent": {
+        "any_of": [
+          "artifact",
+          "creature"
+        ]
+      }
+    },
+    "except": {
+      "legendary": false
+    },
+    "with_counters": true
+  }
 }
 ```
 

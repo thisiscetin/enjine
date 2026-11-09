@@ -254,19 +254,22 @@ module Enjine
                   description: "An activated ability: announce it, choose targets, pay its costs, then it goes on " \
                                "the stack. `timing: \"sorcery\"` restricts it to sorcery speed, `\"your_turn\"` to your " \
                                "turns; `limit: \"once_each_turn\"` to one activation per turn; `only_if` to when a " \
-                               "condition holds.",
+                               "condition holds. `zone` (\"exile\", \"graveyard\" or \"hand\") makes it function only " \
+                               "while its card is in that zone (\"activate only if this card is exiled\").",
                   rules: %w[602.1 602.2 602.5b 602.5d],
                   params: { "cost" => "list of costs (tap, {\"mana\": \"{1}\"}, {\"mana\": \"{X}\"})",
                             "targets" => "list of target filters", "effects" => "list of effects",
                             "timing" => "\"instant\" (default), \"sorcery\" or \"your_turn\"",
                             "limit" => "\"once_each_turn\" (CR 602.5b)", "only_if" => "condition (\"activate only if ...\")",
+                            "zone" => "\"exile\" | \"graveyard\" | \"hand\" (CR 113.6b; default: the battlefield, or the " \
+                                      "zone a cost moves the card from)",
                             "cost_reduction" => "{\"amount\": amount, \"if\": condition}: \"this ability costs {N} less " \
                                                 "to activate\" (CR 601.2f, 602.2b)" },
                   example: { "activated" => { "cost" => ["tap"], "targets" => ["any_target"],
                                               "effects" => [{ "deal_damage" => { "amount" => 1, "to" => { "target" => 0 } } }] } }
 
         def self.build(params, errors, path, **)
-          Mechanics.check_keys(params, %w[cost timing cost_reduction limit only_if] + BODY_KEYS, errors, path)
+          Mechanics.check_keys(params, %w[cost timing cost_reduction limit only_if zone] + BODY_KEYS, errors, path)
           timing = Mechanics.fetch_param(params, :timing) || "instant"
           errors << "#{path}.timing: must be one of #{TIMINGS.join(", ")}" unless TIMINGS.include?(timing)
           restriction = parse_restriction(params, errors, path)
@@ -275,10 +278,26 @@ module Enjine
           raw = Mechanics.fetch_param(params, :cost_reduction)
           reduction = raw && Reduction.build(raw, errors, "#{path}.cost_reduction")
           check_cost_zones(costs, errors, path)
+          zone = parse_zone(params, costs, errors, path)
           body = parse_body(params, errors, path)
           check_mana_ability(body, errors, path)
-          new(**body, costs: costs, sorcery: timing == "sorcery", cost_reduction: reduction,
+          new(**body, costs: costs, sorcery: timing == "sorcery", cost_reduction: reduction, zone: zone,
                       restriction: restriction.merge(your_turn: timing == "your_turn"))
+        end
+
+        ZONES = %w[exile graveyard hand].freeze
+
+        # CR 113.6b: "activate only if this card is exiled" (an ability that functions only from a zone).
+        def self.parse_zone(params, costs, errors, path)
+          zone = Mechanics.fetch_param(params, :zone) or return nil
+          return (errors << "#{path}.zone: must be one of #{ZONES.join(", ")}") && nil unless ZONES.include?(zone)
+
+          own = costs.filter_map { it.zone if it.respond_to?(:zone) }.first
+          errors << "#{path}.zone: its costs are paid from the #{own}" if own && own.to_s != zone
+          if costs.any? { it.is_a?(Costs::Tap) || it.is_a?(Costs::SacrificeSelf) }
+            errors << "#{path}.zone: an ability of a card in the #{zone} can't tap or sacrifice it"
+          end
+          zone.to_sym
         end
 
         TIMINGS = %w[instant sorcery your_turn].freeze
@@ -314,14 +333,16 @@ module Enjine
 
         attr_reader :cost_reduction
 
-        def initialize(sorcery:, cost_reduction: nil, restriction: {}, **)
+        def initialize(sorcery:, cost_reduction: nil, restriction: {}, zone: nil, **)
           @sorcery = sorcery
           @cost_reduction = cost_reduction
           @restriction = restriction
+          @zone = zone
           super(**)
         end
 
         def kind = :activated
+        def zone = @zone || super
         def sorcery_speed? = @sorcery
 
         # How many times it may be activated each turn (nil: no limit, CR 602.5b).

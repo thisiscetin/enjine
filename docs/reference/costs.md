@@ -22,6 +22,25 @@ Rules: CR 701.9a, CR 602.2b, CR 113.6m, CR 118.3
 "discard_self"
 ```
 
+## exile_from_hand
+
+Exile `count` cards from your hand (default 1), chosen while casting or activating, exiled as the spell or ability becomes cast. `card` (a card spec) restricts which.
+
+Rules: CR 406.1, CR 601.2h, CR 602.2b, CR 118.3
+
+| Parameter | Description |
+| --- | --- |
+| `count` | integer (default 1) |
+| `card` | card spec, e.g. {"types": ["creature"]} |
+
+```json
+{
+  "exile_from_hand": {
+    "count": 1
+  }
+}
+```
+
 ## exile_self_from_graveyard
 
 Exile this card from your graveyard. An ability with this cost is activated from your graveyard.
