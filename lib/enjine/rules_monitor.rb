@@ -120,12 +120,20 @@ module Enjine
       return if card.instant_speed? || event.during_resolution # CR 608.2g: timing doesn't apply
 
       caster = event.player
+      return if sneaked?(event, caster)
+
       # Triggered abilities put on the stack later in the same decision (e.g. "whenever you cast") don't count.
       stack = state.stack - @entry.events.grep(Events::TriggerPutOnStack).map(&:object)
       unless state.players[state.active].name == caster && %i[precombat_main postcombat_main].include?(state.step) &&
              stack.size == 1
         finding("307.1", "#{caster} cast sorcery-speed #{event.card} at #{state.step} (stack #{stack.size})")
       end
+    end
+
+    # CR 702.190a: a spell cast for its sneak cost, at instant speed during its caster's declare blockers step.
+    def sneaked?(event, caster)
+      state.objects[event.object]&.memory&.[]("cast_with") == "sneak" && state.step == :declare_blockers &&
+        state.players[state.active].name == caster
     end
 
     # Printed keywords plus those of station symbols with enough charge counters (CR 722.2a), recomputed
@@ -138,12 +146,13 @@ module Enjine
       stationed = card.ability_instances.any? do |inst|
         inst.ability.kind == :station_symbol && charge >= inst.ability.threshold && inst.ability.keywords.include?(keyword)
       end
-      return true if stationed || attached_grants(obj.id).any? { it["keywords"].include?(keyword.to_s) }
+      stationed || granted_keywords(obj.id).include?(keyword.to_sym) || static_keyword?(obj, keyword)
+    end
 
-      granted = state.effects.any? do |e|
-        e["kind"] == "grant" && e["affected"].include?(obj.id) && e["keywords"].include?(keyword.to_s)
-      end
-      granted || static_keyword?(obj, keyword)
+    # Keywords granted until end of turn or by an attached Aura or Equipment (CR 301.5f, 303.4m).
+    def granted_keywords(id)
+      until_eot = state.effects.select { it["kind"] == "grant" && it["affected"].include?(id) }.flat_map { it["keywords"] }
+      (until_eot + attached_grants(id).flat_map { it["keywords"] }).map(&:to_sym)
     end
 
     def ability_activated!(event)
@@ -251,8 +260,11 @@ module Enjine
       end
     end
 
+    # A bonus to creatures "with flying" also counts flying the creature was granted (CR 702.1).
     def static_bonuses(obj, card, statics)
-      facts = Mechanics::Filters::Facts.new(chars: card.printed_characteristics, counters: obj.counters, token: card.token?)
+      chars = card.printed_characteristics
+      chars = chars.with(keywords: chars.keywords | granted_keywords(obj.id))
+      facts = Mechanics::Filters::Facts.new(chars: chars, counters: obj.counters, token: card.token?)
       statics.filter_map do |source, ability, (power, toughness)|
         { "power" => power, "toughness" => toughness } if ability.affects?(obj, source, facts)
       end
