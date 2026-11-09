@@ -7,6 +7,11 @@
 RSpec.describe "Statics, types and restrictions" do
   let(:catalog) do
     catalog_with(
+      { "name" => "Lifeline Charm", "mana_cost" => "{1}", "types" => ["artifact"], "subtypes" => ["equipment"],
+        "abilities" => [{ "static" => { "affects" => "attached", "abilities" => [
+          { "triggered" => { "when" => { "gains_life" => {} }, "effects" => [{ "untap" => { "to" => "granter" } }] } }
+        ] } },
+                        { "equip" => { "cost" => [{ "mana" => "{1}" }] } }] },
       { "name" => "Pathfinding", "mana_cost" => "{G}", "types" => ["sorcery"],
         "abilities" => [{ "spell" => { "effects" => [{ "search_library" => { "for" => { "types" => ["land"] },
                                                                              "put" => "battlefield" } }] } }] },
@@ -173,5 +178,24 @@ RSpec.describe "Statics, types and restrictions" do
     resolve(game)
     crossing = engine(game).object(obj_id(game, "Prismatic Crossing"))
     expect([crossing.tapped, engine(game).chars(crossing).subtypes, game.state.players[0].life]).to eq([true, [:plains], 20])
+  end
+
+  it "a granted triggered ability also knows its granter (CR 607.1a)" do
+    game = board(mine: ["Lifeline Charm", "Copilot Gremlin"], mana: { C: 1 })
+    charm = obj_id(game, "Lifeline Charm")
+    game.submit(type: "activate", object: charm, ability: "printed:1")
+    game.submit(type: "target", target: obj_id(game, "Copilot Gremlin"))
+    resolve(game)
+    engine(game).object(charm).tapped = true
+    engine(game).change_life!(0, 2)
+    expect(game.state.pending_triggers.first["memory"]).to include("granter" => charm)
+    game.submit(type: "pass")
+    resolve(game)
+    expect(engine(game).object(charm).tapped).to be(false)
+  end
+
+  it "protection from each opponent stops their creatures from blocking it (CR 702.16f)" do
+    game = board(mine: ["Oathsworn Paladin"], theirs: ["Copilot Gremlin"])
+    expect(engine(game).can_block?(obj_id(game, "Copilot Gremlin"), obj_id(game, "Oathsworn Paladin"))).to be(false)
   end
 end

@@ -200,8 +200,9 @@ module Enjine
         memory = trigger_memory(source)
         batch = trigger.respond_to?(:batched?) && trigger.batched? ? event_batch : nil
         times = 1 + additional_triggers(event, source)
-        card, ref = granted_origin(inst.ref) # a granted ability lives in the granting card's data (CR 613.1f)
+        card, ref, granter = AbilityLayers.granted_parts(inst.ref) # a granted ability lives in the granting card's data (CR 613.1f)
         queued = source.merge("ability" => ref || inst.ref, "card" => card || source["card"])
+        memory = memory.merge("granter" => granter) if granter # CR 607.1a (Selector "granter")
         found.first(limited?(ability) ? 1 : found.size).each do |facts|
           next if batch && batched_pending!(source, queued["ability"], batch)
 
