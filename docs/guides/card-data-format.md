@@ -973,6 +973,18 @@ completed doesn't happen at all (CR 701.12a).
                                                                  "to": { "triggering": "player" } } }] } }] }
 ```
 
+**Emblems** (CR 114). "You get an emblem with '…'" is `create_emblem` with the emblem's
+`abilities` (triggered, static or player_rule). The emblem goes to the command zone for the rest
+of the game and its abilities work from there; "this emblem" is the source of what they do. The
+game view lists emblems under `command`.
+
+```json
+{ "loyalty": { "cost": -7, "effects": [
+  { "create_emblem": { "abilities": [
+    { "triggered": { "when": { "cast": {} }, "targets": ["any_target"],
+                     "effects": [{ "deal_damage": { "amount": 5, "to": { "target": 0 } } }] } }] } }] } }
+```
+
 **Hexproof from and protection from a quality** (CR 702.11d, 702.16). Abilities whose value is a
 card spec of the quality, matched against the spell, or the source of the ability or damage, as it
 is now: `{ "colors": ["B"] }` (any of those colors), `{ "types": ["instant"] }`,

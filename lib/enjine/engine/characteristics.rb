@@ -19,6 +19,7 @@ module Enjine
       # cached until state changes.
       def chars(object)
         object = self.object(object) if object.is_a?(String)
+        return emblem_characteristics(object) if object.kind == "emblem" # CR 114.3 (Engine::Emblems)
         return Enjine::Characteristics::FACE_DOWN if face_down?(object) && @face_up != object.id # CR 406.3a
 
         defn = definition(object)
@@ -42,7 +43,7 @@ module Enjine
       LAYER_EVENTS = [Events::ZoneChanged, Events::CountersChanged, Events::EffectStarted,
                       Events::EffectsEnded, Events::Attached, Events::Unattached, Events::ControlChanged,
                       Events::PhasedOut, Events::PhasedIn, Events::SpeedChanged,
-                      Events::Transformed].freeze
+                      Events::Transformed, Events::EmblemCreated].freeze
 
       def touch! = @epoch = @epoch.to_i + 1
       def volatile_layers? = @volatile
@@ -223,7 +224,7 @@ module Enjine
         state.battlefield.flat_map do |id|
           obj = object(id)
           own_ability_instances(obj).filter_map { [obj, it.ability] if it.ability.kind == :static }
-        end
+        end + emblems.flat_map { |obj| chars(obj).abilities.filter_map { [obj, it.ability] if it.ability.kind == :static } }
       end
 
       # Starts a continuous effect from a resolving spell or ability (CR 611.2).

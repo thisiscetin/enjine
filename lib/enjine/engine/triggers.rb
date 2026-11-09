@@ -116,7 +116,7 @@ module Enjine
 
         @trigger_epoch = @epoch
         @trigger_state = state
-        @trigger_sources = state.battlefield.filter_map do |id|
+        @trigger_sources = (state.battlefield + (state.command || [])).filter_map do |id| # emblems too (CR 114.4)
           instances = chars(id).triggered_abilities.select { it.ability.zone == :battlefield }
           [id, instances] unless instances.empty?
         end

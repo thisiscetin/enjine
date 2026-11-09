@@ -17,6 +17,124 @@
     }
   },
   {
+    "name": "Ajani Resolute",
+    "mana_cost": "{1}{W}",
+    "types": [
+      "planeswalker"
+    ],
+    "supertypes": [
+      "legendary"
+    ],
+    "subtypes": [
+      "ajani"
+    ],
+    "loyalty": 2,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "gains_life": {}
+          },
+          "effects": [
+            {
+              "add_counters": {
+                "counter": "loyalty",
+                "amount": 1,
+                "to": "self"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "loyalty": {
+          "cost": 0,
+          "effects": [
+            {
+              "gain_life": {
+                "amount": 1
+              }
+            }
+          ]
+        }
+      },
+      {
+        "loyalty": {
+          "cost": -4,
+          "effects": [
+            {
+              "create_token": {
+                "token": {
+                  "name": "Ajani's Pridemate",
+                  "colors": [
+                    "W"
+                  ],
+                  "types": [
+                    "creature"
+                  ],
+                  "subtypes": [
+                    "cat",
+                    "soldier"
+                  ],
+                  "power": 2,
+                  "toughness": 2,
+                  "abilities": [
+                    {
+                      "triggered": {
+                        "when": {
+                          "gains_life": {}
+                        },
+                        "effects": [
+                          {
+                            "add_counters": {
+                              "counter": "+1/+1",
+                              "amount": 1,
+                              "to": "self"
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      },
+      {
+        "loyalty": {
+          "cost": -10,
+          "effects": [
+            {
+              "create_emblem": {
+                "abilities": [
+                  {
+                    "static": {
+                      "affects": {
+                        "each": "creature",
+                        "controller": "you"
+                      },
+                      "pump": {
+                        "power": 2,
+                        "toughness": 2
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "mythic",
+    "printing": {
+      "set": "fra",
+      "number": "195"
+    }
+  },
+  {
     "name": "Trade the Helm",
     "mana_cost": "{4}{U}",
     "types": [

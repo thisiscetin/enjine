@@ -130,6 +130,16 @@ RSpec.describe "Real cards: losing abilities, restrictions and other rules effec
     expect(life(game, "bob")).to eq(17)
   end
 
+  it "Ajani Resolute: −10, an emblem with 'Creatures you control get +2/+2' (CR 114)" do
+    game = board(mine: [["Ajani Resolute", { loyalty: 10 }], "Giant Cindermaw"])
+    ajani = obj_id(game, "Ajani Resolute")
+    option = game.legal_options.select { it[:type] == "activate" && it[:object] == ajani }.last
+    play(game, option)
+    expect(game.state.battlefield).not_to include(ajani) # 0 loyalty
+    expect(game.state.command.size).to eq(1)
+    expect(chars(game, obj_id(game, "Giant Cindermaw")).power).to eq(6)
+  end
+
   it "The Wondrous Wasp: the target loses all abilities only while the Wasp remains (CR 611.2b)" do
     game = board(hand: ["The Wondrous Wasp"], theirs: ["Vampire Nighthawk"], mana: { U: 2 })
     hawk = obj_id(game, "Vampire Nighthawk")

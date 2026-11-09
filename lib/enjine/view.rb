@@ -23,11 +23,18 @@ module Enjine
         "stack" => state.stack.map { object_view(engine, it) },
         "exile" => state.exile.map { exiled_view(engine, it, viewer) },
         "phased_out" => state.phased_out.map { object_view(engine, it) },
+        "command" => engine.emblems.map { emblem_view(engine, it) },
         "pending" => pending_view(engine, viewer),
         "result" => state.result&.dup,
         "effects" => state.effects.map { it.except("controller").merge("controller" => engine.name(it["controller"])) },
         "delayed_triggers" => state.delayed_triggers.map { delayed_view(engine, it) }
       }
+    end
+
+    # An emblem in the command zone (CR 114): public, with its owner and abilities.
+    def emblem_view(engine, obj)
+      { "id" => obj.id, "kind" => "emblem", "owner" => engine.name(obj.owner),
+        "abilities" => engine.chars(obj).abilities.map { it.ability.to_s } }
     end
 
     # A delayed triggered ability waiting for its event (CR 603.7): public, like the spell that made it.

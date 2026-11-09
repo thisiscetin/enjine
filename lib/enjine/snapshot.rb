@@ -177,11 +177,13 @@ module Enjine
 
     def validate_object_state(obj, path, zone, errors)
       kind = obj.fetch("kind", "card")
-      errors << "#{path}.kind: must be \"card\" or \"ability\"" unless %w[card ability].include?(kind)
-      if kind == "ability"
-        errors << "#{path}: abilities can only exist on the stack" unless zone == "stack"
+      errors << "#{path}.kind: must be \"card\", \"ability\" or \"emblem\"" unless %w[card ability emblem].include?(kind)
+      home = { "ability" => "stack", "emblem" => "command" }[kind]
+      if home
+        errors << "#{path}: #{kind}s can only exist in the #{home} zone" unless zone == home
         errors << "#{path}.ability: must be an ability reference" unless obj["ability"].is_a?(String)
       end
+      errors << "#{path}: only emblems are in the command zone (CR 114.1)" if zone == "command" && kind != "emblem"
       counters = obj.fetch("counters", {})
       unless counters.is_a?(Hash) && counters.all? { |k, v| Mechanics::Counters.valid?(k) && non_negative?(v) }
         errors << "#{path}.counters: must map counter kinds to non-negative integers"

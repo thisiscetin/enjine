@@ -78,6 +78,7 @@ module Enjine
     end
     CountersChanged = define(:counters_changed, :object, :counter, :from, :to)
     PlayerCountersChanged = define(:player_counters_changed, :player, :counter, :from, :to) # poison, rad, ... (CR 122.1)
+    EmblemCreated = define(:emblem_created, :player, :object, :card) # CR 114.2
     # CR 707.10: a copy of a spell put on the stack (not cast).
     SpellCopied = define(:spell_copied, :player, :object, :card, :original, :targets)
     EffectStarted = define(:effect_started, :kind, :affected, :details)

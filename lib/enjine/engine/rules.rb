@@ -46,7 +46,7 @@ module Enjine
 
         @player_rule_epoch = @epoch
         @player_rule_state = state
-        @player_rule_statics = state.battlefield.flat_map do |id|
+        @player_rule_statics = (state.battlefield + (state.command || [])).flat_map do |id| # emblems too (CR 114.4)
           source = object(id)
           chars(source).abilities.filter_map { [source, it.ability] if it.ability.kind == :player_rule }
         end

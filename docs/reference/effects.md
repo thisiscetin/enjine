@@ -568,6 +568,38 @@ Rules: CR 701.6a, CR 118.12a, CR 605.3a
 }
 ```
 
+## create_emblem
+
+Each referenced player (default you) gets an emblem with the `abilities` (triggered, static or player_rule abilities). An emblem is in the command zone for the rest of the game; its abilities work there, and "this emblem" is the source of what they do.
+
+Rules: CR 114.1, CR 114.2, CR 114.3, CR 114.4, CR 113.6p
+
+| Parameter | Description |
+| --- | --- |
+| `abilities` | list of triggered, static or player_rule abilities |
+| `to` | selector |
+
+```json
+{
+  "create_emblem": {
+    "abilities": [
+      {
+        "static": {
+          "affects": {
+            "each": "creature",
+            "controller": "you"
+          },
+          "pump": {
+            "power": 2,
+            "toughness": 2
+          }
+        }
+      }
+    ]
+  }
+}
+```
+
 ## create_token
 
 Create `amount` tokens under the referenced player's control (default: you). `token` is a predefined token name (Treasure, Clue, Food) or an inline card definition. `tapped: true` creates them tapped; `attacking: true` attacking (only for the attacking player during combat, CR 506.3b).
