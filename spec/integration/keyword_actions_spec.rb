@@ -38,7 +38,11 @@ RSpec.describe "Keyword actions and abilities from Standard sets" do
       creature("Spec Ember Adept", [{ "firebending" => { "amount" => { "power" => "self" } } }], power: 3, toughness: 1),
       spell("Spec Goblin Gambit", [{ "deal_damage" => { "amount" => 1, "to" => { "target" => 0 } } }],
             targets: ["any_target"], types: %w[kindred instant], cost: "{R}").merge("subtypes" => ["goblin"]),
-      spell("Spec Fire Sprint", [{ "draw" => { "amount" => 1 } }], cost: "{R}{R}{R}", types: ["instant"])
+      spell("Spec Fire Sprint", [{ "draw" => { "amount" => 1 } }], cost: "{R}{R}{R}", types: ["instant"]),
+      spell("Spec Horde Rally", [{ "amass" => { "subtype" => "orc", "amount" => 1 } },
+                                 { "pump" => { "power" => 3, "toughness" => 0, "to" => { "result" => 0 } } }]),
+      creature("Spec Grim Tinker", [{ "activated" => { "cost" => ["tap", { "blight" => { "amount" => 1 } }],
+                                                       "effects" => [{ "draw" => { "amount" => 1 } }] } }])
     ]
   end
   let(:catalog) { catalog_with(*cards) }
@@ -81,6 +85,17 @@ RSpec.describe "Keyword actions and abilities from Standard sets" do
       pay(game)
       expect(counters(game, "Hill Giant")).to eq("-1/-1" => 1)
       expect(game.state.object(game.state.stack.first).paid.first).to include("object" => giant)
+    end
+
+    it "as an activated ability's cost (CR 602.2b)" do
+      game = board(field: ["Spec Grim Tinker"])
+      tinker = obj_id(game, "Spec Grim Tinker")
+      game.submit(game.legal_options.find { it[:type] == "activate" && it[:object] == tinker })
+      expect(game.legal_options).to include({ type: "cost", object: tinker })
+      game.submit(type: "cost", object: tinker)
+      expect(counters(game, "Spec Grim Tinker")).to eq("-1/-1" => 1)
+      resolve(game)
+      expect(ids_in(game, "alice", :hand).size).to eq(1)
     end
 
     it "can't be paid without a creature (CR 701.68b, 118.3)" do
@@ -215,6 +230,17 @@ RSpec.describe "Keyword actions and abilities from Standard sets" do
       expect(game.instance_variable_get(:@engine).chars(first).subtypes).to include(:orc, :zombie)
     end
 
+    it "the amassed Army is the effect's result, whether it was created or already there (CR 701.47c)" do
+      game = board(hand: ["Spec Horde Rally", "Spec Horde Rally"])
+      2.times do
+        cast(game, "Spec Horde Rally")
+        pay(game)
+        resolve(game)
+      end
+      army = tokens(game, "Orc Army").first
+      expect(view_of(game, army)).to include("power" => 8, "toughness" => 2)
+    end
+
     it "creates a Jace planeswalker token with loyalty counters, and empowers it again" do
       game = board(hand: ["Spec Mind Surge", "Spec Mind Surge"])
       cast(game, "Spec Mind Surge")
@@ -296,12 +322,18 @@ RSpec.describe "Keyword actions and abilities from Standard sets" do
       expect(game.state.players[0].restricted_mana).to be_empty
     end
 
-    it "firebending mana empties as combat ends" do
+    it "firebending mana empties as combat ends, and the rules monitor agrees (CR 500.5)" do
       game = board(field: ["Spec Ember Adept"], step: :beginning_of_combat, pool: {})
+      monitor = Enjine::RulesMonitor.new(game)
       attack(game, "Spec Ember Adept")
       resolve(game)
-      skip_to(game, :postcombat_main)
+      until game.step == :postcombat_main
+        option = option_types(game).include?("pass") ? { type: "pass" } : game.legal_options.first
+        monitor.check!(game.submit(option))
+        expect(game.state.players[0].restricted_mana.size).to eq(3) unless game.step == :postcombat_main
+      end
       expect(game.state.players[0].restricted_mana).to be_empty
+      expect(monitor.findings).to eq([])
     end
   end
 

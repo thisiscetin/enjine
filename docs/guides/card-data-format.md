@@ -616,7 +616,7 @@ power"). Keyword *actions* are effects.
 | "each opponent blights 1" | `{ "blight": { "amount": 1, "to": "each_opponent" } }` (the blighted creatures are its results) |
 | "it connives" / "target creature you control connives 2" (CR 701.50) | `{ "connive": {} }` / `{ "connive": { "amount": 2, "to": { "target": 0 } } }` |
 | "recruit" (CR 701.70) | `{ "recruit": {} }` |
-| "amass Orcs 2" (CR 701.47) | `{ "amass": { "subtype": "orc", "amount": 2 } }` (the amassed Army is its result when it wasn't just created) |
+| "amass Orcs 2" (CR 701.47) | `{ "amass": { "subtype": "orc", "amount": 2 } }` (the amassed Army is its result: "attach this Equipment to the amassed Army" is `attach` to `{ "result": n }`) |
 | "empower Jace 2" (CR 701.71) | `{ "empower_jace": { "amount": 2 } }` |
 | "it endures 2" (CR 701.63) | `{ "endure": { "amount": 2 } }` (a fixed number) |
 | "create two 1/1 tokens tapped and attacking" | `create_token` with `"tapped": true, "attacking": true` |

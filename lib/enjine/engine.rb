@@ -434,6 +434,9 @@ module Enjine
     def self.mana_kept?(entry, step) = entry["until"] == "end_of_combat" && COMBAT_STEPS.include?(step)
     COMBAT_STEPS = %i[beginning_of_combat declare_attackers declare_blockers combat_damage].freeze
 
+    # Whether such mana may be in the pool during `step` (it empties as end of combat ends).
+    def self.mana_held?(entry, step) = mana_kept?(entry, step) || (entry["until"] == "end_of_combat" && step == :end_of_combat)
+
     def empty_mana_pools!
       state.players.each do |pl|
         kept = pl.restricted_mana.select { Engine.mana_kept?(it, state.step) }

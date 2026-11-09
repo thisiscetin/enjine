@@ -6,7 +6,7 @@ module Enjine
       # "If you don't control a [kind of permanent], create one as a token. Choose one you control. Put N
       # [counters] on it.": the shared shape of amass (CR 701.47a) and empower Jace (CR 701.71a). The choice
       # is an `effect_choice` only when there is more than one candidate. The chosen permanent is the
-      # effect's result ("the amassed Army", CR 701.47c), unless it is the token just created (already one).
+      # effect's result ("the amassed Army", CR 701.47c); a token just created already is.
       class ChooseOrCreate < ChoiceEffect
         def self.keys = %w[amount if]
         def self.default_to = "you"
@@ -16,7 +16,8 @@ module Enjine
 
           unless locals.key?("n")
             locals["n"] = amount_for(engine, ctx)
-            engine.create_token!(token, ctx.controller) if candidates(engine, ctx.controller).empty?
+            locals["created"] = candidates(engine, ctx.controller).empty?
+            engine.create_token!(token, ctx.controller) if locals["created"]
           end
           options = candidates(engine, ctx.controller)
           answer = answers(locals).first
@@ -39,7 +40,7 @@ module Enjine
 
         def finish(engine, ctx, chosen, locals)
           perm = engine.object(chosen)
-          engine.record_result!(chosen) if answers(locals).any?
+          engine.record_result!(chosen) unless locals["created"]
           engine.add_counters!(perm, counter, locals["n"], by_player: ctx.controller)
         end
       end

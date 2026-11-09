@@ -85,7 +85,7 @@ module Enjine
     def ability(ref)
       (@ability_instances.find { it.ref == ref } || @nested_instances.find { it.ref == ref })&.ability ||
         @delayed_abilities[ref] || @effect_granted.values.flatten.find { it.ref == ref }&.ability ||
-        (ref.start_with?("keyword:") && CardDefinition.keyword_instances(ref.delete_prefix("keyword:")).first&.ability) || nil
+        (ref.to_s.start_with?("keyword:") && CardDefinition.keyword_instances(ref.delete_prefix("keyword:")).first&.ability) || nil
     end
 
     # The abilities a keyword stands for ("Prowess" is a triggered ability, CR 702.108a), as instances
