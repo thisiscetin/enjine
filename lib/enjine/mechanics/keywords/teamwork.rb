@@ -10,7 +10,11 @@ module Enjine
       # more", chosen like crew's (one `choose_cost` decision per creature, `done` once the total is enough).
       class Teamwork < Crew
         def to_s = "Tap any number of untapped creatures you control with total power #{power} or greater"
-        def pay_chosen!(_engine, _object, _entries) = nil
+
+        # "Whenever this creature becomes tapped to pay a teamwork cost" (trigger becomes_tapped `for`).
+        def pay_chosen!(engine, object, entries)
+          entries.each { engine.emit Events::TappedForCost.new(object: it["object"], cost: "teamwork", spell: object.id) }
+        end
       end
     end
 

@@ -98,6 +98,13 @@ module Enjine
         flat = flat.dup
         template.map { it.is_a?(Array) ? flat.shift(it.size) : flat.shift }
       end
+
+      # CR 115.7d: `player` chose new targets for the spell or ability `spell` (shaped like its old ones).
+      def change_targets!(spell, targets, player)
+        added = targets.flatten.compact - Array(spell.targets).flatten
+        spell.targets = targets
+        added.each { emit Events::TargetChosen.new(player: name(player), object: spell.id, target: it) }
+      end
     end
 
     include TargetCounts

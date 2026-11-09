@@ -55,6 +55,14 @@ module Enjine
           chosen_ok?(engine, source, event.card, engine.state.objects[event.object]&.x)
         end
 
+        # "Those creatures" ({"triggering": "targets"}): the spell's targets that matched `targets` (all of them
+        # without it), as they were chosen (CR 601.2c).
+        def occurrences(engine, event, source)
+          return [] unless match?(engine, event, source)
+
+          [Triggers.event_facts(engine, event).merge("targets" => matched_targets(engine, event, source))]
+        end
+
         # "A spell that targets this creature / a creature you control" (CR 115.1, 601.2c): one of the
         # targets chosen as it was cast matches, relative to the trigger's source.
         def setup_targets(params, errors, path)
@@ -62,10 +70,12 @@ module Enjine
           @targets = raw == "self" ? :self : raw && Mechanics.build_entry(:filter, raw, errors, "#{path}.targets")
         end
 
-        def targets_ok?(engine, event, source)
-          return true unless @targets
+        def targets_ok?(engine, event, source) = !@targets || matched_targets(engine, event, source).any?
 
-          Array(event.targets).flatten.compact.uniq.any? do |ref|
+        def matched_targets(engine, event, source)
+          Array(event.targets).flatten.compact.uniq.select do |ref|
+            next true unless @targets
+
             @targets == :self ? ref == source["id"] : @targets.match_for?(engine, ref, source["controller"], source["id"])
           end
         end
@@ -152,41 +162,46 @@ module Enjine
                   description: "A player (`controller`: you (default) | opponent | any) activates an ability that isn't a " \
                                "mana ability. `source`: optional filter on the source's card; `name: \"chosen\"`: only a " \
                                "source with the name chosen as this permanent entered. `exhaust: true`: only an exhaust " \
-                               "ability (\"whenever you activate an exhaust ability\", CR 702.177).",
-                  rules: %w[602.2 605.1a 603.2 201.4 702.177a],
+                               "ability (\"whenever you activate an exhaust ability\", CR 702.177). `boast: true`: only a " \
+                               "boast ability (\"whenever a creature you control boasts\", CR 702.142b).",
+                  rules: %w[602.2 605.1a 603.2 201.4 702.177a 702.142b],
                   params: { "controller" => PLAYERS.join(" | "), "source" => "card filter", "name" => "\"chosen\"",
-                            "exhaust" => "true: only exhaust abilities" },
+                            "exhaust" => "true: only exhaust abilities", "boast" => "true: only boast abilities" },
                   example: { "activates_ability" => { "controller" => "opponent" } }
 
-        def self.keys = %w[controller source name exhaust]
+        def self.keys = %w[controller source name exhaust boast]
+        KINDS = { "exhaust" => :exhaust?, "boast" => :boast? }.freeze
         def event_class = Events::AbilityActivated
 
         def setup(params, errors, path)
           super
           @source = params["source"] && Mechanics.build_entry(:filter, params["source"], errors, "#{path}.source")
           setup_chosen(params, errors, path)
-          @exhaust = params["exhaust"]
-          errors << "#{path}.exhaust: must be true or false" unless [nil, true, false].include?(@exhaust)
+          @kinds = KINDS.select { |key, _| params[key] == true }.values
+          KINDS.each_key { errors << "#{path}.#{it}: must be true or false" unless [nil, true, false].include?(params[it]) }
         end
 
         def match?(engine, event, source)
           return false unless player_ok?(engine, event.player, source) && chosen_ok?(engine, source, event.card)
-          return false if @exhaust && !exhaust?(engine, event)
+          return false unless @kinds.all? { kind?(engine, event, it) }
           return true unless @source
 
           defn = engine.catalog.fetch(event.card)
           @source.matches_facts?(Filters::Facts.new(chars: defn.printed_characteristics, counters: {}, token: defn.token?))
         end
 
-        def to_s = "Whenever #{who} activate#{"s" unless @controller == "you"} an #{"exhaust " if @exhaust}ability#{chosen_words}"
+        def to_s
+          kinds = @kinds.map { "#{it.to_s.delete("?")} " }.join
+          "Whenever #{who} activate#{"s" unless @controller == "you"} an #{kinds}ability#{chosen_words}"
+        end
 
         private
 
-        # The activated ability on the stack is an exhaust ability (CR 702.177a).
-        def exhaust?(engine, event)
+        # The activated ability on the stack is an exhaust ability (CR 702.177a) / a boast ability (CR 702.142b).
+        def kind?(engine, event, flag)
           obj = engine.state.objects[event.object]
           ability = obj && engine.stack_ability(obj)
-          ability.respond_to?(:exhaust?) && ability.exhaust?
+          ability.respond_to?(flag) && ability.public_send(flag)
         end
       end
     end

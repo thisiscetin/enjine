@@ -1,0 +1,236 @@
+[
+  {
+    "name": "Command the Stage",
+    "mana_cost": "{2}{R}",
+    "types": ["sorcery"],
+    "abilities": [
+      {
+        "spell": {
+          "effects": [
+            { "add_counters": { "counter": "+1/+1", "amount": 1,
+                                "to": { "each": { "creature": { "subtypes": ["wizard"], "token": true } }, "controller": "you" } } },
+            { "create_token": { "token": { "name": "Cadet", "types": ["creature"], "subtypes": ["wizard", "soldier"],
+                                           "colors": [], "power": 2, "toughness": 2 } } }
+          ]
+        }
+      },
+      {
+        "triggered": {
+          "when": { "step_begins": { "step": "upkeep", "whose": "each" } },
+          "zone": "graveyard",
+          "if": { "amount": { "noncombat_damage_last_turn": "each_opponent" }, "at_least": 1 },
+          "effects": [{ "return_to_hand": { "to": "self" } }]
+        }
+      }
+    ],
+    "rarity": "uncommon",
+    "printing": { "set": "fra", "number": "77" }
+  },
+  {
+    "name": "The Endstone",
+    "mana_cost": "{7}",
+    "types": ["artifact"],
+    "supertypes": ["legendary"],
+    "abilities": [
+      {
+        "triggered": {
+          "when": { "any_of": [{ "plays_land": {} }, { "cast": {} }] },
+          "effects": [{ "draw": { "amount": 1 } }]
+        }
+      },
+      {
+        "triggered": {
+          "when": { "step_begins": { "step": "end", "whose": "your" } },
+          "effects": [{ "set_life": { "amount": 10 } }]
+        }
+      }
+    ],
+    "rarity": "mythic",
+    "printing": { "set": "eoe", "number": "240" }
+  },
+  {
+    "name": "Shadow of the Goblin",
+    "mana_cost": "{1}{R}",
+    "types": ["enchantment"],
+    "abilities": [
+      {
+        "triggered": {
+          "when": { "step_begins": { "step": "precombat_main", "whose": "your" } },
+          "effects": [
+            { "discard": { "amount": 1 } },
+            { "draw": { "amount": 1, "if": { "amount": { "count": { "result": 0 } }, "at_least": 1 } } }
+          ]
+        }
+      },
+      {
+        "triggered": {
+          "when": { "any_of": [{ "plays_land": { "not_from": "hand" } }, { "cast": { "not_from": "hand" } }] },
+          "effects": [{ "deal_damage": { "amount": 1, "to": "each_opponent" } }]
+        }
+      }
+    ],
+    "rarity": "rare",
+    "printing": { "set": "spm", "number": "87" }
+  },
+  {
+    "name": "Fire Lord Zuko",
+    "mana_cost": "{R}{W}{B}",
+    "types": ["creature"],
+    "supertypes": ["legendary"],
+    "subtypes": ["human", "noble", "ally"],
+    "power": 2,
+    "toughness": 4,
+    "abilities": [
+      { "firebending": { "amount": { "power": "self" } } },
+      {
+        "triggered": {
+          "when": { "any_of": [{ "cast": { "from": "exile" } },
+                               { "enters": { "subject": { "each": "permanent", "controller": "you" }, "from": "exile" } }] },
+          "effects": [{ "add_counters": { "counter": "+1/+1", "amount": 1, "to": { "each": "creature", "controller": "you" } } }]
+        }
+      }
+    ],
+    "rarity": "rare",
+    "printing": { "set": "tla", "number": "221" }
+  },
+  {
+    "name": "Mister Negative",
+    "mana_cost": "{5}{W}{B}",
+    "types": ["creature"],
+    "supertypes": ["legendary"],
+    "subtypes": ["human", "villain"],
+    "power": 5,
+    "toughness": 5,
+    "keywords": ["vigilance", "lifelink"],
+    "abilities": [
+      {
+        "triggered": {
+          "when": { "enters": {} },
+          "targets": ["opponent"],
+          "effects": [
+            { "may": { "effects": [{ "exchange_life_totals": { "with": { "target": 0 } } }] } },
+            { "draw": { "amount": { "this_way": 0 } } }
+          ]
+        }
+      }
+    ],
+    "rarity": "mythic",
+    "printing": { "set": "spm", "number": "135" }
+  },
+  {
+    "name": "Agent Maria Hill",
+    "mana_cost": "{W}",
+    "types": ["creature"],
+    "supertypes": ["legendary"],
+    "subtypes": ["human", "spy", "hero"],
+    "power": 2,
+    "toughness": 1,
+    "abilities": [
+      {
+        "triggered": {
+          "when": { "becomes_tapped": { "for": "teamwork" } },
+          "effects": [{ "add_counters": { "counter": "+1/+1", "amount": 1, "to": "self" } }, { "draw": { "amount": 1 } }]
+        }
+      }
+    ],
+    "rarity": "uncommon",
+    "printing": { "set": "msh", "number": "2" }
+  },
+  {
+    "name": "Speedball, New Warrior",
+    "mana_cost": "{2}{U/R}",
+    "types": ["creature"],
+    "supertypes": ["legendary"],
+    "subtypes": ["human", "hero"],
+    "power": 2,
+    "toughness": 2,
+    "abilities": [
+      {
+        "triggered": {
+          "when": { "cast": { "controller": "any", "targets": "self" } },
+          "effects": [
+            { "pump": { "power": 2, "toughness": 2, "to": "self" } },
+            { "choose_new_targets": { "of": { "triggering": "object" } } }
+          ]
+        }
+      }
+    ],
+    "rarity": "uncommon",
+    "printing": { "set": "msh", "number": "227" }
+  },
+  {
+    "name": "Pit Automaton",
+    "mana_cost": "{2}",
+    "types": ["artifact", "creature"],
+    "subtypes": ["construct"],
+    "power": 0,
+    "toughness": 4,
+    "keywords": ["defender"],
+    "abilities": [
+      { "mana": { "cost": ["tap"], "produce": "{C}{C}", "spend_only": { "abilities": "card" } } },
+      {
+        "activated": {
+          "cost": [{ "mana": "{2}" }, "tap"],
+          "effects": [
+            { "delayed_trigger": { "when": { "activates_ability": { "exhaust": true } }, "this_turn": "once",
+                                   "effects": [{ "copy_spell": { "of": { "triggering": "ability" }, "new_targets": true } }] } }
+          ]
+        }
+      }
+    ],
+    "rarity": "uncommon",
+    "printing": { "set": "dft", "number": "238" }
+  },
+  {
+    "name": "Jeong Jeong, the Deserter",
+    "mana_cost": "{2}{R}",
+    "types": ["creature"],
+    "supertypes": ["legendary"],
+    "subtypes": ["human", "rebel", "ally"],
+    "power": 2,
+    "toughness": 3,
+    "abilities": [
+      { "firebending": { "amount": 1 } },
+      {
+        "activated": {
+          "exhaust": true,
+          "cost": [{ "mana": "{3}" }],
+          "effects": [
+            { "add_counters": { "counter": "+1/+1", "amount": 1, "to": "self" } },
+            { "delayed_trigger": { "when": { "cast": { "spell": { "spell": { "subtypes": ["lesson"] } } } }, "this_turn": "once",
+                                   "effects": [{ "copy_spell": { "of": { "triggering": "object" }, "new_targets": true } }] } }
+          ]
+        }
+      }
+    ],
+    "rarity": "uncommon",
+    "printing": { "set": "tla", "number": "142" }
+  },
+  {
+    "name": "Firebender Ascension",
+    "mana_cost": "{1}{R}",
+    "types": ["enchantment"],
+    "abilities": [
+      {
+        "triggered": {
+          "when": { "enters": {} },
+          "effects": [{ "create_token": { "token": { "name": "Soldier", "types": ["creature"], "subtypes": ["soldier"],
+                                                     "colors": ["R"], "power": 2, "toughness": 2,
+                                                     "abilities": [{ "firebending": { "amount": 1 } }] } } }]
+        }
+      },
+      {
+        "triggered": {
+          "when": { "ability_triggers": { "subject": { "each": "creature", "controller": "you" }, "cause": "attacks" } },
+          "effects": [
+            { "add_counters": { "counter": "quest", "amount": 1, "to": "self" } },
+            { "may": { "if": { "amount": { "counters": { "of": "self", "kind": "quest" } }, "at_least": 4 },
+                       "effects": [{ "copy_spell": { "of": { "triggering": "ability" }, "new_targets": true } }] } }
+          ]
+        }
+      }
+    ],
+    "rarity": "rare",
+    "printing": { "set": "tla", "number": "137" }
+  }
+]

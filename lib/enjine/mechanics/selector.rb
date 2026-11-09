@@ -23,11 +23,15 @@ module Enjine
     #                                               one that has left the battlefield as it last existed (CR 608.2h)
     #   {"triggering": "object" | "player"}        what the trigger event was about ("that creature",
     #                                               "that player", CR 603.2); see Triggers.event_facts
+    #   {"triggering": "targets"}                   the targets of the spell a cast trigger saw that matched its
+    #                                               `targets` filter ("those creatures", CR 601.2c)
+    #   {"triggering": "ability"}                   the activated or triggered ability on the stack the trigger
+    #                                               event was about ("copy that ability", CR 707.10)
     #   "watched"                                   what a delayed triggered ability watches (CR 603.7c)
     #   "exiled_with"                               cards in exile exiled with the source (linked abilities, CR 607.2a)
     class Selector
       CONTROLLERS = %w[you opponent any].freeze
-      TRIGGERING = %w[object player].freeze
+      TRIGGERING = %w[object player targets ability].freeze
       # Where "self" finds its source (CR 113.6m); a source that changed zones is a new object (CR 400.7).
       SELF_ZONES = %i[battlefield graveyard exile hand].freeze
 
@@ -158,7 +162,11 @@ module Enjine
         found = Selector.memory(engine, ctx).fetch("triggering", {})[value]
         return [] if found.nil?
 
-        value == "player" ? [Filters.player_ref(engine, found)] : [found]
+        case value
+        when "player" then [Filters.player_ref(engine, found)]
+        when "ability" then [engine.stack_object_for(found)].compact
+        else Array(found)
+        end
       end
 
       # CR 301.5f / 303.4m: "equipped/enchanted creature" is whatever the source is attached to now.

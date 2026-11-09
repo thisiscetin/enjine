@@ -119,7 +119,7 @@ module Enjine
           copy.kind = "ability"
           copy.source = spell.source
           copy.ability = spell.ability
-          copy.memory = Snapshot.deep_copy(spell.memory)
+          copy.memory = Snapshot.deep_copy(spell.memory.except("trigger_id")) # the copy wasn't triggered
         else
           copy.memory = Marshal.load(Marshal.dump(spell.memory.slice("kicked", "kicked_with", "division"))).merge("copy" => "spell")
         end

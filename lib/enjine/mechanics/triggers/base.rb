@@ -18,7 +18,8 @@ module Enjine
         when Events::SpellCast, Events::DilemmaFaced, Events::Tapped, Events::AttackerDeclared, Events::BecameBlocked,
              Events::BlockerDeclared
           facts["object"] = event.object
-        when Events::AbilityActivated then facts["object"] = event.source
+        when Events::AbilityActivated then facts.merge!("object" => event.source, "ability" => event.object)
+        when Events::TriggerPutOnStack then facts["ability"] = event.object
         when Events::DamageDealt
           facts.merge!("object" => event.source, "amount" => event.amount, "player" => Filters.player_index(engine, event.target))
         when Events::LifeChanged then facts["amount"] = [event.gain, event.loss].max

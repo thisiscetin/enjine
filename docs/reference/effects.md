@@ -521,6 +521,26 @@ Rules: CR 205.3m, CR 607.2d, CR 608.2c
 }
 ```
 
+## choose_new_targets
+
+You may choose new targets for each spell or ability on the stack `of` refers to (e.g. {"triggering": "object"}: "that spell"): for each target, keep it or pick another legal target for that spell.
+
+Rules: CR 115.7, CR 115.7d, CR 115.7e
+
+| Parameter | Description |
+| --- | --- |
+| `of` | selector (spells or abilities on the stack) |
+
+```json
+{
+  "choose_new_targets": {
+    "of": {
+      "triggering": "object"
+    }
+  }
+}
+```
+
 ## choose_option
 
 The player (`to`, default you) chooses one of the `options` (words); later effects of this spell or ability check it with the condition {"chosen": word}.

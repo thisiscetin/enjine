@@ -23,23 +23,33 @@ module Enjine
       end
 
       # "Whenever ~ becomes tapped" (CR 603.2e): only a permanent already on the battlefield changing from
-      # untapped to tapped; entering tapped isn't becoming tapped.
+      # untapped to tapped; entering tapped isn't becoming tapped. `for: "teamwork"`: "becomes tapped to pay a
+      # teamwork cost" (CR 702.194a), known once the spell is cast.
       class BecomesTapped < Trigger
+        COSTS = %w[teamwork].freeze
+
         primitive :trigger, :becomes_tapped,
                   description: "The subject becomes tapped (for any reason: a cost, attacking, an effect). A " \
-                               "permanent that enters tapped doesn't become tapped.",
-                  rules: %w[603.2e 701.26a],
-                  params: { "subject" => "\"self\" (default) or {\"each\": filter, ...}" },
+                               "permanent that enters tapped doesn't become tapped. `for: \"teamwork\"`: only when " \
+                               "it's tapped to pay a teamwork cost (it triggers once the spell is cast).",
+                  rules: %w[603.2e 701.26a 702.194a],
+                  params: { "subject" => "\"self\" (default) or {\"each\": filter, ...}", "for" => COSTS.join(" | ") },
                   example: { "becomes_tapped" => { "subject" => "self" } }
 
-        def event_class = Events::Tapped
+        def self.keys = %w[subject for]
+        def event_class = @for ? Events::TappedForCost : Events::Tapped
+
+        def setup(params, errors, path)
+          @for = params["for"]
+          errors << "#{path}.for: must be one of #{COSTS.join(", ")}" unless @for.nil? || COSTS.include?(@for)
+        end
 
         def match?(engine, event, source)
           obj = engine.state.objects[event.object] or return false
           @subject.match?(engine, event.object, obj.controller, obj.card, source, types: engine.chars(obj).types)
         end
 
-        def to_s = "Whenever #{@subject} becomes tapped"
+        def to_s = "Whenever #{@subject} becomes tapped#{" to pay a #{@for} cost" if @for}"
       end
 
       # "Whenever one or more [kind] counters are put on ~" (CR 122.6): counters put on a permanent, including

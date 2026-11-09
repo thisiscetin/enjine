@@ -175,6 +175,7 @@ module Enjine
         when "control_changed" then "#{ev["controller"]} gains control of #{name_of(ev["object"])}"
         when "became_blocked" then "#{name_of(ev["object"])} is blocked"
         when "crewed_vehicle" then "#{name_of(ev["object"])} crews #{name_of(ev["vehicle"])}"
+        when "tapped_for_cost" then "#{name_of(ev["object"])} is tapped to pay a #{ev["cost"]} cost"
         when "became_crewed" then "#{name_of(ev["object"])} becomes crewed"
         when "transformed" then "#{name_of(ev["object"])} transforms into #{card_name(ev["card"])}"
         when "prepared_changed" then "#{name_of(ev["object"])} #{ev["prepared"] ? "becomes prepared" : "is no longer prepared"}"

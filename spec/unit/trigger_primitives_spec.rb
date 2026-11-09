@@ -73,7 +73,7 @@ RSpec.describe "Trigger, delayed, reflexive and entering-choice primitives" do
 
     it "rejects bad effect parameters" do
       expect(errors_of(:effect, { "draw" => { "amount" => 1, "to" => { "triggering" => "planet" } } }))
-        .to eq(["x.draw.to.triggering: must be one of object, player"])
+        .to eq(["x.draw.to.triggering: must be one of object, player, targets, ability"])
       expect(errors_of(:effect, { "return_to_battlefield" => { "to" => "watched", "counters" => [] } }))
         .to eq(["x.return_to_battlefield.counters: must be an object of counter name => count"])
       expect(errors_of(:effect, { "return_to_battlefield" => { "to" => "watched", "counters" => { "Bad!" => 0 } } }))

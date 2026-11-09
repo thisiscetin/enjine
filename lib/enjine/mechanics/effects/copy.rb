@@ -43,6 +43,36 @@ module Enjine
         end
       end
 
+      # Choosing new targets for a spell or ability on the stack, one target at a time: keep the old one (even if
+      # it's illegal now) or pick a legal new one (CR 115.7d, 707.10c). `legal_for`: whose targets they are
+      # (legality, CR 115.7); `chooser`: who decides.
+      module NewTargets
+        def choose_new_targets(engine, spell, legal_for, locals, chooser: legal_for)
+          old = spell.targets || []
+          specs = engine.resolving_ability(spell)&.targets_for(spell.modes || [], kicked: spell.memory["kicked"]) || []
+          slots = engine.target_slots(old, specs) # each target of a counted slot in turn; same number (CR 707.10c)
+          chosen = answers(locals).map { it["target"] }
+          return engine.regroup_targets(chosen, old) if chosen.size >= slots.size
+
+          i = chosen.size
+          current, spec = slots[i]
+          keep = [{ "type" => "target", "target" => current }]
+          others = spec ? new_target_choices(engine, spec, legal_for, spell, current) : []
+          ask(engine, locals, chooser, "Choose target ##{i + 1} for #{engine.catalog.fetch(spell.card).name}", keep + others)
+        end
+
+        private
+
+        def new_target_choices(engine, spec, controller, spell, current)
+          source = spell.ability? ? spell.source : nil # an ability's copy has the same source (CR 707.10b)
+          spec.candidates_for(engine, controller, source).filter_map do |ref|
+            next if ref == current || ref == spell.id || !engine.targetable?(ref, controller, source, targeter: source || spell.id)
+
+            { "type" => "target", "target" => ref }
+          end
+        end
+      end
+
       # "Create a token that's a copy of ..." (CR 707.8, 111.1).
       class CreateTokenCopy < Effect
         include CopyOf
@@ -130,6 +160,7 @@ module Enjine
       # with the same choices; it isn't cast or activated.
       class CopySpell < ChoiceEffect
         include CopyOf
+        include NewTargets
 
         primitive :effect, :copy_spell,
                   description: "Copy each spell or ability on the stack `of` refers to (\"self\": the spell this ability " \
@@ -169,7 +200,7 @@ module Enjine
           while (spell_id, controller = locals["plan"].first)
             spell = engine.state.objects[spell_id]
             if spell&.zone == :stack
-              targets = @new_targets ? choose_targets(engine, spell, controller, locals) : spell.targets&.dup
+              targets = @new_targets ? choose_new_targets(engine, spell, controller, locals) : spell.targets&.dup
               return :wait if targets == :wait
 
               engine.copy_spell!(spell, controller, targets)
@@ -188,28 +219,44 @@ module Enjine
           spells = of_refs(engine, ctx).select { engine.state.objects[it]&.zone == :stack }
           players(engine, ctx).flat_map { |index| spells.flat_map { |id| Array.new(n) { [id, index] } } }
         end
+      end
 
-        def choose_targets(engine, spell, controller, locals)
-          old = spell.targets || []
-          specs = engine.resolving_ability(spell)&.targets_for(spell.modes || [], kicked: spell.memory["kicked"]) || []
-          slots = engine.target_slots(old, specs) # each target of a counted slot in turn; same number (CR 707.10c)
-          chosen = answers(locals).map { it["target"] }
-          return engine.regroup_targets(chosen, old) if chosen.size >= slots.size
+      # "You may choose new targets for that spell" (CR 115.7d): the controller of this effect goes through each
+      # target of the spell or ability `of` refers to, keeping it or choosing a new legal one (legal for the spell's
+      # controller). Only the final set of targets is checked (CR 115.7e).
+      class ChooseNewTargets < ChoiceEffect
+        include CopyOf
+        include NewTargets
 
-          i = chosen.size
-          current, spec = slots[i]
-          keep = [{ "type" => "target", "target" => current }]
-          others = spec ? new_choices(engine, spec, controller, spell, current) : []
-          ask(engine, locals, controller, "Choose target ##{i + 1} for the copy", keep + others)
-        end
+        primitive :effect, :choose_new_targets,
+                  description: "You may choose new targets for each spell or ability on the stack `of` refers to (e.g. " \
+                               "{\"triggering\": \"object\"}: \"that spell\"): for each target, keep it or pick another " \
+                               "legal target for that spell.",
+                  rules: %w[115.7 115.7d 115.7e],
+                  params: { "of" => "selector (spells or abilities on the stack)" },
+                  example: { "choose_new_targets" => { "of" => { "triggering" => "object" } } }
 
-        def new_choices(engine, spec, controller, spell, current)
-          source = spell.ability? ? spell.source : nil # an ability's copy has the same source (CR 707.10b)
-          spec.candidates_for(engine, controller, source).filter_map do |ref|
-            next if ref == current || ref == spell.id || !engine.targetable?(ref, controller, source, targeter: source || spell.id)
+        def self.keys = %w[of if]
+        def self.default_to = "you"
+        def setup(params, errors, path) = @of = setup_of(params, errors, path)
+        def to_s = "you may choose new targets for #{@of}"
 
-            { "type" => "target", "target" => ref }
+        def run(engine, ctx, locals)
+          return :done unless locals["spells"] || condition.nil? || condition.true?(engine, ctx)
+
+          locals["spells"] ||= of_refs(engine, ctx).select { engine.state.objects[it]&.zone == :stack }
+          while (id = locals["spells"].first)
+            spell = engine.state.objects[id]
+            if spell&.zone == :stack && !Array(spell.targets).flatten.compact.empty?
+              targets = choose_new_targets(engine, spell, spell.controller, locals, chooser: ctx.controller)
+              return :wait if targets == :wait
+
+              engine.change_targets!(spell, targets, ctx.controller)
+            end
+            locals["spells"].shift
+            locals.delete("answers")
           end
+          :done
         end
       end
 

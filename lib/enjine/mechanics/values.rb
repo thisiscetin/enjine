@@ -17,8 +17,10 @@ module Enjine
     #   {"counters": {"of": selector, "kind": name}}  counters on them, objects or players (any kind without "kind", CR 122)
     #   {"life_gained_this_turn" | "life_lost_this_turn" | "dilemmas_this_turn" | "returned_this_turn"
     #    | "cards_drawn_this_turn" | "cards_discarded_this_turn" | "noncombat_damage_this_turn"
+    #    | "noncombat_damage_last_turn"
     #    | "spells_cast_this_game": player selector}  this turn's (or game's) history, see Engine::TurnHistory
-    #   {"spells_cast_this_turn": {"by": player selector, "matching": spell filter}}
+    #   {"spells_cast_this_turn" | "lands_played_this_turn": {"by": player selector, "matching": filter,
+    #    "from" | "not_from": zone}}                spells cast / lands played this turn
     #   {"died_this_turn" | "entered_this_turn" | "left_this_turn" | "sacrificed_this_turn" | "attackers_this_turn"
     #    | "exiled_this_turn": {"each": filter, "controller": you|opponent|any}}  objects in this turn's history
     #   {"this_way": n}                               how much effect n of this list changed (life it took)
@@ -31,20 +33,22 @@ module Enjine
                           distinct_colors distinct_land_types
                           life_gained_this_turn life_lost_this_turn dilemmas_this_turn returned_this_turn
                           cards_drawn_this_turn cards_discarded_this_turn spells_cast_this_game speed
-                          noncombat_damage_this_turn].freeze
+                          noncombat_damage_this_turn noncombat_damage_last_turn].freeze
       ARITHMETIC = %w[times plus divide].freeze
       BASIC_LAND_TYPES = %i[plains island swamp mountain forest].freeze # CR 305.6
       # Object history lists: kind -> turn_log key (Engine::TurnHistory).
       DEPARTED = { "died_this_turn" => "died", "entered_this_turn" => "entered", "left_this_turn" => "left",
                    "sacrificed_this_turn" => "sacrificed", "attackers_this_turn" => "attackers",
                    "exiled_this_turn" => "exiled" }.freeze
-      KINDS = (SELECTOR_KINDS + ARITHMETIC + DEPARTED.keys + %w[counters spells_cast_this_turn this_way
+      KINDS = (SELECTOR_KINDS + ARITHMETIC + DEPARTED.keys + %w[counters spells_cast_this_turn lands_played_this_turn this_way
                                                                 mana_spent]).freeze
       # Player history counters: kind -> turn_log/game_log key.
       HISTORY = { "life_gained_this_turn" => "life_gained", "life_lost_this_turn" => "life_lost",
                   "dilemmas_this_turn" => "dilemmas", "returned_this_turn" => "returned",
                   "cards_drawn_this_turn" => "drawn", "cards_discarded_this_turn" => "discarded",
                   "noncombat_damage_this_turn" => "noncombat_damage" }.freeze
+      # The same, read from the previous turn's log ("was dealt noncombat damage last turn").
+      LAST_TURN = { "noncombat_damage_last_turn" => "noncombat_damage" }.freeze
 
       # `min`: the smallest fixed number allowed (computed amounts may be anything their parts give).
       def self.build(data, errors, path, targets_count:, min: 0, results_count: 0)
@@ -61,7 +65,7 @@ module Enjine
         context = { targets_count: targets_count, results_count: results_count }
         return Arithmetic.build(kind, ref, errors, "#{path}.#{kind}", **context) if ARITHMETIC.include?(kind)
         return Counters.build(ref, errors, "#{path}.#{kind}", **context) if kind == "counters"
-        return SpellsCast.build(ref, errors, "#{path}.#{kind}", **context) if kind == "spells_cast_this_turn"
+        return SpellsCast.build(ref, errors, "#{path}.#{kind}", kind: kind, **context) if SpellsCast::LOGS.key?(kind)
         return Departed.build(kind, ref, errors, "#{path}.#{kind}") if DEPARTED.key?(kind)
         return ThisWay.build(ref, errors, "#{path}.#{kind}", results_count) if kind == "this_way"
         return ManaSpent.build(ref, errors, "#{path}.#{kind}", **context) if kind == "mana_spent" # mana_spent.rb
@@ -129,6 +133,7 @@ module Enjine
         when "speed" then engine.speed(index) # CR 702.179f: 0 without speed
         when "graveyard_size" then engine.player(index).graveyard.size
         when "spells_cast_this_game" then engine.game_log(index).fetch("spells", 0)
+        when *LAST_TURN.keys then engine.last_turn_log(index).fetch(LAST_TURN.fetch(@kind), 0)
         else engine.turn_log(index).fetch(HISTORY.fetch(@kind), 0)
         end
       end
@@ -248,29 +253,50 @@ module Enjine
 
       # {"spells_cast_this_turn": {"by": "you", "matching": {"spell": {"not": ["creature"]}}}}: spells the
       # players cast this turn whose card types match (CR 601.2i; a cancelled cast never counts).
+      # {"lands_played_this_turn": {"by": "you"}}: lands they played this turn (CR 305.1). `from` / `not_from`:
+      # only those cast or played from (not from) that zone (CR 601.2a).
       class SpellsCast
-        def self.build(data, errors, path, **context)
+        LOGS = { "spells_cast_this_turn" => "spells", "lands_played_this_turn" => "lands_played" }.freeze
+
+        def self.build(data, errors, path, kind: "spells_cast_this_turn", **context)
           data = data.is_a?(Hash) ? data.transform_keys(&:to_s) : {}
-          Mechanics.check_keys(data, %w[by matching], errors, path)
+          Mechanics.check_keys(data, %w[by matching from not_from], errors, path)
           casters = Selector.build(data.fetch("by", "you"), errors, "#{path}.by", **context)
           filter = data["matching"] && Mechanics.build_entry(:filter, data["matching"], errors, "#{path}.matching")
-          new(casters, filter)
+          new(casters, filter, CastFrom.build(data, errors, path), LOGS.fetch(kind))
         end
 
-        def initialize(casters, filter)
+        def initialize(casters, filter, zones = CastFrom.new(nil, nil), log = "spells")
           @by = casters
           @filter = filter
+          @zones = zones
+          @log = log
           freeze
         end
 
         def value(engine, ctx)
           players = @by.resolve(engine, ctx).filter_map { Filters.player_index(engine, it) }
           players.sum do |index|
-            Array(engine.turn_log(index)["spells"]).count { @filter.nil? || Departed.facts_match?(engine, @filter, it, nil) }
+            entries(engine.turn_log(index)).count do |card, zone|
+              @zones.match?(zone) && (@filter.nil? || Departed.facts_match?(engine, @filter, card, nil))
+            end
           end
         end
 
-        def to_s = "the number of #{@filter || "spell"}s cast this turn by #{@by}"
+        def to_s
+          what = @log == "spells" ? "#{@filter || "spell"}s cast" : "lands played"
+          "the number of #{what}#{@zones} this turn by #{@by}"
+        end
+
+        private
+
+        # [card, zone] per spell or land; a spell cast before zones were recorded counts as cast from the hand.
+        def entries(log)
+          return Array(log["lands_played"]) unless @log == "spells"
+
+          zones = Array(log["spells_from"])
+          Array(log["spells"]).each_with_index.map { |card, i| [card, zones[i] || "hand"] }
+        end
       end
 
       # {"died_this_turn" | "entered_this_turn" | ...: {"each": filter, "controller": ...}}: permanents that

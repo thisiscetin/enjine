@@ -11,8 +11,11 @@ module Enjine
     # cancelled never emits SpellCast, so it never counts (CR 601.2i: a spell becomes cast only
     # once casting is complete).
     #
-    # Per player (PlayerState#turn_log, reset as each turn begins; #game_log for the whole game):
+    # Per player (PlayerState#turn_log, reset as each turn begins and kept as #last_turn_log for the turn after;
+    # #game_log for the whole game):
     #   "spells"   card ids of spells the player cast       "life_gained" / "life_lost"  totals
+    #   "spells_from"  the zone each of those spells was cast from (CR 601.2a), in the same order
+    #   "lands_played" [card id, zone it was played from] of the lands the player played (CR 305.1)
     #   "entered"  [card id, types, subtypes] of permanents that entered under their control
     #   "died"     [card id, types] of their permanents put into a graveyard from the battlefield
     #   "left"     [card id, types, subtypes] of their permanents that left the battlefield (CR 400.7)
@@ -27,7 +30,7 @@ module Enjine
     module TurnHistory
       def record_history!(event)
         case event
-        when Events::TurnBegan then state.players.each { it.turn_log = {} }
+        when Events::TurnBegan then turn_logs_rolled!
         when Events::SpellCast then cast_recorded!(event)
         when Events::LifeChanged then life_recorded!(event)
         when Events::ZoneChanged
@@ -42,6 +45,9 @@ module Enjine
 
       # This turn's log of the player at `index`.
       def turn_log(index) = player(index).turn_log ||= {}
+
+      # The previous turn's log of the player at `index` ("last turn", CR 500.1: whoever's turn it was).
+      def last_turn_log(index) = player(index).last_turn_log ||= {}
 
       # This game's log of the player at `index`.
       def game_log(index) = player(index).game_log ||= {}
@@ -92,11 +98,19 @@ module Enjine
 
       def log_of(player_name) = turn_log(names.index(player_name))
 
+      def turn_logs_rolled!
+        state.players.each do |pl|
+          pl.last_turn_log = pl.turn_log || {}
+          pl.turn_log = {}
+        end
+      end
+
       def bump!(log, key, amount) = log[key] = log.fetch(key, 0) + amount
 
       def cast_recorded!(event)
         index = names.index(event.player)
         (turn_log(index)["spells"] ||= []) << event.card
+        (turn_log(index)["spells_from"] ||= []) << ((spell = state.objects[event.object]) ? cast_origin(spell) : "hand")
         bump!(game_log(index), "spells", 1)
       end
 
@@ -110,6 +124,7 @@ module Enjine
       # Who it counts for: a permanent's controller as it last existed, or a card's owner.
       def zone_change_recorded!(event)
         entered_recorded!(event) if event.to == "battlefield"
+        land_play_recorded!(event) if event.reason == "play_land"
         lki = event.from == "battlefield" ? last_known(event.old_id) : nil
         departed_recorded!(event, lki) if lki
         log = lki ? turn_log(lki["controller"]) : log_of(event.owner)
@@ -123,6 +138,12 @@ module Enjine
       def entered_recorded!(event)
         obj = state.objects[event.new_id] or return
         (turn_log(obj.controller)["entered"] ||= []) << history_entry(event.card, chars(obj))
+      end
+
+      # CR 305.1: the player who plays a land controls it as it enters.
+      def land_play_recorded!(event)
+        index = state.objects[event.new_id]&.controller || names.index(event.owner)
+        (turn_log(index)["lands_played"] ||= []) << [event.card, event.from]
       end
 
       def departed_recorded!(event, lki)

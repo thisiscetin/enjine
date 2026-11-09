@@ -88,7 +88,10 @@ module Enjine
     AttackerDeclared = define(:attacker_declared, :object, :target)
     BlockerDeclared = define(:blocker_declared, :object, :attacker)
     DamageAssigned = define(:damage_assigned, :attacker, :blocker)
-    AbilityTriggered = define(:ability_triggered, :player, :source, :card, :ability)
+    # `trigger`: the id of the pending triggered ability ("copy that ability", see Engine#stack_object_for).
+    AbilityTriggered = define(:ability_triggered, :player, :source, :card, :ability, :trigger) do
+      def initialize(player:, source:, card:, ability:, trigger: nil) = super
+    end
     TriggerPutOnStack = define(:trigger_put_on_stack, :player, :object, :source, :card, :ability, :targets)
     TriggerRemoved = define(:trigger_removed, :player, :source, :card, :reason)
     TokenCeased = define(:token_ceased, :object, :card, :zone)
@@ -115,6 +118,8 @@ module Enjine
     # Crew (CR 702.122): a creature tapped to pay a crew cost crews that Vehicle (702.122b); the Vehicle
     # becomes crewed as its crew ability resolves (702.122e), by the creatures in `crew`.
     CrewedVehicle = define(:crewed_vehicle, :object, :vehicle)
+    # A permanent tapped to pay a `cost` (e.g. "teamwork", CR 702.194a) of the spell `spell`, once the spell is cast.
+    TappedForCost = define(:tapped_for_cost, :object, :cost, :spell)
     BecameCrewed = define(:became_crewed, :object, :crew)
     # Saddle (CR 702.171): a creature tapped to pay a saddle cost saddles that Mount (702.171c); the Mount
     # becomes saddled (702.171b), by the creatures in `riders` when its saddle ability did it.

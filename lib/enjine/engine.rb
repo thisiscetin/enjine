@@ -23,7 +23,7 @@ module Enjine
       touch! if volatile_layers? || Characteristics::LAYER_EVENTS.include?(event.class)
       record_history!(event) # before triggers look at it (see Engine::TurnHistory)
       @emit.call(event)
-      watch_triggers!(event) unless event.is_a?(Events::AbilityTriggered)
+      watch_triggers!(event)
     end
 
     def name(index) = state.players[index].name
