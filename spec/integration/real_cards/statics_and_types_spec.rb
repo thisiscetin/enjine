@@ -112,7 +112,7 @@ RSpec.describe "Real cards: statics, types and restrictions" do
     end
     game = combat.call("Air Response Unit")
     unit = obj_id(game, "Air Response Unit")
-    expect([chars(game, unit).types, chars(game, unit).toughness, chars(game, unit).keywords]).to eq([%i[artifact creature], 4, %i[flying vigilance]])
+    expect(chars(game, unit)).to have_attributes(types: %i[artifact creature], toughness: 4, keywords: %i[flying vigilance])
     expect(engine(game).saddled?(game.state.object(obj_id(game, "Gilded Ghoda")))).to be(false)
     game = combat.call("Gilded Ghoda")
     expect(engine(game).saddled?(game.state.object(obj_id(game, "Gilded Ghoda")))).to be(true)

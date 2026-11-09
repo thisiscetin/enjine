@@ -2550,5 +2550,126 @@
         }
       }
     ]
+  },
+  {
+    "name": "Oathsworn Paladin",
+    "mana_cost": "{2}{W}{W}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "human",
+      "knight"
+    ],
+    "power": 3,
+    "toughness": 3,
+    "rules_text": "Protection from each of your opponents. You have protection from each of your opponents.",
+    "abilities": [
+      {
+        "protection_from": "each_opponent"
+      },
+      {
+        "player_rule": {
+          "rule": "protection_from_opponents"
+        }
+      }
+    ]
+  },
+  {
+    "name": "Chromatic Mentor",
+    "mana_cost": "{1}{G}{U}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "elf",
+      "wizard"
+    ],
+    "power": 2,
+    "toughness": 3,
+    "rules_text": "Other creatures you control have hexproof from each of their colors.",
+    "abilities": [
+      {
+        "static": {
+          "affects": {
+            "each": "creature",
+            "controller": "you",
+            "other": true
+          },
+          "abilities": [
+            {
+              "hexproof_from": "its_colors"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Copilot Gremlin",
+    "mana_cost": "{R}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "gremlin",
+      "pilot"
+    ],
+    "power": 0,
+    "toughness": 3,
+    "rules_text": "This creature crews Vehicles and saddles Mounts using its toughness, as though it were 1 greater.",
+    "abilities": [
+      {
+        "tapping_power": {
+          "for": [
+            "crew",
+            "saddle",
+            "station"
+          ],
+          "use": "toughness",
+          "plus": 1
+        }
+      }
+    ]
+  },
+  {
+    "name": "Shackle Drone",
+    "mana_cost": "{4}{U}{U}",
+    "types": [
+      "artifact",
+      "creature"
+    ],
+    "subtypes": [
+      "drone"
+    ],
+    "power": 3,
+    "toughness": 3,
+    "rules_text": "When this creature enters, gain control of target creature an opponent controls for as long as you control this creature.",
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "enters": {}
+          },
+          "targets": [
+            {
+              "creature": {
+                "controller": "opponent"
+              }
+            }
+          ],
+          "effects": [
+            {
+              "gain_control": {
+                "to": {
+                  "target": 0
+                },
+                "duration": "while_you_control_source"
+              }
+            }
+          ]
+        }
+      }
+    ]
   }
 ]

@@ -97,7 +97,9 @@ module Enjine
           case @duration
           when "indefinite" then { "duration" => "permanent" }
           when "end_of_turn" then { "duration" => "end_of_turn" }
-          else engine.source_duration_holds?(@duration, ctx.source, ctx.controller) ? { "duration" => @duration, "source" => ctx.source } : nil
+          else
+            holds = engine.source_duration_holds?(@duration, ctx.source, ctx.controller)
+            holds ? { "duration" => @duration, "source" => ctx.source } : nil
           end
         end
 

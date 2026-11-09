@@ -55,7 +55,8 @@ module Enjine
         def apply(engine, ctx)
           paid = engine.object(ctx.object).paid&.first or return
           creature = paid["object"]
-          n = engine.state.battlefield.include?(creature) ? Abilities::TappingPower.of(engine, engine.object(creature), :station) : paid["power"]
+          on = engine.state.battlefield.include?(creature)
+          n = on ? Abilities::TappingPower.of(engine, engine.object(creature), :station) : paid["power"]
           objects(engine, ctx).each { engine.add_counters!(engine.object(it), "charge", n) }
         end
 

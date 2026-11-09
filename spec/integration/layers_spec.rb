@@ -158,7 +158,7 @@ RSpec.describe "Layers: conditional and computed statics, type changes, granted 
     game = board(step: :beginning_of_combat, alice: ["Hive Relay"])
     relay = obj_id(game, "Hive Relay")
     ref = engine_of(game).chars(relay).triggered_abilities.map(&:ref)
-    expect(ref).to eq(["granted:hive_relay:printed:0:0"])
+    expect(ref).to eq(["granted:hive_relay:printed:0:0@#{relay}"]) # its granter (CR 607.1a)
     hand = ids_in(game, "alice", :hand).size
     pass_both(game)
     game.submit(type: "attack", object: relay, target: "player:bob")
@@ -172,7 +172,7 @@ RSpec.describe "Layers: conditional and computed statics, type changes, granted 
   it "grants a mana ability to each creature you control (CR 613.1f, 605.1a)" do
     game = board(alice: ["Root Speaker", "Grizzly Bears"])
     bears = obj_id(game, "Grizzly Bears")
-    option = { type: "activate_mana", object: bears, ability: "granted:root_speaker:printed:0:0" }
+    option = { type: "activate_mana", object: bears, ability: "granted:root_speaker:printed:0:0@#{obj_id(game, "Root Speaker")}" }
     expect(game.legal_options).to include(option)
     game.submit(option)
     expect(game.state.players[0].mana_pool[:G]).to eq(2)
@@ -272,7 +272,7 @@ RSpec.describe "Layers: conditional and computed statics, type changes, granted 
     expect(errors.call([static("affects" => "self", "pump" => { "power" => { "power" => "self" } })]))
       .to include(a_string_matching(/pump.power: can't read power/))
     expect(errors.call([static("affects" => "self", "abilities" => [{ "spell" => { "effects" => [] } }])]))
-      .to include(a_string_matching(/abilities\[0\]: only triggered, mana, activated, hexproof_from, protection_from abilities/))
+      .to include(a_string_matching(/abilities\[0\]: only triggered, mana, activated, hexproof_from, protection_from, tapping_power /))
     expect(errors.call([static("affects" => "self", "creature_types" => [])])).to include(a_string_matching(/creature_types: must be/))
     expect(errors.call([static("affects" => "self", "subtypes" => ["Wizard"])])).to include(a_string_matching(/subtypes: must be/))
     expect(errors.call([{ "activated" => { "cost" => ["tap"], "effects" => [

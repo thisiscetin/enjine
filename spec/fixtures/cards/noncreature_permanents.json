@@ -1626,5 +1626,152 @@
         }
       }
     ]
+  },
+  {
+    "name": "Mask of Anonymity",
+    "mana_cost": "{1}{U}",
+    "types": [
+      "enchantment"
+    ],
+    "subtypes": [
+      "aura"
+    ],
+    "rules_text": "Enchant creature. Enchanted creature loses all abilities and is a blue Rat creature with base power and toughness 1/1 named Nameless One.",
+    "abilities": [
+      {
+        "enchant": "creature"
+      },
+      {
+        "static": {
+          "affects": "attached",
+          "loses_abilities": true,
+          "colors": [
+            "U"
+          ],
+          "set_types": [
+            "creature"
+          ],
+          "creature_types": [
+            "rat"
+          ],
+          "base_power_toughness": {
+            "power": 1,
+            "toughness": 1
+          },
+          "name": "Nameless One"
+        }
+      }
+    ]
+  },
+  {
+    "name": "Silencing Bell",
+    "mana_cost": "{3}",
+    "types": [
+      "artifact"
+    ],
+    "rules_text": "Activated abilities of creatures your opponents control can't be activated. Spells and abilities you control can't be countered.",
+    "abilities": [
+      {
+        "static": {
+          "affects": {
+            "each": "creature",
+            "controller": "opponent"
+          },
+          "keywords": [
+            "abilities_cant_be_activated"
+          ]
+        }
+      },
+      {
+        "player_rule": {
+          "rule": "spells_cant_be_countered"
+        }
+      },
+      {
+        "player_rule": {
+          "rule": "abilities_cant_be_countered"
+        }
+      }
+    ]
+  },
+  {
+    "name": "Homing Glove",
+    "mana_cost": "{1}",
+    "types": [
+      "artifact"
+    ],
+    "subtypes": [
+      "equipment"
+    ],
+    "rules_text": "Equipped creature has \"{1}, {T}: This creature deals 1 damage to any target. Return Homing Glove to its owner's hand.\" Equip {1}",
+    "abilities": [
+      {
+        "static": {
+          "affects": "attached",
+          "abilities": [
+            {
+              "activated": {
+                "cost": [
+                  {
+                    "mana": "{1}"
+                  },
+                  "tap"
+                ],
+                "targets": [
+                  "any_target"
+                ],
+                "effects": [
+                  {
+                    "deal_damage": {
+                      "amount": 1,
+                      "to": {
+                        "target": 0
+                      }
+                    }
+                  },
+                  {
+                    "return_to_hand": {
+                      "to": "granter"
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      },
+      {
+        "equip": {
+          "cost": [
+            {
+              "mana": "{1}"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Prismatic Crossing",
+    "types": [
+      "land"
+    ],
+    "rules_text": "As this land enters, choose a basic land type. Then you may pay 2 life. If you don't, it enters tapped. This land is the chosen type.",
+    "abilities": [
+      {
+        "choose_basic_land_type": {}
+      },
+      {
+        "enters_tapped_unless_pay_life": {
+          "life": 2
+        }
+      },
+      {
+        "static": {
+          "affects": "self",
+          "subtypes": "chosen"
+        }
+      }
+    ]
   }
 ]

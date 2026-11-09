@@ -49,7 +49,7 @@ module Enjine
 
           case quality
           when :each_opponent then QualityAbility.opponents?(object, holder)
-          when :its_colors then !holder.is_a?(Integer) && !holder.nil? && engine.chars(object).colors.intersect?(engine.chars(holder).colors)
+          when :its_colors then holder.is_a?(GameObject) && engine.chars(object).colors.intersect?(engine.chars(holder).colors)
           else quality.match?(engine, object)
           end
         end

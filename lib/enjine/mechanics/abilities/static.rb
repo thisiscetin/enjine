@@ -24,7 +24,8 @@ module Enjine
                                "{\"each\": filter, " \
                                "\"controller\": you|opponent|any, \"other\": true} (relative to the source's " \
                                "controller), \"self\", or \"attached\" (\"equipped/enchanted creature\").",
-                  rules: %w[604.1 604.2 611.3a 612.8 613.1c 205.1a 613.1d 613.1e 613.1f 613.4b 613.4c 613.7a 613.8a 205.1a 205.1b 301.5f 303.4m],
+                  rules: %w[604.1 604.2 611.3a 612.8 613.1c 613.1d 613.1e 613.1f 613.4b 613.4c 613.7a 613.8a 205.1a 205.1b 301.5f
+                            303.4m],
                   params: { "affects" => "{\"each\": filter, \"controller\": ..., \"other\": bool}, \"self\" or \"attached\"",
                             "if" => "condition (\"as long as ...\", \"during your turn\")",
                             "pump" => "{\"power\": amount, \"toughness\": amount} (\"gets +1/+1 for each ...\")",
@@ -79,11 +80,17 @@ module Enjine
           errors << "#{path}.loses_abilities: must be true (or absent)" unless [nil, true].include?(loses)
           { loses_abilities: loses == true,
             colors: Effects::Become.parse_colors(Mechanics.fetch_param(params, :colors), errors, path),
-            set_types: params.key?("set_types") ? Effects::Become.names_param(params, :set_types, :type, errors, path,
-                                                                             allowed: Effects::Become::ADDABLE_TYPES) : nil,
+            set_types: parse_set_types(params, errors, path),
             name: parse_name(params, errors, path),
             base_power_toughness: Effects::Become.parse_power_toughness(Mechanics.fetch_param(params, :base_power_toughness),
                                                                         errors, path) }
+        end
+
+        # "is a black Skeleton creature" (CR 205.1a): exactly these card types, or nil.
+        def self.parse_set_types(params, errors, path)
+          return nil unless params.key?("set_types")
+
+          Effects::Become.names_param(params, :set_types, :type, errors, path, allowed: Effects::Become::ADDABLE_TYPES)
         end
 
         # "named Legitimate Businessperson" (CR 612.8): a non-empty string.
@@ -229,9 +236,7 @@ module Enjine
         def to_s
           bits = []
           bits << "loses all abilities" if loses_abilities?
-          bits << "named #{name}" if name
-          bits << "card types exactly #{set_types.join(" ")}" if set_types
-          bits << "colors #{colors.empty? ? "colorless" : colors.join}" if colors
+          bits.concat(set_bits)
           bits << "base #{base_power_toughness.values.join("/")}" if base_power_toughness
           bits << "#{Effects::Pump.signed_text(@pump["power"] || ZERO)}/#{Effects::Pump.signed_text(@pump["toughness"] || ZERO)}" if pump?
           bits << keywords.join(", ") unless keywords.empty?
@@ -245,6 +250,12 @@ module Enjine
         private
 
         def fixed(amount) = amount.is_a?(Amount::Fixed) ? amount.n : 0
+
+        # What it sets: name (layer 3), card types (layer 4) and colors (layer 5).
+        def set_bits
+          [("named #{name}" if name), ("card types exactly #{set_types.join(" ")}" if set_types),
+           ("colors #{colors.empty? ? "colorless" : colors.join}" if colors)].compact
+        end
 
         def context(source) = EffectContext.new(source.controller, source.id, source.id, [], [])
 
