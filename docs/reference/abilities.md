@@ -65,6 +65,16 @@ Rules: CR 601.2b, CR 601.2f, CR 601.2h, CR 118.8
 }
 ```
 
+## additional_land_plays
+
+Its controller may play an additional land on each of their turns. Each instance adds one land play (CR 305.2); lands put onto the battlefield by effects don't count.
+
+Rules: CR 305.2, CR 305.2a, CR 305.2b, CR 604.1
+
+```json
+"additional_land_plays"
+```
+
 ## additional_triggers
 
 While this permanent is on the battlefield, a triggered ability of a permanent its controller controls that triggers because of `cause` triggers an additional time. `cause`: you_gain_life (its controller gaining life).
@@ -145,6 +155,16 @@ Rules: CR 115.4, CR 113.7, CR 702.11d
     }
   }
 }
+```
+
+## cant_phase_in
+
+While this permanent is on the battlefield, permanents can't phase in.
+
+Rules: CR 702.26a, CR 502.1, CR 604.1
+
+```json
+"cant_phase_in"
 ```
 
 ## chapter
@@ -613,6 +633,16 @@ Rules: CR 605.1a, CR 605.3a, CR 605.3b, CR 106.4
     "produce": "{C}"
   }
 }
+```
+
+## may_not_untap
+
+Its controller may choose not to untap it during their untap step (decision `untap_choice`, asked only while it's tapped).
+
+Rules: CR 502.3, CR 604.1
+
+```json
+"may_not_untap"
 ```
 
 ## play_from

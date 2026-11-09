@@ -80,10 +80,14 @@ The die-roll winner chooses `{type: "play"}` or `{type: "draw"}` (CR 103.1).
 
 The player holding priority takes an action or passes. Options come from the priority actions below (CR 117).
 
+## untap_choice
+
+Untap step: `{type: "untap", object: id}` or `{type: "keep_tapped", object: id}` for a permanent you may choose not to untap (CR 502.3).
+
 ## Priority actions
 
 - `activate` — `{type: "activate", object: id, ability: ref}` — start activating an ability (CR 602.2), including planeswalker loyalty abilities (CR 606) and abilities of cards in your hand (cycling, CR 702.29).
 - `activate_mana` — `{type: "activate_mana", object: id, ability: ref}` — activate a mana ability; it resolves immediately (CR 605.3).
 - `cast` — `{type: "cast", object: id}` — start casting a card from your hand (CR 601.2). `{type: "cast", object: id, via: method}` casts a card from another zone (graveyard, exile, the top of your library) by the permission or alternative cost `via` names, e.g. beam me up (CR 601.3, 702.196). Offered only when timing allows, targets exist and enough mana is available.
 - `pass` — `{type: "pass"}` — pass priority. When all players pass in succession with an empty stack, the step ends (CR 117.4).
-- `play_land` — `{type: "play_land", object: id}` — special action: your main phase, empty stack, one land per turn (CR 305.1, 305.2). With `via`: a land from another zone that an effect lets you play.
+- `play_land` — `{type: "play_land", object: id}` — special action: your main phase, empty stack, one land per turn plus additional land plays (CR 305.1, 305.2). With `via`: a land from another zone that an effect lets you play.

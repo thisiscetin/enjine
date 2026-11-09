@@ -73,6 +73,28 @@ Rules: CR 613.1d, CR 205.1b, CR 611.2a, CR 611.2c
 }
 ```
 
+## additional_triggers
+
+For `duration` (while_source_tapped: for as long as the source remains tapped), each triggered ability of each referenced permanent triggers an additional time.
+
+Rules: CR 603.2d, CR 611.2b, CR 611.2c
+
+| Parameter | Description |
+| --- | --- |
+| `to` | selector |
+| `duration` | while_source_tapped |
+
+```json
+{
+  "additional_triggers": {
+    "to": {
+      "target": 0
+    },
+    "duration": "while_source_tapped"
+  }
+}
+```
+
 ## another_counter
 
 For each referenced permanent, the controller chooses a kind of counter already on it (asked only when there are several kinds) and puts one more counter of that kind on it.
@@ -129,6 +151,53 @@ Rules: CR 701.3a, CR 701.3b, CR 701.3c, CR 301.5c
     "to": {
       "target": 0
     }
+  }
+}
+```
+
+## become
+
+Each referenced permanent becomes what the parameters say, for `duration` (end_of_turn, default, or indefinite: as long as it stays on the battlefield): its creature types are exactly `creature_types` (layer 4), its base power and toughness are `base_power_toughness` (layer 7b), and it has the `abilities` (layer 6: triggered, mana, play_from or additional_land_plays abilities).
+
+Rules: CR 611.2a, CR 611.2b, CR 611.2c, CR 613.1d, CR 613.1f, CR 613.4b, CR 205.1a, CR 514.2
+
+| Parameter | Description |
+| --- | --- |
+| `creature_types` | list of creature types (replaces the others) |
+| `base_power_toughness` | {"power": n, "toughness": n} |
+| `abilities` | list of abilities it gains |
+| `duration` | end_of_turn | indefinite |
+| `to` | selector |
+
+```json
+{
+  "become": {
+    "creature_types": [
+      "ferengi",
+      "scout"
+    ],
+    "base_power_toughness": {
+      "power": 3,
+      "toughness": 4
+    },
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "becomes_tapped": {}
+          },
+          "effects": [
+            {
+              "surveil": {
+                "amount": 2
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "duration": "indefinite",
+    "to": "self"
   }
 }
 ```
@@ -848,6 +917,33 @@ Rules: CR 118.12, CR 118.12a, CR 118.3, CR 119.4, CR 605.3a
         }
       }
     ]
+  }
+}
+```
+
+## phase_out
+
+Each referenced permanent phases out, with the Auras and Equipment attached to it (indirectly). It phases in during the untap step of the player who controlled it as it phased out. Phasing isn't a zone change: no enters or leaves triggers.
+
+Rules: CR 702.26a, CR 702.26b, CR 702.26d, CR 702.26g, CR 702.26h, CR 502.1, CR 506.4
+
+| Parameter | Description |
+| --- | --- |
+| `to` | selector |
+
+```json
+{
+  "phase_out": {
+    "to": {
+      "each": {
+        "permanent": {
+          "any_of": [
+            "artifact",
+            "creature"
+          ]
+        }
+      }
+    }
   }
 }
 ```
