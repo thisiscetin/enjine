@@ -684,6 +684,28 @@ Rules: CR 614.1c, CR 614.12
 }
 ```
 
+## enters_tapped_unless_behold
+
+As this permanent enters, its controller may behold an object matching the card spec `card` (reveal such a card from their hand or choose such a permanent they control); if they don't, it enters tapped.
+
+Rules: CR 614.12, CR 701.4a
+
+| Parameter | Description |
+| --- | --- |
+| `card` | card spec (required), e.g. {"subtypes": ["jace"]} |
+
+```json
+{
+  "enters_tapped_unless_behold": {
+    "card": {
+      "subtypes": [
+        "jace"
+      ]
+    }
+  }
+}
+```
+
 ## enters_tapped_unless_pay_life
 
 As this permanent enters, its controller may pay `life` life; if they don't, it enters tapped. You can't pay more life than you have.

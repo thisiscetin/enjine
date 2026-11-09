@@ -65,6 +65,45 @@ module Enjine
         def enters_for(answer) = { "tapped" => answer[:type] != "pay_life" }
       end
 
+      # "As this land enters, you may behold a Jace. If you don't, this land enters tapped." (CR 614.12,
+      # 701.4a). The controller chooses what to behold (or not) before it enters; a card is revealed as it enters.
+      class EntersTappedUnlessBehold < Primitive
+        primitive :ability, :enters_tapped_unless_behold,
+                  description: "As this permanent enters, its controller may behold an object matching the card spec " \
+                               "`card` (reveal such a card from their hand or choose such a permanent they control); " \
+                               "if they don't, it enters tapped.",
+                  rules: %w[614.12 701.4a],
+                  params: { "card" => "card spec (required), e.g. {\"subtypes\": [\"jace\"]}" },
+                  example: { "enters_tapped_unless_behold" => { "card" => { "subtypes" => ["jace"] } } }
+
+        attr_reader :card
+
+        def self.build(params, errors, path, **)
+          Mechanics.check_keys(params, %w[card], errors, path)
+          raw = Mechanics.fetch_param(params, :card)
+          errors << "#{path}.card: required" if raw.nil?
+          new(CardSpec.build(raw, errors, "#{path}.card"))
+        end
+
+        def initialize(card)
+          super()
+          @card = card
+          freeze
+        end
+
+        def kind = :entering_choice
+        def mana_ability? = false
+        def allowed_types = nil
+        def try_effects = []
+        def to_s = "as this enters, you may behold a #{card.to_s.delete_suffix(" card")}; if you don't, it enters tapped"
+
+        def options(engine, controller)
+          Beholding.candidates(engine, controller, card).map { { type: "behold", object: it } } + [{ type: "enter_tapped" }]
+        end
+
+        def enters_for(answer) = { "tapped" => answer[:type] != "behold" }
+      end
+
       # "This land enters tapped unless you control two or more other lands." A self-replacement effect that
       # checks its condition as the permanent would enter (CR 614.1c, 614.12): it isn't on the battlefield
       # yet, so "you control" counts only the others.

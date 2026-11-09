@@ -53,10 +53,14 @@ module Enjine
         choice.respond_to?(:enters_with) ? choice.enters_with(self, answer) : choice.enters_for(answer)
       end
 
-      def pay_entering_life!(controller, frame)
-        return unless frame["enter"] && frame["enter"]["type"] == "pay_life"
-
-        change_life!(controller, -frame["enter"]["life"])
+      # What an "as this enters" answer pays as the permanent enters: life (CR 119.4), or beholding (CR 701.4a).
+      def pay_entering_cost!(controller, frame)
+        case frame["enter"] && frame["enter"]["type"]
+        when "pay_life" then change_life!(controller, -frame["enter"]["life"])
+        when "behold"
+          id = frame["enter"]["object"]
+          Mechanics::Beholding.behold!(self, controller, id) if state.objects.key?(id)
+        end
       end
 
       # ---- permanents an effect puts onto the battlefield (CR 614.12, 614.12a) ----------------
@@ -89,7 +93,7 @@ module Enjine
       # a life payment chosen is paid now, as it enters (CR 119.4).
       def with_entering_answer(locals, id, controller, enters)
         answer = locals.fetch("entering", {})[id] or return enters
-        pay_entering_life!(controller, "enter" => answer)
+        pay_entering_cost!(controller, "enter" => answer)
         extra = entering_status(entering_choice(id), answer) or return enters
         (enters || {}).merge(extra) do |key, mine, theirs|
           next mine || theirs if key == "tapped" # "enters tapped" from the effect stays

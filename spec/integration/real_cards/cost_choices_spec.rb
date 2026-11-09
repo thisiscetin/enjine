@@ -127,4 +127,21 @@ RSpec.describe "Real cards: cost choices" do
     game.submit(type: "pay")
     expect(alice(game).poison).to eq(5)
   end
+
+  it "Theorist's Sanctum enters untapped if a Jace is beheld, tapped otherwise (CR 614.12, 701.4a)" do
+    game = board(hand: ["Theorist's Sanctum", "The Theorist, Jace Beleren"])
+    game.submit(type: "play_land", object: id(game, "Theorist's Sanctum", zone: :hand))
+    jace = id(game, "The Theorist, Jace Beleren", zone: :hand)
+    expect(game.legal_options).to eq([{ type: "behold", object: jace }, { type: "enter_tapped" }])
+    expect(Enjine::CLI::Text.new(game).option(game.legal_options.first)).to eq("Behold The Theorist, Jace Beleren")
+    entry = game.submit(type: "behold", object: jace)
+    expect(entry.events.map(&:type)).to include("card_revealed")
+    expect(game.state.object(id(game, "Theorist's Sanctum")).tapped).to be(false)
+
+    game = board(hand: ["Theorist's Sanctum"])
+    game.submit(type: "play_land", object: id(game, "Theorist's Sanctum", zone: :hand))
+    expect(game.legal_options).to eq([{ type: "enter_tapped" }])
+    game.submit(type: "enter_tapped")
+    expect(game.state.object(id(game, "Theorist's Sanctum")).tapped).to be(true)
+  end
 end

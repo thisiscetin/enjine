@@ -1287,5 +1287,47 @@
       "set": "msh",
       "number": "226"
     }
+  },
+  {
+    "name": "Theorist's Sanctum",
+    "types": [
+      "land"
+    ],
+    "subtypes": [
+      "island"
+    ],
+    "abilities": [
+      {
+        "enters_tapped_unless_behold": {
+          "card": {
+            "subtypes": [
+              "jace"
+            ]
+          }
+        }
+      },
+      {
+        "activated": {
+          "cost": [
+            {
+              "mana": "{2}{U}"
+            },
+            "tap"
+          ],
+          "effects": [
+            {
+              "empower_jace": {
+                "amount": 2
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "rare",
+    "printing": {
+      "set": "fra",
+      "number": "191"
+    }
   }
 ]
