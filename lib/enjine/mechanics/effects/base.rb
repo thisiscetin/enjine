@@ -12,6 +12,8 @@ module Enjine
 
         def self.keys = %w[amount to if]
         def self.default_to = nil
+        # Whether `amount` may be left out ("discard your hand").
+        def self.amount_optional?(_params) = false
 
         # `results_count`: how many earlier effects of the enclosing list a {"result": n} selector may name.
         def self.build(params, errors, path, targets_count: 0, results_count: 0, **)
@@ -34,7 +36,8 @@ module Enjine
           if self.class.keys.include?("amount")
             raw = Mechanics.fetch_param(params, :amount)
             @amount = if raw.nil?
-                        (errors << "#{path}.amount: required") && Amount::Fixed.new(0)
+                        errors << "#{path}.amount: required" unless self.class.amount_optional?(params)
+                        Amount::Fixed.new(0)
                       else
                         Amount.build(raw, errors, "#{path}.amount", targets_count: targets_count,
                                                                     results_count: results_count)

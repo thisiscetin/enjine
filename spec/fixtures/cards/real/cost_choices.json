@@ -1480,5 +1480,101 @@
       "set": "hob",
       "number": "5"
     }
+  },
+  {
+    "name": "Ironheart, Clever Champion",
+    "mana_cost": "{4}{U}",
+    "types": [
+      "artifact",
+      "creature"
+    ],
+    "supertypes": [
+      "legendary"
+    ],
+    "subtypes": [
+      "human",
+      "hero"
+    ],
+    "power": 3,
+    "toughness": 4,
+    "keywords": [
+      "improvise",
+      "flying"
+    ],
+    "abilities": [
+      {
+        "spells_have": {
+          "spells": {
+            "not_types": [
+              "creature"
+            ]
+          },
+          "keywords": [
+            "improvise"
+          ]
+        }
+      }
+    ],
+    "rarity": "rare",
+    "printing": {
+      "set": "msh",
+      "number": "60"
+    }
+  },
+  {
+    "name": "Narset, Jeskai Waymaster",
+    "mana_cost": "{U}{R}{W}",
+    "types": [
+      "creature"
+    ],
+    "supertypes": [
+      "legendary"
+    ],
+    "subtypes": [
+      "human",
+      "monk"
+    ],
+    "power": 3,
+    "toughness": 4,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "step_begins": {
+              "step": "end"
+            }
+          },
+          "effects": [
+            {
+              "may": {
+                "effects": [
+                  {
+                    "discard": {
+                      "hand": true
+                    }
+                  }
+                ],
+                "then": [
+                  {
+                    "draw": {
+                      "amount": {
+                        "spells_cast_this_turn": {
+                          "by": "you"
+                        }
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "rare",
+    "printing": {
+      "set": "tdm",
+      "number": "209"
+    }
   }
 ]

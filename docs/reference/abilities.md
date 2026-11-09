@@ -1262,6 +1262,32 @@ Rules: CR 113.3a, CR 601.2c, CR 608.2b, CR 608.2c, CR 702.183a, CR 601.2f
 }
 ```
 
+## spells_have
+
+Spells you cast matching the card spec `spells` (default: every spell) have `keywords` (convoke and/or improvise) while this permanent is on the battlefield.
+
+Rules: CR 702.126a, CR 702.51a, CR 611.3a, CR 604.1
+
+| Parameter | Description |
+| --- | --- |
+| `spells` | card spec, e.g. {"not_types": ["creature"]} |
+| `keywords` | list of convoke, improvise |
+
+```json
+{
+  "spells_have": {
+    "spells": {
+      "not_types": [
+        "creature"
+      ]
+    },
+    "keywords": [
+      "improvise"
+    ]
+  }
+}
+```
+
 ## static
 
 While its source is on the battlefield (and its `if` condition holds), every permanent it `affects` gets `pump` (fixed or computed amounts, layer 7c), the `keywords` and granted `abilities` (layer 6, triggered, activated or mana abilities), and with `creature_types` has exactly those creature types (layer 4); `loses_abilities: true` removes the abilities it had before (layer 6, in timestamp order: later grants and keyword counters stay, CR 613.7), `colors` sets its colors (layer 5) and `base_power_toughness` its base power and toughness (layer 7b); `types` are card types it has in addition to its other types ("this Vehicle is an artifact creature", layer 4) and `subtypes` subtypes it has in addition to its other types ("is a Wizard in addition to its other types", layer 4). `affects` is {"each": filter, "controller": you|opponent|any, "other": true} (relative to the source's controller), "self", or "attached" ("equipped/enchanted creature").

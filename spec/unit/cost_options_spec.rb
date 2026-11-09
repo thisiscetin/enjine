@@ -42,6 +42,15 @@ RSpec.describe "Cost options: card data (unit)" do
       .to eq(["abilities[0].ward.cost[0].pay_life: must be an integer >= 1 or \"X\""])
     expect(errors_for(creature([{ "enters_tapped_unless_behold" => {} }])))
       .to eq(["abilities[0].enters_tapped_unless_behold.card: required"])
+    expect(errors_for(card([spell([{ "discard" => { "hand" => true, "random" => true } }])])))
+      .to eq(["abilities[0].spell.effects[0].discard: hand and random can't be combined"])
+    expect(errors_for(card([spell([{ "discard" => {} }])]))).to eq(["abilities[0].spell.effects[0].discard.amount: required"])
+    expect(Enjine::CardDefinition.from_h(card([spell([{ "discard" => { "hand" => true } }])])).abilities.first.to_s)
+      .to eq("discard the whole hand → you")
+    expect(errors_for(creature([{ "spells_have" => { "keywords" => ["flying"] } }])))
+      .to eq(["abilities[0].spells_have.keywords: must be a non-empty list of convoke, improvise"])
+    expect(Enjine::CardDefinition.from_h(creature([{ "spells_have" => { "keywords" => ["convoke"] } }])).abilities.first.to_s)
+      .to eq("Spells you cast have convoke")
   end
 
   it "describes them" do

@@ -166,6 +166,31 @@ RSpec.describe "Real cards: cost choices" do
     expect(game.legal_options.none? { it[:type] == "cast" }).to be(true) # players can't cast spells this turn
   end
 
+  it "Ironheart gives noncreature spells you cast improvise, not creature spells (CR 702.126a)" do
+    game = board(hand: ["Vision of Love", "K'un-Lun Warrior"], battlefield: ["Ironheart, Clever Champion", "Mountain"])
+    expect(game.legal_options.select { it[:type] == "cast" }.map { it[:object] }).to eq([id(game, "Vision of Love", zone: :hand)])
+    cast(game, "Vision of Love")
+    expect(game.legal_options).to include({ type: "improvise", object: id(game, "Ironheart, Clever Champion") })
+    game.submit(type: "improvise", object: id(game, "Ironheart, Clever Champion"))
+    pay_all(game)
+    expect(game.state.stack.size).to eq(1)
+    expect(game.catalog.fetch("ironheart_clever_champion").abilities.first.to_s).to eq("Noncreature spells you cast have improvise")
+  end
+
+  it "Narset, Jeskai Waymaster: you may discard your hand; if you do, draw a card per spell cast this turn (CR 701.9a)" do
+    game = board(hand: ["Vision of Love", "Island", "Swamp"], battlefield: ["Narset, Jeskai Waymaster", "Mountain", "Mountain"])
+    cast(game, "Vision of Love")
+    pay_all(game)
+    pass_both(game)
+    game.submit(type: "decline")
+    game.submit(option_types(game).include?("pass") ? { type: "pass" } : { type: "done" }) until game.pending_decision.kind == "effect_choice"
+    expect(game.state.step).to eq(:end)
+    entry = game.submit(type: "yes")
+    discarded = entry.events.count { it.type == "zone_changed" && it.to_h["reason"] == "discard" }
+    expect(discarded).to eq(2)
+    expect(alice(game).hand.size).to eq(1) # one spell cast this turn
+  end
+
   it "Winter, Cursed Rider exiles X artifact cards from the graveyard: X is at most how many there are (CR 601.2b)" do
     game = board(battlefield: ["Winter, Cursed Rider", "Island", "Island", "Swamp", "Swamp"],
                  graveyard: ["Arc Reactor", "Steel Wrecking Ball", "Island"], theirs: ["Stony-Voiced Goblins"])

@@ -169,7 +169,15 @@ module Enjine
       HELPERS = { "convoke" => :creature, "improvise" => :artifact }.freeze
 
       def convoke?(spell) = helper_keywords(spell).include?("convoke")
-      def helper_keywords(spell) = spell.nil? ? [] : HELPERS.keys.select { chars(spell).keyword?(it.to_sym) }
+      def helper_keywords(spell) = spell.nil? ? [] : HELPERS.keys.select { chars(spell).keyword?(it.to_sym) } | granted_helpers(spell)
+
+      # "Noncreature spells you cast have improvise" (Abilities::SpellsHave, CR 611.3a).
+      def granted_helpers(spell)
+        state.battlefield.flat_map do |id|
+          perm = object(id)
+          chars(perm).abilities.filter_map { it.ability.keywords_for(self, spell, perm.controller) if it.ability.kind == :spells_have }
+        end.flatten
+      end
 
       # Mana units (Engine::ManaSources) the permanents `index` could convoke or improvise with add for
       # `purpose`: one per untapped helper that isn't counted as a mana source, paying {1} or (convoke) one

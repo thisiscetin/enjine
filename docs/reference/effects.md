@@ -884,7 +884,7 @@ Rules: CR 701.20a, CR 701.20e, CR 401.4, CR 400.7j
 
 ## discard
 
-Each referenced player discards `amount` cards of their choice (default: you). `random: true`: the cards are chosen at random (the game's random number generator), with no decision.
+Each referenced player discards `amount` cards of their choice (default: you). `random: true`: the cards are chosen at random (the game's random number generator), with no decision. `hand: true`: each discards their whole hand at once ("discard your hand"; how many is its amount {"this_way": n}).
 
 Rules: CR 701.9a, CR 701.9b
 
@@ -893,6 +893,7 @@ Rules: CR 701.9a, CR 701.9b
 | `amount` | integer |
 | `to` | selector |
 | `random` | boolean |
+| `hand` | true: the whole hand |
 
 ```json
 {
