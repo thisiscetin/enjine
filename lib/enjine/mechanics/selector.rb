@@ -131,7 +131,7 @@ module Enjine
           engine.state.players.each_index.reject { it == ctx.controller }.map { Filters.player_ref(engine, it) }
         when :each then each(engine, ctx)
         when :controller_of then controllers(engine, ctx)
-        when :exiled_with then Linked.exiled_with(engine, ctx.source)
+        when :exiled_with then Linked.exiled_with(engine, ctx.source, ctx)
         end
       end
 

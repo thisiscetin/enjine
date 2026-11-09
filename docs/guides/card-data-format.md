@@ -49,7 +49,7 @@ Tips:
 | --- | --- | --- | --- |
 | `name` | yes | string | Unique (a card with faces: see 4.17). Its slug becomes the card id: `"Jace, the Mind Sculptor"` → `jace_the_mind_sculptor`. Two different definitions with the same name in one game raise `CatalogConflict`. |
 | `types` | yes | list | Card types, lowercase: `land`, `creature`, `artifact`, `enchantment`, `planeswalker`, `instant`, `sorcery`. A card can have several (`["artifact", "creature"]`). |
-| `mana_cost` | castable cards | string | `"{2}{W}{W}"`. Symbols: `{N}` generic, `{W}{U}{B}{R}{G}`, `{C}`, `{X}` (announced while casting; use the amount `"x"` in effects, see 4.7). Lands must **not** have one. A card without one can't be cast. Two-color hybrid `{R/G}` is supported (paid with either color, CR 107.4e); monocolored hybrid `{2/B}`, Phyrexian and `{S}` are not yet. |
+| `mana_cost` | castable cards | string | `"{2}{W}{W}"`. Symbols: `{N}` generic, `{W}{U}{B}{R}{G}`, `{C}`, `{X}` (announced while casting; use the amount `"x"` in effects, see 4.7). Lands must **not** have one. A card without one can't be cast. Two-color hybrid `{R/G}` is supported (paid with either color, CR 107.4e), and so is monocolored hybrid `{2/B}` (one black mana or two mana of any type; mana value 2, CR 202.3f); Phyrexian and `{S}` are not yet. |
 | `supertypes` | no | list | `basic` (exempt from the 4-copy rule). `legendary` and `snow`: not yet. |
 | `subtypes` | no | list | Lowercase, spaces become `_`: `["human", "wizard"]`. Free-form labels, except the basic land types `plains island swamp mountain forest`, which grant their mana ability automatically (CR 305.6) and are valid only on lands. |
 | `keywords` | no | list | Keyword abilities, lowercase: see `SUPPORTED.md` → *Keyword abilities*. |
@@ -98,6 +98,8 @@ pool, so tap other sources first:
 | "{T}: Add two mana in any combination of {R} and/or {G}." | `{ "mana": { "cost": ["tap"], "color": "any", "amount": 2, "colors": ["R", "G"] } }` |
 | "{T}: Add {G} for each creature you control." | `{ "mana": { "cost": ["tap"], "produce": "{G}", "amount": { "count": { "each": "creature", "controller": "you" } } } }` |
 | "{T}: Add X mana of any one color, where X is …" | `"color": "any_one", "amount": <amount>` |
+| "As this land enters, choose a color. {T}: Add one mana of the chosen color." | `{ "choose_color": {} }`, `{ "mana": { "cost": ["tap"], "color": "chosen" } }` (also on `add_mana`, CR 607.2d) |
+| "{T}, Pay 1 life: Add one mana of any color." | `{ "mana": { "cost": ["tap", { "pay_life": 1 }], "color": "any_one" } }` |
 | "{T}: Add {C}. Spend this mana only to cast artifact spells or activate abilities of artifacts." | `{ "mana": { "cost": ["tap"], "produce": "{C}", "spend_only": { "spells": { "types": ["artifact"] }, "abilities": { "types": ["artifact"] } } } }` |
 
 ```json
@@ -154,10 +156,30 @@ takes `spend_only` too ("Add {C}{C}. Spend this mana only to cast spells.").
 - `cost`: costs before the colon. `"tap"` is `{T}`; `{ "mana": "{1}{R}" }` is a mana
   cost; `"sacrifice"` sacrifices this permanent; `{ "sacrifice_permanent": { "filter": "creature", "other": true } }`,
   `{ "tap_permanents": { "count": 3, "filter": ... } }` and `{ "remove_counters": { "count": 3 } }` are chosen while
-  activating; `"exile_self_from_graveyard"` / `"bottom_self_from_graveyard"` make it a graveyard ability. Pay life
-  and `{Q}` are not supported yet.
-- `limit: "once_each_turn"`, `only_if: condition`, `timing: "your_turn"`: "Activate only once each turn / only if …
-  / only during your turn" (CR 602.5b).
+  activating; `"exile_self_from_graveyard"` / `"bottom_self_from_graveyard"` make it a graveyard ability. `{Q}` is
+  not supported yet. More costs (each also usable in a spell's `additional_cost`):
+
+  | Oracle words | Cost |
+  | --- | --- |
+  | "Discard a card" / "Discard two cards" / "Discard a land card" | `"discard"` / `{ "discard": { "count": 2 } }` / `{ "discard": { "card": { "types": ["land"] } } }` |
+  | "Discard a card at random" | `{ "discard": { "random": true } }` (CR 701.9b) |
+  | "Exile two cards from your graveyard" / "Exile a creature card from your graveyard" | `{ "exile_from_graveyard": { "count": 2 } }` / `{ "exile_from_graveyard": { "card": { "types": ["creature"] } } }` |
+  | "Pay 2 life" / "Pay X life" | `{ "pay_life": 2 }` / `{ "pay_life": "X" }` (X announced, at most your life; CR 119.4) |
+  | "Behold a Goblin" / "behold a Kithkin and exile it" | `{ "behold": { "card": { "subtypes": ["goblin"] } } }` / add `"exile": true` (the card is then `exiled_with` it, also after it leaves; CR 701.4) |
+
+  ```json
+  { "name": "Example Banner Champion", "mana_cost": "{2}{W}", "types": ["creature"], "subtypes": ["kithkin"],
+    "power": 4, "toughness": 4,
+    "abilities": [
+      { "additional_cost": { "cost": [{ "behold": { "card": { "subtypes": ["kithkin"] }, "exile": true } }] } },
+      { "triggered": { "when": { "leaves_battlefield": {} },
+                       "effects": [{ "return_to_hand": { "to": "exiled_with" } }] } }] }
+  ```
+
+  "You may behold a Dragon. If you do, …" is the effect `behold` under `may`:
+  `{ "may": { "effects": [{ "behold": { "card": { "subtypes": ["dragon"] } } }], "then": [...] } }`.
+- `limit: "once_each_turn"`, `limit: "once"`, `only_if: condition`, `timing: "your_turn"`: "Activate only once each
+  turn / only once / only if … / only during your turn" (CR 602.5b; "only once" lasts as long as the object).
 - `timing`: `"sorcery"` if the text says "Activate only as a sorcery"; otherwise omit.
 
 Spells: `{ "kicker": { "cost": [...] } }` (condition `{ "kicked": true }`, spell `kicked_targets`) and
@@ -467,7 +489,9 @@ equips for a non-mana cost, and granted activated abilities ("equipped creature 
 
   **Convoke** (CR 702.51) is the keyword `"convoke"`: while paying, the `pay_cost`
   option `{type: "convoke", object: id}` taps an untapped creature you control to pay
-  {1} or one mana of its color.
+  {1} or one mana of its color. **Improvise** (CR 702.126) is the keyword `"improvise"`:
+  `{type: "improvise", object: id}` taps an untapped artifact you control to pay {1} of
+  the generic part.
 
   How a spell was cast is a condition (CR 400.7d): `{ "cast_with": "evoke" }` (its
   keyword cost was paid), `{ "cast_from": "graveyard" }` (also `hand`, `exile`,

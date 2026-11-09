@@ -218,6 +218,70 @@
     }
   },
   {
+    "name": "Desolation Prowler",
+    "mana_cost": "{1}{B}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "wolf"
+    ],
+    "power": 2,
+    "toughness": 2,
+    "abilities": [
+      {
+        "activated": {
+          "cost": [
+            {
+              "pay_life": 2
+            }
+          ],
+          "limit": "once_each_turn",
+          "effects": [
+            {
+              "pump": {
+                "power": 2,
+                "toughness": 2,
+                "to": "self"
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "uncommon",
+    "printing": {
+      "set": "hob",
+      "number": "64"
+    }
+  },
+  {
+    "name": "Arc Reactor",
+    "mana_cost": "{5}",
+    "types": [
+      "artifact"
+    ],
+    "keywords": [
+      "improvise"
+    ],
+    "abilities": [
+      "enters_tapped",
+      {
+        "mana": {
+          "cost": [
+            "tap"
+          ],
+          "produce": "{C}{C}{C}"
+        }
+      }
+    ],
+    "rarity": "rare",
+    "printing": {
+      "set": "msh",
+      "number": "243"
+    }
+  },
+  {
     "name": "City Pigeon",
     "mana_cost": "{W}",
     "types": [

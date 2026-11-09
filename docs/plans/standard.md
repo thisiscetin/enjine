@@ -415,8 +415,18 @@ closed stays under a narrower name with the cards known to need it.
 | Storied (enduring story designation) | 702.195 | keyword `storied`; condition `{"designation": "enduring_story"}` (4.20) |
 | Colors among permanents, domain | 105.2, 305.6 | amounts `distinct_colors`, `distinct_land_types` (4.20) |
 
+| Discard a card / pay life / exile cards from your graveyard as a cost (also as a spell's additional cost) | 701.9, 119.4, 118.3 | costs `discard` (`count`, `card`, `random`), `pay_life` (N or `"X"`), `exile_from_graveyard` (4.2) |
+| Behold | 701.4 | cost `behold` (`exile`: linked `exiled_with`, also after leaving); effect `behold` under `may` (4.2) |
+| Monocolored hybrid mana {2/W} | 107.4e, 202.3f | mana cost symbol `{2/W}` (2) |
+| Improvise; mana of the chosen color; activate only once | 702.126, 607.2d, 602.5b | keyword `improvise` (4.10); mana `color: "chosen"` (3); `limit: "once"` (4.2) |
+
 Still open in these areas (not yet counted as gaps above, since the census didn't
 separate them):
+- Choosing between costs ("behold a Goblin or pay {2}", "pay 5 life or pay {2}"), optional additional
+  costs other than kicker ("you may behold two creatures of that type"), "as this enters, you may behold
+  a Jace; if you don't, it enters tapped", "exile X cards from your graveyard", "discard your hand".
+- Which sources' mana was spent ("if mana from a Treasure was spent") and "mana spent less than its
+  mana value"; "Activate only if …" on mana abilities.
 - Pilots that crew or saddle "as though [their] power were 2 greater" or with toughness (about 13
   Aetherdrift cards), and "can't crew Vehicles" (CR 702.122d).
 - Casting a card "by waterbending {X}" rather than paying its mana cost (Hama, the Bloodbender), an optional

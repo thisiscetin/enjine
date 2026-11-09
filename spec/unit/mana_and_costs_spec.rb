@@ -25,7 +25,7 @@ RSpec.describe "Validation of X costs, mana effects and cost changes (CR 107.3, 
     expect(errors_for(spell({ "add_mana" => { "produce" => "{R}", "color" => "any" } })))
       .to include("abilities[0].spell.effects[0].add_mana: needs exactly one of produce, color")
     expect(errors_for(spell({ "add_mana" => { "color" => "plaid" } })))
-      .to include("abilities[0].spell.effects[0].add_mana.color: must be one of any_one, any")
+      .to include("abilities[0].spell.effects[0].add_mana.color: must be one of any_one, any, chosen")
     expect(errors_for(spell({ "add_mana" => { "produce" => "{G}", "amount" => { "counters" => { "of" => "you" } } } })))
       .to eq([]) # produce, repeated amount times
     expect(errors_for(spell({ "add_mana" => { "produce" => "{Q}" } })))

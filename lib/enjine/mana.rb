@@ -26,18 +26,32 @@ module Enjine
         cost
       end
 
-      # Mana value (CR 202.3); {X} counts as 0 off the stack (CR 202.3e). A two-color hybrid
-      # symbol counts 1: its largest component (CR 202.3f).
-      def mana_value = generic + colored.values.sum + hybrid.size
+      # Mana value (CR 202.3); {X} counts as 0 off the stack (CR 202.3e). A hybrid symbol counts its
+      # largest component (CR 202.3f): 1 for {R/G}, 2 for {2/B}.
+      def mana_value = generic + colored.values.sum + hybrid.sum { Mana.mono_hybrid?(it) ? 2 : 1 }
 
       # The cost with X replaced by `value` (CR 107.3a): each {X} adds that much generic mana.
       def with_x(value) = with(generic: generic + (x_symbols * value), x_symbols: 0)
 
-      # The colors of the cost's colored and hybrid symbols, in WUBRG order (CR 202.2, 202.2d).
+      # The colors of the cost's colored and hybrid symbols, in WUBRG order (CR 202.2, 202.2d, 107.4e).
       def colors = COLORS.select { |c| colored.key?(c) || hybrid.any? { it.include?(c) } }
 
-      # One entry per colored or hybrid symbol: the mana types that can pay it (CR 601.2h).
-      def requirements = colored.flat_map { |color, n| Array.new(n) { [color] } } + hybrid
+      # One entry per colored or two-color hybrid symbol: the mana types that can pay it (CR 601.2h). A
+      # monocolored hybrid symbol has no single requirement; see #equivalents.
+      def requirements = colored.flat_map { |color, n| Array.new(n) { [color] } } + hybrid.reject { Mana.mono_hybrid?(it) }
+
+      # The costs without monocolored hybrid symbols this cost can be paid as (CR 601.2b, 107.4e): each {2/B}
+      # as {B} or as {2}. Just itself when it has none.
+      def equivalents
+        mono, rest = hybrid.partition { Mana.mono_hybrid?(it) }
+        return [self] if mono.empty?
+
+        [true, false].repeated_permutation(mono.size).map do |as_color|
+          paid = mono.zip(as_color).filter_map { |symbol, color| symbol.last if color }
+          with(generic: generic + (2 * (mono.size - paid.size)), hybrid: rest,
+               colored: colored.merge(paid.tally) { |_, a, b| a + b })
+        end
+      end
 
       def to_s
         parts = ["{X}"] * x_symbols
@@ -48,7 +62,10 @@ module Enjine
       end
     end
 
-    HYBRID = %r{\A([WUBRG])/([WUBRG])\z}
+    HYBRID = %r{\A([WUBRG2])/([WUBRG])\z}
+
+    # A monocolored hybrid symbol such as {2/B} (CR 107.4e); its first component is the generic "2".
+    def self.mono_hybrid?(symbol) = symbol.first.to_s == "2"
 
     # The sum of several costs (an ability's mana costs, a spell's mana cost plus a kicker cost).
     def self.sum_costs(costs)
@@ -87,8 +104,9 @@ module Enjine
       Cost.new(generic: generic, colored: colored.freeze, x_symbols: x, hybrid: hybrid.compact.freeze)
     end
 
-    # A two-color hybrid symbol such as {R/G} (CR 107.4e), kept in its printed order. Monocolored
-    # hybrid ({2/B}) and Phyrexian symbols aren't supported (they are "unsupported mana symbol"s).
+    # A hybrid symbol (CR 107.4e), kept in its printed order: two-color such as {R/G} ([:R, :G]) or
+    # monocolored such as {2/B} ([:"2", :B]: one black mana or two mana of any type). Phyrexian symbols
+    # aren't supported (they are "unsupported mana symbol"s).
     def self.hybrid_symbol(sym, errors, path)
       pair = HYBRID.match(sym).captures.map(&:to_sym)
       return pair.freeze if pair.uniq.size == 2

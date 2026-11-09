@@ -85,6 +85,52 @@
     }
   },
   {
+    "name": "Vicious Rivalry",
+    "mana_cost": "{2}{B}{G}",
+    "types": [
+      "sorcery"
+    ],
+    "abilities": [
+      {
+        "additional_cost": {
+          "cost": [
+            {
+              "pay_life": "X"
+            }
+          ]
+        }
+      },
+      {
+        "spell": {
+          "effects": [
+            {
+              "destroy": {
+                "to": {
+                  "each": {
+                    "permanent": {
+                      "any_of": [
+                        "artifact",
+                        "creature"
+                      ],
+                      "mana_value": {
+                        "at_most": "x"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "rare",
+    "printing": {
+      "set": "sos",
+      "number": "241"
+    }
+  },
+  {
     "name": "Rancorous Archaic",
     "mana_cost": "{5}",
     "types": [

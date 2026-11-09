@@ -115,7 +115,7 @@ module Enjine
         card = outside_card(ref)
         origin = { "zone" => "outside", "card" => card, "index" => player(index).outside.index(card) }
         obj = bring_in_from_outside!(index, card, :stack, reason: "cast")
-        start_casting!(index, obj.id, "spell", origin: origin, cost: method_cost(obj, method), extra: { "method" => method })
+        start_casting!(index, obj.id, "spell", origin: origin, extra: { "method" => method })
       end
 
       # CR 305.1: a land played (from a zone or from outside the game) is put onto the battlefield.

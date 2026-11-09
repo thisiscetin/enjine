@@ -66,6 +66,42 @@
     "rules_text": "+1: Creatures you control get +1/+1 until end of turn.\n−2: Put a +1/+1 counter on each creature you control.\n−3: Vessa deals 3 damage to target creature."
   },
   {
+    "name": "Clockwork Cog",
+    "mana_cost": "{1}",
+    "types": [
+      "artifact"
+    ],
+    "abilities": [
+      {
+        "activated": {
+          "cost": [
+            {
+              "mana": "{2}"
+            },
+            "tap",
+            {
+              "discard": {
+                "card": {
+                  "types": [
+                    "land"
+                  ]
+                }
+              }
+            }
+          ],
+          "effects": [
+            {
+              "draw": {
+                "amount": 2
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "Two mana, tap, discard a land card: draw two cards."
+  },
+  {
     "name": "Arc Lantern",
     "mana_cost": "{2}",
     "types": [

@@ -143,9 +143,10 @@ module Enjine
       end
 
       # The permanent a spell becomes remembers how it was cast; a warp spell's permanent is watched by the
-      # delayed trigger; a sneak spell's enters tapped and attacking (CR 702.190b, 506.3a).
+      # delayed trigger; a sneak spell's enters tapped and attacking (CR 702.190b, 506.3a). Cards its costs
+      # exiled stay linked to it ("behold a Goblin and exile it", CR 607.2a).
       def alt_enters!(spell, enters)
-        how = spell.memory.slice("cast_from", "cast_with")
+        how = spell.memory.slice("cast_from", "cast_with", Mechanics::Linked::EXILED)
         how["warp_spell"] = spell.id if spell.memory["cast_with"] == "warp"
         (enters["memory"] ||= {}).merge!(how) unless how.empty?
         target = spell.memory["sneak_attack"] or return
@@ -153,41 +154,55 @@ module Enjine
         enters["attacking"] = target if target.start_with?("player:") || state.battlefield.include?(target)
       end
 
-      # ---- convoke (CR 702.51) ---------------------------------------------------------------------
+      # ---- convoke (CR 702.51) and improvise (CR 702.126) ------------------------------------------
 
-      def convoke?(spell) = !spell.nil? && chars(spell).keyword?(:convoke)
+      # Who helps pay: convoke taps creatures (for {1} or one mana of their color), improvise artifacts
+      # (for {1} only). Neither is an additional or alternative cost (CR 702.51b, 702.126b).
+      HELPERS = { "convoke" => :creature, "improvise" => :artifact }.freeze
 
-      # Mana units (Engine::ManaSources) the creatures `index` could convoke with add for `purpose`: one per
-      # untapped creature that isn't counted as a mana source, paying {1} or one of its colors.
+      def convoke?(spell) = helper_keywords(spell).include?("convoke")
+      def helper_keywords(spell) = spell.nil? ? [] : HELPERS.keys.select { chars(spell).keyword?(it.to_sym) }
+
+      # Mana units (Engine::ManaSources) the permanents `index` could convoke or improvise with add for
+      # `purpose`: one per untapped helper that isn't counted as a mana source, paying {1} or (convoke) one
+      # of its colors; an improvise-only unit has no type, so it pays only generic mana.
       def convoke_units(index, purpose, excluded = [])
         spell = purpose&.[]("spell")
         spell = state.objects[spell] unless spell.is_a?(GameObject)
-        return [] unless convoke?(spell)
+        kinds = helper_keywords(spell)
+        return [] if kinds.empty?
 
         sources = all_mana_sources(index).map(&:first)
-        convoke_candidates(index).reject { excluded.include?(it) || sources.include?(it) }.map { chars(it).colors }
-      end
-
-      def convoke_candidates(index)
-        state.battlefield.select { (o = object(it)).controller == index && !o.tapped && chars(o).creature? }
-      end
-
-      # pay_cost options: `{type: "convoke", object: id}` for each creature that can pay part of what is left.
-      def convoke_options
-        frame = payment
-        return [] unless frame["type"] == "cast" && frame["kind"] == "spell" && convoke?(object(frame["object"]))
-
-        convoke_candidates(frame["player"]).filter_map do |id|
-          { type: "convoke", object: id } if convoke_slot(frame, id)
+        kinds.flat_map { convoke_candidates(index, it) }.uniq.reject { excluded.include?(it) || sources.include?(it) }.map do |id|
+          kinds.include?("convoke") && chars(id).creature? ? chars(id).colors : []
         end
       end
 
-      # The part of the remaining cost the creature pays: a colored or hybrid symbol of one of its colors,
-      # else generic (one that keeps the rest payable once the payment is irreversible).
-      def convoke_slot(frame, id)
+      def convoke_candidates(index, kind = "convoke")
+        state.battlefield.select { (o = object(it)).controller == index && !o.tapped && chars(o).type?(HELPERS[kind]) }
+      end
+
+      # pay_cost options: `{type: "convoke" | "improvise", object: id}` for each helper that can pay part of what is left.
+      def convoke_options
+        frame = payment
+        return [] unless frame["type"] == "cast" && frame["kind"] == "spell"
+
+        helper_keywords(object(frame["object"])).flat_map do |kind|
+          convoke_candidates(frame["player"], kind).filter_map do |id|
+            { type: kind, object: id } if convoke_slot(frame, id, kind)
+          end
+        end
+      end
+
+      # The part of the remaining cost the permanent pays: for convoke a colored or hybrid symbol of one of its
+      # colors, else generic (or half of a {2/B} paid as {2}, CR 107.4e, 601.2b); for improvise only generic (one
+      # that keeps the rest payable once the payment is irreversible).
+      def convoke_slot(frame, id, kind = "convoke")
         rem = frame["remaining"]
-        slots = chars(id).colors.flat_map { pay_slots(rem, it.to_s) }.uniq.reject { it == [:generic] }
+        colors = kind == "convoke" ? chars(id).colors : []
+        slots = colors.flat_map { pay_slots(rem, it.to_s) }.select { %i[color hybrid].include?(it.first) }.uniq
         slots << [:generic] if rem["generic"].positive?
+        slots += pay_slots(rem, "C").select { it.first == :two_generic }
         return slots.first unless frame["irreversible"]
 
         pl = player(frame["player"])
@@ -197,13 +212,13 @@ module Enjine
         end
       end
 
-      # CR 702.51a: tapping the creature pays that mana; cancelling untaps it.
-      def convoke!(id)
+      # CR 702.51a, 702.126a: tapping the permanent pays that mana; cancelling untaps it.
+      def convoke!(id, kind = "convoke")
         frame = payment
-        frame["remaining"] = after_paying(frame["remaining"], convoke_slot(frame, id))
+        frame["remaining"] = after_paying(frame["remaining"], convoke_slot(frame, id, kind))
         tap!(object(id))
         frame["tapped"] << id
-        (frame["convoked"] ||= []) << id
+        (frame["convoked"] ||= []) << id if kind == "convoke" # CR 702.51c
         ask!(nil)
       end
 

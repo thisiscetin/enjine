@@ -23,7 +23,7 @@ RSpec.describe "Keyword alternative costs and convoke: card data validation (uni
     expect(errors_for(sorcery({ "harmonize" => { "cost" => [] } })))
       .to eq(["abilities[1].harmonize.cost: must be a mana cost string or a non-empty list of costs"])
     expect(errors_for(sorcery({ "flashback" => { "cost" => [{ "mana" => "{1}" }, "tap"] } })))
-      .to eq(["abilities[1].flashback.cost[1]: an alternative cost must be mana or a chosen cost (tap, sacrifice, ...)"])
+      .to eq(["abilities[1].flashback.cost[1]: an alternative cost must be mana, life or a chosen cost (tap, sacrifice, ...)"])
     expect(errors_for(sorcery({ "warp" => { "cost" => 3 } }))).to eq(["abilities[1].warp.cost: must be a list"])
     expect(errors_for(sorcery("mayhem"))).to eq([])
   end

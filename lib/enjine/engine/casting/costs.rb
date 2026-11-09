@@ -71,24 +71,35 @@ module Enjine
         lock_waterbend!(ctx) # CR 701.67b (Engine::Waterbending)
       end
 
-      # CR 601.2b: X is announced (once) before targets are chosen. True while waiting for it.
+      # CR 601.2b: X is announced (once) before targets are chosen. True while waiting for it. Without {X} in
+      # the mana cost or a cost such as "pay X life", X is 0.
       def ask_x!(ctx)
-        return false unless ctx["x"].nil? && base_cost(ctx)&.x_symbols.to_i.positive?
+        return false unless ctx["x"].nil?
+        return (ctx["x"] = 0) && false unless base_cost(ctx)&.x_symbols.to_i.positive? || life_x?(ctx)
 
         ask!("kind" => "choose_x", "player" => ctx["player"], "max" => x_limit(ctx))
         true
       end
+
+      # Whether a cost paid while casting is "pay X life" (Costs::PayLife).
+      def life_x?(ctx) = casting_costs(ctx).any? { it.respond_to?(:x?) && it.x? }
 
       # A {T} ability's own source can't pay for it.
       def payment_excluded_source(ctx)
         ctx["type"] == "cast" && ctx["kind"] == "ability" && needs_tap?(casting_ability) ? ctx["source"] : nil
       end
 
-      # The largest X the player could pay for: the mana available beyond the rest of the cost.
+      # The largest X the player could pay for: the mana available beyond the rest of the cost, and for
+      # "pay X life" no more than their life total (CR 119.4).
       def x_limit(ctx)
+        limits = []
+        limits << [player(ctx["player"]).life, 0].max if life_x?(ctx)
+        symbols = base_cost(ctx)&.x_symbols.to_i
+        return limits.min if symbols.zero?
+
         cost = frame_total_cost(ctx, x_value: 0, targets: nil)
         spare = mana_units(ctx["player"], payment_excluded_source(ctx), payment_purpose(ctx)).size - cost.mana_value
-        [spare, 0].max / base_cost(ctx).x_symbols
+        (limits << ([spare, 0].max / symbols)).min
       end
 
       # CR 601.2b / 107.3a: the value of X is announced; the spell or ability keeps it on the stack.

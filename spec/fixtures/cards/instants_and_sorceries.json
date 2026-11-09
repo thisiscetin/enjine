@@ -27,6 +27,115 @@
     "rules_text": "Lightning Bolt deals 3 damage to any target."
   },
   {
+    "name": "Blood Tithe",
+    "mana_cost": "{1}{B}",
+    "types": [
+      "sorcery"
+    ],
+    "abilities": [
+      {
+        "additional_cost": {
+          "cost": [
+            {
+              "pay_life": "X"
+            }
+          ]
+        }
+      },
+      {
+        "spell": {
+          "effects": [
+            {
+              "draw": {
+                "amount": "x"
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "As an additional cost to cast this spell, pay X life. Draw X cards."
+  },
+  {
+    "name": "Reckless Insight",
+    "mana_cost": "{R}",
+    "types": [
+      "instant"
+    ],
+    "abilities": [
+      {
+        "additional_cost": {
+          "cost": [
+            "discard"
+          ]
+        }
+      },
+      {
+        "spell": {
+          "effects": [
+            {
+              "draw": {
+                "amount": 2
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "As an additional cost to cast this spell, discard a card. Draw two cards."
+  },
+  {
+    "name": "Hybrid Spark",
+    "mana_cost": "{2/R}",
+    "types": [
+      "instant"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "targets": [
+            "any_target"
+          ],
+          "effects": [
+            {
+              "deal_damage": {
+                "amount": 2,
+                "to": {
+                  "target": 0
+                }
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "Hybrid Spark deals 2 damage to any target."
+  },
+  {
+    "name": "Gadget Insight",
+    "mana_cost": "{3}{U}",
+    "types": [
+      "sorcery"
+    ],
+    "keywords": [
+      "improvise"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "effects": [
+            {
+              "draw": {
+                "amount": 2
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "Improvise. Draw two cards."
+  },
+  {
     "name": "Giant Growth",
     "mana_cost": "{G}",
     "types": [

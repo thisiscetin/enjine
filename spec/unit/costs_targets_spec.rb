@@ -92,7 +92,7 @@ RSpec.describe "Costs, kicker, targets and payments: card data (unit)" do
     expect(errors_for(card([{ "kicker" => { "cost" => [] } },
                             { "spell" => { "effects" => draw } }]))).to include(a_string_matching(/kicker.cost: must be a non-empty list/))
     expect(errors_for(card([{ "kicker" => { "cost" => ["tap"] } }, { "spell" => { "effects" => draw } }])))
-      .to include(a_string_matching(/additional cost must be mana or a chosen cost/))
+      .to include(a_string_matching(/additional cost must be mana, life or a chosen cost/))
     abilities = Enjine::CardDefinition.from_h(card([{ "kicker" => { "cost" => [{ "mana" => "{1}{U}" }] } },
                                                     { "additional_cost" => { "cost" => [sacrifice_creature] } },
                                                     { "spell" => { "effects" => draw } }])).abilities
@@ -138,5 +138,43 @@ RSpec.describe "Costs, kicker, targets and payments: card data (unit)" do
     filter = Enjine::Mechanics::Filters::StackAbility::Kind.new("activated")
     expect([filter.primitive_name, filter.matches_types?([:creature]), filter.matches_facts?(nil),
             filter.live_keys]).to eq(["stack_ability", false, false, []])
+  end
+
+  it "validates and describes discard, graveyard, life and behold costs (CR 701.9, 119.4, 701.4)" do
+    expect(errors_for(activated("cost" => [{ "discard" => { "count" => 0, "random" => "yes", "card" => 3 } }])))
+      .to match(["abilities[0].activated.cost[0].discard.count: must be an integer >= 1",
+                 a_string_starting_with("abilities[0].activated.cost[0].discard.card: must be \"card\" or an object"),
+                 "abilities[0].activated.cost[0].discard.random: must be true or false"])
+    expect(errors_for(activated("cost" => [{ "exile_from_graveyard" => { "count" => 2, "other" => true } }])))
+      .to eq(["abilities[0].activated.cost[0].exile_from_graveyard: unknown parameter \"other\""])
+    expect(errors_for(activated("cost" => [{ "pay_life" => 0 }, { "pay_life" => "Y" }])))
+      .to eq(["abilities[0].activated.cost[0].pay_life: must be an integer >= 1 or \"X\"",
+              "abilities[0].activated.cost[1].pay_life: must be an integer >= 1 or \"X\""])
+    expect(errors_for(activated("cost" => [{ "behold" => { "exile" => 1 } }])))
+      .to eq(["abilities[0].activated.cost[0].behold.card: required", "abilities[0].activated.cost[0].behold.exile: must be true or false"])
+    expect(errors_for(spell("effects" => [{ "behold" => {} }]))).to eq(["abilities[0].spell.effects[0].behold.card: required"])
+    mana_costs = ["tap", "discard", { "pay_life" => "X" }, { "mana" => "{2/W}" }]
+    expect(errors_for(creature([{ "mana" => { "cost" => mana_costs, "produce" => "{C}" } }])))
+      .to eq((1..3).map { "abilities[0].mana.cost[#{it}]: a mana ability's cost can't need a choice, X or {2/B}" })
+    expect(errors_for(creature([{ "mana" => { "cost" => ["tap"], "color" => "chosen", "colors" => %w[W U] } }])))
+      .to eq(["abilities[0].mana.colors: must list two or more colors (W U B R G), with color"])
+    costs = Enjine::CardDefinition.from_h(activated("cost" => [
+                                                      "discard", { "discard" => { "count" => 2, "random" => true } },
+                                                      { "discard" => { "card" => { "types" => ["land"] } } },
+                                                      { "exile_from_graveyard" => { "count" => 2, "card" => { "types" => ["creature"] } } },
+                                                      { "pay_life" => 2 }, { "pay_life" => "X" },
+                                                      { "behold" => { "card" => { "subtypes" => ["goblin"] }, "exile" => true } },
+                                                      { "behold" => { "card" => { "subtypes" => ["elf"] }, "count" => 2 } }
+                                                    ], "limit" => "once")).abilities.first
+    expect(costs.costs.map(&:to_s)).to eq(["Discard a card", "Discard 2 cards at random", "Discard a land card",
+                                           "Exile 2 creature cards from your graveyard", "Pay 2 life", "Pay X life",
+                                           "Behold a Goblin and exile it", "Behold 2 Elf"])
+    expect(costs.to_s).to end_with("(activate only once)")
+    additional = Enjine::CardDefinition.from_h(card([{ "additional_cost" => { "cost" => [{ "pay_life" => "X" }] } },
+                                                     { "spell" => { "effects" => draw } }])).abilities.first
+    expect(additional.to_s).to eq("As an additional cost to cast this spell: Pay X life")
+    expect(Enjine::CardDefinition.from_h(creature([{ "mana" => { "cost" => ["tap"], "color" => "chosen" } }])).abilities.first.to_s)
+      .to eq("{T}: Add 1 mana of the chosen color.")
+    expect(Enjine::Mechanics::Effects::AddMana.build({ "color" => "chosen" }, [], "e").to_s).to eq("add 1 mana of the chosen color")
   end
 end

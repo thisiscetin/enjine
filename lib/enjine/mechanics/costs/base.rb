@@ -70,6 +70,36 @@ module Enjine
           end
         end
       end
+
+      # `count` cards from one of your zones (`zone`) matching the card spec `card`, never the card the spell
+      # or ability belongs to: "discard a card", "exile two cards from your graveyard" (CR 601.2h, 602.2b).
+      class CardsCost < Choosing
+        def self.keys = %w[count card]
+        def self.zone = raise(NotImplementedError)
+
+        def self.build(params, errors, path, **)
+          Mechanics.check_keys(params, keys, errors, path)
+          count = Mechanics.integer_param(params, :count, errors, path, default: 1, min: 1)
+          raw = Mechanics.fetch_param(params, :card)
+          spec = raw && CardSpec.build(raw, errors, "#{path}.card")
+          new(spec, count, false, params, errors, path)
+        end
+
+        def candidates(engine, object)
+          engine.player(object.controller).public_send(self.class.zone).select do |id|
+            id != object.id && (filter.nil? || filter.match?(engine, engine.object(id)))
+          end
+        end
+
+        # As it becomes cast, the chosen cards still where they were chosen are paid (exiled by default).
+        def pay_chosen!(engine, _object, entries)
+          entries.map { it["object"] }.select { engine.state.objects[it]&.zone == self.class.zone }.each { pay_card!(engine, it) }
+        end
+
+        def pay_card!(engine, id) = engine.move!(id, :exile, reason: "cost")
+
+        def cards_text = "#{count == 1 ? "a" : count} #{filter || "card"}#{"s" if count > 1}"
+      end
     end
   end
 end

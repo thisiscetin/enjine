@@ -85,6 +85,124 @@
     }
   },
   {
+    "name": "Uncharted Haven",
+    "types": [
+      "land"
+    ],
+    "abilities": [
+      "enters_tapped",
+      {
+        "choose_color": {}
+      },
+      {
+        "mana": {
+          "cost": [
+            "tap"
+          ],
+          "color": "chosen"
+        }
+      }
+    ],
+    "rarity": "common",
+    "printing": {
+      "set": "fdn",
+      "number": "564"
+    }
+  },
+  {
+    "name": "Mild-Mannered Librarian",
+    "mana_cost": "{G}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "human"
+    ],
+    "power": 1,
+    "toughness": 1,
+    "abilities": [
+      {
+        "activated": {
+          "cost": [
+            {
+              "mana": "{3}{G}"
+            }
+          ],
+          "limit": "once",
+          "effects": [
+            {
+              "become": {
+                "creature_types": [
+                  "werewolf"
+                ],
+                "duration": "indefinite",
+                "to": "self"
+              }
+            },
+            {
+              "add_counters": {
+                "counter": "+1/+1",
+                "amount": 2,
+                "to": "self"
+              }
+            },
+            {
+              "draw": {
+                "amount": 1
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "uncommon",
+    "printing": {
+      "set": "fdn",
+      "number": "228"
+    }
+  },
+  {
+    "name": "Defibrillating Current",
+    "mana_cost": "{2/R}{2/W}{2/B}",
+    "types": [
+      "sorcery"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "targets": [
+            {
+              "one_of": [
+                "creature",
+                "planeswalker"
+              ]
+            }
+          ],
+          "effects": [
+            {
+              "deal_damage": {
+                "amount": 4,
+                "to": {
+                  "target": 0
+                }
+              }
+            },
+            {
+              "gain_life": {
+                "amount": 2
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "uncommon",
+    "printing": {
+      "set": "tdm",
+      "number": "177"
+    }
+  },
+  {
     "name": "Bloodfell Caves",
     "types": [
       "land"

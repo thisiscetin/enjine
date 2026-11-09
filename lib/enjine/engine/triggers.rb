@@ -18,6 +18,7 @@ module Enjine
         { "controller" => obj.controller, "card" => obj.card, "types" => current.types, "subtypes" => current.subtypes,
           "power" => current.power, "toughness" => current.toughness, "counters" => obj.counters.dup,
           "token" => token?(obj), "except" => copy_exceptions(obj) }
+          .merge(obj.memory.slice(Mechanics::Linked::EXILED)) # the cards exiled with it (CR 607.2a)
       end
 
       def with_last_known(id, info)
@@ -345,8 +346,7 @@ module Enjine
         obj.memory = Snapshot.deep_copy(trigger.fetch("memory", {}))
         obj.x = entered_x(trigger)
         state.stack.unshift(obj.id)
-        start_casting!(trigger["controller"], obj.id, "trigger", source: trigger["source"], ability: trigger["ability"],
-                                                                 cost: nil)
+        start_casting!(trigger["controller"], obj.id, "trigger", source: trigger["source"], ability: trigger["ability"])
       end
     end
     include Triggering

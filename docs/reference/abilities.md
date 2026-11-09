@@ -4,7 +4,7 @@
 
 ## activated
 
-An activated ability: announce it, choose targets, pay its costs, then it goes on the stack. `timing: "sorcery"` restricts it to sorcery speed, `"your_turn"` to your turns; `limit: "once_each_turn"` to one activation per turn; `only_if` to when a condition holds. `zone` ("exile", "graveyard" or "hand") makes it function only while its card is in that zone ("activate only if this card is exiled"). `exhaust: true` makes it an exhaust ability: it can be activated only once (CR 702.177a). `power_up: true` makes it a power-up ability: activate only once, and if the permanent entered this turn its cost is reduced by the permanent's mana cost (CR 702.193). `boast: true`: activate only if this creature attacked this turn and only once each turn (CR 702.142a).
+An activated ability: announce it, choose targets, pay its costs, then it goes on the stack. `timing: "sorcery"` restricts it to sorcery speed, `"your_turn"` to your turns; `limit: "once_each_turn"` to one activation per turn, `"once"` to one activation for as long as the object exists; `only_if` to when a condition holds. `zone` ("exile", "graveyard" or "hand") makes it function only while its card is in that zone ("activate only if this card is exiled"). `exhaust: true` makes it an exhaust ability: it can be activated only once (CR 702.177a). `power_up: true` makes it a power-up ability: activate only once, and if the permanent entered this turn its cost is reduced by the permanent's mana cost (CR 702.193). `boast: true`: activate only if this creature attacked this turn and only once each turn (CR 702.142a).
 
 Rules: CR 602.1, CR 602.2, CR 602.5b, CR 602.5d, CR 702.177a, CR 702.193a, CR 702.193b, CR 702.142a
 
@@ -14,7 +14,7 @@ Rules: CR 602.1, CR 602.2, CR 602.5b, CR 602.5d, CR 702.177a, CR 702.193a, CR 70
 | `targets` | list of target filters |
 | `effects` | list of effects |
 | `timing` | "instant" (default), "sorcery" or "your_turn" |
-| `limit` | "once_each_turn" (CR 602.5b) |
+| `limit` | "once_each_turn" | "once" (CR 602.5b) |
 | `only_if` | condition ("activate only if ...") |
 | `exhaust` | true: "Exhaust — [cost]: [effect]", activate only once (CR 702.177a) |
 | `power_up` | true: "Power-up — [cost]: [effect]" (CR 702.193a) |
@@ -846,16 +846,16 @@ Rules: CR 606.3, CR 606.4, CR 606.5, CR 602.2b
 
 ## mana
 
-An activated mana ability: pay the cost, add the mana to your mana pool immediately. It does not use the stack and can be activated whenever you have priority. `produce`: the fixed mana (`amount` times). Or `color`: `amount` mana (default 1) of one color you choose as you activate it (`"any_one"`) or in any combination of colors (`"any"`); `colors` limits the choice. `spend_only` restricts how the mana can be spent.
+An activated mana ability: pay the cost, add the mana to your mana pool immediately. It does not use the stack and can be activated whenever you have priority. `produce`: the fixed mana (`amount` times). Or `color`: `amount` mana (default 1) of one color you choose as you activate it (`"any_one"`) or in any combination of colors (`"any"`); `colors` limits the choice. `"chosen"`: of the color chosen as this entered (choose_color). `spend_only` restricts how the mana can be spent.
 
-Rules: CR 605.1a, CR 605.3a, CR 605.3b, CR 106.1a, CR 106.4, CR 106.6
+Rules: CR 605.1a, CR 605.3a, CR 605.3b, CR 106.1a, CR 106.4, CR 106.6, CR 607.2d
 
 | Parameter | Description |
 | --- | --- |
 | `cost` | list of costs (e.g. ["tap"]) |
 | `produce` | mana symbols added, e.g. "{G}" or "{C}{C}" |
 | `amount` | amount (default 1; with produce: how many times) |
-| `color` | any_one | any |
+| `color` | any_one | any | chosen |
 | `colors` | list of colors to choose from (default all five) |
 | `spend_only` | {"spells": card spec, "abilities": card spec} |
 

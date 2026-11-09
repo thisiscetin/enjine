@@ -83,11 +83,14 @@ module Enjine
       end
 
       # Where one mana of `type` can go: a colored symbol (its own, or any with "any_type"), a hybrid symbol
-      # that includes it, or generic mana. [[:color, key], [:hybrid, i], [:generic]].
+      # that includes it, generic mana, or half of a {2/B}. [[:color, key], [:hybrid, i], [:generic], [:two_generic, i]].
       def pay_slots(rem, type, any: false)
         slots = (any ? Mana::TYPES.map(&:to_s) : [type]).filter_map { [:color, it] if rem.fetch(it, 0).positive? }
-        rem.fetch("hybrid", []).each_with_index { |pair, i| slots << [:hybrid, i] if any || pair.include?(type) }
+        hybrid = rem.fetch("hybrid", [])
+        hybrid.each_with_index { |pair, i| slots << [:hybrid, i] if any || pair.include?(type) }
         slots << [:generic] if rem["generic"].positive?
+        # CR 107.4e: other mana pays {2/B} as two generic mana: one now, {1} still to pay.
+        hybrid.each_with_index { |pair, i| slots << [:two_generic, i] if Mana.mono_hybrid?(pair) }
         slots
       end
 
@@ -110,6 +113,9 @@ module Enjine
         case slot.first
         when :color then rem[slot.last] -= 1
         when :hybrid then rem["hybrid"].delete_at(slot.last)
+        when :two_generic
+          rem["hybrid"].delete_at(slot.last)
+          rem["generic"] += 1
         else rem["generic"] -= 1
         end
         rem.delete("hybrid") if rem["hybrid"] && rem["hybrid"].empty?
@@ -200,7 +206,7 @@ module Enjine
         units = pool_units(index, pool, purpose, restricted) + source_units(index, excluded, purpose) +
                 convoke_units(index, purpose, excluded) + # CR 702.51a (Engine::AltCasting)
                 waterbend_units(index, purpose, excluded) # CR 701.67a (Engine::Waterbending)
-        units.size >= cost.mana_value && match_colored(cost.requirements, units)
+        covers?(cost, units)
       end
 
       # ---- cancelling ----------------------------------------------------------------------
