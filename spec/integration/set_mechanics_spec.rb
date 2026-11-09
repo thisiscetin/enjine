@@ -272,6 +272,55 @@ RSpec.describe "Set mechanics: power-up, teamwork, increment, extort, boast, col
     end
   end
 
+  describe "storm and cascade (CR 702.40, 702.85)" do
+    let(:storm_bolt) do
+      { "name" => "Spec Storm Bolt", "mana_cost" => "{R}", "types" => ["instant"], "keywords" => ["storm"],
+        "abilities" => [{ "spell" => { "targets" => ["any_target"],
+                                       "effects" => [{ "deal_damage" => { "amount" => 1, "to" => { "target" => 0 } } }] } }] }
+    end
+    let(:cascader) do
+      { "name" => "Spec Cascader", "mana_cost" => "{2}{R}", "types" => ["sorcery"], "keywords" => ["cascade"],
+        "abilities" => [{ "spell" => { "effects" => [{ "gain_life" => { "amount" => 1 } }] } }] }
+    end
+    let(:catalog) { catalog_with(storm_bolt, cascader) }
+
+    def spell_board(hand, library)
+      build_game(catalog) do
+        turn 3, active: "alice", step: :precombat_main
+        player("alice", mana_pool: { R: 5 }) do
+          hand(*hand)
+          library(*library)
+        end
+        player("bob") { library "Forest", count: 5 }
+      end
+    end
+
+    it "storm copies the spell once for each spell cast before it this turn, with new targets" do
+      game = spell_board(["Lightning Bolt", "Lightning Bolt", "Spec Storm Bolt"], ["Forest"] * 3)
+      2.times { cast(game, "Lightning Bolt", { type: "target", target: "player:bob" }) }
+      cast(game, "Spec Storm Bolt", { type: "target", target: "player:bob" },
+           ->(g) { g.legal_options.find { it[:target] == "player:bob" } || g.legal_options.first },
+           ->(g) { g.legal_options.find { it[:target] == "player:bob" } || g.legal_options.first })
+      expect(life(game, "bob")).to eq(20 - 6 - 3)
+    end
+
+    it "cascade exiles until a cheaper nonland card, which may be cast free; the rest go to the bottom" do
+      game = spell_board(["Spec Cascader"], ["Forest", "Hill Giant", "Lightning Bolt", "Mountain", "Island"])
+      cast(game, "Spec Cascader", ->(g) { g.legal_options.find { it[:type] == "cast" } }, { type: "target", target: "player:bob" })
+      expect(life(game, "bob")).to eq(17)
+      expect(life(game, "alice")).to eq(21)
+      library = game.state.players[0].library.map { game.state.object(it).card }
+      expect(library.first(2)).to eq(%w[mountain island])
+      expect(library.drop(2)).to contain_exactly("forest", "hill_giant")
+    end
+
+    it "cascade may be declined: the card goes to the bottom too" do
+      game = spell_board(["Spec Cascader"], ["Lightning Bolt", "Island"])
+      cast(game, "Spec Cascader", ->(g) { g.legal_options.find { it[:type] == "decline" } })
+      expect(game.state.players[0].library.map { game.state.object(it).card }).to eq(%w[island lightning_bolt])
+    end
+  end
+
   describe "Class cards (CR 717)" do
     let(:dojo) do
       { "name" => "Spec Dojo Class", "mana_cost" => "{R}", "types" => ["enchantment"], "subtypes" => ["class"],

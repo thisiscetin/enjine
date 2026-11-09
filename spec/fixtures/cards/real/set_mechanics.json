@@ -679,5 +679,47 @@
       "set": "tmt",
       "number": "13"
     }
+  },
+  {
+    "name": "Stormscale Scion",
+    "mana_cost": "{4}{R}{R}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "dragon"
+    ],
+    "power": 4,
+    "toughness": 4,
+    "keywords": [
+      "flying",
+      "storm"
+    ],
+    "abilities": [
+      {
+        "static": {
+          "affects": {
+            "each": {
+              "creature": {
+                "subtypes": [
+                  "dragon"
+                ]
+              }
+            },
+            "controller": "you",
+            "other": true
+          },
+          "pump": {
+            "power": 1,
+            "toughness": 1
+          }
+        }
+      }
+    ],
+    "rarity": "mythic",
+    "printing": {
+      "set": "tdm",
+      "number": "123"
+    }
   }
 ]

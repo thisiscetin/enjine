@@ -114,6 +114,20 @@ Rules: CR 509.1b
 }
 ```
 
+## cascade
+
+When you cast this spell, exile cards from the top of your library until you exile a nonland card with lesser mana value. You may cast it without paying its mana cost. Then the exiled cards not cast go on the bottom of your library in a random order.
+
+Rules: CR 702.85a, CR 702.85c, CR 608.2g
+
+```json
+{
+  "keywords": [
+    "cascade"
+  ]
+}
+```
+
 ## changeling
 
 This object is every creature type (a characteristic-defining ability that works in all zones).
@@ -432,6 +446,20 @@ Rules: CR 702.195a, CR 702.195b, CR 702.195c
 {
   "keywords": [
     "storied"
+  ]
+}
+```
+
+## storm
+
+When you cast this spell, copy it for each other spell cast before it this turn; you may choose new targets for the copies.
+
+Rules: CR 702.40a, CR 702.40b, CR 707.10
+
+```json
+{
+  "keywords": [
+    "storm"
   ]
 }
 ```

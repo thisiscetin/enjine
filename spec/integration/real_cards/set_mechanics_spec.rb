@@ -145,6 +145,16 @@ RSpec.describe "Real cards: set mechanics" do
     expect(game.history.flat_map(&:events).map(&:type)).to include("class_level_changed")
   end
 
+  it "Stormscale Scion: storm copies it for the spell cast before it; the copy becomes a token (CR 702.40a, 608.3f)" do
+    game = board(hand: ["Fire Magic", "Stormscale Scion"], mana: { R: 7, C: 2 })
+    play(game, { type: "cast", object: hand_id(game, "Fire Magic") }, { type: "mode", mode: 0 })
+    cast(game, "Stormscale Scion")
+    scions = game.state.battlefield.select { game.state.object(it).card == "stormscale_scion" }
+    expect(scions.size).to eq(2)
+    engine = game.instance_variable_get(:@engine)
+    expect(scions.map { engine.power(engine.object(it)) }).to eq([5, 5]) # each pumps the other Dragon
+  end
+
   it "Luminollusk and Shimmercreep: X is the number of colors among permanents you control" do
     game = board(hand: ["Shimmercreep"], battlefield: ["The Kingpin of Crime", "Luminollusk"], mana: { B: 1, C: 4 })
     cast(game, "Shimmercreep", { type: "decline" }) # Kingpin's extort
