@@ -74,15 +74,16 @@ module Enjine
       #   {"creature": {"token": false}}                 {"permanent": {"counters": true}} / {"counters": "+1/+1"}
       #   {"creature": {"modified": true}}               {"spell": {"not": ["creature"]}}
       #   {"creature": {"attached_subtypes": ["communicator"]}}  with a Communicator attached to it (CR 301.5, 303.4)
+      #   {"creature": {"transformed": true}}            back face up (CR 701.27h); {"prepared": true} (CR 723.3a)
       class Restricted
         TYPES = %w[artifact creature enchantment land planeswalker instant sorcery].freeze
-        BOOLEANS = %w[other attacking blocking tapped token modified].freeze
+        BOOLEANS = %w[other attacking blocking tapped token modified transformed prepared].freeze
         RANGES = %w[power toughness mana_value].freeze
         TYPE_LISTS = %w[not any_of types].freeze
         NAME_LISTS = %w[subtypes not_subtypes supertypes not_supertypes attached_subtypes].freeze
         KEYS = (%w[controller counters colors] + BOOLEANS + RANGES + TYPE_LISTS + NAME_LISTS).freeze
         # Keys that need current characteristics or combat/tapped status: not usable in the layer pass.
-        LIVE = %w[power toughness attacking blocking tapped attached_subtypes].freeze
+        LIVE = %w[power toughness attacking blocking tapped attached_subtypes transformed prepared].freeze
 
         attr_reader :base
 
@@ -185,7 +186,7 @@ module Enjine
           words << "another" if @other
           words << "attacking" if @params["attacking"]
           words << (@params["token"] ? "token" : "nontoken") unless @params["token"].nil?
-          words << "modified" if @params["modified"]
+          words.concat(status_words)
           words.concat(@lists["supertypes"]).concat(@lists["not_supertypes"].map { "non#{it}" })
           words << "non#{@lists["not"].join("/non")}" unless @lists["not"].empty?
           words.concat(@lists["types"] + @lists["subtypes"]).concat(@lists["not_subtypes"].map { "non-#{it}" })
@@ -201,6 +202,12 @@ module Enjine
         private_constant :RANGE_WORDS
 
         private
+
+        # "modified"; "transformed" / "untransformed", "prepared" / "unprepared" (CR 701.27h, 723.3a).
+        def status_words
+          words = @params["modified"] ? ["modified"] : []
+          words + %w[transformed prepared].reject { @params[it].nil? }.map { @params[it] ? it : "un#{it}" }
+        end
 
         def range_words(range) = range.map { |k, n| format(RANGE_WORDS.fetch(k), n) }.join(" and ")
 
@@ -267,6 +274,8 @@ module Enjine
         def status_ok?(engine, obj)
           return false if !@params["attacking"].nil? && engine.attackers.key?(obj.id) != @params["attacking"]
           return false if !@params["blocking"].nil? && engine.state.blockers.key?(obj.id) != @params["blocking"]
+          return false if !@params["transformed"].nil? && engine.transformed?(obj) != @params["transformed"] # CR 701.27h
+          return false if !@params["prepared"].nil? && engine.prepared?(obj) != @params["prepared"] # CR 723.3a
 
           @params["tapped"].nil? || obj.tapped == @params["tapped"]
         end

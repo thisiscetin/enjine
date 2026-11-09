@@ -150,7 +150,7 @@ module Enjine
 
         case obj.memory["copy"]
         when "spell" then obj.zone != :stack
-        when "card" then !STAYING.include?(obj.zone)
+        when "card" then !STAYING.include?(obj.zone) && !prepared_copy?(obj) # CR 723.3c (Engine::Faces)
         else !STAYING.include?(obj.zone) && token?(obj)
         end
       end

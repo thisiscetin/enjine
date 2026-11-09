@@ -40,7 +40,7 @@ module Enjine
       # event drops the cache (`@volatile`, see Engine#emit).
       LAYER_EVENTS = [Events::ZoneChanged, Events::CountersChanged, Events::EffectStarted,
                       Events::EffectsEnded, Events::Attached, Events::Unattached, Events::ControlChanged,
-                      Events::PhasedOut, Events::PhasedIn].freeze
+                      Events::PhasedOut, Events::PhasedIn, Events::Transformed].freeze
 
       def touch! = @epoch = @epoch.to_i + 1
       def volatile_layers? = @volatile

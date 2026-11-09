@@ -370,7 +370,7 @@ module Enjine
 
         zone = origin.fetch("zone", "hand").to_sym
         state.objects[origin["id"]] = GameObject.new(
-          id: origin["id"], card: obj.card, owner: obj.owner, controller: obj.owner, zone: zone, tapped: false,
+          id: origin["id"], card: card_after_move(obj, zone), owner: obj.owner, controller: obj.owner, zone: zone, tapped: false,
           controlled_since: nil, kind: "card", counters: {}, damage: 0, source: nil, ability: nil, targets: nil,
           loyalty_turn: nil, deathtouched: false, modes: nil, memory: Snapshot.deep_copy(origin.fetch("memory", {})),
           attached_to: nil # a face-down card goes back face down (CR 406.3)

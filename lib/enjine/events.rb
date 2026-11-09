@@ -107,6 +107,10 @@ module Enjine
     # Combat declarations once final (CR 508.3d "whenever [a player] attacks", 509.3c "becomes blocked").
     AttacksDeclared = define(:attacks_declared, :player, :attackers)
     BecameBlocked = define(:became_blocked, :object, :blockers)
+    # CR 701.27a: a double-faced permanent turned over; `card` names the face now up (CR 712).
+    Transformed = define(:transformed, :object, :card)
+    # CR 723.3a-c: a permanent gained (`prepared` true) or lost the prepared designation.
+    PreparedChanged = define(:prepared_changed, :object, :prepared)
 
     # A card moved between zones; old_id stops existing and new_id is born (CR 400.7). `lookers`: the card
     # was exiled face down, and only these players (by name) see which card it is (CR 406.3).

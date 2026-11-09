@@ -92,7 +92,8 @@ module Enjine
       # CR 601.2a: the card moves from where it is to the stack. `via` names how a card outside the
       # hand is cast (see Engine::Permissions); "free" casts it without paying its mana cost during
       # the resolution of a spell or ability (CR 608.2g, 118.9), after which nobody gets priority.
-      def begin_cast!(index, card_id, via: nil)
+      # `face`: cast another face of the card (a modal card's back, an Adventure, an Omen; Engine::Faces).
+      def begin_cast!(index, card_id, via: nil, face: nil)
         return begin_outside_cast!(index, card_id, via) if outside_key?(card_id) # CR 400.11b
 
         card = object(card_id)
@@ -100,7 +101,9 @@ module Enjine
         origin = { "id" => card_id, "zone" => card.zone.to_s,
                    "index" => state.zone_list(card.zone, card.owner).index(card_id) }
         origin["memory"] = card.memory.slice("face_down", "may_look") if face_down?(card) # turned face up (CR 406.3a)
+        origin["memory"] = card.memory.slice("prepared_for") if card.memory["prepared_for"] # a prepare spell (CR 723.3c)
         obj = move!(card_id, :stack, controller: index, reason: "cast")
+        turn_spell_face!(obj, face) # CR 712.8b, 716.3b, 721.3b
         extra = method ? { "method" => method } : {}
         extra["no_priority"] = true if %w[free resolving].include?(via) # cast while resolving (CR 608.2g)
         cost = method ? method_cost(obj, method) : definition(obj).mana_cost
@@ -235,6 +238,7 @@ module Enjine
         else
           pay_chosen_costs!(ctx) # e.g. the creature sacrificed for an additional cost (CR 601.2h)
           finish_cast_method!(obj, ctx) # Engine::Permissions
+          cast_prepared_copy!(ctx.dig("origin", "id")) # CR 723.3c (Engine::Faces)
           emit Events::SpellCast.new(player: name(index), object: obj.id, card: obj.card, targets: obj.targets,
                                      during_resolution: ctx["no_priority"] == true)
         end

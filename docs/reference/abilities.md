@@ -449,6 +449,16 @@ Rules: CR 614.1c, CR 508.4, CR 506.4
 }
 ```
 
+## enters_prepared
+
+This permanent enters the battlefield prepared (it needs a prepare spell, see `layout: "prepare"`).
+
+Rules: CR 723.3a, CR 614.1c
+
+```json
+"enters_prepared"
+```
+
 ## enters_tapped
 
 This permanent enters the battlefield tapped (a self-replacement effect).

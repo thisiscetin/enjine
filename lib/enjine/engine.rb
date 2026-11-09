@@ -241,9 +241,9 @@ module Enjine
 
     # ---- objects & zones (CR 400) ------------------------------------------
 
-    # A card exiled face down gets an id that doesn't name it (CR 406.3).
+    # A card exiled face down gets an id that doesn't name it (CR 406.3); a card's id names its front face.
     def create_object(card, owner, zone, hidden: false)
-      id = "#{hidden ? FACE_DOWN_ID : card}##{state.next_id}"
+      id = "#{hidden ? FACE_DOWN_ID : card.split(CardDefinition::FACE_SEPARATOR).first}##{state.next_id}"
       state.next_id += 1
       state.objects[id] = GameObject.new(id: id, card: card, owner: owner, controller: owner, zone: zone,
                                          tapped: false, controlled_since: nil, kind: "card", counters: {},
@@ -270,6 +270,7 @@ module Enjine
       data = { "object" => id, "to" => to, "position" => position, "reason" => reason, "controller" => controller }
       data["face_down"] = face_down if face_down && to == :exile
       data["enters"] = { "tapped" => enters&.fetch("tapped", false) == true, "counters" => {} } if to == :battlefield
+      data["enters"]["face"] = enters["face"] if data["enters"] && enters&.key?("face") # seen by its own replacements
       data = propose("zone_change", data).data
       return nil if data["cancelled"] # e.g. a shield counter instead of being destroyed (CR 122.1c)
 
@@ -292,7 +293,7 @@ module Enjine
       old = object(id)
       lki = depart!(old)
       face_down = to == :exile ? data["face_down"] : nil
-      fresh = create_object(own_card(old), old.owner, to, hidden: !face_down.nil?)
+      fresh = create_object(card_after_move(old, to), old.owner, to, hidden: !face_down.nil?) # front face up (Engine::Faces)
       carry_copy_status!(fresh, old, to) # a token or copy stays one (Engine::Copies)
       if old.zone == :battlefield
         leave_combat!(id)
@@ -308,6 +309,7 @@ module Enjine
                                       lookers: face_down&.map { name(it) })
       lki ? with_last_known(id, lki) { emit event } : emit(event)
       return_exiled_until_leaves!(old) if lki # CR 610.3
+      prepare!(fresh) if to == :battlefield && data["enters"]["prepared"] # "enters prepared" (CR 723.3a)
       fresh
     end
 
@@ -319,6 +321,7 @@ module Enjine
         fresh.controlled_since = state.turn
         fresh.memory["cast"] = true if data["enters"]["cast"] # CR 400.7d: it remembers it was cast
         fresh.memory.merge!(data["enters"]["memory"]) if data["enters"]["memory"] # CR 614.12: an "as this enters" choice
+        enter_face!(fresh, data["enters"]["face"]) if data["enters"]["face"] # CR 712.9, 712.11a (Engine::Faces)
         enter_as_copy!(fresh, data["enters"]["copy"]) if data["enters"]["copy"] # CR 707.5 (Engine::Copies)
         fresh.tapped = data["enters"]["tapped"]
         fresh.counters.merge!(data["enters"]["counters"])
@@ -354,6 +357,7 @@ module Enjine
       record_result!(obj.id)
       emit Events::ZoneChanged.new(card: definition.id, old_id: nil, new_id: obj.id, owner: name(controller),
                                    from: "none", to: "battlefield", reason: "create_token")
+      prepare!(obj) if enters["prepared"] # CR 723.3a (Engine::Faces)
       obj
     end
 

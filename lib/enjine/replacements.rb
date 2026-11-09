@@ -134,16 +134,18 @@ module Enjine
     def entering!(engine, proposal)
       obj = engine.object(proposal.data["object"])
       enters = proposal.data["enters"]
-      # Self-replacement effects of the entering permanent (CR 614.12: as it would exist on the battlefield).
-      engine.definition(obj).ability_instances.each do |inst|
+      # Self-replacement effects of the entering permanent (CR 614.12: as it would exist on the battlefield,
+      # with the face it enters with up, CR 712.9).
+      face = engine.entering_face(obj, enters)
+      (face || engine.definition(obj)).ability_instances.each do |inst|
         inst.ability.modify_entering(enters) if inst.ability.respond_to?(:modify_entering)
         if inst.ability.respond_to?(:modify_entering_for) # a condition checked for its controller (CR 614.1c)
           inst.ability.modify_entering_for(engine, proposal.data["controller"] || obj.owner, obj.id, enters)
         end
       end
-      engine.chars(obj).types.each do |type|
+      (face ? face.types : engine.chars(obj).types).each do |type|
         mod = Enjine.registry.fetch(:type, type)
-        mod.entering(engine.definition(obj), enters) if mod.respond_to?(:entering)
+        mod.entering(face || engine.definition(obj), enters) if mod.respond_to?(:entering)
       end
       others_entering!(engine, obj, proposal)
     end

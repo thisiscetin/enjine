@@ -354,3 +354,19 @@ Rules: CR 603.6b, CR 503.1a, CR 513.1a
   }
 }
 ```
+
+## transforms
+
+The subject transforms. For the default subject (this permanent), the ability is on the face that's up afterward, so it means "whenever this transforms into [this face]".
+
+Rules: CR 701.27f, CR 603.2
+
+| Parameter | Description |
+| --- | --- |
+| `subject` | "self" (default) or {"each": filter, ...} |
+
+```json
+{
+  "transforms": {}
+}
+```
