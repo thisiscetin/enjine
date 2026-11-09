@@ -343,9 +343,10 @@ module Enjine
     class Condition
       FLAGS = %w[your_turn was_cast attacked attacked_this_turn max_speed
                  you_attacked_this_turn].freeze
-      # Kinds named by one key and built by their class (ChosenIs: abilities/chosen_values.rb).
+      # Kinds named by one key and built by their class (ChosenIs: abilities/chosen_values.rb; Designation:
+      # keywords/storied.rb).
       KEYED = { "targets" => :Targets, "triggering" => :TriggeringIs, "source" => :Source,
-                "nth_resolution" => :NthResolution, "chosen" => :ChosenIs }.freeze
+                "nth_resolution" => :NthResolution, "chosen" => :ChosenIs, "designation" => :Designation }.freeze
 
       def self.build(data, errors, path, targets_count: 0, results_count: 0)
         unless data.is_a?(Hash)
@@ -385,7 +386,7 @@ module Enjine
           unless subject
             errors << "#{path}: unknown condition (use amount, controls, life, hand_size, your_turn, was_cast, targets, " \
                       "attacked, source, attacked_this_turn, you_attacked_this_turn, nth_resolution, kicked, " \
-                      "sacrificed, cast_with, cast_from, cast_with_this_turn, chosen, max_speed, not, all, any)"
+                      "sacrificed, cast_with, cast_from, cast_with_this_turn, chosen, max_speed, designation, not, all, any)"
             return nil
           end
           Mechanics.check_keys(data, [subject, "at_least", "at_most"], errors, path)

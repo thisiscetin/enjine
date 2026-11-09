@@ -258,4 +258,75 @@ RSpec.describe "Set mechanics: power-up, teamwork, increment, extort, boast, col
       expect(errors.join).to include("cast_with: must be one of")
     end
   end
+
+  describe "tiered (CR 702.183a)" do
+    it "allows a cost on a spell's modes only, as a mana cost" do
+      mode = ->(cost) { { "cost" => cost, "effects" => [{ "draw" => { "amount" => 1 } }] } }
+      spell = { "name" => "Spec Tiers", "mana_cost" => "{U}", "types" => ["instant"],
+                "abilities" => [{ "spell" => { "modes" => [mode.call("{0}"), mode.call("{2}{U}")] } }] }
+      expect(errors_for(spell)).to eq([])
+      bad = spell.merge("abilities" => [{ "spell" => { "modes" => [mode.call("{0}"), mode.call("2")] } }])
+      expect(errors_for(bad).join).to include("modes[1].cost")
+      ability = { "activated" => { "cost" => [{ "mana" => "{1}" }], "modes" => [mode.call("{0}"), mode.call("{1}")] } }
+      expect(errors_for(brawler.merge("abilities" => [ability])).join).to include("modes[0]: unknown parameter \"cost\"")
+    end
+  end
+
+  describe "storied and the enduring story designation (CR 702.195)" do
+    let(:bard) do
+      { "name" => "Spec Story Bard", "mana_cost" => "{1}{R}", "types" => ["creature"], "supertypes" => ["legendary"],
+        "power" => 2, "toughness" => 2, "keywords" => ["storied"],
+        "abilities" => [{ "activated" => { "cost" => [{ "mana" => "{1}" }], "only_if" => { "designation" => "enduring_story" },
+                                           "effects" => [{ "draw" => { "amount" => 1 } }] } }] }
+    end
+    let(:relic) { { "name" => "Spec Old Relic", "mana_cost" => "{1}", "types" => ["artifact"] } }
+    let(:saga) do
+      { "name" => "Spec Short Saga", "mana_cost" => "{1}", "types" => ["enchantment"], "subtypes" => ["saga"],
+        "abilities" => [{ "chapter" => { "chapter" => 1, "effects" => [{ "gain_life" => { "amount" => 1 } }] } },
+                        { "chapter" => { "chapter" => 2, "effects" => [{ "gain_life" => { "amount" => 1 } }] } }] }
+    end
+    let(:catalog) { catalog_with(bard, relic, saga) }
+
+    def story_board(alice, hand: [])
+      build_game(catalog) do
+        turn 3, active: "alice", step: :precombat_main
+        player("alice", mana_pool: { C: 3 }) do
+          alice.each { battlefield it }
+          hand(*hand)
+          library "Forest", count: 5
+        end
+        player("bob") { library "Forest", count: 5 }
+      end
+    end
+
+    it "you get an enduring story once you control three artifacts, Sagas and/or legendaries, for the rest of the game" do
+      game = story_board(["Spec Story Bard", "Spec Old Relic"], hand: ["Spec Short Saga"])
+      bard_id = obj_id(game, "Spec Story Bard")
+      option = { type: "activate", object: bard_id, ability: "printed:0" }
+      expect(game.legal_options).not_to include(option)
+      play(game, { type: "cast", object: ids_in(game, "alice", :hand).first })
+      expect(engine(game).designation?(0, "enduring_story")).to be(true)
+      expect(game.history.flat_map(&:events).map(&:type)).to include("designation_gained")
+      engine(game).move!(obj_id(game, "Spec Old Relic"), :graveyard, reason: "test")
+      game = Enjine::Game.import(game.export, catalog: catalog) # it round-trips
+      expect(engine(game).designation?(0, "enduring_story")).to be(true)
+      expect(game.legal_options).to include(option)
+    end
+
+    it "needs a storied permanent and three pieces" do
+      without = story_board(["Spec Old Relic", "Spec Old Relic", "Spec Short Saga"])
+      expect(engine(without).tell_enduring_stories!).to be(false)
+      two = story_board(["Spec Story Bard", "Spec Old Relic"])
+      expect(engine(two).tell_enduring_stories!).to be(false)
+    end
+
+    it "validates the designation in card data and in snapshots" do
+      bad = bard.merge("abilities" => [{ "static" => { "affects" => "self", "if" => { "designation" => "monarch" },
+                                                       "pump" => { "power" => 1, "toughness" => 0 } } }])
+      expect(errors_for(bad).join).to include("if.designation: must be one of enduring_story")
+      game = story_board(["Spec Old Relic"])
+      data = JSON.parse(game.export).tap { it["state"]["players"][0]["designations"] = %w[enduring_story enduring_story] }
+      expect { Enjine::Game.import(data, catalog: catalog) }.to raise_error(Enjine::InvalidSnapshot, /designations: must be a list/)
+    end
+  end
 end

@@ -422,6 +422,20 @@ Rules: CR 702.184a, CR 722.4
 }
 ```
 
+## storied
+
+While you control this permanent, once you control three or more permanents that are artifacts, Sagas and/or legendary, you have an enduring story for the rest of the game (condition `{"designation": "enduring_story"}`).
+
+Rules: CR 702.195a, CR 702.195b, CR 702.195c
+
+```json
+{
+  "keywords": [
+    "storied"
+  ]
+}
+```
+
 ## sunburst
 
 As this permanent enters from the stack as a resolving spell, it gets a +1/+1 counter (a creature) or a charge counter (otherwise) for each color of mana spent to cast it.

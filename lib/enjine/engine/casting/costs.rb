@@ -47,9 +47,11 @@ module Enjine
       def base_cost(ctx)
         obj = object(ctx["object"])
         case ctx["kind"]
-        when "spell" # plus additional costs and kicker (CR 601.2f); alternative costs (CR 118.9, Permissions)
+        when "spell" # plus additional costs, kicker and chosen tiered modes (CR 601.2f, 702.183a); alternative
+          # costs (CR 118.9, Permissions)
           cost = ctx["method"] ? alternative_base_cost(ctx) : chars(obj).mana_cost
-          cost && Mana.sum_costs([cost, *spell_extra_mana(obj, ctx["kicked"])])
+          modes = spell_ability_of(obj)&.mode_costs(ctx["modes"] || []) || []
+          cost && Mana.sum_costs([cost, *spell_extra_mana(obj, ctx["kicked"]), *modes])
         when "ability" then stack_ability(obj).mana_cost
         end
       end

@@ -753,6 +753,63 @@
     "rules_text": "Boast — {1}{R}: This creature deals 1 damage to any target. (Activate only if it attacked this turn and only once each turn.)"
   },
   {
+    "name": "Hall-Song Chronicler",
+    "mana_cost": "{1}{W}",
+    "types": [
+      "creature"
+    ],
+    "supertypes": [
+      "legendary"
+    ],
+    "subtypes": [
+      "dwarf",
+      "bard"
+    ],
+    "power": 2,
+    "toughness": 2,
+    "keywords": [
+      "storied"
+    ],
+    "abilities": [
+      {
+        "static": {
+          "affects": {
+            "each": "creature",
+            "controller": "you"
+          },
+          "if": {
+            "designation": "enduring_story"
+          },
+          "pump": {
+            "power": 1,
+            "toughness": 0
+          }
+        }
+      },
+      {
+        "activated": {
+          "cost": [
+            {
+              "mana": "{2}"
+            }
+          ],
+          "only_if": {
+            "designation": "enduring_story"
+          },
+          "limit": "once_each_turn",
+          "effects": [
+            {
+              "draw": {
+                "amount": 1
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "Storied. As long as you have an enduring story, creatures you control get +1/+0. {2}: Draw a card. Activate only if you have an enduring story and only once each turn."
+  },
+  {
     "name": "Ascendant Husk",
     "mana_cost": "{2}",
     "types": [

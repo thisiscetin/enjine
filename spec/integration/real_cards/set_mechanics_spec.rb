@@ -81,6 +81,53 @@ RSpec.describe "Real cards: set mechanics" do
     expect(game.state.players[0].hand.size).to eq(1)
   end
 
+  it "Fíli the Pathfinder: a third legendary or artifact gives you an enduring story (storied), so creatures get +1/+1" do
+    game = board(hand: ["Fíli the Pathfinder"], battlefield: ["Ori, Keeper of Songs", "Skateboard"], mana: { W: 1, C: 3 })
+    ori = obj_id(game, "Ori, Keeper of Songs")
+    engine = game.instance_variable_get(:@engine)
+    expect(engine.power(engine.object(ori))).to eq(3)
+    cast(game, "Fíli the Pathfinder")
+    expect(game.view_for(:observer)["players"][0]["designations"]).to eq(["enduring_story"])
+    expect([engine.power(engine.object(ori)), engine.toughness(engine.object(ori))]).to eq([5, 4])
+    expect(engine.chars(engine.object(ori)).keyword?(:vigilance)).to be(true)
+    dwarf = game.state.battlefield.find { game.state.object(it).card.start_with?("dwarf") }
+    expect(engine.power(engine.object(dwarf))).to eq(3)
+  end
+
+  it "Bombur, Gentle Dreamer: doesn't untap unless you have an enduring story" do
+    game = build_game(catalog) do
+      turn 2, active: "bob", step: :end
+      player("alice") do
+        battlefield "Bombur, Gentle Dreamer", tapped: true
+        library "Island", count: 5
+      end
+      player("bob") { library "Swamp", count: 5 }
+    end
+    skip_to(game, :upkeep, turn: 3)
+    expect(game.state.object(obj_id(game, "Bombur, Gentle Dreamer")).tapped).to be(true)
+    engine = game.instance_variable_get(:@engine)
+    engine.gain_designation!(0, "enduring_story")
+    skip_to(game, :upkeep, turn: 5)
+    expect(game.state.object(obj_id(game, "Bombur, Gentle Dreamer")).tapped).to be(false)
+  end
+
+  it "Thunder Magic: tiered, the chosen mode's cost is paid in addition (CR 702.183a)" do
+    game = board(hand: ["Thunder Magic"], theirs: ["Luminollusk"], mana: { R: 1, C: 3 })
+    creep = obj_id(game, "Luminollusk")
+    game.submit(type: "cast", object: hand_id(game, "Thunder Magic"))
+    expect(game.legal_options.select { it[:type] == "mode" }).to eq([{ type: "mode", mode: 0 }, { type: "mode", mode: 1 }])
+    play(game, nil, { type: "mode", mode: 1 }, { type: "target", target: creep })
+    expect(game.state.players[1].graveyard.size).to eq(1)
+    expect(game.state.players[0].mana_pool.values.sum).to eq(0)
+  end
+
+  it "Fire Magic: the {0} tier costs only its mana cost" do
+    game = board(hand: ["Fire Magic"], battlefield: ["Hungry Graffalon"], mana: { R: 1, C: 2 })
+    play(game, { type: "cast", object: hand_id(game, "Fire Magic") }, { type: "mode", mode: 0 })
+    expect(game.state.object(obj_id(game, "Hungry Graffalon")).damage).to eq(1)
+    expect(game.state.players[0].mana_pool[:C]).to eq(2)
+  end
+
   it "Luminollusk and Shimmercreep: X is the number of colors among permanents you control" do
     game = board(hand: ["Shimmercreep"], battlefield: ["The Kingpin of Crime", "Luminollusk"], mana: { B: 1, C: 4 })
     cast(game, "Shimmercreep", { type: "decline" }) # Kingpin's extort

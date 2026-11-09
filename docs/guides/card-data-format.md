@@ -907,7 +907,7 @@ power"). Keyword *actions* are effects.
                 { "triggered": { "when": { "enters": {} }, "effects": [{ "connive": {} }] } }] }
 ```
 
-### 4.20 Set mechanics: power-up, teamwork, increment, extort, boast, colors among, domain
+### 4.20 Set mechanics: power-up, teamwork, tiered, increment, extort, boast, storied, colors among, domain
 
 | Oracle text | Data |
 | --- | --- |
@@ -919,6 +919,9 @@ power"). Keyword *actions* are effects.
 | "Extort" (CR 702.101) | `"keywords": ["extort"]` (a `pay` {W/B} choice as it resolves) |
 | "the number of colors among permanents you control" (CR 105.2) | amount `{ "distinct_colors": { "each": "permanent", "controller": "you" } }` |
 | domain: "the number of basic land types among lands you control" (CR 305.6) | amount `{ "distinct_land_types": { "each": "land", "controller": "you" } }` |
+| "Tiered" (CR 702.183): "• Fira — {2} — …" | a modal `spell` with `"choose": 1` whose modes each have a `cost`: `{ "cost": "{2}", "effects": [...] }`; the chosen mode's cost is paid in addition (modes the player can't pay for aren't offered) |
+| "Storied" (CR 702.195) | `"keywords": ["storied"]`: once you control it and three or more artifacts, Sagas and/or legendary permanents, you have an enduring story for the rest of the game (the player view's `designations`) |
+| "as long as you have an enduring story" | condition `{ "designation": "enduring_story" }` (a static's or trigger's `if`, an activated ability's `only_if`) |
 
 ```json
 { "name": "Example Gamma Brawler", "mana_cost": "{1}{W}", "types": ["creature"], "power": 2, "toughness": 1,

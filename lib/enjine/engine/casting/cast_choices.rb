@@ -101,7 +101,17 @@ module Enjine
       # hasn't been chosen" not chosen before for this object).
       def choosable_modes(ctx, ability)
         modes = available_modes(ability, ctx["player"], ctx["object"], ctx["source"]) - ctx["modes"]
-        modes - used_modes(ability, ctx["source"], ctx["ability"])
+        (modes - used_modes(ability, ctx["source"], ctx["ability"])).select { mode_affordable?(ctx, ability.modes[it]) }
+      end
+
+      # A spell's mode with a cost (tiered, CR 702.183a) is offered only if the spell could still be paid for
+      # with it (CR 601.2f, 118.3).
+      def mode_affordable?(ctx, mode)
+        base = mode.cost && base_cost(ctx) or return true
+
+        obj = object(ctx["object"])
+        total = total_cost(ctx["player"], Mana.sum_costs([base, mode.cost]), spell: obj)
+        affordable?(ctx["player"], total, nil, { "spell" => obj.id })
       end
 
       # Modes chosen before for this source's "choose one that hasn't been chosen" ability `ref`.

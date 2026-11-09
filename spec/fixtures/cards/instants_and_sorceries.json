@@ -1724,6 +1724,63 @@
     "rules_text": "Domain — This spell deals damage to any target equal to the number of basic land types among lands you control."
   },
   {
+    "name": "Tiered Squall",
+    "mana_cost": "{U}",
+    "types": [
+      "instant"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "choose": 1,
+          "modes": [
+            {
+              "cost": "{0}",
+              "targets": [
+                "creature"
+              ],
+              "effects": [
+                {
+                  "tap": {
+                    "to": {
+                      "target": 0
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              "cost": "{2}",
+              "targets": [
+                "creature"
+              ],
+              "effects": [
+                {
+                  "return_to_hand": {
+                    "to": {
+                      "target": 0
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              "cost": "{4}{U}",
+              "effects": [
+                {
+                  "draw": {
+                    "amount": 3
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "Tiered. • {0} — Tap target creature. • {2} — Return target creature to its owner's hand. • {4}{U} — Draw three cards."
+  },
+  {
     "name": "Surge Pageant",
     "mana_cost": "{1}{G}",
     "types": [

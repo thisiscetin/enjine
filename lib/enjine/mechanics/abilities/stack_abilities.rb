@@ -68,8 +68,11 @@ module Enjine
 
       # Shared parsing for abilities that use the stack: targets and effects.
       class StackAbility < Primitive
-        # One mode of a modal ability ("Choose one —", CR 700.2): its own targets and effects.
-        Mode = Data.define(:targets, :effects)
+        # One mode of a modal ability ("Choose one —", CR 700.2): its own targets and effects, and for a spell
+        # the additional mana cost paid when it's chosen (tiered, CR 702.183a), or nil.
+        Mode = Data.define(:targets, :effects, :cost) do
+          def initialize(targets:, effects:, cost: nil) = super
+        end
 
         # Optional parts of the body: how many modes may be chosen and when more may (CR 700.2), modes
         # not chosen before for the same object, targets of a kicked spell (CR 702.33g), and an amount
@@ -84,7 +87,8 @@ module Enjine
         # Parses either plain targets/effects or {"choose": n, "modes": [{targets, effects}, ...]}.
         # `choose` may be {"min": a, "max": b} ("choose one or more"), and `choose_if` {"if": condition,
         # "choose": ...} replaces it while the condition holds.
-        def self.parse_body(params, errors, path)
+        # `mode_costs`: modes may have a `cost` (a spell's tiered modes, CR 702.183a).
+        def self.parse_body(params, errors, path, mode_costs: false)
           modes_data = Mechanics.fetch_param(params, :modes)
           extras = parse_extras(params, errors, path)
           if modes_data.nil?
@@ -102,9 +106,10 @@ module Enjine
           modes = modes_data.each_with_index.map do |mode, i|
             mode_path = "#{path}.modes[#{i}]"
             mode = mode.is_a?(Hash) ? mode.transform_keys(&:to_s) : {}
-            Mechanics.check_keys(mode, %w[targets effects], errors, mode_path)
+            Mechanics.check_keys(mode, %w[targets effects] + (mode_costs ? %w[cost] : []), errors, mode_path)
             mode_targets = parse_targets(mode, errors, mode_path)
-            Mode.new(targets: mode_targets, effects: parse_effects(mode, errors, mode_path, mode_targets.size))
+            cost = mode.key?("cost") ? Mana.parse_cost(mode["cost"], errors, "#{mode_path}.cost") : nil
+            Mode.new(targets: mode_targets, effects: parse_effects(mode, errors, mode_path, mode_targets.size), cost: cost)
           end
           min, max = parse_choose(Mechanics.fetch_param(params, :choose), errors, "#{path}.choose", modes.size)
           extras = extras.with(choose_max: max) if max != min
@@ -202,6 +207,9 @@ module Enjine
         def modal? = !modes.empty?
         def try_effects = effects
 
+        # The additional mana costs of the chosen modes (a spell's tiered modes, CR 702.183a).
+        def mode_costs(chosen) = modal? ? chosen.filter_map { modes[it].cost } : []
+
         # Targets in order for the chosen modes (or the ability's own targets); a kicked spell uses its
         # kicked targets (CR 702.33g).
         def targets_for(chosen, kicked: false)
@@ -260,15 +268,18 @@ module Enjine
         primitive :ability, :spell,
                   description: "The spell ability of an instant or sorcery: its targets are chosen while casting " \
                                "and its effects happen in order when it resolves. If every target is illegal on " \
-                               "resolution, it doesn't resolve.",
-                  rules: %w[113.3a 601.2c 608.2b 608.2c],
-                  params: { "targets" => "list of target filters", "effects" => "list of effects" },
+                               "resolution, it doesn't resolve. A mode of a modal spell may have a `cost`: a mana " \
+                               "cost paid in addition when that mode is chosen (tiered: \"Choose one additional " \
+                               "cost\").",
+                  rules: %w[113.3a 601.2c 608.2b 608.2c 702.183a 601.2f],
+                  params: { "targets" => "list of target filters", "effects" => "list of effects",
+                            "modes" => "list of {targets, effects, cost} (with `choose`)" },
                   example: { "spell" => { "targets" => ["any_target"],
                                           "effects" => [{ "deal_damage" => { "amount" => 3, "to" => { "target" => 0 } } }] } }
 
         def self.build(params, errors, path, **)
           Mechanics.check_keys(params, BODY_KEYS, errors, path)
-          new(**parse_body(params, errors, path))
+          new(**parse_body(params, errors, path, mode_costs: true))
         end
 
         def kind = :spell

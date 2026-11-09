@@ -58,6 +58,7 @@ module Enjine
         ceased = annihilate_counters! || ceased # CR 704.5q
         ceased = unattach_illegal_attachments! || ceased # CR 704.5n, 704.5p
         ceased = start_engines! || ceased # CR 704.5aa (Engine::Speed)
+        ceased = tell_enduring_stories! || ceased # CR 702.195a (Engine::Designations)
         doomed = nil
         state.battlefield.each do |id|
           obj = object(id)

@@ -52,5 +52,13 @@ module Enjine
         errors.concat(problems)
       end
     end
+
+    # Player designations (Engine::Designations): distinct known names; absent in older snapshots.
+    def validate_designations(list, errors, path)
+      known = Engine::Designations::NAMES
+      return if list.is_a?(Array) && list.uniq.size == list.size && list.all? { known.include?(it) }
+
+      errors << "#{path}: must be a list of distinct designations (#{known.join(", ")})"
+    end
   end
 end

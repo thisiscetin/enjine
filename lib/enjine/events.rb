@@ -113,6 +113,8 @@ module Enjine
     BecameCrewed = define(:became_crewed, :object, :crew)
     # A player's speed changed (CR 702.179); `from` nil: they had no speed.
     SpeedChanged = define(:speed_changed, :player, :from, :to)
+    # A player got a designation for the rest of the game, e.g. an enduring story (CR 702.195b).
+    DesignationGained = define(:designation_gained, :player, :designation)
     # CR 701.27a: a double-faced permanent turned over; `card` names the face now up (CR 712).
     Transformed = define(:transformed, :object, :card)
     # CR 723.3a-c: a permanent gained (`prepared` true) or lost the prepared designation.

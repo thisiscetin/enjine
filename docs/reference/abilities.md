@@ -985,14 +985,15 @@ Rules: CR 702.190a, CR 702.190b, CR 506.3a, CR 118.9, CR 601.2b, CR 601.2f, CR 6
 
 ## spell
 
-The spell ability of an instant or sorcery: its targets are chosen while casting and its effects happen in order when it resolves. If every target is illegal on resolution, it doesn't resolve.
+The spell ability of an instant or sorcery: its targets are chosen while casting and its effects happen in order when it resolves. If every target is illegal on resolution, it doesn't resolve. A mode of a modal spell may have a `cost`: a mana cost paid in addition when that mode is chosen (tiered: "Choose one additional cost").
 
-Rules: CR 113.3a, CR 601.2c, CR 608.2b, CR 608.2c
+Rules: CR 113.3a, CR 601.2c, CR 608.2b, CR 608.2c, CR 702.183a, CR 601.2f
 
 | Parameter | Description |
 | --- | --- |
 | `targets` | list of target filters |
 | `effects` | list of effects |
+| `modes` | list of {targets, effects, cost} (with `choose`) |
 
 ```json
 {
