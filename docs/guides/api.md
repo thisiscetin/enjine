@@ -17,7 +17,7 @@ saving and replaying, the deck builder and the testing tools.
 - [10. Saving, replaying, branching](#10-saving-replaying-branching)
 - [11. Writing a bot or an RL environment](#11-writing-a-bot-or-an-rl-environment)
 - [12. The deck builder](#12-the-deck-builder)
-- [13. Testing tools: RulesMonitor and Fuzz](#13-testing-tools-rulesmonitor-and-fuzz)
+- [13. Testing tools: RulesMonitor, Fuzz and Verify](#13-testing-tools-rulesmonitor-fuzz-and-verify)
 - [14. The command line](#14-the-command-line)
 - [15. Errors](#15-errors)
 - [16. Guarantees and limits](#16-guarantees-and-limits)
@@ -502,7 +502,7 @@ player = Enjine::Player.new(name: "bob", deck: deck)
 
 More in the [deck builder guide](deck-builder.md).
 
-## 13. Testing tools: RulesMonitor and Fuzz
+## 13. Testing tools: RulesMonitor, Fuzz and Verify
 
 `Enjine::RulesMonitor` is an independent rules checker: it re-derives from raw
 state and events what must be true after each decision (life totals, mana
@@ -529,6 +529,28 @@ Enjine::Fuzz.random_deck(cards, rng: Enjine::Rng.from_seed(3))   # a random lega
 Use them when you write your own cards: a game that breaks names the seed to
 reproduce it.
 
+`Enjine::Verify` (`require "enjine/verify"`) does all of this for a folder of
+card files at once. It reads every `.json` file below the folder (each holds one
+card or an array of cards), validates every card, builds decks from the valid
+ones so that every card is in some deck, and plays games watched by the rules
+monitor. It records which cards were actually used (cast, played, activated,
+triggered or resolved), and gives cards that were never used extra decks of their
+own:
+
+```ruby
+require "enjine/verify"
+report = Enjine::Verify.new("my_cards/", games: 20, seed: 1).run
+report["ok"]           # false if any card is invalid, the monitor found a rules error, or the engine raised
+report["invalid"]      # [{"file", "index", "name", "errors" => ["types[0]: unknown type ..."]}]
+report["unexercised"]  # valid cards no game ever used: write a scenario for them
+report["findings"]     # rules-monitor findings, with the seed and both deck descriptions
+report["types"]        # per card type: total / valid / exercised
+puts Enjine::Verify.text(report)
+```
+
+The same folder, `games` and `seed` give the same report. Two cards with the same
+name but different rules data count as invalid; an identical reprint counts once.
+
 ## 14. The command line
 
 ```sh
@@ -538,6 +560,7 @@ exe/enjine --deck1 a.json --deck2 b.json --p1 random --p2 random --seed 7 [--qui
 exe/enjine --pool cards.json --deck1 random:colors=RG --deck2 random   # random decks from a pool
 exe/enjine --pool cards.json --random-deck colors=WU seed=7            # print a random deck document
 exe/enjine --validate cards.json                         # JSON report; exit 1 if any card is invalid
+exe/enjine --verify my_cards/ [--games N] [--seed S] [--json]  # validate and play-test a folder of cards
 exe/enjine --load game.json                              # resume a game saved with `s`
 ```
 
