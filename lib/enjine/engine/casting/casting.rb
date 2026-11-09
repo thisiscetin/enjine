@@ -18,9 +18,10 @@ module Enjine
         return false if cast_forbidden?(index, obj) # CR 101.2 (Engine::Rules)
         return false unless additional_costs_payable?(obj) # CR 601.2f: e.g. "sacrifice a creature"
 
-        cost = Mana.sum_costs([defn.mana_cost, *spell_extra_mana(obj, false)])
-        if ability_targetable?(defn.spell_ability, index, id) &&
-           affordable?(index, total_cost(index, cost, spell: obj), nil, { "spell" => id, **spell_waterbend(obj, false) })
+        if ability_targetable?(defn.spell_ability, index, id) && # CR 601.2b: some way of paying its costs (Engine::CostOptions)
+           cost_variant_affordable?(index, spell_cost_list(obj, false), obj, defn.mana_cost, nil, { "spell" => id }) do
+             total_cost(index, it, spell: obj)
+           end
           return true
         end
 
@@ -34,7 +35,6 @@ module Enjine
         return false unless obj.zone == ability.zone # CR 113.6: e.g. cycling only from the hand (702.29a)
         return false if ability.sorcery_speed? && !sorcery_timing?(index)
         return false if activation_forbidden?(index, obj) # CR 602.5, 101.2 (Engine::Rules)
-        return false unless ability.costs.reject(&:mana?).all? { it.payable?(self, obj) }
         return false unless activation_allowed?(index, obj, ability_ref, ability) # CR 602.5b
 
         if (ability.kind == :loyalty) && (obj.loyalty_turn == state.turn || (loyalty(obj) + ability.loyalty_cost).negative?)
@@ -42,10 +42,11 @@ module Enjine
           return false
         end
 
-        cost = total_cost(index, ability.mana_cost, ability: ability, source: id)
-        purpose = { "ability" => id, **waterbend_purpose(ability.costs) } # CR 701.67a (Engine::Waterbending)
+        # CR 118.3, 601.2b: some way of paying its costs (Engine::CostOptions); waterbend: CR 701.67a
         ability_targetable?(ability, index, nil, id, ref: ability_ref) &&
-          affordable?(index, cost, needs_tap?(ability) ? id : nil, purpose)
+          cost_variant_affordable?(index, ability.costs, obj, nil, needs_tap?(ability) ? id : nil, { "ability" => id }) do
+            total_cost(index, it, ability: ability, source: id)
+          end
       end
 
       # Whether the ability can get legal targets: for modal abilities, enough modes must (CR 700.2),
@@ -168,6 +169,7 @@ module Enjine
                  .merge(min == max ? {} : { "min" => min }))
           return :wait
         end
+        return :wait if ask_cost_option!(ctx) # CR 601.2b: which of two costs (Engine::CostOptions)
         return :wait if ask_x!(ctx)
 
         specs = casting_targets
@@ -267,7 +269,7 @@ module Enjine
         source = object(ctx["source"])
         ability = chars(source).ability(ctx["ability"])
         obj.memory["source_counters"] = source.counters.dup if ability.costs.any?(Mechanics::Costs::SacrificeSelf)
-        ability.costs.reject(&:mana?).each { it.pay!(self, source) }
+        frame_costs(ctx).reject(&:mana?).each { it.pay!(self, source) } # the chosen option of a one_of (CR 601.2b)
         pay_chosen_costs!(ctx)
         return unless ability.kind == :loyalty
 

@@ -4327,5 +4327,185 @@
         }
       }
     ]
+  },
+  {
+    "name": "Goblin Toll Blast",
+    "mana_cost": "{R}",
+    "types": [
+      "instant"
+    ],
+    "abilities": [
+      {
+        "additional_cost": {
+          "cost": [
+            {
+              "one_of": [
+                {
+                  "behold": {
+                    "card": {
+                      "subtypes": [
+                        "goblin"
+                      ]
+                    }
+                  }
+                },
+                {
+                  "mana": "{2}"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "spell": {
+          "targets": [
+            "any_target"
+          ],
+          "effects": [
+            {
+              "deal_damage": {
+                "amount": 3,
+                "to": {
+                  "target": 0
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Wyrmcall Insight",
+    "mana_cost": "{1}{U}",
+    "types": [
+      "sorcery"
+    ],
+    "abilities": [
+      {
+        "additional_cost": {
+          "cost": [
+            {
+              "behold": {
+                "card": {
+                  "subtypes": [
+                    "dragon"
+                  ]
+                }
+              }
+            }
+          ],
+          "optional": true
+        }
+      },
+      {
+        "spell": {
+          "effects": [
+            {
+              "draw": {
+                "amount": 1
+              }
+            },
+            {
+              "draw": {
+                "amount": 1,
+                "if": {
+                  "cast_with": "additional_cost"
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Scrapheap Bargain",
+    "mana_cost": "{1}{R}",
+    "types": [
+      "instant"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "effects": [
+            {
+              "pay": {
+                "cost": [
+                  {
+                    "one_of": [
+                      {
+                        "sacrifice_permanent": {
+                          "filter": "artifact"
+                        }
+                      },
+                      "discard"
+                    ]
+                  }
+                ],
+                "then": [
+                  {
+                    "draw": {
+                      "amount": 2
+                    }
+                  }
+                ],
+                "otherwise": [
+                  {
+                    "gain_life": {
+                      "amount": 1
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Bloodprice Rebuke",
+    "mana_cost": "{B}",
+    "types": [
+      "instant"
+    ],
+    "abilities": [
+      {
+        "additional_cost": {
+          "cost": [
+            {
+              "one_of": [
+                {
+                  "pay_life": 3
+                },
+                {
+                  "mana": "{1}"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "spell": {
+          "targets": [
+            "creature"
+          ],
+          "effects": [
+            {
+              "pump": {
+                "power": -2,
+                "toughness": -2,
+                "to": {
+                  "target": 0
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
   }
 ]

@@ -43,6 +43,21 @@ module Enjine
     end
     register("choose_kicker", ChooseKicker)
 
+    # CR 601.2b: announce which of two or more costs ("behold a Goblin or pay {2}") will be paid.
+    class ChooseCostOption < Base
+      def self.doc
+        'While casting/activating with a choice between costs (cost `one_of`): `{type: "cost_option", option: i}` ' \
+          "(0-based, in the order of `costs`) for one that could be paid; `{type: \"cancel\"}` rewinds."
+      end
+
+      def self.options(engine, _pending) = Decisions.with_cancel(engine, engine.cost_option_options)
+
+      def self.submit(engine, _pending, option)
+        option[:type] == "cancel" ? engine.cancel_casting! : engine.choose_cost_option!(option[:option])
+      end
+    end
+    register("choose_cost_option", ChooseCostOption)
+
     # CR 601.2b / 107.3a: announce the value of X for a cost with {X}.
     class ChooseX < Base
       def self.doc

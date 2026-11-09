@@ -10,25 +10,14 @@ module Enjine
 
       def spell_cost_abilities(obj, kind) = chars(obj).abilities.map(&:ability).select { it.kind == kind }
 
-      # Mana the spell's additional costs add to its mana cost: mandatory ones, and kicker when kicked.
-      def spell_extra_mana(obj, kicked)
-        extra = spell_cost_abilities(obj, :additional_cost)
-        extra += spell_cost_abilities(obj, :kicker) if kicked
-        extra.map(&:mana_cost)
-      end
-
       # CR 601.2f / 118.3: the spell's mandatory non-mana additional costs can be paid.
       def additional_costs_payable?(obj) = spell_cost_abilities(obj, :additional_cost).all? { it.payable?(self, obj) }
 
       # The costs being paid, in order: an ability's own costs; a spell's additional costs (and kicker's).
       def casting_costs(ctx)
         case ctx["kind"]
-        when "ability" then stack_ability(object(ctx["object"])).costs
-        when "spell"
-          obj = object(ctx["object"])
-          costs = spell_cost_abilities(obj, :additional_cost)
-          costs += spell_cost_abilities(obj, :kicker) if ctx["kicked"]
-          costs.flat_map(&:choosing_costs) + alt_cost_parts(obj, ctx["method"]) # Engine::AltCasting
+        when "ability" then frame_costs(ctx) # with the chosen option of each one_of (Engine::CostOptions)
+        when "spell" then frame_costs(ctx).reject(&:mana?) + alt_cost_parts(object(ctx["object"]), ctx["method"]) # Engine::AltCasting
         else []
         end
       end
@@ -58,9 +47,9 @@ module Enjine
       # Whether the spell could be cast kicked: kicker payable, the kicked total affordable and its
       # kicked targets (or normal ones) available.
       def kicked_castable?(index, obj)
-        kicker = spell_cost_abilities(obj, :kicker).first or return false
+        return false if spell_cost_abilities(obj, :kicker).empty?
+
         spell = spell_ability_of(obj)
-        total = total_cost(index, Mana.sum_costs([chars(obj).mana_cost, *spell_extra_mana(obj, true)]), spell: obj)
         targetable = if spell.nil? || spell.modal?
                        ability_targetable?(spell, index,
                                            obj.id)
@@ -68,17 +57,22 @@ module Enjine
                        targets_available?(spell.targets_for([], kicked: true),
                                           index, obj.id)
                      end
-        kicker.payable?(self, obj) && targetable && affordable?(index, total, nil, { "spell" => obj.id, **spell_waterbend(obj, true) })
+        targetable && cost_variant_affordable?(index, spell_cost_list(obj, true), obj, chars(obj).mana_cost, nil, { "spell" => obj.id }) do
+          total_cost(index, it, spell: obj)
+        end
       end
 
       # The spell remembers it at once, so a "choose both if ..." mode count sees it (CR 601.2b, 702.194b);
-      # `kicked_with` names the optional cost paid (kicker, teamwork).
+      # `kicked_with` names the optional cost paid (kicker, teamwork, an optional additional cost); only kicker
+      # makes the spell kicked (CR 702.33d).
       def announce_kicker!(kicked)
         ctx = casting
         ctx["kicked"] = kicked
         if kicked
           obj = object(ctx["object"])
-          obj.memory.merge!("kicked" => true, "kicked_with" => spell_cost_abilities(obj, :kicker).first.keyword)
+          optional = spell_cost_abilities(obj, :kicker).first
+          obj.memory["kicked_with"] = optional.keyword
+          obj.memory["kicked"] = true if optional.kicks?
         end
         ask!(nil)
       end
@@ -177,6 +171,7 @@ module Enjine
       # A cost with a fixed number of choices is chosen once it has them; one of "any number" (crew, CR
       # 702.122a) says itself, given whether the player said they're done.
       def cost_chosen?(ctx, cost, index, entries)
+        return entries.size >= ctx["x"].to_i if cost.respond_to?(:x?) && cost.x? # "exile X cards" (CR 601.2b)
         return entries.size >= cost.choices_needed unless cost.respond_to?(:chosen?)
 
         cost.chosen?(self, cost_payer(ctx), entries, ctx.fetch("costs_done", []).include?(index))
@@ -270,7 +265,7 @@ module Enjine
 
       # What was announced while casting stays with the spell or ability (CR 702.33d, 601.2d).
       def record_announcements!(obj, ctx)
-        obj.memory["kicked"] = true if ctx["kicked"]
+        obj.memory["kicked"] = true if ctx["kicked"] && spell_cost_abilities(obj, :kicker).first&.kicks? # CR 702.33d
         obj.memory["division"] = ctx["division"].dup if ctx["division"]
         record_chosen_modes!(ctx, casting_ability)
       end

@@ -273,7 +273,12 @@ module Enjine
     end
 
     # A creature whose power/toughness isn't characteristic-defining (7a) or set by a static ability (7b).
-    def recomputable?(obj, card) = card.creature? && !card.defined_pt? && applying_statics(obj).none?(&:base_power_toughness)
+    # One whose creature types an effect replaced (assimilate, "becomes a Borg", layer 4) is left to the engine's
+    # specs: which statics apply to it depends on those types.
+    def recomputable?(obj, card)
+      card.creature? && !card.defined_pt? && applying_statics(obj).none?(&:base_power_toughness) &&
+        state.effects.none? { %w[creature_types assimilate].include?(it["kind"]) && Array(it["affected"]).include?(obj.id) }
+    end
 
     # CR 613.4b: the latest setting effect, else as printed.
     def base_power_toughness(id, card)

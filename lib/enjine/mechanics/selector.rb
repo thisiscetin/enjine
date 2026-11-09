@@ -25,6 +25,7 @@ module Enjine
     #                                               "that player", CR 603.2); see Triggers.event_facts
     #   "watched"                                   what a delayed triggered ability watches (CR 603.7c)
     #   "exiled_with"                               cards in exile exiled with the source (linked abilities, CR 607.2a)
+    #   "gift_recipient"                            the opponent chosen for the spell's gift (CR 702.174a)
     class Selector
       CONTROLLERS = %w[you opponent any].freeze
       TRIGGERING = %w[object player].freeze
@@ -35,7 +36,7 @@ module Enjine
 
       def self.build(data, errors, path, targets_count:, results_count: 0)
         case data
-        when "self", "you", "each_opponent", "attached", "watched", "exiled_with" then new(data.to_sym)
+        when "self", "you", "each_opponent", "attached", "watched", "exiled_with", "gift_recipient" then new(data.to_sym)
         when Hash
           data = data.transform_keys(&:to_s)
           return build_result(data, errors, path, results_count) if data.key?("result")
@@ -111,6 +112,7 @@ module Enjine
         when :you then "you"
         when :each_opponent then "each opponent"
         when :exiled_with then "the cards exiled with it"
+        when :gift_recipient then "the chosen opponent"
         when :each then "each #{value.primitive_name.tr("_",
                                                         " ")}#{{ "you" => " you control",
                                                                  "opponent" => " an opponent controls" }[controller]}"
@@ -125,7 +127,7 @@ module Enjine
         when :self then SELF_ZONES.include?(engine.state.objects[ctx.source]&.zone) ? [ctx.source] : []
         when :attached then attached(engine, ctx)
         when :triggering then triggering(engine, ctx)
-        when :watched then Array(Selector.memory(engine, ctx)["watched"])
+        when :watched, :gift_recipient then remembered(engine, ctx)
         when :you then [Filters.player_ref(engine, ctx.controller)]
         when :each_opponent
           engine.state.players.each_index.reject { it == ctx.controller }.map { Filters.player_ref(engine, it) }
@@ -137,6 +139,14 @@ module Enjine
 
       # What the resolving triggered ability remembers (the event facts, watched objects).
       def self.memory(engine, ctx) = ctx.memory || engine.state.objects[ctx.object]&.memory || {}
+
+      # What a delayed trigger watches; the opponent chosen for a gift, kept by the spell or the permanent it
+      # became (CR 702.174b).
+      def remembered(engine, ctx)
+        return Array(Selector.memory(engine, ctx)["watched"]) if kind == :watched
+
+        Array(Selector.memory(engine, ctx)["gift"] || engine.state.objects[ctx.source]&.memory&.[]("gift"))
+      end
 
       private
 

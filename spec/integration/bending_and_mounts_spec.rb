@@ -33,9 +33,9 @@ RSpec.describe "Bending, mounts and body keywords" do
       creature("Spec River Spirit", [], cost: "{U}", extra_keys: { "abilities" => [
                  { "additional_cost" => { "cost" => [{ "waterbend" => "{2}" }] } }
                ] }),
-      spell("Spec Revival Tide", [{ "draw" => { "amount" => 1, "if" => { "not" => { "kicked" => true } } } },
-                                  { "draw" => { "amount" => 3, "if" => { "kicked" => true } } }],
-            cost: "{U}", extra: [{ "kicker" => { "cost" => [{ "waterbend" => "{2}" }] } }]),
+      spell("Spec Revival Tide", [{ "draw" => { "amount" => 1, "if" => { "not" => { "cast_with" => "additional_cost" } } } },
+                                  { "draw" => { "amount" => 3, "if" => { "cast_with" => "additional_cost" } } }],
+            cost: "{U}", extra: [{ "additional_cost" => { "cost" => [{ "waterbend" => "{2}" }], "optional" => true } }]),
       spell("Spec Water Lesson", [draw(2), { "pay" => { "waterbend" => "{2}", "otherwise" => [{ "discard" => { "amount" => 1 } }] } }],
             cost: "{U}"),
       { "name" => "Spec Trinket", "mana_cost" => "{1}", "types" => ["artifact"] },
@@ -217,10 +217,11 @@ RSpec.describe "Bending, mounts and body keywords" do
       expect(game.state.stack.size).to eq(1)
     end
 
-    it "as an optional additional cost (kicker): the spell knows it was paid; waterbending triggers (CR 701.67c)" do
+    it "as an optional additional cost: the spell knows it was paid but isn't kicked; waterbending triggers (CR 118.8b, 701.67c)" do
       game = board(hand: ["Spec Revival Tide"], field: ["Spec Water Watcher", "Spec Trinket", "Grizzly Bears"], pool: { U: 1 })
       cast(game, "Spec Revival Tide")
       game.submit(type: "kick")
+      expect(game.state.object(game.state.stack.first).memory).to eq("kicked_with" => "additional_cost")
       game.submit(type: "waterbend", object: obj_id(game, "Spec Trinket"))
       game.submit(type: "waterbend", object: obj_id(game, "Grizzly Bears"))
       pay(game)

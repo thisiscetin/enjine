@@ -11,7 +11,8 @@ module Enjine
                   description: "Exile `count` cards from your hand (default 1), chosen while casting or activating, " \
                                "exiled as the spell or ability becomes cast. `card` (a card spec) restricts which.",
                   rules: %w[406.1 601.2h 602.2b 118.3],
-                  params: { "count" => "integer (default 1)", "card" => "card spec, e.g. {\"types\": [\"creature\"]}" },
+                  params: { "count" => "integer (default 1), or \"X\": the X announced",
+                            "card" => "card spec, e.g. {\"types\": [\"creature\"]}" },
                   example: { "exile_from_hand" => { "count" => 1 } }
 
         def self.zone = :hand
@@ -26,7 +27,8 @@ module Enjine
                                "casting or activating and exiled as the spell or ability becomes cast. `card` (a card " \
                                "spec) restricts which.",
                   rules: %w[406.1 601.2h 602.2b 118.3],
-                  params: { "count" => "integer (default 1)", "card" => "card spec, e.g. {\"types\": [\"creature\"]}" },
+                  params: { "count" => "integer (default 1), or \"X\": the X announced",
+                            "card" => "card spec, e.g. {\"types\": [\"creature\"]}" },
                   example: { "exile_from_graveyard" => { "count" => 2 } }
 
         def self.zone = :graveyard

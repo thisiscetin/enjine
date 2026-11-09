@@ -47,13 +47,14 @@ Rules: CR 602.1, CR 602.2, CR 602.5b, CR 602.5d, CR 702.177a, CR 702.193a, CR 70
 
 ## additional_cost
 
-As an additional cost to cast this spell, pay `cost` too (mana and/or chosen costs such as `sacrifice_permanent`). The spell can't be cast without it.
+As an additional cost to cast this spell, pay `cost` too (mana and/or chosen costs such as `sacrifice_permanent`). The spell can't be cast without it. `optional: true`: you may pay it (announced with the `choose_kicker` decision); the condition `{"cast_with": "additional_cost"}` then holds (the spell isn't kicked).
 
-Rules: CR 601.2b, CR 601.2f, CR 601.2h, CR 118.8
+Rules: CR 601.2b, CR 601.2f, CR 601.2h, CR 118.8, CR 118.8b
 
 | Parameter | Description |
 | --- | --- |
 | `cost` | list of costs |
+| `optional` | true: you may pay it |
 
 ```json
 {
@@ -683,6 +684,28 @@ Rules: CR 614.1c, CR 614.12
 }
 ```
 
+## enters_tapped_unless_behold
+
+As this permanent enters, its controller may behold an object matching the card spec `card` (reveal such a card from their hand or choose such a permanent they control); if they don't, it enters tapped.
+
+Rules: CR 614.12, CR 701.4a
+
+| Parameter | Description |
+| --- | --- |
+| `card` | card spec (required), e.g. {"subtypes": ["jace"]} |
+
+```json
+{
+  "enters_tapped_unless_behold": {
+    "card": {
+      "subtypes": [
+        "jace"
+      ]
+    }
+  }
+}
+```
+
 ## enters_tapped_unless_pay_life
 
 As this permanent enters, its controller may pay `life` life; if they don't, it enters tapped. You can't pay more life than you have.
@@ -843,6 +866,16 @@ Rules: CR 702.34a, CR 118.9, CR 601.2b, CR 601.2f, CR 601.2h
     "cost": "{2}{R}"
   }
 }
+```
+
+## gift
+
+Gift: as you cast this spell you may promise a gift to an opponent you choose (the `choose_kicker` decision, then `choose_cost` for the opponent). `{"cast_with": "gift"}` holds if you did, and the selector "gift_recipient" is that player; write the gift as the spell's first effect (or an enters trigger) under that condition.
+
+Rules: CR 702.174a, CR 702.174b, CR 702.174j, CR 702.174k, CR 702.174m, CR 601.2b
+
+```json
+"gift"
 ```
 
 ## grants_beam_me_up
@@ -1229,6 +1262,32 @@ Rules: CR 113.3a, CR 601.2c, CR 608.2b, CR 608.2c, CR 702.183a, CR 601.2f
 }
 ```
 
+## spells_have
+
+Spells you cast matching the card spec `spells` (default: every spell) have `keywords` (convoke and/or improvise) while this permanent is on the battlefield.
+
+Rules: CR 702.126a, CR 702.51a, CR 611.3a, CR 604.1
+
+| Parameter | Description |
+| --- | --- |
+| `spells` | card spec, e.g. {"not_types": ["creature"]} |
+| `keywords` | list of convoke, improvise |
+
+```json
+{
+  "spells_have": {
+    "spells": {
+      "not_types": [
+        "creature"
+      ]
+    },
+    "keywords": [
+      "improvise"
+    ]
+  }
+}
+```
+
 ## static
 
 While its source is on the battlefield (and its `if` condition holds), every permanent it `affects` gets `pump` (fixed or computed amounts, layer 7c), the `keywords` and granted `abilities` (layer 6, triggered, activated or mana abilities), and with `creature_types` has exactly those creature types (layer 4); `loses_abilities: true` removes the abilities it had before (layer 6, in timestamp order: later grants and keyword counters stay, CR 613.7), `colors` sets its colors (layer 5) and `base_power_toughness` its base power and toughness (layer 7b); `types` are card types it has in addition to its other types ("this Vehicle is an artifact creature", layer 4) and `subtypes` subtypes it has in addition to its other types ("is a Wizard in addition to its other types", layer 4). `affects` is {"each": filter, "controller": you|opponent|any, "other": true} (relative to the source's controller), "self", or "attached" ("equipped/enchanted creature").
@@ -1373,13 +1432,13 @@ Rules: CR 603.2, CR 603.3, CR 603.3b, CR 603.3d
 
 ## ward
 
-Ward: whenever this permanent becomes the target of a spell or ability an opponent controls, counter that spell or ability unless its controller pays `cost` (or, with `waterbend`, waterbends that cost: "Ward—Waterbend {4}").
+Ward: whenever this permanent becomes the target of a spell or ability an opponent controls, counter that spell or ability unless its controller pays `cost`: a mana cost, or a list of costs ("Ward—Pay 2 life", "Ward—Discard a card or pay {2}" with `one_of`). With `waterbend`, they waterbend that cost: "Ward—Waterbend {4}".
 
 Rules: CR 702.21a, CR 601.2c, CR 603.2, CR 701.6a, CR 701.67a
 
 | Parameter | Description |
 | --- | --- |
-| `cost` | mana cost string, e.g. "{2}" |
+| `cost` | mana cost string, e.g. "{2}", or a list of costs, e.g. [{"pay_life": 2}] |
 | `waterbend` | mana cost string, instead of cost |
 
 ```json

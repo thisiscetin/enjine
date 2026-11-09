@@ -50,7 +50,7 @@ RSpec.describe "Keyword alternative costs and convoke: card data validation (uni
     cond = ->(c) { sorcery.merge("abilities" => [{ "spell" => { "effects" => [{ "draw" => { "amount" => 1, "if" => c } }] } }]) }
     expect(errors_for(cond.call({ "cast_with" => "kicker" })))
       .to eq(["abilities[0].spell.effects[0].draw.if.cast_with: must be one of " \
-              "#{(Enjine::Mechanics::Condition::CastHow::KEYWORDS + %w[teamwork]).join(", ")}"])
+              "#{(Enjine::Mechanics::Condition::CastHow::KEYWORDS + Enjine::Mechanics::Condition::CastHow::OPTIONAL).join(", ")}"])
     expect(errors_for(cond.call({ "cast_from" => "battlefield", "x" => 1 })))
       .to eq(["abilities[0].spell.effects[0].draw.if: unknown parameter \"x\"",
               "abilities[0].spell.effects[0].draw.if.cast_from: must be one of hand, graveyard, exile, library, outside"])

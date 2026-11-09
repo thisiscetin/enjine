@@ -645,7 +645,7 @@ Rules: CR 614.1a, CR 614.16, CR 611.2a, CR 122.6, CR 616.1
 
 ## counter_unless_pays
 
-Counter each referenced spell or ability unless its controller pays `mana` (or `waterbend`s that cost, CR 701.67a) as this resolves (they choose, and pay like any cost; mana abilities allowed).
+Counter each referenced spell or ability unless its controller pays `mana` (or `waterbend`s that cost, CR 701.67a, or pays the list of costs `cost`) as this resolves (they choose, and pay like any cost; mana abilities allowed).
 
 Rules: CR 701.6a, CR 118.12a, CR 605.3a, CR 701.67a
 
@@ -653,6 +653,7 @@ Rules: CR 701.6a, CR 118.12a, CR 605.3a, CR 701.67a
 | --- | --- |
 | `mana` | mana cost string |
 | `waterbend` | mana cost string, instead of mana |
+| `cost` | list of costs, instead of mana |
 | `to` | selector (usually {"target": 0}) |
 
 ```json
@@ -883,7 +884,7 @@ Rules: CR 701.20a, CR 701.20e, CR 401.4, CR 400.7j
 
 ## discard
 
-Each referenced player discards `amount` cards of their choice (default: you). `random: true`: the cards are chosen at random (the game's random number generator), with no decision.
+Each referenced player discards `amount` cards of their choice (default: you). `random: true`: the cards are chosen at random (the game's random number generator), with no decision. `hand: true`: each discards their whole hand at once ("discard your hand"; how many is its amount {"this_way": n}).
 
 Rules: CR 701.9a, CR 701.9b
 
@@ -892,6 +893,7 @@ Rules: CR 701.9a, CR 701.9b
 | `amount` | integer |
 | `to` | selector |
 | `random` | boolean |
+| `hand` | true: the whole hand |
 
 ```json
 {
@@ -1452,12 +1454,13 @@ Rules: CR 701.17a
 
 ## pay
 
-You may pay `mana`, `life` or `waterbend` as it resolves. If you do, `then` happens; if you don't, `otherwise`. Paying mana works like paying a spell's cost (mana abilities may be activated; a `waterbend` cost may also be paid by tapping artifacts and creatures, CR 701.67a); life can be paid only if you have that much (CR 119.4). For another player paying, see `counter_unless_pays`.
+You may pay `cost` (a list of costs: mana, life, discarding, sacrificing, a `one_of` choice, ...) as it resolves; `mana`, `life` and `waterbend` are shorthands for one cost. If you do, `then` happens; if you don't, `otherwise`. Paying mana works like paying a spell's cost (mana abilities may be activated; a `waterbend` cost may also be paid by tapping artifacts and creatures, CR 701.67a); a cost that can't be paid can't be chosen (CR 118.3). For another player paying, see `counter_unless_pays`.
 
 Rules: CR 118.12, CR 118.12a, CR 118.3, CR 119.4, CR 605.3a, CR 701.67a, CR 701.67c
 
 | Parameter | Description |
 | --- | --- |
+| `cost` | list of costs, e.g. [{"one_of": [{"sacrifice_permanent": {"filter": "artifact"}}, {"discard": {}}]}] |
 | `mana` | mana cost string, e.g. "{1}" |
 | `life` | integer |
 | `waterbend` | mana cost string: "unless you waterbend {2}" |
@@ -1821,7 +1824,7 @@ Rules: CR 400.7, CR 400.4a, CR 110.2, CR 111.8, CR 603.7c, CR 614.1c, CR 122.6, 
 
 ## return_to_hand
 
-Return each referenced permanent, or card in a graveyard or exile ("target creature card from your graveyard"), to its owner's hand.
+Return each referenced permanent, spell ("return target spell to its owner's hand"), or card in a graveyard or exile ("target creature card from your graveyard"), to its owner's hand.
 
 Rules: CR 400.6, CR 404.1, CR 608.2b
 

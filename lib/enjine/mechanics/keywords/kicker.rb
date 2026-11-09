@@ -14,16 +14,23 @@ module Enjine
           costs = StackAbility.parse_costs(params, errors, path)
           errors << "#{path}.cost: must be a non-empty list" if costs.empty? && errors.none? { it.start_with?("#{path}.cost") }
           costs.each_with_index do |cost, i|
-            next if cost.mana? || cost.respond_to?(:choices_needed) || cost.respond_to?(:spell_cost?)
+            next if spell_cost?(cost)
 
             errors << "#{path}.cost[#{i}]: a spell's additional cost must be mana, life or a chosen cost (sacrifice, tap, ...)"
           end
           new(costs)
         end
 
-        def initialize(costs)
+        def self.spell_cost?(cost)
+          return cost.options.all? { spell_cost?(it) } if cost.is_a?(Costs::OneOf)
+
+          cost.mana? || cost.respond_to?(:choices_needed) || cost.respond_to?(:spell_cost?)
+        end
+
+        def initialize(costs, optional: false)
           super()
           @costs = costs
+          @optional = optional
           freeze
         end
 
@@ -32,6 +39,10 @@ module Enjine
         def try_effects = []
         def mana_cost = Mana.sum_costs(costs.select(&:mana?).map(&:mana_cost))
         def choosing_costs = costs.reject(&:mana?)
+        # Recorded as the spell's "kicked_with" when this optional cost is paid.
+        def keyword = self.class.primitive_name.to_s
+        # Whether paying it makes the spell kicked (CR 702.33d).
+        def kicks? = false
 
         # Whether the non-mana parts can be paid by the spell's controller (CR 118.3).
         def payable?(engine, spell) = choosing_costs.all? { it.payable?(engine, spell) }
@@ -50,23 +61,31 @@ module Enjine
                   example: { "kicker" => { "cost" => [{ "mana" => "{1}{U}" }] } }
 
         def kind = :kicker
-        # Recorded as the spell's "kicked_with".
-        def keyword = self.class.primitive_name.to_s
+        def kicks? = true
         def to_s = "Kicker #{costs.join(", ")}"
       end
 
-      # A mandatory additional cost: "As an additional cost to cast this spell, sacrifice a creature."
-      # (CR 601.2b, 601.2f-h, 118.8).
+      # An additional cost: "As an additional cost to cast this spell, sacrifice a creature." (CR 601.2b,
+      # 601.2f-h, 118.8). An optional one ("you may behold a Dragon", CR 118.8b) is announced like kicker (the
+      # `choose_kicker` decision) without making the spell kicked: {"cast_with": "additional_cost"} holds if it
+      # was paid.
       class AdditionalCost < SpellCost
         primitive :ability, :additional_cost,
                   description: "As an additional cost to cast this spell, pay `cost` too (mana and/or chosen costs " \
-                               "such as `sacrifice_permanent`). The spell can't be cast without it.",
-                  rules: %w[601.2b 601.2f 601.2h 118.8],
-                  params: { "cost" => "list of costs" },
+                               "such as `sacrifice_permanent`). The spell can't be cast without it. `optional: true`: " \
+                               "you may pay it (announced with the `choose_kicker` decision); the condition " \
+                               "`{\"cast_with\": \"additional_cost\"}` then holds (the spell isn't kicked).",
+                  rules: %w[601.2b 601.2f 601.2h 118.8 118.8b],
+                  params: { "cost" => "list of costs", "optional" => "true: you may pay it" },
                   example: { "additional_cost" => { "cost" => [{ "sacrifice_permanent" => { "filter" => "creature" } }] } }
 
-        def kind = :additional_cost
-        def to_s = "As an additional cost to cast this spell: #{costs.join(", ")}"
+        def self.build(params, errors, path, **)
+          optional = Mechanics.flag_param(params, :optional, errors, path)
+          new(super(params.except("optional", :optional), errors, path).costs, optional: optional)
+        end
+
+        def kind = @optional ? :kicker : :additional_cost
+        def to_s = "As an additional cost to cast this spell#{", you may" if @optional}: #{costs.join(", ")}"
       end
     end
   end

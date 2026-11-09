@@ -6,7 +6,8 @@ module Enjine
     class EnterChoice < Base
       def self.doc
         'Before `object` enters: `{type: "pay_life", life: n}` (only with enough life) or ' \
-          '`{type: "enter_tapped"}` (CR 614.12, 119.4); `{type: "number", number: n}` for "choose a number"; ' \
+          '`{type: "enter_tapped"}` (CR 614.12, 119.4), or `{type: "behold", object: id}` (CR 701.4a); ' \
+          '`{type: "number", number: n}` for "choose a number"; ' \
           '`{type: "name", name: "..."}` for "choose a card name" (CR 201.4); `{type: "color", color: "R"}`, ' \
           '`{type: "creature_type", creature_type: "elf"}`, `{type: "card_type", card_type: "artifact"}`, ' \
           '`{type: "basic_land_type", basic_land_type: "forest"}` or ' \

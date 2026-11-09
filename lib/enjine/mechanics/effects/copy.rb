@@ -191,7 +191,7 @@ module Enjine
 
         def choose_targets(engine, spell, controller, locals)
           old = spell.targets || []
-          specs = engine.resolving_ability(spell)&.targets_for(spell.modes || [], kicked: spell.memory["kicked"]) || []
+          specs = engine.resolving_ability(spell)&.targets_for(spell.modes || [], kicked: spell.memory.key?("kicked_with")) || []
           slots = engine.target_slots(old, specs) # each target of a counted slot in turn; same number (CR 707.10c)
           chosen = answers(locals).map { it["target"] }
           return engine.regroup_targets(chosen, old) if chosen.size >= slots.size

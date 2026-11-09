@@ -277,5 +277,34 @@
       "island"
     ],
     "rules_text": "({T}: Add {G} or {U}.)"
+  },
+  {
+    "name": "Wyrmwatch Grotto",
+    "types": [
+      "land"
+    ],
+    "abilities": [
+      {
+        "enters_tapped_unless_behold": {
+          "card": {
+            "subtypes": [
+              "dragon"
+            ]
+          }
+        }
+      },
+      {
+        "mana": {
+          "cost": [
+            "tap"
+          ],
+          "color": "any_one",
+          "colors": [
+            "U",
+            "R"
+          ]
+        }
+      }
+    ]
   }
 ]

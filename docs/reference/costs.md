@@ -63,7 +63,7 @@ Rules: CR 701.9a, CR 701.9b, CR 601.2h, CR 602.2b, CR 118.3
 
 | Parameter | Description |
 | --- | --- |
-| `count` | integer (default 1) |
+| `count` | integer (default 1), or "X": the X announced |
 | `card` | card spec, e.g. {"types": ["land"]} |
 | `random` | true: at random (CR 701.9b) |
 
@@ -103,7 +103,7 @@ Rules: CR 406.1, CR 601.2h, CR 602.2b, CR 118.3
 
 | Parameter | Description |
 | --- | --- |
-| `count` | integer (default 1) |
+| `count` | integer (default 1), or "X": the X announced |
 | `card` | card spec, e.g. {"types": ["creature"]} |
 
 ```json
@@ -122,7 +122,7 @@ Rules: CR 406.1, CR 601.2h, CR 602.2b, CR 118.3
 
 | Parameter | Description |
 | --- | --- |
-| `count` | integer (default 1) |
+| `count` | integer (default 1), or "X": the X announced |
 | `card` | card spec, e.g. {"types": ["creature"]} |
 
 ```json
@@ -143,6 +143,26 @@ Rules: CR 406.1, CR 113.6m, CR 602.2b, CR 118.3
 "exile_self_from_graveyard"
 ```
 
+## get_counters
+
+You get `amount` counters of the kind `counter` (e.g. poison). It can always be paid.
+
+Rules: CR 118.1, CR 122.1, CR 704.5c
+
+| Parameter | Description |
+| --- | --- |
+| `counter` | player counter kind, e.g. "poison" |
+| `amount` | integer >= 1 |
+
+```json
+{
+  "get_counters": {
+    "counter": "poison",
+    "amount": 5
+  }
+}
+```
+
 ## mana
 
 Pay mana as part of an activation. Paid during the activation by spending mana from your pool, tapping sources one at a time.
@@ -156,6 +176,35 @@ Rules: CR 601.2g, CR 601.2h, CR 602.2b
 ```json
 {
   "mana": "{1}{R}"
+}
+```
+
+## one_of
+
+Pay one of the listed costs (two or more), chosen as the spell or ability is cast or activated (the `choose_cost_option` decision) or, for `pay` and ward, as it is paid. A cost that can't be paid can't be chosen.
+
+Rules: CR 118.3, CR 601.2b, CR 601.2f, CR 602.2b, CR 118.12
+
+| Parameter | Description |
+| --- | --- |
+| `(list)` | two or more costs |
+
+```json
+{
+  "one_of": [
+    {
+      "behold": {
+        "card": {
+          "subtypes": [
+            "goblin"
+          ]
+        }
+      }
+    },
+    {
+      "mana": "{2}"
+    }
+  ]
 }
 ```
 

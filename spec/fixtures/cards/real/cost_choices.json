@@ -1,0 +1,1580 @@
+[
+  {
+    "name": "Mudbutton Cursetosser",
+    "mana_cost": "{B}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "goblin",
+      "warlock"
+    ],
+    "power": 2,
+    "toughness": 1,
+    "keywords": [
+      "cant_block"
+    ],
+    "abilities": [
+      {
+        "additional_cost": {
+          "cost": [
+            {
+              "one_of": [
+                {
+                  "behold": {
+                    "card": {
+                      "subtypes": [
+                        "goblin"
+                      ]
+                    }
+                  }
+                },
+                {
+                  "mana": "{2}"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "triggered": {
+          "when": {
+            "dies": {}
+          },
+          "targets": [
+            {
+              "creature": {
+                "controller": "opponent",
+                "power": {
+                  "at_most": 2
+                }
+              }
+            }
+          ],
+          "effects": [
+            {
+              "destroy": {
+                "to": {
+                  "target": 0
+                }
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "uncommon",
+    "printing": {
+      "set": "ecl",
+      "number": "112"
+    }
+  },
+  {
+    "name": "Kinsbaile Aspirant",
+    "mana_cost": "{W}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "kithkin",
+      "citizen"
+    ],
+    "power": 2,
+    "toughness": 1,
+    "abilities": [
+      {
+        "additional_cost": {
+          "cost": [
+            {
+              "one_of": [
+                {
+                  "behold": {
+                    "card": {
+                      "subtypes": [
+                        "kithkin"
+                      ]
+                    }
+                  }
+                },
+                {
+                  "mana": "{2}"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "triggered": {
+          "when": {
+            "enters": {
+              "subject": {
+                "each": "creature",
+                "controller": "you",
+                "other": true
+              }
+            }
+          },
+          "effects": [
+            {
+              "pump": {
+                "power": 1,
+                "toughness": 1,
+                "to": "self"
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "uncommon",
+    "printing": {
+      "set": "ecl",
+      "number": "21"
+    }
+  },
+  {
+    "name": "Silvergill Mentor",
+    "mana_cost": "{1}{U}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "merfolk",
+      "wizard"
+    ],
+    "power": 2,
+    "toughness": 1,
+    "abilities": [
+      {
+        "additional_cost": {
+          "cost": [
+            {
+              "one_of": [
+                {
+                  "behold": {
+                    "card": {
+                      "subtypes": [
+                        "merfolk"
+                      ]
+                    }
+                  }
+                },
+                {
+                  "mana": "{2}"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "triggered": {
+          "when": {
+            "enters": {}
+          },
+          "effects": [
+            {
+              "create_token": {
+                "token": {
+                  "name": "Merfolk",
+                  "types": [
+                    "creature"
+                  ],
+                  "subtypes": [
+                    "merfolk"
+                  ],
+                  "colors": [
+                    "W",
+                    "U"
+                  ],
+                  "power": 1,
+                  "toughness": 1
+                }
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "uncommon",
+    "printing": {
+      "set": "ecl",
+      "number": "69"
+    }
+  },
+  {
+    "name": "Caustic Exhale",
+    "mana_cost": "{B}",
+    "types": [
+      "instant"
+    ],
+    "abilities": [
+      {
+        "additional_cost": {
+          "cost": [
+            {
+              "one_of": [
+                {
+                  "behold": {
+                    "card": {
+                      "subtypes": [
+                        "dragon"
+                      ]
+                    }
+                  }
+                },
+                {
+                  "mana": "{1}"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "spell": {
+          "targets": [
+            "creature"
+          ],
+          "effects": [
+            {
+              "pump": {
+                "power": -3,
+                "toughness": -3,
+                "to": {
+                  "target": 0
+                }
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "common",
+    "printing": {
+      "set": "tdm",
+      "number": "74"
+    }
+  },
+  {
+    "name": "Countersculpt",
+    "mana_cost": "{U}{U}",
+    "types": [
+      "instant"
+    ],
+    "abilities": [
+      {
+        "additional_cost": {
+          "cost": [
+            {
+              "one_of": [
+                {
+                  "behold": {
+                    "card": {
+                      "subtypes": [
+                        "jace"
+                      ]
+                    }
+                  }
+                },
+                {
+                  "mana": "{1}"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "spell": {
+          "targets": [
+            "spell"
+          ],
+          "effects": [
+            {
+              "counter": {
+                "to": {
+                  "target": 0
+                }
+              }
+            },
+            {
+              "empower_jace": {
+                "amount": 1
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "uncommon",
+    "printing": {
+      "set": "fra",
+      "number": "25"
+    }
+  },
+  {
+    "name": "Eaten Alive",
+    "mana_cost": "{B}",
+    "types": [
+      "sorcery"
+    ],
+    "abilities": [
+      {
+        "additional_cost": {
+          "cost": [
+            {
+              "one_of": [
+                {
+                  "sacrifice_permanent": {
+                    "filter": "creature"
+                  }
+                },
+                {
+                  "mana": "{3}{B}"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "spell": {
+          "targets": [
+            "creature_or_planeswalker"
+          ],
+          "effects": [
+            {
+              "exile": {
+                "to": {
+                  "target": 0
+                }
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "common",
+    "printing": {
+      "set": "fdn",
+      "number": "172"
+    }
+  },
+  {
+    "name": "Pumpkin Bombardment",
+    "mana_cost": "{B/R}",
+    "types": [
+      "sorcery"
+    ],
+    "abilities": [
+      {
+        "additional_cost": {
+          "cost": [
+            {
+              "one_of": [
+                "discard",
+                {
+                  "mana": "{2}"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "spell": {
+          "targets": [
+            "creature"
+          ],
+          "effects": [
+            {
+              "deal_damage": {
+                "amount": 3,
+                "to": {
+                  "target": 0
+                }
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "common",
+    "printing": {
+      "set": "spm",
+      "number": "139"
+    }
+  },
+  {
+    "name": "Soaring Stoneglider",
+    "mana_cost": "{2}{W}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "elephant",
+      "cleric"
+    ],
+    "power": 4,
+    "toughness": 3,
+    "keywords": [
+      "flying",
+      "vigilance"
+    ],
+    "abilities": [
+      {
+        "additional_cost": {
+          "cost": [
+            {
+              "one_of": [
+                {
+                  "exile_from_graveyard": {
+                    "count": 2
+                  }
+                },
+                {
+                  "mana": "{1}{W}"
+                }
+              ]
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "uncommon",
+    "printing": {
+      "set": "sos",
+      "number": "32"
+    }
+  },
+  {
+    "name": "Bogslither's Embrace",
+    "mana_cost": "{1}{B}",
+    "types": [
+      "sorcery"
+    ],
+    "abilities": [
+      {
+        "additional_cost": {
+          "cost": [
+            {
+              "one_of": [
+                {
+                  "blight": {
+                    "amount": 1
+                  }
+                },
+                {
+                  "mana": "{3}"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "spell": {
+          "targets": [
+            "creature"
+          ],
+          "effects": [
+            {
+              "exile": {
+                "to": {
+                  "target": 0
+                }
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "common",
+    "printing": {
+      "set": "ecl",
+      "number": "94"
+    }
+  },
+  {
+    "name": "Wild Unraveling",
+    "mana_cost": "{U}{U}",
+    "types": [
+      "instant"
+    ],
+    "abilities": [
+      {
+        "additional_cost": {
+          "cost": [
+            {
+              "one_of": [
+                {
+                  "blight": {
+                    "amount": 2
+                  }
+                },
+                {
+                  "mana": "{1}"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "spell": {
+          "targets": [
+            "spell"
+          ],
+          "effects": [
+            {
+              "counter": {
+                "to": {
+                  "target": 0
+                }
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "common",
+    "printing": {
+      "set": "ecl",
+      "number": "84"
+    }
+  },
+  {
+    "name": "Stir Up Trouble",
+    "mana_cost": "{B}",
+    "types": [
+      "sorcery"
+    ],
+    "abilities": [
+      {
+        "additional_cost": {
+          "cost": [
+            {
+              "one_of": [
+                {
+                  "sacrifice_permanent": {
+                    "filter": {
+                      "one_of": [
+                        "artifact",
+                        "creature"
+                      ]
+                    }
+                  }
+                },
+                {
+                  "mana": "{4}"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "spell": {
+          "targets": [
+            "creature"
+          ],
+          "effects": [
+            {
+              "destroy": {
+                "to": {
+                  "target": 0
+                }
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "common",
+    "printing": {
+      "set": "hob",
+      "number": "84"
+    }
+  },
+  {
+    "name": "Silence the Echo",
+    "mana_cost": "{1}{B}",
+    "types": [
+      "sorcery"
+    ],
+    "abilities": [
+      {
+        "additional_cost": {
+          "cost": [
+            {
+              "one_of": [
+                {
+                  "sacrifice_permanent": {
+                    "filter": "creature_or_planeswalker"
+                  }
+                },
+                {
+                  "mana": "{3}"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "spell": {
+          "targets": [
+            "creature_or_planeswalker"
+          ],
+          "effects": [
+            {
+              "destroy": {
+                "to": {
+                  "target": 0
+                }
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "common",
+    "printing": {
+      "set": "fra",
+      "number": "66"
+    }
+  },
+  {
+    "name": "Titania, Rugged Rumbler",
+    "mana_cost": "{2}{B/G}",
+    "types": [
+      "creature"
+    ],
+    "supertypes": [
+      "legendary"
+    ],
+    "subtypes": [
+      "human",
+      "villain"
+    ],
+    "power": 5,
+    "toughness": 5,
+    "abilities": [
+      {
+        "additional_cost": {
+          "cost": [
+            {
+              "one_of": [
+                "discard",
+                {
+                  "mana": "{2}"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "ward": {
+          "cost": [
+            {
+              "one_of": [
+                "discard",
+                {
+                  "mana": "{2}"
+                }
+              ]
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "uncommon",
+    "printing": {
+      "set": "msh",
+      "number": "235"
+    }
+  },
+  {
+    "name": "Bullseye, Death Dealer",
+    "mana_cost": "{2}{B/R}",
+    "types": [
+      "creature"
+    ],
+    "supertypes": [
+      "legendary"
+    ],
+    "subtypes": [
+      "human",
+      "assassin",
+      "villain"
+    ],
+    "power": 2,
+    "toughness": 3,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "enters": {}
+          },
+          "effects": [
+            {
+              "pay": {
+                "cost": [
+                  {
+                    "one_of": [
+                      {
+                        "sacrifice_permanent": {
+                          "filter": "artifact"
+                        }
+                      },
+                      {
+                        "discard": {
+                          "card": {
+                            "not_types": [
+                              "land"
+                            ]
+                          }
+                        }
+                      }
+                    ]
+                  }
+                ],
+                "then": [
+                  {
+                    "reflexive_trigger": {
+                      "targets": [
+                        "any_target"
+                      ],
+                      "effects": [
+                        {
+                          "deal_damage": {
+                            "amount": 2,
+                            "to": {
+                              "target": 0
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      },
+      {
+        "activated": {
+          "cost": [
+            {
+              "mana": "{3}"
+            },
+            "tap",
+            {
+              "one_of": [
+                {
+                  "sacrifice_permanent": {
+                    "filter": "artifact"
+                  }
+                },
+                {
+                  "discard": {
+                    "card": {
+                      "not_types": [
+                        "land"
+                      ]
+                    }
+                  }
+                }
+              ]
+            }
+          ],
+          "targets": [
+            "any_target"
+          ],
+          "effects": [
+            {
+              "deal_damage": {
+                "amount": 2,
+                "to": {
+                  "target": 0
+                }
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "uncommon",
+    "printing": {
+      "set": "msh",
+      "number": "209"
+    }
+  },
+  {
+    "name": "K'un-Lun Warrior",
+    "mana_cost": "{1}{R}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "human",
+      "warrior",
+      "hero"
+    ],
+    "power": 2,
+    "toughness": 2,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "enters": {}
+          },
+          "effects": [
+            {
+              "pay": {
+                "cost": [
+                  {
+                    "one_of": [
+                      {
+                        "sacrifice_permanent": {
+                          "filter": "artifact"
+                        }
+                      },
+                      "discard"
+                    ]
+                  }
+                ],
+                "then": [
+                  {
+                    "draw": {
+                      "amount": 1
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "common",
+    "printing": {
+      "set": "msh",
+      "number": "140"
+    }
+  },
+  {
+    "name": "Vision of Love",
+    "mana_cost": "{1}{R}",
+    "types": [
+      "instant"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "effects": [
+            {
+              "pay": {
+                "cost": [
+                  {
+                    "one_of": [
+                      {
+                        "sacrifice_permanent": {
+                          "filter": "artifact"
+                        }
+                      },
+                      "discard"
+                    ]
+                  }
+                ],
+                "then": [
+                  {
+                    "draw": {
+                      "amount": 2
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "common",
+    "printing": {
+      "set": "msh",
+      "number": "158"
+    }
+  },
+  {
+    "name": "Osseous Exhale",
+    "mana_cost": "{1}{W}",
+    "types": [
+      "instant"
+    ],
+    "abilities": [
+      {
+        "additional_cost": {
+          "cost": [
+            {
+              "behold": {
+                "card": {
+                  "subtypes": [
+                    "dragon"
+                  ]
+                }
+              }
+            }
+          ],
+          "optional": true
+        }
+      },
+      {
+        "spell": {
+          "targets": [
+            {
+              "one_of": [
+                {
+                  "creature": {
+                    "attacking": true
+                  }
+                },
+                {
+                  "creature": {
+                    "blocking": true
+                  }
+                }
+              ]
+            }
+          ],
+          "effects": [
+            {
+              "deal_damage": {
+                "amount": 5,
+                "to": {
+                  "target": 0
+                }
+              }
+            },
+            {
+              "gain_life": {
+                "amount": 2,
+                "if": {
+                  "cast_with": "additional_cost"
+                }
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "common",
+    "printing": {
+      "set": "tdm",
+      "number": "17"
+    }
+  },
+  {
+    "name": "Piercing Exhale",
+    "mana_cost": "{1}{G}",
+    "types": [
+      "instant"
+    ],
+    "abilities": [
+      {
+        "additional_cost": {
+          "cost": [
+            {
+              "behold": {
+                "card": {
+                  "subtypes": [
+                    "dragon"
+                  ]
+                }
+              }
+            }
+          ],
+          "optional": true
+        }
+      },
+      {
+        "spell": {
+          "targets": [
+            {
+              "creature": {
+                "controller": "you"
+              }
+            },
+            "creature_or_planeswalker"
+          ],
+          "effects": [
+            {
+              "bite": {
+                "from": {
+                  "target": 0
+                },
+                "to": {
+                  "target": 1
+                }
+              }
+            },
+            {
+              "surveil": {
+                "amount": 2,
+                "if": {
+                  "cast_with": "additional_cost"
+                }
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "common",
+    "printing": {
+      "set": "tdm",
+      "number": "151"
+    }
+  },
+  {
+    "name": "Dispelling Exhale",
+    "mana_cost": "{1}{U}",
+    "types": [
+      "instant"
+    ],
+    "abilities": [
+      {
+        "additional_cost": {
+          "cost": [
+            {
+              "behold": {
+                "card": {
+                  "subtypes": [
+                    "dragon"
+                  ]
+                }
+              }
+            }
+          ],
+          "optional": true
+        }
+      },
+      {
+        "spell": {
+          "targets": [
+            "spell"
+          ],
+          "effects": [
+            {
+              "counter_unless_pays": {
+                "mana": "{2}",
+                "to": {
+                  "target": 0
+                },
+                "if": {
+                  "not": {
+                    "cast_with": "additional_cost"
+                  }
+                }
+              }
+            },
+            {
+              "counter_unless_pays": {
+                "mana": "{4}",
+                "to": {
+                  "target": 0
+                },
+                "if": {
+                  "cast_with": "additional_cost"
+                }
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "common",
+    "printing": {
+      "set": "tdm",
+      "number": "41"
+    }
+  },
+  {
+    "name": "Hexing Squelcher",
+    "mana_cost": "{1}{R}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "goblin",
+      "sorcerer"
+    ],
+    "power": 2,
+    "toughness": 2,
+    "keywords": [
+      "cant_be_countered"
+    ],
+    "abilities": [
+      {
+        "ward": {
+          "cost": [
+            {
+              "pay_life": 2
+            }
+          ]
+        }
+      },
+      {
+        "player_rule": {
+          "rule": "spells_cant_be_countered"
+        }
+      },
+      {
+        "static": {
+          "affects": {
+            "each": "creature",
+            "controller": "you",
+            "other": true
+          },
+          "abilities": [
+            {
+              "ward": {
+                "cost": [
+                  {
+                    "pay_life": 2
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "rare",
+    "printing": {
+      "set": "ecl",
+      "number": "145"
+    }
+  },
+  {
+    "name": "Sunset Saboteur",
+    "mana_cost": "{1}{B}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "human",
+      "rogue"
+    ],
+    "power": 4,
+    "toughness": 1,
+    "keywords": [
+      "menace"
+    ],
+    "abilities": [
+      {
+        "ward": {
+          "cost": [
+            "discard"
+          ]
+        }
+      },
+      {
+        "triggered": {
+          "when": {
+            "attacks": {
+              "subject": "self"
+            }
+          },
+          "targets": [
+            {
+              "creature": {
+                "controller": "opponent"
+              }
+            }
+          ],
+          "effects": [
+            {
+              "add_counters": {
+                "counter": "+1/+1",
+                "amount": 1,
+                "to": {
+                  "target": 0
+                }
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "rare",
+    "printing": {
+      "set": "eoe",
+      "number": "116"
+    }
+  },
+  {
+    "name": "The Serpent Society",
+    "mana_cost": "{1}{B}{G}",
+    "types": [
+      "creature"
+    ],
+    "supertypes": [
+      "legendary"
+    ],
+    "subtypes": [
+      "human",
+      "snake",
+      "villain"
+    ],
+    "power": 3,
+    "toughness": 4,
+    "keywords": [
+      "deathtouch"
+    ],
+    "abilities": [
+      {
+        "ward": {
+          "cost": [
+            {
+              "get_counters": {
+                "counter": "poison",
+                "amount": 5
+              }
+            }
+          ]
+        }
+      },
+      {
+        "triggered": {
+          "when": {
+            "dies": {
+              "subject": {
+                "each": {
+                  "creature": {
+                    "keywords": [
+                      "deathtouch"
+                    ]
+                  }
+                },
+                "controller": "you",
+                "other": true
+              }
+            }
+          },
+          "effects": [
+            {
+              "sacrifice_choice": {
+                "to": "each_opponent",
+                "filter": {
+                  "creature": {
+                    "token": false
+                  }
+                }
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "rare",
+    "printing": {
+      "set": "msh",
+      "number": "226"
+    }
+  },
+  {
+    "name": "Theorist's Sanctum",
+    "types": [
+      "land"
+    ],
+    "subtypes": [
+      "island"
+    ],
+    "abilities": [
+      {
+        "enters_tapped_unless_behold": {
+          "card": {
+            "subtypes": [
+              "jace"
+            ]
+          }
+        }
+      },
+      {
+        "activated": {
+          "cost": [
+            {
+              "mana": "{2}{U}"
+            },
+            "tap"
+          ],
+          "effects": [
+            {
+              "empower_jace": {
+                "amount": 2
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "rare",
+    "printing": {
+      "set": "fra",
+      "number": "191"
+    }
+  },
+  {
+    "name": "Winter, Cursed Rider",
+    "mana_cost": "{U}{B}",
+    "types": [
+      "creature"
+    ],
+    "supertypes": [
+      "legendary"
+    ],
+    "subtypes": [
+      "human",
+      "warlock"
+    ],
+    "power": 3,
+    "toughness": 2,
+    "abilities": [
+      {
+        "ward": {
+          "cost": [
+            {
+              "pay_life": 2
+            }
+          ]
+        }
+      },
+      {
+        "static": {
+          "affects": {
+            "each": "artifact",
+            "controller": "you"
+          },
+          "abilities": [
+            {
+              "ward": {
+                "cost": [
+                  {
+                    "pay_life": 2
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      },
+      {
+        "activated": {
+          "exhaust": true,
+          "cost": [
+            {
+              "mana": "{2}{U}{B}"
+            },
+            "tap",
+            {
+              "exile_from_graveyard": {
+                "count": "X",
+                "card": {
+                  "types": [
+                    "artifact"
+                  ]
+                }
+              }
+            }
+          ],
+          "effects": [
+            {
+              "pump": {
+                "power": {
+                  "times": [
+                    "x",
+                    -1
+                  ]
+                },
+                "toughness": {
+                  "times": [
+                    "x",
+                    -1
+                  ]
+                },
+                "to": {
+                  "each": {
+                    "creature": {
+                      "not": [
+                        "artifact"
+                      ],
+                      "other": true
+                    }
+                  }
+                }
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "rare",
+    "printing": {
+      "set": "dft",
+      "number": "228"
+    }
+  },
+  {
+    "name": "Bilbo's Gambit",
+    "mana_cost": "{1}{W}",
+    "types": [
+      "instant"
+    ],
+    "abilities": [
+      "gift",
+      {
+        "spell": {
+          "targets": [
+            "spell"
+          ],
+          "effects": [
+            {
+              "create_token": {
+                "token": "Treasure",
+                "to": "gift_recipient",
+                "if": {
+                  "cast_with": "gift"
+                }
+              }
+            },
+            {
+              "return_to_hand": {
+                "to": {
+                  "target": 0
+                }
+              }
+            },
+            {
+              "player_rule": {
+                "rule": "cant_cast",
+                "to": {
+                  "each": "player"
+                },
+                "if": {
+                  "cast_with": "gift"
+                }
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "rare",
+    "printing": {
+      "set": "hob",
+      "number": "5"
+    }
+  },
+  {
+    "name": "Ironheart, Clever Champion",
+    "mana_cost": "{4}{U}",
+    "types": [
+      "artifact",
+      "creature"
+    ],
+    "supertypes": [
+      "legendary"
+    ],
+    "subtypes": [
+      "human",
+      "hero"
+    ],
+    "power": 3,
+    "toughness": 4,
+    "keywords": [
+      "improvise",
+      "flying"
+    ],
+    "abilities": [
+      {
+        "spells_have": {
+          "spells": {
+            "not_types": [
+              "creature"
+            ]
+          },
+          "keywords": [
+            "improvise"
+          ]
+        }
+      }
+    ],
+    "rarity": "rare",
+    "printing": {
+      "set": "msh",
+      "number": "60"
+    }
+  },
+  {
+    "name": "Narset, Jeskai Waymaster",
+    "mana_cost": "{U}{R}{W}",
+    "types": [
+      "creature"
+    ],
+    "supertypes": [
+      "legendary"
+    ],
+    "subtypes": [
+      "human",
+      "monk"
+    ],
+    "power": 3,
+    "toughness": 4,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "step_begins": {
+              "step": "end"
+            }
+          },
+          "effects": [
+            {
+              "may": {
+                "effects": [
+                  {
+                    "discard": {
+                      "hand": true
+                    }
+                  }
+                ],
+                "then": [
+                  {
+                    "draw": {
+                      "amount": {
+                        "spells_cast_this_turn": {
+                          "by": "you"
+                        }
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "rare",
+    "printing": {
+      "set": "tdm",
+      "number": "209"
+    }
+  }
+]
