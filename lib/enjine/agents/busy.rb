@@ -7,7 +7,7 @@ module Enjine
     # decision (targets, payments, attacks, blocks) is uniform, as for Agents::Random. It still passes now
     # and then, so a free repeatable ability can't hold a game forever. Card checks use it so cards get used.
     class Busy < Random
-      ACTIONS = %w[play_land cast activate].freeze
+      ACTIONS = %w[play_land cast activate special_action].freeze
 
       def initialize(seed: 0, cancel_rate: 0.02, eagerness: 85)
         super(seed: seed, cancel_rate: cancel_rate)

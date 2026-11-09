@@ -7,15 +7,16 @@ RSpec.describe "Exile, suspend and meld mechanics" do
     [
       { "name" => "Spec Hidden Vault", "types" => ["land"],
         "abilities" => [{ "hideaway" => { "amount" => 3 } }, { "mana" => { "cost" => ["tap"], "produce" => "{C}" } },
-                        { "activated" => { "cost" => ["tap"], "effects" => [{ "cast_free" => { "to" => "exiled_with", "play" => true } }] } }] }
+                        { "activated" => { "cost" => ["tap"],
+                                           "effects" => [{ "cast_free" => { "to" => "exiled_with", "play" => true } }] } }] }
     ]
   end
   let(:catalog) { catalog_with(*cards) }
 
-  def board(hand: [], field: [], library: ["Forest"], lands_played: 0, active: "alice")
+  def board(hand: [], field: [], library: ["Forest"], lands_played: 0, active: "alice", mana: {})
     build_game(catalog) do
       turn 3, active: active, step: :precombat_main
-      player("alice", lands_played: lands_played) do
+      player("alice", lands_played: lands_played, mana_pool: mana) do
         hand(*hand) unless hand.empty?
         field.each { battlefield it }
         library(*library, count: 5)
@@ -29,6 +30,45 @@ RSpec.describe "Exile, suspend and meld mechanics" do
   end
 
   def hand_card(game, name) = ids_in(game, "alice", :hand).find { game.state.object(it).card == Enjine::CardDefinition.slug(name) }
+
+  describe "foretell (CR 702.143a, 116.2h) with Portent Spark (fixture)" do
+    it "is a special action during your turn; cancelling its payment changes nothing" do
+      expect(option_types(board(hand: ["Portent Spark"], mana: { C: 1 }))).not_to include("special_action") # can't pay {2}
+      game = board(hand: ["Portent Spark"], mana: { C: 2 })
+      spark = hand_card(game, "Portent Spark")
+      game.submit(type: "special_action", object: spark, ability: "printed:1")
+      expect(game.pending_decision.kind).to eq("pay_cost")
+      game.submit(type: "cancel")
+      expect(game.pending_decision.kind).to eq("priority")
+      expect(game.state.players[0].hand).to eq([spark])
+      expect(game.state.players[0].mana_pool[:C]).to eq(2)
+    end
+
+    it "isn't offered on an opponent's turn" do
+      game = build_game(catalog) do
+        turn 3, active: "bob", step: :precombat_main
+        player("alice", mana_pool: { C: 1, R: 1 }) { hand "Portent Spark" }
+        player("bob") { library "Forest", count: 5 }
+        priority "alice"
+      end
+      expect(option_types(game)).to include("cast")
+      expect(option_types(game)).not_to include("special_action")
+    end
+
+    it "a foretold spell knows it was cast with foretell" do
+      game = board(hand: ["Portent Spark"], mana: { C: 2, R: 1 })
+      game.submit(type: "special_action", object: hand_card(game, "Portent Spark"), ability: "printed:1")
+      2.times { game.submit(type: "pay_mana", mana: "C") }
+      exiled = game.state.exile.first
+      game.state.object(exiled).memory["foretold"] = 2 # foretold on an earlier turn
+      game = Enjine::Game.import(game.export, catalog: catalog) # round-trips
+      game.submit(type: "cast", object: exiled, via: "alt:printed:1")
+      game.submit(type: "target", target: "player:bob")
+      game.submit(type: "pay_mana", mana: "R")
+      resolve_all(game)
+      expect(game.state.players[1].life).to eq(17)
+    end
+  end
 
   describe "hideaway (CR 702.75a) and playing a land while resolving (CR 305.2a, 305.3)" do
     def hide(game)
@@ -66,7 +106,8 @@ RSpec.describe "Exile, suspend and meld mechanics" do
       expect { Enjine::CardDefinition.from_h(bad) }
         .to raise_error(Enjine::InvalidCardDefinition, /abilities\[0\]\.spell\.effects\[0\]\.dig: face_down and link need put: "exile"/)
       bad2 = { "name" => "Spec Bad Hideaway", "types" => ["land"], "abilities" => [{ "hideaway" => {} }] }
-      expect { Enjine::CardDefinition.from_h(bad2) }.to raise_error(Enjine::InvalidCardDefinition, /abilities\[0\]\.hideaway\.amount: required/)
+      expect { Enjine::CardDefinition.from_h(bad2) }
+        .to raise_error(Enjine::InvalidCardDefinition, /abilities\[0\]\.hideaway\.amount: required/)
     end
   end
 end

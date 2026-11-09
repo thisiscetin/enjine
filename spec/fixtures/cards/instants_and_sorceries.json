@@ -4359,5 +4359,52 @@
         }
       }
     ]
+  },
+  {
+    "name": "Portent Spark",
+    "mana_cost": "{1}{R}",
+    "types": [
+      "instant"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "targets": [
+            "any_target"
+          ],
+          "effects": [
+            {
+              "deal_damage": {
+                "amount": 2,
+                "to": {
+                  "target": 0
+                },
+                "if": {
+                  "not": {
+                    "cast_with": "foretell"
+                  }
+                }
+              }
+            },
+            {
+              "deal_damage": {
+                "amount": 3,
+                "to": {
+                  "target": 0
+                },
+                "if": {
+                  "cast_with": "foretell"
+                }
+              }
+            }
+          ]
+        }
+      },
+      {
+        "foretell": {
+          "cost": "{R}"
+        }
+      }
+    ]
   }
 ]

@@ -845,6 +845,24 @@ Rules: CR 702.34a, CR 118.9, CR 601.2b, CR 601.2f, CR 601.2h
 }
 ```
 
+## foretell
+
+Foretell: during your turn, you may pay {2} and exile this card from your hand face down (special action `{type: "special_action"}`). After that turn you may cast it from exile by paying `cost` rather than its mana cost (cast option `via: "alt:<ref>"`). `{"cast_with": "foretell"}` reads it.
+
+Rules: CR 702.143a, CR 702.143b, CR 702.143c, CR 116.2h, CR 406.3, CR 118.9, CR 601.2b, CR 601.2f, CR 601.2h
+
+| Parameter | Description |
+| --- | --- |
+| `cost` | mana cost string, or a list of costs |
+
+```json
+{
+  "foretell": {
+    "cost": "{2}{R}"
+  }
+}
+```
+
 ## grants_beam_me_up
 
 While this permanent is on the battlefield, during your main phase each instant and sorcery card in your graveyard has beam me up with its mana cost as the beam me up cost; this permanent can't be the creature returned to cast a spell this way. Offered as a cast option with `via: "beam_granted:<permanent>:<ref>"`.

@@ -23,11 +23,12 @@ module Enjine
       # The cards in a hand with an alternative cost (only those can be cast from it with a method).
       def alt_cost_hand(player) = player.hand.select { |id| chars(id).abilities.any? { it.ability.kind == :alternative_cost } }
 
-      # The alternative-cost methods of `obj` (a card `index` owns) that function now.
+      # The alternative-cost methods of `obj` (a card `index` owns) that function now. A face-down card its owner
+      # may look at is seen face up (a foretold card, CR 702.143a, 406.3a).
       def alt_methods(index, obj)
-        return [] unless obj.owner == index && obj.kind == "card"
+        return [] unless obj.owner == index && obj.kind == "card" && may_look?(obj, index)
 
-        own = chars(obj).abilities.filter_map do |inst|
+        own = face_up(obj.id) { chars(obj).abilities }.filter_map do |inst|
           ability = inst.ability
           ability.method_for(inst.ref) if ability.kind == :alternative_cost && ability.functions?(self, obj, index)
         end

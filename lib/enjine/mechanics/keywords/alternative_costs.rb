@@ -281,7 +281,7 @@ module Enjine
       # that permanent's triggered abilities), remembers it.
       class CastHow
         KEYS = %w[cast_with cast_from cast_with_this_turn].freeze
-        KEYWORDS = %w[flashback harmonize mayhem warp evoke web_slinging sneak].freeze
+        KEYWORDS = %w[flashback harmonize mayhem warp evoke web_slinging sneak foretell].freeze
         # Optional additional costs announced as the spell is cast (Engine::CastChoices#announce_kicker!):
         # "if this spell was cast using teamwork" (CR 702.194b).
         OPTIONAL = %w[teamwork].freeze

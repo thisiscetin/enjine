@@ -394,5 +394,44 @@
       "set": "fin",
       "number": "275"
     }
+  },
+  {
+    "name": "Sozin's Comet",
+    "mana_cost": "{3}{R}{R}",
+    "types": [
+      "sorcery"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "effects": [
+            {
+              "grant_ability": {
+                "to": {
+                  "each": "creature",
+                  "controller": "you"
+                },
+                "ability": {
+                  "firebending": {
+                    "amount": 5
+                  }
+                },
+                "duration": "end_of_turn"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "foretell": {
+          "cost": "{2}{R}"
+        }
+      }
+    ],
+    "rarity": "mythic",
+    "printing": {
+      "set": "tla",
+      "number": "154"
+    }
   }
 ]

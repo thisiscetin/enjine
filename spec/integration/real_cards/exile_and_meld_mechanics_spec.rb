@@ -27,7 +27,7 @@ RSpec.describe "Real cards: exile, suspend and meld mechanics" do
     until (decision = game.pending_decision).kind == "priority" && game.state.stack.empty?
       case decision.kind
       when "priority" then game.submit(type: "pass")
-      when "pay_cost" then game.submit(game.legal_options.find { it[:type] == "pay_mana" } || raise("can't pay"))
+      when "pay_cost" then game.submit(game.legal_options.find { %w[pay_mana activate_mana].include?(it[:type]) } || raise("can't pay"))
       else
         answer = answers.shift || raise("no answer for #{decision.kind}: #{game.legal_options}")
         game.submit(answer.respond_to?(:call) ? answer.call(game) : answer) # a block: an object made meanwhile
@@ -105,7 +105,8 @@ RSpec.describe "Real cards: exile, suspend and meld mechanics" do
     end
 
     it "Clive's Hideaway: exiles one of the top four face down; with four legendary creatures you may play it free" do
-      game = board(hand: ["Clive's Hideaway"], battlefield: legends + ["Spider-Man, Web-Slinger"], library: ["Krumar Initiate"], mana: { C: 2 })
+      game = board(hand: ["Clive's Hideaway"], battlefield: legends + ["Spider-Man, Web-Slinger"], library: ["Krumar Initiate"],
+                   mana: { C: 2 })
       activate = hide(game)
       hidden = game.state.exile.first
       expect(game.state.object(hidden).memory).to include("face_down" => true, "may_look" => [0])
@@ -120,6 +121,28 @@ RSpec.describe "Real cards: exile, suspend and meld mechanics" do
       game = board(hand: ["Clive's Hideaway"], battlefield: legends, library: ["Krumar Initiate"], mana: { C: 2 })
       play(game, hide(game))
       expect(game.state.exile.size).to eq(1)
+    end
+  end
+
+  describe "foretell (CR 702.143a)" do
+    it "Sozin's Comet: foretold for {2} face down, cast on a later turn for {2}{R}; creatures gain firebending 5" do
+      game = board(hand: ["Sozin's Comet"], battlefield: ["Krumar Initiate"] + (["Mountain"] * 3), mana: { C: 2 })
+      comet = hand_id(game, "Sozin's Comet")
+      foretell = game.legal_options.find { it[:type] == "special_action" }
+      expect(foretell).to eq(type: "special_action", object: comet, ability: "printed:1")
+      play(game, foretell)
+      exiled = game.state.exile.first
+      expect(game.state.object(exiled).memory).to include("face_down" => true, "foretold" => 3)
+      expect(game.view_for("bob")["exile"].first["card"]).to be_nil
+      expect(game.legal_options.select { it[:type] == "cast" }).to be_empty # not the turn it was foretold
+
+      skip_to(game, :precombat_main, turn: 5)
+      cast = game.legal_options.find { it[:type] == "cast" && it[:object] == exiled }
+      expect(cast[:via]).to eq("alt:printed:1")
+      play(game, cast)
+      krumar = obj_id(game, "Krumar Initiate")
+      expect(engine(game).chars(engine(game).object(krumar)).abilities.map { it.ability.to_s }).to include("Firebending 5")
+      expect(game.state.players[0].mana_pool.values.sum).to eq(0)
     end
   end
 
