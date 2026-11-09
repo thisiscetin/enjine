@@ -117,6 +117,12 @@ RSpec.describe "Zone-change triggers and turn-history values" do
       expect(trigger({ "put_into" => { "zone" => "graveyard" } }).match?(engine, discard, source)).to be(true)
     end
 
+    it "put_into from the battlefield is a leaves-the-battlefield ability; from anywhere isn't (CR 603.6c)" do
+      expect(trigger({ "put_into" => { "zone" => "exile", "from" => %w[graveyard battlefield] } }).leaves_battlefield?).to be(true)
+      expect(trigger({ "put_into" => { "zone" => "exile", "from" => ["graveyard"] } }).leaves_battlefield?).to be(false)
+      expect(trigger({ "put_into" => { "zone" => "graveyard" } }).leaves_battlefield?).to be(false)
+    end
+
     it "leaving-the-battlefield triggers need the permanent's last known information" do
       gone = event(:ZoneChanged, card: "hill_giant", old_id: "hill_giant#77", new_id: "hill_giant#78", owner: "bob",
                                  from: "battlefield", to: "graveyard", reason: "sacrifice")

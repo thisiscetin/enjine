@@ -14,6 +14,7 @@ RSpec.describe "Turn-history conditions and zone-change triggers (CR 508.1, 400.
 
   def triggered(when_, effects, **extra) = { "triggered" => { "when" => when_, "effects" => effects }.merge(extra.transform_keys(&:to_s)) }
   def gain(amount) = { "gain_life" => { "amount" => amount } }
+  def food = { "artifact" => { "subtypes" => ["food"] } }
   def its_counters = { "counters" => { "of" => "self", "kind" => "+1/+1" } }
   def at_least(kind, data, n = 1) = { "amount" => { kind => data }, "at_least" => n }
 
@@ -48,6 +49,10 @@ RSpec.describe "Turn-history conditions and zone-change triggers (CR 508.1, 400.
       creature("Vanishing Act", [1, 1], [triggered({ "enters" => {} }, [gain(4)],
                                                    if: at_least("left_this_turn", { "controller" => "you" }))]),
       { "name" => "Trinket", "mana_cost" => "{1}", "types" => ["artifact"] },
+      { "name" => "Trail Ration", "mana_cost" => "{1}", "types" => ["artifact"], "subtypes" => ["food"],
+        "abilities" => [{ "activated" => { "cost" => ["sacrifice"], "effects" => [gain(3)] } }] },
+      creature("Ration Hoarder", [1, 1], [triggered({ "sacrifices" => { "subject" => { "each" => food, "controller" => "you" } } },
+                                                    [{ "draw" => { "amount" => 1 } }])]),
       { "name" => "Mourning Bell", "mana_cost" => "{1}", "types" => ["artifact"],
         "abilities" => [triggered({ "dies" => { "subject" => { "each" => "creature" } } }, [gain(1)])] },
       creature("Pack Mourner", [1, 1], [triggered({ "leaves_battlefield" => { "subject" => { "each" => "creature", "controller" => "you",
@@ -287,6 +292,23 @@ RSpec.describe "Turn-history conditions and zone-change triggers (CR 508.1, 400.
       engine_of(game).move!(trinkets[1], :graveyard, reason: "sacrifice")
       flush(game)
       expect(life(game)).to eq(21)
+    end
+  end
+
+  describe "sacrificing a permanent to pay its own cost (CR 701.21a, 118.3)" do
+    it "counts as a sacrifice for triggers and this turn's history" do
+      game = board do
+        player("alice") do
+          battlefield "Ration Hoarder", "Trail Ration"
+          library "Forest", count: 3
+        end
+        player("bob")
+      end
+      game.submit(type: "activate", object: obj_id(game, "Trail Ration"), ability: "printed:0")
+      pay_all(game)
+      expect(amount(game, { "sacrificed_this_turn" => { "each" => food, "controller" => "you" } })).to eq(1)
+      resolve_all(game)
+      expect([life(game), ids_in(game, "alice", :hand).size]).to eq([23, 1])
     end
   end
 

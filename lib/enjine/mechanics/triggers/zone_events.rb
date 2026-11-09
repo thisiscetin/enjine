@@ -225,7 +225,8 @@ module Enjine
         primitive :trigger, :put_into,
                   description: "A card is put into `zone` (graveyard | exile) from anywhere, or only `from` the listed " \
                                "zones. `controller`: the card's owner (you (default) | opponent | any); optional `card` " \
-                               "filter on the card. `batched: true`: \"one or more cards\", once per event batch.",
+                               "filter on the card. `batched: true`: \"one or more cards\", once per event batch. With " \
+                               "\"battlefield\" among `from` it looks back in time like leaves_battlefield.",
                   rules: %w[603.6c 603.2c 400.3],
                   params: { "zone" => ZONES.join(" | "), "from" => "list of #{FROM.join(", ")} (default: anywhere)",
                             "controller" => PLAYERS.join(" | "), "card" => "card filter", "batched" => "true | false" },
@@ -233,6 +234,9 @@ module Enjine
 
         def self.keys = %w[zone from controller card batched]
         def event_class = Events::ZoneChanged
+        # CR 603.6c: "put into a graveyard from the battlefield" is a leaves-the-battlefield ability; "from anywhere"
+        # never is.
+        def leaves_battlefield? = @from&.include?("battlefield") || false
 
         def setup(params, errors, path)
           super

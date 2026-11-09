@@ -418,7 +418,7 @@ Rules: CR 508.3d, CR 508.1
 
 ## put_into
 
-A card is put into `zone` (graveyard | exile) from anywhere, or only `from` the listed zones. `controller`: the card's owner (you (default) | opponent | any); optional `card` filter on the card. `batched: true`: "one or more cards", once per event batch.
+A card is put into `zone` (graveyard | exile) from anywhere, or only `from` the listed zones. `controller`: the card's owner (you (default) | opponent | any); optional `card` filter on the card. `batched: true`: "one or more cards", once per event batch. With "battlefield" among `from` it looks back in time like leaves_battlefield.
 
 Rules: CR 603.6c, CR 603.2c, CR 400.3
 
