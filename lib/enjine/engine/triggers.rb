@@ -17,6 +17,7 @@ module Enjine
         current = chars(obj)
         { "controller" => obj.controller, "card" => obj.card, "types" => current.types, "subtypes" => current.subtypes,
           "power" => current.power, "toughness" => current.toughness, "counters" => obj.counters.dup,
+          "keywords" => current.keywords.map(&:to_s), # deathtouch, lifelink, wither (CR 702.2e, 702.15c, 702.80b)
           "token" => token?(obj), "except" => copy_exceptions(obj), "abilities" => current.abilities }
           .merge(obj.memory.slice(Mechanics::Linked::EXILED)) # the cards exiled with it (CR 607.2a)
       end

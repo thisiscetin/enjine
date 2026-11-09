@@ -11,12 +11,19 @@ module Enjine
         return 0 unless amount.positive?
 
         data = propose("damage", { "source" => source, "target" => ref, "amount" => amount, "combat" => combat }).data
+        dealt = deal_proposed_damage!(source, data, combat, lifelink)
+        run_follow_ups!(data) # the rest of a prevention effect (CR 615.5)
+        dealt
+      end
+
+      # The damage event after replacement and prevention effects (CR 614, 615).
+      def deal_proposed_damage!(source, data, combat, lifelink)
         amount = data["amount"]
         return 0 unless amount.positive? # prevented (CR 615)
 
         ref = data["target"] # redirected (CR 614.9)
 
-        source_chars = damage_source_chars(source)
+        has = %i[deathtouch lifelink wither].to_h { [it, damage_source_keyword?(source, it)] }
         index = Mechanics::Filters.player_index(self, ref)
         if index
           emit Events::DamageDealt.new(source: source, target: ref, amount: amount, combat: combat)
@@ -28,21 +35,21 @@ module Enjine
           defn = chars(obj)
           emit Events::DamageDealt.new(source: source, target: ref, amount: amount, combat: combat)
           if defn.creature?
-            mark_creature_damage!(obj, source, source_chars, amount)
-            obj.deathtouched = true if source_chars&.keyword?(:deathtouch) # CR 702.2b
+            mark_creature_damage!(obj, source, has[:wither], amount)
+            obj.deathtouched = true if has[:deathtouch] # CR 702.2b
           end
           remove_counters!(obj, "loyalty", amount) if defn.planeswalker? # CR 120.3c
         end
-        lifelink!(source, amount) if lifelink && source_chars&.keyword?(:lifelink)
+        lifelink!(source, amount) if lifelink && has[:lifelink]
         amount
       end
 
       # CR 120.3d-e: damage to a creature is marked on it; from a source with wither it's -1/-1 counters
       # put by the source's controller instead (CR 702.80a).
-      def mark_creature_damage!(obj, source, source_chars, amount)
-        return obj.damage += amount unless source_chars&.keyword?(:wither)
+      def mark_creature_damage!(obj, source, wither, amount)
+        return obj.damage += amount unless wither
 
-        add_counters!(obj, "-1/-1", amount, by_player: object(source).controller)
+        add_counters!(obj, "-1/-1", amount, by_player: damage_source_controller(source))
       end
 
       # CR 120.6, 120.4a: damage that would be lethal to the creature `id` from `source`, counting damage already
@@ -55,7 +62,7 @@ module Enjine
         return nil unless chars(obj).creature?
 
         lethal = [toughness(obj) - obj.damage, 0].max
-        damage_source_chars(source)&.keyword?(:deathtouch) ? [lethal, 1].min : lethal
+        damage_source_keyword?(source, :deathtouch) ? [lethal, 1].min : lethal
       end
 
       # CR 120.4a, 120.10: the excess damage of `amount` dealt to `id`, given its lethal damage before.
@@ -72,16 +79,34 @@ module Enjine
         @damage_batch = nil
       end
 
-      # Characteristics of a damage source: a permanent, or the spell/ability on the stack.
-      def damage_source_chars(source)
+      # Whether a damage source has `keyword` (deathtouch, lifelink, wither): a card (a permanent or a spell) as it
+      # is now; a source no longer in the zone it's expected to be in, as it last existed (CR 702.2e, 702.15c,
+      # 702.80b).
+      def damage_source_keyword?(source, keyword)
         obj = state.objects[source]
-        obj && obj.kind == "card" ? chars(obj) : nil
+        return obj.kind == "card" && chars(obj).keyword?(keyword) if obj
+
+        lki = last_known(source) || resolving_last_known(source) || resolving_source_lki(source)
+        Array(lki&.[]("keywords")).include?(keyword.to_s)
+      end
+
+      # The controller of a damage source, or as it last existed (CR 702.15b, 702.80a).
+      def damage_source_controller(source)
+        state.objects[source]&.controller ||
+          (last_known(source) || resolving_last_known(source) || resolving_source_lki(source))&.[]("controller")
+      end
+
+      # What the resolving ability remembers of its source, if `source` is that source (CR 608.2h).
+      def resolving_source_lki(source)
+        frame = state.frames.rfind { it["type"] == "resolve" }
+        ability = frame && state.objects[frame["object"]]
+        ability.memory&.[]("source_lki") if ability && !source.nil? && ability.source == source
       end
 
       # CR 702.15b: damage dealt by a source with lifelink makes its controller gain that much life.
       def lifelink!(source, amount)
-        obj = state.objects[source] or return
-        change_life!(obj.controller, amount)
+        controller = damage_source_controller(source) or return
+        change_life!(controller, amount)
       end
 
       def change_life!(index, delta)
@@ -151,14 +176,18 @@ module Enjine
 
       # CR 701.14a-d: each creature deals damage equal to its power to the other, at the same time; not
       # combat damage. Neither deals damage unless both are still creatures on the battlefield (701.14b).
-      # A creature fighting itself deals twice its power to itself (701.14c).
+      # A creature fighting itself deals twice its power to itself (701.14c). Returns the excess damage `one` dealt
+      # to `other` (CR 120.4a: "if excess damage is dealt to [it] this way"), 0 if they didn't fight.
       def fight!(one, other)
-        return unless [one, other].all? { state.battlefield.include?(it) && chars(it).creature? }
-        return deal_damage!(one, one, 2 * power(object(one))) if one == other
+        return 0 unless [one, other].all? { state.battlefield.include?(it) && chars(it).creature? }
+
+        lethal = lethal_damage(one, other)
+        return excess_damage(lethal, deal_damage!(one, one, 2 * power(object(one)))) if one == other
 
         powers = [power(object(one)), power(object(other))]
-        deal_damage!(one, other, powers[0])
+        dealt = deal_damage!(one, other, powers[0])
         deal_damage!(other, one, powers[1])
+        excess_damage(lethal, dealt)
       end
     end
 

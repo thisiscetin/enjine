@@ -77,13 +77,14 @@ Rules: CR 613.1d, CR 205.1b, CR 611.2a, CR 611.2c
 
 ## additional_phases
 
-Adds `phases` (in order; each "combat" or "main") directly after the current phase of this turn. Phases added after the same phase come most recently created first. An added main phase is a postcombat main phase.
+Adds `phases` (in order; each "combat" or "main") directly after the current phase of this turn. Phases added after the same phase come most recently created first. An added main phase is a postcombat main phase. `attackers`: only creatures matching this filter can attack during the (first) added combat phase.
 
-Rules: CR 500.8, CR 505.1
+Rules: CR 500.8, CR 505.1, CR 508.1c
 
 | Parameter | Description |
 | --- | --- |
 | `phases` | list of "combat" | "main" |
+| `attackers` | creature filter |
 
 ```json
 {
@@ -757,6 +758,34 @@ Rules: CR 707.2, CR 707.8, CR 707.9a, CR 707.9b, CR 111.1, CR 614.1c
 }
 ```
 
+## damage_replacement
+
+For the `duration` (end_of_turn by default, or until_your_next_turn), damage that would be dealt to the referenced players and permanents (`to`, fixed as it resolves; with `permanents: true` also the permanents a referenced player controls as the damage is dealt) is changed: `multiply` (2 = "double that damage") or `plus` an amount (computed as it resolves). `combat`: combat | noncombat only. Doubling applies before adding.
+
+Rules: CR 614.1a, CR 611.2a, CR 611.2c, CR 616.1
+
+| Parameter | Description |
+| --- | --- |
+| `to` | selector |
+| `permanents` | boolean |
+| `combat` | combat | noncombat |
+| `multiply` | integer >= 2 |
+| `plus` | amount |
+| `duration` | end_of_turn | until_your_next_turn |
+
+```json
+{
+  "damage_replacement": {
+    "to": {
+      "triggering": "player"
+    },
+    "permanents": true,
+    "multiply": 2,
+    "duration": "until_your_next_turn"
+  }
+}
+```
+
 ## damage_unpreventable
 
 Until end of turn, damage (`combat`: combat | noncombat only) can't be prevented.
@@ -997,6 +1026,16 @@ Rules: CR 701.71a, CR 704.3
 }
 ```
 
+## end_the_turn
+
+Ends the turn: triggered abilities not yet on the stack cease to exist, every object on the stack is exiled (this spell too, so its later effects don't happen), state-based actions are checked, combat ends and the game skips to the cleanup step. Abilities that trigger meanwhile go on the stack during cleanup, followed by another cleanup step.
+
+Rules: CR 725.1, CR 725.1a, CR 725.1b, CR 725.1c, CR 725.1d, CR 725.1e, CR 725.1f, CR 514.3a
+
+```json
+"end_the_turn"
+```
+
 ## endure
 
 Each referenced permanent (default: this one) endures `amount`: its controller puts that many +1/+1 counters on it, or creates an N/N white Spirit creature token.
@@ -1197,9 +1236,9 @@ Rules: CR 500.7
 
 ## fight
 
-The creature referenced by `to` fights the one referenced by `with`: each deals damage equal to its power to the other at the same time (not combat damage). If either is gone, no longer a creature or an illegal target, neither deals damage.
+The creature referenced by `to` fights the one referenced by `with`: each deals damage equal to its power to the other at the same time (not combat damage). If either is gone, no longer a creature or an illegal target, neither deals damage. {"this_way": n} naming it is the excess damage dealt to the `with` creature.
 
-Rules: CR 701.14a, CR 701.14b, CR 701.14c, CR 701.14d
+Rules: CR 701.14a, CR 701.14b, CR 701.14c, CR 701.14d, CR 120.4a
 
 | Parameter | Description |
 | --- | --- |
@@ -1576,17 +1615,20 @@ Rules: CR 723.3a, CR 723.3c
 
 ## prevent_damage
 
-For the `duration` (end_of_turn by default, or until_your_next_turn), damage that would be dealt to the referenced players and permanents (`to`) and/or by the referenced sources (`by`) is prevented (`combat`: combat | noncombat only). With `next`, it is a shield that prevents only the next that much damage (CR 615.7). The referenced objects are fixed as it resolves.
+For the `duration` (end_of_turn by default, until_your_next_turn, or while_source_on_battlefield: for as long as this effect's source remains on the battlefield), damage that would be dealt to the referenced players and permanents (`to`, fixed as it resolves) or to those matching `to_each` as the damage is dealt (a damage scope seen from the controller, e.g. {"each": "creature", "controller": "you"}), and/or by the referenced sources (`by`; "chosen_source": a source the controller chooses as it resolves) is prevented (`combat`: combat | noncombat only). With `next`, it is a shield that prevents only the next that much damage; with `next_time: true` it prevents only the next damage event it applies to. `then`: effects right after it prevents damage, reading {"triggering": "amount"} (the damage prevented), "object" (the source) and "player" (its controller).
 
-Rules: CR 615.1, CR 615.3, CR 615.7, CR 611.2a
+Rules: CR 615.1, CR 615.3, CR 615.5, CR 615.7, CR 615.8, CR 609.7a, CR 611.2a, CR 611.2b, CR 611.2c
 
 | Parameter | Description |
 | --- | --- |
 | `to` | selector (recipients) |
-| `by` | selector (sources) |
+| `to_each` | damage scope (recipients, as damage is dealt) |
+| `by` | selector (sources) | "chosen_source" |
 | `combat` | combat | noncombat |
 | `next` | amount (a shield) |
-| `duration` | end_of_turn | until_your_next_turn |
+| `next_time` | boolean |
+| `duration` | end_of_turn | until_your_next_turn | while_source_on_battlefield |
+| `then` | list of effects |
 
 ```json
 {
@@ -1680,7 +1722,7 @@ Rules: CR 701.70a
 
 ## reflexive_trigger
 
-Creates a reflexive triggered ability ("when you do, ...") that triggers immediately, with the controller and source of the resolving spell or ability. Its `targets` are chosen as it's put on the stack; its `effects` may name the results of earlier effects of the creating list.
+Creates a reflexive triggered ability ("when you do, ...") that triggers immediately, with the controller and source of the resolving spell or ability. Its `targets` are chosen as it's put on the stack; its `effects` may name the results of earlier effects of the creating list. With `if`, it triggers only when the condition holds ("when excess damage is dealt this way").
 
 Rules: CR 603.12, CR 603.12a, CR 603.7d, CR 603.7e, CR 603.3d
 
@@ -1688,6 +1730,7 @@ Rules: CR 603.12, CR 603.12a, CR 603.7d, CR 603.7e, CR 603.3d
 | --- | --- |
 | `targets` | list of target filters |
 | `effects` | list of effects |
+| `if` | condition |
 
 ```json
 {

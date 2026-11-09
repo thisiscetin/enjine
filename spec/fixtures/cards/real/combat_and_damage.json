@@ -1,0 +1,225 @@
+[
+  {
+    "name": "Aurelia, the Warleader",
+    "mana_cost": "{2}{R}{R}{W}{W}",
+    "types": ["creature"],
+    "supertypes": ["legendary"],
+    "subtypes": ["angel"],
+    "power": 3,
+    "toughness": 4,
+    "keywords": ["flying", "vigilance", "haste"],
+    "abilities": [
+      { "triggered": { "when": { "attacks": { "first_time_this_turn": true } },
+                       "effects": [{ "untap": { "to": { "each": "creature", "controller": "you" } } },
+                                   { "additional_phases": { "phases": ["combat"] } }] } }
+    ],
+    "rarity": "mythic",
+    "printing": { "set": "fdn", "number": "651" }
+  },
+  {
+    "name": "Desert Were-Worm",
+    "mana_cost": "{4}{R}{R}",
+    "types": ["creature"],
+    "subtypes": ["dragon", "wurm"],
+    "power": 0,
+    "toughness": 5,
+    "abilities": [
+      { "static": { "affects": "self",
+                    "pump": { "power": { "times": [2, { "count": { "each": { "land": { "subtypes": ["mountain"] } }, "controller": "you" } }] },
+                              "toughness": 0 } } },
+      { "triggered": { "when": { "player_attacks": { "attacking_power": { "at_least": 12 }, "first_time_this_turn": true } },
+                       "effects": [{ "untap": { "to": { "each": { "creature": { "attacking": true } }, "controller": "you" } } },
+                                   { "additional_phases": { "phases": ["combat"] } }] } }
+    ],
+    "rarity": "rare",
+    "printing": { "set": "hob", "number": "92" }
+  },
+  {
+    "name": "Bumi, Unleashed",
+    "mana_cost": "{3}{R}{G}",
+    "types": ["creature"],
+    "supertypes": ["legendary"],
+    "subtypes": ["human", "noble", "ally"],
+    "power": 5,
+    "toughness": 4,
+    "keywords": ["trample"],
+    "abilities": [
+      { "triggered": { "when": { "enters": {} }, "targets": [{ "land": { "controller": "you" } }],
+                       "effects": [{ "earthbend": { "amount": 4, "to": { "target": 0 } } }] } },
+      { "triggered": { "when": { "deals_damage": { "combat": true, "to": "player" } },
+                       "effects": [{ "untap": { "to": { "each": "land", "controller": "you" } } },
+                                   { "additional_phases": { "phases": ["combat"],
+                                                            "attackers": { "creature": { "types": ["land"] } } } }] } }
+    ],
+    "rarity": "mythic",
+    "printing": { "set": "tla", "number": "211" }
+  },
+  {
+    "name": "Lightning, Army of One",
+    "mana_cost": "{1}{R}{W}",
+    "types": ["creature"],
+    "supertypes": ["legendary"],
+    "subtypes": ["human", "soldier"],
+    "power": 3,
+    "toughness": 2,
+    "keywords": ["first_strike", "trample", "lifelink"],
+    "abilities": [
+      { "triggered": { "when": { "deals_damage": { "combat": true, "to": "player" } },
+                       "effects": [{ "damage_replacement": { "to": { "triggering": "player" }, "permanents": true, "multiply": 2,
+                                                             "duration": "until_your_next_turn" } }] } }
+    ],
+    "rarity": "mythic",
+    "printing": { "set": "fin", "number": "233" }
+  },
+  {
+    "name": "Neriv, Heart of the Storm",
+    "mana_cost": "{1}{R}{W}{B}",
+    "types": ["creature"],
+    "supertypes": ["legendary"],
+    "subtypes": ["spirit", "dragon"],
+    "power": 4,
+    "toughness": 5,
+    "keywords": ["flying"],
+    "abilities": [
+      { "damage_replacement": { "by": { "each": { "creature": { "entered_this_turn": true } }, "controller": "you" },
+                                "multiply": 2 } }
+    ],
+    "rarity": "mythic",
+    "printing": { "set": "tdm", "number": "210" }
+  },
+  {
+    "name": "New Way Forward",
+    "mana_cost": "{2}{U}{R}{W}",
+    "types": ["instant"],
+    "abilities": [
+      { "spell": { "effects": [{ "prevent_damage": { "to": "you", "by": "chosen_source", "next_time": true,
+                                                     "then": [{ "reflexive_trigger": { "effects": [
+                                                       { "deal_damage": { "amount": { "triggering": "amount" }, "to": { "triggering": "player" } } },
+                                                       { "draw": { "amount": { "triggering": "amount" }, "to": "you" } }] } }] } }] } }
+    ],
+    "rarity": "rare",
+    "printing": { "set": "tdm", "number": "211" }
+  },
+  {
+    "name": "Anti-Venom, Horrifying Healer",
+    "mana_cost": "{W}{W}{W}{W}{W}",
+    "types": ["creature"],
+    "supertypes": ["legendary"],
+    "subtypes": ["symbiote", "hero"],
+    "power": 5,
+    "toughness": 5,
+    "abilities": [
+      { "triggered": { "when": { "enters": {} }, "if": { "was_cast": true },
+                       "targets": [{ "graveyard_card": { "controller": "you", "types": ["creature"] } }],
+                       "effects": [{ "return_to_battlefield": { "to": { "target": 0 } } }] } },
+      { "prevent_damage": { "to": "self", "then": [{ "add_counters": { "counter": "+1/+1", "amount": { "triggering": "amount" },
+                                                                         "to": "self" } }] } }
+    ],
+    "rarity": "mythic",
+    "printing": { "set": "spm", "number": "1" }
+  },
+  {
+    "name": "Old Fat Spider Can't See Me",
+    "mana_cost": "{2}{U}",
+    "types": ["enchantment"],
+    "subtypes": ["saga"],
+    "abilities": [
+      { "chapter": { "chapter": 1, "targets": [{ "creature": { "controller": "you" } }],
+                     "effects": [{ "become": { "keywords": ["hexproof"], "to": { "target": 0 },
+                                               "duration": "while_source_on_battlefield" } }] } },
+      { "chapter": { "chapter": 2, "targets": [{ "filter": "creature", "optional": true }],
+                     "effects": [{ "prevent_damage": { "by": { "target": 0 }, "duration": "while_source_on_battlefield" } }] } },
+      { "chapter": { "chapter": 3, "effects": [{ "draw": { "amount": 1 } }] } },
+      { "chapter": { "chapter": 4, "effects": [{ "draw": { "amount": 1 } }] } }
+    ],
+    "rarity": "uncommon",
+    "printing": { "set": "hob", "number": "50" }
+  },
+  {
+    "name": "Ancient Adamantoise",
+    "mana_cost": "{5}{G}{G}{G}",
+    "types": ["creature"],
+    "subtypes": ["turtle"],
+    "power": 8,
+    "toughness": 20,
+    "keywords": ["vigilance", "keeps_damage"],
+    "abilities": [
+      { "ward": { "cost": "{3}" } },
+      { "damage_replacement": { "to": { "controller": "you", "other": true }, "redirect": "self" } },
+      { "triggered": { "when": { "dies": {} },
+                       "effects": [{ "exile": { "to": "self" } },
+                                   { "create_token": { "token": "Treasure", "amount": 10, "tapped": true } }] } }
+    ],
+    "rarity": "mythic",
+    "printing": { "set": "fin", "number": "172" }
+  },
+  {
+    "name": "Head of the Hunt",
+    "mana_cost": "{2}{B}{B}",
+    "types": ["creature"],
+    "subtypes": ["wolf"],
+    "power": 4,
+    "toughness": 3,
+    "keywords": ["flash"],
+    "abilities": [
+      { "exile_if_dies": { "affects": { "each": "creature", "controller": "opponent" },
+                           "then": [{ "reflexive_trigger": { "effects": [{ "create_token": { "token": {
+                             "name": "Wolf", "types": ["creature"], "subtypes": ["wolf"], "colors": ["G"], "power": 2, "toughness": 2 } } }] } }] } }
+    ],
+    "rarity": "rare",
+    "printing": { "set": "hob", "number": "75" }
+  },
+  {
+    "name": "Rhino's Rampage",
+    "mana_cost": "{R/G}",
+    "types": ["sorcery"],
+    "abilities": [
+      { "spell": { "targets": [{ "creature": { "controller": "you" } }, { "creature": { "controller": "opponent" } }],
+                   "effects": [{ "pump": { "power": 1, "toughness": 0, "to": { "target": 0 } } },
+                               { "fight": { "to": { "target": 0 }, "with": { "target": 1 } } },
+                               { "reflexive_trigger": { "if": { "amount": { "this_way": 1 }, "at_least": 1 },
+                                                        "targets": [{ "filter": { "artifact": { "not": ["creature"], "mana_value": { "at_most": 3 } } },
+                                                                      "optional": true }],
+                                                        "effects": [{ "destroy": { "to": { "target": 0 } } }] } }] } }
+    ],
+    "rarity": "uncommon",
+    "printing": { "set": "spm", "number": "141" }
+  },
+  {
+    "name": "Time Stop",
+    "mana_cost": "{4}{U}{U}",
+    "types": ["instant"],
+    "abilities": [{ "spell": { "effects": ["end_the_turn"] } }],
+    "rarity": "rare",
+    "printing": { "set": "fdn", "number": "166" }
+  },
+  {
+    "name": "Ultima",
+    "mana_cost": "{3}{W}{W}",
+    "types": ["sorcery"],
+    "abilities": [
+      { "spell": { "effects": [{ "destroy": { "to": { "each": { "one_of": ["artifact", "creature"] }, "controller": "any" } } },
+                               "end_the_turn"] } }
+    ],
+    "rarity": "rare",
+    "printing": { "set": "fin", "number": "38" }
+  },
+  {
+    "name": "Pinnacle Emissary",
+    "mana_cost": "{1}{U}{R}",
+    "types": ["artifact", "creature"],
+    "subtypes": ["robot"],
+    "power": 3,
+    "toughness": 3,
+    "abilities": [
+      { "triggered": { "when": { "cast": { "spell": { "spell": { "types": ["artifact"] } } } },
+                       "effects": [{ "create_token": { "token": {
+                         "name": "Drone", "types": ["artifact", "creature"], "subtypes": ["drone"], "power": 1, "toughness": 1,
+                         "keywords": ["flying"],
+                         "abilities": [{ "can_block_only": { "filter": { "creature": { "keywords": ["flying"] } } } }] } } }] } },
+      { "warp": { "cost": "{U/R}" } }
+    ],
+    "rarity": "rare",
+    "printing": { "set": "eoe", "number": "223" }
+  }
+]

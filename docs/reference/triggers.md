@@ -64,18 +64,20 @@ Rules: CR 603.2, CR 603.2c
 
 ## attacks
 
-The subject is declared as an attacker.
+The subject is declared as an attacker. `first_time_this_turn: true`: only the first time that creature attacks this turn (later combats of the turn don't trigger it).
 
-Rules: CR 508.3a
+Rules: CR 508.3a, CR 603.2
 
 | Parameter | Description |
 | --- | --- |
 | `subject` | "self" (default) or {"each": filter, ...} |
+| `first_time_this_turn` | boolean |
 
 ```json
 {
   "attacks": {
-    "subject": "self"
+    "subject": "self",
+    "first_time_this_turn": true
   }
 }
 ```
@@ -568,18 +570,24 @@ Rules: CR 119.3, CR 120.3a
 
 ## player_attacks
 
-A player declares one or more attackers (once per combat, not per creature). `controller`: you (default) | opponent | any.
+A player declares one or more attackers (once per combat, not per creature). `controller`: you (default) | opponent | any. `attacking_power` ({"at_least": n}): only when the attacking creatures' total power is at least n as they're declared; with `first_time_this_turn: true`, only the first combat this turn in which it was.
 
-Rules: CR 508.3d, CR 508.1
+Rules: CR 508.3d, CR 508.1, CR 603.2
 
 | Parameter | Description |
 | --- | --- |
 | `controller` | you | opponent | any |
+| `attacking_power` | {"at_least": n} |
+| `first_time_this_turn` | boolean |
 
 ```json
 {
   "player_attacks": {
-    "controller": "you"
+    "controller": "you",
+    "attacking_power": {
+      "at_least": 12
+    },
+    "first_time_this_turn": true
   }
 }
 ```

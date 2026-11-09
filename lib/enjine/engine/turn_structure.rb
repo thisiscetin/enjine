@@ -160,8 +160,19 @@ module Enjine
 
       # "After this phase, there is an additional combat phase [followed by an additional main phase]": the
       # phases are added directly after the current phase (CR 500.8).
-      def add_phases!(phases)
+      # `attackers` (filter data): "only [these] creatures can attack during that combat phase" (CR 508.1c), the
+      # first added combat phase; the queue then holds {"phase": "combat", "attackers": filter} for it.
+      def add_phases!(phases, attackers: nil)
+        if attackers && (at = phases.index("combat"))
+          phases[at] = { "phase" => "combat", "attackers" => attackers }
+        end
         state.extra_phases["pending"] << { "after" => step.phase.to_s, "phases" => phases }
+      end
+
+      # The attack restriction of the current added combat phase (CR 508.1c), as a filter; nil when none.
+      def combat_attack_filter
+        raw = state.extra_phases["attackers"] or return nil
+        (@attack_filters ||= {})[raw] ||= Mechanics.build_entry(:filter, raw, [], "attackers")
       end
 
       # As `phase` ends: the first step of the next added phase, else of the phase the turn goes on with
@@ -171,12 +182,37 @@ module Enjine
         due = extra["pending"].select { it["after"] == phase.to_s }
         extra["pending"] -= due
         due.each { extra["queue"].unshift(*it["phases"]) }
+        extra.delete("attackers") # a restriction lasts for its combat phase only
         if extra["queue"].empty?
           resume = extra.delete("resume")
           return resume ? resume.to_sym : natural
         end
         extra["resume"] ||= natural.to_s
-        ADDED_PHASES.fetch(extra["queue"].shift)
+        added = extra["queue"].shift
+        return ADDED_PHASES.fetch(added) unless added.is_a?(Hash)
+
+        extra["attackers"] = added["attackers"]
+        ADDED_PHASES.fetch(added["phase"])
+      end
+
+      # ---- ending the turn (CR 725) -------------------------------------------------------
+
+      # CR 725.1: triggered abilities waiting to be put on the stack cease to exist (725.1a); every object on
+      # the stack is exiled, the resolving one included (725.1b); state-based actions are checked (725.1c);
+      # combat ends and the game skips to the cleanup step (725.1d), where abilities that triggered meanwhile
+      # go on the stack and another cleanup step follows (725.1f, 514.3a). The resolving spell or ability does
+      # nothing more (Engine::Resolution sees "turn_ended" on its frame).
+      def end_the_turn!
+        state.pending_triggers.clear
+        state.frames.each { it["turn_ended"] = true if it["type"] == "resolve" }
+        state.stack.dup.each do |id|
+          object(id).ability? ? remove_stack_object!(id) : move!(id, :exile, reason: "end_the_turn")
+        end
+        check_state_based_actions!
+        end_combat!
+        state.extra_phases = State.no_extra_phases.merge("combats" => state.extra_phases["combats"])
+        empty_mana_pools! # CR 500.4: the step ends
+        enter_step!(:cleanup)
       end
 
       # "If it's the first combat phase of the turn".

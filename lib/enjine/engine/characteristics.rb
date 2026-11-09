@@ -259,10 +259,7 @@ module Enjine
       def cleanup_turn!
         expire_permissions! # Engine::Permissions
         end_copy_effects! # Engine::Copies
-        state.battlefield.each do |id|
-          object(id).damage = 0
-          object(id).deathtouched = false
-        end
+        state.battlefield.each { remove_damage!(object(it)) unless chars(it).keyword?(:keeps_damage) }
         ending = state.effects.count { it["duration"] == "end_of_turn" }
         return if ending.zero?
 

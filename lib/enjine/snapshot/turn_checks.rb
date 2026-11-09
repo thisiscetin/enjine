@@ -34,17 +34,27 @@ module Enjine
     # CR 500.8: phases added this turn (State.no_extra_phases).
     def validate_extra_phases(data, errors)
       extra = data.fetch("extra_phases", State.no_extra_phases)
-      ok = extra.is_a?(Hash) && (extra.keys - %w[pending queue resume combats]).empty? && added_phases?(extra["queue"]) &&
+      ok = extra.is_a?(Hash) && (extra.keys - %w[pending queue resume combats attackers]).empty? && added_phases?(extra["queue"]) &&
+           (extra["attackers"].nil? || attack_filter?(extra["attackers"])) &&
            extra["combats"].is_a?(Integer) && !extra["combats"].negative? &&
            (extra["resume"].nil? || Steps::BY_NAME.key?(extra["resume"].to_s.to_sym)) &&
            extra["pending"].is_a?(Array) && extra["pending"].all? { pending_phases?(it) }
       return if ok
 
       errors << "extra_phases: must be {\"pending\": [{\"after\": phase, \"phases\": [...]}], \"queue\": " \
-                "[combat|main...], \"resume\": step, \"combats\": n}"
+                "[combat|main|{\"phase\": \"combat\", \"attackers\": filter}...], \"resume\": step, \"combats\": n, " \
+                "\"attackers\": filter (optional)}"
     end
 
-    def added_phases?(list) = list.is_a?(Array) && list.all? { Engine::ADDED_PHASES.key?(it) }
+    # An added phase: "combat" | "main", or a combat phase only some creatures can attack in (CR 508.1c).
+    def added_phases?(list)
+      list.is_a?(Array) && list.all? do |phase|
+        Engine::ADDED_PHASES.key?(phase) ||
+          (phase.is_a?(Hash) && phase.keys.sort == %w[attackers phase] && phase["phase"] == "combat" && attack_filter?(phase["attackers"]))
+      end
+    end
+
+    def attack_filter?(data) = [].tap { Mechanics.build_entry(:filter, data, it, "attackers") }.empty?
 
     def pending_phases?(entry)
       entry.is_a?(Hash) && entry.keys.sort == %w[after phases] && added_phases?(entry["phases"]) &&

@@ -116,13 +116,29 @@ module Enjine
 
         data["amount"] = 0 if engine.damage_prevented?(data["target"]) # "prevent all damage to you" (player_rule)
         data["amount"] = 0 if protected?(engine, data) # CR 702.16e
-        data["amount"] = 0 if applicable(engine, proposal, :prevent_damage).any?
+        applicable(engine, proposal, :prevent_damage).each do |holder, ability|
+          break if data["amount"].zero?
+
+          follow_up!(engine, data, ability.follow_up&.entry(holder.card, holder.controller, holder.id, {}), data["amount"])
+          data["amount"] = 0
+        end
         engine.state.effects.select { it["kind"] == "prevent_damage" }.each do |effect|
           break if data["amount"].zero?
-          next unless PreventionEffect.applies?(effect, data)
+          next unless PreventionEffect.applies?(engine, effect, data)
 
+          before = data["amount"]
           PreventionEffect.use!(engine, effect, data)
+          follow_up!(engine, data, effect["follow_up"], before - data["amount"])
         end
+      end
+
+      # CR 615.5: the rest of a prevention effect happens right after the event (Engine#run_follow_ups!), seeing
+      # the damage prevented, its source and the source's controller.
+      def follow_up!(engine, data, entry, prevented)
+        return unless entry && prevented.positive?
+
+        facts = { "amount" => prevented, "object" => data["source"], "player" => engine.damage_source_controller(data["source"]) }
+        (data["follow_ups"] ||= []) << entry.merge("facts" => facts.compact)
       end
 
       # Protection from the source's quality prevents the damage (CR 702.16e).
@@ -150,21 +166,65 @@ module Enjine
           proposal.applied << "#{holder.id}:damage_replacement"
           data["amount"] = ability.modified(engine, data["amount"], holder)
         end
+        modify_by_effects!(engine, proposal)
+      end
+
+      # Resolved "until your next turn, if a source would deal damage to that player or a permanent that player
+      # controls, it deals double that damage instead" effects (Effects::DamageReplacementEffect): doubling first.
+      def modify_by_effects!(engine, proposal)
+        data = proposal.data
+        found = engine.state.effects.select do |effect|
+          effect["kind"] == "damage_replacement" && !proposal.applied.include?("effect:#{effect["timestamp"]}") &&
+            ModifyingEffect.applies?(engine, effect, data)
+        end
+        found.sort_by { it["multiply"] ? 0 : 1 }.each do |effect|
+          proposal.applied << "effect:#{effect["timestamp"]}"
+          data["amount"] = effect["multiply"] ? data["amount"] * effect["multiply"] : data["amount"] + effect["plus"]
+        end
+      end
+
+      # Damage replacement effects of resolved spells and abilities (state.effects, kind "damage_replacement"):
+      # {"to": [refs], "permanents": bool, "combat": ..., "multiply": n | nil, "plus": n | nil}. A player in `to`
+      # with "permanents" also covers the permanents they control as the damage is dealt (CR 611.2c).
+      module ModifyingEffect
+        module_function
+
+        def applies?(engine, effect, data)
+          return false unless DamageEvents.combat_ok?(effect["combat"], data["combat"])
+
+          target = data["target"]
+          return true if effect["to"].include?(target)
+
+          controller = engine.state.battlefield.include?(target) && engine.object(target).controller
+          effect["permanents"] && controller && effect["to"].include?(Filters.player_ref(engine, controller))
+        end
       end
 
       # Prevention effects started by a resolved spell or ability (state.effects, kind "prevent_damage"):
-      # {"to": [refs] | nil, "by": [refs] | nil, "combat": "combat" | "noncombat" | nil, "remaining": n | nil}.
+      # {"to": [refs] | nil, "to_each": damage scope | nil, "by": [refs] | nil, "combat": "combat" | "noncombat" | nil,
+      # "remaining": n | nil, "next_time": true | nil, "follow_up": FollowUp entry | nil}.
       module PreventionEffect
         module_function
 
-        def applies?(effect, data)
+        # The effect's controller, standing in for the holder of a `to_each` damage scope (CR 611.2c: the
+        # recipients are checked as the damage is dealt).
+        Holder = Data.define(:id, :controller, :attached_to)
+
+        def applies?(engine, effect, data)
           (effect["to"].nil? || effect["to"].include?(data["target"])) &&
+            (effect["to_each"].nil? || to_each?(engine, effect, data["target"])) &&
             (effect["by"].nil? || effect["by"].include?(data["source"])) &&
             DamageEvents.combat_ok?(effect["combat"], data["combat"])
         end
 
+        def to_each?(engine, effect, ref)
+          scope = DamageScope.build(effect["to_each"], [], "to_each")
+          scope.match?(engine, ref, Holder.new(id: nil, controller: effect["controller"], attached_to: nil))
+        end
+
         # A shield prevents that much and is used up (CR 615.7); without one, all of it is prevented.
         def use!(engine, effect, data)
+          engine.state.effects.delete(effect) if effect["next_time"] # CR 615.8: the next time only
           return data["amount"] = 0 unless effect["remaining"]
 
           prevented = [effect["remaining"], data["amount"]].min
@@ -280,19 +340,31 @@ module Enjine
         primitive :ability, :prevent_damage,
                   description: "While this permanent is on the battlefield, all damage from sources in `by` to " \
                                "recipients in `to` (damage scopes as in damage_replacement, both optional; " \
-                               "`combat`: combat | noncombat) is prevented. \"To and by this creature\" is two of them.",
-                  rules: %w[615.1 615.1a 615.6],
-                  params: { "by" => "damage scope", "to" => "damage scope", "combat" => "combat | noncombat" },
+                               "`combat`: combat | noncombat) is prevented. \"To and by this creature\" is two of them. " \
+                               "`then`: effects right after it prevents damage (\"prevent that damage and put that many " \
+                               "+1/+1 counters on him\"), reading {\"triggering\": \"amount\"} (the damage prevented), " \
+                               "\"object\" (the source) and \"player\" (its controller).",
+                  rules: %w[615.1 615.1a 615.5 615.6],
+                  params: { "by" => "damage scope", "to" => "damage scope", "combat" => "combat | noncombat",
+                            "then" => "list of effects" },
                   example: { "prevent_damage" => { "to" => { "each" => "creature", "controller" => "you", "other" => true },
                                                    "combat" => "noncombat" } }
 
+        attr_reader :follow_up
+
         def self.build(params, errors, path, **)
-          Mechanics.check_keys(params, %w[by to combat], errors, path)
-          new(*parse_scopes(params, errors, path))
+          Mechanics.check_keys(params, %w[by to combat then], errors, path)
+          new(*parse_scopes(params, errors, path), FollowUp.build(params, errors, path))
+        end
+
+        def initialize(sources, recipients, combat, follow_up = nil)
+          @follow_up = follow_up
+          super(sources, recipients, combat)
         end
 
         def kind = :prevent_damage
-        def to_s = "prevent all #{scope_text}"
+        def try_effects = [follow_up].compact
+        def to_s = "prevent all #{scope_text}#{", then #{follow_up}" if follow_up}"
       end
 
       # "Damage can't be prevented." / "Combat damage that would be dealt by creatures you control can't be
@@ -319,28 +391,41 @@ module Enjine
     module Effects
       # "Prevent all combat damage that would be dealt to it this turn", "Prevent the next 3 damage that
       # would be dealt to any target this turn", "Prevent all damage that would be dealt by target creature
-      # this turn" (CR 615.1, 615.3, 615.7).
-      class PreventDamageEffect < Effect
-        DURATIONS = %w[end_of_turn until_your_next_turn].freeze
+      # this turn", "Prevent all damage that would be dealt to creatures you control this turn", "The next time
+      # a source of your choice would deal damage to you this turn, prevent that damage. When damage is
+      # prevented this way, ..." (CR 615.1, 615.3, 615.5, 615.7, 615.8, 609.7a, 611.2b-c).
+      class PreventDamageEffect < ChoiceEffect
+        DURATIONS = %w[end_of_turn until_your_next_turn while_source_on_battlefield].freeze
 
         primitive :effect, :prevent_damage,
-                  description: "For the `duration` (end_of_turn by default, or until_your_next_turn), damage that " \
-                               "would be dealt to the referenced players and permanents (`to`) and/or by the " \
-                               "referenced sources (`by`) is prevented (`combat`: combat | noncombat only). With " \
-                               "`next`, it is a shield that prevents only the next that much damage (CR 615.7). " \
-                               "The referenced objects are fixed as it resolves.",
-                  rules: %w[615.1 615.3 615.7 611.2a],
-                  params: { "to" => "selector (recipients)", "by" => "selector (sources)", "combat" => "combat | noncombat",
-                            "next" => "amount (a shield)", "duration" => DURATIONS.join(" | ") },
+                  description: "For the `duration` (end_of_turn by default, until_your_next_turn, or " \
+                               "while_source_on_battlefield: for as long as this effect's source remains on the " \
+                               "battlefield), damage that would be dealt to the referenced players and permanents " \
+                               "(`to`, fixed as it resolves) or to those matching `to_each` as the damage is dealt " \
+                               "(a damage scope seen from the controller, e.g. {\"each\": \"creature\", " \
+                               "\"controller\": \"you\"}), and/or by the referenced sources (`by`; \"chosen_source\": " \
+                               "a source the controller chooses as it resolves) is prevented (`combat`: combat | " \
+                               "noncombat only). With `next`, it is a shield that prevents only the next that much " \
+                               "damage; with `next_time: true` it prevents only the next damage event it applies to. " \
+                               "`then`: effects right after it prevents damage, reading {\"triggering\": \"amount\"} " \
+                               "(the damage prevented), \"object\" (the source) and \"player\" (its controller).",
+                  rules: %w[615.1 615.3 615.5 615.7 615.8 609.7a 611.2a 611.2b 611.2c],
+                  params: { "to" => "selector (recipients)", "to_each" => "damage scope (recipients, as damage is dealt)",
+                            "by" => "selector (sources) | \"chosen_source\"", "combat" => "combat | noncombat",
+                            "next" => "amount (a shield)", "next_time" => "boolean", "duration" => DURATIONS.join(" | "),
+                            "then" => "list of effects" },
                   example: { "prevent_damage" => { "to" => { "target" => 0 }, "combat" => "combat" } }
 
-        attr_reader :by, :combat, :shield, :duration
+        attr_reader :by, :combat, :shield, :duration, :to_each, :follow_up
 
-        def self.keys = %w[to by combat next duration if]
+        def self.keys = %w[to to_each by combat next next_time duration then if]
 
-        # `to` may be left out when `by` names the sources ("damage that would be dealt by target creature").
+        # `to` may be left out when `by` names the sources ("damage that would be dealt by target creature") or
+        # `to_each` the recipients.
         def self.build(params, errors, path, targets_count: 0, results_count: 0, **)
-          return super if Mechanics.fetch_param(params, :to) || !Mechanics.fetch_param(params, :by)
+          if Mechanics.fetch_param(params, :to) || (!Mechanics.fetch_param(params, :by) && !Mechanics.fetch_param(params, :to_each))
+            return super
+          end
 
           Mechanics.check_keys(params, keys, errors, path)
           new(to: nil, params: params, errors: errors, path: path, targets_count: targets_count, results_count: results_count)
@@ -348,26 +433,110 @@ module Enjine
 
         def setup(params, errors, path)
           raw_by = Mechanics.fetch_param(params, :by)
-          @by = raw_by && Selector.build(raw_by, errors, "#{path}.by", targets_count: @targets_count, results_count: @results_count)
+          @chosen_source = raw_by == "chosen_source"
+          unless raw_by.nil? || @chosen_source
+            @by = Selector.build(raw_by, errors, "#{path}.by", targets_count: @targets_count, results_count: @results_count)
+          end
+          @to_each_data = Mechanics.fetch_param(params, :to_each)
+          @to_each = DamageScope.build(@to_each_data, errors, "#{path}.to_each")
+          errors << "#{path}.to_each: must be a damage scope {\"each\": filter, \"controller\": ...}" if @to_each_data.is_a?(String)
           @combat = DamageEvents.parse_combat(params, errors, path)
           raw_next = Mechanics.fetch_param(params, :next)
           @shield = raw_next && Amount.build(raw_next, errors, "#{path}.next", targets_count: @targets_count, min: 1,
                                                                                results_count: @results_count)
+          @next_time = Mechanics.flag_param(params, :next_time, errors, path)
+          errors << "#{path}: next and next_time can't be combined" if @shield && @next_time
+          @duration = Mechanics.fetch_param(params, :duration) || "end_of_turn"
+          errors << "#{path}.duration: must be one of #{DURATIONS.join(", ")}" unless DURATIONS.include?(@duration)
+          @follow_up = FollowUp.build(params, errors, path)
+        end
+
+        def nested_effects = [follow_up].compact
+
+        # A source of the controller's choice (CR 609.7a): a permanent or a spell on the stack, chosen as it resolves.
+        def run(engine, ctx, locals)
+          return :done unless locals["asked"] || condition.nil? || condition.true?(engine, ctx)
+          return start(engine, ctx, nil) unless @chosen_source
+
+          answer = answers(locals).first
+          return start(engine, ctx, [answer["object"]]) if answer
+
+          sources = engine.state.battlefield + engine.state.stack.reject { it == ctx.object }
+          return :done if sources.empty?
+
+          ask(engine, locals, ctx.controller, "Choose a source of damage", sources.map { { "type" => "source", "object" => it } })
+        end
+
+        def start(engine, ctx, chosen)
+          # CR 611.2b: "for as long as" a source that has already left never starts.
+          return :done if duration == "while_source_on_battlefield" && !engine.state.battlefield.include?(ctx.source)
+
+          to = self.to && refs(engine, ctx)
+          by = chosen || @by&.resolve(engine, ctx)
+          details = { "to" => to, "to_each" => @to_each_data, "by" => by, "combat" => combat, "duration" => duration,
+                      "source" => ctx.source, "next_time" => (true if @next_time) }.compact
+          details["to"] = nil if to.nil? # "to": nil means any recipient
+          details["by"] = nil if by.nil?
+          details["remaining"] = shield.value(engine, ctx) if shield
+          card = engine.state.objects[ctx.object]&.card
+          details["follow_up"] = follow_up.entry(card, ctx.controller, ctx.source, {}) if follow_up && card
+          engine.add_continuous_effect!("prevent_damage", ctx, (to || []) + (by || []), details)
+          :done
+        end
+
+        def to_s
+          what = if shield then "the next #{shield}"
+                 elsif @next_time then "the next time"
+                 else "all"
+                 end
+          ["prevent #{what} #{"#{combat} " if combat}damage", to && "to #{to}", @to_each && "to #{@to_each}",
+           (@chosen_source ? "by a source of your choice" : by && "by #{by}"), follow_up && "then #{follow_up}"].compact.join(" ")
+        end
+      end
+
+      # "Until your next turn, if a source would deal damage to that player or a permanent that player controls,
+      # it deals double that damage instead." (CR 614.1a, 611.2c, 616.1)
+      class DamageReplacementEffect < Effect
+        DURATIONS = %w[end_of_turn until_your_next_turn].freeze
+
+        primitive :effect, :damage_replacement,
+                  description: "For the `duration` (end_of_turn by default, or until_your_next_turn), damage that " \
+                               "would be dealt to the referenced players and permanents (`to`, fixed as it resolves; " \
+                               "with `permanents: true` also the permanents a referenced player controls as the damage " \
+                               "is dealt) is changed: `multiply` (2 = \"double that damage\") or `plus` an amount " \
+                               "(computed as it resolves). `combat`: combat | noncombat only. Doubling applies before " \
+                               "adding.",
+                  rules: %w[614.1a 611.2a 611.2c 616.1],
+                  params: { "to" => "selector", "permanents" => "boolean", "combat" => "combat | noncombat",
+                            "multiply" => "integer >= 2", "plus" => "amount", "duration" => DURATIONS.join(" | ") },
+                  example: { "damage_replacement" => { "to" => { "triggering" => "player" }, "permanents" => true,
+                                                       "multiply" => 2, "duration" => "until_your_next_turn" } }
+
+        attr_reader :multiply, :plus, :combat, :duration
+
+        def self.keys = %w[to permanents combat multiply plus duration if]
+
+        def setup(params, errors, path)
+          modes = %w[multiply plus].select { params.key?(it) }
+          errors << "#{path}: needs exactly one of multiply, plus" unless modes.size == 1
+          @multiply = params.key?("multiply") ? Mechanics.integer_param(params, :multiply, errors, path, min: 2) : nil
+          @plus = params.key?("plus") ? Amount.build(params["plus"], errors, "#{path}.plus", targets_count: @targets_count) : nil
+          @permanents = Mechanics.flag_param(params, :permanents, errors, path)
+          @combat = DamageEvents.parse_combat(params, errors, path)
           @duration = Mechanics.fetch_param(params, :duration) || "end_of_turn"
           errors << "#{path}.duration: must be one of #{DURATIONS.join(", ")}" unless DURATIONS.include?(@duration)
         end
 
         def apply(engine, ctx)
-          to = self.to && refs(engine, ctx)
-          by = @by&.resolve(engine, ctx)
-          details = { "to" => to, "by" => by, "combat" => combat, "duration" => duration }
-          details["remaining"] = shield.value(engine, ctx) if shield
-          engine.add_continuous_effect!("prevent_damage", ctx, (to || []) + (by || []), details)
+          to = refs(engine, ctx)
+          details = { "to" => to, "permanents" => @permanents == true, "combat" => combat, "duration" => duration }
+          multiply ? details["multiply"] = multiply : details["plus"] = [plus.value(engine, ctx), 0].max
+          engine.add_continuous_effect!("damage_replacement", ctx, to, details)
         end
 
         def to_s
-          what = shield ? "the next #{shield}" : "all"
-          ["prevent #{what} #{"#{combat} " if combat}damage", to && "to #{to}", by && "by #{by}"].compact.join(" ")
+          instead = multiply ? "#{multiply} times that damage" : "that much plus #{plus}"
+          "#{"#{combat} " if combat}damage to #{to}#{" and their permanents" if @permanents}: #{instead} instead"
         end
       end
 

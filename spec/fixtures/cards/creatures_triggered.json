@@ -4317,5 +4317,287 @@
         }
       }
     ]
+  },
+  {
+    "name": "Warleader of First Charge",
+    "mana_cost": "{3}{R}{W}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "angel"
+    ],
+    "power": 3,
+    "toughness": 3,
+    "keywords": [
+      "flying",
+      "vigilance"
+    ],
+    "rules_text": "Flying, vigilance. Whenever this creature attacks for the first time each turn, untap all creatures you control. After this phase, there is an additional combat phase.",
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "attacks": {
+              "first_time_this_turn": true
+            }
+          },
+          "effects": [
+            {
+              "untap": {
+                "to": {
+                  "each": "creature",
+                  "controller": "you"
+                }
+              }
+            },
+            {
+              "additional_phases": {
+                "phases": [
+                  "combat"
+                ]
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Dune Wurm",
+    "mana_cost": "{4}{R}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "wurm"
+    ],
+    "power": 5,
+    "toughness": 5,
+    "rules_text": "Whenever you attack with creatures with total power 8 or greater for the first time each turn, untap all attacking creatures. After this phase, there is an additional combat phase.",
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "player_attacks": {
+              "attacking_power": {
+                "at_least": 8
+              },
+              "first_time_this_turn": true
+            }
+          },
+          "effects": [
+            {
+              "untap": {
+                "to": {
+                  "each": {
+                    "creature": {
+                      "attacking": true
+                    }
+                  },
+                  "controller": "you"
+                }
+              }
+            },
+            {
+              "additional_phases": {
+                "phases": [
+                  "combat"
+                ]
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Quarry Boss",
+    "mana_cost": "{3}{R}{G}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "human"
+    ],
+    "power": 4,
+    "toughness": 4,
+    "keywords": [
+      "trample"
+    ],
+    "rules_text": "Trample. Whenever this creature deals combat damage to a player, untap all lands you control. After this phase, there is an additional combat phase. Only land creatures can attack during that combat phase.",
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "deals_damage": {
+              "combat": true,
+              "to": "player"
+            }
+          },
+          "effects": [
+            {
+              "untap": {
+                "to": {
+                  "each": "land",
+                  "controller": "you"
+                }
+              }
+            },
+            {
+              "additional_phases": {
+                "phases": [
+                  "combat"
+                ],
+                "attackers": {
+                  "creature": {
+                    "types": [
+                      "land"
+                    ]
+                  }
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Pack Reaver",
+    "mana_cost": "{2}{B}{B}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "wolf"
+    ],
+    "power": 4,
+    "toughness": 3,
+    "keywords": [
+      "flash"
+    ],
+    "rules_text": "Flash. If a creature an opponent controls would die, exile it instead. When you do, create a 2/2 green Wolf creature token.",
+    "abilities": [
+      {
+        "exile_if_dies": {
+          "affects": {
+            "each": "creature",
+            "controller": "opponent"
+          },
+          "then": [
+            {
+              "reflexive_trigger": {
+                "effects": [
+                  {
+                    "create_token": {
+                      "token": {
+                        "name": "Wolf",
+                        "types": [
+                          "creature"
+                        ],
+                        "subtypes": [
+                          "wolf"
+                        ],
+                        "colors": [
+                          "G"
+                        ],
+                        "power": 2,
+                        "toughness": 2
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Storm Lancer",
+    "mana_cost": "{1}{R}{W}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "human",
+      "soldier"
+    ],
+    "power": 3,
+    "toughness": 2,
+    "keywords": [
+      "first_strike",
+      "trample",
+      "lifelink"
+    ],
+    "rules_text": "First strike, trample, lifelink. Whenever this creature deals combat damage to a player, until your next turn, if a source would deal damage to that player or a permanent that player controls, it deals double that damage instead.",
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "deals_damage": {
+              "combat": true,
+              "to": "player"
+            }
+          },
+          "effects": [
+            {
+              "damage_replacement": {
+                "to": {
+                  "triggering": "player"
+                },
+                "permanents": true,
+                "multiply": 2,
+                "duration": "until_your_next_turn"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Parting Stinger",
+    "mana_cost": "{1}{B}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "insect"
+    ],
+    "power": 1,
+    "toughness": 1,
+    "keywords": [
+      "deathtouch"
+    ],
+    "rules_text": "Deathtouch. When this creature dies, it deals 1 damage to target creature an opponent controls.",
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "dies": {}
+          },
+          "targets": [
+            {
+              "creature": {
+                "controller": "opponent"
+              }
+            }
+          ],
+          "effects": [
+            {
+              "deal_damage": {
+                "amount": 1,
+                "to": {
+                  "target": 0
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
   }
 ]

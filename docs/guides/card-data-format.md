@@ -1137,6 +1137,42 @@ its seed and decisions, and an exported game continues with the same results.
                                              { "scry": { "amount": 1 } }] } }] }
 ```
 
+### 4.24 More combat and damage: block and attack restrictions, prevention follow-ups, ending the turn
+
+A `then` list on a prevention or dies-to-exile replacement happens right after it applies (CR 615.5,
+614.1a). Its effects need no choice; they read `{ "triggering": "amount" }` (the damage prevented),
+`"object"` (the damage source, or the card exiled instead) and `"player"` (that object's controller). A
+"When you do, …" is a `reflexive_trigger` in the list (CR 603.12).
+
+| Oracle text | Data |
+| --- | --- |
+| "This creature can block only creatures with flying" / "can't block non-Spirit creatures" (CR 509.1b) | `{ "can_block_only": { "filter": { "creature": { "keywords": ["flying"] } } } }` / `"filter": { "creature": { "subtypes": ["spirit"] } }` |
+| "Whenever this creature attacks for the first time each turn" | trigger `{ "attacks": { "first_time_this_turn": true } }` |
+| "Whenever you attack with creatures with total power 12 or greater for the first time each turn" | trigger `{ "player_attacks": { "attacking_power": { "at_least": 12 }, "first_time_this_turn": true } }` |
+| "After this phase, there is an additional combat phase. Only land creatures can attack during that combat phase." (CR 508.1c) | `{ "additional_phases": { "phases": ["combat"], "attackers": { "creature": { "types": ["land"] } } } }` |
+| "If a creature you control that entered this turn would deal damage, it deals twice that much damage instead" | `{ "damage_replacement": { "by": { "each": { "creature": { "entered_this_turn": true } }, "controller": "you" }, "multiply": 2 } }` |
+| "Until your next turn, if a source would deal damage to that player or a permanent that player controls, it deals double that damage instead" | effect `{ "damage_replacement": { "to": { "triggering": "player" }, "permanents": true, "multiply": 2, "duration": "until_your_next_turn" } }` |
+| "If damage would be dealt to this creature, prevent that damage and put that many +1/+1 counters on him" | `{ "prevent_damage": { "to": "self", "then": [{ "add_counters": { "counter": "+1/+1", "amount": { "triggering": "amount" }, "to": "self" } }] } }` |
+| "The next time a source of your choice would deal damage to you this turn, prevent that damage. When damage is prevented this way, … deals that much damage to that source's controller" (CR 615.8, 609.7a) | effect `{ "prevent_damage": { "to": "you", "by": "chosen_source", "next_time": true, "then": [{ "reflexive_trigger": { "effects": [{ "deal_damage": { "amount": { "triggering": "amount" }, "to": { "triggering": "player" } } }] } }] } }` |
+| "Prevent all damage that would be dealt by up to one target creature for as long as this Saga remains on the battlefield" (CR 611.2b) | effect `prevent_damage` with `"by": { "target": 0 }, "duration": "while_source_on_battlefield"` |
+| "Prevent all damage that would be dealt to creatures you control this turn" (the creatures as damage is dealt, CR 611.2c) | effect `{ "prevent_damage": { "to_each": { "each": "creature", "controller": "you" } } }` |
+| "Damage isn't removed from this creature during cleanup steps" (CR 514.2) | `"keywords": ["keeps_damage"]` |
+| "If a creature an opponent controls would die, exile it instead. When you do, create a 2/2 Wolf" | `{ "exile_if_dies": { "affects": { … }, "then": [{ "reflexive_trigger": { "effects": [{ "create_token": … }] } }] } }` (the card is also "exiled with" this permanent: `"exiled_with"`) |
+| "It fights target creature an opponent controls. When excess damage is dealt to the creature an opponent controls this way, …" (CR 120.4a) | `fight`, then `{ "reflexive_trigger": { "if": { "amount": { "this_way": 0 }, "at_least": 1 }, … } }` (a fight's `this_way` is the excess damage dealt to its `with` creature) |
+| "End the turn." (CR 725.1) | `"end_the_turn"` (the spell's later effects don't happen) |
+
+A source that left the zone it was in still deals damage with the deathtouch, lifelink and wither it had
+(CR 702.2e, 702.15c, 702.80b).
+
+```json
+{ "name": "Example Sanctum Healer", "mana_cost": "{3}{W}{W}", "types": ["creature"], "subtypes": ["human", "cleric"],
+  "power": 4, "toughness": 4,
+  "abilities": [{ "prevent_damage": { "to": "self", "then": [{ "add_counters": { "counter": "+1/+1",
+                                                                                 "amount": { "triggering": "amount" }, "to": "self" } }] } },
+                { "triggered": { "when": { "attacks": { "first_time_this_turn": true } },
+                                 "effects": [{ "additional_phases": { "phases": ["combat"] } }] } }] }
+```
+
 ---
 
 ## 5. Worked examples

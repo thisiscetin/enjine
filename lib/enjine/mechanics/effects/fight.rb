@@ -32,8 +32,9 @@ module Enjine
         primitive :effect, :fight,
                   description: "The creature referenced by `to` fights the one referenced by `with`: each deals " \
                                "damage equal to its power to the other at the same time (not combat damage). If " \
-                               "either is gone, no longer a creature or an illegal target, neither deals damage.",
-                  rules: %w[701.14a 701.14b 701.14c 701.14d],
+                               "either is gone, no longer a creature or an illegal target, neither deals damage. " \
+                               "{\"this_way\": n} naming it is the excess damage dealt to the `with` creature.",
+                  rules: %w[701.14a 701.14b 701.14c 701.14d 120.4a],
                   params: { "to" => "selector (one creature)", "with" => "selector (one creature)" },
                   example: { "fight" => { "to" => { "target" => 0 }, "with" => { "target" => 1 } } }
 
@@ -42,7 +43,9 @@ module Enjine
         def apply(engine, ctx)
           one = refs(engine, ctx).first
           other_one = other.resolve(engine, ctx).first
-          engine.fight!(one, other_one) # nothing happens unless both are creatures on the battlefield
+          # Nothing happens unless both are creatures on the battlefield. The excess damage dealt to the
+          # `with` creature is what {"this_way": n} reads (CR 120.4a).
+          engine.record_amount!(engine.fight!(one, other_one))
         end
 
         def to_s = "#{to} fights #{other}"

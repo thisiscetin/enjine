@@ -170,7 +170,8 @@ RSpec.describe Enjine::CLI do
       { type: "block", object: bears, attacker: bears } => "Block Grizzly Bears with Grizzly Bears",
       { type: "assign", object: bears } => "Assign 1 damage to Grizzly Bears", { type: "keep" } => "Keep hand",
       { type: "mulligan" } => "Mulligan", { type: "draw" } => "Draw first",
-      { type: "discard", object: mountain } => "Discard Mountain", { type: "future" } => '{type: "future"}'
+      { type: "discard", object: mountain } => "Discard Mountain", { type: "future" } => '{type: "future"}',
+      { type: "source", object: bears } => "Choose Grizzly Bears as the source"
     }.each { |opt, words| expect(text.option(opt)).to eq(words) }
 
     board = text.board(game.view_for("alice"))

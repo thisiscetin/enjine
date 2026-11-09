@@ -147,7 +147,7 @@ module Enjine
         return nil if chars(obj).keyword?(:indestructible) # CR 702.12b
 
         if obj.damage.positive? && obj.damage >= toughness then "sba_lethal_damage" # CR 704.5g
-        elsif obj.deathtouched && obj.damage.positive? then "sba_deathtouch" # CR 704.5h
+        elsif obj.deathtouched then "sba_deathtouch" # CR 704.5h (wither damage is dealt but not marked, CR 702.80a)
         end
       end
     end

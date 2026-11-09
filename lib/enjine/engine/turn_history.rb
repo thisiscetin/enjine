@@ -35,6 +35,8 @@ module Enjine
           discard_recorded!(event) # mayhem (Engine::AltCasting)
         when Events::DilemmaFaced then bump!(log_of(event.player), "dilemmas", 1)
         when Events::AttackerDeclared then attack_recorded!(event)
+        when Events::AttacksDeclared # the attacking creatures' total power, per combat (Triggers::PlayerAttacks)
+          (log_of(event.player)["attack_powers"] ||= []) << event.attackers.sum { power(object(it)) }
         when Events::Resolved then resolution_recorded!(event)
         when Events::DamageDealt then damage_recorded!(event)
         end
@@ -53,7 +55,18 @@ module Enjine
       end
 
       # Whether the permanent attacked this turn (CR 508.1).
-      def attacked_this_turn?(id) = !turned_memory(state.objects[id], "attacked").nil?
+      def attacked_this_turn?(id) = attacks_this_turn(id).positive?
+
+      # How many times the permanent was declared as an attacker this turn ("for the first time each turn").
+      def attacks_this_turn(id) = turned_memory(state.objects[id], "attacked")&.fetch("count", 0).to_i
+
+      # An attack undone before the declaration was legal (CR 508.1c) never happened.
+      def attack_withdrawn!(id)
+        obj = state.objects[id]
+        bump!(object_memory!(id, "attacked"), "count", -1)
+        log = turn_log(obj.controller)["attackers"]
+        log&.delete_at(log.rindex { it.first == obj.card } || log.size)
+      end
 
       # Whether the permanent entered the battlefield this turn (memory "entered", stamped as it enters).
       def entered_this_turn?(obj) = obj.memory["entered"] == state.turn
@@ -75,7 +88,7 @@ module Enjine
       # The part of last known information an ability keeps in its memory ("source_lki"): plain data.
       def last_known_memory(lki)
         info = { "controller" => lki["controller"], "power" => lki["power"], "toughness" => lki["toughness"],
-                 "counters" => lki["counters"].dup, "card" => lki["card"] }
+                 "counters" => lki["counters"].dup, "card" => lki["card"], "keywords" => lki["keywords"].dup }
         info["except"] = lki["except"] if lki["except"] # what a copy of it copies (CR 707.2, Engine::Copies)
         info.merge(lki.slice(Mechanics::Linked::EXILED).transform_values(&:dup)) # CR 607.2a (Linked.exiled_with)
       end
@@ -137,7 +150,7 @@ module Enjine
       # CR 508.1: "you attacked this turn" / "attacked with a Spacecraft"; the attacker remembers it attacked.
       def attack_recorded!(event)
         obj = state.objects[event.object] or return
-        object_memory!(event.object, "attacked")["count"] = 1
+        bump!(object_memory!(event.object, "attacked"), "count", 1)
         (turn_log(obj.controller)["attackers"] ||= []) << history_entry(obj.card, chars(obj))
       end
 

@@ -43,6 +43,39 @@ module Enjine
         def forbids?(engine, blocker) = filter.match?(engine, blocker, engine.object(blocker).controller)
       end
 
+      # "This token can block only creatures with flying" / "This creature can't block non-Spirit creatures".
+      class CanBlockOnly < Restriction
+        primitive :ability, :can_block_only,
+                  description: "This creature can block only attacking creatures matching `filter` (checked as " \
+                               "blockers are declared, with their current characteristics; controller-relative " \
+                               "filter keys are seen from this creature's controller).",
+                  rules: %w[509.1b 509.1a],
+                  params: { "filter" => "a creature filter, e.g. {\"creature\": {\"keywords\": [\"flying\"]}}" },
+                  example: { "can_block_only" => { "filter" => { "creature" => { "keywords" => ["flying"] } } } }
+
+        attr_reader :filter
+
+        def self.build(params, errors, path, **)
+          Mechanics.check_keys(params, %w[filter], errors, path)
+          raw = Mechanics.fetch_param(params, :filter)
+          errors << "#{path}.filter: required" if raw.nil?
+          new(raw && Mechanics.build_entry(:filter, raw, errors, "#{path}.filter"))
+        end
+
+        def initialize(filter)
+          super()
+          @filter = filter
+          freeze
+        end
+
+        def kind = :can_block_only
+        def allowed_types = [:creature]
+        def to_s = "can block only #{filter.is_a?(Class) ? filter.primitive_name : filter}"
+
+        # Whether this creature (`blocker`) may block `attacker`.
+        def allows?(engine, blocker, attacker) = filter.match?(engine, attacker, engine.object(blocker).controller)
+      end
+
       # "This creature can't be the target of abilities from artifact sources your opponents control."
       class CantBeTargetedBy < Restriction
         primitive :ability, :cant_be_targeted_by,

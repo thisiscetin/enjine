@@ -1626,5 +1626,75 @@
         }
       }
     ]
+  },
+  {
+    "name": "Veil of the Unseen",
+    "mana_cost": "{2}{U}",
+    "types": [
+      "enchantment"
+    ],
+    "rules_text": "When this enchantment enters, prevent all damage that would be dealt by up to one target creature an opponent controls for as long as this enchantment remains on the battlefield.",
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "enters": {}
+          },
+          "targets": [
+            {
+              "filter": {
+                "creature": {
+                  "controller": "opponent"
+                }
+              },
+              "optional": true
+            }
+          ],
+          "effects": [
+            {
+              "prevent_damage": {
+                "by": {
+                  "target": 0
+                },
+                "duration": "while_source_on_battlefield"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Gloom Prism",
+    "mana_cost": "{2}{B}{B}",
+    "types": [
+      "artifact"
+    ],
+    "supertypes": [
+      "legendary"
+    ],
+    "rules_text": "If a nontoken creature an opponent controls would die, instead exile it and you gain 2 life.",
+    "abilities": [
+      {
+        "exile_if_dies": {
+          "affects": {
+            "each": {
+              "creature": {
+                "token": false
+              }
+            },
+            "controller": "opponent"
+          },
+          "then": [
+            {
+              "gain_life": {
+                "amount": 2,
+                "to": "you"
+              }
+            }
+          ]
+        }
+      }
+    ]
   }
 ]
