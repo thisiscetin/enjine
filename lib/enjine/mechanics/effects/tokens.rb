@@ -41,11 +41,21 @@ module Enjine
           e.errors.each { errors << "#{path}.token.#{it}" }
         end
 
-        def apply(engine, ctx)
-          return unless definition
+        # CR 614.12a: an "as this enters" choice of each token is made (one token at a time) before any is
+        # created; the number and players are fixed as the effect starts.
+        def run(engine, ctx, locals)
+          return :done unless definition && (locals.key?("tokens") || condition.nil? || condition.true?(engine, ctx))
 
-          n = amount_for(engine, ctx)
-          players(engine, ctx).each { |index| n.times { engine.create_token!(definition, index, tapped: tapped) } }
+          n = amount_for(engine, ctx) unless locals.key?("tokens")
+          entries = locals["tokens"] ||= players(engine, ctx).flat_map do |index|
+            Array.new(n) { [engine.token_key(definition, "#{index}.#{it}"), index] }
+          end
+          return :wait if engine.ask_entering_choices!(locals, entries) == :wait
+
+          entries.each do |key, index|
+            engine.create_token!(definition, index, tapped: tapped, enters: engine.with_entering_answer(locals, key, index, nil))
+          end
+          :done
         end
 
         def to_s = "create #{amount} #{definition&.name} token#{"s" if amount != 1}#{" tapped" if tapped} → #{to}"

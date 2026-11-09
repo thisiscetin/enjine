@@ -14,9 +14,7 @@ module Enjine
 
         # Moves the cards to `@put`; onto the battlefield, under `controller`'s control and all at once.
         def put_cards!(engine, locals, ids, controller, reason:, enters: nil)
-          if @put.to_s == "battlefield"
-            return engine.enter_battlefield!(locals, ids.map { [it, controller, enters] }, reason: reason)
-          end
+          return engine.enter_battlefield!(locals, ids.map { [it, controller, enters] }, reason: reason) if @put.to_s == "battlefield"
 
           ids.each { engine.move!(it, @put.to_sym, reason: reason, enters: enters) }
         end

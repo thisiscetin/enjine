@@ -14,6 +14,7 @@ module Enjine
       # as their zone rules allow, and the shuffle.
       class SearchLibrary < ChoiceEffect
         include EntersBattlefield # effects/library.rb
+
         primitive :effect, :search_library,
                   description: "Search your library for up to `count` cards matching `for`, then put them into your " \
                                "hand (or onto the battlefield, tapped if `tapped`, with `counters`) and shuffle. With a " \

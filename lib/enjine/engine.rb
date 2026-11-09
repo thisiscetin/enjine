@@ -360,9 +360,10 @@ module Enjine
       definition = catalog.fetch(propose("create_token", { "player" => controller, "token" => definition.id }).data["token"])
       obj = create_object(definition.id, controller, :battlefield)
       entering = enters # an "as this enters" choice made before it's created (CR 614.12a)
+      tapped ||= entering&.dig("tapped") == true
       enters = propose("zone_change", { "object" => obj.id, "to" => :battlefield, "controller" => controller,
                                         "reason" => "create_token",
-                                        "enters" => { "tapped" => tapped || entering&.dig("tapped") == true, "counters" => {} } }).data["enters"]
+                                        "enters" => { "tapped" => tapped, "counters" => {} } }).data["enters"]
       merge_enters!(enters, entering.except("tapped")) if entering
       obj.memory.merge!(enters["memory"]) if enters["memory"]
       obj.controlled_since = state.turn

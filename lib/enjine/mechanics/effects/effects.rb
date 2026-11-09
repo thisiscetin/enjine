@@ -167,7 +167,9 @@ module Enjine
         def power = @power.is_a?(Amount::Fixed) ? @power.n : @power
         def toughness = @toughness.is_a?(Amount::Fixed) ? @toughness.n : @toughness
 
-        def to_s = "#{Pump.signed_text(@power)}/#{Pump.signed_text(@toughness)} until #{duration.delete_prefix("until_").tr("_", " ")} → #{to}"
+        def to_s
+          "#{Pump.signed_text(@power)}/#{Pump.signed_text(@toughness)} until #{duration.delete_prefix("until_").tr("_", " ")} → #{to}"
+        end
 
         # The amounts are computed once, as the effect starts (CR 608.2h, 611.2c).
         def apply(engine, ctx)

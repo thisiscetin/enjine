@@ -6909,5 +6909,248 @@
         }
       }
     ]
+  },
+  {
+    "name": "Counted Sentinel",
+    "mana_cost": "{2}",
+    "types": [
+      "artifact",
+      "creature"
+    ],
+    "subtypes": [
+      "construct"
+    ],
+    "power": 2,
+    "toughness": 2,
+    "abilities": [
+      {
+        "choose_number": {
+          "min": 0,
+          "max": 3
+        }
+      }
+    ]
+  },
+  {
+    "name": "Vault Unsealing",
+    "mana_cost": "{2}{B}",
+    "types": [
+      "sorcery"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "effects": [
+            {
+              "exile_top": {
+                "amount": 4
+              }
+            },
+            {
+              "return_to_battlefield": {
+                "to": {
+                  "result": 0
+                },
+                "under": "you"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Cipher Press",
+    "mana_cost": "{1}{U}",
+    "types": [
+      "sorcery"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "effects": [
+            {
+              "create_token": {
+                "amount": 2,
+                "token": {
+                  "name": "Cipher",
+                  "types": [
+                    "artifact"
+                  ],
+                  "abilities": [
+                    {
+                      "choose_number": {
+                        "max": 2
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Assimilation Lattice",
+    "mana_cost": "{4}{B}",
+    "types": [
+      "artifact",
+      "creature"
+    ],
+    "subtypes": [
+      "construct"
+    ],
+    "power": 4,
+    "toughness": 4,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "any_of": [
+              {
+                "enters": {}
+              },
+              {
+                "attacks": {}
+              }
+            ]
+          },
+          "targets": [
+            {
+              "filter": {
+                "creature": {
+                  "controller": "opponent"
+                }
+              },
+              "optional": true
+            }
+          ],
+          "effects": [
+            {
+              "assimilate": {
+                "to": "exiled_with",
+                "for": {
+                  "types": [
+                    "creature"
+                  ]
+                },
+                "choose": true
+              }
+            },
+            {
+              "exile": {
+                "to": {
+                  "target": 0
+                },
+                "link": true,
+                "if": {
+                  "amount": {
+                    "count": {
+                      "result": 0
+                    }
+                  },
+                  "at_most": 0
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Fading Hex",
+    "mana_cost": "{1}{B}",
+    "types": [
+      "instant"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "effects": [
+            {
+              "pump": {
+                "power": -1,
+                "toughness": 0,
+                "duration": "until_your_next_turn",
+                "to": {
+                  "each": {
+                    "creature": {
+                      "controller": "opponent"
+                    }
+                  }
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Ambush Writ",
+    "mana_cost": "{2}{R}",
+    "types": [
+      "sorcery"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "targets": [
+            {
+              "creature": {
+                "controller": "opponent"
+              }
+            }
+          ],
+          "effects": [
+            {
+              "deal_damage": {
+                "amount": 1,
+                "to": {
+                  "target": 0
+                }
+              }
+            },
+            {
+              "delayed_trigger": {
+                "when": {
+                  "step_begins": {
+                    "step": "beginning_of_combat"
+                  }
+                },
+                "this_turn": "once",
+                "watch": {
+                  "target": 0
+                },
+                "effects": [
+                  {
+                    "gain_control": {
+                      "to": "watched",
+                      "duration": "end_of_turn"
+                    }
+                  },
+                  {
+                    "untap": {
+                      "to": "watched"
+                    }
+                  },
+                  {
+                    "grant": {
+                      "keywords": [
+                        "haste"
+                      ],
+                      "to": "watched"
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    ]
   }
 ]

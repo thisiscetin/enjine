@@ -40,7 +40,8 @@ module Enjine
             return ask_which(engine, ctx, locals, refs) if @choose && refs.size > 1 && answers(locals).empty?
 
             picked = answers(locals).map { it["object"] }
-            locals["chosen"] = @choose ? (picked.empty? ? refs.first(1) : picked) : refs
+            picked = refs.first(1) if picked.empty?
+            locals["chosen"] = @choose ? picked : refs
           end
           chosen = locals["chosen"].select { engine.state.objects.key?(it) }
           entering = chosen.reject { engine.object(it).zone == :battlefield }.map { [it, ctx.controller] }

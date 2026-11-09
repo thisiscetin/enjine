@@ -95,13 +95,15 @@ Rules: CR 122.1, CR 122.6
 
 ## assimilate
 
-Assimilate each referenced permanent or permanent card: you gain control of it (or put it onto the battlefield under your control) with a +1/+1 counter, and it becomes a Borg artifact creature while it stays on the battlefield.
+Assimilate each referenced permanent or permanent card: you gain control of it (or put it onto the battlefield under your control) with a +1/+1 counter, and it becomes a Borg artifact creature while it stays on the battlefield. `for`: only cards matching a card spec; `choose: true`: you choose one of them.
 
-Rules: CR 701.72a, CR 701.72b, CR 205.1b, CR 613.1b, CR 613.1d
+Rules: CR 701.72a, CR 701.72b, CR 701.72c, CR 607.2a, CR 205.1b, CR 613.1b, CR 613.1d, CR 614.12a
 
 | Parameter | Description |
 | --- | --- |
-| `to` | selector (permanents, or a target card in a graveyard) |
+| `to` | selector (permanents, or a target card in a graveyard, or "exiled_with") |
+| `for` | card spec (default: any) |
+| `choose` | boolean |
 
 ```json
 {
@@ -342,7 +344,7 @@ Rules: CR 603.7a, CR 603.7b, CR 603.7c, CR 603.7d, CR 603.7e
 | `when` | a trigger condition |
 | `effects` | list of effects |
 | `watch` | selector resolved now (e.g. {"target": 0}): the objects its trigger subject "watched" and its effects' selector "watched" mean ("when that creature dies") |
-| `this_turn` | true: it lasts until the end of this turn and triggers each time ("whenever ... this turn", CR 603.7b) |
+| `this_turn` | true: it lasts until the end of this turn and triggers each time ("whenever ... this turn", CR 603.7b); "once": only the next time this turn ("at the beginning of the next combat this turn") |
 
 ```json
 {
@@ -901,15 +903,16 @@ Rules: CR 702.11c, CR 115.4, CR 508.1c, CR 402.2, CR 514.1, CR 615.1, CR 615.1a,
 
 ## pump
 
-Each referenced creature gets +power/+toughness until end of turn. The set of affected creatures is locked in when the effect starts.
+Each referenced creature gets +power/+toughness until end of turn (`duration: "until_your_next_turn"`: until its controller's next turn begins). The set of affected creatures is locked in when the effect starts.
 
-Rules: CR 611.2a, CR 611.2c, CR 613.4c, CR 514.2
+Rules: CR 611.2a, CR 611.2c, CR 613.4c, CR 514.2, CR 500.1
 
 | Parameter | Description |
 | --- | --- |
 | `power` | amount (may be negative, e.g. {"times": ["x", -1]} for -X) |
 | `toughness` | amount (may be negative) |
 | `to` | selector |
+| `duration` | end_of_turn | until_your_next_turn |
 
 ```json
 {

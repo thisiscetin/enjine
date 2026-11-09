@@ -89,7 +89,7 @@ RSpec.describe "Delayed triggers, optional effects and results: card data valida
     effect = Enjine::Mechanics.build_entry(:effect, { "return_to_battlefield" => { "to" => { "result" => 0 } } }, [], "e",
                                            results_count: 1)
     refs = ids_in(game, "alice", :graveyard) + ids_in(game, "alice", :hand) + ["gone#99"]
-    effect.apply(engine, Enjine::Mechanics::EffectContext.new(0, nil, nil, [], [refs]))
+    expect(effect.run(engine, Enjine::Mechanics::EffectContext.new(0, nil, nil, [], [refs]), {})).to eq(:done)
     expect(game.state.battlefield.map { game.state.object(it).card }).to eq(["grizzly_bears"])
     expect(ids_in(game, "alice", :graveyard).map { game.state.object(it).card }).to eq(["lightning_bolt"])
   end
