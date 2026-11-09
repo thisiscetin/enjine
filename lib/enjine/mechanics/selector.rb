@@ -11,7 +11,9 @@ module Enjine
 
     # Data form of "who/what does this effect apply to":
     #   {"target": 0}                               the first chosen target
-    #   "self"                                      the source permanent
+    #   "self"                                      the source permanent, or the card whose ability works from its
+    #                                               graveyard, exile or hand ("return this card", CR 113.6k); still
+    #                                               the same object (CR 400.7), never a spell on the stack
     #   "you"                                       the controller
     #   "each_opponent"                             every opponent
     #   "attached"                                  what the source is attached to ("enchanted creature", CR 303.4m)
@@ -118,7 +120,7 @@ module Enjine
         case kind
         when :target then Array(ctx.targets[value]).compact # a counted target's slot holds a list (CR 601.2c)
         when :result then Array(ctx.results&.[](value))
-        when :self then engine.state.battlefield.include?(ctx.source) ? [ctx.source] : []
+        when :self then [ctx.source].select { [nil, :stack].none?(engine.state.objects[it]&.zone) }
         when :attached then attached(engine, ctx)
         when :triggering then triggering(engine, ctx)
         when :watched then Array(Selector.memory(engine, ctx)["watched"])

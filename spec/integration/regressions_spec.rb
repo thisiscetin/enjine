@@ -22,6 +22,27 @@ RSpec.describe "Regressions found by the design reviews" do
     expect { Enjine::Game.import(game.export, catalog: game.catalog) }.to raise_error(NoMethodError, "engine bug")
   end
 
+  it "\"self\" in a graveyard card's own triggered ability is that card: it returns itself (CR 113.6k, 400.7)" do
+    phoenix = { "name" => "Ember Phoenix", "mana_cost" => "{R}", "types" => ["creature"], "power" => 1, "toughness" => 1,
+                "abilities" => [{ "triggered" => { "zone" => "graveyard", "when" => { "gains_life" => {} },
+                                                   "effects" => [{ "return_to_battlefield" => { "to" => "self" } }] } }] }
+    tonic = { "name" => "Small Tonic", "mana_cost" => "{G}", "types" => ["instant"],
+              "abilities" => [{ "spell" => { "effects" => [{ "gain_life" => { "amount" => 1 } }] } }] }
+    game = build_game(catalog_with(phoenix, tonic)) do
+      turn 3, active: "alice", step: :precombat_main
+      player("alice", mana_pool: { G: 1 }) do
+        hand "Small Tonic"
+        graveyard "Ember Phoenix"
+        library "Forest", count: 3
+      end
+      player("bob") { library "Forest", count: 3 }
+    end
+    game.submit(type: "cast", object: ids_in(game, "alice", :hand).first)
+    game.submit(type: "pay_mana", mana: "G")
+    pass_both(game, 2)
+    expect(game.state.battlefield.map { game.state.object(it).card }).to eq(["ember_phoenix"])
+  end
+
   describe "State#fork and Game#fork (P3)" do
     it "copies everything: the fork serializes identically and diverges independently" do
       setup = basics_setup

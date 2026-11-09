@@ -63,11 +63,17 @@ module Enjine
 
         def self.build(params, errors, path, **)
           filter = Mechanics.build_entry(:filter, params, errors, path)
-          base = filter.respond_to?(:base) ? filter.base : filter
-          if base && (base.zone != :battlefield || PLAYER_FILTERS.include?(base.primitive_name))
-            errors << "#{path}: must be a filter for permanents (Auras that enchant players are not supported yet)"
-          end
+          message = "must be a filter for permanents (Auras that enchant players are not supported yet)"
+          errors << "#{path}: #{message}" unless permanents?(filter)
           new(filter)
+        end
+
+        # Whether the filter matches only permanents ("Enchant creature or Vehicle" is a one_of of two).
+        def self.permanents?(filter)
+          return filter.filters.all? { permanents?(it) } if filter.respond_to?(:filters)
+
+          base = filter.respond_to?(:base) ? filter.base : filter
+          base.nil? || (base.zone == :battlefield && !PLAYER_FILTERS.include?(base.primitive_name))
         end
 
         def initialize(filter)

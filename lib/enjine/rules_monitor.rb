@@ -42,6 +42,22 @@ module Enjine
 
     def defn(card) = catalog.fetch(card)
 
+    # A permanent's printed abilities, with those of its max speed abilities while its controller's speed
+    # is 4 (CR 702.178a, 702.179e) in their place.
+    def abilities_of(obj)
+      fast = state.players[obj.controller].speed == 4
+      defn(obj.card).abilities.flat_map do |ability|
+        next [ability] unless ability.kind == :max_speed
+
+        fast ? ability.nested_abilities : []
+      end
+    end
+
+    def max_speed_keyword?(obj, keyword)
+      state.players[obj.controller].speed == 4 &&
+        defn(obj.card).abilities.any? { it.kind == :max_speed && it.keywords.include?(keyword) }
+    end
+
     # ---- per-event checks -------------------------------------------------------
 
     def observe(event)
@@ -138,7 +154,7 @@ module Enjine
       stationed = card.ability_instances.any? do |inst|
         inst.ability.kind == :station_symbol && charge >= inst.ability.threshold && inst.ability.keywords.include?(keyword)
       end
-      return true if stationed || attached_grants(obj.id).any? { it["keywords"].include?(keyword.to_s) }
+      return true if stationed || max_speed_keyword?(obj, keyword) || attached_grants(obj.id).any? { it["keywords"].include?(keyword) }
 
       granted = state.effects.any? do |e|
         e["kind"] == "grant" && e["affected"].include?(obj.id) && e["keywords"].include?(keyword.to_s)
@@ -184,7 +200,7 @@ module Enjine
       facts = Mechanics::Filters::Facts.new(chars: card.printed_characteristics, counters: obj.counters, token: card.token?)
       state.battlefield.any? do |id|
         source = state.objects[id]
-        defn(source.card).abilities.any? do |ability|
+        abilities_of(source).any? do |ability|
           ability.kind == :static && ability.keywords.include?(keyword) && ability.affects?(obj, source, facts) &&
             ability.active?(engine, source)
         end
@@ -243,7 +259,7 @@ module Enjine
       engine = @game.instance_variable_get(:@engine)
       state.battlefield.flat_map do |id|
         source = state.objects[id]
-        defn(source.card).abilities.filter_map do |ability|
+        abilities_of(source).filter_map do |ability|
           next unless ability.kind == :static && ability.pump? && !ability.attached? && ability.active?(engine, source)
 
           [source, ability, ability.bonus(engine, source)]
@@ -258,18 +274,16 @@ module Enjine
       end
     end
 
-    # Printed keyword, or granted by an Aura/Equipment attached to it (CR 301.5f, 303.4m).
-    # "Equipped/enchanted creature gets/has ..." of every permanent attached to `id`, read from
-    # the raw card data: [{"power" => n, "toughness" => n, "keywords" => [...]}].
+    # "Equipped/enchanted creature gets/has ..." of every permanent attached to `id` whose condition holds
+    # ("during your turn", CR 604.2): [{"power" => n, "toughness" => n, "keywords" => [...]}].
     def attached_grants(id)
+      engine = @game.instance_variable_get(:@engine)
       state.battlefield.filter_map { state.objects[it] if state.objects[it].attached_to == id }.flat_map do |att|
-        Array(defn(att.card).to_h["abilities"]).filter_map do |entry|
-          static = entry["static"]
-          next unless static.is_a?(Hash) && static["affects"] == "attached"
+        abilities_of(att).filter_map do |ability|
+          next unless ability.kind == :static && ability.attached? && ability.active?(engine, att)
 
-          pump = static.fetch("pump", {})
-          { "power" => pump.fetch("power", 0), "toughness" => pump.fetch("toughness", 0),
-            "keywords" => Array(static["keywords"]).map { it.downcase.tr(" -", "__") } }
+          power, toughness = ability.bonus(engine, att)
+          { "power" => power, "toughness" => toughness, "keywords" => ability.keywords }
         end
       end
     end

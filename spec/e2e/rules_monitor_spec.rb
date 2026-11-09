@@ -109,4 +109,31 @@ RSpec.describe Enjine::RulesMonitor do
       expect(checked(game).map(&:rule)).to eq(["613.4c"])
     end
   end
+
+  context "with conditional Equipment and max speed abilities (CR 604.2, 702.178a)" do
+    let(:catalog) { Enjine::Catalog.from_definitions(CardFixtures.real("creatures-combat-keywords")) }
+
+    def findings_after(game) = described_class.new(game).check!(game.history.last)
+
+    it "expects an Equipment's bonus only while its condition holds, and max speed statics only at speed 4" do
+      game = build_game(catalog) do
+        turn 3, active: "alice", step: :precombat_main
+        player("alice", mana_pool: { C: 2 }, speed: 4) do
+          battlefield "Quick-Draw Katana", "Walking Sarcophagus"
+          library "Forest", count: 3
+        end
+        player("bob") { library "Forest", count: 3 }
+      end
+      sarcophagus = obj_id(game, "Walking Sarcophagus")
+      game.submit(type: "activate", object: obj_id(game, "Quick-Draw Katana"), ability: "printed:1")
+      game.submit(type: "target", target: sarcophagus)
+      2.times { game.submit(type: "pay_mana", mana: "C") }
+      pass_both(game)
+      expect(view_of(game, sarcophagus)).to include("power" => 5, "toughness" => 3)
+      expect(findings_after(game)).to eq([])
+      skip_to(game, :upkeep, turn: 4)
+      expect(view_of(game, sarcophagus)).to include("power" => 3, "toughness" => 3)
+      expect(findings_after(game)).to eq([])
+    end
+  end
 end
