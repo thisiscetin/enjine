@@ -797,5 +797,158 @@
       "set": "tla",
       "number": "76"
     }
+  },
+  {
+    "name": "Clarion Conqueror",
+    "mana_cost": "{2}{W}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "dragon"
+    ],
+    "power": 3,
+    "toughness": 3,
+    "keywords": [
+      "flying"
+    ],
+    "abilities": [
+      {
+        "static": {
+          "affects": {
+            "each": {
+              "permanent": {
+                "any_of": [
+                  "artifact",
+                  "creature",
+                  "planeswalker"
+                ]
+              }
+            }
+          },
+          "keywords": [
+            "abilities_cant_be_activated"
+          ]
+        }
+      }
+    ],
+    "rarity": "rare",
+    "printing": {
+      "set": "tdm",
+      "number": "5"
+    }
+  },
+  {
+    "name": "Stuck in Summoner's Sanctum",
+    "mana_cost": "{2}{U}",
+    "types": [
+      "enchantment"
+    ],
+    "subtypes": [
+      "aura"
+    ],
+    "keywords": [
+      "flash"
+    ],
+    "abilities": [
+      {
+        "enchant": {
+          "permanent": {
+            "any_of": [
+              "artifact",
+              "creature"
+            ]
+          }
+        }
+      },
+      {
+        "triggered": {
+          "when": {
+            "enters": {}
+          },
+          "effects": [
+            {
+              "tap": {
+                "to": "attached"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "static": {
+          "affects": "attached",
+          "keywords": [
+            "doesnt_untap",
+            "abilities_cant_be_activated"
+          ]
+        }
+      }
+    ],
+    "rarity": "common",
+    "printing": {
+      "set": "fin",
+      "number": "76"
+    }
+  },
+  {
+    "name": "Trusty Boomerang",
+    "mana_cost": "{1}",
+    "types": [
+      "artifact"
+    ],
+    "subtypes": [
+      "equipment"
+    ],
+    "abilities": [
+      {
+        "static": {
+          "affects": "attached",
+          "abilities": [
+            {
+              "activated": {
+                "cost": [
+                  {
+                    "mana": "{1}"
+                  },
+                  "tap"
+                ],
+                "targets": [
+                  "creature"
+                ],
+                "effects": [
+                  {
+                    "tap": {
+                      "to": {
+                        "target": 0
+                      }
+                    }
+                  },
+                  {
+                    "return_to_hand": {
+                      "to": "granter"
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      },
+      {
+        "equip": {
+          "cost": [
+            {
+              "mana": "{1}"
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "uncommon",
+    "printing": {
+      "set": "tla",
+      "number": "260"
+    }
   }
 ]

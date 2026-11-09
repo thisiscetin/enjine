@@ -12,7 +12,10 @@ module Enjine
         attacks_despite_defender: ["Defender doesn't stop this creature from attacking.", %w[702.3b 508.1c]],
         doesnt_untap: ["This permanent doesn't untap during its controller's untap step.", %w[502.3]],
         assigns_damage_by_toughness: ["If this creature's toughness is greater than its power, it assigns combat damage " \
-                                      "equal to its toughness rather than its power.", %w[510.1a]]
+                                      "equal to its toughness rather than its power.", %w[510.1a]],
+        abilities_cant_be_activated: ["Its activated abilities, mana abilities included, can't be activated (\"Activated " \
+                                      "abilities of artifacts can't be activated\" is a static handing it out).",
+                                      %w[602.5 605.3a 101.2]]
       }.each { |name, (description, rules)| Evergreen.define(name, description, rules) }
 
       # Combat restrictions and requirements (CR 508.1c-d, 509.1b). They aren't keyword abilities

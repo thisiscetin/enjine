@@ -121,11 +121,12 @@ module Enjine
         source = object(source_id)
         # CR 602.2a: activating from a hidden zone reveals the card.
         emit Events::CardRevealed.new(player: name(index), object: source_id, card: source.card) if source.zone == :hand
-        card, ref = granted_origin(ability_ref) # a granted ability lives in the granting card's data
+        card, ref, granter = AbilityLayers.granted_parts(ability_ref) # a granted ability lives in the granting card's data
         obj = create_object(card || source.card, index, :stack)
         obj.kind = "ability"
         obj.source = source_id
         obj.ability = ref || ability_ref
+        obj.memory["granter"] = granter if granter # CR 607.1a: "Return Trusty Boomerang" (Selector "granter")
         state.stack.unshift(obj.id)
         start_casting!(index, obj.id, "ability", source: source_id, ability: ability_ref)
       end

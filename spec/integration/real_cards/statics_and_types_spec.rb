@@ -200,4 +200,37 @@ RSpec.describe "Real cards: statics, types and restrictions" do
     engine(game).move!(obj_id(game, "Ty Lee, Chi Blocker"), :graveyard, reason: "destroy")
     expect(chars(game, hawk).keywords).not_to include(:doesnt_untap)
   end
+
+  it "Clarion Conqueror: activated abilities of artifacts and creatures can't be activated, mana abilities too (CR 602.5, 605.3a)" do
+    game = board(mine: ["Veloheart Bike", "Aetherjacket", "Island", "Gleaming Barrier"], theirs: ["Clarion Conqueror"])
+    expect(game.legal_options.map { it[:object] }.uniq.compact).to eq([obj_id(game, "Island")]) # a land still taps for mana
+    game = board(mine: ["Veloheart Bike", "Aetherjacket", "Gleaming Barrier"])
+    expect(game.legal_options.map { it[:type] }).to include("activate", "activate_mana")
+  end
+
+  it "Stuck in Summoner's Sanctum: taps the permanent, which doesn't untap and can't activate abilities (CR 502.3, 602.5)" do
+    game = board(hand: ["Stuck in Summoner's Sanctum"], mine: ["Veloheart Bike"], mana: { U: 3 })
+    bike = obj_id(game, "Veloheart Bike")
+    cast(game, "Stuck in Summoner's Sanctum", target(game, "Veloheart Bike"))
+    expect(game.state.object(bike).tapped).to be(true)
+    game.state.object(bike).tapped = false
+    expect(game.legal_options.select { it[:object] == bike }).to be_empty
+    expect(chars(game, bike).keywords).to include(:doesnt_untap)
+  end
+
+  it "Trusty Boomerang: the equipped creature's granted ability returns the Boomerang (CR 607.1a, 613.1f)" do
+    game = board(mine: [["Vampire Nighthawk", { controlled_since: 1 }], "Trusty Boomerang"], theirs: ["Juggernaut"], mana: { C: 2 })
+    hawk = obj_id(game, "Vampire Nighthawk")
+    boomerang = obj_id(game, "Trusty Boomerang")
+    play(game, { type: "activate", object: boomerang, ability: "printed:1" }, { type: "target", target: hawk }) # equip
+    ref = chars(game, hawk).activated_abilities.first.ref
+    expect(ref).to eq("granted:trusty_boomerang:printed:0:0@#{boomerang}")
+    game.submit(type: "activate", object: hawk, ability: ref)
+    game.submit(target(game, "Juggernaut"))
+    game.submit(game.legal_options.find { it[:type] == "pay_mana" }) if game.pending_decision.kind == "pay_cost"
+    game = Enjine::Game.import(JSON.parse(game.export), catalog: catalog) # the granter survives a snapshot
+    play(game, { type: "pass" })
+    expect(game.state.object(obj_id(game, "Juggernaut")).tapped).to be(true)
+    expect(obj_id(game, "Trusty Boomerang", zone: :hand, player: "alice")).not_to be_nil
+  end
 end

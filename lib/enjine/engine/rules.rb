@@ -33,8 +33,14 @@ module Enjine
         player_rule?(index, "cant_cast", obj) || (obj.zone != :hand && player_rule?(index, "cant_cast_except_from_hand"))
       end
 
-      # CR 602.5, 101.2: abilities of a permanent matching a `cant_activate` filter can't be activated.
-      def activation_forbidden?(index, obj) = obj.zone == :battlefield && player_rule?(index, "cant_activate", obj)
+      # CR 602.5, 101.2: abilities of a permanent matching a `cant_activate` filter can't be activated, nor any of a
+      # permanent whose activated abilities can't be activated (#mana_abilities_forbidden?).
+      def activation_forbidden?(index, obj)
+        obj.zone == :battlefield && (mana_abilities_forbidden?(obj) || player_rule?(index, "cant_activate", obj))
+      end
+
+      # CR 602.5, 605.3a: "its activated abilities can't be activated" covers its mana abilities too.
+      def mana_abilities_forbidden?(obj) = chars(obj).keyword?(:abilities_cant_be_activated)
 
       # CR 615.12: damage that can't be prevented.
       def unpreventable?(combat) = game_rule?("damage_cant_be_prevented") || (combat && game_rule?("combat_damage_cant_be_prevented"))

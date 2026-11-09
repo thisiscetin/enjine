@@ -231,10 +231,11 @@ module Enjine
       # ---- countering (CR 701.6) ----------------------------------------------------------------
 
       # CR 701.6a: a countered spell goes to its owner's graveyard; a countered ability ceases to exist.
-      # "This spell can't be countered" and "Spells you control can't be countered" win (CR 101.2). Returns
-      # whether it was countered.
+      # "This spell can't be countered" and "Spells [and abilities] you control can't be countered" win (CR 101.2).
+      # Returns whether it was countered.
       def counter!(id)
         obj = object(id)
+        return false if obj.ability? && player_rule?(obj.controller, "abilities_cant_be_countered")
         return false if !obj.ability? && (chars(obj).keyword?(:cant_be_countered) ||
                                           player_rule?(obj.controller, "spells_cant_be_countered", obj))
 

@@ -12,6 +12,7 @@ module Enjine
     #   cant_cast           the player can't cast spells (matching `spells`) (101.2, 601.3)
     #   cant_cast_except_from_hand  the player can't cast spells from anywhere other than their hand (601.3)
     #   spells_cant_be_countered    spells the player controls (matching `spells`) can't be countered (101.2, 701.6a)
+    #   abilities_cant_be_countered  activated and triggered abilities the player controls can't be countered (101.2)
     #   cant_gain_life      the player can't gain life (119.7)
     #   cant_activate       the player can't activate abilities of sources matching `filter`, except mana
     #                       abilities (602.5)
@@ -26,6 +27,7 @@ module Enjine
         "prevent_all_damage" => %w[615.1 615.1a], "cant_lose_for_life" => %w[704.5a 104.3b],
         "cant_sacrifice" => %w[701.21a 614.17b], "cant_cast" => %w[101.2 601.3],
         "cant_cast_except_from_hand" => %w[101.2 601.3], "spells_cant_be_countered" => %w[101.2 701.6a],
+        "abilities_cant_be_countered" => %w[101.2 701.6a],
         "cant_gain_life" => %w[119.7], "cant_activate" => %w[101.2 602.5],
         "damage_cant_be_prevented" => %w[615.12], "combat_damage_cant_be_prevented" => %w[615.12],
         "protection_from_opponents" => %w[702.16b 702.16e 702.16k]
