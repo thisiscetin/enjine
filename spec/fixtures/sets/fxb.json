@@ -7,19 +7,17 @@
   "standard_legal_until_estimated": true,
   "cards": [
     {
-      "card": {
-        "name": "Gatehold Recruit",
-        "mana_cost": "{W}",
-        "types": [
-          "creature"
-        ],
-        "subtypes": [
-          "human",
-          "soldier"
-        ],
-        "power": 2,
-        "toughness": 1
-      },
+      "name": "Gatehold Recruit",
+      "mana_cost": "{W}",
+      "types": [
+        "creature"
+      ],
+      "subtypes": [
+        "human",
+        "soldier"
+      ],
+      "power": 2,
+      "toughness": 1,
       "rarity": "common",
       "printing": {
         "set": "fxb",
@@ -27,22 +25,20 @@
       }
     },
     {
-      "card": {
-        "name": "Plumed Outrider",
-        "mana_cost": "{1}{W}",
-        "types": [
-          "creature"
-        ],
-        "subtypes": [
-          "bird",
-          "soldier"
-        ],
-        "keywords": [
-          "flash"
-        ],
-        "power": 2,
-        "toughness": 2
-      },
+      "name": "Plumed Outrider",
+      "mana_cost": "{1}{W}",
+      "types": [
+        "creature"
+      ],
+      "subtypes": [
+        "bird",
+        "soldier"
+      ],
+      "keywords": [
+        "flash"
+      ],
+      "power": 2,
+      "toughness": 2,
       "rarity": "common",
       "printing": {
         "set": "fxb",
@@ -50,19 +46,17 @@
       }
     },
     {
-      "card": {
-        "name": "Halo Bearer",
-        "mana_cost": "{2}{W}",
-        "types": [
-          "creature"
-        ],
-        "subtypes": [
-          "human",
-          "cleric"
-        ],
-        "power": 3,
-        "toughness": 2
-      },
+      "name": "Halo Bearer",
+      "mana_cost": "{2}{W}",
+      "types": [
+        "creature"
+      ],
+      "subtypes": [
+        "human",
+        "cleric"
+      ],
+      "power": 3,
+      "toughness": 2,
       "rarity": "uncommon",
       "printing": {
         "set": "fxb",
@@ -70,18 +64,16 @@
       }
     },
     {
-      "card": {
-        "name": "Ivory Bulwark",
-        "mana_cost": "{3}{W}",
-        "types": [
-          "creature"
-        ],
-        "subtypes": [
-          "wall"
-        ],
-        "power": 2,
-        "toughness": 5
-      },
+      "name": "Ivory Bulwark",
+      "mana_cost": "{3}{W}",
+      "types": [
+        "creature"
+      ],
+      "subtypes": [
+        "wall"
+      ],
+      "power": 2,
+      "toughness": 5,
       "rarity": "rare",
       "printing": {
         "set": "fxb",
@@ -89,36 +81,34 @@
       }
     },
     {
-      "card": {
-        "name": "Radiant Exarch",
-        "mana_cost": "{3}{W}{W}",
-        "types": [
-          "creature"
-        ],
-        "subtypes": [
-          "angel"
-        ],
-        "power": 4,
-        "toughness": 4,
-        "abilities": [
-          {
-            "activated": {
-              "cost": [
-                {
-                  "mana": "{W}"
+      "name": "Radiant Exarch",
+      "mana_cost": "{3}{W}{W}",
+      "types": [
+        "creature"
+      ],
+      "subtypes": [
+        "angel"
+      ],
+      "power": 4,
+      "toughness": 4,
+      "abilities": [
+        {
+          "activated": {
+            "cost": [
+              {
+                "mana": "{W}"
+              }
+            ],
+            "effects": [
+              {
+                "gain_life": {
+                  "amount": 1
                 }
-              ],
-              "effects": [
-                {
-                  "gain_life": {
-                    "amount": 1
-                  }
-                }
-              ]
-            }
+              }
+            ]
           }
-        ]
-      },
+        }
+      ],
       "rarity": "common",
       "printing": {
         "set": "fxb",
@@ -126,31 +116,29 @@
       }
     },
     {
-      "card": {
-        "name": "Righteous Edict",
-        "mana_cost": "{3}{W}",
-        "types": [
-          "sorcery"
-        ],
-        "abilities": [
-          {
-            "spell": {
-              "effects": [
-                {
-                  "destroy": {
-                    "to": {
-                      "target": 0
-                    }
+      "name": "Righteous Edict",
+      "mana_cost": "{3}{W}",
+      "types": [
+        "sorcery"
+      ],
+      "abilities": [
+        {
+          "spell": {
+            "effects": [
+              {
+                "destroy": {
+                  "to": {
+                    "target": 0
                   }
                 }
-              ],
-              "targets": [
-                "creature_or_planeswalker"
-              ]
-            }
+              }
+            ],
+            "targets": [
+              "creature_or_planeswalker"
+            ]
           }
-        ]
-      },
+        }
+      ],
       "rarity": "common",
       "printing": {
         "set": "fxb",
@@ -158,33 +146,31 @@
       }
     },
     {
-      "card": {
-        "name": "Shield of Dawn",
-        "mana_cost": "{W}",
-        "types": [
-          "instant"
-        ],
-        "abilities": [
-          {
-            "spell": {
-              "effects": [
-                {
-                  "pump": {
-                    "power": 1,
-                    "toughness": 3,
-                    "to": {
-                      "target": 0
-                    }
+      "name": "Shield of Dawn",
+      "mana_cost": "{W}",
+      "types": [
+        "instant"
+      ],
+      "abilities": [
+        {
+          "spell": {
+            "effects": [
+              {
+                "pump": {
+                  "power": 1,
+                  "toughness": 3,
+                  "to": {
+                    "target": 0
                   }
                 }
-              ],
-              "targets": [
-                "creature"
-              ]
-            }
+              }
+            ],
+            "targets": [
+              "creature"
+            ]
           }
-        ]
-      },
+        }
+      ],
       "rarity": "uncommon",
       "printing": {
         "set": "fxb",
@@ -192,18 +178,16 @@
       }
     },
     {
-      "card": {
-        "name": "Brinespout Sprite",
-        "mana_cost": "{U}",
-        "types": [
-          "creature"
-        ],
-        "subtypes": [
-          "faerie"
-        ],
-        "power": 1,
-        "toughness": 2
-      },
+      "name": "Brinespout Sprite",
+      "mana_cost": "{U}",
+      "types": [
+        "creature"
+      ],
+      "subtypes": [
+        "faerie"
+      ],
+      "power": 1,
+      "toughness": 2,
       "rarity": "rare",
       "printing": {
         "set": "fxb",
@@ -211,22 +195,20 @@
       }
     },
     {
-      "card": {
-        "name": "Kelpweave Mystic",
-        "mana_cost": "{1}{U}",
-        "types": [
-          "creature"
-        ],
-        "subtypes": [
-          "merfolk",
-          "wizard"
-        ],
-        "keywords": [
-          "flash"
-        ],
-        "power": 1,
-        "toughness": 2
-      },
+      "name": "Kelpweave Mystic",
+      "mana_cost": "{1}{U}",
+      "types": [
+        "creature"
+      ],
+      "subtypes": [
+        "merfolk",
+        "wizard"
+      ],
+      "keywords": [
+        "flash"
+      ],
+      "power": 1,
+      "toughness": 2,
       "rarity": "common",
       "printing": {
         "set": "fxb",
@@ -234,18 +216,16 @@
       }
     },
     {
-      "card": {
-        "name": "Coralhide Turtle",
-        "mana_cost": "{2}{U}",
-        "types": [
-          "creature"
-        ],
-        "subtypes": [
-          "turtle"
-        ],
-        "power": 1,
-        "toughness": 5
-      },
+      "name": "Coralhide Turtle",
+      "mana_cost": "{2}{U}",
+      "types": [
+        "creature"
+      ],
+      "subtypes": [
+        "turtle"
+      ],
+      "power": 1,
+      "toughness": 5,
       "rarity": "common",
       "printing": {
         "set": "fxb",
@@ -253,18 +233,16 @@
       }
     },
     {
-      "card": {
-        "name": "Fathom Hunter",
-        "mana_cost": "{3}{U}",
-        "types": [
-          "creature"
-        ],
-        "subtypes": [
-          "serpent"
-        ],
-        "power": 3,
-        "toughness": 4
-      },
+      "name": "Fathom Hunter",
+      "mana_cost": "{3}{U}",
+      "types": [
+        "creature"
+      ],
+      "subtypes": [
+        "serpent"
+      ],
+      "power": 3,
+      "toughness": 4,
       "rarity": "uncommon",
       "printing": {
         "set": "fxb",
@@ -272,18 +250,16 @@
       }
     },
     {
-      "card": {
-        "name": "Maelstrom Wyrm",
-        "mana_cost": "{4}{U}{U}",
-        "types": [
-          "creature"
-        ],
-        "subtypes": [
-          "serpent"
-        ],
-        "power": 5,
-        "toughness": 6
-      },
+      "name": "Maelstrom Wyrm",
+      "mana_cost": "{4}{U}{U}",
+      "types": [
+        "creature"
+      ],
+      "subtypes": [
+        "serpent"
+      ],
+      "power": 5,
+      "toughness": 6,
       "rarity": "rare",
       "printing": {
         "set": "fxb",
@@ -291,26 +267,24 @@
       }
     },
     {
-      "card": {
-        "name": "Thought Eddy",
-        "mana_cost": "{U}",
-        "types": [
-          "instant"
-        ],
-        "abilities": [
-          {
-            "spell": {
-              "effects": [
-                {
-                  "draw": {
-                    "amount": 1
-                  }
+      "name": "Thought Eddy",
+      "mana_cost": "{U}",
+      "types": [
+        "instant"
+      ],
+      "abilities": [
+        {
+          "spell": {
+            "effects": [
+              {
+                "draw": {
+                  "amount": 1
                 }
-              ]
-            }
+              }
+            ]
           }
-        ]
-      },
+        }
+      ],
       "rarity": "common",
       "printing": {
         "set": "fxb",
@@ -318,31 +292,29 @@
       }
     },
     {
-      "card": {
-        "name": "Riptide Denial",
-        "mana_cost": "{2}{U}",
-        "types": [
-          "instant"
-        ],
-        "abilities": [
-          {
-            "spell": {
-              "effects": [
-                {
-                  "counter": {
-                    "to": {
-                      "target": 0
-                    }
+      "name": "Riptide Denial",
+      "mana_cost": "{2}{U}",
+      "types": [
+        "instant"
+      ],
+      "abilities": [
+        {
+          "spell": {
+            "effects": [
+              {
+                "counter": {
+                  "to": {
+                    "target": 0
                   }
                 }
-              ],
-              "targets": [
-                "spell"
-              ]
-            }
+              }
+            ],
+            "targets": [
+              "spell"
+            ]
           }
-        ]
-      },
+        }
+      ],
       "rarity": "common",
       "printing": {
         "set": "fxb",
@@ -350,18 +322,16 @@
       }
     },
     {
-      "card": {
-        "name": "Bogscour Leech",
-        "mana_cost": "{B}",
-        "types": [
-          "creature"
-        ],
-        "subtypes": [
-          "leech"
-        ],
-        "power": 1,
-        "toughness": 2
-      },
+      "name": "Bogscour Leech",
+      "mana_cost": "{B}",
+      "types": [
+        "creature"
+      ],
+      "subtypes": [
+        "leech"
+      ],
+      "power": 1,
+      "toughness": 2,
       "rarity": "uncommon",
       "printing": {
         "set": "fxb",
@@ -369,21 +339,19 @@
       }
     },
     {
-      "card": {
-        "name": "Nightglade Prowler",
-        "mana_cost": "{1}{B}",
-        "types": [
-          "creature"
-        ],
-        "subtypes": [
-          "vampire"
-        ],
-        "keywords": [
-          "haste"
-        ],
-        "power": 2,
-        "toughness": 2
-      },
+      "name": "Nightglade Prowler",
+      "mana_cost": "{1}{B}",
+      "types": [
+        "creature"
+      ],
+      "subtypes": [
+        "vampire"
+      ],
+      "keywords": [
+        "haste"
+      ],
+      "power": 2,
+      "toughness": 2,
       "rarity": "rare",
       "printing": {
         "set": "fxb",
@@ -391,19 +359,17 @@
       }
     },
     {
-      "card": {
-        "name": "Sepulcher Knight",
-        "mana_cost": "{2}{B}",
-        "types": [
-          "creature"
-        ],
-        "subtypes": [
-          "zombie",
-          "knight"
-        ],
-        "power": 3,
-        "toughness": 3
-      },
+      "name": "Sepulcher Knight",
+      "mana_cost": "{2}{B}",
+      "types": [
+        "creature"
+      ],
+      "subtypes": [
+        "zombie",
+        "knight"
+      ],
+      "power": 3,
+      "toughness": 3,
       "rarity": "common",
       "printing": {
         "set": "fxb",
@@ -411,18 +377,16 @@
       }
     },
     {
-      "card": {
-        "name": "Ghoulkin Horde",
-        "mana_cost": "{4}{B}",
-        "types": [
-          "creature"
-        ],
-        "subtypes": [
-          "zombie"
-        ],
-        "power": 5,
-        "toughness": 4
-      },
+      "name": "Ghoulkin Horde",
+      "mana_cost": "{4}{B}",
+      "types": [
+        "creature"
+      ],
+      "subtypes": [
+        "zombie"
+      ],
+      "power": 5,
+      "toughness": 4,
       "rarity": "common",
       "printing": {
         "set": "fxb",
@@ -430,35 +394,33 @@
       }
     },
     {
-      "card": {
-        "name": "Tombspire Wraith",
-        "mana_cost": "{5}{B}",
-        "types": [
-          "creature"
-        ],
-        "subtypes": [
-          "spirit"
-        ],
-        "power": 5,
-        "toughness": 5,
-        "abilities": [
-          {
-            "activated": {
-              "cost": [
-                "tap"
-              ],
-              "effects": [
-                {
-                  "lose_life": {
-                    "amount": 1,
-                    "to": "each_opponent"
-                  }
+      "name": "Tombspire Wraith",
+      "mana_cost": "{5}{B}",
+      "types": [
+        "creature"
+      ],
+      "subtypes": [
+        "spirit"
+      ],
+      "power": 5,
+      "toughness": 5,
+      "abilities": [
+        {
+          "activated": {
+            "cost": [
+              "tap"
+            ],
+            "effects": [
+              {
+                "lose_life": {
+                  "amount": 1,
+                  "to": "each_opponent"
                 }
-              ]
-            }
+              }
+            ]
           }
-        ]
-      },
+        }
+      ],
       "rarity": "uncommon",
       "printing": {
         "set": "fxb",
@@ -466,33 +428,31 @@
       }
     },
     {
-      "card": {
-        "name": "Withering Gaze",
-        "mana_cost": "{1}{B}",
-        "types": [
-          "instant"
-        ],
-        "abilities": [
-          {
-            "spell": {
-              "effects": [
-                {
-                  "pump": {
-                    "power": -2,
-                    "toughness": -2,
-                    "to": {
-                      "target": 0
-                    }
+      "name": "Withering Gaze",
+      "mana_cost": "{1}{B}",
+      "types": [
+        "instant"
+      ],
+      "abilities": [
+        {
+          "spell": {
+            "effects": [
+              {
+                "pump": {
+                  "power": -2,
+                  "toughness": -2,
+                  "to": {
+                    "target": 0
                   }
                 }
-              ],
-              "targets": [
-                "creature"
-              ]
-            }
+              }
+            ],
+            "targets": [
+              "creature"
+            ]
           }
-        ]
-      },
+        }
+      ],
       "rarity": "rare",
       "printing": {
         "set": "fxb",
@@ -500,32 +460,30 @@
       }
     },
     {
-      "card": {
-        "name": "Dread Tithe",
-        "mana_cost": "{3}{B}",
-        "types": [
-          "sorcery"
-        ],
-        "abilities": [
-          {
-            "spell": {
-              "effects": [
-                {
-                  "lose_life": {
-                    "amount": 3,
-                    "to": "each_opponent"
-                  }
-                },
-                {
-                  "draw": {
-                    "amount": 1
-                  }
+      "name": "Dread Tithe",
+      "mana_cost": "{3}{B}",
+      "types": [
+        "sorcery"
+      ],
+      "abilities": [
+        {
+          "spell": {
+            "effects": [
+              {
+                "lose_life": {
+                  "amount": 3,
+                  "to": "each_opponent"
                 }
-              ]
-            }
+              },
+              {
+                "draw": {
+                  "amount": 1
+                }
+              }
+            ]
           }
-        ]
-      },
+        }
+      ],
       "rarity": "common",
       "printing": {
         "set": "fxb",
@@ -533,18 +491,16 @@
       }
     },
     {
-      "card": {
-        "name": "Sparkmane Hound",
-        "mana_cost": "{R}",
-        "types": [
-          "creature"
-        ],
-        "subtypes": [
-          "dog"
-        ],
-        "power": 2,
-        "toughness": 1
-      },
+      "name": "Sparkmane Hound",
+      "mana_cost": "{R}",
+      "types": [
+        "creature"
+      ],
+      "subtypes": [
+        "dog"
+      ],
+      "power": 2,
+      "toughness": 1,
       "rarity": "common",
       "printing": {
         "set": "fxb",
@@ -552,22 +508,20 @@
       }
     },
     {
-      "card": {
-        "name": "Kilnborn Scrapper",
-        "mana_cost": "{1}{R}",
-        "types": [
-          "creature"
-        ],
-        "subtypes": [
-          "goblin",
-          "warrior"
-        ],
-        "keywords": [
-          "haste"
-        ],
-        "power": 2,
-        "toughness": 1
-      },
+      "name": "Kilnborn Scrapper",
+      "mana_cost": "{1}{R}",
+      "types": [
+        "creature"
+      ],
+      "subtypes": [
+        "goblin",
+        "warrior"
+      ],
+      "keywords": [
+        "haste"
+      ],
+      "power": 2,
+      "toughness": 1,
       "rarity": "uncommon",
       "printing": {
         "set": "fxb",
@@ -575,44 +529,42 @@
       }
     },
     {
-      "card": {
-        "name": "Furnace Raider",
-        "mana_cost": "{2}{R}",
-        "types": [
-          "creature"
-        ],
-        "subtypes": [
-          "human",
-          "warrior"
-        ],
-        "power": 3,
-        "toughness": 2,
-        "abilities": [
-          {
-            "activated": {
-              "cost": [
-                "tap",
-                {
-                  "mana": "{1}{R}"
-                }
-              ],
-              "effects": [
-                {
-                  "deal_damage": {
-                    "amount": 1,
-                    "to": {
-                      "target": 0
-                    }
+      "name": "Furnace Raider",
+      "mana_cost": "{2}{R}",
+      "types": [
+        "creature"
+      ],
+      "subtypes": [
+        "human",
+        "warrior"
+      ],
+      "power": 3,
+      "toughness": 2,
+      "abilities": [
+        {
+          "activated": {
+            "cost": [
+              "tap",
+              {
+                "mana": "{1}{R}"
+              }
+            ],
+            "effects": [
+              {
+                "deal_damage": {
+                  "amount": 1,
+                  "to": {
+                    "target": 0
                   }
                 }
-              ],
-              "targets": [
-                "any_target"
-              ]
-            }
+              }
+            ],
+            "targets": [
+              "any_target"
+            ]
           }
-        ]
-      },
+        }
+      ],
       "rarity": "rare",
       "printing": {
         "set": "fxb",
@@ -620,21 +572,19 @@
       }
     },
     {
-      "card": {
-        "name": "Lavaback Rhino",
-        "mana_cost": "{4}{R}",
-        "types": [
-          "creature"
-        ],
-        "subtypes": [
-          "rhino"
-        ],
-        "keywords": [
-          "haste"
-        ],
-        "power": 5,
-        "toughness": 3
-      },
+      "name": "Lavaback Rhino",
+      "mana_cost": "{4}{R}",
+      "types": [
+        "creature"
+      ],
+      "subtypes": [
+        "rhino"
+      ],
+      "keywords": [
+        "haste"
+      ],
+      "power": 5,
+      "toughness": 3,
       "rarity": "common",
       "printing": {
         "set": "fxb",
@@ -642,55 +592,53 @@
       }
     },
     {
-      "card": {
-        "name": "Vorran, Flame Herald",
-        "mana_cost": "{2}{R}{R}",
-        "types": [
-          "planeswalker"
-        ],
-        "subtypes": [
-          "vorran"
-        ],
-        "loyalty": 3,
-        "abilities": [
-          {
-            "loyalty": {
-              "cost": 1,
-              "targets": [
-                "any_target"
-              ],
-              "effects": [
-                {
-                  "deal_damage": {
-                    "amount": 1,
-                    "to": {
-                      "target": 0
-                    }
+      "name": "Vorran, Flame Herald",
+      "mana_cost": "{2}{R}{R}",
+      "types": [
+        "planeswalker"
+      ],
+      "subtypes": [
+        "vorran"
+      ],
+      "loyalty": 3,
+      "abilities": [
+        {
+          "loyalty": {
+            "cost": 1,
+            "targets": [
+              "any_target"
+            ],
+            "effects": [
+              {
+                "deal_damage": {
+                  "amount": 1,
+                  "to": {
+                    "target": 0
                   }
                 }
-              ]
-            }
-          },
-          {
-            "loyalty": {
-              "cost": -3,
-              "targets": [
-                "creature"
-              ],
-              "effects": [
-                {
-                  "deal_damage": {
-                    "amount": 4,
-                    "to": {
-                      "target": 0
-                    }
-                  }
-                }
-              ]
-            }
+              }
+            ]
           }
-        ]
-      },
+        },
+        {
+          "loyalty": {
+            "cost": -3,
+            "targets": [
+              "creature"
+            ],
+            "effects": [
+              {
+                "deal_damage": {
+                  "amount": 4,
+                  "to": {
+                    "target": 0
+                  }
+                }
+              }
+            ]
+          }
+        }
+      ],
       "rarity": "mythic",
       "printing": {
         "set": "fxb",
@@ -698,32 +646,30 @@
       }
     },
     {
-      "card": {
-        "name": "Blazing Volley",
-        "mana_cost": "{1}{R}",
-        "types": [
-          "instant"
-        ],
-        "abilities": [
-          {
-            "spell": {
-              "effects": [
-                {
-                  "deal_damage": {
-                    "amount": 3,
-                    "to": {
-                      "target": 0
-                    }
+      "name": "Blazing Volley",
+      "mana_cost": "{1}{R}",
+      "types": [
+        "instant"
+      ],
+      "abilities": [
+        {
+          "spell": {
+            "effects": [
+              {
+                "deal_damage": {
+                  "amount": 3,
+                  "to": {
+                    "target": 0
                   }
                 }
-              ],
-              "targets": [
-                "creature_or_planeswalker"
-              ]
-            }
+              }
+            ],
+            "targets": [
+              "creature_or_planeswalker"
+            ]
           }
-        ]
-      },
+        }
+      ],
       "rarity": "uncommon",
       "printing": {
         "set": "fxb",
@@ -731,32 +677,30 @@
       }
     },
     {
-      "card": {
-        "name": "Pyre Burst",
-        "mana_cost": "{4}{R}{R}",
-        "types": [
-          "sorcery"
-        ],
-        "abilities": [
-          {
-            "spell": {
-              "effects": [
-                {
-                  "deal_damage": {
-                    "amount": 5,
-                    "to": {
-                      "target": 0
-                    }
+      "name": "Pyre Burst",
+      "mana_cost": "{4}{R}{R}",
+      "types": [
+        "sorcery"
+      ],
+      "abilities": [
+        {
+          "spell": {
+            "effects": [
+              {
+                "deal_damage": {
+                  "amount": 5,
+                  "to": {
+                    "target": 0
                   }
                 }
-              ],
-              "targets": [
-                "any_target"
-              ]
-            }
+              }
+            ],
+            "targets": [
+              "any_target"
+            ]
           }
-        ]
-      },
+        }
+      ],
       "rarity": "rare",
       "printing": {
         "set": "fxb",
@@ -764,29 +708,27 @@
       }
     },
     {
-      "card": {
-        "name": "Saplight Druid",
-        "mana_cost": "{G}",
-        "types": [
-          "creature"
-        ],
-        "subtypes": [
-          "elf",
-          "druid"
-        ],
-        "power": 1,
-        "toughness": 1,
-        "abilities": [
-          {
-            "mana": {
-              "cost": [
-                "tap"
-              ],
-              "produce": "{G}"
-            }
+      "name": "Saplight Druid",
+      "mana_cost": "{G}",
+      "types": [
+        "creature"
+      ],
+      "subtypes": [
+        "elf",
+        "druid"
+      ],
+      "power": 1,
+      "toughness": 1,
+      "abilities": [
+        {
+          "mana": {
+            "cost": [
+              "tap"
+            ],
+            "produce": "{G}"
           }
-        ]
-      },
+        }
+      ],
       "rarity": "common",
       "printing": {
         "set": "fxb",
@@ -794,18 +736,16 @@
       }
     },
     {
-      "card": {
-        "name": "Fernback Boar",
-        "mana_cost": "{1}{G}",
-        "types": [
-          "creature"
-        ],
-        "subtypes": [
-          "boar"
-        ],
-        "power": 3,
-        "toughness": 2
-      },
+      "name": "Fernback Boar",
+      "mana_cost": "{1}{G}",
+      "types": [
+        "creature"
+      ],
+      "subtypes": [
+        "boar"
+      ],
+      "power": 3,
+      "toughness": 2,
       "rarity": "common",
       "printing": {
         "set": "fxb",
@@ -813,18 +753,16 @@
       }
     },
     {
-      "card": {
-        "name": "Canopy Stalker",
-        "mana_cost": "{2}{G}",
-        "types": [
-          "creature"
-        ],
-        "subtypes": [
-          "spider"
-        ],
-        "power": 3,
-        "toughness": 4
-      },
+      "name": "Canopy Stalker",
+      "mana_cost": "{2}{G}",
+      "types": [
+        "creature"
+      ],
+      "subtypes": [
+        "spider"
+      ],
+      "power": 3,
+      "toughness": 4,
       "rarity": "uncommon",
       "printing": {
         "set": "fxb",
@@ -832,18 +770,16 @@
       }
     },
     {
-      "card": {
-        "name": "Grovekeeper Wurm",
-        "mana_cost": "{4}{G}{G}",
-        "types": [
-          "creature"
-        ],
-        "subtypes": [
-          "wurm"
-        ],
-        "power": 6,
-        "toughness": 6
-      },
+      "name": "Grovekeeper Wurm",
+      "mana_cost": "{4}{G}{G}",
+      "types": [
+        "creature"
+      ],
+      "subtypes": [
+        "wurm"
+      ],
+      "power": 6,
+      "toughness": 6,
       "rarity": "rare",
       "printing": {
         "set": "fxb",
@@ -851,18 +787,16 @@
       }
     },
     {
-      "card": {
-        "name": "Highland Mammoth",
-        "mana_cost": "{3}{G}",
-        "types": [
-          "creature"
-        ],
-        "subtypes": [
-          "elephant"
-        ],
-        "power": 4,
-        "toughness": 4
-      },
+      "name": "Highland Mammoth",
+      "mana_cost": "{3}{G}",
+      "types": [
+        "creature"
+      ],
+      "subtypes": [
+        "elephant"
+      ],
+      "power": 4,
+      "toughness": 4,
       "rarity": "common",
       "printing": {
         "set": "fxb",
@@ -870,33 +804,31 @@
       }
     },
     {
-      "card": {
-        "name": "Bramble Growth",
-        "mana_cost": "{1}{G}",
-        "types": [
-          "sorcery"
-        ],
-        "abilities": [
-          {
-            "spell": {
-              "effects": [
-                {
-                  "add_counters": {
-                    "counter": "+1/+1",
-                    "amount": 2,
-                    "to": {
-                      "target": 0
-                    }
+      "name": "Bramble Growth",
+      "mana_cost": "{1}{G}",
+      "types": [
+        "sorcery"
+      ],
+      "abilities": [
+        {
+          "spell": {
+            "effects": [
+              {
+                "add_counters": {
+                  "counter": "+1/+1",
+                  "amount": 2,
+                  "to": {
+                    "target": 0
                   }
                 }
-              ],
-              "targets": [
-                "creature"
-              ]
-            }
+              }
+            ],
+            "targets": [
+              "creature"
+            ]
           }
-        ]
-      },
+        }
+      ],
       "rarity": "common",
       "printing": {
         "set": "fxb",
@@ -904,31 +836,29 @@
       }
     },
     {
-      "card": {
-        "name": "Feral Roar",
-        "mana_cost": "{2}{G}",
-        "types": [
-          "instant"
-        ],
-        "abilities": [
-          {
-            "spell": {
-              "effects": [
-                {
-                  "pump": {
-                    "power": 2,
-                    "toughness": 2,
-                    "to": {
-                      "each": "creature",
-                      "controller": "you"
-                    }
+      "name": "Feral Roar",
+      "mana_cost": "{2}{G}",
+      "types": [
+        "instant"
+      ],
+      "abilities": [
+        {
+          "spell": {
+            "effects": [
+              {
+                "pump": {
+                  "power": 2,
+                  "toughness": 2,
+                  "to": {
+                    "each": "creature",
+                    "controller": "you"
                   }
                 }
-              ]
-            }
+              }
+            ]
           }
-        ]
-      },
+        }
+      ],
       "rarity": "uncommon",
       "printing": {
         "set": "fxb",
@@ -936,19 +866,17 @@
       }
     },
     {
-      "card": {
-        "name": "Brass Golem",
-        "mana_cost": "{4}",
-        "types": [
-          "artifact",
-          "creature"
-        ],
-        "subtypes": [
-          "golem"
-        ],
-        "power": 3,
-        "toughness": 3
-      },
+      "name": "Brass Golem",
+      "mana_cost": "{4}",
+      "types": [
+        "artifact",
+        "creature"
+      ],
+      "subtypes": [
+        "golem"
+      ],
+      "power": 3,
+      "toughness": 3,
       "rarity": "rare",
       "printing": {
         "set": "fxb",
@@ -956,32 +884,30 @@
       }
     },
     {
-      "card": {
-        "name": "Tidewild Compass",
-        "mana_cost": "{3}",
-        "types": [
-          "artifact"
-        ],
-        "abilities": [
-          {
-            "activated": {
-              "cost": [
-                "tap",
-                {
-                  "mana": "{2}"
+      "name": "Tidewild Compass",
+      "mana_cost": "{3}",
+      "types": [
+        "artifact"
+      ],
+      "abilities": [
+        {
+          "activated": {
+            "cost": [
+              "tap",
+              {
+                "mana": "{2}"
+              }
+            ],
+            "effects": [
+              {
+                "gain_life": {
+                  "amount": 2
                 }
-              ],
-              "effects": [
-                {
-                  "gain_life": {
-                    "amount": 2
-                  }
-                }
-              ]
-            }
+              }
+            ]
           }
-        ]
-      },
+        }
+      ],
       "rarity": "common",
       "printing": {
         "set": "fxb",
@@ -989,23 +915,21 @@
       }
     },
     {
-      "card": {
-        "name": "Hollow Idol",
-        "mana_cost": "{1}",
-        "types": [
-          "artifact"
-        ],
-        "abilities": [
-          {
-            "mana": {
-              "cost": [
-                "tap"
-              ],
-              "produce": "{C}"
-            }
+      "name": "Hollow Idol",
+      "mana_cost": "{1}",
+      "types": [
+        "artifact"
+      ],
+      "abilities": [
+        {
+          "mana": {
+            "cost": [
+              "tap"
+            ],
+            "produce": "{C}"
           }
-        ]
-      },
+        }
+      ],
       "rarity": "common",
       "printing": {
         "set": "fxb",
@@ -1013,22 +937,20 @@
       }
     },
     {
-      "card": {
-        "name": "Mirefang Reaver",
-        "mana_cost": "{1}{B}{R}",
-        "types": [
-          "creature"
-        ],
-        "subtypes": [
-          "vampire",
-          "warrior"
-        ],
-        "keywords": [
-          "haste"
-        ],
-        "power": 3,
-        "toughness": 3
-      },
+      "name": "Mirefang Reaver",
+      "mana_cost": "{1}{B}{R}",
+      "types": [
+        "creature"
+      ],
+      "subtypes": [
+        "vampire",
+        "warrior"
+      ],
+      "keywords": [
+        "haste"
+      ],
+      "power": 3,
+      "toughness": 3,
       "rarity": "uncommon",
       "printing": {
         "set": "fxb",
@@ -1036,36 +958,34 @@
       }
     },
     {
-      "card": {
-        "name": "Glade Benediction",
-        "mana_cost": "{G}{W}",
-        "types": [
-          "instant"
-        ],
-        "abilities": [
-          {
-            "spell": {
-              "effects": [
-                {
-                  "gain_life": {
-                    "amount": 3
-                  }
-                },
-                {
-                  "pump": {
-                    "power": 1,
-                    "toughness": 1,
-                    "to": {
-                      "each": "creature",
-                      "controller": "you"
-                    }
+      "name": "Glade Benediction",
+      "mana_cost": "{G}{W}",
+      "types": [
+        "instant"
+      ],
+      "abilities": [
+        {
+          "spell": {
+            "effects": [
+              {
+                "gain_life": {
+                  "amount": 3
+                }
+              },
+              {
+                "pump": {
+                  "power": 1,
+                  "toughness": 1,
+                  "to": {
+                    "each": "creature",
+                    "controller": "you"
                   }
                 }
-              ]
-            }
+              }
+            ]
           }
-        ]
-      },
+        }
+      ],
       "rarity": "rare",
       "printing": {
         "set": "fxb",
@@ -1073,30 +993,28 @@
       }
     },
     {
-      "card": {
-        "name": "Cindermarsh",
-        "types": [
-          "land"
-        ],
-        "abilities": [
-          {
-            "mana": {
-              "cost": [
-                "tap"
-              ],
-              "produce": "{B}"
-            }
-          },
-          {
-            "mana": {
-              "cost": [
-                "tap"
-              ],
-              "produce": "{R}"
-            }
+      "name": "Cindermarsh",
+      "types": [
+        "land"
+      ],
+      "abilities": [
+        {
+          "mana": {
+            "cost": [
+              "tap"
+            ],
+            "produce": "{B}"
           }
-        ]
-      },
+        },
+        {
+          "mana": {
+            "cost": [
+              "tap"
+            ],
+            "produce": "{R}"
+          }
+        }
+      ],
       "rarity": "common",
       "printing": {
         "set": "fxb",
@@ -1104,16 +1022,14 @@
       }
     },
     {
-      "card": {
-        "name": "Sunlit Glade",
-        "types": [
-          "land"
-        ],
-        "subtypes": [
-          "forest",
-          "plains"
-        ]
-      },
+      "name": "Sunlit Glade",
+      "types": [
+        "land"
+      ],
+      "subtypes": [
+        "forest",
+        "plains"
+      ],
       "rarity": "common",
       "printing": {
         "set": "fxb",
@@ -1121,30 +1037,28 @@
       }
     },
     {
-      "card": {
-        "name": "Murkwater Cove",
-        "types": [
-          "land"
-        ],
-        "abilities": [
-          {
-            "mana": {
-              "cost": [
-                "tap"
-              ],
-              "produce": "{U}"
-            }
-          },
-          {
-            "mana": {
-              "cost": [
-                "tap"
-              ],
-              "produce": "{B}"
-            }
+      "name": "Murkwater Cove",
+      "types": [
+        "land"
+      ],
+      "abilities": [
+        {
+          "mana": {
+            "cost": [
+              "tap"
+            ],
+            "produce": "{U}"
           }
-        ]
-      },
+        },
+        {
+          "mana": {
+            "cost": [
+              "tap"
+            ],
+            "produce": "{B}"
+          }
+        }
+      ],
       "rarity": "uncommon",
       "printing": {
         "set": "fxb",

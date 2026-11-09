@@ -7,19 +7,17 @@
   "standard_legal_until_estimated": false,
   "cards": [
     {
-      "card": {
-        "name": "Dawnward Squire",
-        "mana_cost": "{W}",
-        "types": [
-          "creature"
-        ],
-        "subtypes": [
-          "human",
-          "soldier"
-        ],
-        "power": 1,
-        "toughness": 2
-      },
+      "name": "Dawnward Squire",
+      "mana_cost": "{W}",
+      "types": [
+        "creature"
+      ],
+      "subtypes": [
+        "human",
+        "soldier"
+      ],
+      "power": 1,
+      "toughness": 2,
       "rarity": "common",
       "printing": {
         "set": "fxa",
@@ -27,19 +25,17 @@
       }
     },
     {
-      "card": {
-        "name": "Lantern Warden",
-        "mana_cost": "{1}{W}",
-        "types": [
-          "creature"
-        ],
-        "subtypes": [
-          "human",
-          "cleric"
-        ],
-        "power": 2,
-        "toughness": 2
-      },
+      "name": "Lantern Warden",
+      "mana_cost": "{1}{W}",
+      "types": [
+        "creature"
+      ],
+      "subtypes": [
+        "human",
+        "cleric"
+      ],
+      "power": 2,
+      "toughness": 2,
       "rarity": "common",
       "printing": {
         "set": "fxa",
@@ -47,39 +43,37 @@
       }
     },
     {
-      "card": {
-        "name": "Bastion Lancer",
-        "mana_cost": "{2}{W}",
-        "types": [
-          "creature"
-        ],
-        "subtypes": [
-          "human",
-          "knight"
-        ],
-        "power": 2,
-        "toughness": 3,
-        "abilities": [
-          {
-            "activated": {
-              "cost": [
-                {
-                  "mana": "{1}{W}"
+      "name": "Bastion Lancer",
+      "mana_cost": "{2}{W}",
+      "types": [
+        "creature"
+      ],
+      "subtypes": [
+        "human",
+        "knight"
+      ],
+      "power": 2,
+      "toughness": 3,
+      "abilities": [
+        {
+          "activated": {
+            "cost": [
+              {
+                "mana": "{1}{W}"
+              }
+            ],
+            "effects": [
+              {
+                "pump": {
+                  "power": 1,
+                  "toughness": 1,
+                  "to": "self"
                 }
-              ],
-              "effects": [
-                {
-                  "pump": {
-                    "power": 1,
-                    "toughness": 1,
-                    "to": "self"
-                  }
-                }
-              ]
-            }
+              }
+            ]
           }
-        ]
-      },
+        }
+      ],
       "rarity": "uncommon",
       "printing": {
         "set": "fxa",
@@ -87,19 +81,17 @@
       }
     },
     {
-      "card": {
-        "name": "Sunmantle Knight",
-        "mana_cost": "{3}{W}",
-        "types": [
-          "creature"
-        ],
-        "subtypes": [
-          "human",
-          "knight"
-        ],
-        "power": 3,
-        "toughness": 4
-      },
+      "name": "Sunmantle Knight",
+      "mana_cost": "{3}{W}",
+      "types": [
+        "creature"
+      ],
+      "subtypes": [
+        "human",
+        "knight"
+      ],
+      "power": 3,
+      "toughness": 4,
       "rarity": "rare",
       "printing": {
         "set": "fxa",
@@ -107,18 +99,16 @@
       }
     },
     {
-      "card": {
-        "name": "Choir of Spires",
-        "mana_cost": "{4}{W}{W}",
-        "types": [
-          "creature"
-        ],
-        "subtypes": [
-          "angel"
-        ],
-        "power": 5,
-        "toughness": 5
-      },
+      "name": "Choir of Spires",
+      "mana_cost": "{4}{W}{W}",
+      "types": [
+        "creature"
+      ],
+      "subtypes": [
+        "angel"
+      ],
+      "power": 5,
+      "toughness": 5,
       "rarity": "common",
       "printing": {
         "set": "fxa",
@@ -126,26 +116,24 @@
       }
     },
     {
-      "card": {
-        "name": "Mending Rite",
-        "mana_cost": "{1}{W}",
-        "types": [
-          "instant"
-        ],
-        "abilities": [
-          {
-            "spell": {
-              "effects": [
-                {
-                  "gain_life": {
-                    "amount": 4
-                  }
+      "name": "Mending Rite",
+      "mana_cost": "{1}{W}",
+      "types": [
+        "instant"
+      ],
+      "abilities": [
+        {
+          "spell": {
+            "effects": [
+              {
+                "gain_life": {
+                  "amount": 4
                 }
-              ]
-            }
+              }
+            ]
           }
-        ]
-      },
+        }
+      ],
       "rarity": "common",
       "printing": {
         "set": "fxa",
@@ -153,48 +141,46 @@
       }
     },
     {
-      "card": {
-        "name": "Ilsa, Wall Keeper",
-        "mana_cost": "{2}{W}{W}",
-        "types": [
-          "planeswalker"
-        ],
-        "subtypes": [
-          "ilsa"
-        ],
-        "loyalty": 4,
-        "abilities": [
-          {
-            "loyalty": {
-              "cost": 1,
-              "effects": [
-                {
-                  "gain_life": {
-                    "amount": 2
-                  }
+      "name": "Ilsa, Wall Keeper",
+      "mana_cost": "{2}{W}{W}",
+      "types": [
+        "planeswalker"
+      ],
+      "subtypes": [
+        "ilsa"
+      ],
+      "loyalty": 4,
+      "abilities": [
+        {
+          "loyalty": {
+            "cost": 1,
+            "effects": [
+              {
+                "gain_life": {
+                  "amount": 2
                 }
-              ]
-            }
-          },
-          {
-            "loyalty": {
-              "cost": -2,
-              "effects": [
-                {
-                  "add_counters": {
-                    "counter": "+1/+1",
-                    "amount": 1,
-                    "to": {
-                      "each": "creature",
-                      "controller": "you"
-                    }
-                  }
-                }
-              ]
-            }
+              }
+            ]
           }
-        ]
-      },
+        },
+        {
+          "loyalty": {
+            "cost": -2,
+            "effects": [
+              {
+                "add_counters": {
+                  "counter": "+1/+1",
+                  "amount": 1,
+                  "to": {
+                    "each": "creature",
+                    "controller": "you"
+                  }
+                }
+              }
+            ]
+          }
+        }
+      ],
       "rarity": "mythic",
       "printing": {
         "set": "fxa",
@@ -202,22 +188,20 @@
       }
     },
     {
-      "card": {
-        "name": "Tidecaller Adept",
-        "mana_cost": "{U}",
-        "types": [
-          "creature"
-        ],
-        "subtypes": [
-          "merfolk",
-          "wizard"
-        ],
-        "keywords": [
-          "flash"
-        ],
-        "power": 1,
-        "toughness": 1
-      },
+      "name": "Tidecaller Adept",
+      "mana_cost": "{U}",
+      "types": [
+        "creature"
+      ],
+      "subtypes": [
+        "merfolk",
+        "wizard"
+      ],
+      "keywords": [
+        "flash"
+      ],
+      "power": 1,
+      "toughness": 1,
       "rarity": "rare",
       "printing": {
         "set": "fxa",
@@ -225,38 +209,36 @@
       }
     },
     {
-      "card": {
-        "name": "Mistglass Seer",
-        "mana_cost": "{1}{U}",
-        "types": [
-          "creature"
-        ],
-        "subtypes": [
-          "human",
-          "wizard"
-        ],
-        "power": 1,
-        "toughness": 3,
-        "abilities": [
-          {
-            "activated": {
-              "cost": [
-                "tap",
-                {
-                  "mana": "{2}{U}"
+      "name": "Mistglass Seer",
+      "mana_cost": "{1}{U}",
+      "types": [
+        "creature"
+      ],
+      "subtypes": [
+        "human",
+        "wizard"
+      ],
+      "power": 1,
+      "toughness": 3,
+      "abilities": [
+        {
+          "activated": {
+            "cost": [
+              "tap",
+              {
+                "mana": "{2}{U}"
+              }
+            ],
+            "effects": [
+              {
+                "draw": {
+                  "amount": 1
                 }
-              ],
-              "effects": [
-                {
-                  "draw": {
-                    "amount": 1
-                  }
-                }
-              ]
-            }
+              }
+            ]
           }
-        ]
-      },
+        }
+      ],
       "rarity": "common",
       "printing": {
         "set": "fxa",
@@ -264,18 +246,16 @@
       }
     },
     {
-      "card": {
-        "name": "Reefwatch Drake",
-        "mana_cost": "{2}{U}",
-        "types": [
-          "creature"
-        ],
-        "subtypes": [
-          "drake"
-        ],
-        "power": 2,
-        "toughness": 3
-      },
+      "name": "Reefwatch Drake",
+      "mana_cost": "{2}{U}",
+      "types": [
+        "creature"
+      ],
+      "subtypes": [
+        "drake"
+      ],
+      "power": 2,
+      "toughness": 3,
       "rarity": "common",
       "printing": {
         "set": "fxa",
@@ -283,21 +263,19 @@
       }
     },
     {
-      "card": {
-        "name": "Abyssal Courier",
-        "mana_cost": "{3}{U}",
-        "types": [
-          "creature"
-        ],
-        "subtypes": [
-          "merfolk"
-        ],
-        "keywords": [
-          "flash"
-        ],
-        "power": 3,
-        "toughness": 3
-      },
+      "name": "Abyssal Courier",
+      "mana_cost": "{3}{U}",
+      "types": [
+        "creature"
+      ],
+      "subtypes": [
+        "merfolk"
+      ],
+      "keywords": [
+        "flash"
+      ],
+      "power": 3,
+      "toughness": 3,
       "rarity": "uncommon",
       "printing": {
         "set": "fxa",
@@ -305,18 +283,16 @@
       }
     },
     {
-      "card": {
-        "name": "Stormcrown Leviathan",
-        "mana_cost": "{5}{U}{U}",
-        "types": [
-          "creature"
-        ],
-        "subtypes": [
-          "leviathan"
-        ],
-        "power": 6,
-        "toughness": 6
-      },
+      "name": "Stormcrown Leviathan",
+      "mana_cost": "{5}{U}{U}",
+      "types": [
+        "creature"
+      ],
+      "subtypes": [
+        "leviathan"
+      ],
+      "power": 6,
+      "toughness": 6,
       "rarity": "rare",
       "printing": {
         "set": "fxa",
@@ -324,31 +300,29 @@
       }
     },
     {
-      "card": {
-        "name": "Quell the Tide",
-        "mana_cost": "{1}{U}{U}",
-        "types": [
-          "instant"
-        ],
-        "abilities": [
-          {
-            "spell": {
-              "effects": [
-                {
-                  "counter": {
-                    "to": {
-                      "target": 0
-                    }
+      "name": "Quell the Tide",
+      "mana_cost": "{1}{U}{U}",
+      "types": [
+        "instant"
+      ],
+      "abilities": [
+        {
+          "spell": {
+            "effects": [
+              {
+                "counter": {
+                  "to": {
+                    "target": 0
                   }
                 }
-              ],
-              "targets": [
-                "spell"
-              ]
-            }
+              }
+            ],
+            "targets": [
+              "spell"
+            ]
           }
-        ]
-      },
+        }
+      ],
       "rarity": "common",
       "printing": {
         "set": "fxa",
@@ -356,26 +330,24 @@
       }
     },
     {
-      "card": {
-        "name": "Glimpse Beyond",
-        "mana_cost": "{2}{U}",
-        "types": [
-          "sorcery"
-        ],
-        "abilities": [
-          {
-            "spell": {
-              "effects": [
-                {
-                  "draw": {
-                    "amount": 2
-                  }
+      "name": "Glimpse Beyond",
+      "mana_cost": "{2}{U}",
+      "types": [
+        "sorcery"
+      ],
+      "abilities": [
+        {
+          "spell": {
+            "effects": [
+              {
+                "draw": {
+                  "amount": 2
                 }
-              ]
-            }
+              }
+            ]
           }
-        ]
-      },
+        }
+      ],
       "rarity": "common",
       "printing": {
         "set": "fxa",
@@ -383,21 +355,19 @@
       }
     },
     {
-      "card": {
-        "name": "Gravemoss Rat",
-        "mana_cost": "{B}",
-        "types": [
-          "creature"
-        ],
-        "subtypes": [
-          "rat"
-        ],
-        "keywords": [
-          "haste"
-        ],
-        "power": 1,
-        "toughness": 1
-      },
+      "name": "Gravemoss Rat",
+      "mana_cost": "{B}",
+      "types": [
+        "creature"
+      ],
+      "subtypes": [
+        "rat"
+      ],
+      "keywords": [
+        "haste"
+      ],
+      "power": 1,
+      "toughness": 1,
       "rarity": "uncommon",
       "printing": {
         "set": "fxa",
@@ -405,19 +375,17 @@
       }
     },
     {
-      "card": {
-        "name": "Hollow Acolyte",
-        "mana_cost": "{1}{B}",
-        "types": [
-          "creature"
-        ],
-        "subtypes": [
-          "human",
-          "cleric"
-        ],
-        "power": 2,
-        "toughness": 1
-      },
+      "name": "Hollow Acolyte",
+      "mana_cost": "{1}{B}",
+      "types": [
+        "creature"
+      ],
+      "subtypes": [
+        "human",
+        "cleric"
+      ],
+      "power": 2,
+      "toughness": 1,
       "rarity": "rare",
       "printing": {
         "set": "fxa",
@@ -425,18 +393,16 @@
       }
     },
     {
-      "card": {
-        "name": "Duskfang Stalker",
-        "mana_cost": "{2}{B}",
-        "types": [
-          "creature"
-        ],
-        "subtypes": [
-          "vampire"
-        ],
-        "power": 3,
-        "toughness": 2
-      },
+      "name": "Duskfang Stalker",
+      "mana_cost": "{2}{B}",
+      "types": [
+        "creature"
+      ],
+      "subtypes": [
+        "vampire"
+      ],
+      "power": 3,
+      "toughness": 2,
       "rarity": "common",
       "printing": {
         "set": "fxa",
@@ -444,18 +410,16 @@
       }
     },
     {
-      "card": {
-        "name": "Cryptbound Brute",
-        "mana_cost": "{3}{B}",
-        "types": [
-          "creature"
-        ],
-        "subtypes": [
-          "zombie"
-        ],
-        "power": 4,
-        "toughness": 3
-      },
+      "name": "Cryptbound Brute",
+      "mana_cost": "{3}{B}",
+      "types": [
+        "creature"
+      ],
+      "subtypes": [
+        "zombie"
+      ],
+      "power": 4,
+      "toughness": 3,
       "rarity": "common",
       "printing": {
         "set": "fxa",
@@ -463,19 +427,17 @@
       }
     },
     {
-      "card": {
-        "name": "Ossuary Titan",
-        "mana_cost": "{4}{B}{B}",
-        "types": [
-          "creature"
-        ],
-        "subtypes": [
-          "zombie",
-          "giant"
-        ],
-        "power": 6,
-        "toughness": 5
-      },
+      "name": "Ossuary Titan",
+      "mana_cost": "{4}{B}{B}",
+      "types": [
+        "creature"
+      ],
+      "subtypes": [
+        "zombie",
+        "giant"
+      ],
+      "power": 6,
+      "toughness": 5,
       "rarity": "uncommon",
       "printing": {
         "set": "fxa",
@@ -483,32 +445,30 @@
       }
     },
     {
-      "card": {
-        "name": "Siphon Breath",
-        "mana_cost": "{1}{B}",
-        "types": [
-          "instant"
-        ],
-        "abilities": [
-          {
-            "spell": {
-              "effects": [
-                {
-                  "lose_life": {
-                    "amount": 2,
-                    "to": "each_opponent"
-                  }
-                },
-                {
-                  "gain_life": {
-                    "amount": 2
-                  }
+      "name": "Siphon Breath",
+      "mana_cost": "{1}{B}",
+      "types": [
+        "instant"
+      ],
+      "abilities": [
+        {
+          "spell": {
+            "effects": [
+              {
+                "lose_life": {
+                  "amount": 2,
+                  "to": "each_opponent"
                 }
-              ]
-            }
+              },
+              {
+                "gain_life": {
+                  "amount": 2
+                }
+              }
+            ]
           }
-        ]
-      },
+        }
+      ],
       "rarity": "rare",
       "printing": {
         "set": "fxa",
@@ -516,31 +476,29 @@
       }
     },
     {
-      "card": {
-        "name": "Final Rattle",
-        "mana_cost": "{2}{B}{B}",
-        "types": [
-          "sorcery"
-        ],
-        "abilities": [
-          {
-            "spell": {
-              "effects": [
-                {
-                  "destroy": {
-                    "to": {
-                      "target": 0
-                    }
+      "name": "Final Rattle",
+      "mana_cost": "{2}{B}{B}",
+      "types": [
+        "sorcery"
+      ],
+      "abilities": [
+        {
+          "spell": {
+            "effects": [
+              {
+                "destroy": {
+                  "to": {
+                    "target": 0
                   }
                 }
-              ],
-              "targets": [
-                "creature"
-              ]
-            }
+              }
+            ],
+            "targets": [
+              "creature"
+            ]
           }
-        ]
-      },
+        }
+      ],
       "rarity": "common",
       "printing": {
         "set": "fxa",
@@ -548,21 +506,19 @@
       }
     },
     {
-      "card": {
-        "name": "Cinder Whelp",
-        "mana_cost": "{R}",
-        "types": [
-          "creature"
-        ],
-        "subtypes": [
-          "dragon"
-        ],
-        "keywords": [
-          "haste"
-        ],
-        "power": 1,
-        "toughness": 1
-      },
+      "name": "Cinder Whelp",
+      "mana_cost": "{R}",
+      "types": [
+        "creature"
+      ],
+      "subtypes": [
+        "dragon"
+      ],
+      "keywords": [
+        "haste"
+      ],
+      "power": 1,
+      "toughness": 1,
       "rarity": "common",
       "printing": {
         "set": "fxa",
@@ -570,39 +526,37 @@
       }
     },
     {
-      "card": {
-        "name": "Emberfist Brawler",
-        "mana_cost": "{1}{R}",
-        "types": [
-          "creature"
-        ],
-        "subtypes": [
-          "human",
-          "warrior"
-        ],
-        "power": 2,
-        "toughness": 2,
-        "abilities": [
-          {
-            "activated": {
-              "cost": [
-                {
-                  "mana": "{R}"
+      "name": "Emberfist Brawler",
+      "mana_cost": "{1}{R}",
+      "types": [
+        "creature"
+      ],
+      "subtypes": [
+        "human",
+        "warrior"
+      ],
+      "power": 2,
+      "toughness": 2,
+      "abilities": [
+        {
+          "activated": {
+            "cost": [
+              {
+                "mana": "{R}"
+              }
+            ],
+            "effects": [
+              {
+                "pump": {
+                  "power": 1,
+                  "toughness": 0,
+                  "to": "self"
                 }
-              ],
-              "effects": [
-                {
-                  "pump": {
-                    "power": 1,
-                    "toughness": 0,
-                    "to": "self"
-                  }
-                }
-              ]
-            }
+              }
+            ]
           }
-        ]
-      },
+        }
+      ],
       "rarity": "uncommon",
       "printing": {
         "set": "fxa",
@@ -610,21 +564,19 @@
       }
     },
     {
-      "card": {
-        "name": "Ashwing Raider",
-        "mana_cost": "{2}{R}",
-        "types": [
-          "creature"
-        ],
-        "subtypes": [
-          "goblin"
-        ],
-        "keywords": [
-          "haste"
-        ],
-        "power": 3,
-        "toughness": 1
-      },
+      "name": "Ashwing Raider",
+      "mana_cost": "{2}{R}",
+      "types": [
+        "creature"
+      ],
+      "subtypes": [
+        "goblin"
+      ],
+      "keywords": [
+        "haste"
+      ],
+      "power": 3,
+      "toughness": 1,
       "rarity": "rare",
       "printing": {
         "set": "fxa",
@@ -632,18 +584,16 @@
       }
     },
     {
-      "card": {
-        "name": "Slagforge Ogre",
-        "mana_cost": "{3}{R}",
-        "types": [
-          "creature"
-        ],
-        "subtypes": [
-          "ogre"
-        ],
-        "power": 4,
-        "toughness": 3
-      },
+      "name": "Slagforge Ogre",
+      "mana_cost": "{3}{R}",
+      "types": [
+        "creature"
+      ],
+      "subtypes": [
+        "ogre"
+      ],
+      "power": 4,
+      "toughness": 3,
       "rarity": "common",
       "printing": {
         "set": "fxa",
@@ -651,18 +601,16 @@
       }
     },
     {
-      "card": {
-        "name": "Magma Colossus",
-        "mana_cost": "{5}{R}",
-        "types": [
-          "creature"
-        ],
-        "subtypes": [
-          "elemental"
-        ],
-        "power": 6,
-        "toughness": 4
-      },
+      "name": "Magma Colossus",
+      "mana_cost": "{5}{R}",
+      "types": [
+        "creature"
+      ],
+      "subtypes": [
+        "elemental"
+      ],
+      "power": 6,
+      "toughness": 4,
       "rarity": "common",
       "printing": {
         "set": "fxa",
@@ -670,32 +618,30 @@
       }
     },
     {
-      "card": {
-        "name": "Searing Jolt",
-        "mana_cost": "{R}",
-        "types": [
-          "instant"
-        ],
-        "abilities": [
-          {
-            "spell": {
-              "effects": [
-                {
-                  "deal_damage": {
-                    "amount": 2,
-                    "to": {
-                      "target": 0
-                    }
+      "name": "Searing Jolt",
+      "mana_cost": "{R}",
+      "types": [
+        "instant"
+      ],
+      "abilities": [
+        {
+          "spell": {
+            "effects": [
+              {
+                "deal_damage": {
+                  "amount": 2,
+                  "to": {
+                    "target": 0
                   }
                 }
-              ],
-              "targets": [
-                "any_target"
-              ]
-            }
+              }
+            ],
+            "targets": [
+              "any_target"
+            ]
           }
-        ]
-      },
+        }
+      ],
       "rarity": "uncommon",
       "printing": {
         "set": "fxa",
@@ -703,29 +649,27 @@
       }
     },
     {
-      "card": {
-        "name": "Rolling Cinders",
-        "mana_cost": "{3}{R}",
-        "types": [
-          "sorcery"
-        ],
-        "abilities": [
-          {
-            "spell": {
-              "effects": [
-                {
-                  "deal_damage": {
-                    "amount": 2,
-                    "to": {
-                      "each": "creature"
-                    }
+      "name": "Rolling Cinders",
+      "mana_cost": "{3}{R}",
+      "types": [
+        "sorcery"
+      ],
+      "abilities": [
+        {
+          "spell": {
+            "effects": [
+              {
+                "deal_damage": {
+                  "amount": 2,
+                  "to": {
+                    "each": "creature"
                   }
                 }
-              ]
-            }
+              }
+            ]
           }
-        ]
-      },
+        }
+      ],
       "rarity": "rare",
       "printing": {
         "set": "fxa",
@@ -733,18 +677,16 @@
       }
     },
     {
-      "card": {
-        "name": "Thornpaw Cub",
-        "mana_cost": "{G}",
-        "types": [
-          "creature"
-        ],
-        "subtypes": [
-          "cat"
-        ],
-        "power": 1,
-        "toughness": 2
-      },
+      "name": "Thornpaw Cub",
+      "mana_cost": "{G}",
+      "types": [
+        "creature"
+      ],
+      "subtypes": [
+        "cat"
+      ],
+      "power": 1,
+      "toughness": 2,
       "rarity": "common",
       "printing": {
         "set": "fxa",
@@ -752,18 +694,16 @@
       }
     },
     {
-      "card": {
-        "name": "Mossback Grazer",
-        "mana_cost": "{1}{G}",
-        "types": [
-          "creature"
-        ],
-        "subtypes": [
-          "beast"
-        ],
-        "power": 2,
-        "toughness": 3
-      },
+      "name": "Mossback Grazer",
+      "mana_cost": "{1}{G}",
+      "types": [
+        "creature"
+      ],
+      "subtypes": [
+        "beast"
+      ],
+      "power": 2,
+      "toughness": 3,
       "rarity": "common",
       "printing": {
         "set": "fxa",
@@ -771,18 +711,16 @@
       }
     },
     {
-      "card": {
-        "name": "Briarhorn Elk",
-        "mana_cost": "{2}{G}",
-        "types": [
-          "creature"
-        ],
-        "subtypes": [
-          "elk"
-        ],
-        "power": 3,
-        "toughness": 3
-      },
+      "name": "Briarhorn Elk",
+      "mana_cost": "{2}{G}",
+      "types": [
+        "creature"
+      ],
+      "subtypes": [
+        "elk"
+      ],
+      "power": 3,
+      "toughness": 3,
       "rarity": "uncommon",
       "printing": {
         "set": "fxa",
@@ -790,18 +728,16 @@
       }
     },
     {
-      "card": {
-        "name": "Rootwall Behemoth",
-        "mana_cost": "{4}{G}",
-        "types": [
-          "creature"
-        ],
-        "subtypes": [
-          "beast"
-        ],
-        "power": 5,
-        "toughness": 5
-      },
+      "name": "Rootwall Behemoth",
+      "mana_cost": "{4}{G}",
+      "types": [
+        "creature"
+      ],
+      "subtypes": [
+        "beast"
+      ],
+      "power": 5,
+      "toughness": 5,
       "rarity": "rare",
       "printing": {
         "set": "fxa",
@@ -809,18 +745,16 @@
       }
     },
     {
-      "card": {
-        "name": "Elderbark Ancient",
-        "mana_cost": "{5}{G}{G}",
-        "types": [
-          "creature"
-        ],
-        "subtypes": [
-          "treefolk"
-        ],
-        "power": 7,
-        "toughness": 7
-      },
+      "name": "Elderbark Ancient",
+      "mana_cost": "{5}{G}{G}",
+      "types": [
+        "creature"
+      ],
+      "subtypes": [
+        "treefolk"
+      ],
+      "power": 7,
+      "toughness": 7,
       "rarity": "common",
       "printing": {
         "set": "fxa",
@@ -828,33 +762,31 @@
       }
     },
     {
-      "card": {
-        "name": "Wild Surge",
-        "mana_cost": "{G}",
-        "types": [
-          "instant"
-        ],
-        "abilities": [
-          {
-            "spell": {
-              "effects": [
-                {
-                  "pump": {
-                    "power": 3,
-                    "toughness": 3,
-                    "to": {
-                      "target": 0
-                    }
+      "name": "Wild Surge",
+      "mana_cost": "{G}",
+      "types": [
+        "instant"
+      ],
+      "abilities": [
+        {
+          "spell": {
+            "effects": [
+              {
+                "pump": {
+                  "power": 3,
+                  "toughness": 3,
+                  "to": {
+                    "target": 0
                   }
                 }
-              ],
-              "targets": [
-                "creature"
-              ]
-            }
+              }
+            ],
+            "targets": [
+              "creature"
+            ]
           }
-        ]
-      },
+        }
+      ],
       "rarity": "common",
       "printing": {
         "set": "fxa",
@@ -862,39 +794,37 @@
       }
     },
     {
-      "card": {
-        "name": "Verdant Blessing",
-        "mana_cost": "{1}{G}",
-        "types": [
-          "enchantment"
-        ],
-        "abilities": [
-          {
-            "activated": {
-              "cost": [
-                {
-                  "mana": "{2}{G}"
-                }
-              ],
-              "effects": [
-                {
-                  "add_counters": {
-                    "counter": "+1/+1",
-                    "amount": 1,
-                    "to": {
-                      "target": 0
-                    }
+      "name": "Verdant Blessing",
+      "mana_cost": "{1}{G}",
+      "types": [
+        "enchantment"
+      ],
+      "abilities": [
+        {
+          "activated": {
+            "cost": [
+              {
+                "mana": "{2}{G}"
+              }
+            ],
+            "effects": [
+              {
+                "add_counters": {
+                  "counter": "+1/+1",
+                  "amount": 1,
+                  "to": {
+                    "target": 0
                   }
                 }
-              ],
-              "targets": [
-                "creature"
-              ],
-              "timing": "sorcery"
-            }
+              }
+            ],
+            "targets": [
+              "creature"
+            ],
+            "timing": "sorcery"
           }
-        ]
-      },
+        }
+      ],
       "rarity": "uncommon",
       "printing": {
         "set": "fxa",
@@ -902,19 +832,17 @@
       }
     },
     {
-      "card": {
-        "name": "Clockwork Sentry",
-        "mana_cost": "{3}",
-        "types": [
-          "artifact",
-          "creature"
-        ],
-        "subtypes": [
-          "construct"
-        ],
-        "power": 2,
-        "toughness": 3
-      },
+      "name": "Clockwork Sentry",
+      "mana_cost": "{3}",
+      "types": [
+        "artifact",
+        "creature"
+      ],
+      "subtypes": [
+        "construct"
+      ],
+      "power": 2,
+      "toughness": 3,
       "rarity": "rare",
       "printing": {
         "set": "fxa",
@@ -922,23 +850,21 @@
       }
     },
     {
-      "card": {
-        "name": "Copper Wayfinder",
-        "mana_cost": "{2}",
-        "types": [
-          "artifact"
-        ],
-        "abilities": [
-          {
-            "mana": {
-              "cost": [
-                "tap"
-              ],
-              "produce": "{C}"
-            }
+      "name": "Copper Wayfinder",
+      "mana_cost": "{2}",
+      "types": [
+        "artifact"
+      ],
+      "abilities": [
+        {
+          "mana": {
+            "cost": [
+              "tap"
+            ],
+            "produce": "{C}"
           }
-        ]
-      },
+        }
+      ],
       "rarity": "common",
       "printing": {
         "set": "fxa",
@@ -946,32 +872,30 @@
       }
     },
     {
-      "card": {
-        "name": "Rune Lens",
-        "mana_cost": "{1}",
-        "types": [
-          "artifact"
-        ],
-        "abilities": [
-          {
-            "activated": {
-              "cost": [
-                "tap",
-                {
-                  "mana": "{3}"
+      "name": "Rune Lens",
+      "mana_cost": "{1}",
+      "types": [
+        "artifact"
+      ],
+      "abilities": [
+        {
+          "activated": {
+            "cost": [
+              "tap",
+              {
+                "mana": "{3}"
+              }
+            ],
+            "effects": [
+              {
+                "draw": {
+                  "amount": 1
                 }
-              ],
-              "effects": [
-                {
-                  "draw": {
-                    "amount": 1
-                  }
-                }
-              ]
-            }
+              }
+            ]
           }
-        ]
-      },
+        }
+      ],
       "rarity": "common",
       "printing": {
         "set": "fxa",
@@ -979,22 +903,20 @@
       }
     },
     {
-      "card": {
-        "name": "Skyshore Paladin",
-        "mana_cost": "{1}{W}{U}",
-        "types": [
-          "creature"
-        ],
-        "subtypes": [
-          "human",
-          "knight"
-        ],
-        "keywords": [
-          "flash"
-        ],
-        "power": 3,
-        "toughness": 3
-      },
+      "name": "Skyshore Paladin",
+      "mana_cost": "{1}{W}{U}",
+      "types": [
+        "creature"
+      ],
+      "subtypes": [
+        "human",
+        "knight"
+      ],
+      "keywords": [
+        "flash"
+      ],
+      "power": 3,
+      "toughness": 3,
       "rarity": "uncommon",
       "printing": {
         "set": "fxa",
@@ -1002,22 +924,20 @@
       }
     },
     {
-      "card": {
-        "name": "Wildfire Marauder",
-        "mana_cost": "{1}{R}{G}",
-        "types": [
-          "creature"
-        ],
-        "subtypes": [
-          "centaur",
-          "warrior"
-        ],
-        "keywords": [
-          "haste"
-        ],
-        "power": 4,
-        "toughness": 2
-      },
+      "name": "Wildfire Marauder",
+      "mana_cost": "{1}{R}{G}",
+      "types": [
+        "creature"
+      ],
+      "subtypes": [
+        "centaur",
+        "warrior"
+      ],
+      "keywords": [
+        "haste"
+      ],
+      "power": 4,
+      "toughness": 2,
       "rarity": "rare",
       "printing": {
         "set": "fxa",
@@ -1025,18 +945,16 @@
       }
     },
     {
-      "card": {
-        "name": "Plains",
-        "types": [
-          "land"
-        ],
-        "supertypes": [
-          "basic"
-        ],
-        "subtypes": [
-          "plains"
-        ]
-      },
+      "name": "Plains",
+      "types": [
+        "land"
+      ],
+      "supertypes": [
+        "basic"
+      ],
+      "subtypes": [
+        "plains"
+      ],
       "rarity": "common",
       "printing": {
         "set": "fxa",
@@ -1044,18 +962,16 @@
       }
     },
     {
-      "card": {
-        "name": "Island",
-        "types": [
-          "land"
-        ],
-        "supertypes": [
-          "basic"
-        ],
-        "subtypes": [
-          "island"
-        ]
-      },
+      "name": "Island",
+      "types": [
+        "land"
+      ],
+      "supertypes": [
+        "basic"
+      ],
+      "subtypes": [
+        "island"
+      ],
       "rarity": "common",
       "printing": {
         "set": "fxa",
@@ -1063,18 +979,16 @@
       }
     },
     {
-      "card": {
-        "name": "Swamp",
-        "types": [
-          "land"
-        ],
-        "supertypes": [
-          "basic"
-        ],
-        "subtypes": [
-          "swamp"
-        ]
-      },
+      "name": "Swamp",
+      "types": [
+        "land"
+      ],
+      "supertypes": [
+        "basic"
+      ],
+      "subtypes": [
+        "swamp"
+      ],
       "rarity": "common",
       "printing": {
         "set": "fxa",
@@ -1082,18 +996,16 @@
       }
     },
     {
-      "card": {
-        "name": "Mountain",
-        "types": [
-          "land"
-        ],
-        "supertypes": [
-          "basic"
-        ],
-        "subtypes": [
-          "mountain"
-        ]
-      },
+      "name": "Mountain",
+      "types": [
+        "land"
+      ],
+      "supertypes": [
+        "basic"
+      ],
+      "subtypes": [
+        "mountain"
+      ],
       "rarity": "common",
       "printing": {
         "set": "fxa",
@@ -1101,18 +1013,16 @@
       }
     },
     {
-      "card": {
-        "name": "Forest",
-        "types": [
-          "land"
-        ],
-        "supertypes": [
-          "basic"
-        ],
-        "subtypes": [
-          "forest"
-        ]
-      },
+      "name": "Forest",
+      "types": [
+        "land"
+      ],
+      "supertypes": [
+        "basic"
+      ],
+      "subtypes": [
+        "forest"
+      ],
       "rarity": "common",
       "printing": {
         "set": "fxa",
@@ -1120,30 +1030,28 @@
       }
     },
     {
-      "card": {
-        "name": "Seagate Bastion",
-        "types": [
-          "land"
-        ],
-        "abilities": [
-          {
-            "mana": {
-              "cost": [
-                "tap"
-              ],
-              "produce": "{W}"
-            }
-          },
-          {
-            "mana": {
-              "cost": [
-                "tap"
-              ],
-              "produce": "{U}"
-            }
+      "name": "Seagate Bastion",
+      "types": [
+        "land"
+      ],
+      "abilities": [
+        {
+          "mana": {
+            "cost": [
+              "tap"
+            ],
+            "produce": "{W}"
           }
-        ]
-      },
+        },
+        {
+          "mana": {
+            "cost": [
+              "tap"
+            ],
+            "produce": "{U}"
+          }
+        }
+      ],
       "rarity": "common",
       "printing": {
         "set": "fxa",
@@ -1151,16 +1059,14 @@
       }
     },
     {
-      "card": {
-        "name": "Ember Thicket",
-        "types": [
-          "land"
-        ],
-        "subtypes": [
-          "mountain",
-          "forest"
-        ]
-      },
+      "name": "Ember Thicket",
+      "types": [
+        "land"
+      ],
+      "subtypes": [
+        "mountain",
+        "forest"
+      ],
       "rarity": "uncommon",
       "printing": {
         "set": "fxa",
@@ -1168,22 +1074,20 @@
       }
     },
     {
-      "card": {
-        "name": "Barren Monolith",
-        "types": [
-          "land"
-        ],
-        "abilities": [
-          {
-            "mana": {
-              "cost": [
-                "tap"
-              ],
-              "produce": "{C}"
-            }
+      "name": "Barren Monolith",
+      "types": [
+        "land"
+      ],
+      "abilities": [
+        {
+          "mana": {
+            "cost": [
+              "tap"
+            ],
+            "produce": "{C}"
           }
-        ]
-      },
+        }
+      ],
       "rarity": "rare",
       "printing": {
         "set": "fxa",

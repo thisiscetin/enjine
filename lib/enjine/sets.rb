@@ -10,8 +10,8 @@ module Enjine
   #
   #   { "format": 1, "code": "trk", "name": "...", "released_at": "2026-11-13",
   #     "standard_legal_until": "2029-01-19", "standard_legal_until_estimated": true,
-  #     "cards": [ { "card": { ...card DSL... }, "rarity": "common",
-  #                  "printing": { "set": "trk", "number": "12" } } ] }
+  #     "cards": [ { "name": "Alfa", "types": ["instant"], ...card DSL...,
+  #                  "rarity": "common", "printing": { "set": "trk", "number": "12" } } ] }
   #
   # Cards are written by hand in Enjine's card DSL (docs/guides/card-data-format.md).
   # Every card must validate: a set with an invalid card fails to load with each
@@ -98,13 +98,18 @@ module Enjine
                     entries: entries.freeze)
       end
 
+      # A card is one object: the card DSL plus the optional set-only keys `rarity` and `printing`.
       def entry(raw, where)
-        raise InvalidSet, "#{where}: must be an object with a \"card\"" unless raw.is_a?(Hash) && raw["card"].is_a?(Hash)
+        raise InvalidSet, "#{where}: must be a card object" unless raw.is_a?(Hash)
 
-        printing = raw["printing"].is_a?(Hash) ? raw["printing"].slice("set", "number").transform_values(&:to_s).freeze : nil
-        Entry.new(definition: CardDefinition.from_h(raw["card"]), rarity: raw["rarity"], printing: printing)
+        printing = raw["printing"]
+        raise InvalidSet, "#{where}: printing must be {\"set\", \"number\"}" unless printing.nil? || printing.is_a?(Hash)
+
+        printing = printing&.slice("set", "number")&.transform_values(&:to_s)&.freeze
+        Entry.new(definition: CardDefinition.from_h(raw.except("rarity", "printing")), rarity: raw["rarity"],
+                  printing: printing)
       rescue InvalidCardDefinition => e
-        raise InvalidSet, "#{where} (#{raw.dig("card", "name").inspect}): #{e.errors.join("; ")}"
+        raise InvalidSet, "#{where} (#{raw["name"].inspect}): #{e.errors.join("; ")}"
       end
     end
   end

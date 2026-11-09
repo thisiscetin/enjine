@@ -39,8 +39,10 @@ until you ask for it.
 ```json
 { "format": 1, "code": "trk", "name": "...", "released_at": "2026-11-13",
   "standard_legal_until": "2029-01-19", "standard_legal_until_estimated": true,
-  "cards": [ { "card": { ...a card data block in CardDefinition#to_h form... },
+  "cards": [ { "name": "Alfa", "types": ["instant"], ...the card DSL...,
                "rarity": "common", "printing": { "set": "trk", "number": "12" } } ] }
+
+A set card is the card DSL plus two optional set-only keys, `rarity` and `printing`.
 ```
 
 `printing` identifies the printing without depending on any card database: the

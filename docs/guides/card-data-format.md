@@ -31,7 +31,8 @@ listed there works, and one that isn't listed doesn't exist yet.
 3. Put it where you need it:
    - **In a deck document's `cards`** (section 6). This is the simplest option and needs nothing else.
    - **In a set file** `lib/enjine/sets/<code>.json` (or your own `--sets-dir`), as
-     `{ "card": { ... }, "rarity": "common", "printing": { "set": "trk", "number": "12" } }`.
+     the same object plus optional `"rarity": "common"` and
+     `"printing": { "set": "trk", "number": "12" }`.
      The deck builder and collections read set files. A set with an invalid card fails
      to load and names the card and the error.
    - **In your own database** (section 8).

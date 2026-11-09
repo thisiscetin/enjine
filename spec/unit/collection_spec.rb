@@ -58,7 +58,7 @@ RSpec.describe Enjine::Collection do
       Dir.mktmpdir do |tmp|
         FileUtils.cp(File.join(dir, "fxa.json"), tmp)
         reprint = JSON.parse(File.read(File.join(dir, "fxa.json"))).merge("code" => "fxz", "name" => "Reprints")
-        reprint["cards"] = reprint["cards"].first(1).map { it.merge("card" => it["card"].merge("mana_cost" => "{1}{W}")) }
+        reprint["cards"] = reprint["cards"].first(1).map { it.merge("mana_cost" => "{1}{W}") }
         File.write(File.join(tmp, "fxz.json"), JSON.generate(reprint))
         entries = [{ "name" => "Dawnward Squire", "set" => "fxz", "count" => 2 }, { "name" => "Dawnward Squire" }]
         [entries, entries.reverse].each do |list|
