@@ -259,6 +259,14 @@ module Enjine
 
     # `face_down`: exile it face down (CR 406.3); the list of player indices who may look at it.
     def move!(id, to, reason:, position: :top, controller: nil, enters: nil, face_down: nil)
+      data = plan_move(id, to, reason: reason, position: position, controller: controller, enters: enters,
+                               face_down: face_down)
+      data && execute_zone_change!(data)
+    end
+
+    # The zone change `move!` would make, after replacement effects (CR 614), not yet executed; nil if a
+    # replacement cancelled it. Planning several before executing any lets them happen at once (CR 614.12).
+    def plan_move(id, to, reason:, position: :top, controller: nil, enters: nil, face_down: nil)
       data = { "object" => id, "to" => to, "position" => position, "reason" => reason, "controller" => controller }
       data["face_down"] = face_down if face_down && to == :exile
       data["enters"] = { "tapped" => enters&.fetch("tapped", false) == true, "counters" => {} } if to == :battlefield
@@ -266,7 +274,7 @@ module Enjine
       return nil if data["cancelled"] # e.g. a shield counter instead of being destroyed (CR 122.1c)
 
       merge_enters!(data["enters"], enters.except("tapped")) if enters && data["enters"] # tapped: replaceable (614.12)
-      execute_zone_change!(data)
+      data
     end
 
     # Counters from the caller ("with a +1/+1 counter", CR 701.72b) add to the ones replacements gave it.
@@ -276,15 +284,26 @@ module Enjine
       end
     end
 
-    # An "as this enters" choice the controller must make before `id` enters (CR 614.12).
+    # An "as this enters" choice the controller must make before `id` enters (CR 614.12). `id` may also
+    # name a land played from outside the game, or a token an effect is about to create (see
+    # Engine::Resolution#token_key).
     def entering_choice(id)
-      id = outside_object(nil, outside_card(id)) if outside_key?(id) # a land played from outside the game
-      chars(id).abilities.map(&:ability).find { it.kind == :entering_choice }
+      abilities = if outside_key?(id) then chars(outside_object(nil, outside_card(id))).abilities
+                  elsif state.objects.key?(id) then chars(id).abilities
+                  else token_to_create(id).printed_characteristics.abilities
+                  end
+      abilities.map(&:ability).find { it.kind == :entering_choice }
     end
 
-    # Records the answer to an enter_choice decision on the frame that asked.
+    # Records the answer to an enter_choice decision on the frame that asked, or, for a permanent an
+    # effect puts onto the battlefield, in that effect's locals (Engine::Resolution#ask_entering_choices!).
     def enter_choice!(option)
-      state.frames.last["enter"] = option.transform_keys(&:to_s)
+      answer = option.transform_keys(&:to_s)
+      if state.pending["effect"]
+        (answering_locals["entering"] ||= {})[state.pending["object"]] = answer.merge("player" => state.pending["player"])
+      else
+        state.frames.last["enter"] = answer
+      end
       ask!(nil)
     end
 
@@ -297,7 +316,12 @@ module Enjine
       choice = entering_choice(id)
       return nil unless choice && frame["enter"]
 
-      answer = frame["enter"].transform_keys(&:to_sym)
+      entering_status(choice, frame["enter"])
+    end
+
+    # What a permanent enters with given its "as this enters" answer (a memory, tapped, a copy, CR 707.5).
+    def entering_status(choice, answer)
+      answer = answer.except("player").transform_keys(&:to_sym)
       choice.respond_to?(:enters_with) ? choice.enters_with(self, answer) : choice.enters_for(answer)
     end
 
@@ -358,16 +382,21 @@ module Enjine
     # CR 111.1: a token enters the battlefield under its creator's control. Entering replacement
     # effects apply to it like to any permanent (CR 614.1c, 614.12).
     # `memory`: a token that's a copy (Engine::Copies#create_token_copy!).
-    def create_token!(definition, controller, tapped: false, memory: nil)
+    def create_token!(definition, controller, tapped: false, memory: nil, enters: nil)
       definition = catalog.fetch(propose("create_token", { "player" => controller, "token" => definition.id }).data["token"])
       obj = create_object(definition.id, controller, :battlefield)
       obj.memory.merge!(memory) if memory
+      entering = enters # an "as this enters" choice made before it's created (CR 614.12a)
+      tapped ||= entering&.dig("tapped") == true
       enters = propose("zone_change", { "object" => obj.id, "to" => :battlefield, "controller" => controller,
                                         "reason" => "create_token",
                                         "enters" => { "tapped" => tapped, "counters" => {} } }).data["enters"]
+      merge_enters!(enters, entering.except("tapped")) if entering
+      obj.memory.merge!(enters["memory"]) if enters["memory"]
       obj.controlled_since = state.turn
       obj.tapped = enters["tapped"]
       obj.counters.merge!(enters["counters"])
+      enter_as_copy!(obj, enters["copy"]) if enters["copy"] # CR 707.5 (Engine::Copies)
       state.battlefield.unshift(obj.id)
       enter_attacking!(obj) if enters["attacking"] # CR 508.4
       record_result!(obj.id)

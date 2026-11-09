@@ -55,6 +55,22 @@ RSpec.describe "Trigger, delayed, reflexive and entering-choice primitives" do
       expect(errors_of(:ability, { "enters_tapped_unless" => {} })).to eq(["x.enters_tapped_unless.condition: required"])
     end
 
+    it "validates pump durations and assimilate choices (CR 611.2a, 701.72c)" do
+      expect(errors_of(:effect, { "pump" => { "power" => 1, "toughness" => 1, "to" => "self", "duration" => "forever" } }))
+        .to eq(["x.pump.duration: must be one of end_of_turn, until_your_next_turn"])
+      expect(errors_of(:effect, { "assimilate" => { "to" => "exiled_with", "choose" => "yes" } }))
+        .to eq(["x.assimilate.choose: must be true or false"])
+      expect(errors_of(:effect, { "assimilate" => { "to" => "exiled_with", "for" => { "types" => ["planet"] } } }))
+        .to all(start_with("x.assimilate.for"))
+      pump, errors = build(:effect, { "pump" => { "power" => -1, "toughness" => 0, "to" => "self", "duration" => "until_your_next_turn" } })
+      expect([pump.to_s, errors]).to eq(["-1/+0 until your next turn → itself", []])
+      assimilate, = build(:effect, { "assimilate" => { "to" => "exiled_with", "for" => { "types" => ["creature"] }, "choose" => true } })
+      expect(assimilate.to_s).to start_with("assimilate one ")
+      delayed, errors = build(:effect, { "delayed_trigger" => { "when" => { "step_begins" => { "step" => "beginning_of_combat" } },
+                                                                "this_turn" => "once", "effects" => [{ "draw" => { "amount" => 1 } }] } })
+      expect([delayed.class.primitive_name, errors]).to eq(["delayed_trigger", []])
+    end
+
     it "rejects bad effect parameters" do
       expect(errors_of(:effect, { "draw" => { "amount" => 1, "to" => { "triggering" => "planet" } } }))
         .to eq(["x.draw.to.triggering: must be one of object, player"])
@@ -64,7 +80,7 @@ RSpec.describe "Trigger, delayed, reflexive and entering-choice primitives" do
         .to include(a_string_matching(/counters.Bad!: /), "x.return_to_battlefield.counters.Bad!: must be a positive integer")
       expect(errors_of(:effect, { "delayed_trigger" => { "when" => { "enters" => {} }, "this_turn" => "yes",
                                                          "effects" => [{ "draw" => { "amount" => 1 } }] } }))
-        .to eq(["x.delayed_trigger.this_turn: must be true or false"])
+        .to eq(["x.delayed_trigger.this_turn: must be true, false or \"once\""])
       expect(errors_of(:effect,
                        { "reflexive_trigger" => { "effects" => [] } })).to eq(["x.reflexive_trigger.effects: needs at least one effect"])
       expect(errors_of(:effect, { "may" => { "chooser" => "nobody", "effects" => [{ "draw" => { "amount" => 1 } }] } }))

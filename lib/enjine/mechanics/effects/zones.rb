@@ -161,7 +161,9 @@ module Enjine
             choices = stop?(locals, chosen) ? [] : choices(engine, ctx, chosen)
             return ask(engine, locals, ctx.controller, "Choose #{spec}", choices) unless choices.empty?
 
-            locals["chose"] = !perform!(engine, ctx, chosen).empty?
+            return :wait if put == "battlefield" && engine.ask_entering_choices!(locals, chosen.map { [it, ctx.controller] }) == :wait
+
+            locals["chose"] = !perform!(engine, ctx, chosen, locals).empty?
             locals["next"] = 0
           end
           run_list(engine, ctx, locals, @lists[locals["chose"] ? "then" : "otherwise"])
@@ -208,18 +210,23 @@ module Enjine
           options
         end
 
-        def perform!(engine, ctx, chosen)
+        def perform!(engine, ctx, chosen, locals)
           engine.reveal!(ctx.controller, chosen) if @reveal == "chosen"
+          return enter!(engine, ctx, chosen, locals) if put == "battlefield"
+
           chosen.filter_map { move(engine, ctx, it) }
+        end
+
+        # CR 614.12a: their "as this enters" choices were made first; they enter at the same time.
+        def enter!(engine, ctx, chosen, locals)
+          enters = @flags["tapped"] ? { "tapped" => true } : nil
+          engine.enter_battlefield!(locals, chosen.map { [it, ctx.controller, enters] }, reason: "put")
         end
 
         def move(engine, ctx, id)
           case put
           when "library_top", "library_bottom"
             engine.move!(id, :library, reason: "put", position: put == "library_top" ? :top : :bottom)
-          when "battlefield"
-            engine.move!(id, :battlefield, controller: ctx.controller, reason: "put",
-                                           enters: @flags["tapped"] ? { "tapped" => true } : nil)
           else
             fresh = engine.move!(id, put.to_sym, reason: put == "graveyard" ? "put" : put)
             engine.link_exiled!(ctx.source, fresh.id) if fresh && @flags["link"]

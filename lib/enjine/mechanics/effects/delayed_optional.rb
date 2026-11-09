@@ -49,12 +49,18 @@ module Enjine
           "return to the battlefield#{" tapped" if tapped}#{" under your control" if under == "you"}#{extra} → #{to}"
         end
 
-        def apply(engine, ctx)
+        # CR 614.12a: each card's "as this enters" choice is made first (asked in turn), then they all
+        # enter at the same time. The cards are fixed as the effect starts.
+        def run(engine, ctx, locals)
+          return :done unless locals.key?("cards") || condition.nil? || condition.true?(engine, ctx)
+
+          entries = (locals["cards"] ||= cards(engine, ctx).map { [it, under == "you" ? ctx.controller : engine.object(it).owner] })
+          entries = entries.select { engine.state.objects.key?(it[0]) }
+          return :wait if engine.ask_entering_choices!(locals, entries) == :wait
+
           enters = { "tapped" => tapped || nil, "counters" => counters.empty? ? nil : counters.dup }.compact
-          cards(engine, ctx).each do |id|
-            controller = under == "you" ? ctx.controller : engine.object(id).owner
-            engine.move!(id, :battlefield, controller: controller, reason: "return", enters: enters.empty? ? nil : enters)
-          end
+          engine.enter_battlefield!(locals, entries.map { [*it, enters.empty? ? nil : enters] }, reason: "return")
+          :done
         end
 
         # CR 400.4a: an instant or sorcery card can't enter the battlefield. CR 111.8: a token that
@@ -188,7 +194,8 @@ module Enjine
                             "watch" => "selector resolved now (e.g. {\"target\": 0}): the objects its trigger subject " \
                                        "\"watched\" and its effects' selector \"watched\" mean (\"when that creature dies\")",
                             "this_turn" => "true: it lasts until the end of this turn and triggers each time " \
-                                           "(\"whenever ... this turn\", CR 603.7b)" },
+                                           "(\"whenever ... this turn\", CR 603.7b); \"once\": only the next time " \
+                                           "this turn (\"at the beginning of the next combat this turn\")" },
                   example: { "delayed_trigger" => { "when" => { "step_begins" => { "step" => "end", "whose" => "each" } },
                                                     "effects" => [{ "sacrifice" => { "to" => { "result" => 0 } } }] } }
 
@@ -208,7 +215,7 @@ module Enjine
           @watch = raw_watch && Selector.build(raw_watch, errors, "#{path}.watch", targets_count: @targets_count,
                                                                                    results_count: @results_count)
           @this_turn = Mechanics.fetch_param(params, :this_turn)
-          errors << "#{path}.this_turn: must be true or false" unless [nil, true, false].include?(@this_turn)
+          errors << "#{path}.this_turn: must be true, false or \"once\"" unless [nil, true, false, "once"].include?(@this_turn)
         end
 
         def nested_effects = delayed_ability.effects
@@ -221,6 +228,7 @@ module Enjine
                     "ability" => ref, "results" => Snapshot.deep_copy(ctx.results || []) }
           entry["watched"] = @watch.resolve(engine, ctx) if @watch
           entry["turn"] = engine.state.turn if @this_turn
+          entry["once"] = true if @this_turn == "once" # CR 603.7b: the next time only, and only this turn
           engine.create_delayed_trigger!(entry)
         end
       end

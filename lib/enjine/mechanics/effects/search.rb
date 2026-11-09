@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require_relative "library"
+
 module Enjine
   module Mechanics
     module Effects
@@ -11,6 +13,8 @@ module Enjine
       # choices; other players see the reveal (when the effect reveals), the zone change
       # as their zone rules allow, and the shuffle.
       class SearchLibrary < ChoiceEffect
+        include EntersBattlefield # effects/library.rb
+
         primitive :effect, :search_library,
                   description: "Search your library for up to `count` cards matching `for`, then put them into your " \
                                "hand (or onto the battlefield, tapped if `tapped`, with `counters`) and shuffle. With a " \
@@ -103,7 +107,9 @@ module Enjine
             choices = candidates(engine, index, found)
             return ask(engine, locals, index, "Search your library (#{spec}): find a card", choices) unless choices.empty?
           end
-          finish!(engine, index, found)
+          return :wait if entering_choices?(engine, index, locals, found)
+
+          finish!(engine, index, found, locals)
           :done
         end
 
@@ -132,7 +138,7 @@ module Enjine
           choices << { "type" => "done" }
         end
 
-        def finish!(engine, index, found)
+        def finish!(engine, index, found, locals)
           if reveal && put == "hand"
             found.each do |id|
               engine.emit Events::CardRevealed.new(player: engine.name(index), object: id, card: engine.object(id).card)
@@ -141,10 +147,7 @@ module Enjine
           enters = {}
           enters["tapped"] = true if tapped
           enters["counters"] = @counters.dup unless @counters.empty?
-          found.each do
-            engine.move!(it, put.to_sym, controller: put == "battlefield" ? index : nil, reason: "search",
-                                         enters: enters.empty? ? nil : enters)
-          end
+          put_cards!(engine, locals, found, index, reason: "search", enters: enters.empty? ? nil : enters)
           engine.shuffle_library!(index) # CR 701.24b: the found cards have left; the rest is shuffled
         end
       end

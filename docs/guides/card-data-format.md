@@ -8,9 +8,9 @@ data block says.
 ```json
 { "name": "Ember Sprite", "mana_cost": "{1}{R}", "types": ["creature"], "subtypes": ["elemental"],
   "keywords": ["haste"], "power": 2, "toughness": 1,
-  "abilities": [ { "triggered": { "trigger": { "enters": "self" },
+  "abilities": [ { "triggered": { "when": { "enters": {} },
                                   "effects": [ { "deal_damage": { "amount": 1, "to": { "target": 0 } } } ],
-                                  "targets": ["any"] } } ] }
+                                  "targets": ["any_target"] } } ] }
 ```
 
 If a block uses something Enjine doesn't support, or has a typo, validation
@@ -259,6 +259,7 @@ is a flicker ("exile …, then return it to the battlefield under its owner's co
 | the triggering spell is a Saga | condition `{ "triggering": { "spell": { "subtypes": ["saga"] } } }` |
 | the targeted creature dying later this turn | `{ "delayed_trigger": { "when": { "dies": { "subject": "watched" } }, "watch": { "target": 0 }, "this_turn": true, "effects": [...] } }`; effects name the watched objects with the selector `"watched"` |
 | each of your creatures entering for the rest of the turn | `delayed_trigger` with `"this_turn": true` (it triggers each time until the turn ends) |
+| "at the beginning of the next combat this turn, gain control of that creature" | `{ "delayed_trigger": { "when": { "step_begins": { "step": "beginning_of_combat" } }, "this_turn": "once", "watch": { "target": 0 }, "effects": [{ "gain_control": { "to": "watched", "duration": "end_of_turn" } }] } }` (`"once"`: only the next time, and only this turn) |
 | optional A; if it was done, a reflexive trigger B with its own target | `{ "may": { "effects": [A], "then": [{ "reflexive_trigger": { "targets": [...], "effects": [B] } }] } }` |
 | a targeted opponent decides whether A happens; B if not | `{ "may": { "chooser": { "target": 0 }, "effects": [A], "otherwise": [B] } }` |
 | your life gain makes your permanents' triggered abilities trigger one extra time | `{ "additional_triggers": { "cause": "you_gain_life" } }` |
@@ -273,6 +274,7 @@ See `docs/reference/effects.md` for the generated list. Currently:
 | --- | --- | --- |
 | `deal_damage` | "deals N damage to …" | `{ "deal_damage": { "amount": N, "to": … } }` |
 | `pump` | "gets +X/+Y until end of turn" | `{ "pump": { "power": X, "toughness": Y, "to": … } }` |
+| `pump` | "get -1/-0 until your next turn" | `{ "pump": { "power": -1, "toughness": 0, "duration": "until_your_next_turn", "to": … } }` (ends as your next turn begins, CR 611.2a) |
 | `add_counters` | "put N +1/+1 counters on …" | `{ "add_counters": { "counter": "+1/+1", "amount": N, "to": … } }` (any counter name: `+1/+1`, `stun`, `shield`, `oil`, a keyword; see `docs/reference/counters.md`) |
 | `gain_life` | "you gain N life" | `{ "gain_life": { "amount": N } }` (`to` defaults to `"you"`) |
 | `lose_life` | "each opponent loses N life" | `{ "lose_life": { "amount": N, "to": "each_opponent" } }` |
@@ -351,6 +353,31 @@ Rule numbers are from the 2026-11-06 Comprehensive Rules.
   you face a dilemma"; `"controller": "opponent"` or `"any"` for others).
 - **Assimilate** (CR 701.72): the effect `{ "assimilate": { "to": … } }`. "Target
   creature card from a graveyard" is the filter `{ "graveyard_card": { "any_of": ["creature"] } }`.
+  "Assimilate a creature card exiled with this. If you can't, exile up to one target creature an
+  opponent controls" chooses among the linked cards as it resolves (`choose: true`, `for` a card spec),
+  and the exile only happens when the assimilate put nothing onto the battlefield (CR 701.72c, 607.2a;
+  the target is still chosen when the trigger is put on the stack, CR 603.3d):
+
+  ```json
+  { "triggered": { "when": { "any_of": [{ "enters": {} }, { "attacks": {} }] },
+                   "targets": [{ "filter": { "creature": { "controller": "opponent" } }, "optional": true }],
+                   "effects": [
+                     { "assimilate": { "to": "exiled_with", "for": { "types": ["creature"] }, "choose": true } },
+                     { "exile": { "to": { "target": 0 }, "link": true,
+                                  "if": { "amount": { "count": { "result": 0 } }, "at_most": 0 } } }] } }
+  ```
+- **"As this enters" choices on permanents put onto the battlefield by effects** (CR 614.12a).
+  Nothing to write: when `return_to_battlefield`, `search_library`, `dig`, `reveal_until`,
+  `choose_cards` (`put: "battlefield"`), `assimilate` or `create_token` puts a permanent with
+  `choose_number`, `choose_card_name` or `enters_tapped_unless_pay_life` onto the battlefield,
+  its controller-to-be answers an `enter_choice` (with `effect: true`) for each one in turn, then
+  they all enter at once. "Exile the top four cards of your library; put all permanent cards
+  exiled this way onto the battlefield under your control":
+
+  ```json
+  [{ "exile_top": { "amount": 4 } },
+   { "return_to_battlefield": { "to": { "result": 0 }, "under": "you" } }]
+  ```
 - **Strange new worlds** is an ability word: drop it. "The number of differently
   named lands you control" is the amount
   `{ "distinct_names": { "each": "land", "controller": "you" } }`.
