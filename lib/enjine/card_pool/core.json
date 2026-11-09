@@ -8537,6 +8537,336 @@
     ]
   },
   {
+    "name": "Rattletrap Wagon",
+    "mana_cost": "{2}",
+    "types": [
+      "artifact"
+    ],
+    "subtypes": [
+      "vehicle"
+    ],
+    "keywords": [
+      "trample"
+    ],
+    "power": 4,
+    "toughness": 3,
+    "abilities": [
+      {
+        "crew": {
+          "power": 2
+        }
+      },
+      {
+        "triggered": {
+          "when": {
+            "becomes_crewed": {}
+          },
+          "effects": [
+            {
+              "gain_life": {
+                "amount": 1
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "Trample. Whenever this Vehicle becomes crewed, you gain 1 life. Crew 2."
+  },
+  {
+    "name": "Wagon Hand",
+    "mana_cost": "{G}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "human",
+      "pilot"
+    ],
+    "power": 1,
+    "toughness": 1,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "crews_vehicle": {}
+          },
+          "effects": [
+            {
+              "pump": {
+                "power": 2,
+                "toughness": 0,
+                "to": {
+                  "triggering": "object"
+                }
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "Whenever this creature crews a Vehicle, that Vehicle gets +2/+0 until end of turn."
+  },
+  {
+    "name": "Brasswork Lurker",
+    "mana_cost": "{3}",
+    "types": [
+      "artifact"
+    ],
+    "subtypes": [
+      "vehicle"
+    ],
+    "power": 3,
+    "toughness": 3,
+    "abilities": [
+      {
+        "static": {
+          "affects": "self",
+          "if": {
+            "not": {
+              "your_turn": true
+            }
+          },
+          "types": [
+            "artifact",
+            "creature"
+          ]
+        }
+      },
+      {
+        "crew": {
+          "power": 1
+        }
+      }
+    ],
+    "rules_text": "During turns other than yours, this Vehicle is an artifact creature. Crew 1."
+  },
+  {
+    "name": "Cindervault Ridge",
+    "types": [
+      "land"
+    ],
+    "abilities": [
+      {
+        "mana": {
+          "cost": [
+            "tap"
+          ],
+          "produce": "{R}"
+        }
+      },
+      {
+        "activated": {
+          "cost": [
+            {
+              "mana": "{1}{R}"
+            }
+          ],
+          "effects": [
+            {
+              "become": {
+                "types": [
+                  "creature"
+                ],
+                "creature_types": [
+                  "elemental"
+                ],
+                "colors": [
+                  "R"
+                ],
+                "keywords": [
+                  "haste"
+                ],
+                "base_power_toughness": {
+                  "power": 3,
+                  "toughness": 1
+                },
+                "to": "self"
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "Tap: add one red mana. Two mana: this land becomes a 3/1 red Elemental creature with haste until end of turn. It's still a land."
+  },
+  {
+    "name": "Pitlane Hustler",
+    "mana_cost": "{1}{R}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "goblin",
+      "pilot"
+    ],
+    "power": 2,
+    "toughness": 2,
+    "keywords": [
+      "start_your_engines"
+    ],
+    "abilities": [
+      {
+        "max_speed": {
+          "keywords": [
+            "double_strike"
+          ]
+        }
+      },
+      {
+        "max_speed": {
+          "abilities": [
+            {
+              "activated": {
+                "cost": [
+                  {
+                    "mana": "{2}"
+                  },
+                  "exile_self_from_graveyard"
+                ],
+                "effects": [
+                  {
+                    "draw": {
+                      "amount": 1
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "Start your engines! Max speed: double strike. Max speed: two mana, exile this card from your graveyard: draw a card."
+  },
+  {
+    "name": "Speed Gauge",
+    "mana_cost": "{1}",
+    "types": [
+      "artifact"
+    ],
+    "keywords": [
+      "start_your_engines"
+    ],
+    "abilities": [
+      {
+        "activated": {
+          "cost": [
+            {
+              "mana": "{1}"
+            },
+            "tap"
+          ],
+          "effects": [
+            {
+              "gain_life": {
+                "amount": {
+                  "speed": "you"
+                }
+              }
+            }
+          ]
+        }
+      },
+      {
+        "static": {
+          "affects": {
+            "each": "creature",
+            "controller": "you"
+          },
+          "if": {
+            "max_speed": true
+          },
+          "pump": {
+            "power": 1,
+            "toughness": 0
+          }
+        }
+      }
+    ],
+    "rules_text": "Start your engines! One mana, tap: you gain life equal to your speed. As long as you have max speed, creatures you control get +1/+0."
+  },
+  {
+    "name": "Gearbreak Mender",
+    "mana_cost": "{1}{G}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "goblin",
+      "artificer"
+    ],
+    "power": 1,
+    "toughness": 2,
+    "abilities": [
+      {
+        "activated": {
+          "exhaust": true,
+          "cost": [
+            {
+              "mana": "{1}{G}"
+            }
+          ],
+          "effects": [
+            {
+              "add_counters": {
+                "counter": "+1/+1",
+                "amount": 2,
+                "to": "self"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "triggered": {
+          "when": {
+            "activates_ability": {
+              "exhaust": true
+            }
+          },
+          "effects": [
+            {
+              "gain_life": {
+                "amount": 2
+              }
+            }
+          ]
+        }
+      },
+      {
+        "activated": {
+          "cost": [
+            {
+              "mana": "{3}"
+            }
+          ],
+          "targets": [
+            "artifact"
+          ],
+          "effects": [
+            {
+              "become": {
+                "types": [
+                  "artifact",
+                  "creature"
+                ],
+                "base_power_toughness": {
+                  "power": 2,
+                  "toughness": 2
+                },
+                "to": {
+                  "target": 0
+                }
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "Exhaust: two mana: two +1/+1 counters here. Whenever you activate an exhaust ability, you gain 2 life. Three mana: target artifact becomes a 2/2 artifact creature until end of turn."
+  },
+  {
     "name": "Skyline Snare",
     "mana_cost": "{1}{G}",
     "types": [

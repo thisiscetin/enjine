@@ -116,16 +116,23 @@ module Enjine
     class ChooseCost < Base
       def self.doc
         'While casting/activating: `{type: "cost", object: id}` picks the permanent (or card) a cost uses ' \
-          '(the creature to tap for station, the creature to sacrifice, the creature beamed up, ...); `{type: "cancel"}` rewinds. ' \
-          "`cost` describes the cost."
+          '(the creature to tap for station, the creature to sacrifice, the creature beamed up, ...); `{type: "done"}` ' \
+          "stops choosing for a cost of any number of permanents once enough are chosen (crew: total power N or " \
+          'more); `{type: "cancel"}` rewinds. `cost` describes the cost.'
       end
 
       def self.options(engine, _pending)
-        Decisions.with_cancel(engine, engine.cost_choice_candidates.map { { type: "cost", **it } })
+        options = engine.cost_choice_candidates.map { { type: "cost", **it } }
+        options << { type: "done" } if engine.cost_choice_finishable?
+        Decisions.with_cancel(engine, options)
       end
 
       def self.submit(engine, _pending, option)
-        option[:type] == "cancel" ? engine.cancel_casting! : engine.choose_cost!(option)
+        case option[:type]
+        when "cancel" then engine.cancel_casting!
+        when "done" then engine.finish_cost_choice!
+        else engine.choose_cost!(option)
+        end
       end
     end
     register("choose_cost", ChooseCost)

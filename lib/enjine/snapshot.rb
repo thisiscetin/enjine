@@ -93,6 +93,7 @@ module Enjine
         pl.game_log = deep_copy(hash.fetch("game_log", {}))
         pl.restricted_mana = deep_copy(hash.fetch("restricted_mana", []))
         pl.outside = hash.fetch("outside", []).dup
+        pl.speed = hash["speed"] # CR 702.179; absent: no speed
       end
     end
 
@@ -122,6 +123,7 @@ module Enjine
           errors << "#{path}.mana_pool: must map W/U/B/R/G/C to non-negative integers"
         end
         validate_restricted_mana(pl.fetch("restricted_mana", []), errors, "#{path}.restricted_mana")
+        errors << "#{path}.speed: must be 1, 2, 3 or 4 (or absent)" unless [nil, 1, 2, 3, 4].include?(pl["speed"]) # CR 702.179
       end
       validate_logs(players, errors)
       names = players.map { it.is_a?(Hash) ? it["name"] : nil }

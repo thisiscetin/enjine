@@ -52,7 +52,7 @@ RSpec.describe "Turn structure primitives validation" do
     end
 
     it "reports path-addressed errors" do
-      expect(errors_for(become({}))).to include(a_string_matching(/become: needs creature_types/))
+      expect(errors_for(become({}))).to include(a_string_matching(/become: needs at least one of types/))
       expect(errors_for(become("creature_types" => [], "duration" => "forever")))
         .to include(a_string_matching(/become\.creature_types: must be a non-empty list/),
                     a_string_matching(/become\.duration: must be one of end_of_turn, indefinite/))

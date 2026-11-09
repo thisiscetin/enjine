@@ -153,8 +153,32 @@ module Enjine
       def next_cost_choice(ctx, _ability = nil)
         made = (ctx["paid"] || []).group_by { it["cost"] }
         casting_costs(ctx).each_with_index.find do |cost, i|
-          cost.respond_to?(:choices_needed) && made.fetch(i, []).size < cost.choices_needed
+          cost.respond_to?(:choices_needed) && !cost_chosen?(ctx, cost, i, made.fetch(i, []))
         end&.last
+      end
+
+      # A cost with a fixed number of choices is chosen once it has them; one of "any number" (crew, CR
+      # 702.122a) says itself, given whether the player said they're done.
+      def cost_chosen?(ctx, cost, index, entries)
+        return entries.size >= cost.choices_needed unless cost.respond_to?(:chosen?)
+
+        cost.chosen?(self, cost_payer(ctx), entries, ctx.fetch("costs_done", []).include?(index))
+      end
+
+      # Whether the player may stop choosing for the current cost ("any number", once enough is chosen).
+      def cost_choice_finishable?
+        ctx = casting
+        return false if beam_choice_pending?(ctx)
+
+        index = next_cost_choice(ctx)
+        cost = casting_costs(ctx)[index]
+        cost.respond_to?(:finishable?) && cost.finishable?(cost_entries(ctx, index))
+      end
+
+      def finish_cost_choice!
+        ctx = casting
+        (ctx["costs_done"] ||= []) << next_cost_choice(ctx)
+        ask!(nil)
       end
 
       def ask_cost_choice!(ctx, cost)
@@ -207,14 +231,17 @@ module Enjine
       def activation_allowed?(index, obj, ref, ability)
         return true unless ability.respond_to?(:restriction_met?)
         return false if ability.per_turn && activations_this_turn(obj, ref) >= ability.per_turn
+        return false if ability.exhaust? && obj.memory.fetch("exhausted", []).include?(ref) # CR 702.177a
 
         ability.restriction_met?(self, index, obj.id)
       end
 
-      # Kept on the source object, so the limit applies even if its controller changes (CR 602.5b).
+      # Kept on the source object, so the limit applies even if its controller changes (CR 602.5b). An exhaust
+      # ability is remembered for as long as the object exists (CR 702.177a; a new object can again, CR 400.7).
       def record_activation!(ctx)
         source = state.objects[ctx["source"]] or return
         ability = chars(source).ability(ctx["ability"])
+        (source.memory["exhausted"] ||= []) << ctx["ability"] if ability.respond_to?(:exhaust?) && ability.exhaust?
         return unless ability.respond_to?(:per_turn) && ability.per_turn
 
         (source.memory["activations"] ||= {})[ctx["ability"]] =

@@ -87,7 +87,7 @@ RSpec.describe "Creating cards of every type from data" do
     expect(errors_for("name" => "X", "mana_cost" => "{1}", "types" => ["planeswalker"]))
       .to include(a_string_matching(/loyalty: planeswalkers need/))
     expect(errors_for("name" => "X", "mana_cost" => "{1}", "types" => ["instant"], "power" => 1))
-      .to include(a_string_matching(/only creatures have power/))
+      .to include(a_string_matching(/only creatures and Vehicles have power/))
     expect(errors_for("name" => "X", "mana_cost" => "{1}", "types" => ["instant"], "loyalty" => 1))
       .to include(a_string_matching(/only planeswalkers have loyalty/))
     expect(errors_for("name" => "X", "mana_cost" => "{1}", "types" => ["creature"], "power" => 1, "toughness" => 1,

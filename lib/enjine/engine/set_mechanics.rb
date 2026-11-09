@@ -23,12 +23,15 @@ module Enjine
         defn.ability_instances.select { it.ability.kind == :station_symbol && charge >= it.ability.threshold }
       end
 
-      # The abilities the object has from its own card: printed ones plus those of applying station symbols.
+      # The abilities the object has from its own card: printed ones plus those of applying station symbols
+      # and max speed abilities (Engine::Speed).
       def own_ability_instances(obj)
         printed = catalog.fetch(obj.card).ability_instances
-        return printed if obj.counters.fetch("charge", 0).zero?
+        symbols = active_max_speed(obj, obj.controller)
+        symbols += active_station_symbols(obj) if obj.counters.fetch("charge", 0).positive?
+        return printed if symbols.empty?
 
-        printed + active_station_symbols(obj).flat_map { catalog.fetch(obj.card).nested_instances(it.ref) }
+        printed + symbols.flat_map { catalog.fetch(obj.card).nested_instances(it.ref) }
       end
 
       # The printed characteristics changed by the object's own station symbols (CR 722.2a-b: abilities,
@@ -36,15 +39,30 @@ module Enjine
       # assimilation (CR 701.72, 205.1b: an artifact creature whose creature types are replaced by Borg).
       def own_layers(obj, printed, effects)
         symbols = obj.counters.fetch("charge", 0).positive? ? active_station_symbols(obj) : []
+        symbols += active_max_speed(obj, obj.controller) # same shape: keywords and nested abilities (CR 702.178a)
         assimilated = !effects.empty? && effects.any? { it["kind"] == "assimilate" && it["affected"].include?(obj.id) }
         added = effects.empty? ? [] : added_subtypes(obj, effects)
-        return printed if symbols.empty? && !assimilated && added.empty?
+        becomes = effects.empty? ? [] : effects.select { it["kind"] == "add_types" && it["affected"].include?(obj.id) }
+        return printed if symbols.empty? && !assimilated && added.empty? && becomes.empty?
 
         attrs = printed.to_h
         symbols.each { station_symbol_layers(attrs, it, catalog.fetch(obj.card)) }
         assimilated_layers(attrs) if assimilated
         attrs[:subtypes] = attrs[:subtypes] | added
+        becomes.each { added_type_layers(attrs, it) }
         Enjine::Characteristics.new(**attrs.transform_values { it.is_a?(Array) ? it.freeze : it })
+      end
+
+      # "Becomes an artifact creature", "becomes a legendary Spider Hero in addition to its other types" (CR 205.1b):
+      # card types, supertypes and subtypes are added, none lost. Power/toughness: see Characteristics#with_added_types.
+      def added_type_layers(attrs, effect)
+        attrs[:types] = attrs[:types] | effect["types"].map(&:to_sym)
+        attrs[:supertypes] = attrs[:supertypes] | effect["supertypes"].map(&:to_sym)
+        attrs[:subtypes] = attrs[:subtypes] | effect["subtypes"].map(&:to_sym)
+        return unless attrs[:types].include?(:creature) && attrs[:power].nil?
+
+        attrs[:power] = 0
+        attrs[:toughness] = 0
       end
 
       def station_symbol_layers(attrs, inst, defn)

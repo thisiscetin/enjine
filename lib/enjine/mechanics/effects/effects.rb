@@ -171,12 +171,12 @@ module Enjine
           "#{Pump.signed_text(@power)}/#{Pump.signed_text(@toughness)} until #{duration.delete_prefix("until_").tr("_", " ")} → #{to}"
         end
 
-        # The amounts are computed once, as the effect starts (CR 608.2h, 611.2c).
+        # The amounts are computed once, as the effect starts (CR 608.2h, 611.2c). A noncreature it affects (an
+        # uncrewed Vehicle) gets the bonus once it's a creature this turn (CR 611.2c, 208.3).
         def apply(engine, ctx)
-          affected = objects(engine, ctx).select { engine.chars(it).creature? }
-          engine.add_continuous_effect!("pump", ctx, affected, "power" => @power.value(engine, ctx),
-                                                               "toughness" => @toughness.value(engine, ctx),
-                                                               "duration" => duration)
+          engine.add_continuous_effect!("pump", ctx, objects(engine, ctx), "power" => @power.value(engine, ctx),
+                                                                           "toughness" => @toughness.value(engine, ctx),
+                                                                           "duration" => duration)
         end
       end
 

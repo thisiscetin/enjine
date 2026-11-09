@@ -4,15 +4,16 @@
 
 ## activates_ability
 
-A player (`controller`: you (default) | opponent | any) activates an ability that isn't a mana ability. `source`: optional filter on the source's card; `name: "chosen"`: only a source with the name chosen as this permanent entered.
+A player (`controller`: you (default) | opponent | any) activates an ability that isn't a mana ability. `source`: optional filter on the source's card; `name: "chosen"`: only a source with the name chosen as this permanent entered. `exhaust: true`: only an exhaust ability ("whenever you activate an exhaust ability", CR 702.177).
 
-Rules: CR 602.2, CR 605.1a, CR 603.2, CR 201.4
+Rules: CR 602.2, CR 605.1a, CR 603.2, CR 201.4, CR 702.177a
 
 | Parameter | Description |
 | --- | --- |
 | `controller` | you | opponent | any |
 | `source` | card filter |
 | `name` | "chosen" |
+| `exhaust` | true: only exhaust abilities |
 
 ```json
 {
@@ -78,6 +79,22 @@ Rules: CR 509.3c, CR 509.1h, CR 603.2e
   "becomes_blocked": {
     "subject": "self"
   }
+}
+```
+
+## becomes_crewed
+
+A crew ability of the subject resolves (it becomes crewed).
+
+Rules: CR 702.122e, CR 603.2
+
+| Parameter | Description |
+| --- | --- |
+| `subject` | "self" (default) or {"each": filter, ...} |
+
+```json
+{
+  "becomes_crewed": {}
 }
 ```
 
@@ -161,6 +178,24 @@ Rules: CR 122.6, CR 603.2, CR 603.2c
 {
   "counters_placed": {
     "counter": "+1/+1"
+  }
+}
+```
+
+## crews_vehicle
+
+The subject (a creature) crews a Vehicle: it's tapped to pay that Vehicle's crew cost. {"triggering": "object"} is the Vehicle.
+
+Rules: CR 702.122b, CR 603.2
+
+| Parameter | Description |
+| --- | --- |
+| `subject` | "self" (default) or {"each": filter, ...} |
+
+```json
+{
+  "crews_vehicle": {
+    "subject": "self"
   }
 }
 ```

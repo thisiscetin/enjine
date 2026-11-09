@@ -25,7 +25,8 @@ module Enjine
         base = copy_base(object) # layer 1 (CR 613.2a-c): its copiable values
         return board_characteristics.fetch(object.id, base) if object.zone == :battlefield
 
-        defined_pt_copied?(object) ? defined_power_toughness(object, base, defn) : base
+        base = defined_power_toughness(object, base, defn) if defined_pt_copied?(object)
+        with_max_speed(object, base) # CR 702.178b: e.g. an ability that works from the graveyard (Engine::Speed)
       end
 
       def power(object) = chars(object).power.to_i
@@ -40,7 +41,7 @@ module Enjine
       # event drops the cache (`@volatile`, see Engine#emit).
       LAYER_EVENTS = [Events::ZoneChanged, Events::CountersChanged, Events::EffectStarted,
                       Events::EffectsEnded, Events::Attached, Events::Unattached, Events::ControlChanged,
-                      Events::PhasedOut, Events::PhasedIn].freeze
+                      Events::PhasedOut, Events::PhasedIn, Events::SpeedChanged].freeze
 
       def touch! = @epoch = @epoch.to_i + 1
       def volatile_layers? = @volatile
@@ -59,7 +60,7 @@ module Enjine
         statics = static_sources
         effects = state.effects
         @volatile = statics.any? { |_, ability| ability.condition || ability.computed? } || defined_on_battlefield?
-        return {} if statics.empty? && effects.empty? && !@volatile && state.battlefield.none? { !object(it).counters.empty? }
+        return {} if statics.empty? && effects.empty? && !@volatile && printed_board?
 
         @layering = {}
         ids = state.battlefield
@@ -73,6 +74,17 @@ module Enjine
         @layering.reject { |id, c| c.equal?(definition(object(id)).printed_characteristics) }
       ensure
         @layering = nil
+      end
+
+      # Without effects, every permanent is as printed: none has counters or is a noncreature with printed
+      # power and toughness (an uncrewed Vehicle has none, CR 208.3).
+      # A max speed ability applying changes it too (Engine::Speed).
+      def printed_board?
+        speedy = state.players.each_index.any? { max_speed?(it) }
+        state.battlefield.none? do |id|
+          obj = object(id)
+          !obj.counters.empty? || printed_noncreature_pt?(obj) || (speedy && !active_max_speed(obj, obj.controller).empty?)
+        end
       end
 
       def defined_on_battlefield? = state.battlefield.any? { definition(object(it)).defined_pt? }
@@ -107,21 +119,39 @@ module Enjine
         definition(obj).defined_pt? && !(except&.key?("power") || except&.key?("toughness"))
       end
 
-      # Layers 1-4: the object's own changes (Engine::SetMechanics#own_layers), then effects that set its
-      # creature types (CR 205.1a, 613.1d), statics before resolved effects, each in timestamp order.
+      # Layers 1-4: the object's own changes and resolved effects that add types (Engine::SetMechanics#own_layers),
+      # then static abilities that add card types ("this Vehicle is an artifact creature", CR 205.1b), then effects
+      # that set its creature types (CR 205.1a, 613.1d), statics before resolved effects, each in timestamp order.
+      # A noncreature permanent has no power or toughness, even a Vehicle with them printed (CR 208.3, 301.7a).
       def type_layers(obj, statics, effects)
         base = own_layers(obj, copy_base(obj), effects)
         types = nil
+        added = []
         statics.each do |source, ability|
-          types = ability.creature_types if ability.creature_types && ability.affects?(obj, source, facts(obj, base))
+          next unless (ability.creature_types || !ability.card_types.empty?) && ability.affects?(obj, source, facts(obj, base))
+
+          types = ability.creature_types if ability.creature_types
+          added |= ability.card_types
         end
         effects.each { types = it["types"].map(&:to_sym) if it["kind"] == "creature_types" && it["affected"].include?(obj.id) }
-        return base unless types
-
-        base.with(subtypes: ((base.subtypes & SetMechanics::NON_CREATURE_SUBTYPES) | types).freeze)
+        base = with_added_types(base, added) unless added.empty?
+        base = base.with(subtypes: ((base.subtypes & SetMechanics::NON_CREATURE_SUBTYPES) | types).freeze) if types
+        base.creature? || base.power.nil? ? base : base.with(power: nil, toughness: nil)
       end
 
-      # Layer 6 (CR 613.1f): keyword counters (CR 122.1b), keywords and abilities from static abilities,
+      # Card types added "in addition to its other types" (CR 205.1b). A permanent that becomes a creature has
+      # its printed power and toughness (CR 301.7b), or 0/0 without any, until a layer 7 effect changes them.
+      def with_added_types(base, added)
+        return base if (added - base.types).empty?
+
+        base = base.with(types: (base.types | added).freeze)
+        base.creature? && base.power.nil? ? base.with(power: 0, toughness: 0) : base
+      end
+
+      def printed_noncreature_pt?(obj) = definition(obj).then { !it.creature? && !it.power.nil? }
+
+      # Layer 5 (CR 613.1e): effects that set colors. Layer 6 (CR 613.1f): keyword counters (CR 122.1b),
+      # keywords and abilities from static abilities,
       # keywords gained until end of turn. A granted ability is referenced "granted:<card>:<ref>" (the
       # granting card's data holds it, see #granted_origin).
       def ability_layers(obj, base, statics, effects)
@@ -137,6 +167,7 @@ module Enjine
           next unless effect["affected"].include?(obj.id)
 
           keywords |= effect["keywords"].map(&:to_sym) if effect["kind"] == "grant"
+          base = base.with(colors: Mana::COLORS & effect["colors"].map(&:to_sym)) if effect["kind"] == "colors" # layer 5
           abilities += effect_granted_instances(effect) if effect["kind"] == "abilities" # e.g. Effects::Become
         end
         return base if keywords == base.keywords && abilities.equal?(base.abilities)

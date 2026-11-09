@@ -14,7 +14,7 @@ Right after a mulligan, put one card from the new hand on the bottom of the libr
 
 ## choose_cost
 
-While casting/activating: `{type: "cost", object: id}` picks the permanent (or card) a cost uses (the creature to tap for station, the creature to sacrifice, the creature beamed up, ...); `{type: "cancel"}` rewinds. `cost` describes the cost.
+While casting/activating: `{type: "cost", object: id}` picks the permanent (or card) a cost uses (the creature to tap for station, the creature to sacrifice, the creature beamed up, ...); `{type: "done"}` stops choosing for a cost of any number of permanents once enough are chosen (crew: total power N or more); `{type: "cancel"}` rewinds. `cost` describes the cost.
 
 ## choose_kicker
 

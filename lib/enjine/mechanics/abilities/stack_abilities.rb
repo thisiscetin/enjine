@@ -285,12 +285,14 @@ module Enjine
                                "the stack. `timing: \"sorcery\"` restricts it to sorcery speed, `\"your_turn\"` to your " \
                                "turns; `limit: \"once_each_turn\"` to one activation per turn; `only_if` to when a " \
                                "condition holds. `zone` (\"exile\", \"graveyard\" or \"hand\") makes it function only " \
-                               "while its card is in that zone (\"activate only if this card is exiled\").",
-                  rules: %w[602.1 602.2 602.5b 602.5d],
+                               "while its card is in that zone (\"activate only if this card is exiled\"). `exhaust: " \
+                               "true` makes it an exhaust ability: it can be activated only once (CR 702.177a).",
+                  rules: %w[602.1 602.2 602.5b 602.5d 702.177a],
                   params: { "cost" => "list of costs (tap, {\"mana\": \"{1}\"}, {\"mana\": \"{X}\"})",
                             "targets" => "list of target filters", "effects" => "list of effects",
                             "timing" => "\"instant\" (default), \"sorcery\" or \"your_turn\"",
                             "limit" => "\"once_each_turn\" (CR 602.5b)", "only_if" => "condition (\"activate only if ...\")",
+                            "exhaust" => "true: \"Exhaust — [cost]: [effect]\", activate only once (CR 702.177a)",
                             "zone" => "\"exile\" | \"graveyard\" | \"hand\" (CR 113.6b; default: the battlefield, or the " \
                                       "zone a cost moves the card from)",
                             "cost_reduction" => "{\"amount\": amount, \"if\": condition}: \"this ability costs {N} less " \
@@ -299,7 +301,7 @@ module Enjine
                                               "effects" => [{ "deal_damage" => { "amount" => 1, "to" => { "target" => 0 } } }] } }
 
         def self.build(params, errors, path, **)
-          Mechanics.check_keys(params, %w[cost timing cost_reduction limit only_if zone] + BODY_KEYS, errors, path)
+          Mechanics.check_keys(params, %w[cost timing cost_reduction limit only_if zone exhaust] + BODY_KEYS, errors, path)
           timing = Mechanics.fetch_param(params, :timing) || "instant"
           errors << "#{path}.timing: must be one of #{TIMINGS.join(", ")}" unless TIMINGS.include?(timing)
           restriction = parse_restriction(params, errors, path)
@@ -338,7 +340,9 @@ module Enjine
           limit = Mechanics.fetch_param(params, :limit)
           errors << "#{path}.limit: must be one of #{LIMITS.keys.join(", ")}" unless limit.nil? || LIMITS.key?(limit)
           raw = Mechanics.fetch_param(params, :only_if)
-          { per_turn: LIMITS[limit], only_if: raw && Condition.build(raw, errors, "#{path}.only_if") }
+          exhaust = Mechanics.fetch_param(params, :exhaust)
+          errors << "#{path}.exhaust: must be true or false" unless [nil, true, false].include?(exhaust)
+          { per_turn: LIMITS[limit], only_if: raw && Condition.build(raw, errors, "#{path}.only_if"), exhaust: exhaust == true }
         end
 
         # CR 605.1a: an activated ability without targets that could add mana is a mana ability,
@@ -377,6 +381,11 @@ module Enjine
 
         # How many times it may be activated each turn (nil: no limit, CR 602.5b).
         def per_turn = @restriction[:per_turn]
+
+        # An exhaust ability: "Activate only once" (CR 702.177a), see Engine::CastChoices#activation_allowed?.
+        def exhaust? = @restriction[:exhaust] == true
+
+        def to_s = exhaust? ? "Exhaust — #{super}" : super
 
         # CR 602.5b: restrictions on when it may be activated, besides timing and costs.
         def restriction_met?(engine, index, source)

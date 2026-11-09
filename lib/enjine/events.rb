@@ -107,6 +107,12 @@ module Enjine
     # Combat declarations once final (CR 508.3d "whenever [a player] attacks", 509.3c "becomes blocked").
     AttacksDeclared = define(:attacks_declared, :player, :attackers)
     BecameBlocked = define(:became_blocked, :object, :blockers)
+    # Crew (CR 702.122): a creature tapped to pay a crew cost crews that Vehicle (702.122b); the Vehicle
+    # becomes crewed as its crew ability resolves (702.122e), by the creatures in `crew`.
+    CrewedVehicle = define(:crewed_vehicle, :object, :vehicle)
+    BecameCrewed = define(:became_crewed, :object, :crew)
+    # A player's speed changed (CR 702.179); `from` nil: they had no speed.
+    SpeedChanged = define(:speed_changed, :player, :from, :to)
 
     # A card moved between zones; old_id stops existing and new_id is born (CR 400.7). `lookers`: the card
     # was exiled face down, and only these players (by name) see which card it is (CR 406.3).
