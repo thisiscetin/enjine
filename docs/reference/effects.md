@@ -1433,6 +1433,24 @@ Rules: CR 118.12, CR 118.3, CR 608.2d, CR 608.2e
 }
 ```
 
+## meld
+
+Exile this permanent and a creature named `with` that you both own and control, then meld them: a meld pair (cards with layout "meld" sharing a back face) enters the battlefield as one permanent with that back face up. When it leaves the battlefield, both cards go to the new zone.
+
+Rules: CR 701.42a, CR 701.42b, CR 701.42c, CR 713.1a, CR 713.6, CR 713.8
+
+| Parameter | Description |
+| --- | --- |
+| `with` | the name of the other card of the pair |
+
+```json
+{
+  "meld": {
+    "with": "Fang, Fearless l'Cie"
+  }
+}
+```
+
 ## mill
 
 Each referenced player puts the top `amount` cards of their library into their graveyard (default: you).

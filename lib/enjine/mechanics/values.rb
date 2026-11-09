@@ -346,6 +346,7 @@ module Enjine
     #   {"nth_resolution": n}      this is the nth time this turn this ability resolves (CR 608.2)
     #   {"share_card_type": selector}  the referenced objects share a card type ("exiled_with": linked cards)
     #   {"chosen": word}           that word was chosen for this object (choose_option, CR 607.2f)
+    #   {"meld_with": name}        you both own and control the source and a creature named so (CR 713.1a)
     #   {"not": condition}, {"all": [conditions]}, {"any": [conditions]}
     class Condition
       FLAGS = %w[your_turn was_cast attacked attacked_this_turn max_speed
@@ -354,7 +355,7 @@ module Enjine
       # keywords/storied.rb).
       KEYED = { "targets" => :Targets, "triggering" => :TriggeringIs, "source" => :Source,
                 "nth_resolution" => :NthResolution, "chosen" => :ChosenIs, "designation" => :Designation,
-                "first_combat_phase" => :FirstCombatPhase }.freeze
+                "first_combat_phase" => :FirstCombatPhase, "meld_with" => :MeldWith }.freeze # MeldWith: effects/meld.rb
 
       def self.build(data, errors, path, targets_count: 0, results_count: 0)
         unless data.is_a?(Hash)

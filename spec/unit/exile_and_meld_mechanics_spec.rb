@@ -45,6 +45,27 @@ RSpec.describe "Exile, suspend and meld primitives: validation" do
                                                 "each" => 3 } }]))).to include(a_string_starting_with("abilities[0].devour.each"))
   end
 
+  describe "meld cards (CR 713)" do
+    def meld_card(back_types: ["creature"], effect: { "meld" => { "with" => "Spec Other" } }, condition: { "meld_with" => "Spec Other" })
+      { "name" => "Spec Half // Spec Whole", "layout" => "meld",
+        "faces" => [{ "name" => "Spec Half", "mana_cost" => "{1}", "types" => ["creature"], "power" => 1, "toughness" => 1,
+                      "abilities" => [{ "triggered" => { "when" => { "enters" => {} }, "if" => condition, "effects" => [effect] } }] },
+                    { "name" => "Spec Whole", "types" => back_types, "power" => 5, "toughness" => 5 }] }
+    end
+
+    it "accepts a meld card and names the path of each mistake" do
+      expect(errors_for(meld_card)).to eq([])
+      expect(errors_for(meld_card(back_types: ["sorcery"]))).to include("faces[1].types: a melded permanent is a permanent (CR 713.1a)")
+      expect(errors_for(meld_card(effect: { "meld" => {} })))
+        .to include("faces[0].abilities[0].triggered.effects[0].meld.with: must be a card name")
+      expect(errors_for(meld_card(condition: { "meld_with" => 3 })))
+        .to include("faces[0].abilities[0].triggered.if.meld_with: must be a card name")
+      card = Enjine::CardDefinition.from_h(meld_card)
+      expect(card.abilities.first.to_s).to include("you both own and control this and a creature named Spec Other",
+                                                   "exile this and Spec Other, then meld them")
+    end
+  end
+
   it "describes them" do
     card = Enjine::CardDefinition.from_h(spell(abilities: [{ "foretell" => { "cost" => "{1}{R}" } },
                                                            { "suspend" => { "amount" => 3, "cost" => "{2}{W}" } }],

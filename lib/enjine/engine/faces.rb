@@ -10,6 +10,8 @@ module Enjine
     #   memory["transformed_at"]  when the permanent last transformed (a timestamp), CR 701.27g
     #   memory["prepared"]        the id of the prepare spell copy in exile while it's prepared (CR 723.3c)
     #   memory["prepared_for"]    on that copy: the prepared permanent
+    #   memory["melded"]          on a melded permanent (its object is one card of the pair, back face up): the
+    #                             other card's id (CR 713.1a)
     module Faces
       ALTERNATIVE_SPELLS = %w[modal adventure omen].freeze
 
@@ -39,7 +41,8 @@ module Enjine
       # face is a permanent (CR 712.11a-b); otherwise it stays where it is.
       def can_enter_face?(obj, index)
         defn = catalog.fetch(own_card(obj)).card
-        defn.double_faced? && index < defn.faces.size && defn.face(index).permanent?
+        faced = defn.double_faced? || (defn.layout == "meld" && obj.memory.key?("melded")) # CR 713.1b: only melded
+        faced && index < defn.faces.size && defn.face(index).permanent?
       end
 
       def enter_face!(fresh, index)
@@ -81,6 +84,38 @@ module Enjine
 
         at = obj.memory["transformed_at"] or return true
         at < ability.id.split("#").last.to_i
+      end
+
+      # ---- meld (CR 701.42, 713) -------------------------------------------------------------------
+
+      # CR 701.42b: two cards (not tokens or copies) of one meld pair: meld cards with the same back face name.
+      def meld_pair?(one, two)
+        a, b = [one, two].map { catalog.fetch(own_card(it)).card }
+        [one, two].none? { token?(it) || it.memory["copy"] } && a.id != b.id && [a, b].all? { it.layout == "meld" } &&
+          a.face(1).name == b.face(1).name
+      end
+
+      # CR 701.42a, 713.6: the exiled cards `first` and `second` of a meld pair enter the battlefield as one
+      # permanent with the back face up, under `controller`'s control; `first`'s object stands for both. Cards
+      # that can't be melded stay where they are (CR 701.42c).
+      def meld!(first, second, controller)
+        return unless [first, second].all? { it.zone == :exile } && meld_pair?(first, second)
+
+        state.exile.delete(second.id)
+        state.objects.delete(second.id)
+        move!(first.id, :battlefield, controller: controller, reason: "meld",
+                                      enters: { "face" => 1, "memory" => { "melded" => second.card } })
+      end
+
+      # CR 713.8, 713.8c: a melded permanent that leaves the battlefield puts its two cards into the new zone;
+      # the other card is a new object there too, and both are the result of what moved it.
+      def unmeld!(old, to, data)
+        other = create_object(old.memory["melded"], old.owner, to)
+        arrive!(other, old, data.merge("enters" => { "tapped" => false, "counters" => {} })) if to == :battlefield
+        state.zone_list(to, old.owner).unshift(other.id)
+        record_result!(other.id)
+        emit Events::ZoneChanged.new(card: other.card, old_id: nil, new_id: other.id, owner: name(old.owner),
+                                     from: "battlefield", to: to.to_s, reason: data["reason"])
       end
 
       # ---- casting another face (CR 712.8b, 716.3, 721.3) ----------------------------------------------

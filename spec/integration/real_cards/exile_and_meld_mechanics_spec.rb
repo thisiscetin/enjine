@@ -193,6 +193,43 @@ RSpec.describe "Real cards: exile, suspend and meld mechanics" do
     end
   end
 
+  describe "meld (CR 701.42, 713)" do
+    let(:pair) { ["Vanille, Cheerful l'Cie", "Fang, Fearless l'Cie"] }
+
+    def melded(game) = game.state.battlefield.find { game.state.object(it).memory.key?("melded") }
+
+    it "Vanille and Fang: paying {3}{B}{G} at the first main phase melds them into Ragnarok, Divine Deliverance" do
+      game = board(battlefield: pair + %w[Forest Swamp Island Island Island], step: :upkeep)
+      game.submit(type: "pass") until game.pending_decision.kind == "effect_choice"
+      game.submit(type: "pay")
+      game.submit(game.legal_options.find { %w[pay_mana activate_mana].include?(it[:type]) }) while game.pending_decision.kind == "pay_cost"
+      game.submit(type: "pass") until game.state.stack.empty?
+      ragnarok = melded(game)
+      expect(game.state.battlefield.size).to eq(6) # five lands and one melded permanent
+      chars = engine(game).chars(engine(game).object(ragnarok))
+      expect([chars.name, chars.power, chars.toughness]).to eq(["Ragnarok, Divine Deliverance", 7, 6])
+      expect(chars.keyword?(:haste)).to be(true)
+      expect(game.state.exile).to be_empty
+      expect(Enjine::Game.import(game.export, catalog: catalog).state.object(ragnarok).memory["melded"]).to eq("fang_fearless_lcie")
+
+      engine(game).move!(ragnarok, :graveyard, reason: "destroy") # CR 713.8: one permanent leaves, two cards arrive
+      expect(game.state.players[0].graveyard.map { game.state.object(it).card }).to contain_exactly(
+        "vanille_cheerful_lcie", "fang_fearless_lcie"
+      )
+    end
+
+    it "without Fang the trigger doesn't trigger; a lone meld card can't be melded (CR 701.42c)" do
+      game = board(battlefield: ["Vanille, Cheerful l'Cie"], step: :upkeep)
+      skip_to(game, :precombat_main)
+      expect(game.state.stack).to be_empty
+      vanille = obj_id(game, "Vanille, Cheerful l'Cie")
+      e = engine(game)
+      exiled = e.move!(vanille, :exile, reason: "spec")
+      expect(e.meld!(exiled, exiled, 0)).to be_nil
+      expect(game.state.exile).to eq([exiled.id])
+    end
+  end
+
   describe "proliferate X times (CR 701.34a)" do
     it "Tam, the Possibility: proliferates once per planeswalker type among your planeswalkers" do
       game = board(battlefield: ["Tam, the Possibility", "Ajani Resolute", "Ajani, Outland Chaperone", "The Theorist, Jace Beleren"],

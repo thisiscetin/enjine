@@ -548,5 +548,278 @@
       "set": "eoe",
       "number": "182"
     }
+  },
+  {
+    "name": "Fang, Fearless l'Cie // Ragnarok, Divine Deliverance",
+    "layout": "meld",
+    "faces": [
+      {
+        "name": "Fang, Fearless l'Cie",
+        "mana_cost": "{2}{B}",
+        "types": [
+          "creature"
+        ],
+        "supertypes": [
+          "legendary"
+        ],
+        "subtypes": [
+          "human",
+          "warrior"
+        ],
+        "power": 2,
+        "toughness": 3,
+        "abilities": [
+          {
+            "triggered": {
+              "when": {
+                "leaves_graveyard": {
+                  "controller": "you",
+                  "batched": true
+                }
+              },
+              "limit": "once_each_turn",
+              "effects": [
+                {
+                  "draw": {
+                    "amount": 1
+                  }
+                },
+                {
+                  "lose_life": {
+                    "amount": 1,
+                    "to": "you"
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "name": "Ragnarok, Divine Deliverance",
+        "types": [
+          "creature"
+        ],
+        "supertypes": [
+          "legendary"
+        ],
+        "subtypes": [
+          "beast",
+          "avatar"
+        ],
+        "colors": [
+          "B",
+          "G"
+        ],
+        "power": 7,
+        "toughness": 6,
+        "keywords": [
+          "reach",
+          "vigilance",
+          "menace",
+          "trample",
+          "haste"
+        ],
+        "abilities": [
+          {
+            "triggered": {
+              "when": {
+                "dies": {}
+              },
+              "targets": [
+                "permanent",
+                {
+                  "graveyard_card": {
+                    "controller": "you",
+                    "any_of": [
+                      "artifact",
+                      "creature",
+                      "enchantment",
+                      "land",
+                      "planeswalker"
+                    ],
+                    "not_supertypes": [
+                      "legendary"
+                    ]
+                  }
+                }
+              ],
+              "effects": [
+                {
+                  "destroy": {
+                    "to": {
+                      "target": 0
+                    }
+                  }
+                },
+                {
+                  "return_to_battlefield": {
+                    "to": {
+                      "target": 1
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    ],
+    "rarity": "uncommon",
+    "printing": {
+      "set": "fin",
+      "number": "99"
+    }
+  },
+  {
+    "name": "Vanille, Cheerful l'Cie // Ragnarok, Divine Deliverance",
+    "layout": "meld",
+    "faces": [
+      {
+        "name": "Vanille, Cheerful l'Cie",
+        "mana_cost": "{3}{G}",
+        "types": [
+          "creature"
+        ],
+        "supertypes": [
+          "legendary"
+        ],
+        "subtypes": [
+          "human",
+          "cleric"
+        ],
+        "power": 3,
+        "toughness": 2,
+        "abilities": [
+          {
+            "triggered": {
+              "when": {
+                "enters": {}
+              },
+              "effects": [
+                {
+                  "mill": {
+                    "amount": 2,
+                    "to": "you"
+                  }
+                },
+                {
+                  "choose_cards": {
+                    "from": {
+                      "graveyard": "you"
+                    },
+                    "for": {
+                      "permanent": true
+                    },
+                    "put": "hand"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "triggered": {
+              "when": {
+                "step_begins": {
+                  "step": "precombat_main",
+                  "whose": "your"
+                }
+              },
+              "if": {
+                "meld_with": "Fang, Fearless l'Cie"
+              },
+              "effects": [
+                {
+                  "pay": {
+                    "mana": "{3}{B}{G}",
+                    "then": [
+                      {
+                        "meld": {
+                          "with": "Fang, Fearless l'Cie"
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "name": "Ragnarok, Divine Deliverance",
+        "types": [
+          "creature"
+        ],
+        "supertypes": [
+          "legendary"
+        ],
+        "subtypes": [
+          "beast",
+          "avatar"
+        ],
+        "colors": [
+          "B",
+          "G"
+        ],
+        "power": 7,
+        "toughness": 6,
+        "keywords": [
+          "reach",
+          "vigilance",
+          "menace",
+          "trample",
+          "haste"
+        ],
+        "abilities": [
+          {
+            "triggered": {
+              "when": {
+                "dies": {}
+              },
+              "targets": [
+                "permanent",
+                {
+                  "graveyard_card": {
+                    "controller": "you",
+                    "any_of": [
+                      "artifact",
+                      "creature",
+                      "enchantment",
+                      "land",
+                      "planeswalker"
+                    ],
+                    "not_supertypes": [
+                      "legendary"
+                    ]
+                  }
+                }
+              ],
+              "effects": [
+                {
+                  "destroy": {
+                    "to": {
+                      "target": 0
+                    }
+                  }
+                },
+                {
+                  "return_to_battlefield": {
+                    "to": {
+                      "target": 1
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    ],
+    "rarity": "uncommon",
+    "printing": {
+      "set": "fin",
+      "number": "211"
+    }
   }
 ]

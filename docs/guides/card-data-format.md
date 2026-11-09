@@ -1137,7 +1137,7 @@ its seed and decisions, and an exported game continues with the same results.
                                              { "scry": { "amount": 1 } }] } }] }
 ```
 
-### 4.24 Paradigm, foretell, suspend, hideaway, devour and computed endure
+### 4.24 Paradigm, foretell, suspend, hideaway, devour, meld and computed endure
 
 | Oracle text | Data |
 | --- | --- |
@@ -1150,6 +1150,8 @@ its seed and decisions, and an exported game continues with the same results.
 | "You may play the exiled card without paying its mana cost" | `{ "cast_free": { "to": "exiled_with", "play": true } }` (`play: true` also plays a land, on your turn with a land play left, CR 305.2a, 305.3) |
 | "look at the top N cards, exile one face down" | `{ "dig": { "amount": N, "put": "exile", "face_down": true, "link": true } }` (`link`: exiled with the source) |
 | "Devour land 3" (CR 702.82c) / "Devour 2" | ability `{ "devour": { "amount": 3, "each": "land" } }` / `{ "devour": { "amount": 2 } }`: as it enters, `enter_choice` `{type: "devour", object: id}` picks permanents one at a time, then `{type: "done"}`; it enters with N +1/+1 counters for each and remembers how many it devoured |
+| Meld cards (CR 713) | `"layout": "meld"`, `"faces": [front, combined back face]`; both cards of the pair carry the same back face (e.g. Ragnarok, Divine Deliverance on Fang and on Vanille). The back face is up only on the melded permanent; when it leaves the battlefield both cards go to the new zone (CR 713.8) |
+| "if you both own and control this and a creature named Fang, …, exile them, then meld them" (CR 701.42a) | condition `{ "meld_with": "Fang, Fearless l'Cie" }`; effect `{ "meld": { "with": "Fang, Fearless l'Cie" } }` (cards that don't form a meld pair stay exiled, CR 701.42c) |
 | "endures X" / "endures X, where X is the number of counters on this creature" (CR 701.63a) | `{ "endure": { "amount": "x" } }` / `{ "endure": { "amount": { "counters": { "of": "self" } } } }`: the Spirit token is X/X |
 | "Proliferate X times, where X is the number of planeswalker types among planeswalkers you control" | `{ "proliferate": { "amount": { "distinct_planeswalker_types": { "each": "planeswalker", "controller": "you" } } } }` |
 

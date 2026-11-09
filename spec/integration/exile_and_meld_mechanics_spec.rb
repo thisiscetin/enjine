@@ -169,6 +169,39 @@ RSpec.describe "Exile, suspend and meld mechanics" do
     end
   end
 
+  describe "meld (CR 701.42, 713) with Dawn Twin and Dusk Twin (fixtures)" do
+    def twins
+      build_game(catalog) do
+        turn 3, active: "alice", step: :upkeep
+        player("alice") do
+          battlefield "Dawn Twin", "Dusk Twin", "Plains", "Plains"
+          library "Forest", count: 5
+        end
+        player("bob") { library "Forest", count: 5 }
+      end
+    end
+
+    it "declining the payment leaves them apart; paying melds them; exiling the melded permanent exiles both cards" do
+      game = twins
+      game.submit(type: "pass") until game.pending_decision.kind == "effect_choice"
+      game.submit(type: "decline")
+      resolve_all(game)
+      expect(game.state.battlefield.size).to eq(4)
+
+      game = twins
+      game.submit(type: "pass") until game.pending_decision.kind == "effect_choice"
+      game.submit(type: "pay")
+      game.submit(game.legal_options.find { %w[pay_mana activate_mana].include?(it[:type]) }) while game.pending_decision.kind == "pay_cost"
+      resolve_all(game)
+      expect(game.state.battlefield.size).to eq(3)
+      engine = game.instance_variable_get(:@engine)
+      colossus = engine.object(game.state.battlefield.find { engine.object(it).memory.key?("melded") })
+      expect(engine.chars(colossus).name).to eq("Twin Sun Colossus")
+      engine.move!(colossus.id, :exile, reason: "spec")
+      expect(game.state.exile.map { game.state.object(it).card }).to contain_exactly("dawn_twin", "dusk_twin")
+    end
+  end
+
   describe "hideaway (CR 702.75a) and playing a land while resolving (CR 305.2a, 305.3)" do
     def hide(game)
       game.submit(type: "play_land", object: hand_card(game, "Spec Hidden Vault"))
