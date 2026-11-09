@@ -166,7 +166,8 @@ module Enjine
       return granted_keywords(obj.id).include?(keyword.to_sym) if stripped?(obj)
 
       defn(obj.card).keyword?(keyword) || unlocked(obj).any? { it.keywords.include?(keyword) } ||
-        granted_keywords(obj.id).include?(keyword.to_sym) || static_keyword?(obj, keyword)
+        granted_keywords(obj.id).include?(keyword.to_sym) || static_keyword?(obj, keyword) ||
+        (keyword.to_sym == :haste && obj.memory["haste_while_controlled_by"] == obj.controller) # cast with suspend, CR 702.62a
     end
 
     # Whether an effect or an applying static ability makes it lose all abilities (CR 613.1f).
