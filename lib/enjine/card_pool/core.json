@@ -4741,6 +4741,352 @@
     ]
   },
   {
+    "name": "Warcry Lookout",
+    "mana_cost": "{1}{R}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "goblin"
+    ],
+    "power": 2,
+    "toughness": 1,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "step_begins": {
+              "step": "end"
+            }
+          },
+          "if": {
+            "you_attacked_this_turn": true
+          },
+          "effects": [
+            {
+              "create_token": {
+                "token": {
+                  "name": "Warcry Goblin",
+                  "types": [
+                    "creature"
+                  ],
+                  "subtypes": [
+                    "goblin"
+                  ],
+                  "colors": [
+                    "R"
+                  ],
+                  "power": 1,
+                  "toughness": 1
+                }
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "Raid — At the beginning of your end step, if you attacked this turn, create a 1/1 red Goblin creature token."
+  },
+  {
+    "name": "Hollow Echo",
+    "mana_cost": "{2}{B}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "spirit"
+    ],
+    "power": 2,
+    "toughness": 2,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "enters": {}
+          },
+          "if": {
+            "amount": {
+              "left_this_turn": {
+                "each": {
+                  "permanent": {
+                    "not": [
+                      "land"
+                    ]
+                  }
+                }
+              }
+            },
+            "at_least": 1
+          },
+          "effects": [
+            {
+              "draw": {
+                "amount": 1
+              }
+            },
+            {
+              "lose_life": {
+                "amount": 1,
+                "to": "you"
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "When this creature enters, if a nonland permanent left the battlefield this turn, you draw a card and lose 1 life."
+  },
+  {
+    "name": "Lantern Moth",
+    "mana_cost": "{1}{W}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "insect"
+    ],
+    "power": 1,
+    "toughness": 2,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "leaves_battlefield": {}
+          },
+          "effects": [
+            {
+              "gain_life": {
+                "amount": 3
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "When this creature leaves the battlefield, you gain 3 life."
+  },
+  {
+    "name": "Pyre Tender",
+    "mana_cost": "{1}{B}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "human"
+    ],
+    "power": 1,
+    "toughness": 3,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "sacrifices": {
+              "subject": {
+                "each": "permanent",
+                "controller": "you",
+                "other": true
+              }
+            }
+          },
+          "effects": [
+            {
+              "add_counters": {
+                "counter": "+1/+1",
+                "amount": 1,
+                "to": "self"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "activated": {
+          "cost": [
+            {
+              "sacrifice_permanent": {
+                "filter": "creature",
+                "other": true
+              }
+            }
+          ],
+          "effects": [
+            {
+              "scry": {
+                "amount": 1
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "Whenever you sacrifice another permanent, put a +1/+1 counter on this creature. Sacrifice another creature: Scry 1."
+  },
+  {
+    "name": "Scrapheap Rummager",
+    "mana_cost": "{2}{R}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "goblin"
+    ],
+    "power": 2,
+    "toughness": 2,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "discards": {
+              "batched": true
+            }
+          },
+          "effects": [
+            {
+              "deal_damage": {
+                "amount": {
+                  "triggering": "amount"
+                },
+                "to": "each_opponent"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "activated": {
+          "cost": [
+            {
+              "mana": "{1}"
+            },
+            "tap"
+          ],
+          "effects": [
+            {
+              "discard": {
+                "amount": 1
+              }
+            },
+            {
+              "draw": {
+                "amount": 1
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "Whenever you discard one or more cards, this creature deals that much damage to each opponent. {1}, {T}: Discard a card, then draw a card."
+  },
+  {
+    "name": "Augur of Tides",
+    "mana_cost": "{1}{U}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "merfolk"
+    ],
+    "power": 1,
+    "toughness": 3,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "any_of": [
+              {
+                "scries": {}
+              },
+              {
+                "surveils": {}
+              }
+            ]
+          },
+          "effects": [
+            {
+              "pump": {
+                "power": 1,
+                "toughness": 1,
+                "to": "self"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "triggered": {
+          "when": {
+            "becomes_untapped": {}
+          },
+          "effects": [
+            {
+              "surveil": {
+                "amount": 1
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "Whenever you scry or surveil, this creature gets +1/+1 until end of turn. Whenever this creature becomes untapped, surveil 1."
+  },
+  {
+    "name": "Ossuary Keeper",
+    "mana_cost": "{3}{B}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "zombie"
+    ],
+    "power": 3,
+    "toughness": 3,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "put_into": {
+              "zone": "graveyard",
+              "card": "creature",
+              "batched": true
+            }
+          },
+          "effects": [
+            {
+              "gain_life": {
+                "amount": {
+                  "triggering": "amount"
+                }
+              }
+            }
+          ]
+        }
+      },
+      {
+        "triggered": {
+          "when": {
+            "step_begins": {
+              "step": "end"
+            }
+          },
+          "if": {
+            "amount": {
+              "cards_discarded_this_turn": "you"
+            },
+            "at_least": 1
+          },
+          "effects": [
+            {
+              "draw": {
+                "amount": 1
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "Whenever one or more creature cards are put into your graveyard from anywhere, you gain that much life. At the beginning of your end step, if you discarded a card this turn, draw a card."
+  },
+  {
     "name": "Wardline Sentinel",
     "mana_cost": "{G}",
     "types": [

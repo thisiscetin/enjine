@@ -96,16 +96,29 @@ derived from card text is stored here.
 | Double-faced cards (transform / modal DFC) — supported (card-data-format 4.15) | 712, 701.27 | 53 | 5 |
 | Flashback | 702.34 | 42 | 7 |
 | Mana spent to cast a spell (converge, "if N or more mana was spent") | 601.2h, 207.2c | 42 | 6 |
-| Turn-history conditions (you attacked, a permanent left the battlefield, cards drawn / sacrificed / exiled this turn) | 508.1, 400.7 | 42 | 7 |
+| Turn-history conditions (you attacked, a permanent left the battlefield, cards drawn / sacrificed / exiled this turn) — **supported** (see below) | 508.1, 400.7 | 42 | 7 |
 | Start your engines! / max speed | 702.179, 702.178 | 40 | 1 |
-| More trigger events (discard, cycle, sacrifice, scry/surveil, put into exile or a graveyard from anywhere, becomes untapped) | 603.2 | 37 | 11 |
+| More trigger events (discard, cycle, sacrifice, scry/surveil, put into exile or a graveyard from anywhere, becomes untapped) — **supported** (see below) | 603.2 | 37 | 11 |
 | Type-changing effects (becomes a creature, gains a card type) | 613.1d, 205.1b | 36 | 13 |
 | Empower Jace (planeswalker token) | 701.71 | 35 | 1 |
 | Exhaust (activate only once) | 702.177 | 35 | 3 |
 | Choosing a color, creature type or named option (as it enters or on resolution) | 614.12, 607.2 | 34 | 8 |
-| Trigger: leaves the battlefield | 603.6c, 603.10a | 34 | 7 |
+| Trigger: leaves the battlefield — **supported** (see below) | 603.6c, 603.10a | 34 | 7 |
 | Warp | 702.185 | 32 | 1 |
 | Filters on keyword abilities ("creature with flying") | 702.1, 115.1 | 31 | 13 |
+
+**History and zone-change triggers, now supported** (the per-set rows below predate
+this): conditions and amounts `you_attacked_this_turn`, `attackers_this_turn`,
+`left_this_turn`, `sacrificed_this_turn`, `exiled_this_turn`, `cards_drawn_this_turn`,
+`cards_discarded_this_turn` (CR 508.1, 400.7); triggers `leaves_battlefield`,
+`sacrifices`, `discards`, `cycles`, `scries`, `surveils`, `becomes_untapped`,
+`put_into` with `batched` "one or more … that many" (CR 603.2c, 603.6c, 603.10a,
+including permanents that leave at the same time). Still open in this area:
+- Void's "or a spell was warped this turn" half (needs warp, CR 702.185): e.g. Alpharael, Stonechosen.
+- "Whenever you cycle or discard a card" triggering only once for a cycled card (CR 702.29d).
+- Amounts from another leaving object's last known counters ("for each +1/+1 counter on it"; a
+  subject filter `{"creature": {"counters": "+1/+1"}}` already handles "with a counter on it"): e.g. The Ooze.
+- "A card put into your graveyard from anywhere this turn" as a target filter: e.g. Night Nurse, Healer of Heroes.
 
 ### Star Trek (trk) — 1 gap
 

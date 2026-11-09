@@ -15,7 +15,12 @@ module Enjine
     #   "spells"   card ids of spells the player cast       "life_gained" / "life_lost"  totals
     #   "entered"  [card id, types, subtypes] of permanents that entered under their control
     #   "died"     [card id, types] of their permanents put into a graveyard from the battlefield
+    #   "left"     [card id, types, subtypes] of their permanents that left the battlefield (CR 400.7)
+    #   "sacrificed" [card id, types, subtypes] of the permanents they sacrificed (CR 701.21a)
+    #   "attackers" [card id, types, subtypes] of the creatures they attacked with (CR 508.1)
+    #   "exiled"   [card id, types] of their cards put into exile, from anywhere (as it last existed)
     #   "returned" permanents returned to their hand from the battlefield
+    #   "drawn" / "discarded"  how many cards they drew (CR 121.2) / discarded (CR 701.9a)
     #   "dilemmas" dilemmas they faced (CR 700.17)
     # Per object (GameObject#memory, stamped with the turn): "attacked" and "resolved" counts.
     module TurnHistory
@@ -28,7 +33,7 @@ module Enjine
           zone_change_recorded!(event)
           discard_recorded!(event) # mayhem (Engine::AltCasting)
         when Events::DilemmaFaced then bump!(log_of(event.player), "dilemmas", 1)
-        when Events::AttackerDeclared then object_memory!(event.object, "attacked")["count"] = 1
+        when Events::AttackerDeclared then attack_recorded!(event)
         when Events::Resolved then resolution_recorded!(event)
         end
       end
@@ -52,9 +57,7 @@ module Enjine
       # is the source of (on the stack, being activated or waiting to be put on the stack: "source_lki" in
       # their memory) and by the spell or ability resolving now ("its controller" of a destroyed target).
       def remember_last_known!(id, lki)
-        info = { "controller" => lki["controller"], "power" => lki["power"], "toughness" => lki["toughness"],
-                 "counters" => lki["counters"].dup, "card" => lki["card"] }
-        info["except"] = lki["except"] if lki["except"] # what a copy of it copies (CR 707.2, Engine::Copies)
+        info = last_known_memory(lki)
         state.stack.each do |sid|
           obj = object(sid)
           obj.memory["source_lki"] = info.dup if obj.ability? && obj.source == id
@@ -62,6 +65,14 @@ module Enjine
         state.pending_triggers.each { (it["memory"] ||= {})["source_lki"] = info.dup if it["source"] == id }
         resolving = state.frames.rfind { it["type"] == "resolve" && it["ctx"] }
         (resolving["ctx"]["lki"] ||= {})[id] = info if resolving
+      end
+
+      # The part of last known information an ability keeps in its memory ("source_lki"): plain data.
+      def last_known_memory(lki)
+        info = { "controller" => lki["controller"], "power" => lki["power"], "toughness" => lki["toughness"],
+                 "counters" => lki["counters"].dup, "card" => lki["card"] }
+        info["except"] = lki["except"] if lki["except"] # what a copy of it copies (CR 707.2, Engine::Copies)
+        info
       end
 
       # What the resolving spell or ability remembers about an object that left the battlefield during it.
@@ -86,20 +97,42 @@ module Enjine
       end
 
       # CR 700.4: "dies" is battlefield to graveyard; the types are those it last had (CR 603.10a).
+      # Who it counts for: a permanent's controller as it last existed, or a card's owner.
       def zone_change_recorded!(event)
-        if event.to == "battlefield"
-          obj = state.objects[event.new_id] or return
-          c = chars(obj)
-          (turn_log(obj.controller)["entered"] ||= []) << [event.card, c.types.map(&:to_s), c.subtypes.map(&:to_s)]
-        elsif event.from == "battlefield"
-          lki = last_known(event.old_id) or return
-          if event.to == "graveyard"
-            (turn_log(lki["controller"])["died"] ||= []) << [event.card, lki["types"].map(&:to_s)]
-          elsif event.to == "hand"
-            bump!(log_of(event.owner), "returned", 1)
-          end
+        entered_recorded!(event) if event.to == "battlefield"
+        lki = event.from == "battlefield" ? last_known(event.old_id) : nil
+        departed_recorded!(event, lki) if lki
+        log = lki ? turn_log(lki["controller"]) : log_of(event.owner)
+        case event.reason
+        when "draw" then bump!(log_of(event.owner), "drawn", 1)
+        when "discard" then bump!(log_of(event.owner), "discarded", 1)
         end
+        (log["exiled"] ||= []) << [event.card, (lki ? lki["types"] : printed_types(event.card)).map(&:to_s)] if event.to == "exile"
       end
+
+      def entered_recorded!(event)
+        obj = state.objects[event.new_id] or return
+        (turn_log(obj.controller)["entered"] ||= []) << history_entry(event.card, chars(obj))
+      end
+
+      def departed_recorded!(event, lki)
+        log = turn_log(lki["controller"])
+        left = [event.card, lki["types"].map(&:to_s), lki.fetch("subtypes", []).map(&:to_s)]
+        (log["left"] ||= []) << left
+        (log["died"] ||= []) << left.first(2) if event.to == "graveyard"
+        (log["sacrificed"] ||= []) << left if event.reason == "sacrifice"
+        bump!(log_of(event.owner), "returned", 1) if event.to == "hand"
+      end
+
+      # CR 508.1: "you attacked this turn" / "attacked with a Spacecraft"; the attacker remembers it attacked.
+      def attack_recorded!(event)
+        obj = state.objects[event.object] or return
+        object_memory!(event.object, "attacked")["count"] = 1
+        (turn_log(obj.controller)["attackers"] ||= []) << history_entry(obj.card, chars(obj))
+      end
+
+      def history_entry(card, current) = [card, current.types.map(&:to_s), current.subtypes.map(&:to_s)]
+      def printed_types(card) = catalog.fetch(card).types
 
       def resolution_recorded!(event)
         obj = state.objects[event.object]

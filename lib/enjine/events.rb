@@ -117,6 +117,8 @@ module Enjine
     Transformed = define(:transformed, :object, :card)
     # CR 723.3a-c: a permanent gained (`prepared` true) or lost the prepared designation.
     PreparedChanged = define(:prepared_changed, :object, :prepared)
+    # A keyword action that abilities trigger on, once it's complete: "scry" / "surveil" N (CR 701.22, 701.25).
+    KeywordAction = define(:keyword_action, :player, :action, :amount)
 
     # A card moved between zones; old_id stops existing and new_id is born (CR 400.7). `lookers`: the card
     # was exiled face down, and only these players (by name) see which card it is (CR 406.3).

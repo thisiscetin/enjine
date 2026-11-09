@@ -292,6 +292,33 @@ is a flicker ("exile …, then return it to the battlefield under its owner's co
 | tapped unless its controller has two other lands / a trigger only if it came in untapped | `{ "enters_tapped_unless": { "condition": { "controls": { "each": "land", "controller": "you" }, "at_least": 2 } } }` / `{ "enters": { "untapped": true } }` |
 | returned to the battlefield carrying a +1/+1 counter | `"counters": { "+1/+1": 1 }` on `return_to_battlefield` |
 
+Zone-change and keyword-action triggers. Leaving the battlefield and sacrificing look back in time
+(CR 603.10a): the permanent is matched as it last existed, its own ability triggers although it has
+left, its effects read its last known counters and power (`{ "counters": { "of": "self" } }`), and
+permanents that leave at the same time (one effect, or state-based actions) see each other leave.
+`"batched": true` is "one or more": one trigger per event batch, and `{ "triggering": "amount" }` is
+how many occurrences the batch had.
+
+| Shape | Data |
+| --- | --- |
+| "When this leaves the battlefield" / "is put into exile from the battlefield" | `{ "leaves_battlefield": {} }` / `{ "leaves_battlefield": { "to": "exile" } }` |
+| "Whenever another creature you control leaves the battlefield" | `{ "leaves_battlefield": { "subject": { "each": "creature", "controller": "you", "other": true } } }` |
+| "When this enters or leaves the battlefield" | `{ "any_of": [{ "enters": {} }, { "leaves_battlefield": {} }] }` |
+| "Whenever you sacrifice another permanent" / "a Food" | `{ "sacrifices": { "subject": { "each": "permanent", "controller": "you", "other": true } } }` / `"each": { "artifact": { "subtypes": ["food"] } }` |
+| "Whenever you discard one or more cards, create that many …" | `{ "discards": { "batched": true } }`, amount `{ "triggering": "amount" }` |
+| "Whenever you cycle a card" | `{ "cycles": {} }` (a cycled card is also discarded: `discards` triggers too) |
+| "Whenever you scry or surveil" | `{ "any_of": [{ "scries": {} }, { "surveils": {} }] }` (scry 0 isn't a scry) |
+| "Whenever equipped creature becomes untapped" | `{ "becomes_untapped": { "subject": "attached" } }` |
+| "Whenever one or more creature cards are put into your graveyard from anywhere" | `{ "put_into": { "zone": "graveyard", "card": "creature", "batched": true } }` |
+| "Whenever one or more cards are put into exile from graveyards and/or the battlefield" | `{ "put_into": { "zone": "exile", "from": ["graveyard", "battlefield"], "controller": "any", "batched": true } }` |
+| "during your turn" | `"if": { "your_turn": true }` on the `triggered` ability |
+
+```json
+{ "triggered": { "when": { "leaves_battlefield": {} }, "targets": [{ "creature": { "controller": "you" } }],
+                 "effects": [{ "add_counters": { "counter": "+1/+1", "amount": { "counters": { "of": "self", "kind": "+1/+1" } },
+                                                 "to": { "target": 0 } } }] } }
+```
+
 ### 4.6 Effects
 
 See `docs/reference/effects.md` for the generated list. Currently:
@@ -533,6 +560,14 @@ The full lists are in `lib/enjine/mechanics/values.rb` (`Amount`, `Condition`).
 | N or more cards drawn by an earlier effect; "if you do" after a mandatory effect | `{ "amount": { "count": { "result": n } }, "at_least": 3 }` |
 | a trigger that also needs total power N or more of your creatures | `"while": { "amount": { "power": { "each": "creature", "controller": "you" } }, "at_least": 8 }` on a trigger (checked only as it triggers) |
 | "if a creature died this turn", "if you've cast a noncreature spell this turn" | `{ "amount": { "died_this_turn": { "each": "creature" } }, "at_least": 1 }`, `{ "spells_cast_this_turn": { "by": "you", "matching": { "spell": { "not": ["creature"] } } } }` |
+| raid: "if you attacked this turn" | `{ "you_attacked_this_turn": true }` |
+| "if you attacked with three or more Merfolk this turn" | `{ "amount": { "attackers_this_turn": { "each": { "creature": { "subtypes": ["merfolk"] } }, "controller": "you" } }, "at_least": 3 }` |
+| "if a permanent left the battlefield under your control this turn" / "a nonland permanent left the battlefield this turn" | `{ "amount": { "left_this_turn": { "controller": "you" } }, "at_least": 1 }` / `{ "left_this_turn": { "each": { "permanent": { "not": ["land"] } } } }` |
+| "the number of permanents you've sacrificed this turn" | `{ "sacrificed_this_turn": { "controller": "you" } }` |
+| "if one or more cards were put into exile this turn" | `{ "amount": { "exiled_this_turn": {} }, "at_least": 1 }` |
+| "if you've drawn two or more cards this turn", "each card you've discarded this turn" | `{ "amount": { "cards_drawn_this_turn": "you" }, "at_least": 2 }`, `{ "cards_discarded_this_turn": "you" }` |
+| "if you gained life this turn" | `{ "amount": { "life_gained_this_turn": "you" }, "at_least": 1 }` |
+| "if a creature died under your control this turn" | `{ "amount": { "died_this_turn": { "each": "creature", "controller": "you" } }, "at_least": 1 }` |
 | the Nth resolution of this ability this turn | `{ "nth_resolution": 2 }` |
 | "if it isn't a creature", "if it attacked this turn" | `{ "not": { "source": "creature" } }`, `{ "attacked_this_turn": true }` |
 | "its controller creates …" | `"to": { "controller_of": { "target": 0 } }` |

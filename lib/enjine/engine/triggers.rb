@@ -7,14 +7,15 @@ module Enjine
     module Triggering
       # The object as it last existed on the battlefield, while its zone-change event is
       # being matched (CR 603.10a). Nil otherwise.
-      def last_known(id) = @last_known&.[](id)
+      # A permanent that left earlier in the same simultaneous zone change is remembered too (#simultaneously).
+      def last_known(id) = @last_known&.[](id) || @departed_together&.dig(id, "lki")
 
       # What a permanent looked like as it last existed on the battlefield (CR 603.10a, 608.2h):
       # controller and current characteristics, so "a creature you control dies" checks the
       # types it had then, not its printed ones.
       def last_known_info(obj)
         current = chars(obj)
-        { "controller" => obj.controller, "card" => obj.card, "types" => current.types,
+        { "controller" => obj.controller, "card" => obj.card, "types" => current.types, "subtypes" => current.subtypes,
           "power" => current.power, "toughness" => current.toughness, "counters" => obj.counters.dup,
           "token" => token?(obj), "except" => copy_exceptions(obj) }
       end
@@ -121,20 +122,39 @@ module Enjine
         end
       end
 
-      # "When ~ dies" / "leaves": the leaving object's own abilities, as it last existed.
+      # "When ~ dies" / "leaves": the leaving object's own abilities, as it last existed. Permanents that left
+      # earlier in the same simultaneous event look back too (CR 603.10a: an artifact destroyed along with
+      # creatures sees them die), see #simultaneously.
       def watch_leaving!(event)
         return unless event.is_a?(Events::ZoneChanged) && event.from == "battlefield"
 
         lki = last_known(event.old_id) or return
-        defn = catalog.fetch(event.card)
+        @departed_together&.each_value { queue_leaving_triggers(it, event) }
+        gone = { "id" => event.old_id, "card" => event.card, "controller" => lki["controller"] }
+        queue_leaving_triggers(gone, event)
+        @departed_together[event.old_id] = gone.merge("lki" => lki) if @departed_together
+      end
+
+      def queue_leaving_triggers(gone, event)
+        defn = catalog.fetch(gone["card"])
         return unless defn.triggered?
 
-        source = { "id" => event.old_id, "card" => event.card, "controller" => lki["controller"] }
+        source = gone.slice("id", "card", "controller")
         defn.ability_instances.each do |inst|
           ability = inst.ability
           queue_trigger(inst, event, source) if ability.kind == :triggered && ability.zone == :battlefield &&
                                                 ability.trigger.leaves_battlefield?
         end
+      end
+
+      # Zone changes made inside the block happen at once (one effect, or state-based actions, CR 704.3):
+      # leaves-the-battlefield abilities of permanents that left look back in time at the others (CR 603.10a).
+      def simultaneously
+        outer = @departed_together
+        @departed_together ||= {}
+        yield
+      ensure
+        @departed_together = outer
       end
 
       # "When you cast this spell" (CR 601.2i): the spell's own ability, functioning on the stack.
@@ -175,21 +195,30 @@ module Enjine
         return unless ability.condition_met?(self, source["controller"], source["id"]) # CR 603.4
         return if once_each_turn_used!(ability, inst.ref, source)
 
-        source_memory = state.objects[source["id"]]&.memory || {}
-        memory = source_memory["cast"] ? { "source_cast" => true } : {}
-        memory["kicked"] = true if source_memory["kicked"] # CR 702.33d: a kicked permanent's "if it was kicked"
-        memory.merge!(source_memory.slice("cast_from", "cast_with")) # "if its evoke cost was paid" (Engine::AltCasting)
+        memory = trigger_memory(source)
         batch = trigger.respond_to?(:batched?) && trigger.batched? ? event_batch : nil
         times = 1 + additional_triggers(event, source)
         card, ref = granted_origin(inst.ref) # a granted ability lives in the granting card's data (CR 613.1f)
         queued = source.merge("ability" => ref || inst.ref, "card" => card || source["card"])
         found.first(limited?(ability) ? 1 : found.size).each do |facts|
-          next if batch && batched_pending?(source, queued["ability"], batch)
+          next if batch && batched_pending!(source, queued["ability"], batch)
 
-          times.times do
-            queue_pending_trigger!(queued, event, memory.merge("triggering" => facts), batch: batch)
-          end
+          facts = facts.merge("amount" => 1) if batch # "that many": the occurrences so far (batched_pending!)
+          times.times { queue_pending_trigger!(queued, event, memory.merge("triggering" => facts), batch: batch) }
         end
+      end
+
+      # What a triggered ability remembers of its source: whether it was cast and kicked, and, for a source that
+      # just left the battlefield ("when this leaves, put its counters on ..."), how it last existed (CR 603.10a,
+      # 608.2h).
+      def trigger_memory(source)
+        source_memory = state.objects[source["id"]]&.memory || {}
+        memory = source_memory["cast"] ? { "source_cast" => true } : {}
+        memory["kicked"] = true if source_memory["kicked"] # CR 702.33d: a kicked permanent's "if it was kicked"
+        memory.merge!(source_memory.slice("cast_from", "cast_with")) # "if its evoke cost was paid" (Engine::AltCasting)
+        lki = last_known(source["id"])
+        memory["source_lki"] = last_known_memory(lki) if lki
+        memory
       end
 
       # A once-each-turn limit: remembered on the source object, so the same card
@@ -234,8 +263,15 @@ module Enjine
         "#{frame["type"]}:#{frame["object"]}:#{frame["pc"]}"
       end
 
-      def batched_pending?(source, ref, batch)
-        state.pending_triggers.any? { it["source"] == source["id"] && it["ability"] == ref && it["batch"] == batch }
+      # Whether a "one or more" trigger already waits for this batch. If so, this occurrence joins it: its
+      # "that many" counts the occurrences in the batch (CR 603.2c).
+      def batched_pending!(source, ref, batch)
+        waiting = state.pending_triggers.select { it["source"] == source["id"] && it["ability"] == ref && it["batch"] == batch }
+        waiting.each do |trigger|
+          facts = trigger["memory"]["triggering"]
+          facts["amount"] = facts.fetch("amount", 1) + 1
+        end
+        !waiting.empty?
       end
 
       # `memory` travels to the ability on the stack (its source's last known status, a delayed

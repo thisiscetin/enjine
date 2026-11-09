@@ -97,7 +97,7 @@ module Enjine
           effect, offset, count, index = plan[frame["pc"]]
           ctx = effect_context(frame["ctx"], offset, count, index ? frame["pc"] - index : 0)
           locals = (frame["locals"][frame["pc"].to_s] ||= {})
-          return :wait if recording_results(frame) { effect.run(self, ctx, locals) } == :wait
+          return :wait if recording_results(frame) { simultaneously { effect.run(self, ctx, locals) } } == :wait
 
           frame["pc"] += 1
         end

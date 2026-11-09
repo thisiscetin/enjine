@@ -14,9 +14,11 @@ module Enjine
     #   {"distinct_types": selector}                  how many different creature types they have (CR 205.3m)
     #   {"counters": {"of": selector, "kind": name}}  counters on them (any kind without "kind", CR 122)
     #   {"life_gained_this_turn" | "life_lost_this_turn" | "dilemmas_this_turn" | "returned_this_turn"
+    #    | "cards_drawn_this_turn" | "cards_discarded_this_turn"
     #    | "spells_cast_this_game": player selector}  this turn's (or game's) history, see Engine::TurnHistory
     #   {"spells_cast_this_turn": {"by": player selector, "matching": spell filter}}
-    #   {"died_this_turn" | "entered_this_turn": {"each": filter, "controller": you|opponent|any}}
+    #   {"died_this_turn" | "entered_this_turn" | "left_this_turn" | "sacrificed_this_turn" | "attackers_this_turn"
+    #    | "exiled_this_turn": {"each": filter, "controller": you|opponent|any}}  objects in this turn's history
     #   {"this_way": n}                               how much effect n of this list changed (life it took)
     #   {"times": [a, b]} / {"plus": [a, b]} / {"divide": [a, b]}   arithmetic on amounts; division rounds down
     #                                                 (CR 107.1a). "-X" is {"times": ["x", -1]}.
@@ -24,12 +26,17 @@ module Enjine
     class Amount
       SELECTOR_KINDS = %w[count power toughness greatest_power hand_size life graveyard_size distinct_names distinct_types
                           life_gained_this_turn life_lost_this_turn dilemmas_this_turn returned_this_turn
-                          spells_cast_this_game speed].freeze
+                          cards_drawn_this_turn cards_discarded_this_turn spells_cast_this_game speed].freeze
       ARITHMETIC = %w[times plus divide].freeze
-      KINDS = (SELECTOR_KINDS + ARITHMETIC + %w[counters spells_cast_this_turn died_this_turn entered_this_turn this_way]).freeze
+      # Object history lists: kind -> turn_log key (Engine::TurnHistory).
+      DEPARTED = { "died_this_turn" => "died", "entered_this_turn" => "entered", "left_this_turn" => "left",
+                   "sacrificed_this_turn" => "sacrificed", "attackers_this_turn" => "attackers",
+                   "exiled_this_turn" => "exiled" }.freeze
+      KINDS = (SELECTOR_KINDS + ARITHMETIC + DEPARTED.keys + %w[counters spells_cast_this_turn this_way]).freeze
       # Player history counters: kind -> turn_log/game_log key.
       HISTORY = { "life_gained_this_turn" => "life_gained", "life_lost_this_turn" => "life_lost",
-                  "dilemmas_this_turn" => "dilemmas", "returned_this_turn" => "returned" }.freeze
+                  "dilemmas_this_turn" => "dilemmas", "returned_this_turn" => "returned",
+                  "cards_drawn_this_turn" => "drawn", "cards_discarded_this_turn" => "discarded" }.freeze
 
       # `min`: the smallest fixed number allowed (computed amounts may be anything their parts give).
       def self.build(data, errors, path, targets_count:, min: 0, results_count: 0)
@@ -47,7 +54,7 @@ module Enjine
         return Arithmetic.build(kind, ref, errors, "#{path}.#{kind}", **context) if ARITHMETIC.include?(kind)
         return Counters.build(ref, errors, "#{path}.#{kind}", **context) if kind == "counters"
         return SpellsCast.build(ref, errors, "#{path}.#{kind}", **context) if kind == "spells_cast_this_turn"
-        return Departed.build(kind, ref, errors, "#{path}.#{kind}") if %w[died_this_turn entered_this_turn].include?(kind)
+        return Departed.build(kind, ref, errors, "#{path}.#{kind}") if DEPARTED.key?(kind)
         return ThisWay.build(ref, errors, "#{path}.#{kind}", results_count) if kind == "this_way"
 
         new(kind, Selector.build(ref, errors, "#{path}.#{kind}", **context))
@@ -88,8 +95,14 @@ module Enjine
       def self.last_known(engine, ctx, selector, key)
         return 0 unless selector.kind == :self
 
-        lki = engine.state.objects[ctx.object]&.memory&.[]("source_lki")
+        lki = source_lki(engine, ctx)
         lki ? lki[key].to_i : 0
+      end
+
+      # How a source that has left the battlefield last existed: remembered by the resolving ability, or,
+      # while its leaves-the-battlefield trigger is being checked (CR 603.4, 603.10a), the engine's.
+      def self.source_lki(engine, ctx)
+        engine.state.objects[ctx.object]&.memory&.[]("source_lki") || engine.last_known(ctx.source)
       end
 
       private
@@ -214,10 +227,7 @@ module Enjine
         def value(engine, ctx)
           refs = @selector.resolve(engine, ctx).select { engine.state.objects.key?(it) }
           counters = refs.map { engine.object(it).counters }
-          if refs.empty? && @selector.kind == :self
-            counters = [engine.state.objects[ctx.object]&.memory&.dig("source_lki",
-                                                                      "counters") || {}]
-          end
+          counters = [Amount.source_lki(engine, ctx)&.[]("counters") || {}] if refs.empty? && @selector.kind == :self
           counters.sum { @kind ? it.fetch(@kind, 0) : it.values.sum }
         end
 
@@ -251,17 +261,20 @@ module Enjine
         def to_s = "the number of #{@filter || "spell"}s cast this turn by #{@by}"
       end
 
-      # {"died_this_turn" | "entered_this_turn": {"each": filter, "controller": ...}}: permanents that
-      # died (CR 700.4) or entered this turn, matched by their card and the card types (and, for entering
-      # ones, the subtypes, e.g. "an Equipment entered") they had then.
+      # {"died_this_turn" | "entered_this_turn" | ...: {"each": filter, "controller": ...}}: permanents that
+      # died (CR 700.4), entered, left the battlefield (CR 400.7) or were sacrificed (CR 701.21a) this turn,
+      # creatures that attacked (CR 508.1) and cards put into exile, matched by their card and the card types
+      # (and subtypes, except for died and exiled ones) they had then. `controller`: whose they were (the
+      # attacking player; for a card exiled from another zone, its owner). Without `each`, every one counts.
       class Departed
         def self.build(kind, data, errors, path)
+          errors << "#{path}: must be an object {\"each\": filter, \"controller\": ...}" unless data.is_a?(Hash)
           data = data.is_a?(Hash) ? data.transform_keys(&:to_s) : {}
           Mechanics.check_keys(data, %w[each controller], errors, path)
-          filter = Mechanics.build_entry(:filter, data.fetch("each", "permanent"), errors, "#{path}.each")
+          filter = data.key?("each") ? Mechanics.build_entry(:filter, data["each"], errors, "#{path}.each") : nil
           controller = data.fetch("controller", "any")
           errors << "#{path}.controller: must be one of you, opponent, any" unless %w[you opponent any].include?(controller)
-          new(kind == "died_this_turn" ? "died" : "entered", filter, controller)
+          new(DEPARTED.fetch(kind), filter, controller)
         end
 
         # Whether a card (with the card types it had, when given) matches a filter's characteristics.
@@ -285,12 +298,15 @@ module Enjine
             next 0 unless @controller == "any" || (@controller == "you") == (index == ctx.controller)
 
             Array(engine.turn_log(index)[@key]).count do |card, types, subtypes|
-              @filter && Departed.facts_match?(engine, @filter, card, types, subtypes)
+              @filter.nil? || Departed.facts_match?(engine, @filter, card, types, subtypes)
             end
           end
         end
 
-        def to_s = "the number of #{@filter} that #{@key} this turn"
+        WORDS = { "died" => "that died", "entered" => "that entered", "left" => "that left the battlefield",
+                  "sacrificed" => "sacrificed", "attackers" => "that attacked", "exiled" => "put into exile" }.freeze
+
+        def to_s = "the number of #{Triggers.filter_words(@filter) || "object"}s #{WORDS.fetch(@key)} this turn"
       end
     end
 
@@ -311,12 +327,14 @@ module Enjine
     #   {"source": filter}         the source is on the battlefield and matches ("if this isn't a creature":
     #                              {"not": {"source": "creature"}})
     #   {"attacked_this_turn": true}  the source attacked this turn
+    #   {"you_attacked_this_turn": true}  you attacked with one or more creatures this turn (raid, CR 508.1)
     #   {"nth_resolution": n}      this is the nth time this turn this ability resolves (CR 608.2)
     #   {"share_card_type": selector}  the referenced objects share a card type ("exiled_with": linked cards)
     #   {"chosen": word}           that word was chosen for this object (choose_option, CR 607.2f)
     #   {"not": condition}, {"all": [conditions]}, {"any": [conditions]}
     class Condition
-      FLAGS = %w[your_turn was_cast attacked attacked_this_turn max_speed].freeze
+      FLAGS = %w[your_turn was_cast attacked attacked_this_turn max_speed
+                 you_attacked_this_turn].freeze
       # Kinds named by one key and built by their class (ChosenIs: abilities/chosen_values.rb).
       KEYED = { "targets" => :Targets, "triggering" => :TriggeringIs, "source" => :Source,
                 "nth_resolution" => :NthResolution, "chosen" => :ChosenIs }.freeze
@@ -358,8 +376,8 @@ module Enjine
           subject = (data.keys & (SUBJECTS.keys + ["amount"])).first
           unless subject
             errors << "#{path}: unknown condition (use amount, controls, life, hand_size, your_turn, was_cast, targets, " \
-                      "attacked, source, attacked_this_turn, nth_resolution, kicked, sacrificed, cast_with, cast_from, " \
-                      "cast_with_this_turn, not, all, any)"
+                      "attacked, source, attacked_this_turn, you_attacked_this_turn, nth_resolution, kicked, " \
+                      "sacrificed, cast_with, cast_from, cast_with_this_turn, chosen, max_speed, not, all, any)"
             return nil
           end
           Mechanics.check_keys(data, [subject, "at_least", "at_most"], errors, path)
@@ -401,7 +419,9 @@ module Enjine
         WORDS = { "your_turn" => ["it's your turn", "it's not your turn"], "was_cast" => ["it was cast", "it wasn't cast"],
                   "attacked" => ["a creature is attacking you", "no creature is attacking you"],
                   "attacked_this_turn" => ["it attacked this turn", "it didn't attack this turn"],
-                  "max_speed" => ["you have max speed", "you don't have max speed"] }.freeze
+                  "max_speed" => ["you have max speed", "you don't have max speed"],
+                  "you_attacked_this_turn" => ["you attacked this turn", "you didn't attack this turn"] }.freeze
+
 
         def to_s = WORDS.fetch(@flag)[@wanted ? 0 : 1]
 
@@ -415,6 +435,7 @@ module Enjine
             engine.attackers.values.any? { it["target"] == you }
           when "attacked_this_turn" then engine.attacked_this_turn?(ctx.source)
           when "max_speed" then engine.max_speed?(ctx.controller) # CR 702.179e
+          when "you_attacked_this_turn" then !engine.turn_log(ctx.controller).fetch("attackers", []).empty?
           else was_cast?(engine, ctx)
           end
         end
