@@ -536,7 +536,7 @@ back in with it.
 activated ability that only works while it has a subtype uses
 `"only_if": { "source": { "creature": { "subtypes": ["rogue"] } } }`.
 
-### 4.13 Copies (CR 707)
+### 4.14 Copies (CR 707)
 
 A copy has the **copiable values** of what it copies: the values printed on its card,
 as changed by other copy effects and their exceptions, and nothing else: no counters,

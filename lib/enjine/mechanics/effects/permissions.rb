@@ -254,9 +254,8 @@ module Enjine
         def riders(params, errors, path)
           increase = Mechanics.fetch_param(params, :cost_increase)
           any_type = Mechanics.fetch_param(params, :any_mana_type)
-          unless increase.nil? || (increase.is_a?(Integer) && increase.positive?)
-            errors << "#{path}.cost_increase: must be an integer >= 1"
-          end
+          ok = increase.nil? || (increase.is_a?(Integer) && increase.positive?)
+          errors << "#{path}.cost_increase: must be an integer >= 1" unless ok
           errors << "#{path}.any_mana_type: must be true or false" unless [nil, true, false].include?(any_type)
           { "cost_increase" => increase, "any_mana_type" => (true if any_type == true) }.compact
         end
