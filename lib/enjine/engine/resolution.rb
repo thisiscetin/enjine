@@ -140,7 +140,7 @@ module Enjine
           enters = enters.merge("attached_to" => frame.dig("ctx", "targets", 0)) if aura?(obj) # CR 608.3c
           pay_entering_life!(obj.controller, frame)
           move!(obj.id, :battlefield, controller: obj.controller, reason: "resolve", enters: enters) # CR 608.3
-        elsif !put_away_spell_face!(obj) # an Adventure or Omen (Engine::Faces)
+        elsif !put_away_spell_face!(obj) && !Mechanics::Keywords::Paradigm.resolved!(self, obj) # Engine::Faces; CR 702.192a
           move!(obj.id, :graveyard, reason: "resolve") # CR 608.2n
         end
       end

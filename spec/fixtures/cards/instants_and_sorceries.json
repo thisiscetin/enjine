@@ -4327,5 +4327,37 @@
         }
       }
     ]
+  },
+  {
+    "name": "Ember Thesis",
+    "mana_cost": "{2}{R}",
+    "types": [
+      "sorcery"
+    ],
+    "subtypes": [
+      "lesson"
+    ],
+    "keywords": [
+      "paradigm"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "targets": [
+            "any_target"
+          ],
+          "effects": [
+            {
+              "deal_damage": {
+                "amount": 2,
+                "to": {
+                  "target": 0
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
   }
 ]

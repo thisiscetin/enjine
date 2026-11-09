@@ -422,6 +422,20 @@ Rules: CR 509.1c
 }
 ```
 
+## paradigm
+
+As this instant or sorcery finishes resolving: if it's the first time a spell you control with its name has resolved this game, at the beginning of each of your precombat main phases for the rest of the game you create a copy of the card in exile and may cast it without paying its mana cost. Then the spell is exiled.
+
+Rules: CR 702.192a, CR 707.12, CR 603.7, CR 608.2g
+
+```json
+{
+  "keywords": [
+    "paradigm"
+  ]
+}
+```
+
 ## phasing
 
 During each of its controller's untap steps, before they untap, it phases out if it's phased in (and phases in if it phased out under their control).

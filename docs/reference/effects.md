@@ -1001,11 +1001,11 @@ Rules: CR 701.71a, CR 704.3
 
 Each referenced permanent (default: this one) endures `amount`: its controller puts that many +1/+1 counters on it, or creates an N/N white Spirit creature token.
 
-Rules: CR 701.63a, CR 701.63b
+Rules: CR 701.63a, CR 701.63b, CR 707.2, CR 111.4
 
 | Parameter | Description |
 | --- | --- |
-| `amount` | integer >= 0 |
+| `amount` | amount (2, "x", {"counters": ...}) |
 | `to` | selector of permanents (default self) |
 
 ```json

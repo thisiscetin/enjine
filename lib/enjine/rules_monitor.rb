@@ -265,7 +265,7 @@ module Enjine
         net = obj.counters.fetch("+1/+1", 0) - obj.counters.fetch("-1/-1", 0)
         pumps = state.effects.select { it["kind"] == "pump" && it["affected"].include?(id) } + attached_grants(id) +
                 static_bonuses(obj, card, statics)
-        base = base_power_toughness(id, card)
+        base = base_power_toughness(obj, card)
         expected = [base[0] + net + pumps.sum { it["power"] }, base[1] + net + pumps.sum { it["toughness"] }]
         actual = view.fetch(id).values_at("power", "toughness")
         finding("613.4c", "#{id} is #{actual.join("/")}, expected #{expected.join("/")}") if actual != expected
@@ -275,10 +275,14 @@ module Enjine
     # A creature whose power/toughness isn't characteristic-defining (7a) or set by a static ability (7b).
     def recomputable?(obj, card) = card.creature? && !card.defined_pt? && applying_statics(obj).none?(&:base_power_toughness)
 
-    # CR 613.4b: the latest setting effect, else as printed.
-    def base_power_toughness(id, card)
-      setting = state.effects.select { it["kind"] == "base_power_toughness" && it["affected"].include?(id) }.last
-      setting ? setting.values_at("power", "toughness") : [card.power, card.toughness]
+    # CR 613.4b: the latest setting effect, else as printed, or as a copy's exceptions or a token's creating
+    # effect set them (CR 707.9b, 707.2: "copy_except").
+    def base_power_toughness(obj, card)
+      setting = state.effects.select { it["kind"] == "base_power_toughness" && it["affected"].include?(obj.id) }.last
+      return setting.values_at("power", "toughness") if setting
+
+      except = obj.memory["copy_effects"]&.last&.[]("except") || obj.memory["copy_except"] || {}
+      [except.fetch("power", card.power), except.fetch("toughness", card.toughness)]
     end
 
     # Static abilities printed on permanents that give a bonus to more than the attached permanent and

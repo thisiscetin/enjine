@@ -98,8 +98,9 @@ module Enjine
         state.delayed_triggers -= fired.reject { repeats?(it) }
       end
 
-      # "Whenever ... this turn" triggers each time; "the next ... this turn" ("once") only the first time.
-      def repeats?(entry) = entry["turn"] && !entry["once"]
+      # "Whenever ... this turn" triggers each time; "the next ... this turn" ("once") only the first time; one
+      # "for the rest of the game" ("game", paradigm, CR 702.192a) each time, forever.
+      def repeats?(entry) = (entry["turn"] && !entry["once"]) || entry["game"] == true
 
       def delayed_memory(entry, facts)
         { "results" => entry["results"], "watched" => entry["watched"], "triggering" => facts }.compact

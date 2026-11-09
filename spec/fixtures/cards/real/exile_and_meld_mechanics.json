@@ -1,0 +1,338 @@
+[
+  {
+    "name": "Krumar Initiate",
+    "mana_cost": "{1}{B}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "human",
+      "cleric"
+    ],
+    "power": 2,
+    "toughness": 2,
+    "abilities": [
+      {
+        "activated": {
+          "cost": [
+            {
+              "mana": "{X}{B}"
+            },
+            "tap",
+            {
+              "pay_life": "X"
+            }
+          ],
+          "timing": "sorcery",
+          "effects": [
+            {
+              "endure": {
+                "amount": "x"
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "uncommon",
+    "printing": {
+      "set": "tdm",
+      "number": "84"
+    }
+  },
+  {
+    "name": "Warden of the Grove",
+    "mana_cost": "{2}{G}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "hydra"
+    ],
+    "power": 2,
+    "toughness": 2,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "step_begins": {
+              "step": "end",
+              "whose": "your"
+            }
+          },
+          "effects": [
+            {
+              "add_counters": {
+                "counter": "+1/+1",
+                "amount": 1,
+                "to": "self"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "triggered": {
+          "when": {
+            "enters": {
+              "subject": {
+                "each": {
+                  "creature": {
+                    "token": false
+                  }
+                },
+                "controller": "you",
+                "other": true
+              }
+            }
+          },
+          "effects": [
+            {
+              "endure": {
+                "amount": {
+                  "counters": {
+                    "of": "self"
+                  }
+                },
+                "to": {
+                  "triggering": "object"
+                }
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "rare",
+    "printing": {
+      "set": "tdm",
+      "number": "166"
+    }
+  },
+  {
+    "name": "Tam, the Possibility",
+    "mana_cost": "{1}{G}{U}",
+    "types": [
+      "creature"
+    ],
+    "supertypes": [
+      "legendary"
+    ],
+    "subtypes": [
+      "gorgon",
+      "wizard"
+    ],
+    "power": 2,
+    "toughness": 4,
+    "abilities": [
+      {
+        "cost_modifier": {
+          "spells": {
+            "any_of": [
+              "planeswalker"
+            ]
+          },
+          "reduce": 1
+        }
+      },
+      {
+        "activated": {
+          "cost": [
+            {
+              "mana": "{W}{U}{B}{R}{G}"
+            },
+            "tap"
+          ],
+          "effects": [
+            {
+              "proliferate": {
+                "amount": {
+                  "distinct_planeswalker_types": {
+                    "each": "planeswalker",
+                    "controller": "you"
+                  }
+                }
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "rare",
+    "printing": {
+      "set": "fra",
+      "number": "276"
+    }
+  },
+  {
+    "name": "Decorum Dissertation",
+    "mana_cost": "{3}{B}{B}",
+    "types": [
+      "sorcery"
+    ],
+    "subtypes": [
+      "lesson"
+    ],
+    "keywords": [
+      "paradigm"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "targets": [
+            "player"
+          ],
+          "effects": [
+            {
+              "draw": {
+                "amount": 2,
+                "to": {
+                  "target": 0
+                }
+              }
+            },
+            {
+              "lose_life": {
+                "amount": 2,
+                "to": {
+                  "target": 0
+                }
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "mythic",
+    "printing": {
+      "set": "sos",
+      "number": "78"
+    }
+  },
+  {
+    "name": "Echocasting Symposium",
+    "mana_cost": "{4}{U}{U}",
+    "types": [
+      "sorcery"
+    ],
+    "subtypes": [
+      "lesson"
+    ],
+    "keywords": [
+      "paradigm"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "targets": [
+            "player",
+            {
+              "creature": {
+                "controller": "you"
+              }
+            }
+          ],
+          "effects": [
+            {
+              "create_token_copy": {
+                "of": {
+                  "target": 1
+                },
+                "to": {
+                  "target": 0
+                }
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "mythic",
+    "printing": {
+      "set": "sos",
+      "number": "44"
+    }
+  },
+  {
+    "name": "Germination Practicum",
+    "mana_cost": "{3}{G}{G}",
+    "types": [
+      "sorcery"
+    ],
+    "subtypes": [
+      "lesson"
+    ],
+    "keywords": [
+      "paradigm"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "effects": [
+            {
+              "add_counters": {
+                "counter": "+1/+1",
+                "amount": 2,
+                "to": {
+                  "each": "creature",
+                  "controller": "you"
+                }
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "mythic",
+    "printing": {
+      "set": "sos",
+      "number": "149"
+    }
+  },
+  {
+    "name": "Restoration Seminar",
+    "mana_cost": "{5}{W}{W}",
+    "types": [
+      "sorcery"
+    ],
+    "subtypes": [
+      "lesson"
+    ],
+    "keywords": [
+      "paradigm"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "targets": [
+            {
+              "graveyard_card": {
+                "controller": "you",
+                "any_of": [
+                  "artifact",
+                  "creature",
+                  "enchantment",
+                  "planeswalker"
+                ]
+              }
+            }
+          ],
+          "effects": [
+            {
+              "return_to_battlefield": {
+                "to": {
+                  "target": 0
+                }
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "mythic",
+    "printing": {
+      "set": "sos",
+      "number": "30"
+    }
+  }
+]
