@@ -280,8 +280,12 @@ module Enjine
     # One whose creature types an effect replaced (assimilate, "becomes a Borg", layer 4) is left to the engine's
     # specs: which statics apply to it depends on those types.
     def recomputable?(obj, card)
-      card.creature? && !card.defined_pt? && applying_statics(obj).none?(&:base_power_toughness) &&
-        state.effects.none? { %w[creature_types assimilate].include?(it["kind"]) && Array(it["affected"]).include?(obj.id) }
+      card.creature? && !card.defined_pt? && applying_statics(obj).none?(&:base_power_toughness) && !types_replaced?(obj)
+    end
+
+    # Creature types an effect replaced (layer 4): the monitor matches statics against printed types.
+    def types_replaced?(obj)
+      state.effects.any? { %w[creature_types assimilate].include?(it["kind"]) && Array(it["affected"]).include?(obj.id) }
     end
 
     # CR 613.4b: the latest setting effect, else as printed, or as a copy's exceptions or a token's creating
@@ -367,7 +371,8 @@ module Enjine
       end
     end
 
-    def indestructible?(obj) = keyword?(obj, :indestructible)
+    # With replaced creature types, a static keyed on them may grant it.
+    def indestructible?(obj) = keyword?(obj, :indestructible) || types_replaced?(obj)
 
     # CR 514.1: after cleanup the active player has at most seven cards (checked at the next turn's priority).
     # The player whose turn ended is the one active before (an extra turn may follow its own, CR 500.7).

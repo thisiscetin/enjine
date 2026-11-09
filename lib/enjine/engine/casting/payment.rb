@@ -199,7 +199,8 @@ module Enjine
       def completable_after_activating?(frame, option)
         id = option[:object]
         ability = chars(id).ability(option[:ability])
-        produced = (option[:mana] ? Mana.parse_produce(option[:mana], [], "mana") : ability.outcomes(self, object(id)).first) || [] # "": none
+        # A mana ability that would add nothing (mana: "") produces none.
+        produced = (option[:mana] ? Mana.parse_produce(option[:mana], [], "mana") : ability.outcomes(self, object(id)).first) || []
         pool = player(frame["player"]).mana_pool.dup
         rest = player(frame["player"]).restricted_mana
         if ability.spend_only
@@ -221,11 +222,12 @@ module Enjine
       end
 
       # Whether `cost` can be paid from `pool` (and the `restricted` pool) plus the player's untapped
-      # sources, minus `excluded`, for the payment `frame`.
+      # sources, minus `excluded` and a source the ability taps for its own cost, for the payment `frame`.
       def payable_with?(frame, cost, pool, excluded, restricted:)
         return true if cost.mana_value.zero?
 
         index = frame["player"]
+        excluded = [*excluded, payment_excluded_source(frame)].compact
         purpose = payment_purpose(frame)
         units = pool_units(index, pool, purpose, restricted) + source_units(index, excluded, purpose) +
                 convoke_units(index, purpose, excluded) + # CR 702.51a (Engine::AltCasting)

@@ -56,6 +56,26 @@ RSpec.describe "Cancelling a cast after paying an irreversible cost (CR 734.1, 6
     expect(treasure_options.map { it[:ability] }).to eq(["printed:3"])
   end
 
+  it "doesn't count the ability's own {T} source when checking an irreversible mana ability keeps the cost payable" do
+    cache = { "name" => "Spec Cache", "types" => ["land"],
+              "abilities" => [{ "mana" => { "cost" => ["tap"], "produce" => "{B}" } },
+                              { "activated" => { "cost" => [{ "mana" => "{B}" }, "tap"],
+                                                 "effects" => [{ "draw" => { "amount" => 1 } }] } }] }
+    crossroads = { "name" => "Spec Crossroads", "types" => ["land"],
+                   "abilities" => [{ "mana" => { "cost" => ["tap", { "pay_life" => 1 }], "color" => "any_one" } }] }
+    game = build_game(catalog_with(cache, crossroads)) do
+      turn 3, active: "alice", step: :precombat_main
+      player("alice") do
+        battlefield "Spec Cache", "Spec Crossroads"
+        library "Forest", count: 5
+      end
+      player("bob") { library "Forest", count: 5 }
+    end
+    game.submit(type: "activate", object: obj_id(game, "Spec Cache"), ability: "printed:1")
+    colors = game.legal_options.select { it[:object] == obj_id(game, "Spec Crossroads") }.map { it[:mana] }
+    expect(colors).to eq(["{B}"]) # any other color would strand {B}: the Cache taps for its own cost
+  end
+
   it "after a Treasure, a pool mana that would strand a colored symbol isn't offered" do
     game = treasure_game(hand: ["Spec Twin Insight"], lands: ["Island"])
     game.state.players[0].mana_pool[:R] = 1 # left over from earlier

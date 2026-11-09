@@ -34,11 +34,18 @@ module Enjine
       # payable for `payer` (CR 118.3) and the total cost affordable (CR 601.2f). The block turns the mana to pay
       # into the total cost.
       def cost_variant_affordable?(index, costs, payer, base, excluded, purpose)
-        cost_variants(costs).any? do |variant|
-          variant.reject(&:mana?).all? { it.payable?(self, payer) } &&
-            affordable?(index, yield(Mana.sum_costs([base, costs_mana(variant)].compact)), excluded,
-                        { **purpose, **waterbend_purpose(variant) })
+        variants = costs.any?(ONE_OF) ? cost_variants(costs) : [costs]
+        variants.any? do |variant|
+          variant.all? { it.mana? || it.payable?(self, payer) } &&
+            affordable?(index, yield(variant_mana(base, variant)), excluded, { **purpose, **waterbend_purpose(variant) })
         end
+      end
+
+      # The mana cost `base` plus the mana parts of a cost list.
+      def variant_mana(base, costs)
+        return base if base && costs.none?(&:mana?)
+
+        Mana.sum_costs([base, costs_mana(costs)].compact)
       end
 
       # The cost list of a cast frame, before the announced options are applied: an ability's costs, a spell's

@@ -45,6 +45,8 @@ module Enjine
           source = { "id" => id, "card" => obj.card, "controller" => obj.controller }
           instances.each { |inst| queue_trigger(inst, event, source) }
         end
+        return if event.is_a?(Events::AbilityTriggered) # only abilities on the battlefield watch it (Triggers::AbilityTriggers)
+
         watch_leaving!(event)
         watch_own_cast!(event) if event.is_a?(Events::SpellCast)
         watch_graveyards!(event)

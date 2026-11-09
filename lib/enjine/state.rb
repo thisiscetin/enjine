@@ -45,13 +45,19 @@ module Enjine
         "graveyard" => graveyard.dup, "mana_pool" => mana_pool.transform_keys(&:to_s),
         "lands_played" => lands_played, "drew_from_empty" => drew_from_empty, "lost" => lost,
         "mulligans" => mulligans, "kept" => kept, "mulligan_choice" => mulligan_choice,
-        "turn_log" => Marshal.load(Marshal.dump(turn_log || {})), "game_log" => Marshal.load(Marshal.dump(game_log || {})),
-        "last_turn_log" => Marshal.load(Marshal.dump(last_turn_log || {})),
-        "restricted_mana" => Marshal.load(Marshal.dump(restricted_mana || [])),
-        "outside" => (outside || []).dup }.merge(speed ? { "speed" => speed } : {})
-        .merge(designations.to_a.empty? ? {} : { "designations" => designations.dup })
-        .merge(counters.nil? || counters.empty? ? {} : { "counters" => counters.dup })
-        .merge(pool_sources.nil? || pool_sources.empty? ? {} : { "pool_sources" => Marshal.load(Marshal.dump(pool_sources)) })
+        "turn_log" => deep(turn_log || {}), "game_log" => deep(game_log || {}), "last_turn_log" => deep(last_turn_log || {}),
+        "restricted_mana" => deep(restricted_mana || []), "outside" => (outside || []).dup }.merge(optional_h)
+    end
+
+    private
+
+    def deep(value) = Marshal.load(Marshal.dump(value))
+
+    # Fields left out while empty.
+    def optional_h
+      { "speed" => speed, "designations" => designations.to_a.empty? ? nil : designations.dup,
+        "counters" => counters.nil? || counters.empty? ? nil : counters.dup,
+        "pool_sources" => pool_sources.nil? || pool_sources.empty? ? nil : deep(pool_sources) }.compact
     end
   end
 

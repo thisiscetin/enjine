@@ -190,9 +190,7 @@ module Enjine
         own = chars(obj).mana_cost or return false # CR 118.6a: no mana cost, can't be cast paying it
         purpose = { "spell" => id, "any_type" => any_mana_type }.compact
         free_castable?(index, id) &&
-          cost_variant_affordable?(index, spell_cost_list(obj, false), obj, own, nil, purpose) do
-            total_cost(index, it, spell: obj)
-          end
+          cost_variant_affordable?(index, spell_cost_list(obj, false), obj, own, nil, purpose) { total_cost(index, it, spell: obj) }
       end
 
       # The mana cost paid with a method: the card's own, nothing (CR 118.9) or the beam me up cost, plus a

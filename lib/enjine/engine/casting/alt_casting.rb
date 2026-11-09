@@ -174,10 +174,7 @@ module Enjine
 
       # "Noncreature spells you cast have improvise" (Abilities::SpellsHave, CR 611.3a).
       def granted_helpers(spell)
-        state.battlefield.flat_map do |id|
-          perm = object(id)
-          chars(perm).abilities.filter_map { it.ability.keywords_for(self, spell, perm.controller) if it.ability.kind == :spells_have }
-        end.flatten
+        board_abilities(:spells_have).flat_map { |perm, ability| ability.keywords_for(self, spell, perm.controller) }
       end
 
       # Mana units (Engine::ManaSources) the permanents `index` could convoke or improvise with add for

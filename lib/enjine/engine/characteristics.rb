@@ -22,10 +22,17 @@ module Enjine
         return emblem_characteristics(object) if object.kind == "emblem" # CR 114.3 (Engine::Emblems)
         return Enjine::Characteristics::FACE_DOWN if face_down?(object) && @face_up != object.id # CR 406.3a
 
-        defn = definition(object)
-        base = copy_base(object) # layer 1 (CR 613.2a-c): its copiable values
-        return board_characteristics.fetch(object.id, base) if object.zone == :battlefield
+        # layer 1 (CR 613.2a-c): its copiable values
+        return board_characteristics.fetch(object.id) { copy_base(object) } if object.zone == :battlefield
+        return @options_memo[object.id] ||= off_board_chars(object) if @options_memo && object.zone == :hand
 
+        off_board_chars(object)
+      end
+
+      # Off the battlefield. The options of one decision ask about each card in hand often (Engine#options).
+      def off_board_chars(object)
+        defn = definition(object)
+        base = copy_base(object)
         base = defined_power_toughness(object, base, defn) if defined_pt_copied?(object)
         base = with_spell_grants(object, base) if object.zone == :stack # Engine::SpellGrants
         with_max_speed(object, base) # CR 702.178b: e.g. an ability that works from the graveyard (Engine::Speed)
@@ -143,7 +150,8 @@ module Enjine
         subtypes = []
         matching = statics.select { |source, ability| ability.type_changes? && ability.affects?(obj, source, facts(obj, base)) }
         # Layers 3-4 in timestamp order (CR 613.7a): a name or card types set later win (CR 612.8, 205.1a).
-        matching.each_with_index.sort_by { |(source, _), i| [timestamp_of(source), i] }.each do |(source, ability), _|
+        matching = matching.each_with_index.sort_by { |(source, _), i| [timestamp_of(source), i] }.map(&:first) if matching.size > 1
+        matching.each do |source, ability|
           base = base.with(name: ability.name) if ability.name
           base = with_set_types(base, ability.set_types) if ability.set_types
           types = ability.creature_types if ability.creature_types

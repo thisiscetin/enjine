@@ -47,16 +47,19 @@ module Enjine
       # CR 615.12: damage that can't be prevented.
       def unpreventable?(combat) = game_rule?("damage_cant_be_prevented") || (combat && game_rule?("combat_damage_cant_be_prevented"))
 
-      # [[source permanent, PlayerRule ability]] on the battlefield, cached with the layer pass (they
-      # change only on the events that change characteristics).
-      def player_rule_statics
-        return @player_rule_statics if @player_rule_epoch == @epoch && @player_rule_state.equal?(state) && @player_rule_statics
+      def player_rule_statics = board_abilities(:player_rule)
 
-        @player_rule_epoch = @epoch
-        @player_rule_state = state
-        @player_rule_statics = (state.battlefield + (state.command || [])).flat_map do |id| # emblems too (CR 114.4)
+      # [[source, ability]] of abilities of `kind` on the battlefield and of emblems (CR 114.4), cached with the
+      # layer pass (they change only on the events that change characteristics).
+      def board_abilities(kind)
+        unless @board_abilities && @board_abilities_epoch == @epoch && @board_abilities_state.equal?(state)
+          @board_abilities_epoch = @epoch
+          @board_abilities_state = state
+          @board_abilities = {}
+        end
+        @board_abilities[kind] ||= (state.battlefield + (state.command || [])).flat_map do |id|
           source = object(id)
-          chars(source).abilities.filter_map { [source, it.ability] if it.ability.kind == :player_rule }
+          chars(source).abilities.filter_map { [source, it.ability] if it.ability.kind == kind }
         end
       end
 
