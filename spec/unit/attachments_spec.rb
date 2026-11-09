@@ -32,6 +32,9 @@ RSpec.describe "Aura and Equipment card data (CR 301.5, 303.4, 702.5, 702.6)" do
     expect(defn.abilities.first.to_s).to eq("Enchant artifact or creature")
     expect(build(types: ["enchantment"], subtypes: ["aura"], abilities: [{ "enchant" => "creature" }]).abilities.first.to_s)
       .to eq("Enchant creature")
+    vehicle = { "permanent" => { "subtypes" => ["vehicle"] } } # "Enchant creature or Vehicle" (regression: one_of crashed)
+    expect(build(types: ["enchantment"], subtypes: ["aura"], abilities: [{ "enchant" => { "one_of" => ["creature", vehicle] } }])
+      .abilities.first.to_s).to start_with("Enchant creature or ")
   end
 
   it "reports path-addressed errors for misused attachment data" do
@@ -47,6 +50,8 @@ RSpec.describe "Aura and Equipment card data (CR 301.5, 303.4, 702.5, 702.6)" do
     expect(errors_for(types: ["enchantment"], subtypes: ["aura"], abilities: [{ "enchant" => "player" }]))
       .to include(a_string_starting_with("abilities[0].enchant: must be a filter for permanents"))
     expect(errors_for(types: ["enchantment"], subtypes: ["aura"], abilities: [{ "enchant" => "spell" }]))
+      .to include(a_string_starting_with("abilities[0].enchant: must be a filter for permanents"))
+    expect(errors_for(types: ["enchantment"], subtypes: ["aura"], abilities: [{ "enchant" => { "one_of" => %w[creature player] } }]))
       .to include(a_string_starting_with("abilities[0].enchant: must be a filter for permanents"))
     expect(errors_for(types: ["creature"], subtypes: ["aura"], power: 1, toughness: 1, abilities: [{ "enchant" => "creature" }]))
       .to include(a_string_matching(/aura is only valid for enchantment cards/))

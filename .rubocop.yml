@@ -66,6 +66,10 @@ Metrics/CyclomaticComplexity:
   Exclude:
     - "lib/enjine/cli/text.rb"
     - "lib/enjine/cli.rb"
+# Real-card specs are named after their fixture family (spec/fixtures/cards/real/<family>.json).
+Naming/FileName:
+  Exclude:
+    - "spec/integration/real_cards/*_spec.rb"
 Naming/PredicateMethod:
   Enabled: false
 Naming/MethodParameterName:

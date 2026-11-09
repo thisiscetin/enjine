@@ -71,27 +71,14 @@ class Scenario
     names = @players.map(&:name)
     index = ->(name) { names.index(name) || raise(ArgumentError, "unknown player #{name}") }
     active = index.call(@active || names.first)
-    next_id = 1
-    objects = []
+    @next_id = 1
+    @objects = []
     battlefield = []
     exile = []
     players = @players.each_with_index.map do |spec, owner|
-      zones = %i[library hand graveyard].to_h do |zone|
-        ids = spec.zones[zone].map do |entry|
-          id = "#{Enjine::CardDefinition.slug(entry[:card])}##{next_id}"
-          next_id += 1
-          objects << object_h(id, entry, owner, zone)
-          id
-        end
-        [zone.to_s, ids]
-      end
-      { battlefield: battlefield, exile: exile }.each do |zone, list| # shared zones: owned by this player
-        spec.zones[zone].each do |entry|
-          list << "#{Enjine::CardDefinition.slug(entry[:card])}##{next_id}"
-          next_id += 1
-          objects << object_h(list.last, entry, owner, zone)
-        end
-      end
+      zones = %i[library hand graveyard].to_h { |zone| [zone.to_s, spec.zones[zone].map { new_object(it, owner, zone) }] }
+      battlefield.concat(spec.zones[:battlefield].map { new_object(it, owner, :battlefield) }) # shared zones: owned by this player
+      exile.concat(spec.zones[:exile].map { new_object(it, owner, :exile) })
       player_h(spec, zones)
     end
     priority = @priority ? index.call(@priority) : active
@@ -99,18 +86,26 @@ class Scenario
     {
       "version" => Enjine::Snapshot::VERSION, "rules" => Enjine::RULES_VERSION, "seed" => @seed,
       "rng" => Enjine::Rng.from_seed(@seed).state,
-      "decklists" => players.each_index.map { |i| objects.select { it["owner"] == i }.map { it["card"] } },
+      "decklists" => players.each_index.map { |i| @objects.select { it["owner"] == i }.map { it["card"] } },
       "turn" => @turn, "active" => active, "step" => @step.to_s, "step_state" => "active",
       "priority" => pending["kind"] == "priority" ? pending["player"] : nil, "passes" => 0,
-      "next_id" => next_id, "starting_player" => 0, "pending" => pending, "result" => nil,
+      "next_id" => @next_id, "starting_player" => 0, "pending" => pending, "result" => nil,
       "outside_lists" => @players.map { it.zones[:outside].dup },
-      "players" => players, "objects" => objects, "battlefield" => battlefield, "stack" => [], "exile" => exile
+      "players" => players, "objects" => @objects, "battlefield" => battlefield, "stack" => [], "exile" => exile
     }
   end
 
   def game = Enjine::Game.import({ "state" => to_h }, catalog: @catalog)
 
   private
+
+  # Adds the object for a zone entry and returns its id.
+  def new_object(entry, owner, zone)
+    id = "#{Enjine::CardDefinition.slug(entry[:card])}##{@next_id}"
+    @next_id += 1
+    @objects << object_h(id, entry, owner, zone)
+    id
+  end
 
   def object_h(id, entry, owner, zone)
     { "id" => id, "card" => id.split("#").first, "owner" => owner, "controller" => owner, "zone" => zone.to_s,
