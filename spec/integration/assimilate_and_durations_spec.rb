@@ -36,7 +36,15 @@ RSpec.describe "Assimilating linked cards, 'until your next turn' and 'the next 
         } }]
       } }] }
   end
-  let(:catalog) { catalog_with(lattice, hex, ambush) }
+  let(:probe) do
+    { "name" => "Lattice Probe", "mana_cost" => "{1}", "types" => ["artifact"],
+      "abilities" => [{ "activated" => { "cost" => [{ "mana" => "{0}" }], "targets" => ["creature"],
+                                         "effects" => [{ "exile" => { "to" => { "target" => 0 }, "link" => true } }] } },
+                      { "activated" => { "cost" => [{ "mana" => "{0}" }], "effects" => [
+                        { "assimilate" => { "to" => "exiled_with", "for" => { "types" => ["creature"] }, "choose" => true } }
+                      ] } }] }
+  end
+  let(:catalog) { catalog_with(lattice, hex, ambush, probe) }
 
   def cast(game, spell, targets: nil)
     id = ids_in(game, "alice", :hand).find { game.state.object(it).card == Enjine::CardDefinition.slug(spell) }
@@ -102,6 +110,32 @@ RSpec.describe "Assimilating linked cards, 'until your next turn' and 'the next 
       expect(game.state.object(assimilated)).to have_attributes(controller: 0, counters: { "+1/+1" => 1 })
       expect(game.state.battlefield).to include(giant) # it could assimilate, so the target wasn't exiled
     end
+  end
+
+  it "with several linked creature cards, the controller chooses which one to assimilate (CR 701.72c)" do
+    game = build_game(catalog) do
+      turn 3, active: "alice", step: :precombat_main
+      player("alice") { battlefield "Lattice Probe" }
+      player("bob") { battlefield "Grizzly Bears", "Hill Giant" }
+    end
+    probe = obj_id(game, "Lattice Probe")
+    [obj_id(game, "Grizzly Bears"), obj_id(game, "Hill Giant")].each do |target|
+      game.submit(type: "activate", object: probe, ability: "printed:0")
+      game.submit(type: "target", target: target)
+      game.submit(type: "pay_mana", mana: "") if game.pending_decision.kind == "pay_cost"
+      pass_both(game)
+    end
+    expect(game.state.exile.size).to eq(2)
+    game.submit(type: "activate", object: probe, ability: "printed:1")
+    game.submit(type: "pay_mana", mana: "") if game.pending_decision.kind == "pay_cost"
+    pass_both(game)
+    expect(game.pending_decision.kind).to eq("effect_choice")
+    giant = game.state.exile.find { game.state.object(it).card == "hill_giant" }
+    expect(game.legal_options).to contain_exactly(a_hash_including(type: "assimilate", object: giant),
+                                                  a_hash_including(type: "assimilate"))
+    game.submit(game.legal_options.find { it[:object] == giant })
+    expect(game.state.object(obj_id(game, "Hill Giant"))).to have_attributes(controller: 0, counters: { "+1/+1" => 1 })
+    expect(game.state.exile.map { game.state.object(it).card }).to eq(["grizzly_bears"])
   end
 
   it "a pump until your next turn lasts through the opponent's turn and ends as yours begins (CR 611.2a)" do

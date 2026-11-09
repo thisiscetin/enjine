@@ -8,9 +8,9 @@ data block says.
 ```json
 { "name": "Ember Sprite", "mana_cost": "{1}{R}", "types": ["creature"], "subtypes": ["elemental"],
   "keywords": ["haste"], "power": 2, "toughness": 1,
-  "abilities": [ { "triggered": { "trigger": { "enters": "self" },
+  "abilities": [ { "triggered": { "when": { "enters": {} },
                                   "effects": [ { "deal_damage": { "amount": 1, "to": { "target": 0 } } } ],
-                                  "targets": ["any"] } } ] }
+                                  "targets": ["any_target"] } } ] }
 ```
 
 If a block uses something Enjine doesn't support, or has a typo, validation
