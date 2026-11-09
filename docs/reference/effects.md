@@ -1138,6 +1138,26 @@ Rules: CR 120.6, CR 514.2
 }
 ```
 
+## return_choice
+
+Each referenced player (default: you) returns `count` (default 1; "any": any number) permanents they control matching `filter` to their owners' hands, chosen by them in turn order starting with the active player (not targeted); all move at once.
+
+Rules: CR 101.4, CR 400.7, CR 608.2c
+
+| Parameter | Description |
+| --- | --- |
+| `filter` | a filter, e.g. "land" |
+| `count` | integer or "any" |
+| `to` | selector of players |
+
+```json
+{
+  "return_choice": {
+    "filter": "land"
+  }
+}
+```
+
 ## return_to_battlefield
 
 Put each referenced card that is in exile or a graveyard onto the battlefield under its owner's control (`under: "you"`: under the controller's), tapped if `tapped: true`. A card that is no longer in the zone it was expected in, or isn't a permanent card, stays where it is.

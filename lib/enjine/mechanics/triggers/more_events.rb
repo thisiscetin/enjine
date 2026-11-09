@@ -63,7 +63,10 @@ module Enjine
 
         def match?(engine, event, source) = !occurrences(engine, event, source).empty?
 
-        def to_s = "Whenever one or more #{"#{@counter} " if @counter}counters are put on #{@subject}#{" for the first time each turn" if @first_time}"
+        def to_s
+          first = " for the first time each turn" if @first_time
+          "Whenever one or more #{"#{@counter} " if @counter}counters are put on #{@subject}#{first}"
+        end
 
         private
 

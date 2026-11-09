@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+require_relative "../keywords/evergreen"
+require_relative "../abilities/turn_structure"
+
 module Enjine
   module Mechanics
     module Effects
@@ -22,6 +25,12 @@ module Enjine
 
         def to_s = "phase out → #{to}"
       end
+    end
+
+    module Keywords
+      Evergreen.define(:phasing, "During each of its controller's untap steps, before they untap, it phases out if " \
+                                 "it's phased in (and phases in if it phased out under their control).",
+                       %w[702.26a 702.26p 502.1])
     end
 
     module Abilities

@@ -155,7 +155,9 @@ module Enjine
       end).freeze
       @delayed_abilities = @all_effects.select { it.respond_to?(:delayed_ability) }.to_h { [it.ref, it.delayed_ability] }.freeze
       @effect_granted = @all_effects.select { it.respond_to?(:granted_abilities) }.to_h do |effect|
-        [effect.ref, effect.granted_abilities.each_with_index.map { |a, j| AbilityInstance.new(ref: "#{effect.ref}:#{j}", ability: a) }.freeze]
+        [effect.ref, effect.granted_abilities.each_with_index.map do |a, j|
+          AbilityInstance.new(ref: "#{effect.ref}:#{j}", ability: a)
+        end.freeze]
       end.freeze
     end
 

@@ -278,9 +278,14 @@ module Enjine
 
             queue.shift
           end
-          picks.each { engine.move!(it[1], :graveyard, reason: "sacrifice") }
+          picks.each { finish!(engine, it[1]) }
           :done
         end
+
+        # Hooks for Effects::ReturnChoice: what happens to the chosen permanents, who may choose one.
+        def finish!(engine, id) = engine.move!(id, :graveyard, reason: "sacrifice")
+        def choosable?(engine, obj, index) = engine.can_sacrifice?(obj, index)
+        def verb = "sacrifice"
 
         private
 
@@ -289,7 +294,7 @@ module Enjine
         # Permanents `index` controls that match the filter, not yet chosen.
         def candidates(engine, ctx, index, chosen)
           filter.candidates_for(engine, ctx.controller, ctx.source)
-                .select { engine.state.objects.key?(it) && engine.can_sacrifice?(engine.object(it), index) } - chosen
+                .select { engine.state.objects.key?(it) && choosable?(engine, engine.object(it), index) } - chosen
         end
 
         # Asks `index` for their next permanent, or picks automatically when there is no real choice.
@@ -301,10 +306,10 @@ module Enjine
             left.each { locals["picks"] << [index, it] }
             return :next
           end
-          choices = left.map { { "type" => "sacrifice", "object" => it } }
+          choices = left.map { { "type" => verb, "object" => it } }
           choices << { "type" => "done" } if count == "any"
           locals["chooser"] = index
-          ask(engine, locals, index, "Sacrifice #{words}", choices)
+          ask(engine, locals, index, "#{verb.capitalize} #{words}", choices)
         end
 
         def take_answers(locals, picks)

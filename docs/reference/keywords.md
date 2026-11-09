@@ -282,6 +282,20 @@ Rules: CR 702.111b
 }
 ```
 
+## phasing
+
+During each of its controller's untap steps, before they untap, it phases out if it's phased in (and phases in if it phased out under their control).
+
+Rules: CR 702.26a, CR 702.26p, CR 502.1
+
+```json
+{
+  "keywords": [
+    "phasing"
+  ]
+}
+```
+
 ## reach
 
 Can block creatures with flying.

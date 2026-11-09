@@ -35,7 +35,7 @@ module Enjine
 
       def begin_untap_step!
         index = state.active
-        phase_in_all!(index) # CR 502.1
+        phasing_step!(index) # CR 502.1
         candidates = untap_choice_candidates(index)
         return finish_untap_step!(index, []) if candidates.empty?
 
@@ -108,18 +108,17 @@ module Enjine
         emit Events::PhasedOut.new(object: obj.id, indirectly: indirectly)
       end
 
-      # CR 502.1, 702.26a: the permanents that phased out directly under `index`'s control phase in, with
-      # whatever phased out indirectly attached to them (CR 702.26g). Nothing phases in while an effect
-      # says permanents can't phase in.
-      def phase_in_all!(index)
-        return if state.phased_out.empty? || phasing_in_prevented?
-
-        direct = state.phased_out.select do |id|
-          info = object(id).phased_out
-          info["by"] == index && !info["indirectly"]
-        end
-        direct.each { phase_in!(object(it)) }
+      # CR 502.1, 702.26a: simultaneously, the phased-in permanents with phasing that `index` controls phase
+      # out, and the permanents that phased out directly under `index`'s control phase in, with whatever
+      # phased out indirectly attached to them (CR 702.26g). The set phasing in is fixed first, so nothing
+      # phases out and back in at once. Nothing phases in while an effect says permanents can't phase in.
+      def phasing_step!(index)
+        coming = phasing_in_prevented? ? [] : state.phased_out.select { phases_in_for?(object(it), index) }
+        phase_out!(state.battlefield.select { object(it).controller == index && chars(it).keyword?(:phasing) })
+        coming.each { phase_in!(object(it)) }
       end
+
+      def phases_in_for?(obj, index) = obj.phased_out["by"] == index && !obj.phased_out["indirectly"]
 
       def phasing_in_prevented?
         state.battlefield.any? { |id| chars(id).abilities.any? { it.ability.kind == :cant_phase_in } }
