@@ -13,12 +13,12 @@ RSpec.describe "Drawing and ending the game (CR 103.8a, 504, 704.5, 104)" do
     expect(ids_in(game, "bob", :library).size).to eq(2)
   end
 
-  it "skips the starting player's first draw (CR 103.8a)" do
+  it "skips the starting player's whole first draw step (CR 103.8a)" do
     game = through_pregame(basics_setup.new_game(seed: 3))
     starting = game.view_for(:observer)["active"]
     expect(game.step).to eq(:upkeep)
     pass_both(game)
-    expect(game.step).to eq(:draw)
+    expect(game.step).to eq(:precombat_main)
     expect(game.view_for(:observer)["players"].find { it["name"] == starting }["hand_count"]).to eq(7)
   end
 

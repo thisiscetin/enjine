@@ -32,11 +32,13 @@ module Enjine
       def begin(engine) = engine.begin_untap_step!
     end
 
-    # CR 504: the active player draws, except the starting player on turn 1 (CR 103.8a).
+    # CR 504: the active player draws. In a two-player game the starting player skips the whole
+    # draw step of their first turn (CR 103.8a): no draw, no priority, no "draw step" triggers.
     class Draw < Step
+      def skip?(engine) = engine.state.then { it.turn == 1 && it.active == it.starting_player }
+
       def begin(engine)
-        state = engine.state
-        engine.draw!(state.active) unless state.turn == 1 && state.active == state.starting_player
+        engine.draw!(engine.state.active)
         engine.turn_based_actions_done!
       end
     end
