@@ -24,6 +24,8 @@ module Enjine
         when Events::CountersChanged then facts.merge!("object" => event.object, "amount" => event.to - event.from)
         when Events::StepBegan then facts["player"] = engine.state.active # "that player": whose step it is
         end
+        # CR 601.2h: the mana spent to cast "that spell", as it was cast
+        facts["mana_spent"] = engine.state.objects[event.object]&.mana_spent&.dup if event.is_a?(Events::SpellCast)
         facts["player"] ||= engine.names.index(event.player) if event.respond_to?(:player)
         facts["card"] = event.respond_to?(:card) ? event.card : engine.state.objects[facts["object"]]&.card
         facts.compact

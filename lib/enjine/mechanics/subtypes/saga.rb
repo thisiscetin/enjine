@@ -84,7 +84,7 @@ module Enjine
         def kind = :triggered
         def allowed_types = [:enchantment]
         def condition = nil
-        def condition_met?(_engine, _controller, _source, _object = nil) = true
+        def condition_met?(*, **) = true
         def to_s = "Chapter #{chapter} — #{effects_text}"
       end
     end

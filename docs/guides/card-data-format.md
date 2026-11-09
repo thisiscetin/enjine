@@ -851,6 +851,63 @@ Not yet: casting another face from outside the hand, casting a card transformed,
 value of a back face (CR 202.3b), day/night (CR 702.145), meld (CR 713), convert
 (CR 701.28) and an "as this enters" choice on a modal card's land face.
 
+### 4.18 Mana spent to cast a spell (converge)
+
+The mana paid for a spell is recorded by type as it is paid (CR 601.2h), and the permanent the
+spell becomes keeps it (CR 400.7d). The amount `mana_spent` reads it:
+
+| Oracle words | Data |
+| --- | --- |
+| "the amount of mana spent to cast this spell / this creature" | `{ "mana_spent": {} }` |
+| converge: "the number of colors of mana spent to cast it" | `{ "mana_spent": { "colors": true } }` (colorless isn't a color) |
+| "if {W}{W} was spent to cast it" | `{ "amount": { "mana_spent": { "color": "W" } }, "at_least": 2 }` |
+| "whenever you cast a spell, if four or more mana was spent to cast it" | trigger `if`: `{ "amount": { "mana_spent": { "of": { "triggering": "object" } } }, "at_least": 4 }` |
+| "the amount of mana spent to cast target spell" | `{ "mana_spent": { "of": { "target": 0 } } }` |
+| "enters with a +1/+1 counter for each color of mana spent to cast it" | `{ "enters_with_counters": { "counters": { "+1/+1": { "mana_spent": { "colors": true } } } } }` |
+
+A trigger's `if` is checked as it triggers with the event it's about (CR 603.4), so "that
+spell" works there. Nothing was spent on a permanent that wasn't cast, and a copy of a spell
+had no mana spent on it (CR 707.10).
+
+```json
+{ "name": "Example Prism Archaic", "mana_cost": "{4}{G}", "types": ["creature"], "subtypes": ["avatar"],
+  "power": 1, "toughness": 1,
+  "abilities": [{ "enters_with_counters": { "counters": { "+1/+1": { "mana_spent": { "colors": true } } } } },
+                { "triggered": { "when": { "enters": {} }, "if": { "amount": { "mana_spent": { "color": "G" } }, "at_least": 2 },
+                                 "effects": [{ "draw": { "amount": 1 } }] } }] }
+```
+
+### 4.19 Keyword actions and keyword abilities of recent sets
+
+Keyword *abilities* without a number go in `keywords`; those with a number are abilities
+with an `amount` (any amount, e.g. `{ "power": "self" }` for "firebending X, where X is its
+power"). Keyword *actions* are effects.
+
+| Oracle text | Data |
+| --- | --- |
+| "Prowess" (CR 702.108) | `"keywords": ["prowess"]` (granted by `grant` too) |
+| "Job select" on an Equipment (CR 702.182) | `"keywords": ["job_select"]` |
+| "Mobilize 2" (CR 702.181) | ability `{ "mobilize": { "amount": 2 } }` |
+| "Firebending 2" (CR 702.189) | ability `{ "firebending": { "amount": 2 } }` |
+| "Kindred Sorcery — Goblin" (CR 308) | `"types": ["kindred", "sorcery"], "subtypes": ["goblin"]` |
+| "As an additional cost to cast this spell, blight 1" (CR 701.68) | `{ "additional_cost": { "cost": [{ "blight": { "amount": 1 } }] } }`; also an activated ability's `cost` |
+| "you may blight 2. If you do, draw a card" | `{ "may": { "effects": [{ "blight": { "amount": 2 } }], "then": [{ "draw": { "amount": 1 } }] } }` |
+| "each opponent blights 1" | `{ "blight": { "amount": 1, "to": "each_opponent" } }` (the blighted creatures are its results) |
+| "it connives" / "target creature you control connives 2" (CR 701.50) | `{ "connive": {} }` / `{ "connive": { "amount": 2, "to": { "target": 0 } } }` |
+| "recruit" (CR 701.70) | `{ "recruit": {} }` |
+| "amass Orcs 2" (CR 701.47) | `{ "amass": { "subtype": "orc", "amount": 2 } }` (the amassed Army is its result: "attach this Equipment to the amassed Army" is `attach` to `{ "result": n }`) |
+| "empower Jace 2" (CR 701.71) | `{ "empower_jace": { "amount": 2 } }` |
+| "it endures 2" (CR 701.63) | `{ "endure": { "amount": 2 } }` (a fixed number) |
+| "create two 1/1 tokens tapped and attacking" | `create_token` with `"tapped": true, "attacking": true` |
+| "add {R}{R}; until end of combat, you don't lose this mana" | `{ "add_mana": { "produce": "{R}{R}", "until": "end_of_combat" } }` |
+
+```json
+{ "name": "Example Ember Captain", "mana_cost": "{2}{R}", "types": ["creature"], "subtypes": ["human", "soldier"],
+  "power": 2, "toughness": 2, "keywords": ["prowess"],
+  "abilities": [{ "mobilize": { "amount": 1 } }, { "firebending": { "amount": { "power": "self" } } },
+                { "triggered": { "when": { "enters": {} }, "effects": [{ "connive": {} }] } }] }
+```
+
 ---
 
 ## 5. Worked examples

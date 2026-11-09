@@ -20,6 +20,7 @@ module Enjine
     #   {"died_this_turn" | "entered_this_turn" | "left_this_turn" | "sacrificed_this_turn" | "attackers_this_turn"
     #    | "exiled_this_turn": {"each": filter, "controller": you|opponent|any}}  objects in this turn's history
     #   {"this_way": n}                               how much effect n of this list changed (life it took)
+    #   {"mana_spent": {"of": ..., "color" | "colors": ...}}  mana spent to cast a spell (CR 601.2h), see mana_spent.rb
     #   {"times": [a, b]} / {"plus": [a, b]} / {"divide": [a, b]}   arithmetic on amounts; division rounds down
     #                                                 (CR 107.1a). "-X" is {"times": ["x", -1]}.
     # A source that has left the battlefield is used as it last existed (CR 608.2h).
@@ -32,7 +33,8 @@ module Enjine
       DEPARTED = { "died_this_turn" => "died", "entered_this_turn" => "entered", "left_this_turn" => "left",
                    "sacrificed_this_turn" => "sacrificed", "attackers_this_turn" => "attackers",
                    "exiled_this_turn" => "exiled" }.freeze
-      KINDS = (SELECTOR_KINDS + ARITHMETIC + DEPARTED.keys + %w[counters spells_cast_this_turn this_way]).freeze
+      KINDS = (SELECTOR_KINDS + ARITHMETIC + DEPARTED.keys + %w[counters spells_cast_this_turn this_way
+                                                                  mana_spent]).freeze
       # Player history counters: kind -> turn_log/game_log key.
       HISTORY = { "life_gained_this_turn" => "life_gained", "life_lost_this_turn" => "life_lost",
                   "dilemmas_this_turn" => "dilemmas", "returned_this_turn" => "returned",
@@ -56,6 +58,7 @@ module Enjine
         return SpellsCast.build(ref, errors, "#{path}.#{kind}", **context) if kind == "spells_cast_this_turn"
         return Departed.build(kind, ref, errors, "#{path}.#{kind}") if DEPARTED.key?(kind)
         return ThisWay.build(ref, errors, "#{path}.#{kind}", results_count) if kind == "this_way"
+        return ManaSpent.build(ref, errors, "#{path}.#{kind}", **context) if kind == "mana_spent" # mana_spent.rb
 
         new(kind, Selector.build(ref, errors, "#{path}.#{kind}", **context))
       end
@@ -86,9 +89,9 @@ module Enjine
 
       def to_s = "the #{@kind.tr("_", " ")} of #{@selector}"
 
-      # CR 205.3m: a creature's subtypes are creature types, except those that belong to its other card types.
+      # CR 205.3m: a creature's or kindred's subtypes are creature types, except those of its other card types.
       def self.creature_types(chars)
-        chars.creature? ? chars.subtypes - Engine::SetMechanics::NON_CREATURE_SUBTYPES : []
+        chars.creature? || chars.type?(:kindred) ? chars.subtypes - Engine::SetMechanics::NON_CREATURE_SUBTYPES : []
       end
 
       # CR 608.2h: "its power" of a source that has left the battlefield is its last known value.

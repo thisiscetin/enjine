@@ -446,8 +446,9 @@ module Enjine
         # CR 603.4: an intervening "if" must be true when the trigger event happens and on resolution.
         # A "while" condition is part of the trigger event (CR 603.2): only checked as it triggers, which is
         # when no resolving `object` is given.
-        def condition_met?(engine, controller, source, object = nil)
-          ctx = EffectContext.new(controller, source, object, [])
+        # `facts`: the trigger event being checked (no ability object exists yet), see Selector.memory.
+        def condition_met?(engine, controller, source, object = nil, facts: nil)
+          ctx = EffectContext.new(controller, source, object, [], nil, nil, facts && { "triggering" => facts })
           return false if object.nil? && while_condition && !while_condition.true?(engine, ctx)
 
           condition.nil? || condition.true?(engine, ctx)

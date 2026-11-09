@@ -610,13 +610,13 @@ Rules: CR 614.1c, CR 614.12, CR 616.1
 
 ## enters_with_counters
 
-Without `affects`: this permanent enters with the `counters` on it. With `affects` ({"each": filter, "controller": you|opponent|any, "other": true}, relative to this permanent's controller): while this permanent is on the battlefield, each matching permanent enters with the `counters` in addition to any others.
+Without `affects`: this permanent enters with the `counters` on it; a count may be an amount computed as it enters (e.g. the mana spent to cast it, CR 601.2h). With `affects` ({"each": filter, "controller": you|opponent|any, "other": true}, relative to this permanent's controller): while this permanent is on the battlefield, each matching permanent enters with the `counters` in addition to any others.
 
 Rules: CR 614.1c, CR 614.12, CR 122.6, CR 122.6a
 
 | Parameter | Description |
 | --- | --- |
-| `counters` | {counter name: n} (n >= 1) |
+| `counters` | {counter name: n} (n >= 1; without `affects`, n may be an amount) |
 | `affects` | optional {"each": filter, "controller": ..., "other": bool} |
 
 ```json
@@ -670,6 +670,24 @@ Rules: CR 702.74a, CR 118.9, CR 601.2b, CR 601.2f, CR 601.2h, CR 603.4
 {
   "evoke": {
     "cost": "{R/W}{R/W}"
+  }
+}
+```
+
+## firebending
+
+Firebending `amount`: whenever this creature attacks, add that much {R}; you don't lose this mana as steps end until end of combat.
+
+Rules: CR 702.189a, CR 500.5
+
+| Parameter | Description |
+| --- | --- |
+| `amount` | amount |
+
+```json
+{
+  "firebending": {
+    "amount": 2
   }
 }
 ```
@@ -869,6 +887,24 @@ Rules: CR 702.187a, CR 702.187b, CR 702.187c, CR 118.9, CR 601.2b, CR 601.2f, CR
 {
   "mayhem": {
     "cost": "{1}{R}"
+  }
+}
+```
+
+## mobilize
+
+Mobilize `amount`: whenever this creature attacks, create that many 1/1 red Warrior creature tokens tapped and attacking; sacrifice them at the beginning of the next end step.
+
+Rules: CR 702.181a, CR 508.4
+
+| Parameter | Description |
+| --- | --- |
+| `amount` | amount |
+
+```json
+{
+  "mobilize": {
+    "amount": 2
   }
 }
 ```

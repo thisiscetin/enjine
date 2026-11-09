@@ -29,9 +29,9 @@ Rules: CR 122.1, CR 122.6, CR 613.4c
 
 ## add_mana
 
-You add mana to your mana pool: the fixed mana in `produce`, or `amount` mana of a color you choose as it resolves (`color: "any_one"`: all of one color; `color: "any"`: each mana's color chosen separately, "in any combination of colors"). `colors` limits the choice ("add {R} or {G}"). `spend_only` restricts how the mana can be spent (CR 106.6).
+You add mana to your mana pool: the fixed mana in `produce`, or `amount` mana of a color you choose as it resolves (`color: "any_one"`: all of one color; `color: "any"`: each mana's color chosen separately, "in any combination of colors"). `colors` limits the choice ("add {R} or {G}"). `spend_only` restricts how the mana can be spent (CR 106.6). `until: "end_of_combat"`: you don't lose this mana as steps end until end of combat (CR 702.189a).
 
-Rules: CR 106.1a, CR 106.4, CR 608.2d, CR 605.1a, CR 106.6
+Rules: CR 106.1a, CR 106.4, CR 608.2d, CR 605.1a, CR 106.6, CR 500.5
 
 | Parameter | Description |
 | --- | --- |
@@ -40,6 +40,7 @@ Rules: CR 106.1a, CR 106.4, CR 608.2d, CR 605.1a, CR 106.6
 | `color` | any_one | any |
 | `colors` | list of colors to choose from (default all five) |
 | `spend_only` | {"spells": card spec, "abilities": card spec} |
+| `until` | "end_of_combat" (optional) |
 
 ```json
 {
@@ -92,6 +93,26 @@ Rules: CR 603.2d, CR 611.2b, CR 611.2c
       "target": 0
     },
     "duration": "while_source_tapped"
+  }
+}
+```
+
+## amass
+
+Amass `subtype` `amount`: if you control no Army creature, create a 0/0 black [subtype] Army creature token; then put `amount` +1/+1 counters on an Army creature you control (chosen if there are several), which becomes a [subtype] too.
+
+Rules: CR 701.47a, CR 701.47b, CR 701.47c, CR 613.1d
+
+| Parameter | Description |
+| --- | --- |
+| `subtype` | lowercase creature type, e.g. "orc" |
+| `amount` | amount |
+
+```json
+{
+  "amass": {
+    "subtype": "orc",
+    "amount": 2
   }
 }
 ```
@@ -246,6 +267,25 @@ Rules: CR 120.3, CR 120.4, CR 608.2b
     "to": {
       "target": 1
     }
+  }
+}
+```
+
+## blight
+
+Each referenced player (default: you) blights `amount`: puts that many -1/-1 counters on a creature they control, chosen as it resolves (one `effect_choice` each, in turn order). The blighted creatures are its results.
+
+Rules: CR 701.68a, CR 701.68b, CR 701.68c
+
+| Parameter | Description |
+| --- | --- |
+| `amount` | amount |
+| `to` | player selector (default you) |
+
+```json
+{
+  "blight": {
+    "amount": 2
   }
 }
 ```
@@ -405,6 +445,25 @@ Rules: CR 607.2f, CR 608.2c
 }
 ```
 
+## connive
+
+Each referenced permanent (default: this one) connives `amount` (default 1): its controller draws that many cards, then discards that many, then it gets a +1/+1 counter for each nonland card discarded.
+
+Rules: CR 701.50a, CR 701.50b, CR 701.50d, CR 701.50e
+
+| Parameter | Description |
+| --- | --- |
+| `amount` | amount (default 1) |
+| `to` | selector of permanents (default self) |
+
+```json
+{
+  "connive": {
+    "to": "self"
+  }
+}
+```
+
 ## copy_card
 
 Create `amount` copies of each card `of` refers to ("self": the source card), in the zone that card is in, owned by you. They are the effect's result, e.g. for `cast_free` or `cast`. A card copy ceases to exist if it is anywhere but the stack or the battlefield (so one that isn't cast now is gone at the next state-based-action check).
@@ -510,15 +569,16 @@ Rules: CR 701.6a, CR 118.12a, CR 605.3a
 
 ## create_token
 
-Create `amount` tokens under the referenced player's control (default: you). `token` is a predefined token name (Treasure, Clue, Food) or an inline card definition. `tapped: true` creates them tapped.
+Create `amount` tokens under the referenced player's control (default: you). `token` is a predefined token name (Treasure, Clue, Food) or an inline card definition. `tapped: true` creates them tapped; `attacking: true` attacking (only for the attacking player during combat, CR 506.3b).
 
-Rules: CR 111.1, CR 111.10, CR 701.7a, CR 704.5d
+Rules: CR 111.1, CR 111.10, CR 701.7a, CR 704.5d, CR 508.4, CR 506.3b
 
 | Parameter | Description |
 | --- | --- |
 | `token` | "Treasure" | "Clue" | "Food" | {card data} |
 | `amount` | integer (default 1) |
 | `tapped` | boolean |
+| `attacking` | boolean |
 | `to` | selector (default "you") |
 
 ```json
@@ -746,6 +806,43 @@ Rules: CR 121.1, CR 121.2
 ```json
 {
   "draw": {
+    "amount": 2
+  }
+}
+```
+
+## empower_jace
+
+Empower Jace `amount`: if you control no Jace planeswalker token, create a blue Jace planeswalker token (0 loyalty; -1: surveil 1; -3: draw a card); then put `amount` loyalty counters on a Jace planeswalker token you control.
+
+Rules: CR 701.71a, CR 704.3
+
+| Parameter | Description |
+| --- | --- |
+| `amount` | amount |
+
+```json
+{
+  "empower_jace": {
+    "amount": 2
+  }
+}
+```
+
+## endure
+
+Each referenced permanent (default: this one) endures `amount`: its controller puts that many +1/+1 counters on it, or creates an N/N white Spirit creature token.
+
+Rules: CR 701.63a, CR 701.63b
+
+| Parameter | Description |
+| --- | --- |
+| `amount` | integer >= 0 |
+| `to` | selector of permanents (default self) |
+
+```json
+{
+  "endure": {
     "amount": 2
   }
 }
@@ -1290,6 +1387,22 @@ Rules: CR 401.4, CR 400.7, CR 608.2b
     },
     "position": "bottom"
   }
+}
+```
+
+## recruit
+
+Each referenced player (default: you) recruits: draws a card, then discards a card; if a nonland card was discarded, they create a 1/1 white Human Soldier creature token.
+
+Rules: CR 701.70a
+
+| Parameter | Description |
+| --- | --- |
+| `to` | player selector (default you) |
+
+```json
+{
+  "recruit": {}
 }
 ```
 

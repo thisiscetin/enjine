@@ -90,6 +90,45 @@ Rules: CR 304.1, CR 304.2, CR 608.2n
 }
 ```
 
+## kindred
+
+A card type that goes with another one ("Kindred Sorcery — Goblin"): the card is cast and resolves as its other type, and its subtypes are creature types.
+
+Rules: CR 308.1, CR 308.2, CR 205.3m
+
+```json
+{
+  "name": "Example Goblin Gambit",
+  "mana_cost": "{R}",
+  "types": [
+    "kindred",
+    "sorcery"
+  ],
+  "subtypes": [
+    "goblin"
+  ],
+  "abilities": [
+    {
+      "spell": {
+        "targets": [
+          "any_target"
+        ],
+        "effects": [
+          {
+            "deal_damage": {
+              "amount": 1,
+              "to": {
+                "target": 0
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}
+```
+
 ## land
 
 A permanent played with the special action "play a land" (one per turn, main phase, empty stack). It has no mana cost.

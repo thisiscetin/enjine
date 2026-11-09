@@ -192,7 +192,10 @@ module Enjine
 
         found = Mechanics::Triggers.occurrences(trigger, self, event, source)
         return if found.empty?
-        return unless ability.condition_met?(self, source["controller"], source["id"]) # CR 603.4
+
+        # CR 603.4: an intervening "if" is checked for each trigger event, and may ask about it ("that spell")
+        found = found.select { ability.condition_met?(self, source["controller"], source["id"], facts: it) }
+        return if found.empty?
         return if once_each_turn_used!(ability, inst.ref, source)
 
         memory = trigger_memory(source)
@@ -208,14 +211,16 @@ module Enjine
         end
       end
 
-      # What a triggered ability remembers of its source: whether it was cast and kicked, and, for a source that
-      # just left the battlefield ("when this leaves, put its counters on ..."), how it last existed (CR 603.10a,
-      # 608.2h).
+      # What a triggered ability remembers of its source: whether it was cast (CR 400.7d) and kicked (CR 702.33d),
+      # how it was cast, the mana spent to cast it (CR 601.2h) and, for a source that just left the battlefield
+      # ("when this leaves, put its counters on ..."), how it last existed (CR 603.10a, 608.2h).
       def trigger_memory(source)
-        source_memory = state.objects[source["id"]]&.memory || {}
+        obj = state.objects[source["id"]]
+        source_memory = obj&.memory || {}
         memory = source_memory["cast"] ? { "source_cast" => true } : {}
         memory["kicked"] = true if source_memory["kicked"] # CR 702.33d: a kicked permanent's "if it was kicked"
         memory.merge!(source_memory.slice("cast_from", "cast_with")) # "if its evoke cost was paid" (Engine::AltCasting)
+        memory["source_mana_spent"] = obj.mana_spent.dup if obj&.mana_spent
         lki = last_known(source["id"])
         memory["source_lki"] = last_known_memory(lki) if lki
         memory

@@ -36,11 +36,18 @@ module Enjine
       { "controller" => engine.name(entry["controller"]), "card" => defn.name, "ability" => defn.ability(entry["ability"]).to_s }
     end
 
+    # How a mana kept apart in the pool may be spent and how long it stays (CR 106.6, 702.189a).
+    def pool_entry_text(entry)
+      parts = [entry["spend_only"] && Mechanics::SpendOnly.from_data(entry["spend_only"]).to_s,
+               entry["until"] && "you don't lose this mana until end of combat"]
+      parts.compact.join("; ")
+    end
+
     def player_view(engine, player, sees_hand, sees_library)
       view = {
         "name" => player.name, "life" => player.life, "poison" => player.poison,
         "mana_pool" => player.mana_pool.reject { |_, n| n.zero? }.transform_keys(&:to_s),
-        "restricted_mana" => player.restricted_mana.map { it.merge("text" => Mechanics::SpendOnly.from_data(it["spend_only"]).to_s) },
+        "restricted_mana" => player.restricted_mana.map { it.merge("text" => View.pool_entry_text(it)) },
         "lands_played" => player.lands_played, "mulligans" => player.mulligans,
         "hand_count" => player.hand.size, "library_count" => player.library.size, "outside_count" => player.outside.size,
         "graveyard" => player.graveyard.map { object_view(engine, it) }

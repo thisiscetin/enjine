@@ -282,6 +282,20 @@ Rules: CR 702.12b
 }
 ```
 
+## job_select
+
+When this Equipment enters, create a 1/1 colorless Hero creature token, then attach this Equipment to it.
+
+Rules: CR 702.182a
+
+```json
+{
+  "keywords": [
+    "job_select"
+  ]
+}
+```
+
 ## lifelink
 
 Damage dealt by this source also causes its controller to gain that much life.
@@ -320,6 +334,20 @@ Rules: CR 702.26a, CR 702.26p, CR 502.1
 {
   "keywords": [
     "phasing"
+  ]
+}
+```
+
+## prowess
+
+Whenever you cast a noncreature spell, this creature gets +1/+1 until end of turn.
+
+Rules: CR 702.108a
+
+```json
+{
+  "keywords": [
+    "prowess"
   ]
 }
 ```

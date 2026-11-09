@@ -113,7 +113,8 @@ module Enjine
     end
 
     def to_h
-      doc = { "cards" => @catalog.to_a, "main" => @entries.map { |id, n| { "card" => id, "count" => n } } }
+      # Tokens aren't listed: the cards that create them bring them back (two tokens may share a name).
+      doc = { "cards" => @catalog.reject(&:token?).map(&:to_h), "main" => @entries.map { |id, n| { "card" => id, "count" => n } } }
       doc["outside"] = @outside.map { |id, n| { "card" => id, "count" => n } } unless @outside.empty?
       doc
     end

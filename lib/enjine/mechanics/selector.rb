@@ -6,7 +6,8 @@ module Enjine
     # `results` lists, per earlier effect of the same effect list, the objects that effect
     # moved or created (CR 400.7j: "the card exiled this way"); see Selector {"result": n}.
     # `amounts`: per earlier effect, how much it changed (life an earlier effect took); see Amount {"this_way": n}.
-    EffectContext = Struct.new(:controller, :source, :object, :targets, :results, :amounts)
+    # `memory`: stands in for the resolving ability's memory while a trigger condition is checked (CR 603.4).
+    EffectContext = Struct.new(:controller, :source, :object, :targets, :results, :amounts, :memory)
 
     # Data form of "who/what does this effect apply to":
     #   {"target": 0}                               the first chosen target
@@ -131,7 +132,7 @@ module Enjine
       end
 
       # What the resolving triggered ability remembers (the event facts, watched objects).
-      def self.memory(engine, ctx) = engine.state.objects[ctx.object]&.memory || {}
+      def self.memory(engine, ctx) = ctx.memory || engine.state.objects[ctx.object]&.memory || {}
 
       private
 

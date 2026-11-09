@@ -327,6 +327,7 @@ module Enjine
         fresh.counters.merge!(data["enters"]["counters"])
         fresh.x = old.x if old.zone == :stack # CR 107.3m: its ETB abilities use the spell's X
         fresh.memory["kicked"] = true if old.zone == :stack && old.memory["kicked"] # CR 702.33d, 400.7d
+        fresh.mana_spent = old.mana_spent&.dup if old.zone == :stack # CR 601.2h, 400.7d: "mana spent to cast it"
         fresh.attached_to = data["enters"]["attached_to"] # CR 608.3c: an Aura enters attached
         enter_attacking!(fresh, data["enters"]["attacking"]) if data["enters"]["attacking"] # CR 508.4, 506.3a
       when :stack
@@ -418,27 +419,37 @@ module Enjine
 
     # ---- mana (CR 106) ----------------------------------------------------------
 
-    # CR 106.4: mana goes into the pool. Mana with a spending restriction (CR 106.6) is kept apart, one
-    # entry per mana, with the restriction's data.
-    def add_mana!(index, produce, source, restriction: nil)
+    # CR 106.4: mana goes into the pool. Mana with a spending restriction (CR 106.6), or that isn't lost as
+    # steps end (`keep_until: "end_of_combat"`, CR 702.189a), is kept apart, one entry per mana.
+    def add_mana!(index, produce, source, restriction: nil, keep_until: nil)
       return if produce.empty?
 
       pl = player(index)
-      if restriction
-        produce.each { pl.restricted_mana << { "mana" => it.to_s, "spend_only" => Snapshot.deep_copy(restriction) } }
+      if restriction || keep_until
+        entry = { "spend_only" => restriction && Snapshot.deep_copy(restriction), "until" => keep_until }.compact
+        produce.each { pl.restricted_mana << { "mana" => it.to_s }.merge(entry) }
       else
         produce.each { |type| pl.mana_pool[type] += 1 }
       end
       emit Events::ManaAdded.new(player: name(index), mana: Mana.symbols(produce), source: source)
     end
 
+    # Mana that stays as `step` ends: "until end of combat" mana through the combat steps (CR 702.189a).
+    def self.mana_kept?(entry, step) = entry["until"] == "end_of_combat" && COMBAT_STEPS.include?(step)
+    COMBAT_STEPS = %i[beginning_of_combat declare_attackers declare_blockers combat_damage].freeze
+
+    # Whether such mana may be in the pool during `step` (it empties as end of combat ends).
+    def self.mana_held?(entry, step) = mana_kept?(entry, step) || (entry["until"] == "end_of_combat" && step == :end_of_combat)
+
     def empty_mana_pools!
       state.players.each do |pl|
-        next if pl.mana_pool.values.all?(&:zero?) && pl.restricted_mana.empty?
+        kept = pl.restricted_mana.select { Engine.mana_kept?(it, state.step) }
+        lost = pl.restricted_mana - kept
+        next if pl.mana_pool.values.all?(&:zero?) && lost.empty?
 
-        text = pl.mana_pool.flat_map { |type, n| ["{#{type}}"] * n }.join + pl.restricted_mana.map { "{#{it["mana"]}}" }.join
+        text = pl.mana_pool.flat_map { |type, n| ["{#{type}}"] * n }.join + lost.map { "{#{it["mana"]}}" }.join
         pl.mana_pool.transform_values! { 0 }
-        pl.restricted_mana.clear
+        pl.restricted_mana = kept
         emit Events::ManaEmptied.new(player: pl.name, mana: text)
       end
     end
