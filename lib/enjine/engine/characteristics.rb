@@ -20,7 +20,7 @@ module Enjine
       def chars(object)
         object = self.object(object) if object.is_a?(String)
         defn = definition(object)
-        base = defn.printed_characteristics
+        base = copy_base(object) # layer 1 (CR 613.2a-c): its copiable values
         return board_characteristics.fetch(object.id, base) if object.zone == :battlefield
 
         defn.defined_pt? ? defined_power_toughness(object, base, defn) : base
@@ -74,12 +74,35 @@ module Enjine
 
       def defined_on_battlefield? = state.battlefield.any? { definition(object(it)).defined_pt? }
 
-      def facts(obj, current) = Mechanics::Filters::Facts.new(chars: current, counters: obj.counters, token: definition(obj).token?)
+      def facts(obj, current) = Mechanics::Filters::Facts.new(chars: current, counters: obj.counters, token: token?(obj))
+
+      # ---- layer 1 (CR 613.2a-c, 707.2) ---------------------------------------------------------
+
+      # The object's copiable values: the printed characteristics of its card, which is the copied card
+      # while a copy effect applies (Engine::Copies keeps GameObject#card on it), with the exceptions of the
+      # copy effect (CR 707.9a-b: "except it isn't legendary", "except it has menace", kept in
+      # memory["copy_of"]["except"]). Then the characteristic-defining changeling (CR 702.73a, all zones)
+      # and abilities effects grant to a card outside the battlefield (Q's exiled card, CR 113.6b).
+      def copy_base(obj)
+        defn = definition(obj)
+        except = obj.memory["copy_of"]&.[]("except")
+        base = if except && !except.empty?
+                 Mechanics::Keywords::Changeling.apply(Copies.apply_exceptions(defn.printed_characteristics, except))
+               elsif defn.keywords.include?(:changeling)
+                 (@changeling_printed ||= {})[defn.id] ||= Mechanics::Keywords::Changeling.apply(defn.printed_characteristics)
+               else
+                 defn.printed_characteristics
+               end
+        return base if obj.zone == :battlefield || state.effects.none? { it["kind"] == "grant_ability" }
+
+        granted = card_granted_abilities(obj)
+        granted.empty? ? base : base.with(abilities: (base.abilities + granted).freeze)
+      end
 
       # Layers 1-4: the object's own changes (Engine::SetMechanics#own_layers), then effects that set its
       # creature types (CR 205.1a, 613.1d), statics before resolved effects, each in timestamp order.
       def type_layers(obj, statics, effects)
-        base = own_layers(obj, definition(obj).printed_characteristics, effects)
+        base = own_layers(obj, copy_base(obj), effects)
         types = nil
         statics.each do |source, ability|
           types = ability.creature_types if ability.creature_types && ability.affects?(obj, source, facts(obj, base))
