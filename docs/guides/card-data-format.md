@@ -1273,6 +1273,39 @@ grants its abilities.
                               "name": "Nobody in Particular" } }] }
 ```
 
+### 4.28 Triggers, turn history and the stack: last turn, land plays, copying "that ability"
+
+| Oracle text | Data |
+| --- | --- |
+| "if an opponent was dealt noncombat damage last turn" (whoever's turn it was) | `{ "amount": { "noncombat_damage_last_turn": "each_opponent" }, "at_least": 1 }` |
+| "Whenever you play a land" / "… from anywhere other than your hand" / "from exile" (CR 305.1) | trigger `{ "plays_land": {} }` / `{ "plays_land": { "not_from": "hand" } }` / `{ "from": "exile" }` (`controller` as for `cast`) |
+| "if you've played a land or cast a spell this turn from anywhere other than your hand" | `{ "amount": { "plus": [{ "lands_played_this_turn": { "by": "you", "not_from": "hand" } }, { "spells_cast_this_turn": { "by": "you", "not_from": "hand" } }] }, "at_least": 1 }` |
+| "Whenever a permanent you control enters from exile" | `{ "enters": { "subject": { "each": "permanent", "controller": "you" }, "from": "exile" } }` |
+| "you may exchange life totals with target opponent. If you lost life this way, draw that many cards" (CR 608.2c) | `[{ "may": { "effects": [{ "exchange_life_totals": { "with": { "target": 0 } } }] } }, { "draw": { "amount": { "this_way": 0 } } }]` (a `may` records what its effects did) |
+| "two target nonland permanents that share a card type" (CR 701.12b) | second target `{ "filter": …, "distinct_from": [0], "shares_type_with": 0 }`; on resolution `"if": { "share_card_type": [{ "target": 0 }, { "target": 1 }] }` |
+| "Whenever you cast a spell that targets one or more creatures, those creatures …" | trigger `{ "cast": { "targets": "creature" } }`, selector `{ "triggering": "targets" }` (the targets that matched) |
+| "an instant or sorcery spell with a single target" | `{ "cast": { "spell": "instant_or_sorcery", "single_target": true } }` |
+| "You may choose new targets for that spell" (CR 115.7d) | `{ "choose_new_targets": { "of": { "triggering": "object" } } }` (keep or replace each target) |
+| "When you next activate an exhaust ability this turn, copy it" (CR 707.10) | `{ "delayed_trigger": { "when": { "activates_ability": { "exhaust": true } }, "this_turn": "once", "effects": [{ "copy_spell": { "of": { "triggering": "ability" }, "new_targets": true } }] } }` |
+| "When you next cast a Lesson spell this turn, copy it" | the same with `{ "cast": { "spell": { "spell": { "subtypes": ["lesson"] } } } }` and `"of": { "triggering": "object" }` |
+| "Whenever a creature you control attacking causes a triggered ability of that creature to trigger, … copy that ability" | trigger `{ "ability_triggers": { "subject": { "each": "creature", "controller": "you" }, "cause": "attacks" } }`, `copy_spell` of `{ "triggering": "ability" }` (nothing to copy once it left the stack) |
+| "Whenever a creature you control boasts" (CR 702.142b) | `{ "activates_ability": { "boast": true } }` |
+| "Whenever this creature becomes tapped to pay a teamwork cost" | `{ "becomes_tapped": { "for": "teamwork" } }` (it triggers once the spell is cast) |
+| "you may copy it. If you do, those spells gain wither" | `copy_spell` with `"except": { "keywords": ["wither"] }`, then `{ "grant": { "keywords": ["wither"], "to": { "triggering": "object" } } }` (a spell on the stack can gain keywords) |
+| "Instant and sorcery spells you cast from your hand have cascade" | ability `{ "spell_keywords": { "spells": { "spell": { "any_of": ["instant", "sorcery"] } }, "from": "hand", "keywords": ["cascade"] } }` |
+| "search your library for up to X basic land cards with different names" | `{ "search_library": { "for": { "supertypes": ["basic"], "types": ["land"] }, "count": "x", "different_names": true } }` |
+| "The first time you flip one or more coins each turn, those coins come up heads and you win those flips" (CR 705.3) | ability `"first_flips_win"` |
+| "Roll a d20" / "roll two six-sided dice" (CR 706) | `{ "roll_dice": { "sides": 20 } }` / `{ "roll_dice": { "amount": 2 } }`; the total is `{ "this_way": n }` (a results table is effects with an `if` on it) |
+
+```json
+{ "name": "Example Echo Drillmaster", "mana_cost": "{2}{R}", "types": ["creature"], "subtypes": ["goblin"],
+  "power": 2, "toughness": 2,
+  "abilities": [
+    { "triggered": { "when": { "attacks": {} }, "effects": [{ "deal_damage": { "amount": 1, "to": "each_opponent" } }] } },
+    { "triggered": { "when": { "ability_triggers": { "subject": { "each": "creature", "controller": "you" }, "cause": "attacks" } },
+                     "effects": [{ "may": { "effects": [{ "copy_spell": { "of": { "triggering": "ability" } } }] } }] } }] }
+```
+
 ---
 
 ## 5. Worked examples

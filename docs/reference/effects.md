@@ -526,6 +526,26 @@ Rules: CR 205.3m, CR 607.2d, CR 608.2c
 }
 ```
 
+## choose_new_targets
+
+You may choose new targets for each spell or ability on the stack `of` refers to (e.g. {"triggering": "object"}: "that spell"): for each target, keep it or pick another legal target for that spell.
+
+Rules: CR 115.7, CR 115.7d, CR 115.7e
+
+| Parameter | Description |
+| --- | --- |
+| `of` | selector (spells or abilities on the stack) |
+
+```json
+{
+  "choose_new_targets": {
+    "of": {
+      "triggering": "object"
+    }
+  }
+}
+```
+
 ## choose_option
 
 The player (`to`, default you) chooses one of the `options` (words); later effects of this spell or ability check it with the condition {"chosen": word}.
@@ -591,7 +611,7 @@ Rules: CR 707.12, CR 707.12a, CR 707.10a, CR 704.5d
 
 ## copy_spell
 
-Copy each spell or ability on the stack `of` refers to ("self": the spell this ability or spell belongs to; a `stack_ability` target: an activated or triggered ability) `amount` times. The copies are put on the stack under the referenced player's control (default: you) with the same modes, X, kicker and targets; they aren't cast or activated, and an ability's copy has the same source. With `new_targets: true` the controller may choose new targets for each copy. A copy of a permanent spell becomes a token as it resolves.
+Copy each spell or ability on the stack `of` refers to ("self": the spell this ability or spell belongs to; a `stack_ability` target: an activated or triggered ability) `amount` times. The copies are put on the stack under the referenced player's control (default: you) with the same modes, X, kicker and targets; they aren't cast or activated, and an ability's copy has the same source. With `new_targets: true` the controller may choose new targets for each copy. A copy of a permanent spell becomes a token as it resolves. `except`: the copies have these differences (e.g. {"keywords": ["wither"]}: "the copy gains wither").
 
 Rules: CR 707.10, CR 707.10a, CR 707.10b, CR 707.10c, CR 707.10f, CR 608.3f
 
@@ -601,6 +621,7 @@ Rules: CR 707.10, CR 707.10a, CR 707.10b, CR 707.10c, CR 707.10f, CR 608.3f
 | `amount` | amount (default 1) |
 | `new_targets` | boolean |
 | `to` | selector (default "you") |
+| `except` | {"legendary": false, "keywords": [...], "types": [...], "subtypes": [...], "supertypes": [...], "name": ..., "power": n, "toughness": n, "colors": [...]} |
 
 ```json
 {
@@ -1280,7 +1301,7 @@ Rules: CR 701.14a, CR 701.14b, CR 701.14c, CR 701.14d, CR 120.4a
 
 You flip `amount` coins (default 1), each coming up heads or tails at random (the game's random number generator). `count`: "wins" (default; you call each flip and win it if the call matches) or "heads" (no one wins or loses). How many were counted is this effect's amount: {"this_way": n} in later effects and conditions.
 
-Rules: CR 705.1, CR 705.2, CR 608.2c
+Rules: CR 705.1, CR 705.2, CR 705.3, CR 608.2c
 
 | Parameter | Description |
 | --- | --- |
@@ -1337,7 +1358,7 @@ Rules: CR 119.3
 
 ## grant
 
-Each referenced permanent gains the `keywords` until end of turn.
+Each referenced permanent (or spell on the stack) gains the `keywords` until end of turn.
 
 Rules: CR 611.2a, CR 611.2c, CR 613.1f, CR 514.2
 
@@ -1932,6 +1953,25 @@ Rules: CR 701.20a, CR 401.4, CR 400.7j
 }
 ```
 
+## roll_dice
+
+You roll `amount` dice (default 1) with `sides` sides (default 6). The total of the results is this effect's amount: {"this_way": n} in later effects and conditions (a results table is effects with an `if` on it).
+
+Rules: CR 706.1, CR 706.1a, CR 706.2, CR 706.3a, CR 608.2c
+
+| Parameter | Description |
+| --- | --- |
+| `sides` | integer >= 2 (default 6) |
+| `amount` | amount (default 1) |
+
+```json
+{
+  "roll_dice": {
+    "sides": 20
+  }
+}
+```
+
 ## sacrifice
 
 The controller sacrifices each referenced permanent they control (it goes to its owner's graveyard; it isn't destroyed, so indestructible doesn't stop it).
@@ -1993,20 +2033,21 @@ Rules: CR 701.22a
 
 ## search_library
 
-Search your library for up to `count` cards matching `for`, then put them into your hand (or onto the battlefield, tapped if `tapped`, with `counters`) and shuffle. With a stated quality you may find fewer (or none); a search for just "a card" must find one if it can. `reveal` shows the found cards to every player. `searcher` names another player who searches their own library (e.g. {"controller_of": {"target": 0}}); `may: true` lets the searcher decline (then nothing is shuffled).
+Search your library for up to `count` cards matching `for`, then put them into your hand (or onto the battlefield, tapped if `tapped`, with `counters`) and shuffle. With a stated quality you may find fewer (or none); a search for just "a card" must find one if it can. `reveal` shows the found cards to every player. `searcher` names another player who searches their own library (e.g. {"controller_of": {"target": 0}}); `may: true` lets the searcher decline (then nothing is shuffled). `different_names: true`: the cards found must all have different names ("basic land cards with different names").
 
 Rules: CR 701.23a, CR 701.23b, CR 701.23d, CR 701.23e, CR 701.20a, CR 701.24a, CR 701.24b, CR 118.12, CR 110.2a
 
 | Parameter | Description |
 | --- | --- |
 | `for` | card spec: "card" (default), {"types"|"subtypes"|"supertypes": [...], "name": "..."} or {"any_of": [spec, ...]} |
-| `count` | integer (default 1), "any" (any number) or an amount ("up to that many") |
+| `count` | integer (default 1), "any" (any number), "x" or an amount ("up to that many") |
 | `put` | "hand" (default) or "battlefield" |
 | `tapped` | true: the cards enter tapped (with put: battlefield) |
 | `counters` | {counter name: n}: the cards enter with these counters (with put: battlefield) |
 | `reveal` | true: reveal the found cards |
 | `searcher` | selector of the searching player (default "you") |
 | `may` | true: the searcher may choose not to search |
+| `different_names` | true: each card found has a different name |
 
 ```json
 {

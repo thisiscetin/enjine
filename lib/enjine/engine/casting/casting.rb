@@ -202,10 +202,20 @@ module Enjine
         spec = casting_targets[target_slot(ctx)] # Engine::TargetCounts: a counted slot's list may be open
         taken = spec.respond_to?(:distinct_from) ? spec.distinct_from.flat_map { Array(ctx["targets"][it]) } : []
         taken += open_target_group(ctx)
-        spec.candidates_for(self, ctx["player"], ctx["source"]).reject do
+        candidates = spec.candidates_for(self, ctx["player"], ctx["source"]).reject do
           it == ctx["object"] || taken.include?(it) || !targetable?(it, ctx["player"], ctx["source"],
                                                                     targeter: ctx["source"] || ctx["object"])
         end
+        sharing_type(candidates, spec, ctx)
+      end
+
+      # "Target permanents that share a card type" (`shares_type_with`, CR 205.2a): only candidates sharing one
+      # with the earlier target.
+      def sharing_type(candidates, spec, ctx)
+        index = spec.respond_to?(:shares_type_with) && spec.shares_type_with
+        other = index && state.objects[Array(ctx["targets"][index]).first] or return candidates
+
+        candidates.select { state.objects.key?(it) && chars(it).types.intersect?(chars(other).types) }
       end
 
       # The target options; an "up to one" target may be left unchosen (`done`).

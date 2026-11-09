@@ -93,6 +93,7 @@ module Enjine
         pl.mana_pool = Mana::TYPES.to_h { |t| [t, hash["mana_pool"].fetch(t.to_s, 0)] }
         pl.turn_log = deep_copy(hash.fetch("turn_log", {}))
         pl.game_log = deep_copy(hash.fetch("game_log", {}))
+        pl.last_turn_log = deep_copy(hash.fetch("last_turn_log", {}))
         pl.restricted_mana = deep_copy(hash.fetch("restricted_mana", []))
         pl.outside = hash.fetch("outside", []).dup
         pl.speed = hash["speed"] # CR 702.179; absent: no speed
@@ -141,7 +142,9 @@ module Enjine
     # snapshots.
     def validate_logs(players, errors)
       players.each_with_index.select { |pl, _| pl.is_a?(Hash) }.each do |pl, i|
-        %w[turn_log game_log].each { |k| errors << "players[#{i}].#{k}: must be an object" unless pl.fetch(k, {}).is_a?(Hash) }
+        %w[turn_log game_log last_turn_log].each do |k|
+          errors << "players[#{i}].#{k}: must be an object" unless pl.fetch(k, {}).is_a?(Hash)
+        end
         counters = pl.fetch("counters", {}) # CR 122.1: counters other than poison; absent in older snapshots
         next if counters.is_a?(Hash) && counters.all? { |k, n| Mechanics::Counters.valid?(k) && k != "poison" && non_negative?(n) }
 

@@ -27,6 +27,7 @@ module Enjine
         return board_characteristics.fetch(object.id, base) if object.zone == :battlefield
 
         base = defined_power_toughness(object, base, defn) if defined_pt_copied?(object)
+        base = with_spell_grants(object, base) if object.zone == :stack # Engine::SpellGrants
         with_max_speed(object, base) # CR 702.178b: e.g. an ability that works from the graveyard (Engine::Speed)
       end
 

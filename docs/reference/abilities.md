@@ -898,6 +898,16 @@ Rules: CR 702.189a, CR 500.5
 }
 ```
 
+## first_flips_win
+
+The first time each turn its controller flips one or more coins, those coins come up heads and they win those flips.
+
+Rules: CR 705.3, CR 604.1
+
+```json
+"first_flips_win"
+```
+
 ## flashback
 
 Flashback: you may cast this instant or sorcery card from your graveyard by paying `cost` rather than its mana cost; then it's exiled whenever it would leave the stack. `cost` is a mana cost string or a list of costs (`[{"mana": "{1}{U}"}, {"tap_permanents": {"count": 3}}]`). Cast option `via: "alt:<ref>"`.
@@ -1307,6 +1317,38 @@ Rules: CR 113.3a, CR 601.2c, CR 608.2b, CR 608.2c, CR 702.183a, CR 601.2f
           }
         }
       }
+    ]
+  }
+}
+```
+
+## spell_keywords
+
+Spells you control on the stack matching `spells` (a spell filter; default every spell), cast `from` / `not_from` a zone if given, have the `keywords` (e.g. cascade, which then triggers as such a spell is cast).
+
+Rules: CR 604.1, CR 611.3a, CR 702.85a
+
+| Parameter | Description |
+| --- | --- |
+| `spells` | spell filter |
+| `from` | zone |
+| `not_from` | zone |
+| `keywords` | list of keywords |
+
+```json
+{
+  "spell_keywords": {
+    "spells": {
+      "spell": {
+        "any_of": [
+          "instant",
+          "sorcery"
+        ]
+      }
+    },
+    "from": "hand",
+    "keywords": [
+      "cascade"
     ]
   }
 }

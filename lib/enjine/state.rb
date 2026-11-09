@@ -25,6 +25,7 @@ module Enjine
   PlayerState = Struct.new(:name, :life, :poison, :library, :hand, :graveyard, :mana_pool, :lands_played,
                            :drew_from_empty, :lost, :mulligans, :kept, :mulligan_choice,
                            :turn_log, :game_log, # what happened this turn / this game (see Engine::History)
+                           :last_turn_log, # what happened during the previous turn (CR 500.1)
                            :restricted_mana, # mana with a spending restriction (CR 106.6), see Engine#add_mana!
                            :outside, # definition ids of the cards they own outside the game (CR 400.11a)
                            :speed, # nil (no speed) or 1-4 (CR 702.179), see Engine::Speed
@@ -45,6 +46,7 @@ module Enjine
         "lands_played" => lands_played, "drew_from_empty" => drew_from_empty, "lost" => lost,
         "mulligans" => mulligans, "kept" => kept, "mulligan_choice" => mulligan_choice,
         "turn_log" => Marshal.load(Marshal.dump(turn_log || {})), "game_log" => Marshal.load(Marshal.dump(game_log || {})),
+        "last_turn_log" => Marshal.load(Marshal.dump(last_turn_log || {})),
         "restricted_mana" => Marshal.load(Marshal.dump(restricted_mana || [])),
         "outside" => (outside || []).dup }.merge(speed ? { "speed" => speed } : {})
         .merge(designations.to_a.empty? ? {} : { "designations" => designations.dup })
@@ -114,7 +116,7 @@ module Enjine
     def self.new_player(name, outside = [])
       PlayerState.new(name: name, life: STARTING_LIFE, poison: 0, library: [], hand: [], graveyard: [],
                       mana_pool: Mana.empty_pool, lands_played: 0, drew_from_empty: false, lost: nil,
-                      mulligans: 0, kept: false, mulligan_choice: nil, turn_log: {}, game_log: {}, restricted_mana: [],
+                      mulligans: 0, kept: false, mulligan_choice: nil, turn_log: {}, game_log: {}, last_turn_log: {}, restricted_mana: [],
                       outside: outside.dup)
     end
 

@@ -29,7 +29,12 @@ module Enjine
         @last_known&.delete(id)
       end
 
-      # Called for every event: queue every triggered ability whose condition matches.
+      # The activated or triggered ability on the stack named by `ref`: its object id, or the id of the pending
+      # trigger it was put on the stack from ("copy that ability", CR 707.10). Nil once it has left the stack.
+      def stack_object_for(ref) = state.stack.find { it == ref || object(it).memory["trigger_id"] == ref }
+
+      # Called for every event: queue every triggered ability whose condition matches. Only an ability_triggers
+      # trigger watches another ability triggering (Events::AbilityTriggered).
       def watch_triggers!(event)
         return if state.step.nil? # no triggers during the pregame
 
@@ -273,7 +278,8 @@ module Enjine
                                     "source" => source["id"], "card" => source["card"], "ability" => source["ability"],
                                     "event" => event.to_h, "memory" => memory, "batch" => batch }.compact
         emit Events::AbilityTriggered.new(player: name(source["controller"]), source: source["id"],
-                                          card: source["card"], ability: source["ability"])
+                                          card: source["card"], ability: source["ability"],
+                                          trigger: state.pending_triggers.last["id"])
       end
 
       # CR 117.5 / 603.3: before a player receives priority, pending triggers go on the stack.
@@ -343,7 +349,7 @@ module Enjine
         obj.kind = "ability"
         obj.source = trigger["source"]
         obj.ability = trigger["ability"]
-        obj.memory = Snapshot.deep_copy(trigger.fetch("memory", {}))
+        obj.memory = Snapshot.deep_copy(trigger.fetch("memory", {})).merge("trigger_id" => trigger["id"])
         obj.x = entered_x(trigger)
         state.stack.unshift(obj.id)
         start_casting!(trigger["controller"], obj.id, "trigger", source: trigger["source"], ability: trigger["ability"])

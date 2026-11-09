@@ -5,24 +5,30 @@ module Enjine
     module Triggers
       # "When ~ enters" / "Whenever a creature you control enters" (landfall: lands you control).
       # `untapped: true` is "when this land enters untapped": the status it entered with (CR 614.12).
+      # `from`: only a permanent that entered from that zone ("enters from exile", CR 603.6a).
       class Enters < Trigger
+        FROM = %w[hand graveyard exile library stack outside].freeze
+
         primitive :trigger, :enters,
-                  description: "The subject enters the battlefield. `untapped: true`: only if it entered untapped.",
+                  description: "The subject enters the battlefield. `untapped: true`: only if it entered untapped. " \
+                               "`from`: only if it entered from that zone (\"enters from exile\").",
                   rules: %w[603.6a 603.2 614.12],
                   params: { "subject" => "\"self\" (default) or {\"each\": filter, \"controller\": you|opponent|any, \"other\": true}",
-                            "untapped" => "true | false" },
+                            "untapped" => "true | false", "from" => FROM.join(" | ") },
                   example: { "enters" => { "subject" => { "each" => "land", "controller" => "you" } } }
 
-        def self.keys = %w[subject untapped]
+        def self.keys = %w[subject untapped from]
         def event_class = Events::ZoneChanged
 
         def setup(params, errors, path)
           @untapped = params.fetch("untapped", false)
           errors << "#{path}.untapped: must be true or false" unless [true, false].include?(@untapped)
+          @from = params["from"]
+          errors << "#{path}.from: must be one of #{FROM.join(", ")}" unless @from.nil? || FROM.include?(@from)
         end
 
         def match?(engine, event, source)
-          return false unless event.to == "battlefield"
+          return false unless event.to == "battlefield" && (@from.nil? || event.from == @from)
 
           obj = engine.state.objects[event.new_id] or return false
           return false if @untapped && obj.tapped
@@ -30,7 +36,37 @@ module Enjine
           @subject.match?(engine, event.new_id, obj.controller, event.card, source, types: engine.chars(obj).types)
         end
 
-        def to_s = "When #{@subject} enters#{" untapped" if @untapped}"
+        def to_s = "When #{@subject} enters#{" untapped" if @untapped}#{" from #{@from}" if @from}"
+      end
+
+      # "Whenever you play a land" (CR 305.1): a player plays a land, from their hand or, when an effect allows it,
+      # from another zone (`from` / `not_from`: "from exile", "from anywhere other than your hand"). Putting a land
+      # onto the battlefield with an effect isn't playing it.
+      class PlaysLand < PlayerTrigger
+        primitive :trigger, :plays_land,
+                  description: "A player (`controller`: you (default) | opponent | any) plays a land. `from` / " \
+                               "`not_from`: only a land played from (not from) that zone: hand | graveyard | exile | " \
+                               "library | outside. Lands put onto the battlefield by effects aren't played.",
+                  rules: %w[305.1 603.2 601.2a],
+                  params: { "controller" => PLAYERS.join(" | "), "from" => "zone", "not_from" => "zone" },
+                  example: { "plays_land" => { "not_from" => "hand" } }
+
+        def self.keys = %w[controller from not_from]
+        def event_class = Events::ZoneChanged
+
+        def setup(params, errors, path)
+          super
+          @zones = CastFrom.build(params, errors, path)
+        end
+
+        def match?(engine, event, source)
+          return false unless event.reason == "play_land" && event.to == "battlefield" && @zones.match?(event.from)
+
+          player = engine.state.objects[event.new_id]&.controller || engine.names.index(event.owner)
+          player_ok?(engine, engine.name(player), source)
+        end
+
+        def to_s = "Whenever #{who} play#{"s" unless @controller == "you"} a land#{@zones}"
       end
 
       # "When ~ dies" / "Whenever another creature you control dies".

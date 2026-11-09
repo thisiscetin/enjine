@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require_relative "../abilities/turn_rules"
+
 module Enjine
   module Mechanics
     module Effects
@@ -16,7 +18,7 @@ module Enjine
                                "game's random number generator). `count`: \"wins\" (default; you call each flip and " \
                                "win it if the call matches) or \"heads\" (no one wins or loses). How many were " \
                                "counted is this effect's amount: {\"this_way\": n} in later effects and conditions.",
-                  rules: %w[705.1 705.2 608.2c],
+                  rules: %w[705.1 705.2 705.3 608.2c],
                   params: { "amount" => "amount (default 1)", "count" => COUNTS.join(" | ") },
                   example: { "flip_coins" => {} }
 
@@ -42,12 +44,14 @@ module Enjine
             return :done unless condition.nil? || condition.true?(engine, ctx)
 
             locals["left"] = amount_for(engine, ctx)
+            locals["fixed"] = true if Abilities::FirstFlipsWin.applies?(engine, ctx.controller) # CR 705.3
           end
+          calls = @count == "wins" && !locals["fixed"] # a flip with a stated result needs no call (CR 705.3)
           while locals["left"].positive?
-            call = @count == "wins" ? answers(locals).shift&.fetch("call") : nil
-            return ask(engine, locals, ctx.controller, "Call the coin flip", CALLS) if @count == "wins" && call.nil?
+            call = calls ? answers(locals).shift&.fetch("call") : nil
+            return ask(engine, locals, ctx.controller, "Call the coin flip", CALLS) if calls && call.nil?
 
-            flip!(engine, ctx, call)
+            flip!(engine, ctx, call, fixed: locals["fixed"])
             locals["left"] -= 1
           end
           :done
@@ -55,11 +59,37 @@ module Enjine
 
         private
 
-        def flip!(engine, ctx, call)
-          heads = engine.state.rng.rand(2).zero?
-          won = call && (call == "heads") == heads
+        # CR 705.3: a flip with a stated result (heads, and won) ignores the actual result.
+        def flip!(engine, ctx, call, fixed: false)
+          heads = fixed || engine.state.rng.rand(2).zero?
+          won = fixed ? @count == "wins" || nil : call && (call == "heads") == heads
+          call = "heads" if fixed && @count == "wins"
           engine.emit Events::CoinFlipped.new(player: engine.name(ctx.controller), heads: heads, won: won)
           engine.record_amount!(1) if call ? won : heads
+        end
+      end
+    end
+
+    module Abilities
+      # "The first time you flip one or more coins each turn, those coins come up heads and you win those flips"
+      # (CR 705.3): the flips of the first flip_coins effect its controller performs each turn have that result
+      # (no call is asked). A flip is remembered in the turn's history (Engine::TurnHistory "coin_flips").
+      class FirstFlipsWin < TurnRule
+        primitive :ability, :first_flips_win,
+                  description: "The first time each turn its controller flips one or more coins, those coins come up " \
+                               "heads and they win those flips.",
+                  rules: %w[705.3 604.1], example: "first_flips_win"
+
+        INSTANCE = new.freeze
+
+        def kind = :first_flips_win
+        def to_s = "The first time you flip one or more coins each turn, those coins come up heads and you win those flips"
+
+        def self.applies?(engine, index)
+          engine.turn_log(index).fetch("coin_flips", 0).zero? &&
+            engine.state.battlefield.any? do |id|
+              engine.object(id).controller == index && engine.chars(id).abilities.any? { it.ability.kind == :first_flips_win }
+            end
         end
       end
     end
