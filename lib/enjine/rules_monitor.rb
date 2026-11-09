@@ -75,7 +75,7 @@ module Enjine
       state.players.each do |pl|
         next if pl.mana_pool.values.all?(&:zero?) && pl.restricted_mana.empty?
 
-        finding("500.4", "#{pl.name}'s mana pool isn't empty at #{state.step}")
+        finding("500.5", "#{pl.name}'s mana pool isn't empty at #{state.step}")
       end
     end
 

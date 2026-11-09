@@ -27,7 +27,17 @@ RSpec.describe "Kicked permanents, exiling spells and computed filter ranges" do
         } } } } }]
       } }] }
   end
-  let(:catalog) { catalog_with(raptor, rebuff, bomb) }
+  let(:strike) do
+    mine = { "creature" => { "controller" => "you" } }
+    { "name" => "Spec Joint Strike", "mana_cost" => "{G}", "types" => ["instant"],
+      "abilities" => [{ "spell" => {
+        "targets" => [mine, { "filter" => mine, "optional" => true, "distinct_from" => [0] },
+                      { "creature" => { "controller" => "opponent" } }],
+        "effects" => [{ "bite" => { "from" => { "target" => 0 }, "to" => { "target" => 2 } } },
+                      { "bite" => { "from" => { "target" => 1 }, "to" => { "target" => 2 } } }]
+      } }] }
+  end
+  let(:catalog) { catalog_with(raptor, rebuff, bomb, strike) }
 
   def board(alice_hand: [], alice_field: [], bob_hand: [], bob_field: [])
     build_game(catalog) do
@@ -118,6 +128,31 @@ RSpec.describe "Kicked permanents, exiling spells and computed filter ranges" do
 
     it "validates the exile target zone list" do
       expect(Enjine::Mechanics::Effects::Exile.from_zones).to include(:stack)
+    end
+  end
+
+  describe "two creatures each dealing damage equal to their power, the second optional (CR 120.3, 601.2c)" do
+    def cast_strike(game, second)
+      game.submit(type: "cast", object: ids_in(game, "alice", :hand).first)
+      game.submit(type: "target", target: obj_id(game, "Grizzly Bears"))
+      second ? game.submit(type: "target", target: obj_id(game, "Hill Giant")) : game.submit(type: "done")
+      game.submit(type: "target", target: game.state.battlefield.find do
+        game.state.object(it).controller == 1 && game.state.object(it).card == "craw_wurm"
+      end)
+      pay_all(game)
+      settle(game)
+    end
+
+    it "both deal damage" do
+      game = board(alice_hand: ["Spec Joint Strike"], alice_field: ["Forest", "Grizzly Bears", "Hill Giant"], bob_field: ["Craw Wurm"])
+      cast_strike(game, true)
+      expect(game.state.battlefield.map { game.state.object(it).card }).not_to include("craw_wurm") # 2 + 3 damage: lethal
+    end
+
+    it "without the second creature only the first does" do
+      game = board(alice_hand: ["Spec Joint Strike"], alice_field: ["Forest", "Grizzly Bears", "Hill Giant"], bob_field: ["Craw Wurm"])
+      cast_strike(game, false)
+      expect(game.state.object(obj_id(game, "Craw Wurm")).damage).to eq(2)
     end
   end
 

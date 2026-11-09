@@ -92,7 +92,12 @@ RSpec.describe "Face-down exile, look permission and mana of any type (CR 406.3,
   it "a land is played face up from exile with a play permission" do
     game = exchanged
     mountain = exiled(game, "bob").find { face_up_name(game, it) == "Mountain" }
-    expect(game.legal_options).to include({ type: "play_land", object: mountain, via: anything })
+    option = game.legal_options.find { it[:type] == "play_land" && it[:object] == mountain }
+    expect(option).not_to be_nil
+    game.submit(option)
+    land = game.state.battlefield.map { game.state.object(it) }.find { it.card == "mountain" && it.owner == 1 && it.controller == 0 }
+    expect(land).not_to be_nil # CR 305.1: played by Alice, so she controls Bob's Mountain
+    expect(land.id).to start_with("mountain#")
   end
 
   it "a cancelled cast puts the card back face down (CR 733.1)" do

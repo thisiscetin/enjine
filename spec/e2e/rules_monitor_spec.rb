@@ -31,9 +31,9 @@ RSpec.describe Enjine::RulesMonitor do
     expect(rules(play)).to include("613.4c")
   end
 
-  it "catches mana that doesn't empty between steps (CR 500.4)" do
+  it "catches mana that doesn't empty between steps (CR 500.5)" do
     allow_any_instance_of(Enjine::Engine).to receive(:empty_mana_pools!) # rubocop:disable RSpec/AnyInstance
-    expect(rules(play)).to include("500.4")
+    expect(rules(play)).to include("500.5")
   end
 
   it "catches creatures surviving lethal damage (CR 704.5g)" do
