@@ -20,9 +20,6 @@ RSpec.describe "Choosing between costs (CR 601.2b, 601.2f, 118.3)" do
         "targets" => ["any_target"], "effects" => [{ "deal_damage" => { "amount" => 2, "to" => { "target" => 0 } } }]
       } }] }
   end
-  def warded(name, cost) = { "name" => name, "mana_cost" => "{1}{B}", "types" => ["creature"], "power" => 3, "toughness" => 3,
-                              "abilities" => [{ "ward" => { "cost" => cost } }] }
-
   let(:courier) do
     { "name" => "Spec Scrap Courier", "mana_cost" => "{1}{R}", "types" => ["creature"], "power" => 2, "toughness" => 1,
       "abilities" => [{ "triggered" => { "when" => { "enters" => {} }, "effects" => [{ "pay" => {
@@ -35,6 +32,11 @@ RSpec.describe "Choosing between costs (CR 601.2b, 601.2f, 118.3)" do
                  warded("Spec Life Warden", [{ "pay_life" => 2 }]),
                  warded("Spec Toll Titan", [{ "one_of" => [{ "discard" => {} }, { "mana" => "{2}" }] }]),
                  warded("Spec Venom Society", [{ "get_counters" => { "counter" => "poison", "amount" => 5 } }]))
+  end
+
+  def warded(name, cost)
+    { "name" => name, "mana_cost" => "{1}{B}", "types" => ["creature"], "power" => 3, "toughness" => 3,
+      "abilities" => [{ "ward" => { "cost" => cost } }] }
   end
 
   def board(hand: [], field: [], lands: [], theirs: [], life: 20)
@@ -64,9 +66,7 @@ RSpec.describe "Choosing between costs (CR 601.2b, 601.2f, 118.3)" do
   def cast(game, name) = game.submit(type: "cast", object: obj_id(game, name, zone: :hand, player: "alice"))
 
   def pay_all(game)
-    while game.pending_decision.kind == "pay_cost"
-      game.submit(game.legal_options.find { %w[pay_mana activate_mana].include?(it[:type]) })
-    end
+    game.submit(game.legal_options.find { %w[pay_mana activate_mana].include?(it[:type]) }) while game.pending_decision.kind == "pay_cost"
   end
 
   it "offers only the options that could be paid: no Goblin to behold and only {B} means no cast (CR 118.3)" do
@@ -96,7 +96,9 @@ RSpec.describe "Choosing between costs (CR 601.2b, 601.2f, 118.3)" do
     expect(game.pending_decision.kind).to eq("choose_cost")
     game.submit(type: "cost", object: obj_id(game, "Spec Hand Goblin", zone: :hand, player: "alice"))
     entry = nil
-    entry = game.submit(game.legal_options.find { %w[pay_mana activate_mana].include?(it[:type]) }) while game.pending_decision.kind == "pay_cost"
+    entry = game.submit(game.legal_options.find do
+      %w[pay_mana activate_mana].include?(it[:type])
+    end) while game.pending_decision.kind == "pay_cost"
     expect(game.state.stack.size).to eq(1)
     expect(entry.events.map(&:type)).to include("spell_cast")
   end
@@ -182,6 +184,30 @@ RSpec.describe "Choosing between costs (CR 601.2b, 601.2f, 118.3)" do
       game.submit(type: "cost", object: obj_id(game, "Spec Bauble"))
       expect(game.state.players[0].graveyard.map { game.state.object(it).card }).to eq(["spec_bauble"])
       expect(game.state.players[0].hand.size).to eq(2)
+    end
+  end
+
+  describe "snapshots" do
+    def round_trip(game) = Enjine::Game.import(game.to_h, catalog: catalog)
+
+    it "a cast waiting for the cost option, and after it, survives export and import" do
+      game = board(hand: ["Spec Cursetosser"], lands: %w[Swamp Swamp Swamp])
+      cast(game, "Spec Cursetosser")
+      game = round_trip(game)
+      expect(game.legal_options).to include({ type: "cost_option", option: 1 })
+      game.submit(type: "cost_option", option: 1)
+      game = round_trip(game)
+      expect(game.pending_decision.details["remaining"]).to eq("{2}{B}")
+    end
+
+    it "a ward payment halfway through its choices survives export and import" do
+      game = board(hand: ["Lightning Bolt", "Forest"], lands: ["Mountain"], theirs: ["Spec Toll Titan"])
+      bolt_at(game, "Spec Toll Titan")
+      game.submit(game.legal_options.first)
+      game = round_trip(game)
+      game.submit(type: "cost", object: obj_id(game, "Forest", zone: :hand, player: "alice"))
+      expect(game.state.players[0].hand).to be_empty
+      expect(game.state.stack.size).to eq(1)
     end
   end
 end

@@ -17,7 +17,8 @@ module Enjine
                                "or a list of costs (\"Ward—Pay 2 life\", \"Ward—Discard a card or pay {2}\" with " \
                                "`one_of`). With `waterbend`, they waterbend that cost: \"Ward—Waterbend {4}\".",
                   rules: %w[702.21a 601.2c 603.2 701.6a 701.67a],
-                  params: { "cost" => "mana cost string, e.g. \"{2}\", or a list of costs, e.g. [{\"pay_life\": 2}]", "waterbend" => "mana cost string, instead of cost" },
+                  params: { "cost" => "mana cost string, e.g. \"{2}\", or a list of costs, e.g. [{\"pay_life\": 2}]",
+                            "waterbend" => "mana cost string, instead of cost" },
                   example: { "ward" => { "cost" => "{2}" } }
 
         # The trigger: this permanent becomes the target of an opponent's spell or ability.

@@ -924,8 +924,8 @@ power"). Keyword *actions* are effects.
 | "create two 1/1 tokens tapped and attacking" | `create_token` with `"tapped": true, "attacking": true` |
 | "add {R}{R}; until end of combat, you don't lose this mana" | `{ "add_mana": { "produce": "{R}{R}", "until": "end_of_combat" } }` |
 | "earthbend 2" (CR 701.66) | a target `{ "land": { "controller": "you" } }` and `{ "earthbend": { "amount": 2, "to": { "target": 0 } } }` (the land is its result: "that land becomes an Island" is `become` with `{ "result": n }`) |
-| "Waterbend {3}: …" / "As an additional cost to cast this spell, waterbend {X}" (CR 701.67) | the cost `{ "waterbend": "{3}" }` in an activated ability's `cost`, an `additional_cost` or `kicker`; while paying, `{type: "waterbend", object: id}` taps an artifact or creature for {1} of it |
-| "you may waterbend {4} as an additional cost … if this spell's additional cost was paid" | `{ "kicker": { "cost": [{ "waterbend": "{4}" }] } }` and the condition `{ "kicked": true }` |
+| "Waterbend {3}: …" / "As an additional cost to cast this spell, waterbend {X}" (CR 701.67) | the cost `{ "waterbend": "{3}" }` in an activated ability's `cost`, an `additional_cost` (optional or not) or `kicker`; while paying, `{type: "waterbend", object: id}` taps an artifact or creature for {1} of it |
+| "you may waterbend {4} as an additional cost … if this spell's additional cost was paid" | `{ "additional_cost": { "cost": [{ "waterbend": "{4}" }], "optional": true } }` and the condition `{ "cast_with": "additional_cost" }` (4.24) |
 | "discard a card unless you waterbend {2}" / "Ward—Waterbend {4}" | `{ "pay": { "waterbend": "{2}", "otherwise": [{ "discard": { "amount": 1, "to": "you" } }] } }` / `{ "ward": { "waterbend": "{4}" } }` (also `counter_unless_pays`) |
 | "airbend target creature or spell" (CR 701.65) | `{ "airbend": { "to": { "target": 0 } } }` (the owner may cast each exiled card for {2} while it stays exiled) |
 | "Whenever you waterbend, earthbend, firebend, or airbend" | `{ "any_of": [{ "waterbends": {} }, { "earthbends": {} }, { "firebends": {} }, { "airbends": {} }] }` |
@@ -1135,6 +1135,35 @@ its seed and decisions, and an exported game continues with the same results.
   "abilities": [{ "triggered": { "when": { "cast": { "targets": { "creature": { "controller": "you" } } } },
                                  "effects": [{ "add_counters": { "counter": "+1/+1", "amount": 1, "to": "self" } },
                                              { "scry": { "amount": 1 } }] } }] }
+```
+
+### 4.24 Choosing between costs, optional additional costs and paying costs while resolving
+
+| Oracle text | Data |
+| --- | --- |
+| "As an additional cost to cast this spell, behold a Goblin or pay {2}" (CR 601.2b) | `{ "additional_cost": { "cost": [{ "one_of": [{ "behold": { "card": { "subtypes": ["goblin"] } } }, { "mana": "{2}" }] }] } }` |
+| "… sacrifice a creature or pay {3}{B}", "… blight 1 or pay {3}", "… pay 5 life or pay {2}", "… exile two cards from your graveyard or pay {1}{W}" | the same, with any two or more costs in the `one_of` |
+| "{3}, {T}, Sacrifice an artifact or discard a nonland card: …" (CR 602.2b) | `"cost": [{ "mana": "{3}" }, "tap", { "one_of": [{ "sacrifice_permanent": { "filter": "artifact" } }, { "discard": { "card": { "not_types": ["land"] } } }] }]` |
+| "As an additional cost to cast this spell, you may behold a Dragon. … If a Dragon was beheld, …" (CR 118.8b) | `{ "additional_cost": { "cost": [{ "behold": { "card": { "subtypes": ["dragon"] } } }], "optional": true } }` and the condition `{ "cast_with": "additional_cost" }` |
+| "You may sacrifice an artifact or discard a card. If you do, draw a card." (CR 118.12) | `{ "pay": { "cost": [{ "one_of": [{ "sacrifice_permanent": { "filter": "artifact" } }, "discard"] }], "then": [{ "draw": { "amount": 1 } }] } }` |
+| "… When you do, it deals 2 damage to any target" | `then`: `[{ "reflexive_trigger": { "targets": ["any_target"], "effects": [ … ] } }]` |
+| "Ward—Pay 2 life", "Ward—Discard a card", "Ward—Discard a card or pay {2}" (CR 702.21a) | `{ "ward": { "cost": [{ "pay_life": 2 }] } }`, `[ "discard" ]`, `[{ "one_of": ["discard", { "mana": "{2}" }] }]` |
+| "Ward—Get five poison counters" | `{ "ward": { "cost": [{ "get_counters": { "counter": "poison", "amount": 5 } }] } }` |
+| "Counter target spell unless its controller pays {2}. If …, {4} instead" | two `counter_unless_pays` with opposite `if` conditions (`cost` takes a list of costs too) |
+
+Which `one_of` option is paid is announced while casting or activating, after modes and before X
+(the `choose_cost_option` decision, CR 601.2b); only options that could be paid are offered, and a
+spell or ability is castable only if some option can be. An optional additional cost is announced
+with the `choose_kicker` decision (a spell has at most one kicker-like optional cost). While
+resolving, the payer picks one `pay` choice per way the costs could be paid, makes the costs'
+choices (which card to discard), then pays any mana; cancelling the mana counts as not paying,
+but cards already revealed for a behold or permanents tapped for a cost stay so.
+
+```json
+{ "name": "Example Toll Titan", "mana_cost": "{2}{B}", "types": ["creature"], "subtypes": ["giant"],
+  "power": 5, "toughness": 5,
+  "abilities": [{ "additional_cost": { "cost": [{ "one_of": ["discard", { "mana": "{2}" }] }] } },
+                { "ward": { "cost": [{ "one_of": ["discard", { "mana": "{2}" }] }] } }] }
 ```
 
 ---

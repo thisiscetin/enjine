@@ -143,6 +143,26 @@ Rules: CR 406.1, CR 113.6m, CR 602.2b, CR 118.3
 "exile_self_from_graveyard"
 ```
 
+## get_counters
+
+You get `amount` counters of the kind `counter` (e.g. poison). It can always be paid.
+
+Rules: CR 118.1, CR 122.1, CR 704.5c
+
+| Parameter | Description |
+| --- | --- |
+| `counter` | player counter kind, e.g. "poison" |
+| `amount` | integer >= 1 |
+
+```json
+{
+  "get_counters": {
+    "counter": "poison",
+    "amount": 5
+  }
+}
+```
+
 ## mana
 
 Pay mana as part of an activation. Paid during the activation by spending mana from your pool, tapping sources one at a time.

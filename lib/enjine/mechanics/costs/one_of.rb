@@ -42,7 +42,7 @@ module Enjine
         def payable?(engine, object) = options.any? { it.mana? || it.payable?(engine, object) }
         # Each option as text: "Behold a Goblin", "Pay {2}".
         def option_texts = options.map { it.mana? ? "Pay #{it}" : it.to_s }
-        def to_s = option_texts.join(" or ")
+        def to_s = option_texts.each_with_index.map { |text, i| i.zero? ? text : text.sub(/\A\w/, &:downcase) }.join(" or ")
       end
     end
   end

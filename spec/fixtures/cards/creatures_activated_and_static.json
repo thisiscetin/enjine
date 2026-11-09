@@ -2550,5 +2550,130 @@
         }
       }
     ]
+  },
+  {
+    "name": "Bloodward Sentinel",
+    "mana_cost": "{1}{B}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "human",
+      "cleric"
+    ],
+    "power": 2,
+    "toughness": 2,
+    "abilities": [
+      {
+        "ward": {
+          "cost": [
+            {
+              "pay_life": 2
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Tithe-Warded Brute",
+    "mana_cost": "{2}{B}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "ogre"
+    ],
+    "power": 4,
+    "toughness": 3,
+    "abilities": [
+      {
+        "ward": {
+          "cost": [
+            {
+              "one_of": [
+                "discard",
+                {
+                  "mana": "{2}"
+                }
+              ]
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Venomous Warden",
+    "mana_cost": "{1}{G}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "snake"
+    ],
+    "power": 2,
+    "toughness": 2,
+    "abilities": [
+      {
+        "ward": {
+          "cost": [
+            {
+              "get_counters": {
+                "counter": "poison",
+                "amount": 3
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Junk Slinger",
+    "mana_cost": "{1}{R}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "goblin"
+    ],
+    "power": 2,
+    "toughness": 1,
+    "abilities": [
+      {
+        "activated": {
+          "cost": [
+            {
+              "mana": "{1}"
+            },
+            "tap",
+            {
+              "one_of": [
+                {
+                  "sacrifice_permanent": {
+                    "filter": "artifact"
+                  }
+                },
+                "discard"
+              ]
+            }
+          ],
+          "targets": [
+            "any_target"
+          ],
+          "effects": [
+            {
+              "deal_damage": {
+                "amount": 2,
+                "to": {
+                  "target": 0
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
   }
 ]

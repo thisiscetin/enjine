@@ -19,7 +19,9 @@ module Enjine
         return false unless additional_costs_payable?(obj) # CR 601.2f: e.g. "sacrifice a creature"
 
         if ability_targetable?(defn.spell_ability, index, id) && # CR 601.2b: some way of paying its costs (Engine::CostOptions)
-           cost_variant_affordable?(index, spell_cost_list(obj, false), obj, defn.mana_cost, nil, { "spell" => id }) { total_cost(index, it, spell: obj) }
+           cost_variant_affordable?(index, spell_cost_list(obj, false), obj, defn.mana_cost, nil, { "spell" => id }) do
+             total_cost(index, it, spell: obj)
+           end
           return true
         end
 

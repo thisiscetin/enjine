@@ -18,7 +18,9 @@ module Enjine
           raw = given.first && Mechanics.fetch_param(params, given.first)
           case given.first
           when "cost"
-            Abilities::StackAbility.parse_costs(params, errors, path).tap { errors << "#{path}.cost: must be a non-empty list" if it.empty? }
+            Abilities::StackAbility.parse_costs(params, errors, path).tap do
+              errors << "#{path}.cost: must be a non-empty list" if it.empty?
+            end
           when "life"
             return [Costs::PayLife.new(raw)].freeze if raw.is_a?(Integer) && raw >= 1
 
@@ -47,50 +49,50 @@ module Enjine
         end
 
         # "{2}", "3 life", "discard a card or {2}".
-        def costs_text(costs) = costs.map { it.to_s.gsub(/(\A| or )Pay /, "\\1").sub(/\A\w/, &:downcase) }.join(", ")
+        def costs_text(costs) = costs.map { it.to_s.gsub(/(\A| or )[Pp]ay /, "\\1").sub(/\A\w/, &:downcase) }.join(", ")
 
         # After a "pay" answer: makes the choices, pays the mana, then the rest. :wait while asking or paying
         # mana; otherwise "paid" or "unpaid".
         def pay_costs(engine, ctx, locals, payer_obj, costs)
-          st = locals["paying"] ||= { "variant" => answers(locals).last["option"].to_i, "entries" => {},
-                                      "seen" => answers(locals).size }
-          variant = engine.cost_variants(costs)[st["variant"]]
-          if answers(locals).size > st["seen"]
-            st["seen"] = answers(locals).size
+          paying = locals["paying"] ||= { "variant" => answers(locals).last["option"].to_i, "entries" => {},
+                                          "seen" => answers(locals).size }
+          variant = engine.cost_variants(costs)[paying["variant"]]
+          if answers(locals).size > paying["seen"]
+            paying["seen"] = answers(locals).size
             answer = answers(locals).last
-            return "unpaid" if st.delete("mana") && answer["type"] != "paid"
+            return "unpaid" if paying.delete("mana") && answer["type"] != "paid"
 
-            take_choice(engine, st, variant, answer) if st["cost"]
+            take_choice(engine, paying, variant, answer) if paying["cost"]
           end
-          choose_next(engine, locals, st, variant, payer_obj) || pay_variant(engine, ctx, st, variant, payer_obj)
+          choose_next(engine, locals, paying, variant, payer_obj) || pay_variant(engine, ctx, paying, variant, payer_obj)
         end
 
         private
 
-        def take_choice(engine, st, variant, answer)
-          i = st.delete("cost")
-          (st["entries"][i.to_s] ||= []) << variant[i].choose!(engine, { object: answer["object"] })
+        def take_choice(engine, paying, variant, answer)
+          i = paying.delete("cost")
+          (paying["entries"][i.to_s] ||= []) << variant[i].choose!(engine, { object: answer["object"] })
         end
 
         # Asks for the next choice a cost needs (CR 601.2h, as for casting); nil when none is left.
-        def choose_next(engine, locals, st, variant, payer_obj)
+        def choose_next(engine, locals, paying, variant, payer_obj)
           variant.each_with_index do |cost, i|
             next unless cost.respond_to?(:choices_needed)
 
-            chosen = st["entries"].fetch(i.to_s, [])
+            chosen = paying["entries"].fetch(i.to_s, [])
             options = cost.choice_options(engine, payer_obj, chosen)
             next if chosen.size >= cost.choices_needed || options.empty?
 
-            st["cost"] = i
+            paying["cost"] = i
             return ask(engine, locals, payer_obj.controller, cost.to_s, options.map { { "type" => "cost", "object" => it[:object] } })
           end
           nil
         end
 
-        def pay_variant(engine, ctx, st, variant, payer_obj)
+        def pay_variant(engine, ctx, paying, variant, payer_obj)
           mana = engine.costs_mana(variant)
-          if mana.mana_value.positive? && !st["mana_paid"]
-            st["mana"] = st["mana_paid"] = true
+          if mana.mana_value.positive? && !paying["mana_paid"]
+            paying["mana"] = paying["mana_paid"] = true
             bend = engine.waterbend_generic(variant)
             engine.begin_payment!(payer_obj.controller, mana, ctx.object, waterbend: bend.positive? ? bend : nil)
             return :wait
@@ -98,7 +100,12 @@ module Enjine
           variant.each_with_index do |cost, i|
             next if cost.mana?
 
-            cost.respond_to?(:choices_needed) ? cost.pay_chosen!(engine, payer_obj, st["entries"].fetch(i.to_s, [])) : cost.pay!(engine, payer_obj)
+            if cost.respond_to?(:choices_needed)
+              cost.pay_chosen!(engine, payer_obj,
+                               paying["entries"].fetch(i.to_s, []))
+            else
+              cost.pay!(engine, payer_obj)
+            end
           end
           "paid"
         end
@@ -190,7 +197,7 @@ module Enjine
                             "cost" => "list of costs, instead of mana", "to" => "selector (usually {\"target\": 0})" },
                   example: { "counter_unless_pays" => { "mana" => "{3}", "to" => { "target" => 0 } } }
 
-        def self.keys = %w[mana waterbend cost to]
+        def self.keys = %w[mana waterbend cost to if]
 
         attr_reader :costs
 
@@ -200,6 +207,8 @@ module Enjine
         def to_s = "counter #{to} unless its controller pays #{what}"
 
         def run(engine, ctx, locals)
+          return :done unless locals["target"] || condition.nil? || condition.true?(engine, ctx)
+
           target = (locals["target"] ||= on_stack(engine, ctx).first) or return :done
 
           payer = engine.object(target)

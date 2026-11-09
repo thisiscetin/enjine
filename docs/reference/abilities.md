@@ -1374,13 +1374,13 @@ Rules: CR 603.2, CR 603.3, CR 603.3b, CR 603.3d
 
 ## ward
 
-Ward: whenever this permanent becomes the target of a spell or ability an opponent controls, counter that spell or ability unless its controller pays `cost` (or, with `waterbend`, waterbends that cost: "Ward—Waterbend {4}").
+Ward: whenever this permanent becomes the target of a spell or ability an opponent controls, counter that spell or ability unless its controller pays `cost`: a mana cost, or a list of costs ("Ward—Pay 2 life", "Ward—Discard a card or pay {2}" with `one_of`). With `waterbend`, they waterbend that cost: "Ward—Waterbend {4}".
 
 Rules: CR 702.21a, CR 601.2c, CR 603.2, CR 701.6a, CR 701.67a
 
 | Parameter | Description |
 | --- | --- |
-| `cost` | mana cost string, e.g. "{2}" |
+| `cost` | mana cost string, e.g. "{2}", or a list of costs, e.g. [{"pay_life": 2}] |
 | `waterbend` | mana cost string, instead of cost |
 
 ```json

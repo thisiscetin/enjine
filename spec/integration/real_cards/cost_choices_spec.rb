@@ -1,0 +1,130 @@
+# frozen_string_literal: true
+
+# Real cards that needed a choice between costs (cost `one_of`, CR 601.2b), optional additional costs
+# (CR 118.8b), paying costs while resolving (CR 118.12) and ward with non-mana costs (CR 702.21a).
+RSpec.describe "Real cards: cost choices" do
+  let(:catalog) { Enjine::Catalog.from_definitions(CardFixtures.real_cards) }
+
+  def board(hand: [], battlefield: [], theirs: [], graveyard: [], life: 20)
+    build_game(catalog) do
+      turn 3, active: "alice", step: :precombat_main
+      player("alice", life: life) do
+        hand(*hand)
+        graveyard(*graveyard) unless graveyard.empty?
+        library "Island", count: 10
+        battlefield.each { battlefield it }
+      end
+      player("bob") do
+        library "Swamp", count: 10
+        theirs.each { battlefield it }
+      end
+    end
+  end
+
+  def id(game, name, zone: :battlefield, player: "alice") = obj_id(game, name, zone: zone, player: player)
+  def alice(game) = game.state.players[0]
+  def cards(game, ids) = ids.map { game.state.object(it).card }
+  def cast(game, name) = game.submit(type: "cast", object: id(game, name, zone: :hand))
+
+  def pay_all(game)
+    game.submit(game.legal_options.find { %w[pay_mana activate_mana].include?(it[:type]) }) while game.pending_decision.kind == "pay_cost"
+  end
+
+  it "Mudbutton Cursetosser beholds a Goblin from the hand, or costs {2} more (CR 601.2b, 701.4a)" do
+    game = board(hand: ["Mudbutton Cursetosser", "Fanatical Firebrand"], battlefield: ["Swamp"])
+    cast(game, "Mudbutton Cursetosser")
+    expect(game.legal_options).to eq([{ type: "cost_option", option: 0 }, { type: "cancel" }])
+    game.submit(type: "cost_option", option: 0)
+    game.submit(type: "cost", object: id(game, "Fanatical Firebrand", zone: :hand))
+    pay_all(game)
+    pass_both(game)
+    expect(cards(game, game.state.battlefield)).to include("mudbutton_cursetosser")
+    expect(cards(game, alice(game).hand)).to eq(["fanatical_firebrand"])
+
+    game = board(hand: ["Mudbutton Cursetosser"], battlefield: %w[Swamp Swamp])
+    expect(game.legal_options.none? { it[:type] == "cast" }).to be(true) # {2}{B} unaffordable, no Goblin
+  end
+
+  it "Bogslither's Embrace blights 1 instead of paying {3} (CR 701.68a)" do
+    game = board(hand: ["Bogslither's Embrace"], battlefield: ["Swamp", "Swamp", "Fanatical Firebrand"], theirs: ["Stony-Voiced Goblins"])
+    cast(game, "Bogslither's Embrace")
+    expect(game.legal_options).to eq([{ type: "cost_option", option: 0 }, { type: "cancel" }])
+    game.submit(type: "cost_option", option: 0)
+    game.submit(type: "target", target: id(game, "Stony-Voiced Goblins", player: "bob"))
+    game.submit(game.legal_options.find { it[:type] == "cost" })
+    pay_all(game)
+    pass_both(game)
+    expect(cards(game, game.state.battlefield)).not_to include("stony_voiced_goblins", "fanatical_firebrand")
+  end
+
+  it "Titania: discard a card or pay {2} to cast; Ward—Discard a card or pay {2} against Pumpkin Bombardment" do
+    game = board(hand: ["Titania, Rugged Rumbler", "Island"], battlefield: %w[Swamp Swamp Swamp])
+    cast(game, "Titania, Rugged Rumbler")
+    expect(game.legal_options).to eq([{ type: "cost_option", option: 0 }, { type: "cancel" }])
+
+    game = board(hand: ["Pumpkin Bombardment", "Island", "Swamp"], battlefield: %w[Swamp], theirs: ["Titania, Rugged Rumbler"])
+    cast(game, "Pumpkin Bombardment")
+    game.submit(type: "cost_option", option: 0)
+    game.submit(type: "target", target: id(game, "Titania, Rugged Rumbler", player: "bob"))
+    game.submit(type: "cost", object: id(game, "Island", zone: :hand))
+    pay_all(game)
+    pass_both(game) # ward resolves: alice may discard her Swamp
+    expect(game.legal_options).to eq([{ type: "pay", option: 0, cost: "Discard a card" }, { type: "decline" }])
+    game.submit(game.legal_options.first)
+    game.submit(type: "cost", object: id(game, "Swamp", zone: :hand))
+    expect(alice(game).hand).to be_empty
+    expect(game.state.stack.size).to eq(1)
+  end
+
+  it "Piercing Exhale: beholding a Dragon is optional, isn't kicking, and adds surveil 2 (CR 118.8b)" do
+    game = board(hand: ["Piercing Exhale", "Stormscale Scion"], battlefield: ["Forest", "Forest", "Fanatical Firebrand"],
+                 theirs: ["Stony-Voiced Goblins"])
+    cast(game, "Piercing Exhale")
+    expect(game.pending_decision.kind).to eq("choose_kicker")
+    game.submit(type: "kick")
+    game.submit(type: "target", target: id(game, "Fanatical Firebrand"))
+    game.submit(type: "target", target: id(game, "Stony-Voiced Goblins", player: "bob"))
+    game.submit(type: "cost", object: id(game, "Stormscale Scion", zone: :hand))
+    pay_all(game)
+    memory = game.state.object(game.state.stack.first).memory
+    expect(memory["kicked_with"]).to eq("additional_cost")
+    expect(memory).not_to have_key("kicked")
+    pass_both(game)
+    expect(game.pending_decision.kind).to eq("effect_choice") # surveil 2
+  end
+
+  it "Vision of Love: sacrifice an artifact or discard a card, then draw two (CR 118.12)" do
+    game = board(hand: ["Vision of Love", "Island"], battlefield: %w[Mountain Mountain])
+    cast(game, "Vision of Love")
+    pay_all(game)
+    pass_both(game)
+    expect(game.legal_options).to eq([{ type: "pay", option: 1, cost: "Discard a card" }, { type: "decline" }])
+    game.submit(game.legal_options.first)
+    game.submit(type: "cost", object: id(game, "Island", zone: :hand))
+    expect(alice(game).hand.size).to eq(2)
+  end
+
+  it "Hexing Squelcher gives other creatures Ward—Pay 2 life (CR 702.21a)" do
+    game = board(hand: ["Pumpkin Bombardment"], battlefield: %w[Swamp Swamp Swamp],
+                 theirs: ["Hexing Squelcher", "Stony-Voiced Goblins"])
+    cast(game, "Pumpkin Bombardment")
+    game.submit(type: "cost_option", option: 1)
+    game.submit(type: "target", target: id(game, "Stony-Voiced Goblins", player: "bob"))
+    pay_all(game)
+    pass_both(game)
+    expect(game.legal_options).to eq([{ type: "pay" }, { type: "decline" }])
+    game.submit(type: "pay")
+    expect(alice(game).life).to eq(18)
+  end
+
+  it "The Serpent Society: Ward—Get five poison counters" do
+    game = board(hand: ["Pumpkin Bombardment"], battlefield: %w[Swamp Swamp Swamp], theirs: ["The Serpent Society"])
+    cast(game, "Pumpkin Bombardment")
+    game.submit(type: "cost_option", option: 1)
+    game.submit(type: "target", target: id(game, "The Serpent Society", player: "bob"))
+    pay_all(game)
+    pass_both(game)
+    game.submit(type: "pay")
+    expect(alice(game).poison).to eq(5)
+  end
+end
