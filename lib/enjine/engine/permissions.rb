@@ -364,7 +364,7 @@ module Enjine
       end
 
       # A cancelled cast (Casting#cancel_casting!): the card goes back where it came from as the same object
-      # (CR 733.1), hand, graveyard, exile or library, at its old position. So a permission naming it applies.
+      # (CR 734.1), hand, graveyard, exile or library, at its old position. So a permission naming it applies.
       def restore_to_origin!(obj, origin)
         return player(obj.owner).outside.insert(origin["index"] || 0, obj.card) if origin["zone"] == "outside"
 

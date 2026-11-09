@@ -160,7 +160,7 @@ RSpec.describe "Mana choices and restricted mana (CR 605.3b, 106.6)" do
       expect(game.state.stack.size).to eq(1)
     end
 
-    it "a cancelled payment gives restricted mana back (CR 733.1)" do
+    it "a cancelled payment gives restricted mana back (CR 734.1)" do
       game = board(field: ["Spec Isolinear Core", "Forest"], hand: ["Spec Gear Golem"])
       game.submit(mana_options(game, "Spec Isolinear Core").first)
       game.submit(type: "cast", object: ids_in(game, "alice", :hand).first)

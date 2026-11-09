@@ -5,7 +5,7 @@ module Enjine
     # Casting spells (CR 601) and activating abilities (CR 602), one atomic decision
     # at a time: announce -> choose targets -> pay mana (tapping sources manually)
     # -> cast. Until every cost is paid the whole process can be cancelled and is
-    # rewound (CR 733, "Handling Illegal Actions"). The in-progress context lives in
+    # rewound (CR 734, "Handling Illegal Actions"). The in-progress context lives in
     # casting so a game can be exported mid-cast.
     module Casting
       # ---- what can be started ---------------------------------------------------
@@ -259,7 +259,7 @@ module Enjine
         cost.negative? ? remove_counters!(source, "loyalty", -cost) : add_counters!(source, "loyalty", cost)
       end
 
-      # Rewinds an unfinished cast or activation (CR 733.1). Offered only while nothing irreversible
+      # Rewinds an unfinished cast or activation (CR 734.1). Offered only while nothing irreversible
       # has been paid (see Engine::Payment#cancellable?): tapping is undone, mana abilities' mana
       # leaves the pool, and abilities that triggered meanwhile are dropped.
       def cancel_casting!

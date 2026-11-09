@@ -16,7 +16,7 @@ module Enjine
     #   "entered"  [card id, types, subtypes] of permanents that entered under their control
     #   "died"     [card id, types] of their permanents put into a graveyard from the battlefield
     #   "returned" permanents returned to their hand from the battlefield
-    #   "dilemmas" dilemmas they faced (CR 700.17 of the 2026-11-06 rules)
+    #   "dilemmas" dilemmas they faced (CR 700.17)
     # Per object (GameObject#memory, stamped with the turn): "attacked" and "resolved" counts.
     module TurnHistory
       def record_history!(event)

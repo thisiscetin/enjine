@@ -3,8 +3,7 @@
 module Enjine
   class Engine
     # Engine support for station cards (CR 702.184, 722), Sagas (CR 715, 704.5s), costs that
-    # tap another creature (CR 702.184a) and assimilate (CR 701.72). Rule numbers follow the
-    # 2026-11-06 Comprehensive Rules (Sagas are CR 714 in the pinned 2026-09-25 text).
+    # tap another creature (CR 702.184a) and assimilate (CR 701.72).
     module SetMechanics
       # Subtypes that aren't creature types (CR 205.3g-i). "Becomes a Borg artifact creature"
       # replaces creature types only (CR 205.1b).

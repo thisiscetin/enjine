@@ -74,7 +74,7 @@ fields, so a set drops out of generated decks automatically on that date.
 
 ## Rules version
 
-The engine is pinned to the 2026-09-25 CR. Re-pin to the current CR (2026-11-06
-or newer) before implementing Star Trek's Assimilate, which is defined only in
-the newer document. Re-check every cited rule number against the renumbering
-table in docs/MECHANICS_COVERAGE.md.
+The engine is pinned to the 2026-11-06 CR (`Enjine::RULES_VERSION`). When a newer
+CR comes out, re-pin: diff the section headings, renumber what moved, and run
+`bundle exec rake "cr_citations[path/to/cr.txt]"` to check that every cited rule
+number exists in the new text (see docs/MECHANICS_COVERAGE.md).

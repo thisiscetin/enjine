@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# Sagas: CR 715 and 704.5s in the 2026-11-06 rules (CR 714 in the pinned 2026-09-25 text).
+# Sagas: CR 715 and 704.5s.
 RSpec.describe "Sagas (CR 715, 704.5s, 505.4)" do
   let(:double_chapter) do
     { "name" => "Twofold Annals", "mana_cost" => "{1}{W}", "types" => ["enchantment"], "subtypes" => ["saga"],

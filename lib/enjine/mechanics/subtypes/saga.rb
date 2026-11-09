@@ -6,7 +6,7 @@ require_relative "../triggers/triggers"
 module Enjine
   module Mechanics
     module Subtypes
-      # The Saga enchantment type (CR 715 in the 2026-11-06 rules, CR 714 in the 2026-09-25 rules).
+      # The Saga enchantment type (CR 715).
       class Saga < Primitive
         primitive :subtype, :saga,
                   description: "Enchantment type. A Saga enters with a lore counter; as its controller's precombat " \

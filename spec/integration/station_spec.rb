@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# Station and station cards: CR 702.184 and 722 (2026-11-06 rules; also in the pinned 2026-09-25 text).
+# Station and station cards: CR 702.184 and 722.
 RSpec.describe "Station (CR 702.184, 722)" do
   let(:outpost) do
     { "name" => "Relay Outpost", "mana_cost" => "{3}", "types" => ["artifact"], "subtypes" => ["spacecraft"],
@@ -55,7 +55,7 @@ RSpec.describe "Station (CR 702.184, 722)" do
     expect(game.state.object(skiff(game)).counters["charge"]).to eq(3)
   end
 
-  it "cancelling after the creature was tapped for the cost untaps it again (CR 733.1)" do
+  it "cancelling after the creature was tapped for the cost untaps it again (CR 734.1)" do
     game = board(alice: [["Tapping Rig"], ["Hill Giant"], ["Forest"]])
     giant = obj_id(game, "Hill Giant")
     rig = { type: "activate", object: obj_id(game, "Tapping Rig"), ability: "printed:0" }

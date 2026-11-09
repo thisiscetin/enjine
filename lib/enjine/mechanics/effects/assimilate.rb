@@ -3,7 +3,7 @@
 module Enjine
   module Mechanics
     module Effects
-      # Assimilate (CR 701.72, defined in the 2026-11-06 rules). A permanent: gain control of it and put a
+      # Assimilate (CR 701.72). A permanent: gain control of it and put a
       # +1/+1 counter on it (701.72a). A permanent card in another zone: put it onto the battlefield under
       # your control with a +1/+1 counter (701.72b). Either way it's a Borg artifact creature from then on:
       # it keeps its other card types and subtypes except its creature types (CR 205.1b).

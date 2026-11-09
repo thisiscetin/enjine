@@ -78,7 +78,7 @@ RSpec.describe "Outside the game and owner permissions (CR 400.11, 601.2f)" do
     expect(game.legal_options.select { it[:via] == via }).to be_empty
   end
 
-  it "puts a cancelled cast back outside the game (CR 733.1)" do
+  it "puts a cancelled cast back outside the game (CR 734.1)" do
     game = board { outside "Hill Giant", "Grizzly Bears" }
     game.submit(type: "cast", object: "outside:grizzly_bears", via: forge_via(game))
     expect(game.state.players[0].outside).to eq(["hill_giant"])

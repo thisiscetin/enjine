@@ -272,7 +272,7 @@ RSpec.describe "Pay while resolving, counter unless pays, ward (CR 118.12, 701.6
     expect(game.state.players[0].graveyard.size).to eq(1)
   end
 
-  it "a ward trigger from a cancelled cast is dropped (CR 733.1)" do
+  it "a ward trigger from a cancelled cast is dropped (CR 734.1)" do
     game = board(alice_hand: ["Lightning Bolt"], alice_lands: ["Mountain"], bob_field: ["Spec Warded Whale"])
     game.submit(type: "cast", object: ids_in(game, "alice", :hand).first)
     game.submit(type: "target", target: obj_id(game, "Spec Warded Whale"))

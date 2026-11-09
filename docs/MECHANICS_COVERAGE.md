@@ -1,6 +1,6 @@
 # Mechanics coverage checklist
 
-Rules version: Comprehensive Rules effective 2026-09-25.
+Rules version: Comprehensive Rules effective 2026-11-06.
 
 A source-backed checklist of every game mechanic a fully rules-accurate
 **two-player** engine must eventually support, organised by the Comprehensive
@@ -29,34 +29,31 @@ build ★ items that appear in current Standard first.
 
 ## Sources
 
-All rule numbers and wording below were checked against the **plain-text** CR,
-fetched 2026-11-08:
+All rule numbers below follow the **plain-text** CR effective 2026-11-06
+(`https://media.wizards.com/2026/downloads/MagicCompRules%2020261106.txt`),
+the version `Enjine::RULES_VERSION` names. The checklist was first written
+against the 2026-09-25 CR
+(`https://media.wizards.com/2026/downloads/MagicCompRules%2020260925.txt`) and
+re-pinned on 2026-11-09; `bundle exec rake cr_citations` checks that every rule
+number cited in the code and docs exists in the pinned CR.
 
-- Pinned version (used for every rule number here):
-  `https://media.wizards.com/2026/downloads/MagicCompRules%2020260925.txt`
-  ("These rules are effective as of September 25, 2026.")
-- PDF of the same version (downloaded, not parsed; the TXT was used):
-  `https://media.wizards.com/2026/downloads/MagicCompRules%2020260925.pdf`
-- Rules index: `https://magic.wizards.com/en/rules`. **As of 2026-11-08 it links
-  a newer CR, effective 2026-11-06**
-  (`https://media.wizards.com/2026/downloads/MagicCompRules%2020261106.txt`).
-  It was diffed against the pinned version at heading level only (see below).
+### Renumbering: 2026-09-25 → 2026-11-06
 
-### Version drift: 2026-09-25 → 2026-11-06
+The 2026-11-06 CR adds a section and renumbers the rest of section 7. Older
+notes that use 2026-09-25 numbers translate like this (rows marked
+`cr-citations: ignore` cite 2026-09-25 numbers on purpose):
 
-The newer CR adds a section and renumbers the rest of section 7. Anyone
-reading a newer CR must translate 7xx numbers:
-
-| 2026-09-25 (pinned) | 2026-11-06 |
+| 2026-09-25 | 2026-11-06 |
 | --- | --- |
-| (none) | 713 Meld Cards (new section) |
+| (none) | 713 Meld Cards (new section; meld rules moved out of 712) |
 | 713 Substitute Cards … 722 Preparation Cards | 714 … 723 (each +1) |
 | 723 Controlling Another Player … 733 Handling Illegal Actions | 724 … 734 (each +1) |
+| 701.27c–g (transform) | 701.27d–h <!-- cr-citations: ignore --> |
+| 701.28c–f (convert) | 701.28d–g <!-- cr-citations: ignore --> |
+| 614.13b–c | merged into 614.13a; 614.13c is now 614.13b <!-- cr-citations: ignore --> |
+| (none) | 700.17 Dilemmas |
 | (none) | 701.72 Assimilate (new keyword action) |
 | (none) | 702.196 Beam me up (new keyword ability) |
-
-Only headings were diffed. Subrule wording changes inside the newer CR were
-**not** checked.
 
 ## Milestone tags
 
@@ -80,14 +77,13 @@ there is on the critical path regardless.
 
 ## Engine-architecture implications
 
-These rules cut across every mechanic. All numbers were checked in the
-2026-09-25 text.
+These rules cut across every mechanic. All numbers follow the 2026-11-06 text.
 
 1. **400.7: a zone change creates a new object** "with no memory of, or relation to, its previous existence" (the exceptions are listed in 400.7a–). Object identity has to be per-zone-instance, not per-card. Last-known information (LKI) is needed for 603.10 look-back triggers and for 704.8.
 2. **110.5: permanent status** (tapped/untapped, flipped/unflipped, face up/face down, phased in/out). Status is not a characteristic (110.5a) and only permanents have it (110.5d).
 3. **117.3–117.5: the priority loop.** Before any player would receive priority, the engine performs SBAs repeatedly as single simultaneous events, then puts triggered abilities on the stack, then repeats until stable (117.5). The active player gets priority after a resolution (117.3b). If all players pass in succession, the top of the stack resolves, or the step ends if the stack is empty (117.4). Mana in the pool is announced on a pass (117.3d).
 4. **601.2a–i: casting is a transaction.** Propose: move the card to the stack, choose modes, splice, and alternative/additional costs (a–b), then targets (c), then division (d). Legality check (e). Determine the locked-in total cost (f). Activate mana abilities (g). Pay (h): costs with no random element and no library-to-public-zone movement go first, then the rest, and partial payments are not allowed. The spell becomes cast and cast-triggers fire (i). Activation (602.2) mirrors this.
-5. **733.1 (not 732): illegal-action reversal.** "The entire action is reversed and any payments already made are canceled. No abilities trigger…" 601.2e points here. In the 2026-09-25 CR, 732 is *Taking Shortcuts*. (In the 2026-11-06 CR these become 734 and 733.) The engine needs snapshot/rollback around every cast, activation and attack/block declaration.
+5. **734.1 (not 733): illegal-action reversal.** "The entire action is reversed and any payments already made are canceled. No abilities trigger…" 601.2e points here. 733 is *Taking Shortcuts*. The engine needs snapshot/rollback around every cast, activation and attack/block declaration.
 6. **605.1a: mana-ability classification (changed in Aug 2026).** An activated ability is a mana ability only if it has no target, could add mana, is not a loyalty ability, **and "its cost and effect don't move any card to or from a library."** Classification must apply this full test, not just "adds mana". 605.3a: mana abilities can be activated in the middle of casting or resolving.
 7. **603.3b: trigger ordering in APNAP order.** Each player puts the triggers they control on the stack in the order they choose, in APNAP order (101.4). 603.10 lists the "look back in time" triggers (leaves-the-battlefield and similar). 603.7 covers delayed triggers. 603.4 covers intervening-"if" clauses, which are checked both on trigger and on resolution.
 8. **608.2b: target re-check on resolution.** A spell or ability with no legal targets left doesn't resolve. If only some targets are illegal, it resolves and does nothing to the illegal ones.
@@ -97,7 +93,7 @@ These rules cut across every mechanic. All numbers were checked in the
 12. **704.7 / 704.8: SBAs are simultaneous.** A single replacement effect replaces all identical simultaneous SBA results (704.7). LKI for permanents that leave through SBAs comes from before any of the simultaneous SBAs were performed (704.8).
 13. **514.3a: the cleanup step repeats.** If SBAs happen or triggers are waiting during cleanup, players get priority and another cleanup step follows.
 14. **116.2: special actions** don't use the stack and come in twelve kinds (see §1). The action model needs "play land", "turn face up" and so on as first-class actions alongside cast and activate.
-15. **Designations and player-level state** (monarch 725, initiative 726, day/night 731, speed 702.179, city's blessing 702.131, Ring-bearer 701.54, enduring story 702.195, rad counters 728). These need a general per-player and per-game designation store, not ad-hoc flags.
+15. **Designations and player-level state** (monarch 726, initiative 727, day/night 732, speed 702.179, city's blessing 702.131, Ring-bearer 701.54, enduring story 702.195, rad counters 729). These need a general per-player and per-game designation store, not ad-hoc flags.
 
 ---
 
@@ -223,7 +219,7 @@ These rules cut across every mechanic. All numbers were checked in the
 | 601.2b | Announce modes, splice, alternative/additional costs, X, hybrid/Phyrexian choices | M2 |
 | 601.2c | Choose targets (including targets that depend on mode or kicker) | M2 |
 | 601.2d | Divide/distribute among targets (at least 1 each) | M2 |
-| 601.2e | Legality check, reversing via 733 if the spell is illegal | M2 |
+| 601.2e | Legality check, reversing via 734 if the spell is illegal | M2 |
 | 601.2f | Determine the total cost (mana cost or alternative cost, plus additional costs, plus increases, minus reductions); locked in | M2 |
 | 601.2g | Activate mana abilities | M2 |
 | 601.2h | Pay costs in any order (costs with no random element and no library-to-public-zone movement first); no partial payment | M2 |
@@ -249,7 +245,7 @@ These rules cut across every mechanic. All numbers were checked in the
 | 615 | Prevention effects: prevention shields, "prevent all", damage that can't be prevented | M3 |
 | 616 | Ordering of replacement/prevention effects (616.1a–f) | M3 |
 
-## 7. Additional Rules (700–733)
+## 7. Additional Rules (700–734)
 
 | Rule | Mechanic | Milestone |
 | --- | --- | --- |
@@ -265,28 +261,29 @@ These rules cut across every mechanic. All numbers were checked in the
 | 709 | Split cards (fuse, aftermath); **709.5 split permanents with locked/unlocked halves (Rooms)** | M5 |
 | 710 | Flip cards | M5 |
 | 711 | Leveler cards (level up) | M5 |
-| 712 | Double-faced cards: transforming DFCs, modal DFCs, meld; which face is up in each zone | M4 (transform/MDFC) |
-| 713 | Substitute cards (checklist proxies for DFCs) | M5 |
-| 714 | Saga cards: lore counters, chapter triggers, sacrifice SBA | M4 |
-| 715 | Adventurer cards: cast as the Adventure, exile, cast the creature later | M4 |
-| 716 | Class cards: level bars | M5 |
-| 717 | Attraction cards | OOS |
-| 718 | Prototype cards | M5 |
-| 719 | Case cards (solved) | M5 |
-| 720 | Omen cards: two-part frame; cast normally or as an Omen; an Omen spell is shuffled into the library on resolution (720.3d) | M5 |
-| 721 | Station cards: station symbols `{N+}` grant abilities/P/T at a charge-counter threshold | M5 |
-| 722 | **Preparation cards** (new): inset "prepare spell"; prepared/unprepared designation; on becoming prepared, a copy is created in exile that may be cast (722.3a–c) | M5 |
-| 723 | Controlling another player (Mindslaver) | M5 |
-| 724 | Ending turns and phases (Time Stop, Sundial) | M5 |
-| 725 | The monarch | M5 |
-| 726 | The initiative (Undercity dungeon) | M5 |
-| 727 | Restarting the game (Karn Liberated) | M5 |
-| 728 | Rad counters (inherent player trigger) | M5 |
-| 729 | Subgames (Shahrazad) | M5 |
-| 730 | Merging with permanents (mutate) | M5 |
-| 731 | Day and night | M5 |
-| 732 | Taking shortcuts (loop shortcuts, conditional priority passes) | M2 (engine/UI policy) |
-| 733 | Handling illegal actions: reversal and rollback (733.1) | M2 |
+| 712 | Double-faced cards: transforming DFCs, modal DFCs; which face is up in each zone | M4 (transform/MDFC) |
+| 713 | Meld cards: melding a pair into one permanent; which half is which (moved out of 712) | M5 |
+| 714 | Substitute cards (checklist proxies for DFCs) | M5 |
+| 715 | Saga cards: lore counters, chapter triggers, sacrifice SBA | M4 |
+| 716 | Adventurer cards: cast as the Adventure, exile, cast the creature later | M4 |
+| 717 | Class cards: level bars | M5 |
+| 718 | Attraction cards | OOS |
+| 719 | Prototype cards | M5 |
+| 720 | Case cards (solved) | M5 |
+| 721 | Omen cards: two-part frame; cast normally or as an Omen; an Omen spell is shuffled into the library on resolution (721.3d) | M5 |
+| 722 | Station cards: station symbols `{N+}` grant abilities/P/T at a charge-counter threshold | M5 |
+| 723 | **Preparation cards** (new): inset "prepare spell"; prepared/unprepared designation; on becoming prepared, a copy is created in exile that may be cast (723.3a–c) | M5 |
+| 724 | Controlling another player (Mindslaver) | M5 |
+| 725 | Ending turns and phases (Time Stop, Sundial) | M5 |
+| 726 | The monarch | M5 |
+| 727 | The initiative (Undercity dungeon) | M5 |
+| 728 | Restarting the game (Karn Liberated) | M5 |
+| 729 | Rad counters (inherent player trigger) | M5 |
+| 730 | Subgames (Shahrazad) | M5 |
+| 731 | Merging with permanents (mutate) | M5 |
+| 732 | Day and night | M5 |
+| 733 | Taking shortcuts (loop shortcuts, conditional priority passes) | M2 (engine/UI policy) |
+| 734 | Handling illegal actions: reversal and rollback (734.1) | M2 |
 
 ### State-based actions (704.5a–aa; the letters skip l and o)
 
@@ -321,9 +318,9 @@ These rules cut across every mechanic. All numbers were checked in the
 
 ---
 
-## Keyword actions (701.2–701.71)
+## Keyword actions (701.2–701.72)
 
-701.1 is the general rule. Every numbered keyword action in the 2026-09-25 CR is listed.
+701.1 is the general rule. Every numbered keyword action in the 2026-11-06 CR is listed.
 
 | Rule | Action | Description | Milestone |
 | --- | --- | --- | --- |
@@ -397,11 +394,11 @@ These rules cut across every mechanic. All numbers were checked in the
 | 701.69 | Heal | Remove damage marked on a permanent | M5 |
 | 701.70 | Recruit | Draw, discard; nonland discarded → 1/1 Human Soldier token | M5 |
 | 701.71 | Empower Jace | Create or choose a Jace planeswalker token and add N loyalty | M5 |
-| *(701.72)* | *Assimilate* | *2026-11-06 CR only: gain control, +1/+1 counter, becomes a Borg artifact creature* | *M5 (not in pinned CR)* |
+| 701.72 | Assimilate | Gain control, +1/+1 counter, becomes a Borg artifact creature | M5 |
 
-## Keyword abilities (702.2–702.195)
+## Keyword abilities (702.2–702.196)
 
-702.1 is the general rule. Every numbered keyword ability in the 2026-09-25 CR is listed.
+702.1 is the general rule. Every numbered keyword ability in the 2026-11-06 CR is listed.
 
 | Rule | Ability | Description | Milestone |
 | --- | --- | --- | --- |
@@ -543,12 +540,12 @@ These rules cut across every mechanic. All numbers were checked in the
 | 702.137 | Spectacle | Alternative cost if an opponent lost life this turn | M5 |
 | 702.138 | Escape | Cast from the graveyard by exiling other cards | M5 |
 | 702.139 | Companion | Outside-the-game deckbuilding condition; {3} special action | M5 |
-| 702.140 | Mutate | Merge onto a non-Human creature (730) | M5 |
+| 702.140 | Mutate | Merge onto a non-Human creature (731) | M5 |
 | 702.141 | Encore | Exile from the graveyard: token copies attack each opponent | M5 |
 | 702.142 | Boast | Activate only if it attacked this turn, once per turn | M5 |
 | 702.143 | Foretell | Exile face down for {2}; cast later for the foretell cost | M5 |
 | 702.144 | Demonstrate | On cast, may copy; then an opponent copies too | M5 |
-| 702.145 | Daybound and Nightbound | DFC faces tied to day/night (731) | M5 |
+| 702.145 | Daybound and Nightbound | DFC faces tied to day/night (732) | M5 |
 | 702.146 | Disturb | Cast transformed from the graveyard | M5 |
 | 702.147 | Decayed | Can't block; sacrifice at end of combat after attacking | M5 |
 | 702.148 | Cleave | Alternative cost removes bracketed text | M5 |
@@ -563,7 +560,7 @@ These rules cut across every mechanic. All numbers were checked in the
 | 702.157 | Squad | Pay additional costs to create token copies | M5 |
 | 702.158 | Space Sculptor | Sector designations (Space Beleren, Un-set) | OOS |
 | 702.159 | Visit | Attraction only | OOS |
-| 702.160 | Prototype | Alternative smaller P/T and mana cost (718) | M5 |
+| 702.160 | Prototype | Alternative smaller P/T and mana cost (719) | M5 |
 | 702.161 | Living Metal | An artifact creature during your turn | M5 |
 | 702.162 | More Than Meets the Eye | Cast converted (Transformers) | M5 |
 | 702.163 | For Mirrodin! | Create a 2/2 Rebel and attach to it | M5 |
@@ -572,7 +569,7 @@ These rules cut across every mechanic. All numbers were checked in the
 | 702.166 | Bargain | Optional sacrifice of an artifact/enchantment/token as an additional cost | M5 |
 | 702.167 | Craft | Exile with materials: return transformed | M5 |
 | 702.168 | Disguise | Face-down 2/2 with ward {2}; turn up for the disguise cost | M5 |
-| 702.169 | Solved | Case abilities once solved (719) | M5 |
+| 702.169 | Solved | Case abilities once solved (720) | M5 |
 | 702.170 | Plot | Exile from hand (special action); cast free on a later turn at sorcery speed | M5 |
 | 702.171 | Saddle | Tap creatures with total power N: becomes saddled; sorcery speed | M5 |
 | 702.172 | Spree | Choose one or more modes, paying each mode's additional cost | M5 |
@@ -587,7 +584,7 @@ These rules cut across every mechanic. All numbers were checked in the
 | 702.181 | Mobilize | On attack, N 1/1 Warrior tokens tapped and attacking; sacrificed at end step | M5 |
 | 702.182 | Job Select | Equipment ETB: 1/1 Hero token and attach | M5 |
 | 702.183 | Tiered | Choose one mode and pay its additional cost | M5 |
-| 702.184 | Station | Tap another creature: charge counters equal to its power; sorcery speed (721) | M5 |
+| 702.184 | Station | Tap another creature: charge counters equal to its power; sorcery speed (722) | M5 |
 | 702.185 | Warp | Cast from hand for the warp cost; exiled at the next end step and may be cast later | M5 |
 | 702.186 | ∞ (Infinity) | Grants an ability while the permanent is harnessed | M5 |
 | 702.187 | Mayhem | Cast from the graveyard for the mayhem cost if discarded this turn | M5 |
@@ -599,7 +596,7 @@ These rules cut across every mechanic. All numbers were checked in the
 | 702.193 | Power-up | Activate once; cost reduced by its mana cost if it entered this turn | M5 |
 | 702.194 | Teamwork | Optional additional cost: tap creatures with total power ≥ N | M5 |
 | 702.195 | Storied | Enduring story once you control three or more artifacts/Sagas/legendaries | M5 |
-| *(702.196)* | *Beam me up* | *2026-11-06 CR only: graveyard-cast alternative cost involving returning a creature to hand* | *M5 (not in pinned CR)* |
+| 702.196 | Beam me up | Graveyard-cast alternative cost involving returning a creature to hand | M5 |
 
 ### Other priority mechanics (not keywords)
 
@@ -608,14 +605,14 @@ Mechanics that are ★ priority but don't have a 701/702 number: mana abilities
 (117), costs including X (107.3, 118), modal spells (700.2), +1/+1 counters
 (122.1a), predefined tokens such as Treasure, Clue and Food (111.10), the
 legend rule (704.5j), Auras (303.4), Equipment (301.5), planeswalker loyalty
-(306/606), Sagas (714), DFCs/MDFCs (712), copy effects (707), layers (613),
+(306/606), Sagas (715), DFCs/MDFCs (712), copy effects (707), layers (613),
 replacement/prevention (614–616), "dies" and leaves-the-battlefield triggers
 (603.6/603.10), and summoning sickness (302.6).
 
 ### Costs, payment and targets: where they are implemented
 
 - 107.4e / 202.2d / 202.3f hybrid mana: `Mana::Cost#hybrid`; 601.2h payment `Engine::Payment`.
-- 733.1 / 605.3 rewinding a cast: offered until an irreversible mana ability is activated.
+- 734.1 / 605.3 rewinding a cast: offered until an irreversible mana ability is activated.
 - 601.2b-d kicker, additional costs, mode counts, optional and distinct targets, dividing: `Engine::CastChoices`.
 - 601.2h / 602.2b chosen costs (sacrifice, tap N, remove counters, graveyard costs): `Mechanics::Costs`.
 - 602.5b activation limits; 118.12 / 701.6a paying while resolving and countering abilities; 702.21 ward.
@@ -626,15 +623,15 @@ replacement/prevention (614–616), "dies" and leaves-the-battlefield triggers
 
 - **Section 8, Multiplayer Rules (800–811)**: range of influence, attack multiple players, Two-Headed Giant, Emperor, and the other team variants.
 - **Section 9, Casual Variants (900–905)**: Planechase, Vanguard, Commander, Archenemy, Conspiracy Draft.
-- Variant-only card types (311–315), ante (407), stickers (123), Attractions (717, 701.51–52, 702.159), Contraptions (701.45), Space Sculptor (702.158, 704.5u), and the variant SBAs and turn-based actions (704.6, 703.4e, 703.4h).
+- Variant-only card types (311–315), ante (407), stickers (123), Attractions (718, 701.51–52, 702.159), Contraptions (701.45), Space Sculptor (702.158, 704.5u), and the variant SBAs and turn-based actions (704.6, 703.4e, 703.4h).
 - Mechanics that are legal in two-player games but rare (goad, vote, monarch, initiative, companion, dethrone) are kept as **M5**, not OOS.
 
 ## Verification notes
 
-- Every 701/702 number and name comes from the pinned TXT heading lines. Descriptions paraphrase each rule's "a" subrule, which was read for all entries.
-- 704.5 letters a–aa, 116.2 a–m, 613.1/613.4/613.7, 616.1a–f, 601.2a–i, 605.1a, 703.4a–q and 733.1 were read in full or near-full.
+- Every 701/702 number and name comes from the TXT heading lines. Descriptions paraphrase each rule's "a" subrule, which was read for all entries.
+- 704.5 letters a–aa, 116.2 a–m, 613.1/613.4/613.7, 616.1a–f, 601.2a–i, 605.1a, 703.4a–q and 734.1 were read in full or near-full.
 - Descriptions of the section 1–6 rules marked n/a or M1 are paraphrases. Check the rule text before implementing; this document is a checklist, not a substitute.
-- Not verified: subrule-level wording changes between 2026-09-25 and 2026-11-06, and the exact date of the mana-ability (605.1a) change. It is present in the 2026-09-25 text, and this document doesn't claim when it was introduced.
+- Subrule numbers that moved between 2026-09-25 and 2026-11-06 were found by matching rule text across both documents; the table under Sources lists them. Not verified: the exact date of the mana-ability (605.1a) change, and descriptions here were not re-read for wording changes.
 
 ## Implementation notes: amounts, history, statics and layers
 

@@ -48,7 +48,7 @@ game.submit(type: "pay_mana", mana: "R")                              # pay_cost
 
 At any point before the last payment, `{type: "cancel"}` rewinds the whole cast:
 the card returns to the same place in hand, sources tapped during the cast untap,
-and the mana pool is restored (CR 733).
+and the mana pool is restored (CR 734).
 
 ## Observing
 

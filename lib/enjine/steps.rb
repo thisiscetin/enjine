@@ -41,7 +41,7 @@ module Enjine
       end
     end
 
-    # CR 505.4 / 715.3c (2026-11-06): as the precombat main phase begins, the active player puts a
+    # CR 505.4 / 715.3c: as the precombat main phase begins, the active player puts a
     # lore counter on each Saga they control with one or more chapter abilities.
     class PrecombatMain < Step
       def begin(engine)

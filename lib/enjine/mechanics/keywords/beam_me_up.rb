@@ -3,7 +3,7 @@
 module Enjine
   module Mechanics
     module Abilities
-      # Beam me up [cost] (CR 702.196a, 2026-11-06 rules): "You may cast this card from your graveyard if the
+      # Beam me up [cost] (CR 702.196a): "You may cast this card from your graveyard if the
       # resulting spell is an instant or sorcery spell by paying [cost] and returning a creature you control
       # to its owner's hand rather than paying its mana cost" and "If the beam me up cost was paid, exile this
       # card instead of putting it anywhere else any time it would leave the stack." The creature is chosen

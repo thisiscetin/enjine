@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# Validation of the Star Trek set mechanics and Sagas (rule numbers from the 2026-11-06 CR).
+# Validation of the Star Trek set mechanics and Sagas.
 RSpec.describe "Set mechanics validation" do
   def errors_for(card)
     Enjine::CardDefinition.from_h(card)

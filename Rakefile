@@ -14,6 +14,13 @@ task :docs do
   Enjine::Docs.write
 end
 
+desc "Check that every cited CR rule number exists: rake cr_citations[path/to/MagicCompRules.txt]"
+task :cr_citations, %i[cr] do |_, args|
+  require_relative "script/check_cr_citations"
+  status = CrCitations.main([args[:cr]].compact)
+  abort "cited CR rule numbers are missing from the CR" unless status.zero?
+end
+
 desc "Play random games checking invariants: rake fuzz[games,seed]"
 task :fuzz, %i[games seed] do |_, args|
   require_relative "lib/enjine"

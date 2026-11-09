@@ -63,7 +63,7 @@ module Enjine
     end
 
     module Keywords
-      # Station (CR 702.184a, 2026-11-06 / 2025 rules): "Tap another untapped creature you control: Put a
+      # Station (CR 702.184a): "Tap another untapped creature you control: Put a
       # number of charge counters on this permanent equal to the tapped creature's power. Activate only as
       # a sorcery." A station card has it at all times, whatever its charge counters (CR 722.4).
       class Station < Primitive

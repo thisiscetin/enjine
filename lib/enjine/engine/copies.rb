@@ -2,7 +2,7 @@
 
 module Enjine
   class Engine
-    # Copying objects (CR 707, 2026-11-06 numbering).
+    # Copying objects (CR 707).
     #
     # A copy takes the copiable values of the object it copies (CR 707.2): the values printed on its card,
     # as modified by other copy effects and their exceptions (CR 707.9b). Every copiable value comes from a

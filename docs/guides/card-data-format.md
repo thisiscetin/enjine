@@ -323,8 +323,6 @@ equips for a non-mana cost, and granted activated abilities ("equipped creature 
 
 ### 4.9 Station cards, Sagas and other set mechanics
 
-Rule numbers are from the 2026-11-06 Comprehensive Rules.
-
 - **Station cards** (CR 702.184, 722). Put `"station"` in `keywords`: that is the
   station activated ability. Each `N+ | …` striation is a `station_symbol` ability.
   The card's power/toughness box goes on the symbol it's printed with (the one the
@@ -503,8 +501,6 @@ Generic shapes (N, [quality] and [zone] stand for whatever the card says):
 
 ### 4.13 Turn structure: untap step, land plays and phasing
 
-Rule numbers are from the 2026-11-06 Comprehensive Rules.
-
 | Shape | Data |
 | --- | --- |
 | "You may play an additional land on each of your turns" (CR 305.2) | ability `"additional_land_plays"` (each instance is one more land play; lands put onto the battlefield by effects don't count) |
@@ -663,7 +659,7 @@ bundle exec exe/enjine --validate cards.json
 `cards.json` is a JSON array of card blocks (or a single block). The report:
 
 ```json
-{ "rules_version": "2026-09-25", "engine_version": "0.1.0",
+{ "rules_version": "2026-11-06", "engine_version": "0.1.0",
   "valid":   [ { "index": 0, "id": "lightning_bolt", "name": "Lightning Bolt", "card": { ...canonical... } } ],
   "invalid": [ { "index": 1, "name": "Gale Drifter", "errors": ["keywords[0]: unknown keyword \"flyng\" ..."] } ] }
 ```

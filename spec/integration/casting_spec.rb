@@ -73,7 +73,7 @@ RSpec.describe "Casting spells and the stack (CR 601, 608)" do
     expect(game.legal_options).not_to include(a_hash_including(type: "pay_mana"))
   end
 
-  it "rewinds everything on cancel: card back in hand at the same place, lands untapped, pool restored (CR 733)" do
+  it "rewinds everything on cancel: card back in hand at the same place, lands untapped, pool restored (CR 734)" do
     game.submit(type: "activate_mana", object: mountains[1], ability: mana_ref(game, mountains[1])) # mana in pool before casting stays
     before_hand = ids_in(game, "alice", :hand).dup
     game.submit(type: "cast", object: bears_card)

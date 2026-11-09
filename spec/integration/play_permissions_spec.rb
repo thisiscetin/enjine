@@ -63,7 +63,7 @@ RSpec.describe "Play permissions from other zones (CR 601.3, 305.1)" do
     expect(game.state.object(recruit).counters).to eq("finality" => 1)
   end
 
-  it "cancelling puts the card back where it was cast from, as the same object (CR 733.1)" do
+  it "cancelling puts the card back where it was cast from, as the same object (CR 734.1)" do
     game = board do
       graveyard "Grizzly Bears", "Gravecaller Recruit", "Hill Giant"
       battlefield "Swamp"

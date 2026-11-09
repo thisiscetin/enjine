@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# Beam me up: CR 702.196a-b (2026-11-06 rules).
+# Beam me up: CR 702.196a-b.
 RSpec.describe "Beam me up (CR 702.196)" do
   let(:shot) do
     { "name" => "Phase Shot", "mana_cost" => "{1}{R}", "types" => ["sorcery"],

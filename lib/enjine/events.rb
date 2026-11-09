@@ -103,7 +103,7 @@ module Enjine
     end
     ControlChanged = define(:control_changed, :object, :controller)
     ExtraTurnAdded = define(:extra_turn_added, :player) # CR 500.7
-    DilemmaFaced = define(:dilemma_faced, :player, :object, :modes) # CR 700.17 (2026-11-06)
+    DilemmaFaced = define(:dilemma_faced, :player, :object, :modes) # CR 700.17
     # Combat declarations once final (CR 508.3d "whenever [a player] attacks", 509.3c "becomes blocked").
     AttacksDeclared = define(:attacks_declared, :player, :attackers)
     BecameBlocked = define(:became_blocked, :object, :blockers)

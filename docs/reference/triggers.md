@@ -246,7 +246,7 @@ Rules: CR 603.6a, CR 603.2, CR 614.12
 
 ## faces_dilemma
 
-A player faces a dilemma: they chose one or more modes for a spell or ability (cast, activated, or a triggered ability put on the stack). `controller`: you (default) | opponent | any. CR 700.17 of the 2026-11-06 rules.
+A player faces a dilemma: they chose one or more modes for a spell or ability (cast, activated, or a triggered ability put on the stack). `controller`: you (default) | opponent | any. CR 700.17.
 
 Rules: CR 700.17, CR 700.2, CR 601.2b, CR 603.3c
 

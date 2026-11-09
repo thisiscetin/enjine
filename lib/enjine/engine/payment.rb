@@ -7,7 +7,7 @@ module Enjine
     #
     # The frame holds what is left to pay ("remaining": generic, one key per color, and "hybrid":
     # the hybrid symbols still unpaid, CR 107.4e), the pool before payment started ("pool") and the
-    # sources tapped for it ("tapped"), so an unfinished payment can be rewound (CR 733.1). Once a
+    # sources tapped for it ("tapped"), so an unfinished payment can be rewound (CR 734.1). Once a
     # mana ability with a cost other than {T} has been activated (a Treasure's sacrifice), the payment
     # is "irreversible": it can't be cancelled any more, and only choices that keep the rest payable
     # are offered, so the player can't get stuck.
@@ -207,8 +207,8 @@ module Enjine
         payment["type"] == "cast" ? cancel_casting! : decline_payment!
       end
 
-      # Undoes the mana abilities activated for the payment (CR 733.1): untaps their sources and restores
-      # the pool. Abilities that triggered meanwhile didn't trigger (CR 733.1).
+      # Undoes the mana abilities activated for the payment (CR 734.1): untaps their sources and restores
+      # the pool. Abilities that triggered meanwhile didn't trigger (CR 734.1).
       def rewind_payment!(frame)
         frame["tapped"].select { state.objects.key?(it) }.each do |id|
           object(id).tapped = false

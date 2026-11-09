@@ -4,7 +4,7 @@
 
 Enjine runs two-player Magic: The Gathering games by the
 [Comprehensive Rules](https://magic.wizards.com/en/rules) (pinned to the version
-effective **2026-09-25**). It turns every moment of the game into an explicit,
+effective **2026-11-06**). It turns every moment of the game into an explicit,
 atomic decision with a list of legal options. That makes it a solid base for
 simulations, bots and reinforcement learning, or for a game client.
 

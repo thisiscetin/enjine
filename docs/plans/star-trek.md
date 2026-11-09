@@ -12,14 +12,13 @@ mechanic is implemented and which rules it cites.
 
 ## Set mechanics
 
-Rule numbers below are from the **2026-11-06** CR (`cr1106`), the first version
-that defines assimilate. Where the pinned **2026-09-25** CR (`cr0925`) numbers the
-same rule differently, both are given. Code comments and spec names use the
-2026-11-06 numbers and say so.
+Rule numbers follow the pinned **2026-11-06** CR, the first version that
+defines assimilate. The "2026-09-25" column records how the previous CR
+numbered (or lacked) each rule.
 
 | Mechanic | Rules used (2026-11-06) | 2026-09-25 | Card data | Status |
 | --- | --- | --- | --- | --- |
-| Station | 702.184a, 722.2a-c, 722.4, 302.6 | same numbers | keyword `station` (an intrinsic activated ability, ref `keyword:station`) + `station_symbol` abilities `{"at": N, "power", "toughness", "keywords", "abilities"}` | done |
+| Station | 702.184a, 722.2a-c, 722.4, 302.6 | 721.x (same subrules) | keyword `station` (an intrinsic activated ability, ref `keyword:station`) + `station_symbol` abilities `{"at": N, "power", "toughness", "keywords", "abilities"}` | done |
 | Tap another creature (the station cost) | 702.184a, 601.2h, 602.2b | same | cost `tap_another_creature`, decision `choose_cost` | done |
 | Sagas | 715.2b-d, 715.3a, 715.3c, 715.4, 704.5s, 505.4, 122.6 | 714.x (same subrules), 704.5s, 505.4 | subtype `saga` + `chapter` abilities `{"chapter": N, targets, effects/modes}` | done |
 | Face a dilemma | 700.17 | not in this version | trigger `faces_dilemma {"controller"}` | trigger done |
@@ -67,12 +66,12 @@ Still to do:
 
 ## Costs, mana and targets
 
-Rule numbers from the pinned 2026-09-25 CR (`cr0925`).
+Rule numbers from the pinned 2026-11-06 CR.
 
 | Capability | Rules | Card data | Status |
 | --- | --- | --- | --- |
 | Hybrid mana `{R/G}` | 107.4e, 202.2d, 202.3f, 601.2h | mana costs; each symbol paid by either color | done (monocolored hybrid `{2/B}` and Phyrexian: todo) |
-| Cancelling a cast | 733.1, 605.3 | — | "cancel" only until something irreversible is paid (a Treasure's sacrifice); from then on only payments that keep the rest payable are offered |
+| Cancelling a cast | 734.1, 605.3 | — | "cancel" only until something irreversible is paid (a Treasure's sacrifice); from then on only payments that keep the rest payable are offered |
 | Chosen costs | 601.2h, 602.2b, 701.21a | costs `sacrifice_permanent`, `tap_permanents`, `remove_counters` (paid entries in `GameObject#paid`, condition `sacrificed`) | done |
 | Graveyard costs | 113.6m | costs `exile_self_from_graveyard`, `bottom_self_from_graveyard` | done |
 | Kicker / additional costs | 702.33a/d/g, 601.2b, 601.2f | abilities `kicker`, `additional_cost`; condition `kicked`; spell `kicked_targets` | done |
@@ -123,7 +122,7 @@ asking; a decision frame is needed once two effects can be usefully ordered eith
 
 ### Zone effects: library, hand, graveyard, edicts, linked exile
 
-Primitives (2026-09-25 numbering unless noted): `dig` (look at or reveal the top N, take
+Primitives: `dig` (look at or reveal the top N, take
 cards matching a card spec, the rest to the bottom in a random order via the game RNG, in a
 chosen order, or into the graveyard; 701.20a/e, 401.4), `reveal_until` (701.20a), `exile_top`
 (its results are the exiled cards, for later effects and impulse permissions), `explore`

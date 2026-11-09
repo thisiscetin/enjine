@@ -164,7 +164,7 @@ module Enjine
           enters["counters"][kind] *= 2 if ability.doubles?(source, controller, controller, kind, facts)
         end
       end
-      engine.chars(obj).subtypes.each do |sub| # e.g. a Saga enters with a lore counter (CR 715.3a, 2026-11-06)
+      engine.chars(obj).subtypes.each do |sub| # e.g. a Saga enters with a lore counter (CR 715.3a)
         mod = Enjine.registry.fetch(:subtype, sub)
         mod.entering(engine.definition(obj), proposal.data["enters"]) if mod.respond_to?(:entering)
       end

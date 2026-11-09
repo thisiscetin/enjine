@@ -50,6 +50,11 @@ Follow [docs/guides/adding-a-mechanic.md](docs/guides/adding-a-mechanic.md). In 
 
 - **Cite the rules.** Use `# CR 704.5a`-style comments in code and rule numbers in
   spec names, against the version pinned in `lib/enjine/version.rb`.
+  `spec/unit/cr_citations_spec.rb` fails if a cited number doesn't exist in that
+  version (its rule numbers are vendored in `spec/fixtures/cr/rule_numbers.txt`).
+  To re-pin, run `bundle exec rake "cr_citations[path/to/MagicCompRules.txt]"`,
+  renumber what moved, then regenerate the list with
+  `ruby script/check_cr_citations.rb --extract path/to/MagicCompRules.txt`.
 - **Keep it deterministic.** Use only the game's `Rng`, never `Kernel#rand` or wall
   clock time, and never depend on hash ordering you don't control.
 - **Keep decisions atomic.** Expose each choice as its own small decision with an

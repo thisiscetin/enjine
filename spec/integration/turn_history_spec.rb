@@ -8,7 +8,7 @@ RSpec.describe "Turn and game history (CR 601.2i, 700.4, 119.9, 608.2h)" do
         { "draw" => { "amount" => 1, "if" => { "nth_resolution" => 2 } } }
       ] } }] }
   end
-  let(:split) do # modal: a player who chooses a mode faces a dilemma (CR 700.17, 2026-11-06)
+  let(:split) do # modal: a player who chooses a mode faces a dilemma (CR 700.17)
     { "name" => "Forked Ember", "mana_cost" => "{R}", "types" => ["instant"],
       "abilities" => [{ "spell" => { "choose" => 1, "modes" => [
         { "effects" => [{ "gain_life" => { "amount" => 1 } }] },
@@ -110,7 +110,7 @@ RSpec.describe "Turn and game history (CR 601.2i, 700.4, 119.9, 608.2h)" do
     expect(game.state.players[0].hand.size).to eq(hand + 1)
   end
 
-  it "counts dilemmas faced this turn (CR 700.17 of the 2026-11-06 rules)" do
+  it "counts dilemmas faced this turn (CR 700.17)" do
     game.submit(type: "cast", object: card_in_hand("Forked Ember"))
     game.submit(type: "mode", mode: 0)
     pay(game, mountains.first)

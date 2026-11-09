@@ -71,7 +71,7 @@ module Enjine
     end
 
     def step_began!(_event)
-      # CR 500.5 (2026-11-06): mana pools, restricted mana included, empty between steps.
+      # CR 500.5: mana pools, restricted mana included, empty between steps.
       state.players.each do |pl|
         next if pl.mana_pool.values.all?(&:zero?) && pl.restricted_mana.empty?
 

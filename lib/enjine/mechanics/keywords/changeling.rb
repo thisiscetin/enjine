@@ -3,7 +3,7 @@
 module Enjine
   module Mechanics
     module Keywords
-      # Changeling (CR 702.73a, 2026-11-06 numbering): a characteristic-defining ability, "this object is
+      # Changeling (CR 702.73a): a characteristic-defining ability, "this object is
       # every creature type". It works in every zone (CR 604.3, 113.6a), so it is applied with the object's
       # copiable values (Engine::Characteristics#copy_base): the object's subtypes then include every
       # creature type, and subtype filters, "creature types among" counts and type-changing effects
@@ -14,7 +14,7 @@ module Enjine
                                "in all zones).",
                   rules: %w[702.73a 604.3 205.3m 113.6a], example: { "keywords" => ["changeling"] }
 
-        # CR 205.3m (2026-11-06): every creature type, written as card data subtypes (lowercase, "-" and
+        # CR 205.3m: every creature type, written as card data subtypes (lowercase, "-" and
         # spaces become "_", apostrophes dropped).
         CREATURE_TYPES = <<~TYPES.split.map(&:to_sym).freeze
           time_lord advisor aenar aetherborn alien ally andorian android angel antelope ape archer archon armadillo

@@ -100,7 +100,7 @@ RSpec.describe "Face-down exile, look permission and mana of any type (CR 406.3,
     expect(land.id).to start_with("mountain#")
   end
 
-  it "a cancelled cast puts the card back face down (CR 733.1)" do
+  it "a cancelled cast puts the card back face down (CR 734.1)" do
     game = exchanged(alice_field: %w[Island Island Island])
     bolt = game.legal_options.find { it[:type] == "cast" && game.state.object(it[:object]).zone == :exile }[:object]
     game.submit(game.legal_options.find { it[:type] == "cast" && it[:object] == bolt })

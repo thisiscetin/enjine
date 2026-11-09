@@ -455,7 +455,7 @@ RSpec.describe "Copy effects (CR 707)" do
       expect(game.state.object(exiled).zone).to eq(:exile) # the original stays exiled
     end
 
-    it "a cancelled cast puts the card copy back as a copy; declining leaves it to cease to exist (CR 733.1, 707.10a)" do
+    it "a cancelled cast puts the card copy back as a copy; declining leaves it to cease to exist (CR 734.1, 707.10a)" do
       game = board(alice: { battlefield: %w[Mountain Mountain Mountain Mountain], hand: ["Trickster of Stacks", "Island"],
                             library: ["Arc Jolt", "Island"] })
       cast(game, "Trickster of Stacks")

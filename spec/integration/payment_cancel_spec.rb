@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
-# CR 733.1 (Handling Illegal Actions): an unfinished cast is rewound by cancelling it. Enjine offers that
+# CR 734.1 (Handling Illegal Actions): an unfinished cast is rewound by cancelling it. Enjine offers that
 # only until something irreversible is paid: a mana ability whose cost is more than {T} (a Treasure's
 # sacrifice, CR 605.3, 111.10a) can't be undone, so from then on no casting decision offers "cancel".
-RSpec.describe "Cancelling a cast after paying an irreversible cost (CR 733.1, 605.3)" do
+RSpec.describe "Cancelling a cast after paying an irreversible cost (CR 734.1, 605.3)" do
   let(:prospector) do
     { "name" => "Spec Prospector", "mana_cost" => "{R}", "types" => ["creature"], "power" => 1, "toughness" => 1,
       "abilities" => [{ "triggered" => { "when" => { "enters" => {} },
@@ -105,7 +105,7 @@ RSpec.describe "Cancelling a cast after paying an irreversible cost (CR 733.1, 6
     10.times { expect(agent.choose(game.pending_decision)).not_to eq(type: "cancel") }
   end
 
-  it "drops abilities that triggered during a cast that is cancelled (CR 733.1)" do
+  it "drops abilities that triggered during a cast that is cancelled (CR 734.1)" do
     game = treasure_game(hand: ["Lightning Bolt"], lands: ["Mountain"])
     engine = game.instance_variable_get(:@engine)
     game.submit(type: "cast", object: bolt(game))

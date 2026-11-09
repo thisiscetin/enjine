@@ -4,7 +4,7 @@ module Enjine
   module Decisions
     CANCEL = { type: "cancel" }.freeze
 
-    # CR 733.1: a cast or activation can be rewound ("cancel") until something irreversible has been
+    # CR 734.1: a cast or activation can be rewound ("cancel") until something irreversible has been
     # paid (Engine::Payment#cancellable?); a triggered ability being put on the stack never can.
     def self.with_cancel(engine, options) = engine.cancellable? ? options + [CANCEL] : options
 

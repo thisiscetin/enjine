@@ -1,7 +1,7 @@
 # Enjine — Architecture
 
 Companion to [DESIGN.md](DESIGN.md). Describes how the code is laid out and why.
-Rules reference: Comprehensive Rules effective **2026-09-25**.
+Rules reference: Comprehensive Rules effective **2026-11-06**.
 
 ## Folder structure
 
