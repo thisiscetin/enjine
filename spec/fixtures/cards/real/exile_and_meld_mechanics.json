@@ -433,5 +433,63 @@
       "set": "tla",
       "number": "154"
     }
+  },
+  {
+    "name": "Taigam, Master Opportunist",
+    "mana_cost": "{1}{U}",
+    "types": [
+      "creature"
+    ],
+    "supertypes": [
+      "legendary"
+    ],
+    "subtypes": [
+      "human",
+      "monk"
+    ],
+    "power": 2,
+    "toughness": 2,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "cast": {
+              "controller": "you"
+            }
+          },
+          "if": {
+            "amount": {
+              "spells_cast_this_turn": {
+                "by": "you"
+              }
+            },
+            "at_least": 2,
+            "at_most": 2
+          },
+          "effects": [
+            {
+              "copy_spell": {
+                "of": {
+                  "triggering": "object"
+                }
+              }
+            },
+            {
+              "suspend": {
+                "to": {
+                  "triggering": "object"
+                },
+                "amount": 4
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "mythic",
+    "printing": {
+      "set": "tdm",
+      "number": "60"
+    }
   }
 ]

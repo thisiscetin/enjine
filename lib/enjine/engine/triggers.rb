@@ -44,6 +44,7 @@ module Enjine
         watch_graveyards!(event)
         watch_delayed!(event) unless state.delayed_triggers.empty?
         watch_speed!(event) # CR 702.179d (Engine::Speed)
+        Mechanics::Keywords::Suspend.watch!(self, event) # CR 702.62a: suspended cards in exile
       end
 
       # "For the first time each turn" (trigger counters_placed with first_time_this_turn): every placement of

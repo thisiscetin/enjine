@@ -562,6 +562,20 @@ Rules: CR 702.44a, CR 702.44b
 }
 ```
 
+## suspend
+
+This card has suspend: while it's exiled with time counters, its owner removes one at the beginning of each of their upkeeps; when the last is removed they may play it without paying its mana cost (a creature spell gains haste). "Suspend N—cost" is the ability `suspend`.
+
+Rules: CR 702.62a, CR 702.62b
+
+```json
+{
+  "keywords": [
+    "suspend"
+  ]
+}
+```
+
 ## trample
 
 Excess combat damage beyond lethal damage to its blockers can be assigned to the player or planeswalker it's attacking.

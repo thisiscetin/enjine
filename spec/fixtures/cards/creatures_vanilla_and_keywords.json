@@ -608,5 +608,25 @@
     "power": 4,
     "toughness": 4,
     "rules_text": "Decayed"
+  },
+  {
+    "name": "Rift Hatchling",
+    "mana_cost": "{4}{G}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "beast"
+    ],
+    "power": 4,
+    "toughness": 4,
+    "abilities": [
+      {
+        "suspend": {
+          "amount": 2,
+          "cost": "{G}"
+        }
+      }
+    ]
   }
 ]

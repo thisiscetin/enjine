@@ -96,7 +96,7 @@ module Enjine
         state.battlefield.none? do |id|
           obj = object(id)
           !obj.counters.empty? || printed_noncreature_pt?(obj) || (speedy && !active_max_speed(obj, obj.controller).empty?) ||
-            obj.memory.key?("class_level") # CR 717.2a
+            obj.memory.key?("class_level") || obj.memory.key?("haste_while_controlled_by") # CR 717.2a, 702.62a
         end
       end
 

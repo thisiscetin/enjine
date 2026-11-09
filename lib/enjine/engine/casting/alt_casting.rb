@@ -155,7 +155,7 @@ module Enjine
       # delayed trigger; a sneak spell's enters tapped and attacking (CR 702.190b, 506.3a). Cards its costs
       # exiled stay linked to it ("behold a Goblin and exile it", CR 607.2a).
       def alt_enters!(spell, enters)
-        how = spell.memory.slice("cast_from", "cast_with", Mechanics::Linked::EXILED)
+        how = spell.memory.slice("cast_from", "cast_with", Mechanics::Linked::EXILED, "haste_while_controlled_by")
         how["warp_spell"] = spell.id if spell.memory["cast_with"] == "warp"
         (enters["memory"] ||= {}).merge!(how) unless how.empty?
         target = spell.memory["sneak_attack"] or return

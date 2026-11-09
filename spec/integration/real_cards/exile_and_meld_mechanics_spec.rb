@@ -146,6 +146,29 @@ RSpec.describe "Real cards: exile, suspend and meld mechanics" do
     end
   end
 
+  describe "suspend (CR 702.62a)" do
+    it "Taigam, Master Opportunist: the second spell is copied and suspended with four time counters; cast free with haste" do
+      game = board(hand: ["Krumar Initiate"] * 2, battlefield: ["Taigam, Master Opportunist"], mana: { B: 4 })
+      cast = -> { play(game, { type: "cast", object: hand_id(game, "Krumar Initiate") }) }
+      cast.call
+      cast.call
+      expect(game.state.battlefield.count { game.state.object(it).card == "krumar_initiate" }).to eq(2) # the first, the copy
+      suspended = game.state.exile.first
+      expect(game.state.object(suspended).counters).to eq("time" => 4)
+      expect(game.state.object(suspended).memory["suspend"]).to be(true)
+
+      skip_to(game, :draw, turn: 9)
+      expect(game.state.object(suspended).counters).to eq("time" => 1)
+      skip_to(game, :upkeep, turn: 11)
+      game.submit(type: "pass") until game.pending_decision.kind == "effect_choice"
+      expect(game.legal_options).to eq([{ type: "cast", object: suspended }, { type: "done" }])
+      play(game, { type: "cast", object: suspended })
+      krumar = game.state.battlefield.find { (o = game.state.object(it)).card == "krumar_initiate" && o.controlled_since == 11 }
+      expect(engine(game).chars(engine(game).object(krumar)).keyword?(:haste)).to be(true)
+      expect(game.state.exile).to be_empty
+    end
+  end
+
   describe "proliferate X times (CR 701.34a)" do
     it "Tam, the Possibility: proliferates once per planeswalker type among your planeswalkers" do
       game = board(battlefield: ["Tam, the Possibility", "Ajani Resolute", "Ajani, Outland Chaperone", "The Theorist, Jace Beleren"],

@@ -2106,6 +2106,28 @@ Rules: CR 701.25a
 }
 ```
 
+## suspend
+
+Exile each referenced card or spell with `amount` time counters on it; if it doesn't have suspend, it gains suspend (keyword `suspend`) while it stays exiled.
+
+Rules: CR 702.62a, CR 702.62b, CR 406.1
+
+| Parameter | Description |
+| --- | --- |
+| `amount` | amount (time counters) |
+| `to` | selector (a spell, a card or a permanent) |
+
+```json
+{
+  "suspend": {
+    "to": {
+      "triggering": "object"
+    },
+    "amount": 4
+  }
+}
+```
+
 ## tap
 
 Tap each referenced permanent.

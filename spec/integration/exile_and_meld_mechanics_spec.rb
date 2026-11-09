@@ -70,6 +70,64 @@ RSpec.describe "Exile, suspend and meld mechanics" do
     end
   end
 
+  describe "suspend (CR 702.62a, 116.2f) with Rift Hatchling and Delayed Ember (fixtures)" do
+    it "exiles the card with N time counters as a special action, only when it could be cast" do
+      game = board(hand: ["Rift Hatchling"], mana: { G: 1 })
+      hatchling = hand_card(game, "Rift Hatchling")
+      option = { type: "special_action", object: hatchling, ability: "printed:0" }
+      expect(game.legal_options).to include(option)
+      game.submit(option)
+      game.submit(type: "pay_mana", mana: "G")
+      exiled = game.state.exile.first
+      expect(game.state.object(exiled).counters).to eq("time" => 2)
+      expect(game.pending_decision.kind).to eq("priority")
+
+      game = board(hand: ["Rift Hatchling"], mana: { G: 1 }, active: "bob")
+      expect(option_types(game)).not_to include("special_action") # sorcery timing (CR 702.62a)
+    end
+
+    it "removes a counter each upkeep; the last one lets its owner cast it free, with haste" do
+      game = board(hand: ["Rift Hatchling"], mana: { G: 1 })
+      game.submit(type: "special_action", object: hand_card(game, "Rift Hatchling"), ability: "printed:0")
+      game.submit(type: "pay_mana", mana: "G")
+      exiled = game.state.exile.first
+      skip_to(game, :draw, turn: 5)
+      expect(game.state.object(exiled).counters).to eq("time" => 1)
+      skip_to(game, :upkeep, turn: 7)
+      game.submit(type: "pass") until game.pending_decision.kind == "effect_choice"
+      game.submit(type: "cast", object: exiled)
+      resolve_all(game)
+      beast = obj_id(game, "Rift Hatchling")
+      engine = game.instance_variable_get(:@engine)
+      expect(engine.chars(engine.object(beast)).keyword?(:haste)).to be(true)
+    end
+
+    it "declining leaves it exiled without counters; a spell on the stack can be suspended" do
+      game = board(hand: ["Delayed Ember"], mana: { R: 1 })
+      game.submit(type: "special_action", object: hand_card(game, "Delayed Ember"), ability: "printed:1")
+      game.submit(type: "pay_mana", mana: "R")
+      exiled = game.state.exile.first
+      skip_to(game, :upkeep, turn: 7)
+      game.submit(type: "pass") until game.pending_decision.kind == "effect_choice"
+      game.submit(type: "done")
+      expect(game.state.exile).to eq([exiled])
+      expect(game.state.object(exiled).counters).to eq("time" => 0).or eq({})
+
+      game = board(hand: ["Delayed Ember", "Timeweaver's Lesson"], mana: { R: 1, U: 1, C: 4 })
+      game.submit(type: "cast", object: hand_card(game, "Delayed Ember"))
+      game.submit(type: "target", target: "player:bob")
+      game.submit(game.legal_options.find { it[:type] == "pay_mana" && it[:mana] != "U" }) while game.pending_decision.kind == "pay_cost"
+      ember = game.state.stack.first
+      game.submit(type: "cast", object: hand_card(game, "Timeweaver's Lesson"))
+      game.submit(type: "target", target: ember)
+      game.submit(game.legal_options.find { it[:type] == "pay_mana" }) while game.pending_decision.kind == "pay_cost"
+      resolve_all(game)
+      suspended = game.state.exile.first
+      expect(game.state.object(suspended).counters).to eq("time" => 2)
+      expect(game.state.players[1].life).to eq(20)
+    end
+  end
+
   describe "hideaway (CR 702.75a) and playing a land while resolving (CR 305.2a, 305.3)" do
     def hide(game)
       game.submit(type: "play_land", object: hand_card(game, "Spec Hidden Vault"))

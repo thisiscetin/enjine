@@ -1327,6 +1327,26 @@ Rules: CR 722.2a, CR 722.2b, CR 722.2c, CR 613.1d, CR 613.4b
 }
 ```
 
+## suspend
+
+Suspend `amount`—`cost`: whenever you could begin to cast this card from your hand, you may pay `cost` and exile it with `amount` time counters (special action `{type: "special_action"}`); then it works as the keyword `suspend`.
+
+Rules: CR 702.62a, CR 702.62c, CR 116.2f
+
+| Parameter | Description |
+| --- | --- |
+| `amount` | integer >= 1 (time counters) |
+| `cost` | mana cost string |
+
+```json
+{
+  "suspend": {
+    "amount": 3,
+    "cost": "{2}{W}"
+  }
+}
+```
+
 ## teamwork
 
 Teamwork N: as you cast this spell you may also tap any number of untapped creatures you control with total power N or more (the `choose_kicker` decision, then one `choose_cost` per creature). `{"cast_with": "teamwork"}` holds if you did; `kicked_targets` are its targets then.
