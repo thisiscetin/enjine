@@ -192,7 +192,9 @@ module Enjine
 
       def pumped(ev)
         verb = ev["affected"].size == 1 ? "gets" : "get"
-        "#{ev["affected"].map { name_of(it) }.join(", ")} #{verb} +#{ev["details"]["power"]}/+#{ev["details"]["toughness"]} until end of turn"
+        "#{ev["affected"].map do
+          name_of(it)
+        end.join(", ")} #{verb} +#{ev["details"]["power"]}/+#{ev["details"]["toughness"]} until end of turn"
       end
 
       def zone_changed(ev)
