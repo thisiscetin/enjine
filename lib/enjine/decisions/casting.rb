@@ -147,11 +147,13 @@ module Enjine
           '(plus `mana: "{G}{G}"` when the mana is chosen) taps a source, `{type: "cancel"}` ' \
           "rewinds (or declines a payment asked for while resolving). Cancel isn't offered once a mana ability " \
           "with a cost other than {T} (a Treasure) has been activated. `{type: \"convoke\", object: id}` taps a " \
-          "creature to pay for {1} or one mana of its color (a spell with convoke). `remaining` shows what is left to pay."
+          "creature to pay for {1} or one mana of its color (a spell with convoke); `{type: \"waterbend\", object: id}` taps " \
+          "an artifact or creature to pay {1} of a waterbend cost. `remaining` shows what is left to pay."
       end
 
       def self.options(engine, _pending)
-        Decisions.with_cancel(engine, engine.payable_mana_options + engine.payment_mana_options + engine.convoke_options)
+        Decisions.with_cancel(engine, engine.payable_mana_options + engine.payment_mana_options + engine.convoke_options +
+                                       engine.waterbend_options)
       end
 
       def self.submit(engine, _pending, option)
@@ -159,6 +161,7 @@ module Enjine
         when "cancel" then engine.cancel_payment!
         when "pay_mana" then engine.pay_mana!(option[:mana], option[:restricted])
         when "convoke" then engine.convoke!(option[:object]) # CR 702.51a
+        when "waterbend" then engine.waterbend!(option[:object]) # CR 701.67a
         else engine.tap_for_payment!(option[:object], option[:ability], option[:mana])
         end
       end

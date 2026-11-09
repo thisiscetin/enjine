@@ -35,6 +35,21 @@ module Enjine
 
         def self.action = "surveil"
       end
+
+      # "Whenever you earthbend / waterbend / airbend / firebend" (CR 701.66b, 701.67c, 701.65b, 702.189b): the
+      # bending happened (the earthbend delayed trigger was created, a waterbend cost was paid, objects were
+      # exiled by an airbend, a firebending ability resolved). "Whenever you waterbend, earthbend, firebend, or
+      # airbend" is `any_of` the four.
+      {
+        earthbends: ["earthbend", %w[701.66b]], waterbends: ["waterbend", %w[701.67c]],
+        airbends: ["airbend", %w[701.65b]], firebends: ["firebend", %w[702.189b]]
+      }.each do |name, (verb, rules)|
+        klass = Class.new(KeywordActionTrigger) { define_singleton_method(:action) { verb } }
+        Triggers.const_set(name.to_s.capitalize, klass)
+        klass.primitive :trigger, name,
+                        description: "A player (`controller`: you (default) | opponent | any) #{verb}s.",
+                        rules: rules, params: { "controller" => PLAYERS.join(" | ") }, example: { name.to_s => {} }
+      end
     end
   end
 end

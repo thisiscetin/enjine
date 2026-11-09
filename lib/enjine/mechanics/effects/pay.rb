@@ -13,32 +13,37 @@ module Enjine
         LISTS = %w[then otherwise].freeze
 
         primitive :effect, :pay,
-                  description: "You may pay `mana` or `life` as it resolves. If you do, `then` happens; if you " \
-                               "don't, `otherwise`. Paying mana works like paying a spell's cost (mana abilities may " \
-                               "be activated); life can be paid only if you have that much (CR 119.4). For another " \
-                               "player paying, see `counter_unless_pays`.",
-                  rules: %w[118.12 118.12a 118.3 119.4 605.3a],
+                  description: "You may pay `mana`, `life` or `waterbend` as it resolves. If you do, `then` happens; " \
+                               "if you don't, `otherwise`. Paying mana works like paying a spell's cost (mana abilities " \
+                               "may be activated; a `waterbend` cost may also be paid by tapping artifacts and " \
+                               "creatures, CR 701.67a); life can be paid only if you have that much (CR 119.4). For " \
+                               "another player paying, see `counter_unless_pays`.",
+                  rules: %w[118.12 118.12a 118.3 119.4 605.3a 701.67a 701.67c],
                   params: { "mana" => "mana cost string, e.g. \"{1}\"", "life" => "integer",
+                            "waterbend" => "mana cost string: \"unless you waterbend {2}\"",
                             "then" => "list of effects",
                             "otherwise" => "list of effects" },
                   example: { "pay" => { "mana" => "{1}", "then" => [{ "draw" => { "amount" => 1 } }] } }
 
         attr_reader :cost, :life
 
-        def self.keys = %w[mana life then otherwise if]
+        def self.keys = %w[mana life waterbend then otherwise if]
         def self.default_to = "you"
 
         def setup(params, errors, path)
           raw = Mechanics.fetch_param(params, :mana)
+          bend = Mechanics.fetch_param(params, :waterbend)
           @life = Mechanics.fetch_param(params, :life)
-          errors << "#{path}: needs exactly one of mana, life" unless raw.nil? ^ @life.nil?
+          errors << "#{path}: needs exactly one of mana, life, waterbend" unless [raw, bend, @life].compact.size == 1
           errors << "#{path}.life: must be an integer >= 1" unless @life.nil? || (@life.is_a?(Integer) && @life >= 1)
           @cost = raw && Mana.parse_cost(raw, errors, "#{path}.mana")
+          @cost ||= bend && Mana.parse_cost(bend, errors, "#{path}.waterbend")
+          @waterbend = bend && @cost && { "waterbend" => @cost.generic }
           @lists = parse_lists(params, errors, path, LISTS)
         end
 
         def nested_effects = @lists.values.flatten
-        def what = cost ? cost.to_s : "#{life} life"
+        def what = @waterbend ? "waterbend #{cost}" : (cost ? cost.to_s : "#{life} life")
 
         def to_s
           text = "you may pay #{what}"
@@ -48,7 +53,7 @@ module Enjine
         end
 
         def can_pay?(engine, index)
-          cost ? engine.affordable?(index, cost, nil) : engine.player(index).life >= life
+          cost ? engine.affordable?(index, cost, nil, @waterbend) : engine.player(index).life >= life
         end
 
         def run(engine, ctx, locals)
@@ -77,7 +82,7 @@ module Enjine
           return pay_life(engine, index, locals) if life
           return locals["outcome"] = (payment["type"] == "paid" ? "paid" : "unpaid") if payment
 
-          engine.begin_payment!(index, cost, ctx.object)
+          engine.begin_payment!(index, cost, ctx.object, waterbend: @waterbend&.fetch("waterbend"))
           :wait
         end
 

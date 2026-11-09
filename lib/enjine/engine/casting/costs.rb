@@ -66,6 +66,7 @@ module Enjine
       # CR 601.2f: the total cost is determined once and locked in.
       def lock_total_cost!(ctx)
         ctx["remaining"] = remaining_hash(frame_total_cost(ctx))
+        lock_waterbend!(ctx) # CR 701.67b (Engine::Waterbending)
       end
 
       # CR 601.2b: X is announced (once) before targets are chosen. True while waiting for it.

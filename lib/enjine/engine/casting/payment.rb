@@ -47,11 +47,12 @@ module Enjine
       # mana may pay any symbol (CR 609.4b, a permission's `any_mana_type`): {"spell" => id} or
       # {"ability" => source id}, plus "any_type"; nil for a cost paid while resolving (CR 118.12).
       def payment_purpose(frame)
-        return nil unless frame["type"] == "cast"
+        waterbend = frame["waterbend"] ? { "waterbend" => frame["waterbend"] } : {} # CR 701.67b (Engine::Waterbending)
+        return (waterbend unless waterbend.empty?) unless frame["type"] == "cast"
 
         purpose = frame["kind"] == "spell" ? { "spell" => frame["object"] } : { "ability" => frame["source"] }
         purpose["any_type"] = true if frame.dig("method", "any_mana_type")
-        purpose
+        purpose.merge(waterbend)
       end
 
       # Pool mana that can pay part of the remaining cost (CR 601.2h): `{type: "pay_mana", mana: "R"}`, and
@@ -197,7 +198,8 @@ module Enjine
         index = frame["player"]
         purpose = payment_purpose(frame)
         units = pool_units(index, pool, purpose, restricted) + source_units(index, excluded, purpose) +
-                convoke_units(index, purpose, excluded) # CR 702.51a (Engine::AltCasting)
+                convoke_units(index, purpose, excluded) + # CR 702.51a (Engine::AltCasting)
+                waterbend_units(index, purpose, excluded) # CR 701.67a (Engine::Waterbending)
         units.size >= cost.mana_value && match_colored(cost.requirements, units)
       end
 
@@ -241,11 +243,13 @@ module Enjine
 
       # Starts paying `cost` for an effect that is resolving; Effects::Payment learns the outcome as an
       # answer ("paid" or "declined") when the pay frame is done.
-      def begin_payment!(index, cost, object)
+      # `waterbend`: the generic mana of a waterbend cost that tapping may pay (CR 701.67a, Engine::Waterbending).
+      def begin_payment!(index, cost, object, waterbend: nil)
         state.frames << { "type" => "pay", "player" => index, "object" => object, "remaining" => remaining_hash(cost),
                           "pool" => player(index).mana_pool.transform_keys(&:to_s), "tapped" => [],
                           "restricted" => Snapshot.deep_copy(player(index).restricted_mana),
-                          "triggers_before" => state.pending_triggers.map { it["id"] } }
+                          "triggers_before" => state.pending_triggers.map { it["id"] },
+                          "waterbend" => waterbend }.compact
         ask!(nil)
       end
 
@@ -266,6 +270,7 @@ module Enjine
       end
 
       def finish_payment!(frame, outcome)
+        waterbent!(frame) if outcome == "paid" # CR 701.67c (Engine::Waterbending)
         emit Events::PaymentFinished.new(player: name(frame["player"]), object: frame["object"], outcome: outcome)
         resolving = state.frames.rfind { it["type"] == "resolve" }
         locals = resolving["locals"][resolving["pc"].to_s]

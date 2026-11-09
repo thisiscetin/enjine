@@ -167,7 +167,8 @@ module Enjine
 
         cost = Mana.sum_costs([method_cost(obj, method), *spell_extra_mana(obj, false)])
         # CR 609.4b; a stand-in for a card outside the game is passed itself (it isn't in state.objects).
-        purpose = { "spell" => state.objects.key?(obj.id) ? obj.id : obj, "any_type" => method["any_mana_type"] }.compact
+        purpose = { "spell" => state.objects.key?(obj.id) ? obj.id : obj, "any_type" => method["any_mana_type"],
+                    **spell_waterbend(obj, false) }.compact
         total = harmonize_reduced(total_cost(index, cost, spell: obj), best_harmonize_power(index, method))
         ability_targetable?(spell_ability_of(obj), index, obj.id) && affordable?(index, total, nil, purpose)
       end

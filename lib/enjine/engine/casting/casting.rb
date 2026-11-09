@@ -19,7 +19,7 @@ module Enjine
 
         cost = Mana.sum_costs([defn.mana_cost, *spell_extra_mana(obj, false)])
         if ability_targetable?(defn.spell_ability, index, id) &&
-           affordable?(index, total_cost(index, cost, spell: obj), nil, { "spell" => id })
+           affordable?(index, total_cost(index, cost, spell: obj), nil, { "spell" => id, **spell_waterbend(obj, false) })
           return true
         end
 
@@ -42,7 +42,8 @@ module Enjine
 
         cost = total_cost(index, ability.mana_cost, ability: ability, source: id)
         ability_targetable?(ability, index, nil, id,
-                            ref: ability_ref) && affordable?(index, cost, needs_tap?(ability) ? id : nil, { "ability" => id })
+                            ref: ability_ref) && affordable?(index, cost, needs_tap?(ability) ? id : nil,
+                                                 { "ability" => id, **waterbend_purpose(ability.costs) })
       end
 
       # Whether the ability can get legal targets: for modal abilities, enough modes must (CR 700.2),
@@ -227,6 +228,7 @@ module Enjine
         obj.mana_spent = ctx["spent"].dup if ctx["spent"]
         record_announcements!(obj, ctx) # kicked (CR 702.33d), division (CR 601.2d), modes chosen before
         record_cast_choices!(obj, ctx) # cost choices; facing a dilemma (CR 700.17)
+        waterbent!(ctx) # CR 701.67c (Engine::Waterbending)
         if ctx["kind"] == "trigger"
           emit Events::TriggerPutOnStack.new(player: name(index), object: obj.id, source: ctx["source"], card: obj.card,
                                              ability: ctx["ability"], targets: obj.targets.flatten)
