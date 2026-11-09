@@ -4317,5 +4317,371 @@
         }
       }
     ]
+  },
+  {
+    "name": "Galeborne Paragon",
+    "mana_cost": "{1}{G}{W}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "human",
+      "warrior"
+    ],
+    "power": 3,
+    "toughness": 3,
+    "keywords": [
+      "flying"
+    ],
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "cast": {
+              "targets": "creature"
+            }
+          },
+          "effects": [
+            {
+              "grant": {
+                "keywords": [
+                  "flying"
+                ],
+                "to": {
+                  "triggering": "targets"
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Redirecting Sprite",
+    "mana_cost": "{1}{U}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "faerie"
+    ],
+    "power": 1,
+    "toughness": 2,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "cast": {
+              "controller": "opponent",
+              "targets": "self"
+            }
+          },
+          "effects": [
+            {
+              "choose_new_targets": {
+                "of": {
+                  "triggering": "object"
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Wayward Cartographer",
+    "mana_cost": "{2}{G}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "elf",
+      "scout"
+    ],
+    "power": 2,
+    "toughness": 2,
+    "abilities": [
+      {
+        "play_from": {
+          "zone": "graveyard",
+          "cards": {
+            "types": [
+              "land"
+            ]
+          },
+          "play": "play"
+        }
+      },
+      {
+        "triggered": {
+          "when": {
+            "plays_land": {
+              "not_from": "hand"
+            }
+          },
+          "effects": [
+            {
+              "add_counters": {
+                "counter": "+1/+1",
+                "amount": 1,
+                "to": "self"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "triggered": {
+          "when": {
+            "step_begins": {
+              "step": "end",
+              "whose": "your"
+            }
+          },
+          "if": {
+            "amount": {
+              "plus": [
+                {
+                  "lands_played_this_turn": {
+                    "by": "you",
+                    "not_from": "hand"
+                  }
+                },
+                {
+                  "spells_cast_this_turn": {
+                    "by": "you",
+                    "not_from": "hand"
+                  }
+                }
+              ]
+            },
+            "at_least": 1
+          },
+          "effects": [
+            {
+              "draw": {
+                "amount": 1
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Boastful Herald",
+    "mana_cost": "{1}{R}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "human",
+      "warrior"
+    ],
+    "power": 2,
+    "toughness": 2,
+    "abilities": [
+      {
+        "activated": {
+          "boast": true,
+          "cost": [
+            {
+              "mana": "{R}"
+            }
+          ],
+          "effects": [
+            {
+              "pump": {
+                "power": 1,
+                "toughness": 0,
+                "to": "self"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "triggered": {
+          "when": {
+            "activates_ability": {
+              "boast": true
+            }
+          },
+          "effects": [
+            {
+              "gain_life": {
+                "amount": 1
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Exile Returner",
+    "mana_cost": "{2}{W}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "spirit"
+    ],
+    "power": 2,
+    "toughness": 3,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "enters": {
+              "subject": {
+                "each": "creature",
+                "controller": "you"
+              },
+              "from": "exile"
+            }
+          },
+          "effects": [
+            {
+              "gain_life": {
+                "amount": 2
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Echoing Drillmaster",
+    "mana_cost": "{2}{R}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "goblin",
+      "soldier"
+    ],
+    "power": 2,
+    "toughness": 2,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "attacks": {}
+          },
+          "effects": [
+            {
+              "deal_damage": {
+                "amount": 1,
+                "to": "each_opponent"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "triggered": {
+          "when": {
+            "ability_triggers": {
+              "subject": {
+                "each": "creature",
+                "controller": "you"
+              },
+              "cause": "attacks"
+            }
+          },
+          "limit": "once_each_turn",
+          "effects": [
+            {
+              "may": {
+                "effects": [
+                  {
+                    "copy_spell": {
+                      "of": {
+                        "triggering": "ability"
+                      },
+                      "new_targets": true
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Ember Grudgekeeper",
+    "mana_cost": "{1}{R}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "goblin"
+    ],
+    "power": 2,
+    "toughness": 1,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "step_begins": {
+              "step": "upkeep",
+              "whose": "your"
+            }
+          },
+          "if": {
+            "amount": {
+              "noncombat_damage_last_turn": "each_opponent"
+            },
+            "at_least": 1
+          },
+          "effects": [
+            {
+              "add_counters": {
+                "counter": "+1/+1",
+                "amount": 1,
+                "to": "self"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Teamwork Cadet",
+    "mana_cost": "{W}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "human",
+      "soldier"
+    ],
+    "power": 1,
+    "toughness": 1,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "becomes_tapped": {
+              "for": "teamwork"
+            }
+          },
+          "effects": [
+            {
+              "gain_life": {
+                "amount": 2
+              }
+            }
+          ]
+        }
+      }
+    ]
   }
 ]

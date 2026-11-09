@@ -4327,5 +4327,139 @@
         }
       }
     ]
+  },
+  {
+    "name": "Swap Tactics",
+    "mana_cost": "{3}{U}",
+    "types": [
+      "sorcery"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "targets": [
+            {
+              "permanent": {
+                "not": [
+                  "land"
+                ]
+              }
+            },
+            {
+              "filter": {
+                "permanent": {
+                  "not": [
+                    "land"
+                  ]
+                }
+              },
+              "distinct_from": [
+                0
+              ],
+              "shares_type_with": 0
+            }
+          ],
+          "effects": [
+            {
+              "exchange_control": {
+                "to": {
+                  "target": 0
+                },
+                "with": {
+                  "target": 1
+                },
+                "if": {
+                  "share_card_type": [
+                    {
+                      "target": 0
+                    },
+                    {
+                      "target": 1
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Basic Survey",
+    "mana_cost": "{X}{G}",
+    "types": [
+      "sorcery"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "effects": [
+            {
+              "search_library": {
+                "for": {
+                  "supertypes": [
+                    "basic"
+                  ],
+                  "types": [
+                    "land"
+                  ]
+                },
+                "count": "x",
+                "different_names": true
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Withering Mirror",
+    "mana_cost": "{1}{R}{R}",
+    "types": [
+      "instant"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "targets": [
+            {
+              "spell": {
+                "any_of": [
+                  "instant",
+                  "sorcery"
+                ]
+              }
+            }
+          ],
+          "effects": [
+            {
+              "copy_spell": {
+                "of": {
+                  "target": 0
+                },
+                "new_targets": true,
+                "except": {
+                  "keywords": [
+                    "wither"
+                  ]
+                }
+              }
+            },
+            {
+              "grant": {
+                "keywords": [
+                  "wither"
+                ],
+                "to": {
+                  "target": 0
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
   }
 ]

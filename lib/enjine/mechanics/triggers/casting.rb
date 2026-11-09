@@ -201,8 +201,8 @@ module Enjine
         end
 
         def to_s
-          kinds = @kinds.map { "#{it.to_s.delete("?")} " }.join
-          "Whenever #{who} activate#{"s" unless @controller == "you"} an #{kinds}ability#{chosen_words}"
+          what = "#{@kinds.map { "#{it.to_s.delete("?")} " }.join}ability"
+          "Whenever #{who} activate#{"s" unless @controller == "you"} #{what.start_with?("b") ? "a" : "an"} #{what}#{chosen_words}"
         end
 
         private
