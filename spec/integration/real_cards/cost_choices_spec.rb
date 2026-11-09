@@ -144,4 +144,18 @@ RSpec.describe "Real cards: cost choices" do
     game.submit(type: "enter_tapped")
     expect(game.state.object(id(game, "Theorist's Sanctum")).tapped).to be(true)
   end
+
+  it "Winter, Cursed Rider exiles X artifact cards from the graveyard: X is at most how many there are (CR 601.2b)" do
+    game = board(battlefield: ["Winter, Cursed Rider", "Island", "Island", "Swamp", "Swamp"],
+                 graveyard: ["Arc Reactor", "Steel Wrecking Ball", "Island"], theirs: ["Stony-Voiced Goblins"])
+    game.submit(game.legal_options.find { it[:type] == "activate" && it[:object] == id(game, "Winter, Cursed Rider") })
+    expect(game.pending_decision.kind).to eq("choose_x")
+    expect(game.legal_options.filter_map { it[:value] }).to eq([0, 1, 2])
+    game.submit(type: "x", value: 2)
+    2.times { game.submit(game.legal_options.find { it[:type] == "cost" }) }
+    pay_all(game)
+    expect(cards(game, alice(game).graveyard)).to eq(["island"])
+    pass_both(game)
+    expect(cards(game, game.state.battlefield)).not_to include("stony_voiced_goblins")
+  end
 end

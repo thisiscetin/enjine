@@ -171,6 +171,7 @@ module Enjine
       # A cost with a fixed number of choices is chosen once it has them; one of "any number" (crew, CR
       # 702.122a) says itself, given whether the player said they're done.
       def cost_chosen?(ctx, cost, index, entries)
+        return entries.size >= ctx["x"].to_i if cost.respond_to?(:x?) && cost.x? # "exile X cards" (CR 601.2b)
         return entries.size >= cost.choices_needed unless cost.respond_to?(:chosen?)
 
         cost.chosen?(self, cost_payer(ctx), entries, ctx.fetch("costs_done", []).include?(index))

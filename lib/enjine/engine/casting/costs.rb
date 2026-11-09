@@ -72,17 +72,18 @@ module Enjine
       end
 
       # CR 601.2b: X is announced (once) before targets are chosen. True while waiting for it. Without {X} in
-      # the mana cost or a cost such as "pay X life", X is 0.
+      # the mana cost or a cost such as "pay X life" or "exile X cards", X is 0.
       def ask_x!(ctx)
         return false unless ctx["x"].nil?
-        return (ctx["x"] = 0) && false unless base_cost(ctx)&.x_symbols.to_i.positive? || life_x?(ctx)
+        return (ctx["x"] = 0) && false unless base_cost(ctx)&.x_symbols.to_i.positive? || x_costs(ctx).any?
 
         ask!("kind" => "choose_x", "player" => ctx["player"], "max" => x_limit(ctx))
         true
       end
 
-      # Whether a cost paid while casting is "pay X life" (Costs::PayLife).
-      def life_x?(ctx) = casting_costs(ctx).any? { it.respond_to?(:x?) && it.x? }
+      # The costs paid while casting that define X: "pay X life" (Costs::PayLife), "exile X cards from your
+      # graveyard" (Costs::CardsCost).
+      def x_costs(ctx) = casting_costs(ctx).select { it.respond_to?(:x?) && it.x? }
 
       # A {T} ability's own source can't pay for it.
       def payment_excluded_source(ctx)
@@ -90,10 +91,9 @@ module Enjine
       end
 
       # The largest X the player could pay for: the mana available beyond the rest of the cost, and for
-      # "pay X life" no more than their life total (CR 119.4).
+      # "pay X life" no more than their life total (CR 119.4), for "exile X cards" no more than there are (CR 118.3).
       def x_limit(ctx)
-        limits = []
-        limits << [player(ctx["player"]).life, 0].max if life_x?(ctx)
+        limits = x_costs(ctx).map { it.x_limit(self, cost_payer(ctx)) }
         symbols = base_cost(ctx)&.x_symbols.to_i
         return limits.min if symbols.zero?
 

@@ -33,6 +33,7 @@ module Enjine
         def mana? = false
         def spell_cost? = true
         def x? = @amount == "X"
+        def x_limit(engine, object) = [engine.player(object.controller).life, 0].max
 
         # X is bounded by the life total as it's announced (Engine::Costs#x_limit).
         def payable?(engine, object) = x? || engine.player(object.controller).life >= @amount.to_i

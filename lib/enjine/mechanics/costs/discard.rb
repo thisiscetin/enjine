@@ -35,7 +35,7 @@ module Enjine
                                "spec `card` if given: chosen while casting or activating and discarded as the spell " \
                                "or ability becomes cast. `random: true` discards them at random instead.",
                   rules: %w[701.9a 701.9b 601.2h 602.2b 118.3],
-                  params: { "count" => "integer (default 1)", "card" => "card spec, e.g. {\"types\": [\"land\"]}",
+                  params: { "count" => "integer (default 1), or \"X\": the X announced", "card" => "card spec, e.g. {\"types\": [\"land\"]}",
                             "random" => "true: at random (CR 701.9b)" },
                   example: { "discard" => { "count" => 1 } }
 

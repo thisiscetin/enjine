@@ -1329,5 +1329,105 @@
       "set": "fra",
       "number": "191"
     }
+  },
+  {
+    "name": "Winter, Cursed Rider",
+    "mana_cost": "{U}{B}",
+    "types": [
+      "creature"
+    ],
+    "supertypes": [
+      "legendary"
+    ],
+    "subtypes": [
+      "human",
+      "warlock"
+    ],
+    "power": 3,
+    "toughness": 2,
+    "abilities": [
+      {
+        "ward": {
+          "cost": [
+            {
+              "pay_life": 2
+            }
+          ]
+        }
+      },
+      {
+        "static": {
+          "affects": {
+            "each": "artifact",
+            "controller": "you"
+          },
+          "abilities": [
+            {
+              "ward": {
+                "cost": [
+                  {
+                    "pay_life": 2
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      },
+      {
+        "activated": {
+          "exhaust": true,
+          "cost": [
+            {
+              "mana": "{2}{U}{B}"
+            },
+            "tap",
+            {
+              "exile_from_graveyard": {
+                "count": "X",
+                "card": {
+                  "types": [
+                    "artifact"
+                  ]
+                }
+              }
+            }
+          ],
+          "effects": [
+            {
+              "pump": {
+                "power": {
+                  "times": [
+                    "x",
+                    -1
+                  ]
+                },
+                "toughness": {
+                  "times": [
+                    "x",
+                    -1
+                  ]
+                },
+                "to": {
+                  "each": {
+                    "creature": {
+                      "not": [
+                        "artifact"
+                      ],
+                      "other": true
+                    }
+                  }
+                }
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "rare",
+    "printing": {
+      "set": "dft",
+      "number": "228"
+    }
   }
 ]

@@ -1149,6 +1149,8 @@ its seed and decisions, and an exported game continues with the same results.
 | "… When you do, it deals 2 damage to any target" | `then`: `[{ "reflexive_trigger": { "targets": ["any_target"], "effects": [ … ] } }]` |
 | "Ward—Pay 2 life", "Ward—Discard a card", "Ward—Discard a card or pay {2}" (CR 702.21a) | `{ "ward": { "cost": [{ "pay_life": 2 }] } }`, `[ "discard" ]`, `[{ "one_of": ["discard", { "mana": "{2}" }] }]` |
 | "Ward—Get five poison counters" | `{ "ward": { "cost": [{ "get_counters": { "counter": "poison", "amount": 5 } }] } }` |
+| "Exile X artifact cards from your graveyard: … -X/-X" (CR 601.2b) | `{ "exile_from_graveyard": { "count": "X", "card": { "types": ["artifact"] } } }` in the `cost` (X is announced, at most the number of matching cards; also `discard`, `exile_from_hand`) and the amount `"x"` in effects |
+| "As this land enters, you may behold a Jace. If you don't, this land enters tapped." (CR 614.12) | `{ "enters_tapped_unless_behold": { "card": { "subtypes": ["jace"] } } }` (the `enter_choice` option `{type: "behold", object: id}`) |
 | "Counter target spell unless its controller pays {2}. If …, {4} instead" | two `counter_unless_pays` with opposite `if` conditions (`cost` takes a list of costs too) |
 
 Which `one_of` option is paid is announced while casting or activating, after modes and before X

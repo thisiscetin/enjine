@@ -77,9 +77,12 @@ module Enjine
         def self.keys = %w[count card]
         def self.zone = raise(NotImplementedError)
 
+        # `count` "X": as many as the X announced for the spell or ability (CR 601.2b, 107.3a).
         def self.build(params, errors, path, **)
           Mechanics.check_keys(params, keys, errors, path)
-          count = Mechanics.integer_param(params, :count, errors, path, default: 1, min: 1)
+          count = if Mechanics.fetch_param(params, :count) == "X" then "X"
+                  else Mechanics.integer_param(params, :count, errors, path, default: 1, min: 1)
+                  end
           raw = Mechanics.fetch_param(params, :card)
           spec = raw && CardSpec.build(raw, errors, "#{path}.card")
           new(spec, count, false, params, errors, path)
@@ -91,6 +94,13 @@ module Enjine
           end
         end
 
+        # "Exile X cards": the engine asks for as many as X (Engine::CastChoices#cost_chosen?); X can be at
+        # most the number of matching cards (Engine::Costs#x_limit).
+        def x? = count == "X"
+        def choices_needed = x? ? 0 : super
+        def payable?(engine, object) = x? || super
+        def x_limit(engine, object) = candidates(engine, object).size
+
         # As it becomes cast, the chosen cards still where they were chosen are paid (exiled by default).
         def pay_chosen!(engine, _object, entries)
           entries.map { it["object"] }.select { engine.state.objects[it]&.zone == self.class.zone }.each { pay_card!(engine, it) }
@@ -98,7 +108,7 @@ module Enjine
 
         def pay_card!(engine, id) = engine.move!(id, :exile, reason: "cost")
 
-        def cards_text = "#{count == 1 ? "a" : count} #{filter || "card"}#{"s" if count > 1}"
+        def cards_text = "#{count == 1 ? "a" : count} #{filter || "card"}#{"s" unless count == 1}"
       end
     end
   end

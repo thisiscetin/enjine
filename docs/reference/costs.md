@@ -63,7 +63,7 @@ Rules: CR 701.9a, CR 701.9b, CR 601.2h, CR 602.2b, CR 118.3
 
 | Parameter | Description |
 | --- | --- |
-| `count` | integer (default 1) |
+| `count` | integer (default 1), or "X": the X announced |
 | `card` | card spec, e.g. {"types": ["land"]} |
 | `random` | true: at random (CR 701.9b) |
 
@@ -103,7 +103,7 @@ Rules: CR 406.1, CR 601.2h, CR 602.2b, CR 118.3
 
 | Parameter | Description |
 | --- | --- |
-| `count` | integer (default 1) |
+| `count` | integer (default 1), or "X": the X announced |
 | `card` | card spec, e.g. {"types": ["creature"]} |
 
 ```json
@@ -122,7 +122,7 @@ Rules: CR 406.1, CR 601.2h, CR 602.2b, CR 118.3
 
 | Parameter | Description |
 | --- | --- |
-| `count` | integer (default 1) |
+| `count` | integer (default 1), or "X": the X announced |
 | `card` | card spec, e.g. {"types": ["creature"]} |
 
 ```json
