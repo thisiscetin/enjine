@@ -261,7 +261,7 @@ These rules cut across every mechanic. All numbers follow the 2026-11-06 text.
 | 709 | Split cards (fuse, aftermath); **709.5 split permanents with locked/unlocked halves (Rooms)** | M5 |
 | 710 | Flip cards | M5 |
 | 711 | Leveler cards (level up) | M5 |
-| 712 | Double-faced cards: transforming DFCs, modal DFCs; which face is up in each zone. Done (`layout`/`faces`, card-data-format 4.15). Not yet: day/night, cast transformed | M4 (transform/MDFC) |
+| 712 | Double-faced cards: transforming DFCs, modal DFCs; which face is up in each zone. Done (`layout`/`faces`, card-data-format 4.17). Not yet: day/night, cast transformed | M4 (transform/MDFC) |
 | 713 | Meld cards: melding a pair into one permanent; which half is which (moved out of 712) | M5 |
 | 714 | Substitute cards (checklist proxies for DFCs) | M5 |
 | 715 | Saga cards: lore counters, chapter triggers, sacrifice SBA | M4 |

@@ -45,6 +45,10 @@ Nothing reads rules text. Put cards in a deck's `cards`, or in a set file
 their metadata only: name, release date and `standard_legal_until`, so
 `sets=standard` only uses sets legal on a given day.
 
+Every mechanic of **Star Trek** (`trk`) can be written in the DSL: the set is
+supported. For the other Standard sets, the mechanics that can't be written yet
+are listed per set in [docs/plans/standard.md](docs/plans/standard.md#mechanics-gaps).
+
 ## Try it: play both sides in your terminal
 
 ```sh
