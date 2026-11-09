@@ -92,10 +92,13 @@ module Enjine
       end
 
       # CR 509.1a; CR 509.1b: a creature that can't block is never offered.
-      def eligible_blockers
+      def eligible_blockers = able_blockers.reject { state.blockers.key?(it) }
+
+      # The defending player's creatures that could block, whether they block already or not.
+      def able_blockers
         state.battlefield.select do |id|
           obj = object(id)
-          obj.controller == defending_player && !obj.tapped && chars(obj).creature? && !state.blockers.key?(id) &&
+          obj.controller == defending_player && !obj.tapped && chars(obj).creature? &&
             !chars(obj).keyword?(:cant_block) && !chars(obj).keyword?(:decayed) # CR 702.147a
         end
       end
@@ -133,7 +136,32 @@ module Enjine
       end
 
       # CR 702.111b: an attacker with menace can't be blocked by just one creature.
-      def blocks_legal? = menace_violations.empty?
+      # CR 509.1c: an attacker that must be blocked if able is blocked whenever some creature could block it.
+      def blocks_legal? = menace_violations.empty? && unmet_block_requirements.empty?
+
+      # Attackers that must be blocked if able, unblocked while creatures could block them: blocking another
+      # attacker instead obeys fewer requirements (CR 509.1c). With menace it takes two (CR 509.1b).
+      def unmet_block_requirements
+        attackers.keys.select do |id|
+          next false unless chars(id).keyword?(:must_be_blocked) && blockers_of(id).empty?
+
+          able_blockers.count { could_obey?(it, id) } >= (chars(id).keyword?(:menace) ? 2 : 1)
+        end
+      end
+
+      # Whether `blocker` blocking `attacker` would obey more requirements: it can block it and blocks nothing,
+      # or blocks an attacker without such a requirement (moving it from one that must be blocked gains nothing).
+      def could_obey?(blocker, attacker)
+        return false unless can_block?(blocker, attacker)
+
+        blocking = state.blockers[blocker]
+        blocking.nil? || !chars(blocking).keyword?(:must_be_blocked)
+      end
+
+      # Blocks to undo so a creature can block an attacker that must be blocked.
+      def requirement_unblocks
+        unmet_block_requirements.flat_map { |id| state.blockers.keys.select { could_obey?(it, id) } }.uniq
+      end
 
       def menace_violations
         attackers.keys.select { |id| chars(id).keyword?(:menace) && blockers_of(id).size == 1 }
@@ -182,9 +210,17 @@ module Enjine
 
       def trample?(id) = chars(id).keyword?(:trample)
 
+      # CR 510.1a: the combat damage a creature assigns: its power, or its toughness when an effect says so
+      # and its toughness is greater (assigns_damage_by_toughness).
+      def combat_damage_amount(id)
+        obj = object(id)
+        amount = power(obj)
+        chars(id).keyword?(:assigns_damage_by_toughness) ? [amount, toughness(obj)].max : amount
+      end
+
       # CR 510.1c-d / 702.19b: several blockers, or trample, means the attacking player divides damage.
       def needs_assignment?(id)
-        return false unless attackers[id]["blocked"] && deals_damage_now?(id) && power(object(id)).positive?
+        return false unless attackers[id]["blocked"] && deals_damage_now?(id) && combat_damage_amount(id).positive?
 
         count = blockers_of(id).size
         count > 1 || (count == 1 && trample?(id))
@@ -196,7 +232,7 @@ module Enjine
       def step_combat_damage!(frame)
         while (attacker = frame["queue"].first)
           assigned = frame["assigned"][attacker] ||= {}
-          remaining = power(object(attacker)) - assigned.values.sum
+          remaining = combat_damage_amount(attacker) - assigned.values.sum
           if remaining.positive?
             ask!("kind" => "assign_damage", "player" => state.active, "attacker" => attacker, "remaining" => remaining)
             return :wait
@@ -219,8 +255,7 @@ module Enjine
 
       # CR 702.19b: lethal damage counts damage already marked; with deathtouch, 1 is lethal (702.2c).
       def lethal_assigned?(attacker, blocker, assigned)
-        needed = chars(attacker).keyword?(:deathtouch) ? 1 : toughness(object(blocker)) - object(blocker).damage
-        assigned.fetch(blocker, 0) >= [needed, 1].max
+        assigned.fetch(blocker, 0) >= [lethal_damage(attacker, blocker), 1].max
       end
 
       def assign_damage!(attacker, target)
@@ -236,7 +271,7 @@ module Enjine
         attackers.each do |id, info|
           next unless deals_damage_now?(id)
 
-          amount = power(object(id))
+          amount = combat_damage_amount(id)
           blockers = blockers_of(id)
           if !info["blocked"] then hits << [id, info["target"], amount]
           elsif blockers.empty? then hits << [id, info["target"], amount] if trample?(id) # CR 702.19e
@@ -245,7 +280,7 @@ module Enjine
           end
         end
         state.blockers.each do |blocker, attacker|
-          hits << [blocker, attacker, power(object(blocker))] if deals_damage_now?(blocker)
+          hits << [blocker, attacker, combat_damage_amount(blocker)] if deals_damage_now?(blocker)
         end
         simultaneous_damage do # CR 510.2
           dealt = Hash.new(0)

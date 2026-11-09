@@ -34,7 +34,7 @@ module Enjine
       when "zone_change" then zone_change!(engine, proposal)
       when "counters" then putting_counters!(engine, proposal)
       when "draw" then drawing!(engine, proposal)
-      when "damage" then preventing!(engine, proposal)
+      when "damage" then Mechanics::DamageEvents.replace!(engine, proposal) # abilities/damage_replacements.rb
       when "create_token" then creating_token!(engine, proposal)
       end
       Mechanics::Counters.replace!(engine, proposal) unless proposal.data["cancelled"]
@@ -70,17 +70,7 @@ module Enjine
     def creating_token!(engine, proposal)
       _, ability = next_controlled(engine, proposal, :token_definition, proposal.data["player"])
       proposal.data["token"] = ability.token_definition.id if ability
-    end
-
-    # CR 615.1: "prevent all damage that would be dealt to you this turn" and protection from the source's
-    # quality (CR 702.16e), unless the damage can't be prevented (CR 615.12).
-    def preventing!(engine, proposal)
-      data = proposal.data
-      return if data["unpreventable"]
-
-      target = engine.state.objects[data["target"]]
-      protected = target&.zone == :battlefield && engine.protected_from?(target, engine.state.objects[data["source"]]) # CR 702.16e
-      data["amount"] = 0 if protected || engine.damage_prevented?(data["target"])
+      proposal.data["count"] *= 2 while next_controlled(engine, proposal, :doubles_tokens, proposal.data["player"]) # "twice that many"
     end
 
     # CR 701.8a, 704.5g-h: destroying a permanent, by an effect or for lethal damage / deathtouch.
@@ -100,13 +90,16 @@ module Enjine
       end
     end
 
-    # "If it would die this turn, exile it instead" (CR 614.1a, 700.4).
+    # "If it would die this turn, exile it instead" and "If a creature an opponent controls would die, exile it
+    # instead" (CR 614.1a, 700.4).
     def dying!(engine, proposal)
       data = proposal.data
       return unless data["to"] == :graveyard && engine.state.battlefield.include?(data["object"])
-      return unless engine.state.effects.any? { it["kind"] == "exile_if_dies" && it["affected"].include?(data["object"]) }
 
-      data["to"] = :exile
+      obj = engine.object(data["object"])
+      this_turn = engine.state.effects.any? { it["kind"] == "exile_if_dies" && it["affected"].include?(obj.id) }
+      static = battlefield_abilities(engine, :exiles_dying?).any? { |source, ability| ability.exiles_dying?(engine, obj, source) }
+      data["to"] = :exile if this_turn || static
     end
 
     # Bonus counters from "until end of turn, ... that many plus one of each of those kinds" effects of

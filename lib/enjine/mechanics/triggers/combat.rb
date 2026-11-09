@@ -19,48 +19,6 @@ module Enjine
         def to_s = "Whenever #{@subject} attacks"
       end
 
-      # "Whenever ~ deals combat damage to a player" / "Whenever a creature you control deals damage".
-      class DealsDamage < Trigger
-        RECIPIENTS = %w[player creature any].freeze
-
-        primitive :trigger, :deals_damage,
-                  description: "The subject deals damage. `combat: true` only counts combat damage; `to`: player | " \
-                               "creature | any (default). Triggers once per damage event (each combat damage step " \
-                               "is one, so double strike can trigger twice).",
-                  rules: %w[510.2 603.2 603.2c 120.3],
-                  params: { "subject" => "\"self\" (default) or {\"each\": filter, ...}", "combat" => "true | false",
-                            "to" => RECIPIENTS.join(" | ") },
-                  example: { "deals_damage" => { "combat" => true, "to" => "player" } }
-
-        def self.keys = %w[subject combat to]
-        def event_class = Events::DamageDealt
-
-        def setup(params, errors, path)
-          @combat = params.fetch("combat", false)
-          @to = params.fetch("to", "any")
-          errors << "#{path}.combat: must be true or false" unless [true, false].include?(@combat)
-          errors << "#{path}.to: must be one of #{RECIPIENTS.join(", ")}" unless RECIPIENTS.include?(@to)
-        end
-
-        def match?(engine, event, source)
-          return false if @combat && !event.combat
-          return false unless recipient_ok?(engine, event.target)
-
-          obj = engine.state.objects[event.source] or return false
-          @subject.match?(engine, event.source, obj.controller, obj.card, source, types: engine.chars(obj).types)
-        end
-
-        def recipient_ok?(engine, ref)
-          case @to
-          when "player" then !Filters.player_index(engine, ref).nil?
-          when "creature" then engine.state.objects.key?(ref) && engine.chars(ref).creature?
-          else true
-          end
-        end
-
-        def to_s = "Whenever #{@subject} deals #{"combat " if @combat}damage#{" to a #{@to}" unless @to == "any"}"
-      end
-
       # "Whenever you attack" (CR 508.3d): once per combat, if one or more creatures attack.
       class PlayerAttacks < PlayerTrigger
         primitive :trigger, :player_attacks,
@@ -73,6 +31,33 @@ module Enjine
         def event_class = Events::AttacksDeclared
         def match?(engine, event, source) = player_ok?(engine, event.player, source)
         def to_s = "Whenever #{who} attack#{"s" unless @controller == "you"}"
+      end
+
+      # "Whenever ~ blocks" / "Whenever this creature blocks a creature with flying" (CR 509.3a-b, 509.3f).
+      class Blocks < Trigger
+        primitive :trigger, :blocks,
+                  description: "The subject is declared as a blocker. With `blocking`, only when the attacking creature " \
+                               "it blocks matches that filter (\"blocks a creature with flying\"). {\"triggering\": " \
+                               "\"object\"} is the blocking creature.",
+                  rules: %w[509.3a 509.3b 509.3f 603.2],
+                  params: { "subject" => "\"self\" (default) or {\"each\": filter, ...}", "blocking" => "filter" },
+                  example: { "blocks" => { "blocking" => { "creature" => { "keywords" => ["flying"] } } } }
+
+        def self.keys = %w[subject blocking]
+        def event_class = Events::BlockerDeclared
+
+        def setup(params, errors, path)
+          @blocking = params["blocking"] && Mechanics.build_entry(:filter, params["blocking"], errors, "#{path}.blocking")
+        end
+
+        def match?(engine, event, source)
+          obj = engine.state.objects[event.object] or return false
+          return false if @blocking && !@blocking.match_for?(engine, event.attacker, source["controller"], source["id"])
+
+          @subject.match?(engine, event.object, obj.controller, obj.card, source, types: engine.chars(obj).types)
+        end
+
+        def to_s = "Whenever #{@subject} blocks#{" a #{Triggers.filter_words(@blocking)}" if @blocking}"
       end
 
       # "Whenever ~ becomes blocked" (CR 509.3c): once per combat, however many creatures block it.

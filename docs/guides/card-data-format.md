@@ -1074,6 +1074,42 @@ blocking it and such Auras and Equipment from staying attached (CR 704.5m-n). `"
   "abilities": [{ "hexproof_from": { "colors": ["B"] } }, { "protection_from": { "colors": ["R"] } }] }
 ```
 
+### 4.22 Damage and combat rules
+
+A damage replacement or prevention ability names the damage it watches with `by` (sources) and `to`
+(recipients), both optional: `"self"`, `"attached"` or `{ "each": filter, "controller": "you" | "opponent" |
+"any", "other": bool }`. `each` is optional and players match too, so `{ "controller": "opponent" }` is "an
+opponent or a permanent an opponent controls". `combat` is `"combat"` or `"noncombat"`.
+
+| Oracle text | Data |
+| --- | --- |
+| "If a source you control would deal damage to an opponent or a permanent an opponent controls, it deals double that damage instead" | `{ "damage_replacement": { "by": { "controller": "you" }, "to": { "controller": "opponent" }, "multiply": 2 } }` |
+| "... noncombat damage ..., it deals that much damage plus 1 instead" | same with `"combat": "noncombat", "plus": 1` (`plus` is an amount) |
+| "All damage that would be dealt to you and other permanents you control is dealt to this creature instead" | `{ "damage_replacement": { "to": { "controller": "you", "other": true }, "redirect": "self" } }` |
+| "Prevent all combat damage that would be dealt to and dealt by this creature" | two abilities: `{ "prevent_damage": { "to": "self", "combat": "combat" } }` and the same with `"by": "self"` |
+| "Damage can't be prevented" / "... this turn" | ability `"damage_unpreventable"` / effect `"damage_unpreventable"` |
+| "Prevent the next 3 damage that would be dealt to any target this turn" | effect `{ "prevent_damage": { "to": { "target": 0 }, "next": 3 } }` (`by` instead of or with `to`: "dealt by target creature") |
+| "Whenever this creature is dealt damage" / "Whenever an opponent is dealt noncombat damage" | trigger `{ "dealt_damage": {} }` / `{ "dealt_damage": { "player": "opponent", "noncombat": true } }` ("that much" is `{ "triggering": "amount" }`) |
+| "Whenever a source you control deals noncombat damage to an opponent" | trigger `{ "deals_damage": { "subject": { "each": "permanent", "controller": "you" }, "noncombat": true, "to": "opponent" } }` |
+| "if an opponent was dealt noncombat damage this turn" | `{ "amount": { "noncombat_damage_this_turn": "each_opponent" }, "at_least": 1 }` |
+| "Whenever this creature blocks a creature with flying" | trigger `{ "blocks": { "blocking": { "creature": { "keywords": ["flying"] } } } }` |
+| "If excess damage was dealt this way" / "equal to the excess damage" | `{ "this_way": n }` of the `deal_damage` effect n |
+| "This creature must be blocked if able" | `"keywords": ["must_be_blocked"]` |
+| "assigns combat damage equal to its toughness rather than its power" (when greater) | `"keywords": ["assigns_damage_by_toughness"]`, or a `static`/`grant` handing it out |
+| "After this phase, there is an additional combat phase [followed by an additional main phase]" | `{ "additional_phases": { "phases": ["combat", "main"] } }`; "if it's the first combat phase of the turn" is `{ "first_combat_phase": true }` |
+| "If a creature an opponent controls would die, exile it instead" | `{ "exile_if_dies": { "affects": { "each": "creature", "controller": "opponent" } } }` |
+| "If one or more tokens would be created under your control, twice that many ... instead" | `"double_tokens"` |
+
+```json
+{ "name": "Example Pyre Warden", "mana_cost": "{2}{R}{W}", "types": ["creature"], "subtypes": ["human", "wizard"],
+  "power": 2, "toughness": 4,
+  "abilities": [{ "damage_replacement": { "by": { "controller": "you" }, "to": { "controller": "opponent" },
+                                          "combat": "noncombat", "plus": 1 } },
+                { "prevent_damage": { "to": { "each": "creature", "controller": "you", "other": true }, "combat": "noncombat" } },
+                { "triggered": { "when": { "dealt_damage": { "player": "opponent", "noncombat": true } },
+                                 "effects": [{ "gain_life": { "amount": 1 } }] } }] }
+```
+
 ---
 
 ## 5. Worked examples

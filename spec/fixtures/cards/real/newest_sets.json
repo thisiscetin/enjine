@@ -5969,5 +5969,111 @@
       "set": "trk",
       "number": "292"
     }
+  },
+  {
+    "name": "Tomik, Izzet Sparkmage",
+    "mana_cost": "{1}{R}",
+    "types": [
+      "creature"
+    ],
+    "supertypes": [
+      "legendary"
+    ],
+    "subtypes": [
+      "human",
+      "wizard"
+    ],
+    "power": 1,
+    "toughness": 2,
+    "keywords": [
+      "prowess"
+    ],
+    "abilities": [
+      {
+        "damage_replacement": {
+          "by": {
+            "controller": "you"
+          },
+          "to": {
+            "controller": "opponent"
+          },
+          "combat": "noncombat",
+          "plus": 1
+        }
+      }
+    ],
+    "rarity": "uncommon",
+    "printing": {
+      "set": "fra",
+      "number": "253"
+    }
+  },
+  {
+    "name": "Tetsuko Umezawa, Pursuer",
+    "mana_cost": "{3}{R}",
+    "types": [
+      "creature"
+    ],
+    "supertypes": [
+      "legendary"
+    ],
+    "subtypes": [
+      "human",
+      "mercenary"
+    ],
+    "power": 2,
+    "toughness": 4,
+    "keywords": [
+      "double_strike",
+      "prowess"
+    ],
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "blocks": {
+              "subject": {
+                "each": {
+                  "one_of": [
+                    {
+                      "creature": {
+                        "power": {
+                          "at_most": 1
+                        }
+                      }
+                    },
+                    {
+                      "creature": {
+                        "toughness": {
+                          "at_most": 1
+                        }
+                      }
+                    }
+                  ]
+                },
+                "controller": "opponent"
+              }
+            }
+          },
+          "effects": [
+            {
+              "deal_damage": {
+                "amount": 1,
+                "to": {
+                  "controller_of": {
+                    "triggering": "object"
+                  }
+                }
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "uncommon",
+    "printing": {
+      "set": "fra",
+      "number": "252"
+    }
   }
 ]

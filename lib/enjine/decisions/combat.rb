@@ -35,15 +35,15 @@ module Enjine
     class DeclareBlockers < Base
       def self.doc
         'Declare one blocker: `{type: "block", object: id, attacker: id}`, `{type: "done"}` (only when the ' \
-          'blocks are legal), or `{type: "unblock", object: id}` to fix an illegal menace block.'
+          'blocks are legal), or `{type: "unblock", object: id}` to fix an illegal menace block or free a ' \
+          "creature for an attacker that must be blocked if able (CR 509.1c)."
       end
 
-      # "done" is offered only when the blocks are legal (menace); otherwise blocks can be removed.
+      # "done" is offered only when the blocks are legal (menace, requirements); otherwise blocks can be removed.
       def self.options(engine, _pending)
         blocks = engine.block_options.map { |id, attacker| { type: "block", object: id, attacker: attacker } }
-        removals = engine.menace_violations.flat_map do |attacker|
-          engine.blockers_of(attacker).map { { type: "unblock", object: it } }
-        end
+        unblock = engine.menace_violations.flat_map { engine.blockers_of(it) } + engine.requirement_unblocks
+        removals = unblock.uniq.map { { type: "unblock", object: it } }
         (engine.blocks_legal? ? [DONE] : []) + blocks + removals
       end
 

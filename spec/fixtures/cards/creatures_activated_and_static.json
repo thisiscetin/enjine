@@ -2106,6 +2106,248 @@
     "rules_text": "Start your engines! Max speed: double strike. Max speed: two mana, exile this card from your graveyard: draw a card."
   },
   {
+    "name": "Ember Twin",
+    "mana_cost": "{3}{R}{R}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "dragon"
+    ],
+    "power": 3,
+    "toughness": 4,
+    "keywords": [
+      "flying"
+    ],
+    "abilities": [
+      {
+        "damage_replacement": {
+          "by": {
+            "controller": "you"
+          },
+          "to": {
+            "controller": "opponent"
+          },
+          "multiply": 2
+        }
+      }
+    ],
+    "rules_text": "Flying. If a source you control would deal damage to an opponent or a permanent an opponent controls, it deals double that damage instead."
+  },
+  {
+    "name": "Sparkwright Adept",
+    "mana_cost": "{1}{R}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "human",
+      "wizard"
+    ],
+    "power": 1,
+    "toughness": 2,
+    "abilities": [
+      {
+        "damage_replacement": {
+          "by": {
+            "controller": "you"
+          },
+          "to": {
+            "controller": "opponent"
+          },
+          "combat": "noncombat",
+          "plus": 1
+        }
+      }
+    ],
+    "rules_text": "If a source you control would deal noncombat damage to an opponent or a permanent an opponent controls, it deals that much damage plus 1 instead."
+  },
+  {
+    "name": "Bulwark Tortoise",
+    "mana_cost": "{4}{G}{G}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "turtle"
+    ],
+    "power": 3,
+    "toughness": 9,
+    "abilities": [
+      {
+        "damage_replacement": {
+          "to": {
+            "controller": "you",
+            "other": true
+          },
+          "redirect": "self"
+        }
+      }
+    ],
+    "rules_text": "All damage that would be dealt to you and other permanents you control is dealt to this creature instead."
+  },
+  {
+    "name": "Haze Wall",
+    "mana_cost": "{1}{U}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "wall"
+    ],
+    "power": 0,
+    "toughness": 2,
+    "keywords": [
+      "defender"
+    ],
+    "abilities": [
+      {
+        "prevent_damage": {
+          "to": "self",
+          "combat": "combat"
+        }
+      },
+      {
+        "prevent_damage": {
+          "by": "self",
+          "combat": "combat"
+        }
+      }
+    ],
+    "rules_text": "Defender. Prevent all combat damage that would be dealt to and dealt by this creature."
+  },
+  {
+    "name": "Rampart Warden",
+    "mana_cost": "{1}{W}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "wall"
+    ],
+    "power": 0,
+    "toughness": 4,
+    "keywords": [
+      "defender"
+    ],
+    "abilities": [
+      {
+        "prevent_damage": {
+          "to": {
+            "each": "creature",
+            "controller": "you",
+            "other": true
+          },
+          "combat": "noncombat"
+        }
+      }
+    ],
+    "rules_text": "Defender. Prevent all noncombat damage that would be dealt to other creatures you control."
+  },
+  {
+    "name": "Grudgebearer",
+    "mana_cost": "{1}{R}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "goblin"
+    ],
+    "power": 2,
+    "toughness": 1,
+    "abilities": [
+      {
+        "damage_unpreventable": {}
+      }
+    ],
+    "rules_text": "Damage can't be prevented."
+  },
+  {
+    "name": "Taunting Brute",
+    "mana_cost": "{2}{G}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "elf",
+      "berserker"
+    ],
+    "power": 4,
+    "toughness": 2,
+    "keywords": [
+      "must_be_blocked"
+    ],
+    "rules_text": "This creature must be blocked if able."
+  },
+  {
+    "name": "Bastion Elder",
+    "mana_cost": "{3}{W}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "treefolk"
+    ],
+    "power": 1,
+    "toughness": 5,
+    "abilities": [
+      {
+        "static": {
+          "affects": {
+            "each": "creature",
+            "controller": "you"
+          },
+          "keywords": [
+            "assigns_damage_by_toughness"
+          ]
+        }
+      }
+    ],
+    "rules_text": "Each creature you control with toughness greater than its power assigns combat damage equal to its toughness rather than its power."
+  },
+  {
+    "name": "Pale Reaper",
+    "mana_cost": "{2}{B}{B}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "wolf"
+    ],
+    "power": 3,
+    "toughness": 3,
+    "abilities": [
+      {
+        "exile_if_dies": {
+          "affects": {
+            "each": "creature",
+            "controller": "opponent"
+          }
+        }
+      }
+    ],
+    "rules_text": "If a creature an opponent controls would die, exile it instead."
+  },
+  {
+    "name": "Mirrorborn Angel",
+    "mana_cost": "{3}{W}{W}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "angel"
+    ],
+    "power": 3,
+    "toughness": 4,
+    "keywords": [
+      "flying"
+    ],
+    "abilities": [
+      "double_tokens"
+    ],
+    "rules_text": "Flying. If one or more tokens would be created under your control, twice that many of those tokens are created instead."
+  },
+  {
     "name": "Tidecaller Initiate",
     "mana_cost": "{2}{U}",
     "types": [

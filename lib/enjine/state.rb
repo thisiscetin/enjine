@@ -68,7 +68,7 @@ module Enjine
                   :step, :step_state, :priority, :passes, :next_id, :starting_player, :pending, :result,
                   :attackers, :blockers, :effects, :frames, :attacks_declared,
                   :pending_triggers, :repeat_cleanup, :combat_damage_pass, :delayed_triggers,
-                  :extra_turns
+                  :extra_turns, :extra_phases
     # The definition ids each player started the game with outside it (CR 400.11a, 100.4), like
     # `decklists`: a restart begins from these again. What is still outside is PlayerState#outside.
     attr_accessor :outside_lists
@@ -93,6 +93,7 @@ module Enjine
       state.pending_triggers = []
       state.delayed_triggers = []
       state.extra_turns = { "queue" => [], "begun" => [] } # CR 500.7
+      state.extra_phases = no_extra_phases # CR 500.8
       state.repeat_cleanup = false
       state.combat_damage_pass = nil
       state.attacks_declared = 0
@@ -102,6 +103,11 @@ module Enjine
       state.step_state = "begin"
       state
     end
+
+    # Phases added this turn (CR 500.8): "pending" [{"after": phase, "phases": ["combat", "main"]}] wait for
+    # their phase to end, "queue" lists added phases still to come and "resume" the step the turn goes on
+    # with after them (Engine::TurnStructure); "combats" counts combat phases begun this turn.
+    def self.no_extra_phases = { "pending" => [], "queue" => [], "combats" => 0 }
 
     def self.new_player(name, outside = [])
       PlayerState.new(name: name, life: STARTING_LIFE, poison: 0, library: [], hand: [], graveyard: [],
@@ -129,6 +135,7 @@ module Enjine
         "attackers" => attackers.dup, "blockers" => blockers.dup, "effects" => effects.map { deep_dup(it) },
         "frames" => deep_dup(frames), "pending_triggers" => deep_dup(pending_triggers),
         "delayed_triggers" => deep_dup(delayed_triggers), "extra_turns" => deep_dup(extra_turns),
+        "extra_phases" => deep_dup(extra_phases),
         "repeat_cleanup" => repeat_cleanup, "combat_damage_pass" => combat_damage_pass,
         "attacks_declared" => attacks_declared }.merge("outside_lists" => (outside_lists || []).map(&:dup))
     end

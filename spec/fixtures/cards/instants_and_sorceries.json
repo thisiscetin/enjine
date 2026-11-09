@@ -3986,6 +3986,158 @@
     ]
   },
   {
+    "name": "Turn Aside",
+    "mana_cost": "{W}",
+    "types": [
+      "instant"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "targets": [
+            "any_target"
+          ],
+          "effects": [
+            {
+              "prevent_damage": {
+                "to": {
+                  "target": 0
+                },
+                "next": 3
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "Prevent the next 3 damage that would be dealt to any target this turn."
+  },
+  {
+    "name": "Pacify the Blade",
+    "mana_cost": "{1}{W}",
+    "types": [
+      "instant"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "targets": [
+            "creature"
+          ],
+          "effects": [
+            {
+              "prevent_damage": {
+                "by": {
+                  "target": 0
+                },
+                "combat": "combat"
+              }
+            },
+            {
+              "draw": {
+                "amount": 1,
+                "to": "you"
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "Prevent all combat damage that would be dealt by target creature this turn. Draw a card."
+  },
+  {
+    "name": "Crater Plunge",
+    "mana_cost": "{3}{R}",
+    "types": [
+      "sorcery"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "targets": [
+            "creature"
+          ],
+          "effects": [
+            {
+              "deal_damage": {
+                "amount": 6,
+                "to": {
+                  "target": 0
+                }
+              }
+            },
+            {
+              "create_token": {
+                "token": "Treasure",
+                "amount": {
+                  "this_way": 0
+                }
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "Crater Plunge deals 6 damage to target creature. Create a Treasure token for each excess damage dealt this way."
+  },
+  {
+    "name": "Reckless Brawl",
+    "mana_cost": "{R}",
+    "types": [
+      "sorcery"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "targets": [
+            {
+              "creature": {
+                "controller": "opponent"
+              }
+            }
+          ],
+          "effects": [
+            "damage_unpreventable",
+            {
+              "deal_damage": {
+                "amount": 3,
+                "to": {
+                  "target": 0
+                }
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "Damage can't be prevented this turn. Reckless Brawl deals 3 damage to target creature an opponent controls."
+  },
+  {
+    "name": "Double Assault",
+    "mana_cost": "{4}{R}{R}",
+    "types": [
+      "sorcery"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "targets": [],
+          "effects": [
+            {
+              "additional_phases": {
+                "phases": [
+                  "combat",
+                  "main"
+                ]
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "After this main phase, there is an additional combat phase followed by an additional main phase."
+  },
+  {
     "name": "Gust of Release",
     "mana_cost": "{1}{W}",
     "types": [

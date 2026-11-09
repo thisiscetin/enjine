@@ -8,14 +8,21 @@ module Enjine
         primitive :effect, :deal_damage,
                   description: "Deal `amount` damage to each referenced creature, planeswalker or player. Damage to a " \
                                "player causes life loss; to a planeswalker removes loyalty counters; to a creature " \
-                               "is marked until cleanup.",
-                  rules: %w[120.3a 120.3c 120.3e 120.6],
+                               "is marked until cleanup. {\"this_way\": n} naming it is the excess damage it dealt " \
+                               "(beyond lethal damage, or a planeswalker's loyalty).",
+                  rules: %w[120.3a 120.3c 120.3e 120.6 120.4a 120.10],
                   params: { "amount" => "integer", "to" => "selector" },
                   example: { "deal_damage" => { "amount" => 3, "to" => { "target" => 0 } } }
 
+        # The excess damage it deals (beyond lethal damage to a creature, or a planeswalker's loyalty) is
+        # what {"this_way": n} reads ("if excess damage was dealt this way", CR 120.4a, 120.10).
         def apply(engine, ctx)
           n = amount_for(engine, ctx)
-          refs(engine, ctx).each { engine.deal_damage!(ctx.source || ctx.object, it, n) }
+          source = ctx.source || ctx.object
+          refs(engine, ctx).each do |ref|
+            lethal = engine.lethal_damage(source, ref)
+            engine.record_amount!(engine.excess_damage(lethal, engine.deal_damage!(source, ref, n)))
+          end
         end
       end
 

@@ -174,6 +174,58 @@ module Enjine
         def to_s = "if tokens would be created under your control, that many #{token_definition.name} tokens are created instead"
       end
 
+      # "If one or more tokens would be created under your control, twice that many of those tokens are
+      # created instead." (CR 614.1a, 111.1)
+      class DoubleTokens < StaticReplacement
+        primitive :ability, :double_tokens,
+                  description: "While this permanent is on the battlefield, if tokens would be created under its " \
+                               "controller's control, twice that many of those tokens are created instead. Several " \
+                               "apply one after another (two make four times as many).",
+                  rules: %w[614.1a 614.5 111.1 616.1],
+                  example: "double_tokens"
+
+        def self.build(params, errors, path, **)
+          Mechanics.check_keys(params, [], errors, path)
+          new
+        end
+
+        def initialize
+          super
+          freeze
+        end
+
+        def kind = :double_tokens
+        def doubles_tokens = true
+        def to_s = "if tokens would be created under your control, twice that many are created instead"
+      end
+
+      # "If a creature an opponent controls would die, exile it instead." (CR 614.1a, 700.4)
+      class ExileIfDiesStatic < StaticReplacement
+        primitive :ability, :exile_if_dies,
+                  description: "While this permanent is on the battlefield, a permanent matching `affects` that would " \
+                               "be put into a graveyard from the battlefield is exiled instead.",
+                  rules: %w[614.1a 700.4],
+                  params: { "affects" => "{\"each\": filter, \"controller\": you|opponent|any, \"other\": bool}" },
+                  example: { "exile_if_dies" => { "affects" => { "each" => "creature", "controller" => "opponent" } } }
+
+        attr_reader :affects
+
+        def self.build(params, errors, path, **)
+          Mechanics.check_keys(params, %w[affects], errors, path)
+          new(Affects.build(Mechanics.fetch_param(params, :affects), errors, "#{path}.affects"))
+        end
+
+        def initialize(affects)
+          super()
+          @affects = affects
+          freeze
+        end
+
+        def kind = :exile_if_dies
+        def exiles_dying?(engine, obj, source) = affects.match?(engine, obj, source)
+        def to_s = "if #{affects} would die, exile it instead"
+      end
+
       # "Lands you control enter untapped." (CR 614.1c, 614.12; applied after every "enters tapped", 616.1)
       class EntersUntapped < StaticReplacement
         primitive :ability, :enters_untapped,

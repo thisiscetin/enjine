@@ -5036,5 +5036,179 @@
         }
       }
     ]
+  },
+  {
+    "name": "Twinflame Tyrant",
+    "mana_cost": "{3}{R}{R}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "dragon",
+      "beast"
+    ],
+    "power": 3,
+    "toughness": 5,
+    "keywords": [
+      "flying"
+    ],
+    "abilities": [
+      {
+        "damage_replacement": {
+          "by": {
+            "controller": "you"
+          },
+          "to": {
+            "controller": "opponent"
+          },
+          "multiply": 2
+        }
+      }
+    ],
+    "rarity": "mythic",
+    "printing": {
+      "set": "fdn",
+      "number": "97"
+    }
+  },
+  {
+    "name": "Fleeting Flight",
+    "mana_cost": "{W}",
+    "types": [
+      "instant"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "targets": [
+            "creature"
+          ],
+          "effects": [
+            {
+              "add_counters": {
+                "counter": "+1/+1",
+                "amount": 1,
+                "to": {
+                  "target": 0
+                }
+              }
+            },
+            {
+              "grant": {
+                "keywords": [
+                  "flying"
+                ],
+                "to": {
+                  "target": 0
+                }
+              }
+            },
+            {
+              "prevent_damage": {
+                "to": {
+                  "target": 0
+                },
+                "combat": "combat"
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "common",
+    "printing": {
+      "set": "fdn",
+      "number": "13"
+    }
+  },
+  {
+    "name": "Goblin Negotiation",
+    "mana_cost": "{X}{R}{R}",
+    "types": [
+      "sorcery"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "targets": [
+            "creature"
+          ],
+          "effects": [
+            {
+              "deal_damage": {
+                "amount": "x",
+                "to": {
+                  "target": 0
+                }
+              }
+            },
+            {
+              "create_token": {
+                "token": {
+                  "name": "Goblin",
+                  "types": [
+                    "creature"
+                  ],
+                  "subtypes": [
+                    "goblin"
+                  ],
+                  "colors": [
+                    "R"
+                  ],
+                  "power": 1,
+                  "toughness": 1
+                },
+                "amount": {
+                  "this_way": 0
+                }
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "uncommon",
+    "printing": {
+      "set": "fdn",
+      "number": "88"
+    }
+  },
+  {
+    "name": "Crystal Barricade",
+    "mana_cost": "{1}{W}",
+    "types": [
+      "artifact",
+      "creature"
+    ],
+    "subtypes": [
+      "wall"
+    ],
+    "power": 0,
+    "toughness": 4,
+    "keywords": [
+      "defender"
+    ],
+    "abilities": [
+      {
+        "player_rule": {
+          "rule": "hexproof"
+        }
+      },
+      {
+        "prevent_damage": {
+          "to": {
+            "each": "creature",
+            "controller": "you",
+            "other": true
+          },
+          "combat": "noncombat"
+        }
+      }
+    ],
+    "rarity": "rare",
+    "printing": {
+      "set": "fdn",
+      "number": "7"
+    }
   }
 ]

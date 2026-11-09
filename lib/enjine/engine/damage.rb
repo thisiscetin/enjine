@@ -10,10 +10,11 @@ module Enjine
       def deal_damage!(source, ref, amount, combat: false, lifelink: true)
         return 0 unless amount.positive?
 
-        data = { "source" => source, "target" => ref, "amount" => amount, "combat" => combat }
-        data["unpreventable"] = true if unpreventable?(combat) # CR 615.12 (Engine::Rules)
-        amount = propose("damage", data).data["amount"]
-        return 0 unless amount.positive? # prevention (CR 615) will reduce it here
+        data = propose("damage", { "source" => source, "target" => ref, "amount" => amount, "combat" => combat }).data
+        amount = data["amount"]
+        return 0 unless amount.positive? # prevented (CR 615)
+
+        ref = data["target"] # redirected (CR 614.9)
 
         source_chars = damage_source_chars(source)
         index = Mechanics::Filters.player_index(self, ref)
@@ -43,6 +44,22 @@ module Enjine
 
         add_counters!(obj, "-1/-1", amount, by_player: object(source).controller)
       end
+
+      # CR 120.6, 120.4a: damage that would be lethal to the creature `id` from `source`, counting damage already
+      # marked on it (1 if the source has deathtouch, CR 702.2c); a planeswalker's is its loyalty (CR 120.10).
+      # Nil for a player or an object that is neither.
+      def lethal_damage(source, id)
+        obj = state.objects[id]
+        return nil unless obj && state.battlefield.include?(id)
+        return loyalty(obj) if !chars(obj).creature? && chars(obj).planeswalker?
+        return nil unless chars(obj).creature?
+
+        lethal = [toughness(obj) - obj.damage, 0].max
+        damage_source_chars(source)&.keyword?(:deathtouch) ? [lethal, 1].min : lethal
+      end
+
+      # CR 120.4a, 120.10: the excess damage of `amount` dealt to `id`, given its lethal damage before.
+      def excess_damage(lethal, amount) = lethal ? [amount - lethal, 0].max : 0
 
       # Damage dealt at the same time (combat damage, CR 510.2) is one event for prevention effects
       # that apply once per event (a shield counter, CR 122.1c). Nil outside such a batch.

@@ -42,7 +42,7 @@ Declare one attacker: `{type: "attack", object: id, target: ref}` (the defending
 
 ## declare_blockers
 
-Declare one blocker: `{type: "block", object: id, attacker: id}`, `{type: "done"}` (only when the blocks are legal), or `{type: "unblock", object: id}` to fix an illegal menace block.
+Declare one blocker: `{type: "block", object: id, attacker: id}`, `{type: "done"}` (only when the blocks are legal), or `{type: "unblock", object: id}` to fix an illegal menace block or free a creature for an attacker that must be blocked if able (CR 509.1c).
 
 ## discard
 
