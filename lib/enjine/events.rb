@@ -107,6 +107,8 @@ module Enjine
     # Combat declarations once final (CR 508.3d "whenever [a player] attacks", 509.3c "becomes blocked").
     AttacksDeclared = define(:attacks_declared, :player, :attackers)
     BecameBlocked = define(:became_blocked, :object, :blockers)
+    # A keyword action that abilities trigger on, once it's complete: "scry" / "surveil" N (CR 701.22, 701.25).
+    KeywordAction = define(:keyword_action, :player, :action, :amount)
 
     # A card moved between zones; old_id stops existing and new_id is born (CR 400.7). `lookers`: the card
     # was exiled face down, and only these players (by name) see which card it is (CR 406.3).

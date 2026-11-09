@@ -135,7 +135,8 @@ module Enjine
 
         def run(engine, ctx, locals)
           index = ctx.controller
-          seen = (locals["seen"] ||= engine.player(index).library.first(amount_for(engine, ctx)))
+          locals["amount"] ||= amount_for(engine, ctx)
+          seen = (locals["seen"] ||= engine.player(index).library.first(locals["amount"]))
           decided = answers(locals).reject { it["type"] == "order" }
           if decided.size < seen.size
             card = seen[decided.size]
@@ -149,7 +150,17 @@ module Enjine
                        (tops - order).map { { "type" => "order", "object" => it } })
           end
           place(engine, index, order + (tops - order), decided.reject { it["type"] == "top" }.map { it["object"] })
+          performed!(engine, index, locals["amount"])
           :done
+        end
+
+        # CR 701.22b, 701.25c-d: scry or surveil N > 0 is an event once it's complete, even if the library
+        # had fewer cards; "whenever you scry" triggers on it.
+        def performed!(engine, index, amount)
+          return unless amount.positive?
+
+          engine.emit Events::KeywordAction.new(player: engine.name(index), action: self.class.primitive_name.to_s,
+                                                amount: amount)
         end
       end
 

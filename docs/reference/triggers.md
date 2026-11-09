@@ -122,6 +122,24 @@ Rules: CR 115.1, CR 601.2c, CR 603.2, CR 603.2c
 }
 ```
 
+## becomes_untapped
+
+The subject becomes untapped (in the untap step or by an effect). A permanent that enters untapped doesn't become untapped.
+
+Rules: CR 603.2e, CR 701.26b
+
+| Parameter | Description |
+| --- | --- |
+| `subject` | "self" (default), "attached" or {"each": filter, ...} |
+
+```json
+{
+  "becomes_untapped": {
+    "subject": "attached"
+  }
+}
+```
+
 ## cast
 
 A player casts a spell. `controller`: you (default) | opponent | any; `spell`: creature | noncreature | instant_or_sorcery, or any spell filter, e.g. {"spell": {"subtypes": ["saga"]}} or {"one_of": [...]} for "creature or Spacecraft spell"; `name` / `mana_value`: "chosen" (the source's as-it-entered choice); `self: true`: "when you cast this spell" (it functions on the stack).
@@ -165,6 +183,25 @@ Rules: CR 122.6, CR 603.2, CR 603.2c
 }
 ```
 
+## cycles
+
+A player (`controller`: you (default) | opponent | any) cycles a card (activates its cycling or typecycling ability; optional `card` filter).
+
+Rules: CR 702.29a, CR 702.29e
+
+| Parameter | Description |
+| --- | --- |
+| `controller` | you | opponent | any |
+| `card` | card filter |
+
+```json
+{
+  "cycles": {
+    "controller": "you"
+  }
+}
+```
+
 ## deals_damage
 
 The subject deals damage. `combat: true` only counts combat damage; `to`: player | creature | any (default). Triggers once per damage event (each combat damage step is one, so double strike can trigger twice).
@@ -200,6 +237,27 @@ Rules: CR 603.6c, CR 603.10a, CR 700.4
 {
   "dies": {
     "subject": "self"
+  }
+}
+```
+
+## discards
+
+A player (`controller`: you (default) | opponent | any) discards a card (optional `card` filter). `batched: true`: "one or more cards", once per event batch; then "that many" is how many were discarded.
+
+Rules: CR 701.9a, CR 603.2c, CR 702.29d
+
+| Parameter | Description |
+| --- | --- |
+| `controller` | you | opponent | any |
+| `card` | card filter |
+| `batched` | true | false |
+
+```json
+{
+  "discards": {
+    "controller": "you",
+    "batched": true
   }
 }
 ```
@@ -278,6 +336,29 @@ Rules: CR 119.9, CR 120.3f
 }
 ```
 
+## leaves_battlefield
+
+The subject leaves the battlefield (for any zone, or only `to` that zone). Looks back in time: the permanent is matched as it last existed (types, controller, counters).
+
+Rules: CR 603.6c, CR 603.10a, CR 400.7
+
+| Parameter | Description |
+| --- | --- |
+| `subject` | "self" (default) or {"each": filter, "controller": ..., "other": true} |
+| `to` | graveyard | exile | hand | library |
+
+```json
+{
+  "leaves_battlefield": {
+    "subject": {
+      "each": "creature",
+      "controller": "you",
+      "other": true
+    }
+  }
+}
+```
+
 ## leaves_graveyard
 
 A card leaves a graveyard (whose: `controller` you (default) | opponent | any). Optional `card` filter on its card types. `batched: true` is "one or more cards leave": once per event that moves cards (one effect, cost or action), however many cards.
@@ -335,6 +416,75 @@ Rules: CR 508.3d, CR 508.1
 }
 ```
 
+## put_into
+
+A card is put into `zone` (graveyard | exile) from anywhere, or only `from` the listed zones. `controller`: the card's owner (you (default) | opponent | any); optional `card` filter on the card. `batched: true`: "one or more cards", once per event batch.
+
+Rules: CR 603.6c, CR 603.2c, CR 400.3
+
+| Parameter | Description |
+| --- | --- |
+| `zone` | graveyard | exile |
+| `from` | list of battlefield, graveyard, hand, library, stack, exile (default: anywhere) |
+| `controller` | you | opponent | any |
+| `card` | card filter |
+| `batched` | true | false |
+
+```json
+{
+  "put_into": {
+    "zone": "graveyard",
+    "card": "creature",
+    "batched": true
+  }
+}
+```
+
+## sacrifices
+
+The subject is sacrificed (`controller` of the subject: who sacrificed it). Looks back in time, like leaves_battlefield. `batched: true`: "one or more", once per event batch.
+
+Rules: CR 701.21a, CR 603.10a, CR 603.2c
+
+| Parameter | Description |
+| --- | --- |
+| `subject` | "self" (default) or {"each": filter, "controller": you, "other": true} |
+| `batched` | true | false |
+
+```json
+{
+  "sacrifices": {
+    "subject": {
+      "each": "artifact",
+      "controller": "you"
+    }
+  }
+}
+```
+
+## scries
+
+A player (`controller`: you (default) | opponent | any) scries (not scry 0). Triggers after the scry is complete.
+
+Rules: CR 701.22a, CR 701.22b
+
+| Parameter | Description |
+| --- | --- |
+| `controller` | you | opponent | any |
+
+```json
+{
+  "any_of": [
+    {
+      "scries": {}
+    },
+    {
+      "surveils": {}
+    }
+  ]
+}
+```
+
 ## step_begins
 
 A step begins. `whose`: "your" (default), "each" or "opponent".
@@ -351,6 +501,24 @@ Rules: CR 603.6b, CR 503.1a, CR 513.1a
   "step_begins": {
     "step": "upkeep",
     "whose": "your"
+  }
+}
+```
+
+## surveils
+
+A player (`controller`: you (default) | opponent | any) surveils (not surveil 0). Triggers after the surveil is complete.
+
+Rules: CR 701.25a, CR 701.25c, CR 701.25d
+
+| Parameter | Description |
+| --- | --- |
+| `controller` | you | opponent | any |
+
+```json
+{
+  "surveils": {
+    "controller": "you"
   }
 }
 ```

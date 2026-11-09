@@ -111,7 +111,7 @@ module Enjine
         end
         return ceased unless doomed
 
-        doomed.each { |id, reason| move!(id, :graveyard, reason: reason) }
+        simultaneously { doomed.each { |id, reason| move!(id, :graveyard, reason: reason) } } # CR 704.3, 603.10a
         true
       end
 
