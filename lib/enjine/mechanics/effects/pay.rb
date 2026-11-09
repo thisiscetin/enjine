@@ -3,62 +3,149 @@
 module Enjine
   module Mechanics
     module Effects
-      # Paying a cost while a spell or ability resolves (CR 118.12): "[Player] may pay {1}. If they do,
-      # [then]. If they don't, [otherwise]." The payer answers yes or no (yes only when the cost can be
-      # paid, CR 118.3), then pays mana one decision at a time in a "pay" frame (mana abilities allowed,
-      # CR 605.3a); declining or cancelling that payment counts as not paying.
+      # Paying a cost while a spell or ability resolves (CR 118.12): any costs (mana, life, discarding,
+      # sacrificing, poison counters, a choice between costs). The payer is asked whether to pay — one choice per
+      # way the costs could be paid now (CR 118.3), so a `one_of` is chosen with it — then makes the cost's choices
+      # (which card to discard) one `effect_choice` at a time, then pays the mana in a "pay" frame (mana abilities
+      # allowed, CR 605.3a); declining or cancelling that payment counts as not paying, and nothing is paid. The
+      # rest is paid once the mana is.
+      module PaysCosts
+        # The costs given as `cost` (a list), or as the shorthands `mana`, `life` and `waterbend`.
+        def parse_payment(params, errors, path)
+          keys = %w[mana life waterbend cost] & self.class.keys
+          given = keys.reject { Mechanics.fetch_param(params, it).nil? }
+          errors << "#{path}: needs exactly one of #{keys.join(", ")}" unless given.size == 1
+          raw = given.first && Mechanics.fetch_param(params, given.first)
+          case given.first
+          when "cost"
+            Abilities::StackAbility.parse_costs(params, errors, path).tap { errors << "#{path}.cost: must be a non-empty list" if it.empty? }
+          when "life"
+            return [Costs::PayLife.new(raw)].freeze if raw.is_a?(Integer) && raw >= 1
+
+            (errors << "#{path}.life: must be an integer >= 1") && [].freeze
+          when nil then [].freeze
+          else [Mechanics.build_entry(:cost, { given.first => raw }, errors, path)].compact.freeze
+          end
+        end
+
+        # Each way of paying `costs` open to the payer now: its other parts payable for `payer_obj` (an object
+        # the payer controls, CR 118.3) and its mana affordable.
+        def open_variants(engine, payer_obj, costs)
+          engine.cost_variants(costs).each_index.select do |i|
+            variant = engine.cost_variants(costs)[i]
+            variant.reject(&:mana?).all? { it.payable?(engine, payer_obj) } &&
+              engine.affordable?(payer_obj.controller, engine.costs_mana(variant), nil, engine.waterbend_purpose(variant))
+          end
+        end
+
+        # `{type: "pay"}` (with `option` and `cost` when the costs can be paid more than one way) for each open way.
+        def pay_choices(engine, payer_obj, costs)
+          ways = engine.cost_variants(costs)
+          open_variants(engine, payer_obj, costs).map do |i|
+            ways.size == 1 ? { "type" => "pay" } : { "type" => "pay", "option" => i, "cost" => ways[i].join(", ") }
+          end
+        end
+
+        # "{2}", "3 life", "discard a card or {2}".
+        def costs_text(costs) = costs.map { it.to_s.gsub(/(\A| or )Pay /, "\\1").sub(/\A\w/, &:downcase) }.join(", ")
+
+        # After a "pay" answer: makes the choices, pays the mana, then the rest. :wait while asking or paying
+        # mana; otherwise "paid" or "unpaid".
+        def pay_costs(engine, ctx, locals, payer_obj, costs)
+          st = locals["paying"] ||= { "variant" => answers(locals).last["option"].to_i, "entries" => {},
+                                      "seen" => answers(locals).size }
+          variant = engine.cost_variants(costs)[st["variant"]]
+          if answers(locals).size > st["seen"]
+            st["seen"] = answers(locals).size
+            answer = answers(locals).last
+            return "unpaid" if st.delete("mana") && answer["type"] != "paid"
+
+            take_choice(engine, st, variant, answer) if st["cost"]
+          end
+          choose_next(engine, locals, st, variant, payer_obj) || pay_variant(engine, ctx, st, variant, payer_obj)
+        end
+
+        private
+
+        def take_choice(engine, st, variant, answer)
+          i = st.delete("cost")
+          (st["entries"][i.to_s] ||= []) << variant[i].choose!(engine, { object: answer["object"] })
+        end
+
+        # Asks for the next choice a cost needs (CR 601.2h, as for casting); nil when none is left.
+        def choose_next(engine, locals, st, variant, payer_obj)
+          variant.each_with_index do |cost, i|
+            next unless cost.respond_to?(:choices_needed)
+
+            chosen = st["entries"].fetch(i.to_s, [])
+            options = cost.choice_options(engine, payer_obj, chosen)
+            next if chosen.size >= cost.choices_needed || options.empty?
+
+            st["cost"] = i
+            return ask(engine, locals, payer_obj.controller, cost.to_s, options.map { { "type" => "cost", "object" => it[:object] } })
+          end
+          nil
+        end
+
+        def pay_variant(engine, ctx, st, variant, payer_obj)
+          mana = engine.costs_mana(variant)
+          if mana.mana_value.positive? && !st["mana_paid"]
+            st["mana"] = st["mana_paid"] = true
+            bend = engine.waterbend_generic(variant)
+            engine.begin_payment!(payer_obj.controller, mana, ctx.object, waterbend: bend.positive? ? bend : nil)
+            return :wait
+          end
+          variant.each_with_index do |cost, i|
+            next if cost.mana?
+
+            cost.respond_to?(:choices_needed) ? cost.pay_chosen!(engine, payer_obj, st["entries"].fetch(i.to_s, [])) : cost.pay!(engine, payer_obj)
+          end
+          "paid"
+        end
+      end
+
+      # "[Player] may pay {1}. If they do, [then]. If they don't, [otherwise]." (CR 118.12): the payer answers
+      # pay or decline (pay only when the cost can be paid, CR 118.3), then pays (PaysCosts).
       class Pay < ChoiceEffect
         include NestedList
+        include PaysCosts
 
         LISTS = %w[then otherwise].freeze
 
         primitive :effect, :pay,
-                  description: "You may pay `mana`, `life` or `waterbend` as it resolves. If you do, `then` happens; " \
-                               "if you don't, `otherwise`. Paying mana works like paying a spell's cost (mana abilities " \
-                               "may be activated; a `waterbend` cost may also be paid by tapping artifacts and " \
-                               "creatures, CR 701.67a); life can be paid only if you have that much (CR 119.4). For " \
-                               "another player paying, see `counter_unless_pays`.",
+                  description: "You may pay `cost` (a list of costs: mana, life, discarding, sacrificing, a `one_of` " \
+                               "choice, ...) as it resolves; `mana`, `life` and `waterbend` are shorthands for one cost. " \
+                               "If you do, `then` happens; if you don't, `otherwise`. Paying mana works like paying a " \
+                               "spell's cost (mana abilities may be activated; a `waterbend` cost may also be paid by " \
+                               "tapping artifacts and creatures, CR 701.67a); a cost that can't be paid can't be " \
+                               "chosen (CR 118.3). For another player paying, see `counter_unless_pays`.",
                   rules: %w[118.12 118.12a 118.3 119.4 605.3a 701.67a 701.67c],
-                  params: { "mana" => "mana cost string, e.g. \"{1}\"", "life" => "integer",
+                  params: { "cost" => "list of costs, e.g. [{\"one_of\": [{\"sacrifice_permanent\": {\"filter\": " \
+                                      "\"artifact\"}}, {\"discard\": {}}]}]",
+                            "mana" => "mana cost string, e.g. \"{1}\"", "life" => "integer",
                             "waterbend" => "mana cost string: \"unless you waterbend {2}\"",
                             "then" => "list of effects",
                             "otherwise" => "list of effects" },
                   example: { "pay" => { "mana" => "{1}", "then" => [{ "draw" => { "amount" => 1 } }] } }
 
-        attr_reader :cost, :life
+        attr_reader :costs
 
-        def self.keys = %w[mana life waterbend then otherwise if]
+        def self.keys = %w[cost mana life waterbend then otherwise if]
         def self.default_to = "you"
 
         def setup(params, errors, path)
-          raw = Mechanics.fetch_param(params, :mana)
-          bend = Mechanics.fetch_param(params, :waterbend)
-          @life = Mechanics.fetch_param(params, :life)
-          errors << "#{path}: needs exactly one of mana, life, waterbend" unless [raw, bend, @life].compact.size == 1
-          errors << "#{path}.life: must be an integer >= 1" unless @life.nil? || (@life.is_a?(Integer) && @life >= 1)
-          @cost = raw && Mana.parse_cost(raw, errors, "#{path}.mana")
-          @cost ||= bend && Mana.parse_cost(bend, errors, "#{path}.waterbend")
-          @waterbend = bend && @cost && { "waterbend" => @cost.generic }
+          @costs = parse_payment(params, errors, path)
           @lists = parse_lists(params, errors, path, LISTS)
         end
 
         def nested_effects = @lists.values.flatten
-
-        def what
-          return "#{life} life" unless cost
-
-          @waterbend ? "waterbend #{cost}" : cost.to_s
-        end
+        def what = costs_text(costs)
 
         def to_s
           text = "you may pay #{what}"
           text += " — if paid: #{@lists["then"].join("; ")}" unless @lists["then"].empty?
           text += " — if not: #{@lists["otherwise"].join("; ")}" unless @lists["otherwise"].empty?
           text
-        end
-
-        def can_pay?(engine, index)
-          cost ? engine.affordable?(index, cost, nil, @waterbend) : engine.player(index).life >= life
         end
 
         def run(engine, ctx, locals)
@@ -75,70 +162,55 @@ module Enjine
 
         private
 
-        # Asks yes/no, then pays; returns :wait while a decision or the payment is pending.
+        # Asks pay or decline, then pays; returns :wait while a decision or the payment is pending.
         def decide(engine, ctx, locals)
-          index = ctx.controller
-          answer, payment = answers(locals)
-          unless answer
-            choices = can_pay?(engine, index) ? [{ "type" => "pay" }, { "type" => "decline" }] : [{ "type" => "decline" }]
-            return ask(engine, locals, index, "Pay #{what}?", choices)
+          payer = engine.object(ctx.object)
+          unless locals["paying"] || answers(locals).first
+            choices = pay_choices(engine, payer, costs) + [{ "type" => "decline" }]
+            return ask(engine, locals, payer.controller, "Pay #{what}?", choices)
           end
-          return locals["outcome"] = "unpaid" if answer["type"] == "decline"
-          return pay_life(engine, index, locals) if life
-          return locals["outcome"] = (payment["type"] == "paid" ? "paid" : "unpaid") if payment
+          return locals["outcome"] = "unpaid" if answers(locals).first["type"] == "decline"
 
-          engine.begin_payment!(index, cost, ctx.object, waterbend: @waterbend&.fetch("waterbend"))
-          :wait
-        end
-
-        def pay_life(engine, index, locals)
-          engine.change_life!(index, -life)
-          locals["outcome"] = "paid"
+          result = pay_costs(engine, ctx, locals, payer, costs)
+          result == :wait ? :wait : (locals["outcome"] = result)
         end
       end
 
       # "Counter target spell unless its controller pays {3}." (CR 701.6a, 118.12a): the spell's (or
-      # ability's) controller may pay; if they don't, it's countered.
+      # ability's) controller may pay (PaysCosts); if they don't, it's countered.
       class CounterUnlessPays < ChoiceEffect
+        include PaysCosts
+
         primitive :effect, :counter_unless_pays,
                   description: "Counter each referenced spell or ability unless its controller pays `mana` (or " \
-                               "`waterbend`s that cost, CR 701.67a) as this resolves (they choose, and pay like any " \
-                               "cost; mana abilities allowed).",
+                               "`waterbend`s that cost, CR 701.67a, or pays the list of costs `cost`) as this " \
+                               "resolves (they choose, and pay like any cost; mana abilities allowed).",
                   rules: %w[701.6a 118.12a 605.3a 701.67a],
                   params: { "mana" => "mana cost string", "waterbend" => "mana cost string, instead of mana",
-                            "to" => "selector (usually {\"target\": 0})" },
+                            "cost" => "list of costs, instead of mana", "to" => "selector (usually {\"target\": 0})" },
                   example: { "counter_unless_pays" => { "mana" => "{3}", "to" => { "target" => 0 } } }
 
-        def self.keys = %w[mana waterbend to]
+        def self.keys = %w[mana waterbend cost to]
 
-        attr_reader :cost, :waterbend
+        attr_reader :costs
 
-        def setup(params, errors, path)
-          key = %w[mana waterbend].find { params.key?(it) } || "mana"
-          raw = Mechanics.fetch_param(params, key)
-          errors << "#{path}: needs exactly one of mana, waterbend" if params.key?("mana") && params.key?("waterbend")
-          @cost = raw.nil? ? ((errors << "#{path}.mana: required") && nil) : Mana.parse_cost(raw, errors, "#{path}.#{key}")
-          @waterbend = key == "waterbend" && @cost ? @cost.generic : nil
-        end
+        def setup(params, errors, path) = @costs = parse_payment(params, errors, path)
 
-        def what = waterbend ? "waterbend #{cost}" : cost.to_s
+        def what = costs_text(costs)
         def to_s = "counter #{to} unless its controller pays #{what}"
 
         def run(engine, ctx, locals)
           target = (locals["target"] ||= on_stack(engine, ctx).first) or return :done
 
-          payer = engine.object(target).controller
-          answer, payment = answers(locals)
-          unless answer
-            affordable = engine.affordable?(payer, cost, nil, waterbend && { "waterbend" => waterbend })
-            choices = affordable ? [{ "type" => "pay" }, { "type" => "decline" }] : [{ "type" => "decline" }]
-            return ask(engine, locals, payer, "Pay #{what} or #{engine.object(target).card} is countered?", choices)
+          payer = engine.object(target)
+          unless locals["paying"] || answers(locals).first
+            choices = pay_choices(engine, payer, costs) + [{ "type" => "decline" }]
+            return ask(engine, locals, payer.controller, "Pay #{what} or #{payer.card} is countered?", choices)
           end
-          if answer["type"] == "pay" && payment.nil?
-            engine.begin_payment!(payer, cost, ctx.object, waterbend: waterbend)
-            return :wait
-          end
-          engine.counter!(target) unless payment && payment["type"] == "paid"
+          paid = answers(locals).first["type"] == "pay" && pay_costs(engine, ctx, locals, payer, costs)
+          return :wait if paid == :wait
+
+          engine.counter!(target) unless paid == "paid"
           :done
         end
 

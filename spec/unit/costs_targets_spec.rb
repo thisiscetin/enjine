@@ -105,7 +105,7 @@ RSpec.describe "Costs, kicker, targets and payments: card data (unit)" do
       .to include(a_string_matching(/needs exactly one of mana, life/))
     expect(errors_for(spell("effects" => [{ "pay" => { "life" => 0 } }]))).to include(a_string_matching(/life: must be an integer >= 1/))
     expect(errors_for(spell("targets" => ["spell"], "effects" => [{ "counter_unless_pays" => { "to" => { "target" => 0 } } }])))
-      .to include(a_string_matching(/counter_unless_pays.mana: required/))
+      .to include(a_string_matching(/counter_unless_pays: needs exactly one of mana, waterbend, cost/))
     expect(errors_for(creature([{ "ward" => {} }]))).to include(a_string_matching(/ward.cost: required/))
     expect(errors_for(spell("effects" => [{ "add_mana" => { "color" => "any_one", "colors" => ["R"] } }])))
       .to include(a_string_matching(/colors: must list two or more colors/))

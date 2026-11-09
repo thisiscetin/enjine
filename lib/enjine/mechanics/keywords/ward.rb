@@ -13,10 +13,11 @@ module Enjine
       class Ward < TriggeredAbility
         primitive :ability, :ward,
                   description: "Ward: whenever this permanent becomes the target of a spell or ability an opponent " \
-                               "controls, counter that spell or ability unless its controller pays `cost` (or, with " \
-                               "`waterbend`, waterbends that cost: \"Ward—Waterbend {4}\").",
+                               "controls, counter that spell or ability unless its controller pays `cost`: a mana cost, " \
+                               "or a list of costs (\"Ward—Pay 2 life\", \"Ward—Discard a card or pay {2}\" with " \
+                               "`one_of`). With `waterbend`, they waterbend that cost: \"Ward—Waterbend {4}\".",
                   rules: %w[702.21a 601.2c 603.2 701.6a 701.67a],
-                  params: { "cost" => "mana cost string, e.g. \"{2}\"", "waterbend" => "mana cost string, instead of cost" },
+                  params: { "cost" => "mana cost string, e.g. \"{2}\", or a list of costs, e.g. [{\"pay_life\": 2}]", "waterbend" => "mana cost string, instead of cost" },
                   example: { "ward" => { "cost" => "{2}" } }
 
         # The trigger: this permanent becomes the target of an opponent's spell or ability.
@@ -41,18 +42,24 @@ module Enjine
 
         TRIGGER = BecomesTarget.new.freeze
 
+        # `cost`: a mana cost string ("Ward {2}") or a list of costs ("Ward—Pay 2 life", CR 702.21a).
         def self.build(params, errors, path, **)
           Mechanics.check_keys(params, %w[cost waterbend], errors, path)
-          key = params.key?("waterbend") ? "waterbend" : "cost"
-          raw = Mechanics.fetch_param(params, key)
-          errors << "#{path}.cost: required" if raw.nil?
+          raw = Mechanics.fetch_param(params, :cost)
+          bend = Mechanics.fetch_param(params, :waterbend)
+          errors << "#{path}.cost: required" if raw.nil? && bend.nil?
           errors << "#{path}: needs exactly one of cost, waterbend" if params.key?("cost") && params.key?("waterbend")
-          paid = { (key == "cost" ? "mana" : key) => raw || "{0}" }
-          effect = Counter.new(to: nil, params: paid, errors: errors, path: "#{path}.#{key}")
+          effect = if raw.is_a?(Array) then Counter.new(to: nil, params: { "cost" => raw }, errors: errors, path: path)
+                   elsif bend then Counter.new(to: nil, params: { "waterbend" => bend }, errors: errors, path: path)
+                   else Counter.new(to: nil, params: { "mana" => raw || "{0}" }, errors: errors, path: "#{path}.cost")
+                   end
           new(targets: [].freeze, effects: [effect].freeze, trigger: TRIGGER)
         end
 
-        def to_s = effects.first.waterbend ? "Ward—Waterbend #{effects.first.cost}" : "Ward #{effects.first.cost}"
+        def to_s
+          costs = effects.first.costs
+          costs.size == 1 && costs.first.instance_of?(Costs::ManaPayment) ? "Ward #{costs.first}" : "Ward—#{costs.join(", ")}"
+        end
       end
     end
   end

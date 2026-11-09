@@ -102,7 +102,8 @@ module Enjine
         when "pay_mana" then "Pay {#{opt[:mana]}} from mana pool#{" (restricted)" if opt[:restricted]}"
         when "target" then "Target #{name_of(opt[:target])}"
         when "cost" then "Use #{name_of(opt[:object])} to pay the cost"
-        when "cost_option" then "Pay this: #{@game.pending_decision.details["costs"][opt[:option]]}"
+        when "pay" then opt[:cost] ? "Pay: #{opt[:cost]}" : "Pay"
+        when "cost_option" then @game.pending_decision.details["costs"][opt[:option]]
         when "cancel" then "Cancel (rewind this cast/activation)"
         when "attack" then "Attack #{name_of(opt[:target])} with #{name_of(opt[:object])}"
         when "block" then "Block #{name_of(opt[:attacker])} with #{name_of(opt[:object])}"
