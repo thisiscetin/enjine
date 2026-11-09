@@ -27,6 +27,10 @@ module Enjine
       # effect puts onto the battlefield, in that effect's locals (#ask_entering_choices!).
       def enter_choice!(option)
         answer = option.transform_keys(&:to_s)
+        # A choice of any number of permanents (devour): each pick asks again; "done" ends it (CR 614.12).
+        return ask!(state.pending.merge("chosen" => state.pending.fetch("chosen", []) + [answer["object"]])) if answer["type"] == "devour"
+
+        answer["objects"] = state.pending["chosen"] if state.pending.key?("chosen")
         if state.pending["effect"]
           (answering_locals["entering"] ||= {})[state.pending["object"]] = answer.merge("player" => state.pending["player"])
         else
@@ -53,10 +57,14 @@ module Enjine
         choice.respond_to?(:enters_with) ? choice.enters_with(self, answer) : choice.enters_for(answer)
       end
 
-      def pay_entering_life!(controller, frame)
-        return unless frame["enter"] && frame["enter"]["type"] == "pay_life"
+      # What an "as this enters" answer costs, paid as the permanent enters: life (CR 119.4), or the
+      # permanents it devours (CR 702.82a).
+      def pay_entering_costs!(controller, frame)
+        answer = frame["enter"] or return
+        return change_life!(controller, -answer["life"]) if answer["type"] == "pay_life"
 
-        change_life!(controller, -frame["enter"]["life"])
+        choice = answer.key?("objects") && entering_choice(frame["object"])
+        choice.pay!(self, controller, answer) if choice.respond_to?(:pay!)
       end
 
       # ---- permanents an effect puts onto the battlefield (CR 614.12, 614.12a) ----------------
@@ -89,7 +97,7 @@ module Enjine
       # a life payment chosen is paid now, as it enters (CR 119.4).
       def with_entering_answer(locals, id, controller, enters)
         answer = locals.fetch("entering", {})[id] or return enters
-        pay_entering_life!(controller, "enter" => answer)
+        pay_entering_costs!(controller, "enter" => answer, "object" => id)
         extra = entering_status(entering_choice(id), answer) or return enters
         (enters || {}).merge(extra) do |key, mine, theirs|
           next mine || theirs if key == "tapped" # "enters tapped" from the effect stays
@@ -101,7 +109,10 @@ module Enjine
       # The options of a pending enter_choice. Several permanents entering at once can't be given choices
       # whose combined life payments are more than the player has (CR 614.12b).
       def entering_options(pending)
-        options = entering_choice(pending["object"]).options(self, pending["player"])
+        choice = entering_choice(pending["object"])
+        return choice.pick_options(self, pending["player"], pending.fetch("chosen", [])) if choice.respond_to?(:pick_options)
+
+        options = choice.options(self, pending["player"])
         return options unless pending["effect"]
 
         spent = answering_locals.fetch("entering", {}).values.sum do

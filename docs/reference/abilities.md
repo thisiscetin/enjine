@@ -521,6 +521,26 @@ Rules: CR 614.1a, CR 614.8, CR 701.8a, CR 701.21a, CR 704.5f, CR 704.5g, CR 704.
 }
 ```
 
+## devour
+
+Devour `amount`: as this permanent enters, you may sacrifice any number of permanents matching `each` (default "creature"; "land" for devour land) that you control, one at a time; it enters with `amount` +1/+1 counters for each.
+
+Rules: CR 702.82a, CR 702.82b, CR 702.82c, CR 614.12, CR 701.21a
+
+| Parameter | Description |
+| --- | --- |
+| `amount` | integer >= 1 |
+| `each` | permanent filter (default "creature") |
+
+```json
+{
+  "devour": {
+    "amount": 3,
+    "each": "land"
+  }
+}
+```
+
 ## double_counters
 
 While this permanent is on the battlefield, if its controller would put one or more counters (only `counter`, if given) on a permanent matching `affects` ({"each": filter, "controller": you|opponent|any}, relative to this permanent's controller), the number put is doubled. This includes counters a permanent enters with.

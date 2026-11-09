@@ -128,6 +128,47 @@ RSpec.describe "Exile, suspend and meld mechanics" do
     end
   end
 
+  describe "devour (CR 702.82a) with Gorging Maw (fixture)" do
+    let(:reanimate) do
+      { "name" => "Spec Reanimation", "mana_cost" => "{B}", "types" => ["sorcery"],
+        "abilities" => [{ "spell" => { "targets" => [{ "graveyard_card" => { "controller" => "you", "any_of" => ["creature"] } }],
+                                       "effects" => [{ "return_to_battlefield" => { "to" => { "target" => 0 } } }] } }] }
+    end
+    let(:cards) { [reanimate] }
+
+    it "also asks when a resolving effect puts it onto the battlefield; it remembers what it devoured" do
+      game = build_game(catalog) do
+        turn 3, active: "alice", step: :precombat_main
+        player("alice", mana_pool: { B: 1 }) do
+          hand "Spec Reanimation"
+          graveyard "Gorging Maw"
+          battlefield "Grizzly Bears", count: 2
+          library "Forest", count: 5
+        end
+        player("bob") { library "Forest", count: 5 }
+      end
+      bears = game.state.battlefield.dup
+      game.submit(type: "cast", object: hand_card(game, "Spec Reanimation"))
+      game.submit(type: "target", target: game.state.players[0].graveyard.first)
+      game.submit(type: "pay_mana", mana: "B")
+      game.submit(type: "pass") until game.pending_decision.kind == "enter_choice"
+      bears.each { game.submit(type: "devour", object: it) }
+      expect(game.legal_options).to eq([{ type: "done" }])
+      game.submit(type: "done")
+      maw = obj_id(game, "Gorging Maw")
+      expect(game.state.object(maw).counters).to eq("+1/+1" => 4)
+      expect(game.state.object(maw).memory["devoured"]).to eq(2)
+      expect(game.state.battlefield).to eq([maw])
+    end
+
+    it "validates amount and each" do
+      bad = { "name" => "Spec Bad Maw", "mana_cost" => "{1}", "types" => ["creature"], "power" => 1, "toughness" => 1,
+              "abilities" => [{ "devour" => { "amount" => 0, "each" => 5 } }] }
+      expect { Enjine::CardDefinition.from_h(bad) }
+        .to raise_error(Enjine::InvalidCardDefinition, /abilities\[0\]\.devour\.amount: must be an integer >= 1/)
+    end
+  end
+
   describe "hideaway (CR 702.75a) and playing a land while resolving (CR 305.2a, 305.3)" do
     def hide(game)
       game.submit(type: "play_land", object: hand_card(game, "Spec Hidden Vault"))

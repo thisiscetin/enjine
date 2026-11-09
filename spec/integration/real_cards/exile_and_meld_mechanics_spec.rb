@@ -169,6 +169,30 @@ RSpec.describe "Real cards: exile, suspend and meld mechanics" do
     end
   end
 
+  describe "devour (CR 702.82c)" do
+    it "Famished Worldsire: devours two lands for six +1/+1 counters, then looks at the top six" do
+      game = board(hand: ["Famished Worldsire"], battlefield: ["Forest"] * 3, mana: { G: 3, C: 5 })
+      lands = game.state.battlefield.dup
+      game.submit(type: "cast", object: hand_id(game, "Famished Worldsire"))
+      game.submit(game.legal_options.find { it[:type] == "pay_mana" }) while game.pending_decision.kind == "pay_cost"
+      game.submit(type: "pass") until game.pending_decision.kind == "enter_choice"
+      expect(game.legal_options).to eq(lands.map { { type: "devour", object: it } } + [{ type: "done" }])
+      game.submit(type: "devour", object: lands[0])
+      expect(game.legal_options).to eq(lands.drop(1).map { { type: "devour", object: it } } + [{ type: "done" }])
+      play(game, { type: "devour", object: lands[1] }, { type: "done" }, ->(g) { g.legal_options.last })
+      worldsire = obj_id(game, "Famished Worldsire")
+      expect(stats(game, worldsire)).to eq([6, 6])
+      expect(game.state.object(worldsire).memory["devoured"]).to eq(2)
+      expect(game.state.players[0].graveyard.size).to eq(2)
+    end
+
+    it "Famished Worldsire: devouring nothing, it's a 0/0 and dies" do
+      game = board(hand: ["Famished Worldsire"], battlefield: ["Forest"], mana: { G: 3, C: 5 })
+      play(game, { type: "cast", object: hand_id(game, "Famished Worldsire") }, { type: "done" })
+      expect(game.state.players[0].graveyard.map { game.state.object(it).card }).to eq(["famished_worldsire"])
+    end
+  end
+
   describe "proliferate X times (CR 701.34a)" do
     it "Tam, the Possibility: proliferates once per planeswalker type among your planeswalkers" do
       game = board(battlefield: ["Tam, the Possibility", "Ajani Resolute", "Ajani, Outland Chaperone", "The Theorist, Jace Beleren"],

@@ -41,7 +41,7 @@ module Enjine
 
         land = engine.candidate_object(frame["player"], frame["object"])
         enters = engine.enters_from_answer(land, frame)
-        engine.pay_entering_life!(frame["player"], frame)
+        engine.pay_entering_costs!(frame["player"], frame)
         engine.put_played_land!(frame["player"], frame["object"], enters: enters)
         engine.action_taken!(frame["player"])
         :done

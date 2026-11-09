@@ -491,5 +491,62 @@
       "set": "tdm",
       "number": "60"
     }
+  },
+  {
+    "name": "Famished Worldsire",
+    "mana_cost": "{5}{G}{G}{G}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "leviathan"
+    ],
+    "power": 0,
+    "toughness": 0,
+    "abilities": [
+      {
+        "ward": {
+          "cost": "{3}"
+        }
+      },
+      {
+        "devour": {
+          "amount": 3,
+          "each": "land"
+        }
+      },
+      {
+        "triggered": {
+          "when": {
+            "enters": {}
+          },
+          "effects": [
+            {
+              "dig": {
+                "amount": {
+                  "power": "self"
+                },
+                "for": {
+                  "types": [
+                    "land"
+                  ]
+                },
+                "count": "any",
+                "put": "battlefield",
+                "tapped": true
+              }
+            },
+            {
+              "shuffle_library": {}
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "mythic",
+    "printing": {
+      "set": "eoe",
+      "number": "182"
+    }
   }
 ]

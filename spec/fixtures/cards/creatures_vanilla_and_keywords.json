@@ -628,5 +628,24 @@
         }
       }
     ]
+  },
+  {
+    "name": "Gorging Maw",
+    "mana_cost": "{2}{B}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "horror"
+    ],
+    "power": 1,
+    "toughness": 1,
+    "abilities": [
+      {
+        "devour": {
+          "amount": 2
+        }
+      }
+    ]
   }
 ]

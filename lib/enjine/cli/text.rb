@@ -108,6 +108,7 @@ module Enjine
         when "block" then "Block #{name_of(opt[:attacker])} with #{name_of(opt[:object])}"
         when "assign" then "Assign 1 damage to #{name_of(opt[:object])}"
         when "done" then "Done"
+        when "devour" then "Devour #{name_of(opt[:object])}"
         when "discard", "bottom", "find" then "#{opt[:type].capitalize} #{name_of(opt[:object])}"
         when "keep" then "Keep hand"
         when "call" then "Call #{opt[:call]}"
