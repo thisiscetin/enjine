@@ -89,9 +89,25 @@ module Enjine
       land = state.objects[event.new_id]
       player = land ? state.players[land.controller].name : event.owner
       @lands_this_turn[player] += 1
-      finding("305.2", "#{player} played #{@lands_this_turn[player]} lands this turn") if @lands_this_turn[player] > 1
+      allowed = 1 + additional_land_plays(state.players.index { it.name == player })
+      finding("305.2", "#{player} played #{@lands_this_turn[player]} lands this turn") if @lands_this_turn[player] > allowed
       active = state.players[state.active].name
       finding("305.1", "#{player} played a land on #{active}'s turn") if player != active
+    end
+
+    # CR 305.2: "you may play an additional land" abilities of the player's permanents, from the raw card data
+    # and from resolved effects that granted them (Effects::Become).
+    def additional_land_plays(index)
+      state.battlefield.sum do |id|
+        obj = state.objects[id]
+        next 0 unless obj.controller == index
+
+        printed = defn(obj.card).abilities.count { it.kind == :additional_land_plays }
+        granted = state.effects.select { it["kind"] == "abilities" && it["affected"].include?(id) }.sum do |effect|
+          defn(effect["card"]).effect_granted(effect["ref"]).count { it.ability.kind == :additional_land_plays }
+        end
+        printed + granted
+      end
     end
 
     # CR 307.1 / 301.1 etc.: sorcery-speed spells only in your main phase with an empty stack.

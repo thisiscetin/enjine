@@ -57,7 +57,7 @@ RSpec.describe Enjine::RulesMonitor do
   end
 
   it "catches extra land plays (CR 305.2)" do
-    stub_const("Enjine::Actions::PlayLand::LANDS_PER_TURN", 3)
+    allow_any_instance_of(Enjine::Engine).to receive(:land_plays_allowed).and_return(3) # rubocop:disable RSpec/AnyInstance
     expect(rules(play)).to include("305.2")
   end
 
