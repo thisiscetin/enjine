@@ -139,9 +139,7 @@ module Enjine
         when "damage_dealt" then "#{name_of(ev["source"])} deals #{ev["amount"]} damage to #{name_of(ev["target"])}"
         when "life_changed" then "#{ev["player"]}: life #{ev["from"]} → #{ev["to"]}"
         when "counters_changed" then "#{name_of(ev["object"])}: #{ev["counter"]} counters #{ev["from"]} → #{ev["to"]}"
-        when "effect_started" then "#{ev["affected"].map do
-          name_of(it)
-        end.join(", ")} #{ev["affected"].size == 1 ? "gets" : "get"} +#{ev["details"]["power"]}/+#{ev["details"]["toughness"]} until end of turn"
+        when "effect_started" then pumped(ev)
         when "effects_ended" then "#{ev["count"]} until-end-of-turn effect(s) end"
         when "attacker_declared" then "#{name_of(ev["object"])} attacks #{name_of(ev["target"])}"
         when "blocker_declared" then "#{name_of(ev["object"])} blocks #{name_of(ev["attacker"])}"
@@ -190,6 +188,11 @@ module Enjine
         when "keyword_action" then "#{ev["player"]} #{ev["action"].to_s.tr("_", " ")}#{" #{ev["amount"]}" if ev["amount"]}"
         else "#{ev["type"]}: #{ev.except("type")}"
         end
+      end
+
+      def pumped(ev)
+        verb = ev["affected"].size == 1 ? "gets" : "get"
+        "#{ev["affected"].map { name_of(it) }.join(", ")} #{verb} +#{ev["details"]["power"]}/+#{ev["details"]["toughness"]} until end of turn"
       end
 
       def zone_changed(ev)
