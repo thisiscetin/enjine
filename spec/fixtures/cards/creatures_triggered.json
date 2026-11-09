@@ -3633,5 +3633,188 @@
         }
       }
     ]
+  },
+  {
+    "name": "Wrathful Brute",
+    "mana_cost": "{3}{R}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "berserker"
+    ],
+    "power": 3,
+    "toughness": 5,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "dealt_damage": {}
+          },
+          "effects": [
+            {
+              "add_counters": {
+                "counter": "+1/+1",
+                "amount": {
+                  "triggering": "amount"
+                },
+                "to": "self"
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "Whenever this creature is dealt damage, put that many +1/+1 counters on it."
+  },
+  {
+    "name": "Gloating Imp",
+    "mana_cost": "{1}{B}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "imp"
+    ],
+    "power": 1,
+    "toughness": 1,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "dealt_damage": {
+              "player": "opponent",
+              "noncombat": true
+            }
+          },
+          "effects": [
+            {
+              "gain_life": {
+                "amount": 1,
+                "to": "you"
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "Whenever an opponent is dealt noncombat damage, you gain 1 life."
+  },
+  {
+    "name": "Pyre Scholar",
+    "mana_cost": "{2}{U}{R}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "human",
+      "wizard"
+    ],
+    "power": 2,
+    "toughness": 3,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "deals_damage": {
+              "subject": {
+                "each": "permanent",
+                "controller": "you"
+              },
+              "to": "opponent",
+              "noncombat": true
+            }
+          },
+          "effects": [
+            {
+              "draw": {
+                "amount": 1,
+                "to": "you"
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "Whenever a source you control deals noncombat damage to an opponent, draw a card."
+  },
+  {
+    "name": "Canopy Stinger",
+    "mana_cost": "{2}{G}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "insect"
+    ],
+    "power": 3,
+    "toughness": 3,
+    "keywords": [
+      "reach"
+    ],
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "blocks": {
+              "blocking": {
+                "creature": {
+                  "keywords": [
+                    "flying"
+                  ]
+                }
+              }
+            }
+          },
+          "effects": [
+            {
+              "pump": {
+                "power": 3,
+                "toughness": 0,
+                "to": "self"
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "Reach. Whenever this creature blocks a creature with flying, it gets +3/+0 until end of turn."
+  },
+  {
+    "name": "Warcry Herald",
+    "mana_cost": "{2}{R}{W}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "angel"
+    ],
+    "power": 3,
+    "toughness": 3,
+    "keywords": [
+      "flying"
+    ],
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "attacks": {}
+          },
+          "effects": [
+            {
+              "additional_phases": {
+                "phases": [
+                  "combat"
+                ],
+                "if": {
+                  "first_combat_phase": true
+                }
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "Flying. Whenever this creature attacks, if it's the first combat phase of the turn, after this phase there is an additional combat phase."
   }
 ]

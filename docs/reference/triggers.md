@@ -157,6 +157,31 @@ Rules: CR 603.2e, CR 701.26b
 }
 ```
 
+## blocks
+
+The subject is declared as a blocker. With `blocking`, only when the attacking creature it blocks matches that filter ("blocks a creature with flying"). {"triggering": "object"} is the blocking creature.
+
+Rules: CR 509.3a, CR 509.3b, CR 509.3f, CR 603.2
+
+| Parameter | Description |
+| --- | --- |
+| `subject` | "self" (default) or {"each": filter, ...} |
+| `blocking` | filter |
+
+```json
+{
+  "blocks": {
+    "blocking": {
+      "creature": {
+        "keywords": [
+          "flying"
+        ]
+      }
+    }
+  }
+}
+```
+
 ## cast
 
 A player casts a spell. `controller`: you (default) | opponent | any; `spell`: creature | noncreature | instant_or_sorcery, or any spell filter, e.g. {"spell": {"subtypes": ["saga"]}} or {"one_of": [...]} for "creature or Spacecraft spell"; `name` / `mana_value`: "chosen" (the source's as-it-entered choice); `self: true`: "when you cast this spell" (it functions on the stack).
@@ -239,21 +264,44 @@ Rules: CR 702.29a, CR 702.29e
 
 ## deals_damage
 
-The subject deals damage. `combat: true` only counts combat damage; `to`: player | creature | any (default). Triggers once per damage event (each combat damage step is one, so double strike can trigger twice).
+The subject deals damage. `combat: true` only counts combat damage, `noncombat: true` only noncombat damage; `to`: player | opponent (of the source's controller) | creature | any (default). Triggers once per damage event (each combat damage step is one, so double strike can trigger twice).
 
-Rules: CR 510.2, CR 603.2, CR 603.2c, CR 120.3
+Rules: CR 510.2, CR 603.2, CR 603.2c, CR 120.2a, CR 120.2b, CR 120.3
 
 | Parameter | Description |
 | --- | --- |
 | `subject` | "self" (default) or {"each": filter, ...} |
 | `combat` | true | false |
-| `to` | player | creature | any |
+| `noncombat` | true | false |
+| `to` | player | opponent | creature | any |
 
 ```json
 {
   "deals_damage": {
     "combat": true,
     "to": "player"
+  }
+}
+```
+
+## dealt_damage
+
+Damage is dealt to the `subject` (a permanent: "self" by default, "attached" or {"each": filter, ...}) or, with `player` (you | opponent | any), to a player. `combat` / `noncombat`: only that damage. {"triggering": "object"} is the permanent dealt damage, {"triggering": "player"} the player, {"triggering": "amount"} how much. `batched: true`: "one or more ..." (once per damage event, CR 603.2c).
+
+Rules: CR 120.3, CR 603.2, CR 603.2c, CR 120.2a, CR 120.2b
+
+| Parameter | Description |
+| --- | --- |
+| `subject` | "self" (default), "attached" or {"each": filter, ...} |
+| `player` | you | opponent | any |
+| `combat` | true | false |
+| `noncombat` | true | false |
+| `batched` | true | false |
+
+```json
+{
+  "dealt_damage": {
+    "subject": "self"
   }
 }
 ```

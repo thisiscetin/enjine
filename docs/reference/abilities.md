@@ -387,6 +387,55 @@ Rules: CR 702.29a, CR 702.29b, CR 702.29e, CR 702.29f, CR 113.6m, CR 602.2a
 }
 ```
 
+## damage_replacement
+
+While this permanent is on the battlefield, damage from sources in `by` to recipients in `to` (both optional; `combat`: combat | noncombat) is changed: `multiply` (2 = "double that damage"), `plus` an amount ("that much damage plus 1"), or `redirect` ("self" | "attached": dealt to this permanent or the one it's attached to instead). A scope is "self", "attached" or {"each": filter, "controller": you|opponent|any, "other": bool}; `each` is optional and players match too, so {"controller": "opponent"} is "an opponent or a permanent an opponent controls". Several apply in the order the affected player would pick: redirections, then prevention, then multiplying, then adding.
+
+Rules: CR 614.1a, CR 614.5, CR 614.9, CR 616.1, CR 616.1e, CR 616.1f, CR 120.2b
+
+| Parameter | Description |
+| --- | --- |
+| `by` | damage scope |
+| `to` | damage scope |
+| `combat` | combat | noncombat |
+| `multiply` | integer >= 2 |
+| `plus` | amount |
+| `redirect` | "self" | "attached" |
+
+```json
+{
+  "damage_replacement": {
+    "by": {
+      "controller": "you"
+    },
+    "to": {
+      "controller": "opponent"
+    },
+    "multiply": 2
+  }
+}
+```
+
+## damage_unpreventable
+
+While this permanent is on the battlefield, damage from sources in `by` to recipients in `to` (both optional; `combat`: combat | noncombat) can't be prevented: prevention effects don't reduce it and shields aren't used up.
+
+Rules: CR 615.12
+
+| Parameter | Description |
+| --- | --- |
+| `by` | damage scope |
+| `to` | damage scope |
+| `combat` | combat | noncombat |
+
+```json
+{
+  "damage_unpreventable": {
+    "combat": "combat"
+  }
+}
+```
+
 ## destroy_replacement
 
 If a permanent matching `affects` would be destroyed (by an effect, lethal damage or deathtouch), instead: all its `remove_counters` counters are removed (if given) and, with `remove_damage: true`, all damage marked on it is removed. Sacrificing isn't destroying, and 0 toughness isn't either.
@@ -437,6 +486,16 @@ Rules: CR 614.1a, CR 122.6, CR 122.6a, CR 616.1
     }
   }
 }
+```
+
+## double_tokens
+
+While this permanent is on the battlefield, if tokens would be created under its controller's control, twice that many of those tokens are created instead. Several apply one after another (two make four times as many).
+
+Rules: CR 614.1a, CR 614.5, CR 111.1, CR 616.1
+
+```json
+"double_tokens"
 ```
 
 ## draw_replacement
@@ -670,6 +729,27 @@ Rules: CR 702.74a, CR 118.9, CR 601.2b, CR 601.2f, CR 601.2h, CR 603.4
 {
   "evoke": {
     "cost": "{R/W}{R/W}"
+  }
+}
+```
+
+## exile_if_dies
+
+While this permanent is on the battlefield, a permanent matching `affects` that would be put into a graveyard from the battlefield is exiled instead.
+
+Rules: CR 614.1a, CR 700.4
+
+| Parameter | Description |
+| --- | --- |
+| `affects` | {"each": filter, "controller": you|opponent|any, "other": bool} |
+
+```json
+{
+  "exile_if_dies": {
+    "affects": {
+      "each": "creature",
+      "controller": "opponent"
+    }
   }
 }
 ```
@@ -959,6 +1039,31 @@ Rules: CR 702.11c, CR 115.4, CR 508.1c, CR 402.2, CR 514.1, CR 615.1, CR 615.1a,
         ]
       }
     }
+  }
+}
+```
+
+## prevent_damage
+
+While this permanent is on the battlefield, all damage from sources in `by` to recipients in `to` (damage scopes as in damage_replacement, both optional; `combat`: combat | noncombat) is prevented. "To and by this creature" is two of them.
+
+Rules: CR 615.1, CR 615.1a, CR 615.6
+
+| Parameter | Description |
+| --- | --- |
+| `by` | damage scope |
+| `to` | damage scope |
+| `combat` | combat | noncombat |
+
+```json
+{
+  "prevent_damage": {
+    "to": {
+      "each": "creature",
+      "controller": "you",
+      "other": true
+    },
+    "combat": "noncombat"
   }
 }
 ```

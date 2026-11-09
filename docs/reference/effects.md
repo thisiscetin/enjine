@@ -75,6 +75,27 @@ Rules: CR 613.1d, CR 205.1b, CR 611.2a, CR 611.2c
 }
 ```
 
+## additional_phases
+
+Adds `phases` (in order; each "combat" or "main") directly after the current phase of this turn. Phases added after the same phase come most recently created first. An added main phase is a postcombat main phase.
+
+Rules: CR 500.8, CR 505.1
+
+| Parameter | Description |
+| --- | --- |
+| `phases` | list of "combat" | "main" |
+
+```json
+{
+  "additional_phases": {
+    "phases": [
+      "combat",
+      "main"
+    ]
+  }
+}
+```
+
 ## additional_triggers
 
 For `duration` (while_source_tapped: for as long as the source remains tapped), each triggered ability of each referenced permanent triggers an additional time.
@@ -626,11 +647,25 @@ Rules: CR 707.2, CR 707.8, CR 707.9a, CR 707.9b, CR 111.1, CR 614.1c
 }
 ```
 
+## damage_unpreventable
+
+Until end of turn, damage (`combat`: combat | noncombat only) can't be prevented.
+
+Rules: CR 615.12, CR 611.2a
+
+| Parameter | Description |
+| --- | --- |
+| `combat` | combat | noncombat |
+
+```json
+"damage_unpreventable"
+```
+
 ## deal_damage
 
-Deal `amount` damage to each referenced creature, planeswalker or player. Damage to a player causes life loss; to a planeswalker removes loyalty counters; to a creature is marked until cleanup.
+Deal `amount` damage to each referenced creature, planeswalker or player. Damage to a player causes life loss; to a planeswalker removes loyalty counters; to a creature is marked until cleanup. {"this_way": n} naming it is the excess damage it dealt (beyond lethal damage, or a planeswalker's loyalty).
 
-Rules: CR 120.3a, CR 120.3c, CR 120.3e, CR 120.6
+Rules: CR 120.3a, CR 120.3c, CR 120.3e, CR 120.6, CR 120.4a, CR 120.10
 
 | Parameter | Description |
 | --- | --- |
@@ -1339,6 +1374,31 @@ Rules: CR 723.3a, CR 723.3c
 {
   "prepare": {
     "to": "self"
+  }
+}
+```
+
+## prevent_damage
+
+For the `duration` (end_of_turn by default, or until_your_next_turn), damage that would be dealt to the referenced players and permanents (`to`) and/or by the referenced sources (`by`) is prevented (`combat`: combat | noncombat only). With `next`, it is a shield that prevents only the next that much damage (CR 615.7). The referenced objects are fixed as it resolves.
+
+Rules: CR 615.1, CR 615.3, CR 615.7, CR 611.2a
+
+| Parameter | Description |
+| --- | --- |
+| `to` | selector (recipients) |
+| `by` | selector (sources) |
+| `combat` | combat | noncombat |
+| `next` | amount (a shield) |
+| `duration` | end_of_turn | until_your_next_turn |
+
+```json
+{
+  "prevent_damage": {
+    "to": {
+      "target": 0
+    },
+    "combat": "combat"
   }
 }
 ```

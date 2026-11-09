@@ -15,7 +15,8 @@ module Enjine
         facts = {}
         case event
         when Events::ZoneChanged then facts.merge!("object" => event.new_id, "player" => engine.names.index(event.owner))
-        when Events::SpellCast, Events::DilemmaFaced, Events::Tapped, Events::AttackerDeclared, Events::BecameBlocked
+        when Events::SpellCast, Events::DilemmaFaced, Events::Tapped, Events::AttackerDeclared, Events::BecameBlocked,
+             Events::BlockerDeclared
           facts["object"] = event.object
         when Events::AbilityActivated then facts["object"] = event.source
         when Events::DamageDealt

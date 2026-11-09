@@ -31,6 +31,26 @@ module Enjine
       errors << "extra_turns: must be {\"queue\": [player index...], \"begun\": [player index...]}" unless ok
     end
 
+    # CR 500.8: phases added this turn (State.no_extra_phases).
+    def validate_extra_phases(data, errors)
+      extra = data.fetch("extra_phases", State.no_extra_phases)
+      ok = extra.is_a?(Hash) && (extra.keys - %w[pending queue resume combats]).empty? && added_phases?(extra["queue"]) &&
+           extra["combats"].is_a?(Integer) && !extra["combats"].negative? &&
+           (extra["resume"].nil? || Steps::BY_NAME.key?(extra["resume"].to_s.to_sym)) &&
+           extra["pending"].is_a?(Array) && extra["pending"].all? { pending_phases?(it) }
+      return if ok
+
+      errors << "extra_phases: must be {\"pending\": [{\"after\": phase, \"phases\": [...]}], \"queue\": " \
+                "[combat|main...], \"resume\": step, \"combats\": n}"
+    end
+
+    def added_phases?(list) = list.is_a?(Array) && list.all? { Engine::ADDED_PHASES.key?(it) }
+
+    def pending_phases?(entry)
+      entry.is_a?(Hash) && entry.keys.sort == %w[after phases] && added_phases?(entry["phases"]) &&
+        Steps::ORDER.any? { it.phase.to_s == entry["after"] }
+    end
+
     def validate_turn(data, errors)
       errors << "step_state: must be one of #{State::STEP_STATES.join(", ")}" unless State::STEP_STATES.include?(data["step_state"])
       step = data["step"]

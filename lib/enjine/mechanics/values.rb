@@ -14,7 +14,7 @@ module Enjine
     #   {"distinct_types": selector}                  how many different creature types they have (CR 205.3m)
     #   {"counters": {"of": selector, "kind": name}}  counters on them (any kind without "kind", CR 122)
     #   {"life_gained_this_turn" | "life_lost_this_turn" | "dilemmas_this_turn" | "returned_this_turn"
-    #    | "cards_drawn_this_turn" | "cards_discarded_this_turn"
+    #    | "cards_drawn_this_turn" | "cards_discarded_this_turn" | "noncombat_damage_this_turn"
     #    | "spells_cast_this_game": player selector}  this turn's (or game's) history, see Engine::TurnHistory
     #   {"spells_cast_this_turn": {"by": player selector, "matching": spell filter}}
     #   {"died_this_turn" | "entered_this_turn" | "left_this_turn" | "sacrificed_this_turn" | "attackers_this_turn"
@@ -27,7 +27,8 @@ module Enjine
     class Amount
       SELECTOR_KINDS = %w[count power toughness greatest_power hand_size life graveyard_size distinct_names distinct_types
                           life_gained_this_turn life_lost_this_turn dilemmas_this_turn returned_this_turn
-                          cards_drawn_this_turn cards_discarded_this_turn spells_cast_this_game speed].freeze
+                          cards_drawn_this_turn cards_discarded_this_turn spells_cast_this_game speed
+                          noncombat_damage_this_turn].freeze
       ARITHMETIC = %w[times plus divide].freeze
       # Object history lists: kind -> turn_log key (Engine::TurnHistory).
       DEPARTED = { "died_this_turn" => "died", "entered_this_turn" => "entered", "left_this_turn" => "left",
@@ -38,7 +39,8 @@ module Enjine
       # Player history counters: kind -> turn_log/game_log key.
       HISTORY = { "life_gained_this_turn" => "life_gained", "life_lost_this_turn" => "life_lost",
                   "dilemmas_this_turn" => "dilemmas", "returned_this_turn" => "returned",
-                  "cards_drawn_this_turn" => "drawn", "cards_discarded_this_turn" => "discarded" }.freeze
+                  "cards_drawn_this_turn" => "drawn", "cards_discarded_this_turn" => "discarded",
+                  "noncombat_damage_this_turn" => "noncombat_damage" }.freeze
 
       # `min`: the smallest fixed number allowed (computed amounts may be anything their parts give).
       def self.build(data, errors, path, targets_count:, min: 0, results_count: 0)
@@ -339,7 +341,8 @@ module Enjine
                  you_attacked_this_turn].freeze
       # Kinds named by one key and built by their class (ChosenIs: abilities/chosen_values.rb).
       KEYED = { "targets" => :Targets, "triggering" => :TriggeringIs, "source" => :Source,
-                "nth_resolution" => :NthResolution, "chosen" => :ChosenIs }.freeze
+                "nth_resolution" => :NthResolution, "chosen" => :ChosenIs,
+                "first_combat_phase" => :FirstCombatPhase }.freeze
 
       def self.build(data, errors, path, targets_count: 0, results_count: 0)
         unless data.is_a?(Hash)

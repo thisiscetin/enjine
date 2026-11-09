@@ -27,6 +27,7 @@ module Enjine
       validate_turn(data, errors) if errors.empty?
       validate_delayed_triggers(data, catalog, errors) if errors.empty?
       validate_extra_turns(data, errors)
+      validate_extra_phases(data, errors)
       validate_outside(data, catalog, errors)
       errors
     end
@@ -56,6 +57,7 @@ module Enjine
       state.pending_triggers = deep_copy(data.fetch("pending_triggers", []))
       state.delayed_triggers = deep_copy(data.fetch("delayed_triggers", []))
       state.extra_turns = deep_copy(data.fetch("extra_turns", { "queue" => [], "begun" => [] }))
+      state.extra_phases = deep_copy(data.fetch("extra_phases", State.no_extra_phases))
       state.outside_lists = data.fetch("outside_lists", [[], []]).map { |l| l.dup.freeze }.freeze
       state.repeat_cleanup = data.fetch("repeat_cleanup", false)
       state.combat_damage_pass = data["combat_damage_pass"]

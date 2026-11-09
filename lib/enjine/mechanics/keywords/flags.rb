@@ -10,7 +10,9 @@ module Enjine
       # turn.
       {
         attacks_despite_defender: ["Defender doesn't stop this creature from attacking.", %w[702.3b 508.1c]],
-        doesnt_untap: ["This permanent doesn't untap during its controller's untap step.", %w[502.3]]
+        doesnt_untap: ["This permanent doesn't untap during its controller's untap step.", %w[502.3]],
+        assigns_damage_by_toughness: ["If this creature's toughness is greater than its power, it assigns combat damage " \
+                                      "equal to its toughness rather than its power.", %w[510.1a]]
       }.each { |name, (description, rules)| Evergreen.define(name, description, rules) }
 
       # Combat restrictions and requirements (CR 508.1c-d, 509.1b). They aren't keyword abilities
@@ -26,7 +28,9 @@ module Enjine
                             "offered as an attacker only while another creature attacks or could still be declared, " \
                             "and declaring attackers can't finish while it attacks alone.", %w[506.5 508.1c]],
         attacks_each_combat: ["Requirement: this creature attacks each combat if able. Declaring attackers can't " \
-                              "finish while it could still attack.", %w[508.1d]]
+                              "finish while it could still attack.", %w[508.1d]],
+        must_be_blocked: ["Requirement: this attacking creature must be blocked if able. Declaring blockers can't " \
+                          "finish while it is unblocked and a creature that could block it blocks nothing.", %w[509.1c]]
       }.each { |name, (description, rules)| Evergreen.define(name, description, rules) }
 
       # "This spell can't be countered." (CR 101.2: a "can't" wins over an effect that would counter it.)

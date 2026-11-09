@@ -168,8 +168,14 @@ module Enjine
       # CR 111.1: a token enters the battlefield under its creator's control. Entering replacement
       # effects apply to it like to any permanent (CR 614.1c, 614.12).
       # `memory`: a token that's a copy (Engine::Copies#create_token_copy!).
-      def create_token!(definition, controller, tapped: false, memory: nil, enters: nil)
-        definition = catalog.fetch(propose("create_token", { "player" => controller, "token" => definition.id }).data["token"])
+      # A replacement may create several instead ("twice that many", CR 614.1a): the extra ones are part of the
+      # replaced event (`replaced`), so the replacement effects don't apply to them again (CR 614.5).
+      def create_token!(definition, controller, tapped: false, memory: nil, enters: nil, replaced: false)
+        unless replaced
+          data = propose("create_token", { "player" => controller, "token" => definition.id, "count" => 1 }).data
+          definition = catalog.fetch(data["token"])
+          (data["count"] - 1).times { create_token!(definition, controller, tapped:, memory:, enters:, replaced: true) }
+        end
         obj = create_object(definition.id, controller, :battlefield)
         obj.memory.merge!(memory) if memory
         entering = enters # an "as this enters" choice made before it's created (CR 614.12a)

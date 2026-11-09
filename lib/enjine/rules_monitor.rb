@@ -280,6 +280,9 @@ module Enjine
     def facts(obj, card)
       chars = Mechanics::Keywords::Changeling.apply(card.printed_characteristics)
       chars = chars.with(keywords: chars.keywords | granted_keywords(obj.id))
+      # A crewed Vehicle is an artifact creature (CR 702.122b): the types an effect adds count.
+      added = state.effects.select { it["kind"] == "add_types" && it["affected"].include?(obj.id) }.flat_map { it["types"] }
+      chars = chars.with(types: chars.types | added.map(&:to_sym)) unless added.empty?
       Mechanics::Filters::Facts.new(chars: chars, counters: obj.counters, token: card.token?)
     end
 

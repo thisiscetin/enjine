@@ -79,11 +79,13 @@ module Enjine
         state.turn += 1
         state.active = index
         state.players.each { it.lands_played = 0 }
+        state.extra_phases = State.no_extra_phases
         emit Events::TurnBegan.new(turn: state.turn, active: name(index))
         enter_step!(:untap)
       end
 
       def enter_step!(step_name)
+        state.extra_phases["combats"] += 1 if step_name == :beginning_of_combat
         state.step = step_name
         state.step_state = "begin"
         state.passes = 0
@@ -146,9 +148,39 @@ module Enjine
         if index >= Steps::ORDER.size
           begin_turn!(take_next_turn!) # an extra turn comes first (CR 500.7)
         else
-          enter_step!(Steps::ORDER[index].name)
+          following = Steps::ORDER[index]
+          enter_step!(following.phase == step.phase ? following.name : phase_after!(step.phase, following.name))
         end
       end
+
+      # ---- additional phases (CR 500.8) ---------------------------------------------------
+
+      # The first step of each kind of phase an effect can add (an added main phase is a postcombat one).
+      ADDED_PHASES = { "combat" => :beginning_of_combat, "main" => :postcombat_main }.freeze
+
+      # "After this phase, there is an additional combat phase [followed by an additional main phase]": the
+      # phases are added directly after the current phase (CR 500.8).
+      def add_phases!(phases)
+        state.extra_phases["pending"] << { "after" => step.phase.to_s, "phases" => phases }
+      end
+
+      # As `phase` ends: the first step of the next added phase, else of the phase the turn goes on with
+      # (`natural`). Phases added after the same phase come most recently created first (CR 500.8).
+      def phase_after!(phase, natural)
+        extra = state.extra_phases
+        due = extra["pending"].select { it["after"] == phase.to_s }
+        extra["pending"] -= due
+        due.each { extra["queue"].unshift(*it["phases"]) }
+        if extra["queue"].empty?
+          resume = extra.delete("resume")
+          return resume ? resume.to_sym : natural
+        end
+        extra["resume"] ||= natural.to_s
+        ADDED_PHASES.fetch(extra["queue"].shift)
+      end
+
+      # "If it's the first combat phase of the turn".
+      def first_combat_phase? = state.extra_phases["combats"] == 1
     end
 
     include TurnStructure
