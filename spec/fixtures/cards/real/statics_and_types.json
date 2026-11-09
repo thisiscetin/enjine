@@ -950,5 +950,32 @@
       "set": "tla",
       "number": "260"
     }
+  },
+  {
+    "name": "Multiversal Passage",
+    "types": [
+      "land"
+    ],
+    "abilities": [
+      {
+        "choose_basic_land_type": {}
+      },
+      {
+        "enters_tapped_unless_pay_life": {
+          "life": 2
+        }
+      },
+      {
+        "static": {
+          "affects": "self",
+          "subtypes": "chosen"
+        }
+      }
+    ],
+    "rarity": "rare",
+    "printing": {
+      "set": "spm",
+      "number": "180"
+    }
   }
 ]

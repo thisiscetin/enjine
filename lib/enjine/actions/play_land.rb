@@ -37,9 +37,9 @@ module Enjine
 
       # The play_land frame: ask the "as this enters" choice, then put the land onto the battlefield.
       def self.step(engine, frame)
-        return engine.ask_enter_choice!(frame["object"], frame["player"]) unless frame["enter"]
-
         land = engine.candidate_object(frame["player"], frame["object"])
+        return engine.ask_enter_choice!(frame["object"], frame["player"]) if engine.entering_choice_pending?(land, frame["enter"])
+
         enters = engine.enters_from_answer(land, frame)
         engine.pay_entering_life!(frame["player"], frame)
         engine.put_played_land!(frame["player"], frame["object"], enters: enters)

@@ -233,4 +233,31 @@ RSpec.describe "Real cards: statics, types and restrictions" do
     expect(game.state.object(obj_id(game, "Juggernaut")).tapped).to be(true)
     expect(obj_id(game, "Trusty Boomerang", zone: :hand, player: "alice")).not_to be_nil
   end
+
+  it "an Equipment attached after Eaten by Piranhas gets a new timestamp, so its abilities stay (CR 613.7e, 613.7a)" do
+    game = board(hand: ["Eaten by Piranhas"], mine: ["Swiftfoot Boots", "Gleaming Barrier"], mana: { U: 2, C: 1 })
+    wall = obj_id(game, "Gleaming Barrier")
+    cast(game, "Eaten by Piranhas", target(game, "Gleaming Barrier"))
+    expect(chars(game, wall).keywords).to eq([])
+    play(game, { type: "activate", object: obj_id(game, "Swiftfoot Boots"), ability: "printed:1" }, target(game, "Gleaming Barrier"))
+    expect(chars(game, wall).keywords).to eq(%i[hexproof haste])
+  end
+
+  it "Multiversal Passage: two 'as this enters' choices in printed order, a basic land type then life (CR 614.12)" do
+    game = board(hand: ["Multiversal Passage"])
+    game.submit(type: "play_land", object: obj_id(game, "Multiversal Passage", zone: :hand, player: "alice"))
+    expect(game.legal_options).to include({ type: "basic_land_type", basic_land_type: "forest" })
+    game.submit(type: "basic_land_type", basic_land_type: "forest")
+    game = Enjine::Game.import(JSON.parse(game.export), catalog: catalog) # between the two choices
+    expect(game.legal_options).to eq([{ type: "pay_life", life: 2 }, { type: "enter_tapped" }])
+    game.submit(type: "pay_life", life: 2)
+    land = game.state.object(obj_id(game, "Multiversal Passage"))
+    expect([land.tapped, chars(game, land.id).subtypes, game.state.players[0].life]).to eq([false, [:forest], 18])
+    expect(chars(game, land.id).mana_abilities.size).to eq(1)
+    game = board(hand: ["Multiversal Passage"])
+    game.submit(type: "play_land", object: obj_id(game, "Multiversal Passage", zone: :hand, player: "alice"))
+    game.submit(type: "basic_land_type", basic_land_type: "island")
+    game.submit(type: "enter_tapped")
+    expect(game.state.object(obj_id(game, "Multiversal Passage")).tapped).to be(true)
+  end
 end
