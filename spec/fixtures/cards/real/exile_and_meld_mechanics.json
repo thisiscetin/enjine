@@ -334,5 +334,65 @@
       "set": "sos",
       "number": "30"
     }
+  },
+  {
+    "name": "Clive's Hideaway",
+    "types": [
+      "land"
+    ],
+    "subtypes": [
+      "town"
+    ],
+    "abilities": [
+      {
+        "hideaway": {
+          "amount": 4
+        }
+      },
+      {
+        "mana": {
+          "cost": [
+            "tap"
+          ],
+          "produce": "{C}"
+        }
+      },
+      {
+        "activated": {
+          "cost": [
+            {
+              "mana": "{2}"
+            },
+            "tap"
+          ],
+          "effects": [
+            {
+              "cast_free": {
+                "to": "exiled_with",
+                "play": true,
+                "if": {
+                  "controls": {
+                    "each": {
+                      "creature": {
+                        "supertypes": [
+                          "legendary"
+                        ]
+                      }
+                    },
+                    "controller": "you"
+                  },
+                  "at_least": 4
+                }
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "rare",
+    "printing": {
+      "set": "fin",
+      "number": "275"
+    }
   }
 ]

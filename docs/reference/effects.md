@@ -413,9 +413,9 @@ Rules: CR 608.2g, CR 707.12, CR 707.12a, CR 601.2a, CR 601.2f
 
 ## cast_free
 
-The controller may cast referenced cards without paying their mana costs while this resolves. `to` names the cards ({"result": n}), or a player for the cards in their hand (default: your hand). Only cards matching `for`/`not_types` with mana value up to `max_mana_value` (optional amount) that could be cast now (legal targets). `count`: 1 (default) or "any" (any number, one at a time). X is 0 (CR 107.3b).
+The controller may cast referenced cards without paying their mana costs while this resolves. `to` names the cards ({"result": n}), or a player for the cards in their hand (default: your hand). Only cards matching `for`/`not_types` with mana value up to `max_mana_value` (optional amount) that could be cast now (legal targets). `count`: 1 (default) or "any" (any number, one at a time). X is 0 (CR 107.3b). `play: true` ("you may play"): a land among them may be played, on your turn with a land play left (`{type: "play_land"}`). A face-down card is judged face up.
 
-Rules: CR 608.2g, CR 118.9, CR 601.2a, CR 107.3b, CR 118.6a
+Rules: CR 608.2g, CR 118.9, CR 601.2a, CR 107.3b, CR 118.6a, CR 305.2a, CR 305.3, CR 406.3a
 
 | Parameter | Description |
 | --- | --- |
@@ -424,6 +424,7 @@ Rules: CR 608.2g, CR 118.9, CR 601.2a, CR 107.3b, CR 118.6a
 | `not_types` | list of card types |
 | `max_mana_value` | amount |
 | `count` | 1 or "any" |
+| `play` | boolean |
 
 ```json
 {
@@ -850,9 +851,9 @@ Rules: CR 701.8a
 
 ## dig
 
-Look at the top `amount` cards of your library (`reveal: "all"`: reveal them). Take `count` (default 1; "all": every matching card, no choice; "any": any number) cards matching `for` and put them into `put` (`tapped` onto the battlefield); `optional`: you may take fewer. `reveal: "chosen"` reveals the cards taken. The rest go to `rest`: "bottom_random" (default), "bottom_any" (in an order you choose) or "graveyard".
+Look at the top `amount` cards of your library (`reveal: "all"`: reveal them). Take `count` (default 1; "all": every matching card, no choice; "any": any number) cards matching `for` and put them into `put` (`tapped` onto the battlefield); `optional`: you may take fewer. `reveal: "chosen"` reveals the cards taken. The rest go to `rest`: "bottom_random" (default), "bottom_any" (in an order you choose) or "graveyard". `put: "exile"` takes `face_down: true` (only you may look at them) and `link: true` (exiled with the source, CR 607.2a: hideaway).
 
-Rules: CR 701.20a, CR 701.20e, CR 401.4, CR 400.7j
+Rules: CR 701.20a, CR 701.20e, CR 401.4, CR 400.7j, CR 406.3, CR 607.2a
 
 | Parameter | Description |
 | --- | --- |
@@ -860,10 +861,12 @@ Rules: CR 701.20a, CR 701.20e, CR 401.4, CR 400.7j
 | `for` | card spec (default any card) |
 | `count` | integer, "all" or "any" |
 | `optional` | boolean |
-| `put` | hand | battlefield | graveyard |
+| `put` | hand | battlefield | graveyard | exile |
 | `tapped` | boolean |
 | `reveal` | none | chosen | all |
 | `rest` | bottom_random | bottom_any | graveyard |
+| `face_down` | boolean (put exile) |
+| `link` | boolean (put exile) |
 
 ```json
 {

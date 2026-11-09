@@ -277,5 +277,54 @@
       "island"
     ],
     "rules_text": "({T}: Add {G} or {U}.)"
+  },
+  {
+    "name": "Hollow Cache",
+    "types": [
+      "land"
+    ],
+    "abilities": [
+      {
+        "hideaway": {
+          "amount": 3
+        }
+      },
+      {
+        "enters_tapped": {}
+      },
+      {
+        "mana": {
+          "cost": [
+            "tap"
+          ],
+          "produce": "{B}"
+        }
+      },
+      {
+        "activated": {
+          "cost": [
+            {
+              "mana": "{B}"
+            },
+            "tap"
+          ],
+          "effects": [
+            {
+              "cast_free": {
+                "to": "exiled_with",
+                "play": true,
+                "if": {
+                  "controls": {
+                    "each": "creature",
+                    "controller": "you"
+                  },
+                  "at_least": 2
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
   }
 ]

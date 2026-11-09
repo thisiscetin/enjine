@@ -893,6 +893,24 @@ Rules: CR 702.11d, CR 702.11f, CR 115.4
 }
 ```
 
+## hideaway
+
+Hideaway `amount`: when this permanent enters, look at the top N cards of your library, exile one face down (linked: "exiled_with") and put the rest on the bottom in a random order.
+
+Rules: CR 702.75a, CR 406.3, CR 607.2a
+
+| Parameter | Description |
+| --- | --- |
+| `amount` | amount |
+
+```json
+{
+  "hideaway": {
+    "amount": 4
+  }
+}
+```
+
 ## kicker
 
 Kicker: as you cast this spell you may also pay `cost` (mana and/or chosen costs such as `sacrifice_permanent`). The spell is then kicked: `{"kicked": true}` conditions hold and its `kicked_targets` are used.

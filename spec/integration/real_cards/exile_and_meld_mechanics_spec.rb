@@ -96,6 +96,33 @@ RSpec.describe "Real cards: exile, suspend and meld mechanics" do
     end
   end
 
+  describe "hideaway (CR 702.75a)" do
+    let(:legends) { ["Tam, the Possibility", "The Kingpin of Crime", "Swarm, Being of Bees"] }
+
+    def hide(game)
+      play(game, { type: "play_land", object: hand_id(game, "Clive's Hideaway") }, ->(g) { g.legal_options.find { it[:type] == "take" } })
+      { type: "activate", object: obj_id(game, "Clive's Hideaway"), ability: "printed:2" }
+    end
+
+    it "Clive's Hideaway: exiles one of the top four face down; with four legendary creatures you may play it free" do
+      game = board(hand: ["Clive's Hideaway"], battlefield: legends + ["Spider-Man, Web-Slinger"], library: ["Krumar Initiate"], mana: { C: 2 })
+      activate = hide(game)
+      hidden = game.state.exile.first
+      expect(game.state.object(hidden).memory).to include("face_down" => true, "may_look" => [0])
+      expect(game.state.players[0].library.size).to eq(9)
+      expect(game.view_for("bob")["exile"].first["card"]).to be_nil # only alice may look at it (CR 406.3)
+      play(game, activate, ->(g) { g.legal_options.find { it[:type] == "cast" } }, { type: "decline" }) # extort
+      expect(game.state.exile).to be_empty
+      expect(obj_id(game, "Krumar Initiate")).not_to be_nil
+    end
+
+    it "Clive's Hideaway: with three legendary creatures nothing happens" do
+      game = board(hand: ["Clive's Hideaway"], battlefield: legends, library: ["Krumar Initiate"], mana: { C: 2 })
+      play(game, hide(game))
+      expect(game.state.exile.size).to eq(1)
+    end
+  end
+
   describe "proliferate X times (CR 701.34a)" do
     it "Tam, the Possibility: proliferates once per planeswalker type among your planeswalkers" do
       game = board(battlefield: ["Tam, the Possibility", "Ajani Resolute", "Ajani, Outland Chaperone", "The Theorist, Jace Beleren"],
