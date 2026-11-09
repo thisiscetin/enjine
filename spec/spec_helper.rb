@@ -10,7 +10,6 @@ if ENV["COVERAGE"] != "0"
 end
 
 require "enjine"
-require "enjine/card_pool/core"
 require "enjine/docs"
 require "enjine/cli"
 require "enjine/deck_builder"

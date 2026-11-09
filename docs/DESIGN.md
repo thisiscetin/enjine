@@ -10,8 +10,8 @@ agents in a separate project later) drive it through an atomic decision API.
 - Two-player constructed: 20 life, deck ≥ 60 cards, max 4 copies of a card
   (basic lands and "any number" cards exempt). No sideboard tracking.
 - Single games, start to finish. No best-of-3 / match object.
-- The engine knows **no cards** by default. A curated pool ships as an opt-in
-  (`require "enjine/card_pool/core"`), used by tests and seeding.
+- The engine knows **no cards**: every card arrives as data, in a deck document or a
+  `DeckBuilder` pool. The test and fuzz cards live in `spec/fixtures/cards/`.
 - Pinned to a dated CR version. Code and tests cite rule numbers (`# CR 704.5a`).
 
 ## 2. Cards

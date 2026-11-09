@@ -24,8 +24,9 @@ way, because development dependencies go in the `Gemfile`.
 - **Bugs:** anything that differs from the Comprehensive Rules. Open an issue with the
   rule number, the seed and the decision log (`game.decision_log`), or a snapshot
   saved with the CLI's `s FILE` command.
-- **Cards:** the sample pool (`lib/enjine/card_pool/core.json`) is for tests and
-  demos. Card databases belong outside the gem. See
+- **Cards:** the gem ships none. The cards in `spec/fixtures/cards/` are for tests and
+  fuzzing, and `examples/` holds demo decks; neither is in the gem. Card databases belong
+  outside it. See
   [docs/guides/card-data-format.md](docs/guides/card-data-format.md).
 
 ## How to add a mechanic

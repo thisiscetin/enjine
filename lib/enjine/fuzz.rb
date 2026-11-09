@@ -20,6 +20,32 @@ module Enjine
 
     module_function
 
+    # A random legal deck of `size` cards drawn uniformly from `cards` (card data blocks), whatever their colors,
+    # plus `outside` cards its player owns outside the game (CR 400.11a; the copy limit counts both, 100.4a).
+    def random_deck(cards, rng:, size: Deck::MIN_SIZE, outside: 0)
+      definitions = cards.map { CardDefinition.from_h(it) }
+      counts = Hash.new(0)
+      extra = Hash.new(0)
+      draw(definitions, counts, rng, size) { counts[it] += 1 }
+      draw(definitions, counts, rng, outside) do |id|
+        counts[id] += 1
+        extra[id] += 1
+      end
+      doc = { "cards" => definitions.select { counts.key?(it.id) }.map(&:to_h),
+              "main" => counts.filter_map { |id, n| { "card" => id, "count" => n - extra[id] } if n > extra[id] } }
+      doc["outside"] = extra.map { |id, n| { "card" => id, "count" => n } } unless extra.empty?
+      doc
+    end
+
+    # Picks `number` random cards that still fit the four-copy rule, yielding each one's id.
+    def draw(definitions, counts, rng, number)
+      number.times do
+        defn = definitions[rng.rand(definitions.size)]
+        defn = definitions[rng.rand(definitions.size)] until defn.deck_limit.nil? || counts[defn.id] < defn.deck_limit
+        yield defn.id
+      end
+    end
+
     # roundtrip_every: export+import and compare every N decisions (0 disables).
     def run(setup, games:, seed: 0, max_decisions: 20_000, roundtrip_every: 0, invariants: true, monitor: true)
       started = Process.clock_gettime(Process::CLOCK_MONOTONIC)

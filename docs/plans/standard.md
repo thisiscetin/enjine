@@ -3,16 +3,15 @@
 **Goal.** The engine supports every mechanic used by cards of the Standard-legal
 sets that stay legal past the next rotation, newest set first. **Cards are written
 by hand** in the [card DSL](../guides/card-data-format.md). The engine never reads
-card text, and the repository ships no real card data. Set files hold only
-metadata (name, release date, `standard_legal_until`) and an empty `cards` list
-for cards you author.
+card text, and the library ships no card data and no sets: cards reach it as data,
+in decks or a `DeckBuilder` pool.
 
 For each set:
 1. List the mechanics its cards need (keywords, keyword actions, set mechanics,
    ability and effect shapes) and compare that list with `SUPPORTED.md`.
 2. Implement each missing mechanic as a primitive, cite its Comprehensive Rules
    numbers, and test it at every level with **invented** cards (unit, integration,
-   and fuzz through `lib/enjine/card_pool/core.json`).
+   and fuzz through `spec/fixtures/cards/`).
 3. Mark the set's mechanics **supported** in the table below.
 
 ## Definition of "supported"
@@ -30,8 +29,7 @@ Release dates and rotation years are from Wizards' published schedule as
 summarized at draftsim.com/mtg-standard-rotation (retrieved 2026-11-08). From 2027,
 rotation happens at the first set release of the year. Legal-until dates for 2028
 and later are **estimates** (January 1 of the rotation year) until that year's
-first release is dated, and are marked `standard_legal_until_estimated: true` in
-the set files.
+first release is dated.
 
 | # | Set | Released | Leaves Standard | Status |
 | ---: | --- | --- | --- | --- |
@@ -55,13 +53,7 @@ next announced rotation, are out of scope. On 2027-02-05 Wilds of Eldraine, The
 Lost Caverns of Ixalan, Murders at Karlov Manor, Outlaws of Thunder Junction,
 Bloomburrow and Duskmourn leave Standard, so they're skipped (the maintainer
 decided this on 2026-11-08). When a new set releases, add it at the top. When a
-rotation is announced, drop the rotating sets from this table and their set files.
-
-**Every set file records when it stops being Standard:** `standard_legal_until`
-(ISO date, the first day the set is no longer legal) and
-`standard_legal_until_estimated` (true until Wizards announces the exact date).
-`Sets.standard_legal(on: date)` and the deck builder's `sets=standard` use those
-fields, so a set drops out of generated decks automatically on that date.
+rotation is announced, drop the rotating sets from this table.
 
 ## Mechanics gaps
 

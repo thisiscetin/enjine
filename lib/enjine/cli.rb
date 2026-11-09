@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 require "optparse"
-require "enjine/card_pool/core"
 require "enjine/deck_builder"
 require_relative "cli/text"
 
@@ -9,6 +8,9 @@ module Enjine
   # Interactive text client. Hot-seat by default: you play both players, see what
   # the deciding player sees, pick numbered options, and after each choice see
   # exactly what happened. Seats can also be "random" (uniform legal choices).
+  #
+  #   enjine --deck1 examples/decks/gruul_beats.json --deck2 examples/decks/azorius_walkers.json
+  #   enjine --pool examples/pool.json --deck1 random:colors=RG --deck2 random --p2 random
   class CLI
     SEATS = %w[human random].freeze
     HELP = <<~HELP
@@ -26,19 +28,15 @@ module Enjine
     def initialize(argv, input: $stdin, output: $stdout)
       @input = input
       @out = output
-      @options = { seed: Random.new_seed % (2**31), p1: "human", p2: "human", deck1: "gruul_beats",
-                   deck2: "azorius_walkers", quiet: false, max_decisions: 100_000, observer: false, names: %w[alice bob],
-                   sets_dir: Sets.dir }
+      @options = { seed: Random.new_seed % (2**31), p1: "human", p2: "human", quiet: false, max_decisions: 100_000,
+                   observer: false, names: %w[alice bob] }
       parser.parse!(argv)
-      # `--random-deck sets=a,b colors=WU seed=7` works unquoted: the key=value words after it belong to the spec.
+      # `--random-deck colors=WU seed=7` works unquoted: the key=value words after it belong to the spec.
       @options[:random_deck] = [@options[:random_deck], *argv.grep(/=/)].compact.join(" ") if @options.key?(:random_deck)
     end
 
     def run
-      return list_decks if @options[:list_decks]
       return validate(@options[:validate]) if @options[:validate]
-      return list_sets if @options[:list_sets]
-      return collection_report(@options[:collection_report]) if @options[:collection_report]
       return random_deck(@options[:random_deck]) if @options.key?(:random_deck)
 
       @game = start_game or return 1
@@ -56,23 +54,17 @@ module Enjine
 
     def parser
       OptionParser.new do |o|
-        o.banner = "Usage: enjine [options]   (default: hot-seat, you play both players)"
+        o.banner = "Usage: enjine --deck1 DECK --deck2 DECK [options]   (default: hot-seat, you play both players)"
         o.on("--seed N", Integer, "Seed for shuffling and the die roll") { @options[:seed] = it }
         o.on("--p1 SEAT", SEATS, "Seat 1: human (default) or random") { @options[:p1] = it }
         o.on("--p2 SEAT", SEATS, "Seat 2: human (default) or random") { @options[:p2] = it }
-        o.on("--deck1 NAME", "Sample deck for seat 1 (default gruul_beats), or random:SPEC") { @options[:deck1] = it }
-        o.on("--deck2 NAME", "Sample deck for seat 2 (default azorius_walkers), or random:SPEC") { @options[:deck2] = it }
-        o.on("--random-deck [SPEC]", "Print a random deck as JSON, e.g. \"sets=trk,abc colors=WU seed=7\"") do
+        o.on("--deck1 DECK", "Seat 1's deck: a deck document (JSON file), or random[:SPEC] from --pool") { @options[:deck1] = it }
+        o.on("--deck2 DECK", "Seat 2's deck: a deck document (JSON file), or random[:SPEC] from --pool") { @options[:deck2] = it }
+        o.on("--pool FILE", "Cards random decks are built from: a JSON array of card data blocks") { @options[:pool] = it }
+        o.on("--random-deck [SPEC]", "Print a random deck from --pool as JSON, e.g. \"colors=WU seed=7\"") do
           @options[:random_deck] = it
         end
-        o.on("--sets-dir DIR", "Directory of card set files (default: #{Sets::DEFAULT_DIR})") { @options[:sets_dir] = it }
-        o.on("--list-sets", "List the card sets in the sets directory") { @options[:list_sets] = true }
-        o.on("--collection FILE", "Build random decks only from the cards in this collection (JSON)") { @options[:collection] = it }
-        o.on("--collection-report FILE", "Resolve a collection against the sets; prints a JSON report") do
-          @options[:collection_report] = it
-        end
         o.on("--names A,B", Array, "Player names (default alice,bob)") { @options[:names] = it }
-        o.on("--list-decks", "List the sample decks") { @options[:list_decks] = true }
         o.on("--validate FILE", "Validate a JSON array of card data blocks; prints a JSON report") { @options[:validate] = it }
         o.on("--load FILE", "Resume a game saved with the s command") { @options[:load] = it }
         o.on("--observer", "Start in observer view (see both hands and library order)") { @options[:observer] = true }
@@ -99,50 +91,24 @@ module Enjine
       1
     end
 
-    def list_decks
-      CardPool::Core.deck_names.each { say "#{it.ljust(18)} #{CardPool::Core.deck(it)["description"]}" }
-      0
-    end
-
-    def list_sets
-      today = Date.today
-      Sets.all(dir: @options[:sets_dir]).each do |set|
-        legal = set.standard_legal?(today) ? "standard" : "-"
-        say "#{set.code.ljust(6)} #{set.name} (#{set.released_at}) · #{set.size} cards · #{legal}"
-      end
-      0
-    end
-
-    # What a collection resolved to: resolved and unknown entries. Exit code 1 if any are unknown.
-    def collection_report(path)
-      report = Collection.load(path, sets_dir: @options[:sets_dir]).report
-      say JSON.pretty_generate(report)
-      report["unknown"].empty? ? 0 : 1
-    rescue Error => e
-      say JSON.generate("error" => e.message)
-      1
-    end
-
     # Prints a random deck document; exit code 1 with a message if it can't be built.
     def random_deck(spec)
       say JSON.pretty_generate(build_random_deck(spec, @options[:seed]))
       0
-    rescue Error, ArgumentError => e
+    rescue Error, ArgumentError, SystemCallError, JSON::ParserError => e
       say "error: #{e.message}"
       1
     end
 
     # SPEC: whitespace- or comma-separated key=value pairs; a bare word continues the previous
-    # value, so "sets=trk,abc,colors=WU" works. Keys: sets (codes, "all" or "standard"), colors
-    # (letters like WU, a count 1-5, or any), seed, size, and with --collection, basics (unlimited or owned).
+    # value, so "colors=W,U,seed=7" works. Keys: colors (letters like WU, a count 1-5, or any), seed, size.
     def build_random_deck(spec, default_seed)
       args = parse_spec(spec.to_s)
-      sets = args.delete("sets")
-      DeckBuilder.build(sets: resolve_sets(sets), colors: args.delete("colors") || :any,
-                        seed: Integer(args.delete("seed") || default_seed), size: Integer(args.delete("size") || 60),
-                        sets_dir: @options[:sets_dir], collection: collection, basics: args.delete("basics") || :unlimited).tap do
-        raise ArgumentError, "unknown random deck option(s): #{args.keys.join(", ")}" unless args.empty?
-      end
+      deck = deck_builder.build(colors: args.delete("colors") || :any, seed: Integer(args.delete("seed") || default_seed),
+                                size: Integer(args.delete("size") || DeckBuilder::BASE_SIZE))
+      raise ArgumentError, "unknown random deck option(s): #{args.keys.join(", ")}" unless args.empty?
+
+      deck
     end
 
     def parse_spec(spec)
@@ -159,46 +125,45 @@ module Enjine
       end
     end
 
-    # The --collection, loaded once for every deck built in this run.
-    def collection
-      return nil unless @options[:collection]
+    # One builder over the --pool, for every random deck of this run.
+    def deck_builder
+      raise ArgumentError, "random decks need --pool FILE (a JSON array of cards)" unless @options[:pool]
 
-      @collection ||= Collection.load(@options[:collection], sets_dir: @options[:sets_dir])
-    end
-
-    def resolve_sets(value)
-      case value
-      when nil, "all" then nil
-      when "standard" then Sets.standard_legal(dir: @options[:sets_dir]).map(&:code)
-      else value.split(",")
-      end
+      @deck_builder ||= DeckBuilder.new(JSON.parse(File.read(@options[:pool])))
     end
 
     def start_game
       @options[:load] ? load_game : new_game
-    rescue DeckBuilder::NotEnoughCards, Sets::InvalidSet, Collection::InvalidCollection, ArgumentError => e
+    rescue Error, ArgumentError, SystemCallError, JSON::ParserError => e
       say "error: #{e.message}"
       nil
     end
 
     def new_game
-      decks = [@options[:deck1], @options[:deck2]].each_with_index.map { |name, i| deck_for(name, i) }
+      decks = [@options[:deck1], @options[:deck2]].each_with_index.map { |deck, i| deck_for(deck, i) }
       players = @options[:names].zip(decks).map { |name, deck| Player.new(name: name, deck: deck) }
       @setup = Setup.new(*players)
       @setup.new_game(seed: @options[:seed])
     end
 
-    # A sample deck by name, or "random[:SPEC]" for a generated one (seed defaults to game seed + seat).
-    def deck_for(name, seat)
-      return CardPool::Core.deck(name) unless name.start_with?("random")
+    # A deck file, or "random[:SPEC]" for one built from --pool (seed defaults to game seed + seat).
+    # Remembers each deck's label for the intro.
+    def deck_for(deck, seat)
+      raise ArgumentError, "pass --deck#{seat + 1}: a deck file (see examples/decks) or random[:SPEC] with --pool" if deck.nil?
 
-      deck = build_random_deck(name.delete_prefix("random").delete_prefix(":"), @options[:seed] + seat)
-      @options[:"deck#{seat + 1}"] = deck["description"]
-      deck
+      if deck.start_with?("random")
+        doc = build_random_deck(deck.delete_prefix("random").delete_prefix(":"), @options[:seed] + seat)
+        @options[:"deck#{seat + 1}"] = doc["description"]
+        return doc
+      end
+      JSON.parse(File.read(deck)).tap { @options[:"deck#{seat + 1}"] = it["name"] || File.basename(deck, ".json") }
     end
 
+    # A saved game carries its cards (see #save), so it resumes without the decks.
     def load_game
-      Game.import(File.read(@options[:load]), catalog: CardPool::Core.catalog)
+      data = JSON.parse(File.read(@options[:load]))
+      cards = data.fetch("cards") { raise ArgumentError, "#{@options[:load]}: not a game saved with the s command" }
+      Game.import(data, catalog: Catalog.from_definitions(cards))
     end
 
     def intro
@@ -295,7 +260,7 @@ module Enjine
     end
 
     def save(path)
-      File.write(path, @game.export)
+      File.write(path, JSON.generate(@game.to_h.merge("cards" => @game.catalog.reject(&:token?).map(&:to_h))))
       say "Saved to #{path}. Resume with: enjine --load #{path}"
     end
 

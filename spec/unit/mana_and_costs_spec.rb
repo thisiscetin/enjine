@@ -68,7 +68,7 @@ RSpec.describe "Validation of X costs, mana effects and cost changes (CR 107.3, 
   end
 
   it "describes cost changes and mana effects in words" do
-    defn = Enjine::CardPool::Core.catalog
+    defn = CardFixtures.catalog
     expect(defn.fetch("tidecaller_adept").abilities.first.to_s).to eq("noncreature spells you cast cost {1} less")
     expect(defn.fetch("toll_warden").abilities.first.to_s).to eq("noncreature spells your opponents cast cost {1} more")
     expect(defn.fetch("rally_signal").abilities.first.to_s).to eq("This spell costs {1} less if a creature is attacking you.")

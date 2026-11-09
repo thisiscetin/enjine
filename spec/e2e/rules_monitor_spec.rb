@@ -4,8 +4,8 @@
 # bugs in the engine and check the monitor reports them.
 RSpec.describe Enjine::RulesMonitor do
   def play(decisions: 4000, seed: 3)
-    setup = Enjine::Setup.new(Enjine::Player.new(name: "p1", deck: Enjine::CardPool::Core.deck("gruul_beats")),
-                              Enjine::Player.new(name: "p2", deck: Enjine::CardPool::Core.deck("azorius_walkers")))
+    setup = Enjine::Setup.new(Enjine::Player.new(name: "p1", deck: CardFixtures.deck("gruul_beats")),
+                              Enjine::Player.new(name: "p2", deck: CardFixtures.deck("azorius_walkers")))
     game = setup.new_game(seed: seed)
     monitor = described_class.new(game)
     agent = Enjine::Agents::Random.new(seed: seed)

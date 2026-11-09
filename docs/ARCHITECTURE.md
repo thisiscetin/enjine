@@ -54,9 +54,10 @@ lib/enjine/
   docs.rb                         # generates docs/reference/*.md + SUPPORTED.md from the Registry
   agents/random.rb  fuzz.rb       # random legal player, invariant-checking fuzzer
   cli.rb  cli/text.rb             # interactive hot-seat CLI + text renderer, --validate
-  card_pool/core.rb core.json decks/*.json   # OPT-IN sample cards and decks
+  deck_builder.rb                 # OPT-IN random constructed decks from a card pool
 exe/enjine
-spec/ unit/ integration/ e2e/ support/scenario.rb
+examples/                         # ready-to-play decks and a card pool (not in the gem)
+spec/ unit/ integration/ e2e/ support/scenario.rb  fixtures/cards/ (the test and fuzz cards)
 docs/ DESIGN.md ARCHITECTURE.md MECHANICS_COVERAGE.md SUPPORTED.md(root) reference/ guides/
 ```
 

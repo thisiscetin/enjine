@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 RSpec.describe Enjine::Deck do
-  let(:pool) { Enjine::CardPool::Core.cards }
+  let(:pool) { CardFixtures.cards }
   let(:nonbasic) { { "name" => "Lone Tower", "types" => ["land"] } }
 
   def deck(main, cards: pool)

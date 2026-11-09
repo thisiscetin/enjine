@@ -1,13 +1,12 @@
 # frozen_string_literal: true
 
-RSpec.describe "Random decks from card sets" do
-  let(:dir) { DeckBuilderHelpers::SET_FIXTURES }
-
-  [%w[fxa], %w[fxb], %w[fxa fxb]].each do |sets|
+RSpec.describe "Random decks from card pools" do
+  [%w[fxa], %w[fxb], %w[fxa fxb]].each do |pools|
     [1, 2, 3].each do |count|
-      it "builds valid #{count}-color decks from #{sets.join(" + ")}" do
+      it "builds valid #{count}-color decks from #{pools.join(" + ")}" do
+        deck_builder = builder(*pools)
         12.times do |seed|
-          doc = build_deck(sets: sets, colors: count, seed: seed)
+          doc = deck_builder.build(colors: count, seed: seed)
           player = Enjine::Player.new(name: "p", deck: doc)
           expect(player).to be_ready, player.deck.errors.join("; ")
           expect(player.deck.size).to eq(60)
@@ -24,25 +23,21 @@ RSpec.describe "Random decks from card sets" do
 
   it "builds explicit-color decks that use every requested color" do
     %w[W U B R G WU BR GW UBR WBG].each do |colors|
-      doc = build_deck(sets: %w[fxa fxb], colors: colors, seed: colors.sum)
+      doc = build_deck(%w[fxa fxb], colors: colors, seed: colors.sum)
       used = doc["cards"].flat_map { Enjine::DeckBuilder.colors_of(Enjine::CardDefinition.from_h(it)) }.uniq
       expect(Enjine::DeckBuilder.parse_colors(colors) - used).to be_empty
       expect(Enjine::Player.new(name: "p", deck: doc)).to be_ready
     end
   end
 
-  it "draws from every Standard-legal set and from the core sample pool" do
-    standard = Enjine::Sets.standard_legal(on: Date.new(2026, 1, 1), dir: dir)
-    doc = Enjine::DeckBuilder.build(sets: standard, colors: "R", seed: 5, sets_dir: dir)
-    expect(doc["description"]).to include("sets=fxa ")
-    core = Enjine::DeckBuilder.build(cards: Enjine::CardPool::Core.cards, colors: "RG", seed: 5)
+  it "draws from the whole fixture card pool, every mechanic family" do
+    core = Enjine::DeckBuilder.new(CardFixtures.cards).build(colors: "RG", seed: 5)
     expect(Enjine::Player.new(name: "p", deck: core)).to be_ready
-    expect(build_deck(colors: :any, seed: 3)["description"]).to include("sets=fxa,fxb")
   end
 
-  it "seats two generated decks from different sets in one Setup" do
-    alice = Enjine::Player.new(name: "alice", deck: build_deck(sets: %w[fxa], colors: 2, seed: 1))
-    bob = Enjine::Player.new(name: "bob", deck: build_deck(sets: %w[fxb fxa], colors: 3, seed: 2))
+  it "seats two generated decks from different pools in one Setup" do
+    alice = Enjine::Player.new(name: "alice", deck: build_deck(%w[fxa], colors: 2, seed: 1))
+    bob = Enjine::Player.new(name: "bob", deck: build_deck(%w[fxb fxa], colors: 3, seed: 2))
     setup = Enjine::Setup.new(alice, bob)
     expect(setup.new_game(seed: 1).pending_decision).not_to be_nil
   end

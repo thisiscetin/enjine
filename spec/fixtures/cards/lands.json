@@ -1,0 +1,204 @@
+[
+  {
+    "name": "Plains",
+    "types": [
+      "land"
+    ],
+    "supertypes": [
+      "basic"
+    ],
+    "subtypes": [
+      "plains"
+    ]
+  },
+  {
+    "name": "Island",
+    "types": [
+      "land"
+    ],
+    "supertypes": [
+      "basic"
+    ],
+    "subtypes": [
+      "island"
+    ]
+  },
+  {
+    "name": "Swamp",
+    "types": [
+      "land"
+    ],
+    "supertypes": [
+      "basic"
+    ],
+    "subtypes": [
+      "swamp"
+    ]
+  },
+  {
+    "name": "Mountain",
+    "types": [
+      "land"
+    ],
+    "supertypes": [
+      "basic"
+    ],
+    "subtypes": [
+      "mountain"
+    ]
+  },
+  {
+    "name": "Forest",
+    "types": [
+      "land"
+    ],
+    "supertypes": [
+      "basic"
+    ],
+    "subtypes": [
+      "forest"
+    ]
+  },
+  {
+    "name": "Wastes",
+    "types": [
+      "land"
+    ],
+    "supertypes": [
+      "basic"
+    ],
+    "abilities": [
+      {
+        "mana": {
+          "cost": [
+            "tap"
+          ],
+          "produce": "{C}"
+        }
+      }
+    ],
+    "rules_text": "{T}: Add {C}."
+  },
+  {
+    "name": "Verdant Overlook",
+    "types": [
+      "land"
+    ],
+    "abilities": [
+      {
+        "enters_tapped_unless": {
+          "condition": {
+            "controls": {
+              "each": "land",
+              "controller": "you"
+            },
+            "at_least": 2
+          }
+        }
+      },
+      {
+        "triggered": {
+          "when": {
+            "enters": {
+              "untapped": true
+            }
+          },
+          "effects": [
+            {
+              "gain_life": {
+                "amount": 1
+              }
+            }
+          ]
+        }
+      },
+      {
+        "mana": {
+          "cost": [
+            "tap"
+          ],
+          "produce": "{G}"
+        }
+      }
+    ]
+  },
+  {
+    "name": "Lyceum of Many Hands",
+    "types": [
+      "land"
+    ],
+    "abilities": [
+      {
+        "mana": {
+          "cost": [
+            "tap"
+          ],
+          "produce": "{C}"
+        }
+      },
+      {
+        "mana": {
+          "cost": [
+            "tap"
+          ],
+          "color": "any_one",
+          "amount": {
+            "count": {
+              "each": "creature",
+              "controller": "you"
+            }
+          }
+        }
+      }
+    ]
+  },
+  {
+    "name": "Cindervault Ridge",
+    "types": [
+      "land"
+    ],
+    "abilities": [
+      {
+        "mana": {
+          "cost": [
+            "tap"
+          ],
+          "produce": "{R}"
+        }
+      },
+      {
+        "activated": {
+          "cost": [
+            {
+              "mana": "{1}{R}"
+            }
+          ],
+          "effects": [
+            {
+              "become": {
+                "types": [
+                  "creature"
+                ],
+                "creature_types": [
+                  "elemental"
+                ],
+                "colors": [
+                  "R"
+                ],
+                "keywords": [
+                  "haste"
+                ],
+                "base_power_toughness": {
+                  "power": 3,
+                  "toughness": 1
+                },
+                "to": "self"
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "Tap: add one red mana. Two mana: this land becomes a 3/1 red Elemental creature with haste until end of turn. It's still a land."
+  }
+]

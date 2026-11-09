@@ -1,0 +1,244 @@
+{
+  "name": "gruul_beats",
+  "description": "Red-green creatures and burn",
+  "cards": [
+    {
+      "name": "Mountain",
+      "types": [
+        "land"
+      ],
+      "supertypes": [
+        "basic"
+      ],
+      "subtypes": [
+        "mountain"
+      ]
+    },
+    {
+      "name": "Forest",
+      "types": [
+        "land"
+      ],
+      "supertypes": [
+        "basic"
+      ],
+      "subtypes": [
+        "forest"
+      ]
+    },
+    {
+      "name": "Raging Goblin",
+      "mana_cost": "{R}",
+      "types": [
+        "creature"
+      ],
+      "subtypes": [
+        "goblin",
+        "berserker"
+      ],
+      "keywords": [
+        "haste"
+      ],
+      "power": 1,
+      "toughness": 1,
+      "rules_text": "Haste"
+    },
+    {
+      "name": "Grizzly Bears",
+      "mana_cost": "{1}{G}",
+      "types": [
+        "creature"
+      ],
+      "subtypes": [
+        "bear"
+      ],
+      "power": 2,
+      "toughness": 2
+    },
+    {
+      "name": "Gray Ogre",
+      "mana_cost": "{2}{R}",
+      "types": [
+        "creature"
+      ],
+      "subtypes": [
+        "ogre"
+      ],
+      "power": 2,
+      "toughness": 2
+    },
+    {
+      "name": "Trained Armodon",
+      "mana_cost": "{1}{G}{G}",
+      "types": [
+        "creature"
+      ],
+      "subtypes": [
+        "elephant"
+      ],
+      "power": 3,
+      "toughness": 3
+    },
+    {
+      "name": "Hill Giant",
+      "mana_cost": "{3}{R}",
+      "types": [
+        "creature"
+      ],
+      "subtypes": [
+        "giant"
+      ],
+      "power": 3,
+      "toughness": 3
+    },
+    {
+      "name": "Craw Wurm",
+      "mana_cost": "{4}{G}{G}",
+      "types": [
+        "creature"
+      ],
+      "subtypes": [
+        "wurm"
+      ],
+      "power": 6,
+      "toughness": 4
+    },
+    {
+      "name": "Prodigal Pyromancer",
+      "mana_cost": "{2}{R}",
+      "types": [
+        "creature"
+      ],
+      "subtypes": [
+        "human",
+        "wizard"
+      ],
+      "power": 1,
+      "toughness": 1,
+      "abilities": [
+        {
+          "activated": {
+            "cost": [
+              "tap"
+            ],
+            "targets": [
+              "any_target"
+            ],
+            "effects": [
+              {
+                "deal_damage": {
+                  "amount": 1,
+                  "to": {
+                    "target": 0
+                  }
+                }
+              }
+            ]
+          }
+        }
+      ],
+      "rules_text": "{T}: Prodigal Pyromancer deals 1 damage to any target."
+    },
+    {
+      "name": "Lightning Bolt",
+      "mana_cost": "{R}",
+      "types": [
+        "instant"
+      ],
+      "abilities": [
+        {
+          "spell": {
+            "targets": [
+              "any_target"
+            ],
+            "effects": [
+              {
+                "deal_damage": {
+                  "amount": 3,
+                  "to": {
+                    "target": 0
+                  }
+                }
+              }
+            ]
+          }
+        }
+      ],
+      "rules_text": "Lightning Bolt deals 3 damage to any target."
+    },
+    {
+      "name": "Giant Growth",
+      "mana_cost": "{G}",
+      "types": [
+        "instant"
+      ],
+      "abilities": [
+        {
+          "spell": {
+            "targets": [
+              "creature"
+            ],
+            "effects": [
+              {
+                "pump": {
+                  "power": 3,
+                  "toughness": 3,
+                  "to": {
+                    "target": 0
+                  }
+                }
+              }
+            ]
+          }
+        }
+      ],
+      "rules_text": "Target creature gets +3/+3 until end of turn."
+    }
+  ],
+  "main": [
+    {
+      "card": "Mountain",
+      "count": 12
+    },
+    {
+      "card": "Forest",
+      "count": 12
+    },
+    {
+      "card": "Raging Goblin",
+      "count": 4
+    },
+    {
+      "card": "Grizzly Bears",
+      "count": 4
+    },
+    {
+      "card": "Gray Ogre",
+      "count": 4
+    },
+    {
+      "card": "Trained Armodon",
+      "count": 4
+    },
+    {
+      "card": "Hill Giant",
+      "count": 4
+    },
+    {
+      "card": "Craw Wurm",
+      "count": 4
+    },
+    {
+      "card": "Prodigal Pyromancer",
+      "count": 4
+    },
+    {
+      "card": "Lightning Bolt",
+      "count": 4
+    },
+    {
+      "card": "Giant Growth",
+      "count": 4
+    }
+  ]
+}

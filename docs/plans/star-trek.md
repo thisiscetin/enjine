@@ -2,12 +2,10 @@
 
 Goal: the engine supports every mechanic that Star Trek cards use, so you can
 write any `trk` card yourself in the [card DSL](../guides/card-data-format.md).
-Enjine ships no real card data and never reads card text. `lib/enjine/sets/trk.json`
-holds only the set's metadata (release date, `standard_legal_until`) and an empty
-`cards` list for your own cards.
+Enjine ships no card data and never reads card text.
 
 Every mechanic is tested with invented cards (unit, integration and fuzz through
-`lib/enjine/card_pool/core.json`). The notes below record how each Star Trek
+`spec/fixtures/cards/`). The notes below record how each Star Trek
 mechanic is implemented and which rules it cites.
 
 ## Set mechanics

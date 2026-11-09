@@ -1,0 +1,3637 @@
+[
+  {
+    "name": "Tower Scholar",
+    "mana_cost": "{1}{U}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "human",
+      "wizard"
+    ],
+    "power": 1,
+    "toughness": 1,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "enters": {}
+          },
+          "effects": [
+            {
+              "draw": {
+                "amount": 1
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "When this creature enters, draw a card."
+  },
+  {
+    "name": "Ember Martyr",
+    "mana_cost": "{R}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "human",
+      "warrior"
+    ],
+    "power": 1,
+    "toughness": 1,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "dies": {}
+          },
+          "effects": [
+            {
+              "deal_damage": {
+                "amount": 2,
+                "to": "each_opponent"
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "When this creature dies, it deals 2 damage to each opponent."
+  },
+  {
+    "name": "Dawn Keeper",
+    "mana_cost": "{1}{W}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "human",
+      "cleric"
+    ],
+    "power": 1,
+    "toughness": 3,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "step_begins": {
+              "step": "upkeep"
+            }
+          },
+          "effects": [
+            {
+              "gain_life": {
+                "amount": 1
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "At the beginning of your upkeep, you gain 1 life."
+  },
+  {
+    "name": "Ridge Sniper",
+    "mana_cost": "{2}{R}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "goblin",
+      "archer"
+    ],
+    "power": 2,
+    "toughness": 1,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "enters": {}
+          },
+          "targets": [
+            "creature"
+          ],
+          "effects": [
+            {
+              "deal_damage": {
+                "amount": 1,
+                "to": {
+                  "target": 0
+                }
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "When this creature enters, it deals 1 damage to target creature."
+  },
+  {
+    "name": "Moss Grower",
+    "mana_cost": "{1}{G}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "elf",
+      "druid"
+    ],
+    "power": 1,
+    "toughness": 2,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "enters": {
+              "subject": {
+                "each": "land",
+                "controller": "you"
+              }
+            }
+          },
+          "effects": [
+            {
+              "add_counters": {
+                "counter": "+1/+1",
+                "amount": 1,
+                "to": "self"
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "Whenever a land you control enters, put a +1/+1 counter on this creature."
+  },
+  {
+    "name": "Banner Raider",
+    "mana_cost": "{1}{W}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "human",
+      "soldier"
+    ],
+    "power": 2,
+    "toughness": 2,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "attacks": {}
+          },
+          "effects": [
+            {
+              "gain_life": {
+                "amount": 1
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "Whenever this creature attacks, you gain 1 life."
+  },
+  {
+    "name": "Lucky Prospector",
+    "mana_cost": "{1}{R}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "goblin"
+    ],
+    "power": 2,
+    "toughness": 1,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "enters": {}
+          },
+          "effects": [
+            {
+              "create_token": {
+                "token": "Treasure"
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "When this creature enters, create a Treasure token."
+  },
+  {
+    "name": "Curious Sleuth",
+    "mana_cost": "{1}{U}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "human",
+      "detective"
+    ],
+    "power": 1,
+    "toughness": 2,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "enters": {}
+          },
+          "effects": [
+            {
+              "create_token": {
+                "token": "Clue"
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "When this creature enters, create a Clue token."
+  },
+  {
+    "name": "Ashcaller Warlord",
+    "mana_cost": "{2}{R}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "goblin",
+      "warrior"
+    ],
+    "power": 2,
+    "toughness": 2,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "step_begins": {
+              "step": "beginning_of_combat"
+            }
+          },
+          "effects": [
+            {
+              "create_token": {
+                "token": {
+                  "name": "Ash Raider",
+                  "types": [
+                    "creature"
+                  ],
+                  "subtypes": [
+                    "goblin"
+                  ],
+                  "power": 2,
+                  "toughness": 1,
+                  "keywords": [
+                    "haste"
+                  ]
+                }
+              }
+            },
+            {
+              "delayed_trigger": {
+                "when": {
+                  "step_begins": {
+                    "step": "end",
+                    "whose": "each"
+                  }
+                },
+                "effects": [
+                  {
+                    "sacrifice": {
+                      "to": {
+                        "result": 0
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "At the beginning of combat on your turn, create a 2/1 Goblin creature token with haste. Sacrifice it at the beginning of the next end step."
+  },
+  {
+    "name": "Wakeful Colossus",
+    "mana_cost": "{3}{G}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "giant"
+    ],
+    "power": 4,
+    "toughness": 4,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "enters": {}
+          },
+          "if": {
+            "was_cast": true
+          },
+          "effects": [
+            {
+              "add_counters": {
+                "counter": "+1/+1",
+                "amount": 1,
+                "to": {
+                  "each": "creature",
+                  "controller": "you"
+                }
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "When this creature enters, if you cast it, put a +1/+1 counter on each creature you control."
+  },
+  {
+    "name": "Prism Calf",
+    "mana_cost": "{2}{G}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "ox"
+    ],
+    "power": 1,
+    "toughness": 3,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "enters": {}
+          },
+          "effects": [
+            {
+              "add_mana": {
+                "amount": 2,
+                "color": "any_one"
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "When this creature enters, add two mana of any one color."
+  },
+  {
+    "name": "Brood Caller",
+    "mana_cost": "{X}{G}{G}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "elf",
+      "druid"
+    ],
+    "power": 2,
+    "toughness": 2,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "enters": {}
+          },
+          "effects": [
+            {
+              "create_token": {
+                "token": {
+                  "name": "Sapling",
+                  "types": [
+                    "creature"
+                  ],
+                  "subtypes": [
+                    "plant"
+                  ],
+                  "power": 1,
+                  "toughness": 1
+                },
+                "amount": "x"
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "When this creature enters, create X 1/1 Plant creature tokens."
+  },
+  {
+    "name": "Crossroads Oracle",
+    "mana_cost": "{1}{U}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "human",
+      "wizard"
+    ],
+    "power": 1,
+    "toughness": 3,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "faces_dilemma": {}
+          },
+          "effects": [
+            {
+              "add_counters": {
+                "counter": "+1/+1",
+                "amount": 1,
+                "to": "self"
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "Whenever you face a dilemma, put a +1/+1 counter on this creature."
+  },
+  {
+    "name": "Wayfinder Cartographer",
+    "mana_cost": "{2}{G}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "elf",
+      "scout"
+    ],
+    "power": 2,
+    "toughness": 2,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "enters": {}
+          },
+          "effects": [
+            {
+              "gain_life": {
+                "amount": {
+                  "distinct_names": {
+                    "each": "land",
+                    "controller": "you"
+                  }
+                }
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "When this creature enters, you gain life equal to the number of differently named lands you control."
+  },
+  {
+    "name": "Dockside Pickpocket",
+    "mana_cost": "{1}{B}",
+    "types": [
+      "creature"
+    ],
+    "power": 2,
+    "toughness": 1,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "deals_damage": {
+              "combat": true,
+              "to": "player"
+            }
+          },
+          "effects": [
+            {
+              "draw": {
+                "amount": 1
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Warhorn Herald",
+    "mana_cost": "{2}{R}",
+    "types": [
+      "creature"
+    ],
+    "power": 2,
+    "toughness": 2,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "player_attacks": {}
+          },
+          "effects": [
+            {
+              "pump": {
+                "power": 1,
+                "toughness": 0,
+                "to": {
+                  "each": {
+                    "creature": {
+                      "attacking": true
+                    }
+                  },
+                  "controller": "you"
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Ambush Bait",
+    "mana_cost": "{1}{G}",
+    "types": [
+      "creature"
+    ],
+    "power": 2,
+    "toughness": 2,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "becomes_blocked": {}
+          },
+          "effects": [
+            {
+              "pump": {
+                "power": 2,
+                "toughness": 2,
+                "to": "self"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Dawnhymn Acolyte",
+    "mana_cost": "{1}{W}",
+    "types": [
+      "creature"
+    ],
+    "power": 1,
+    "toughness": 3,
+    "keywords": [
+      "lifelink"
+    ],
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "gains_life": {}
+          },
+          "effects": [
+            {
+              "add_counters": {
+                "counter": "+1/+1",
+                "amount": 1,
+                "to": "self"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Archive Gremlin",
+    "mana_cost": "{2}{U}",
+    "types": [
+      "creature"
+    ],
+    "power": 1,
+    "toughness": 3,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "draws": {}
+          },
+          "effects": [
+            {
+              "lose_life": {
+                "amount": 1,
+                "to": "each_opponent"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Bloodfeast Imp",
+    "mana_cost": "{1}{B}",
+    "types": [
+      "creature"
+    ],
+    "power": 1,
+    "toughness": 1,
+    "keywords": [
+      "flying"
+    ],
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "loses_life": {
+              "controller": "opponent"
+            }
+          },
+          "effects": [
+            {
+              "gain_life": {
+                "amount": 1
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Carrion Warden",
+    "mana_cost": "{3}{B}",
+    "types": [
+      "creature"
+    ],
+    "power": 2,
+    "toughness": 3,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "dies": {
+              "subject": {
+                "each": "creature",
+                "controller": "you",
+                "other": true
+              }
+            }
+          },
+          "effects": [
+            {
+              "gain_life": {
+                "amount": 2
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Ridgeline Skirmisher",
+    "mana_cost": "{1}{R}",
+    "types": [
+      "creature"
+    ],
+    "power": 2,
+    "toughness": 1,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "any_of": [
+              {
+                "enters": {}
+              },
+              {
+                "attacks": {}
+              }
+            ]
+          },
+          "effects": [
+            {
+              "deal_damage": {
+                "amount": 1,
+                "to": "each_opponent"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Archive Diver",
+    "mana_cost": "{1}{U}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "merfolk",
+      "scholar"
+    ],
+    "power": 1,
+    "toughness": 2,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "enters": {}
+          },
+          "effects": [
+            {
+              "dig": {
+                "amount": 4,
+                "for": {
+                  "not_types": [
+                    "land"
+                  ]
+                },
+                "optional": true,
+                "reveal": "chosen",
+                "put": "hand",
+                "rest": "bottom_any"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Cinder Archivist",
+    "mana_cost": "{2}{R}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "human",
+      "wizard"
+    ],
+    "power": 2,
+    "toughness": 2,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "enters": {}
+          },
+          "effects": [
+            {
+              "exile_top": {
+                "amount": 2,
+                "link": true
+              }
+            },
+            {
+              "return_to_battlefield": {
+                "to": {
+                  "result": 0
+                },
+                "under": "you"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Trail Scout",
+    "mana_cost": "{1}{G}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "elf",
+      "scout"
+    ],
+    "power": 2,
+    "toughness": 1,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "enters": {}
+          },
+          "effects": [
+            {
+              "explore": {
+                "to": "self"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Tithe Collector",
+    "mana_cost": "{2}{B}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "human",
+      "cleric"
+    ],
+    "power": 2,
+    "toughness": 2,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "enters": {}
+          },
+          "effects": [
+            {
+              "sacrifice_choice": {
+                "filter": {
+                  "creature": {
+                    "token": false
+                  }
+                },
+                "to": "each_opponent"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Field Medic Tovan",
+    "mana_cost": "{2}{W}{W}",
+    "types": [
+      "creature"
+    ],
+    "supertypes": [
+      "legendary"
+    ],
+    "subtypes": [
+      "human",
+      "cleric"
+    ],
+    "power": 2,
+    "toughness": 2,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "enters": {}
+          },
+          "targets": [
+            {
+              "creature": {
+                "controller": "you",
+                "other": true
+              }
+            }
+          ],
+          "effects": [
+            {
+              "add_counters": {
+                "counter": "+1/+1",
+                "amount": 1,
+                "to": {
+                  "target": 0
+                }
+              }
+            }
+          ]
+        }
+      },
+      {
+        "destroy_replacement": {
+          "affects": {
+            "each": {
+              "creature": {
+                "counters": "+1/+1"
+              }
+            },
+            "controller": "you",
+            "other": true
+          },
+          "remove_counters": "+1/+1",
+          "remove_damage": true
+        }
+      }
+    ]
+  },
+  {
+    "name": "Mirage Foundry",
+    "mana_cost": "{2}{G}{G}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "human",
+      "artificer"
+    ],
+    "power": 3,
+    "toughness": 3,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "enters": {}
+          },
+          "effects": [
+            {
+              "create_token": {
+                "token": "Treasure"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "token_replacement": {
+          "token": {
+            "name": "Phantasm",
+            "types": [
+              "artifact",
+              "creature"
+            ],
+            "subtypes": [
+              "illusion"
+            ],
+            "power": 2,
+            "toughness": 2
+          }
+        }
+      }
+    ]
+  },
+  {
+    "name": "Undying Regent",
+    "mana_cost": "{3}{B}{B}",
+    "types": [
+      "creature"
+    ],
+    "supertypes": [
+      "legendary"
+    ],
+    "subtypes": [
+      "vampire",
+      "noble"
+    ],
+    "power": 3,
+    "toughness": 5,
+    "abilities": [
+      {
+        "player_rule": {
+          "rule": "cant_lose_for_life"
+        }
+      },
+      {
+        "triggered": {
+          "when": {
+            "step_begins": {
+              "step": "end"
+            }
+          },
+          "effects": [
+            {
+              "lose_life": {
+                "amount": 2,
+                "to": "you"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Hoarding Broker",
+    "mana_cost": "{2}{R}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "goblin",
+      "rogue"
+    ],
+    "power": 1,
+    "toughness": 2,
+    "abilities": [
+      {
+        "player_rule": {
+          "rule": "cant_sacrifice",
+          "filter": {
+            "permanent": {
+              "token": true,
+              "subtypes": [
+                "treasure"
+              ]
+            }
+          }
+        }
+      },
+      {
+        "triggered": {
+          "when": {
+            "step_begins": {
+              "step": "upkeep",
+              "whose": "each"
+            }
+          },
+          "effects": [
+            {
+              "create_token": {
+                "token": "Treasure"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Temporal Sloop",
+    "mana_cost": "{3}{U}{U}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "construct"
+    ],
+    "power": 3,
+    "toughness": 3,
+    "keywords": [
+      "flying"
+    ],
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "deals_damage": {
+              "combat": true,
+              "to": "player"
+            }
+          },
+          "effects": [
+            {
+              "draw": {
+                "amount": 1
+              }
+            },
+            {
+              "extra_turn": {
+                "if": {
+                  "began_extra_turn": false
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Gearwatch Pilot",
+    "mana_cost": "{1}{W}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "human",
+      "pilot"
+    ],
+    "power": 2,
+    "toughness": 2,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "becomes_tapped": {}
+          },
+          "effects": [
+            {
+              "gain_life": {
+                "amount": 1
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Bloomtrack Sage",
+    "mana_cost": "{1}{G}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "elf"
+    ],
+    "power": 1,
+    "toughness": 2,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "counters_placed": {
+              "counter": "+1/+1"
+            }
+          },
+          "effects": [
+            {
+              "gain_life": {
+                "amount": 1
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Warcry Lookout",
+    "mana_cost": "{1}{R}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "goblin"
+    ],
+    "power": 2,
+    "toughness": 1,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "step_begins": {
+              "step": "end"
+            }
+          },
+          "if": {
+            "you_attacked_this_turn": true
+          },
+          "effects": [
+            {
+              "create_token": {
+                "token": {
+                  "name": "Warcry Goblin",
+                  "types": [
+                    "creature"
+                  ],
+                  "subtypes": [
+                    "goblin"
+                  ],
+                  "colors": [
+                    "R"
+                  ],
+                  "power": 1,
+                  "toughness": 1
+                }
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "Raid — At the beginning of your end step, if you attacked this turn, create a 1/1 red Goblin creature token."
+  },
+  {
+    "name": "Hollow Echo",
+    "mana_cost": "{2}{B}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "spirit"
+    ],
+    "power": 2,
+    "toughness": 2,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "enters": {}
+          },
+          "if": {
+            "amount": {
+              "left_this_turn": {
+                "each": {
+                  "permanent": {
+                    "not": [
+                      "land"
+                    ]
+                  }
+                }
+              }
+            },
+            "at_least": 1
+          },
+          "effects": [
+            {
+              "draw": {
+                "amount": 1
+              }
+            },
+            {
+              "lose_life": {
+                "amount": 1,
+                "to": "you"
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "When this creature enters, if a nonland permanent left the battlefield this turn, you draw a card and lose 1 life."
+  },
+  {
+    "name": "Lantern Moth",
+    "mana_cost": "{1}{W}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "insect"
+    ],
+    "power": 1,
+    "toughness": 2,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "leaves_battlefield": {}
+          },
+          "effects": [
+            {
+              "gain_life": {
+                "amount": 3
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "When this creature leaves the battlefield, you gain 3 life."
+  },
+  {
+    "name": "Pyre Tender",
+    "mana_cost": "{1}{B}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "human"
+    ],
+    "power": 1,
+    "toughness": 3,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "sacrifices": {
+              "subject": {
+                "each": "permanent",
+                "controller": "you",
+                "other": true
+              }
+            }
+          },
+          "effects": [
+            {
+              "add_counters": {
+                "counter": "+1/+1",
+                "amount": 1,
+                "to": "self"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "activated": {
+          "cost": [
+            {
+              "sacrifice_permanent": {
+                "filter": "creature",
+                "other": true
+              }
+            }
+          ],
+          "effects": [
+            {
+              "scry": {
+                "amount": 1
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "Whenever you sacrifice another permanent, put a +1/+1 counter on this creature. Sacrifice another creature: Scry 1."
+  },
+  {
+    "name": "Scrapheap Rummager",
+    "mana_cost": "{2}{R}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "goblin"
+    ],
+    "power": 2,
+    "toughness": 2,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "discards": {
+              "batched": true
+            }
+          },
+          "effects": [
+            {
+              "deal_damage": {
+                "amount": {
+                  "triggering": "amount"
+                },
+                "to": "each_opponent"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "activated": {
+          "cost": [
+            {
+              "mana": "{1}"
+            },
+            "tap"
+          ],
+          "effects": [
+            {
+              "discard": {
+                "amount": 1
+              }
+            },
+            {
+              "draw": {
+                "amount": 1
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "Whenever you discard one or more cards, this creature deals that much damage to each opponent. {1}, {T}: Discard a card, then draw a card."
+  },
+  {
+    "name": "Augur of Tides",
+    "mana_cost": "{1}{U}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "merfolk"
+    ],
+    "power": 1,
+    "toughness": 3,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "any_of": [
+              {
+                "scries": {}
+              },
+              {
+                "surveils": {}
+              }
+            ]
+          },
+          "effects": [
+            {
+              "pump": {
+                "power": 1,
+                "toughness": 1,
+                "to": "self"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "triggered": {
+          "when": {
+            "becomes_untapped": {}
+          },
+          "effects": [
+            {
+              "surveil": {
+                "amount": 1
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "Whenever you scry or surveil, this creature gets +1/+1 until end of turn. Whenever this creature becomes untapped, surveil 1."
+  },
+  {
+    "name": "Ossuary Keeper",
+    "mana_cost": "{3}{B}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "zombie"
+    ],
+    "power": 3,
+    "toughness": 3,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "put_into": {
+              "zone": "graveyard",
+              "card": "creature",
+              "batched": true
+            }
+          },
+          "effects": [
+            {
+              "gain_life": {
+                "amount": {
+                  "triggering": "amount"
+                }
+              }
+            }
+          ]
+        }
+      },
+      {
+        "triggered": {
+          "when": {
+            "step_begins": {
+              "step": "end"
+            }
+          },
+          "if": {
+            "amount": {
+              "cards_discarded_this_turn": "you"
+            },
+            "at_least": 1
+          },
+          "effects": [
+            {
+              "draw": {
+                "amount": 1
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "Whenever one or more creature cards are put into your graveyard from anywhere, you gain that much life. At the beginning of your end step, if you discarded a card this turn, draw a card."
+  },
+  {
+    "name": "Wardline Sentinel",
+    "mana_cost": "{G}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "human",
+      "soldier"
+    ],
+    "power": 2,
+    "toughness": 1,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "becomes_target": {
+              "subject": {
+                "each": "creature",
+                "controller": "you"
+              },
+              "by": "opponent"
+            }
+          },
+          "effects": [
+            {
+              "add_counters": {
+                "counter": "+1/+1",
+                "amount": 1,
+                "to": {
+                  "triggering": "object"
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Cryptborn Scavenger",
+    "mana_cost": "{1}{B}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "rat"
+    ],
+    "power": 1,
+    "toughness": 2,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "leaves_graveyard": {
+              "batched": true
+            }
+          },
+          "effects": [
+            {
+              "gain_life": {
+                "amount": 1
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Relic Hoarder",
+    "mana_cost": "{1}{B}{G}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "human",
+      "rogue"
+    ],
+    "power": 2,
+    "toughness": 3,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "leaves_graveyard": {}
+          },
+          "limit": "once_each_turn",
+          "effects": [
+            {
+              "draw": {
+                "amount": 1
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Levy Collector",
+    "mana_cost": "{1}{B}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "human",
+      "advisor"
+    ],
+    "power": 2,
+    "toughness": 1,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "activates_ability": {
+              "controller": "opponent"
+            }
+          },
+          "effects": [
+            {
+              "lose_life": {
+                "amount": 1,
+                "to": {
+                  "triggering": "player"
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Pyre Harbinger",
+    "mana_cost": "{2}{R}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "elemental"
+    ],
+    "power": 2,
+    "toughness": 2,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "cast": {
+              "self": true
+            }
+          },
+          "effects": [
+            {
+              "deal_damage": {
+                "amount": 1,
+                "to": "each_opponent"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Gravewail Specter",
+    "mana_cost": "{2}{B}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "spirit"
+    ],
+    "power": 2,
+    "toughness": 2,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "dies": {
+              "subject": {
+                "each": "creature",
+                "controller": "you"
+              }
+            }
+          },
+          "zone": "graveyard",
+          "effects": [
+            {
+              "lose_life": {
+                "amount": 1,
+                "to": "each_opponent"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Hullwright Patron",
+    "mana_cost": "{1}{W}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "human",
+      "artificer"
+    ],
+    "power": 1,
+    "toughness": 2,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "cast": {
+              "spell": {
+                "one_of": [
+                  {
+                    "spell": {
+                      "any_of": [
+                        "enchantment"
+                      ]
+                    }
+                  },
+                  {
+                    "spell": {
+                      "any_of": [
+                        "artifact"
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          },
+          "effects": [
+            {
+              "gain_life": {
+                "amount": 1
+              }
+            },
+            {
+              "draw": {
+                "amount": 1,
+                "if": {
+                  "triggering": {
+                    "spell": {
+                      "subtypes": [
+                        "saga"
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Mendwell Cleric",
+    "mana_cost": "{2}{W}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "human",
+      "cleric"
+    ],
+    "power": 2,
+    "toughness": 2,
+    "abilities": [
+      {
+        "additional_triggers": {
+          "cause": "you_gain_life"
+        }
+      },
+      {
+        "triggered": {
+          "when": {
+            "gains_life": {}
+          },
+          "effects": [
+            {
+              "add_counters": {
+                "counter": "+1/+1",
+                "amount": 1,
+                "to": "self"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Ember Duelist",
+    "mana_cost": "{3}{R}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "human",
+      "warrior"
+    ],
+    "power": 3,
+    "toughness": 3,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "enters": {}
+          },
+          "effects": [
+            {
+              "may": {
+                "effects": [
+                  {
+                    "lose_life": {
+                      "amount": 2,
+                      "to": "you"
+                    }
+                  }
+                ],
+                "then": [
+                  {
+                    "reflexive_trigger": {
+                      "targets": [
+                        "any_target"
+                      ],
+                      "effects": [
+                        {
+                          "deal_damage": {
+                            "amount": 2,
+                            "to": {
+                              "target": 0
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Signal Adept",
+    "mana_cost": "{2}{U}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "human",
+      "wizard"
+    ],
+    "power": 2,
+    "toughness": 3,
+    "abilities": [
+      {
+        "choose_number": {
+          "min": 0,
+          "max": 6
+        }
+      },
+      {
+        "triggered": {
+          "when": {
+            "cast": {
+              "controller": "opponent",
+              "mana_value": "chosen"
+            }
+          },
+          "effects": [
+            {
+              "draw": {
+                "amount": 1
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Edict Warden",
+    "mana_cost": "{1}{B}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "human",
+      "cleric"
+    ],
+    "power": 3,
+    "toughness": 1,
+    "abilities": [
+      {
+        "choose_card_name": {
+          "not": [
+            "land"
+          ]
+        }
+      },
+      {
+        "triggered": {
+          "when": {
+            "any_of": [
+              {
+                "cast": {
+                  "controller": "opponent",
+                  "name": "chosen"
+                }
+              },
+              {
+                "activates_ability": {
+                  "controller": "opponent",
+                  "name": "chosen"
+                }
+              }
+            ]
+          },
+          "effects": [
+            {
+              "lose_life": {
+                "amount": 2,
+                "to": {
+                  "triggering": "player"
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Scarred Packleader",
+    "mana_cost": "{1}{R}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "goblin",
+      "warrior"
+    ],
+    "keywords": [
+      "menace"
+    ],
+    "power": 1,
+    "toughness": 1,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "dies": {
+              "subject": {
+                "each": "creature",
+                "other": true
+              }
+            }
+          },
+          "limit": "once_each_turn",
+          "effects": [
+            {
+              "add_counters": {
+                "counter": "+1/+1",
+                "amount": 1,
+                "to": "self"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Tidepool Warden",
+    "mana_cost": "{1}{U}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "merfolk",
+      "scout"
+    ],
+    "power": 2,
+    "toughness": 2,
+    "abilities": [
+      {
+        "static": {
+          "affects": "self",
+          "if": {
+            "your_turn": true
+          },
+          "keywords": [
+            "flying"
+          ]
+        }
+      },
+      {
+        "triggered": {
+          "when": {
+            "player_attacks": {}
+          },
+          "while": {
+            "amount": {
+              "power": {
+                "each": "creature",
+                "controller": "you"
+              }
+            },
+            "at_least": 5
+          },
+          "effects": [
+            {
+              "gain_life": {
+                "amount": 1
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Signal Relay",
+    "mana_cost": "{2}{U}",
+    "types": [
+      "artifact",
+      "creature"
+    ],
+    "subtypes": [
+      "construct"
+    ],
+    "power": 1,
+    "toughness": 3,
+    "abilities": [
+      {
+        "static": {
+          "affects": {
+            "each": {
+              "creature": {
+                "types": [
+                  "artifact"
+                ]
+              }
+            },
+            "controller": "you"
+          },
+          "abilities": [
+            {
+              "triggered": {
+                "when": {
+                  "deals_damage": {
+                    "combat": true,
+                    "to": "player"
+                  }
+                },
+                "effects": [
+                  {
+                    "draw": {
+                      "amount": 1
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Debt Collector",
+    "mana_cost": "{3}{B}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "human",
+      "rogue"
+    ],
+    "power": 2,
+    "toughness": 3,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "step_begins": {
+              "step": "end",
+              "whose": "each"
+            }
+          },
+          "effects": [
+            {
+              "lose_life": {
+                "amount": {
+                  "divide": [
+                    {
+                      "life_lost_this_turn": "each_opponent"
+                    },
+                    2
+                  ]
+                },
+                "to": "each_opponent"
+              }
+            },
+            {
+              "gain_life": {
+                "amount": {
+                  "this_way": 0
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Echo Shaman",
+    "mana_cost": "{1}{R}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "goblin",
+      "shaman"
+    ],
+    "power": 2,
+    "toughness": 1,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "enters": {
+              "subject": {
+                "each": "land",
+                "controller": "you"
+              }
+            }
+          },
+          "effects": [
+            {
+              "deal_damage": {
+                "amount": 1,
+                "to": "each_opponent"
+              }
+            },
+            {
+              "add_counters": {
+                "counter": "+1/+1",
+                "amount": 1,
+                "to": "self",
+                "if": {
+                  "nth_resolution": 2
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Tally Engineer",
+    "mana_cost": "{1}{U}",
+    "types": [
+      "creature"
+    ],
+    "power": 1,
+    "toughness": 2,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "cast": {
+              "controller": "any",
+              "spell": "noncreature"
+            }
+          },
+          "effects": [
+            {
+              "add_counters": {
+                "counter": "+1/+1",
+                "amount": 1,
+                "to": "self"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "activated": {
+          "cost": [
+            {
+              "mana": "{1}"
+            },
+            {
+              "remove_counters": {
+                "count": 2
+              }
+            }
+          ],
+          "effects": [
+            {
+              "draw": {
+                "amount": 1
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Driftgate Warden",
+    "mana_cost": "{2}{W}",
+    "types": [
+      "creature"
+    ],
+    "power": 2,
+    "toughness": 2,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "enters": {}
+          },
+          "targets": [
+            {
+              "filter": {
+                "permanent": {
+                  "controller": "you",
+                  "not": [
+                    "land"
+                  ],
+                  "other": true
+                }
+              },
+              "optional": true
+            }
+          ],
+          "effects": [
+            {
+              "exile": {
+                "to": {
+                  "target": 0
+                }
+              }
+            },
+            {
+              "delayed_trigger": {
+                "when": {
+                  "step_begins": {
+                    "step": "end",
+                    "whose": "each"
+                  }
+                },
+                "effects": [
+                  {
+                    "return_to_battlefield": {
+                      "to": {
+                        "result": 0
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Rallying Marshal",
+    "mana_cost": "{2}{R}",
+    "types": [
+      "creature"
+    ],
+    "power": 2,
+    "toughness": 2,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "any_of": [
+              {
+                "enters": {}
+              },
+              {
+                "attacks": {}
+              }
+            ]
+          },
+          "choose": 1,
+          "choose_if": {
+            "if": {
+              "hand_size": "you",
+              "at_most": 1
+            },
+            "choose": {
+              "min": 1,
+              "max": 3
+            }
+          },
+          "modes": [
+            {
+              "effects": [
+                {
+                  "gain_life": {
+                    "amount": 2
+                  }
+                }
+              ]
+            },
+            {
+              "effects": [
+                {
+                  "pump": {
+                    "power": 1,
+                    "toughness": 0,
+                    "to": {
+                      "each": "creature",
+                      "controller": "you"
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              "effects": [
+                {
+                  "draw": {
+                    "amount": 1
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Quiet Arbiter",
+    "mana_cost": "{1}{U}",
+    "types": [
+      "creature"
+    ],
+    "power": 1,
+    "toughness": 2,
+    "keywords": [
+      "flash"
+    ],
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "enters": {}
+          },
+          "choose": 1,
+          "modes": [
+            {
+              "targets": [
+                "stack_ability"
+              ],
+              "effects": [
+                {
+                  "counter": {
+                    "to": {
+                      "target": 0
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              "targets": [
+                {
+                  "filter": {
+                    "permanent": {
+                      "any_of": [
+                        "artifact",
+                        "creature"
+                      ]
+                    }
+                  },
+                  "optional": true
+                }
+              ],
+              "effects": [
+                {
+                  "tap": {
+                    "to": {
+                      "target": 0
+                    }
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Bramble Courier",
+    "mana_cost": "{R}{G}",
+    "types": [
+      "creature"
+    ],
+    "power": 2,
+    "toughness": 2,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "enters": {
+              "subject": {
+                "each": "land",
+                "controller": "you"
+              }
+            }
+          },
+          "effects": [
+            {
+              "add_mana": {
+                "color": "any_one",
+                "colors": [
+                  "R",
+                  "G"
+                ]
+              }
+            }
+          ]
+        }
+      },
+      {
+        "activated": {
+          "cost": [
+            {
+              "mana": "{2}"
+            },
+            {
+              "sacrifice_permanent": {
+                "filter": "land"
+              }
+            }
+          ],
+          "effects": [
+            {
+              "draw": {
+                "amount": 1
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Ore Seeker",
+    "mana_cost": "{3}{R}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "elemental"
+    ],
+    "keywords": [
+      "reach"
+    ],
+    "power": 3,
+    "toughness": 3,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "enters": {}
+          },
+          "effects": [
+            {
+              "exile_top": {
+                "amount": 1
+              }
+            },
+            {
+              "play_permission": {
+                "to": {
+                  "result": 0
+                },
+                "duration": "end_of_your_next_turn"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Border Warden",
+    "mana_cost": "{3}{U}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "human",
+      "pilot"
+    ],
+    "power": 1,
+    "toughness": 5,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "enters": {}
+          },
+          "effects": [
+            {
+              "exile_top": {
+                "amount": 3,
+                "to": "each_opponent"
+              }
+            },
+            {
+              "play_permission": {
+                "to": {
+                  "result": 0
+                },
+                "for": {
+                  "types": [
+                    "land"
+                  ]
+                },
+                "choose": "one_per_owner",
+                "duration": "while_exiled"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Abyssal Steward",
+    "mana_cost": "{4}{U}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "elemental"
+    ],
+    "power": 4,
+    "toughness": 4,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "attacks": {}
+          },
+          "targets": [
+            "opponent"
+          ],
+          "effects": [
+            {
+              "exile_until": {
+                "until": "nonland",
+                "to": {
+                  "target": 0
+                }
+              }
+            },
+            {
+              "cast_free": {
+                "to": {
+                  "result": 0
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Probe Vessel",
+    "mana_cost": "{3}{G}{G}",
+    "types": [
+      "artifact",
+      "creature"
+    ],
+    "subtypes": [
+      "construct"
+    ],
+    "power": 4,
+    "toughness": 4,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "enters": {}
+          },
+          "effects": [
+            {
+              "discover": {
+                "amount": 3
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Assimilation Lattice",
+    "mana_cost": "{4}{B}",
+    "types": [
+      "artifact",
+      "creature"
+    ],
+    "subtypes": [
+      "construct"
+    ],
+    "power": 4,
+    "toughness": 4,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "any_of": [
+              {
+                "enters": {}
+              },
+              {
+                "attacks": {}
+              }
+            ]
+          },
+          "targets": [
+            {
+              "filter": {
+                "creature": {
+                  "controller": "opponent"
+                }
+              },
+              "optional": true
+            }
+          ],
+          "effects": [
+            {
+              "assimilate": {
+                "to": "exiled_with",
+                "for": {
+                  "types": [
+                    "creature"
+                  ]
+                },
+                "choose": true
+              }
+            },
+            {
+              "exile": {
+                "to": {
+                  "target": 0
+                },
+                "link": true,
+                "if": {
+                  "amount": {
+                    "count": {
+                      "result": 0
+                    }
+                  },
+                  "at_most": 0
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Echo Pilferer",
+    "mana_cost": "{1}{U}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "rogue"
+    ],
+    "power": 1,
+    "toughness": 1,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "enters": {}
+          },
+          "targets": [
+            "opponent"
+          ],
+          "effects": [
+            {
+              "look_at_hand": {
+                "to": {
+                  "target": 0
+                }
+              }
+            },
+            {
+              "choose_cards": {
+                "from": {
+                  "hand": {
+                    "target": 0
+                  }
+                },
+                "for": {
+                  "not_types": [
+                    "land"
+                  ]
+                },
+                "put": "exile"
+              }
+            },
+            {
+              "play_permission": {
+                "to": {
+                  "result": 1
+                },
+                "to_player": "owner",
+                "duration": "while_exiled",
+                "cost_increase": 2
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Gearwatch Smith",
+    "mana_cost": "{1}{W}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "dwarf"
+    ],
+    "power": 2,
+    "toughness": 2,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "step_begins": {
+              "step": "end"
+            }
+          },
+          "if": {
+            "amount": {
+              "entered_this_turn": {
+                "each": {
+                  "artifact": {
+                    "subtypes": [
+                      "equipment"
+                    ]
+                  }
+                },
+                "controller": "you"
+              }
+            },
+            "at_least": 1
+          },
+          "effects": [
+            {
+              "draw": {
+                "amount": 1
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Surge Raptor",
+    "mana_cost": "{1}{G}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "dinosaur"
+    ],
+    "power": 2,
+    "toughness": 2,
+    "abilities": [
+      {
+        "kicker": {
+          "cost": [
+            {
+              "mana": "{2}"
+            }
+          ]
+        }
+      },
+      {
+        "triggered": {
+          "when": {
+            "enters": {}
+          },
+          "if": {
+            "kicked": true
+          },
+          "effects": [
+            {
+              "add_counters": {
+                "counter": "+1/+1",
+                "amount": 2,
+                "to": "self"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Shifting Cadet",
+    "mana_cost": "{1}{R}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "goblin",
+      "rogue"
+    ],
+    "power": 1,
+    "toughness": 1,
+    "abilities": [
+      {
+        "activated": {
+          "cost": [
+            {
+              "mana": "{1}"
+            }
+          ],
+          "timing": "sorcery",
+          "only_if": {
+            "source": {
+              "creature": {
+                "subtypes": [
+                  "rogue"
+                ]
+              }
+            }
+          },
+          "effects": [
+            {
+              "become": {
+                "creature_types": [
+                  "goblin",
+                  "scout"
+                ],
+                "base_power_toughness": {
+                  "power": 3,
+                  "toughness": 4
+                },
+                "abilities": [
+                  "additional_land_plays",
+                  {
+                    "triggered": {
+                      "when": {
+                        "becomes_tapped": {}
+                      },
+                      "effects": [
+                        {
+                          "gain_life": {
+                            "amount": 1
+                          }
+                        }
+                      ]
+                    }
+                  }
+                ],
+                "duration": "indefinite",
+                "to": "self"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Ferry Pilot",
+    "mana_cost": "{1}{R}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "human",
+      "pilot"
+    ],
+    "power": 2,
+    "toughness": 1,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "becomes_tapped": {}
+          },
+          "effects": [
+            {
+              "choose_cards": {
+                "from": {
+                  "hand": "you"
+                },
+                "for": {
+                  "types": [
+                    "land"
+                  ]
+                },
+                "optional": true,
+                "put": "battlefield",
+                "then": [
+                  {
+                    "delayed_trigger": {
+                      "when": {
+                        "step_begins": {
+                          "step": "end",
+                          "whose": "each"
+                        }
+                      },
+                      "effects": [
+                        {
+                          "return_choice": {
+                            "filter": {
+                              "permanent": {
+                                "any_of": [
+                                  "land"
+                                ],
+                                "controller": "you"
+                              }
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Stackwise Trickster",
+    "mana_cost": "{2}{R}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "shapeshifter"
+    ],
+    "power": 2,
+    "toughness": 2,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "enters": {}
+          },
+          "effects": [
+            {
+              "shuffle_library": {}
+            },
+            {
+              "exile_until": {
+                "until": "nonland"
+              }
+            },
+            {
+              "grant_ability": {
+                "to": {
+                  "result": 1
+                },
+                "for": {
+                  "not_types": [
+                    "land"
+                  ]
+                },
+                "ability": {
+                  "activated": {
+                    "cost": [
+                      {
+                        "exile_from_hand": {}
+                      }
+                    ],
+                    "timing": "your_turn",
+                    "zone": "exile",
+                    "effects": [
+                      {
+                        "copy_card": {
+                          "of": "self"
+                        }
+                      },
+                      {
+                        "cast": {
+                          "to": {
+                            "result": 0
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Heirloom Smith",
+    "mana_cost": "{1}{U}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "artificer"
+    ],
+    "power": 1,
+    "toughness": 1,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "enters": {}
+          },
+          "effects": [
+            {
+              "create_token": {
+                "token": {
+                  "name": "Smith's Charm",
+                  "colors": [],
+                  "types": [
+                    "artifact"
+                  ],
+                  "subtypes": [
+                    "equipment"
+                  ],
+                  "abilities": [
+                    {
+                      "static": {
+                        "affects": "attached",
+                        "pump": {
+                          "power": 1,
+                          "toughness": 1
+                        }
+                      }
+                    },
+                    {
+                      "equip": {
+                        "cost": [
+                          {
+                            "mana": "{2}"
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "attach": {
+                "to": "self",
+                "attachment": {
+                  "result": 0
+                }
+              }
+            }
+          ]
+        }
+      },
+      {
+        "activated": {
+          "cost": [
+            {
+              "mana": "{2}"
+            }
+          ],
+          "targets": [
+            {
+              "permanent": {
+                "subtypes": [
+                  "equipment"
+                ],
+                "controller": "you"
+              }
+            }
+          ],
+          "effects": [
+            {
+              "become_copy": {
+                "to": {
+                  "each": {
+                    "permanent": {
+                      "subtypes": [
+                        "equipment"
+                      ],
+                      "token": true
+                    }
+                  },
+                  "controller": "you"
+                },
+                "of": {
+                  "target": 0
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Prism Tide Caller",
+    "mana_cost": "{2}{G}{U}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "elemental"
+    ],
+    "power": 1,
+    "toughness": 1,
+    "abilities": [
+      {
+        "enters_with_counters": {
+          "counters": {
+            "+1/+1": {
+              "mana_spent": {
+                "colors": true
+              }
+            }
+          }
+        }
+      },
+      {
+        "triggered": {
+          "when": {
+            "enters": {}
+          },
+          "if": {
+            "amount": {
+              "mana_spent": {
+                "color": "U"
+              }
+            },
+            "at_least": 2
+          },
+          "effects": [
+            {
+              "draw": {
+                "amount": 1
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "Converge — This creature enters with a +1/+1 counter on it for each color of mana spent to cast it. When it enters, if {U}{U} was spent to cast it, draw a card."
+  },
+  {
+    "name": "Grand Audience",
+    "mana_cost": "{1}{U}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "human",
+      "wizard"
+    ],
+    "power": 1,
+    "toughness": 3,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "cast": {
+              "controller": "you",
+              "spell": "noncreature"
+            }
+          },
+          "if": {
+            "amount": {
+              "mana_spent": {
+                "of": {
+                  "triggering": "object"
+                }
+              }
+            },
+            "at_least": 3
+          },
+          "effects": [
+            {
+              "add_counters": {
+                "counter": "+1/+1",
+                "amount": 1,
+                "to": "self"
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "Whenever you cast a noncreature spell, if at least three mana was spent to cast it, put a +1/+1 counter on this creature."
+  },
+  {
+    "name": "Hollow Hedge Witch",
+    "mana_cost": "{2}{B}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "elf",
+      "warlock"
+    ],
+    "power": 3,
+    "toughness": 3,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "enters": {}
+          },
+          "effects": [
+            {
+              "may": {
+                "effects": [
+                  {
+                    "blight": {
+                      "amount": 1
+                    }
+                  }
+                ],
+                "then": [
+                  {
+                    "blight": {
+                      "amount": 1,
+                      "to": "each_opponent"
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "When this creature enters, you may blight 1. If you do, each opponent blights 1."
+  },
+  {
+    "name": "Velvet Informant",
+    "mana_cost": "{1}{U}{B}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "human",
+      "rogue"
+    ],
+    "power": 2,
+    "toughness": 2,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "enters": {}
+          },
+          "effects": [
+            {
+              "connive": {}
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "When this creature enters, it connives."
+  },
+  {
+    "name": "Harbor Muster",
+    "mana_cost": "{1}{W}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "human",
+      "soldier"
+    ],
+    "power": 1,
+    "toughness": 2,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "enters": {}
+          },
+          "effects": [
+            {
+              "recruit": {}
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "When this creature enters, recruit."
+  },
+  {
+    "name": "Steppe Holdout",
+    "mana_cost": "{1}{W}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "human",
+      "warrior"
+    ],
+    "power": 2,
+    "toughness": 1,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "enters": {}
+          },
+          "effects": [
+            {
+              "endure": {
+                "amount": 1
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "When this creature enters, it endures 1."
+  },
+  {
+    "name": "Void Sentry",
+    "mana_cost": "{1}{B}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "human"
+    ],
+    "power": 2,
+    "toughness": 1,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "step_begins": {
+              "step": "end",
+              "whose": "your"
+            }
+          },
+          "if": {
+            "cast_with_this_turn": "warp"
+          },
+          "effects": [
+            {
+              "draw": {
+                "amount": 1
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Flicker Wisp",
+    "mana_cost": "{2}{R}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "elemental"
+    ],
+    "power": 2,
+    "toughness": 1,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "enters": {}
+          },
+          "targets": [
+            "any_target"
+          ],
+          "effects": [
+            {
+              "deal_damage": {
+                "amount": 1,
+                "to": {
+                  "target": 0
+                }
+              }
+            }
+          ]
+        }
+      },
+      {
+        "evoke": {
+          "cost": "{R}"
+        }
+      }
+    ]
+  },
+  {
+    "name": "Wagon Hand",
+    "mana_cost": "{G}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "human",
+      "pilot"
+    ],
+    "power": 1,
+    "toughness": 1,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "crews_vehicle": {}
+          },
+          "effects": [
+            {
+              "pump": {
+                "power": 2,
+                "toughness": 0,
+                "to": {
+                  "triggering": "object"
+                }
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "Whenever this creature crews a Vehicle, that Vehicle gets +2/+0 until end of turn."
+  },
+  {
+    "name": "Gearbreak Mender",
+    "mana_cost": "{1}{G}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "goblin",
+      "artificer"
+    ],
+    "power": 1,
+    "toughness": 2,
+    "abilities": [
+      {
+        "activated": {
+          "exhaust": true,
+          "cost": [
+            {
+              "mana": "{1}{G}"
+            }
+          ],
+          "effects": [
+            {
+              "add_counters": {
+                "counter": "+1/+1",
+                "amount": 2,
+                "to": "self"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "triggered": {
+          "when": {
+            "activates_ability": {
+              "exhaust": true
+            }
+          },
+          "effects": [
+            {
+              "gain_life": {
+                "amount": 2
+              }
+            }
+          ]
+        }
+      },
+      {
+        "activated": {
+          "cost": [
+            {
+              "mana": "{3}"
+            }
+          ],
+          "targets": [
+            "artifact"
+          ],
+          "effects": [
+            {
+              "become": {
+                "types": [
+                  "artifact",
+                  "creature"
+                ],
+                "base_power_toughness": {
+                  "power": 2,
+                  "toughness": 2
+                },
+                "to": {
+                  "target": 0
+                }
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "Exhaust: two mana: two +1/+1 counters here. Whenever you activate an exhaust ability, you gain 2 life. Three mana: target artifact becomes a 2/2 artifact creature until end of turn."
+  },
+  {
+    "name": "Warren Herald",
+    "mana_cost": "{1}{W}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "rabbit"
+    ],
+    "power": 1,
+    "toughness": 1,
+    "deck_limit": "any",
+    "rules_text": "When this creature enters, you gain 1 life. A deck can have any number of cards named Warren Herald.",
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "enters": {}
+          },
+          "effects": [
+            {
+              "gain_life": {
+                "amount": 1
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Grove Rallier",
+    "mana_cost": "{2}{G}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "elf",
+      "warrior"
+    ],
+    "power": 2,
+    "toughness": 2,
+    "rules_text": "When this creature enters, up to X target creatures you control each get +1/+1 until end of turn, where X is the number of lands you control.",
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "enters": {}
+          },
+          "targets": [
+            {
+              "filter": {
+                "creature": {
+                  "controller": "you"
+                }
+              },
+              "optional": true,
+              "count": {
+                "count": {
+                  "each": "land",
+                  "controller": "you"
+                }
+              }
+            }
+          ],
+          "effects": [
+            {
+              "pump": {
+                "power": 1,
+                "toughness": 1,
+                "to": {
+                  "target": 0
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+]

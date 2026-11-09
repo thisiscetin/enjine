@@ -15,18 +15,21 @@ RSpec.describe "Small units" do
     expect(Enjine::Docs.supported).to include("## Supertypes\n\n_None yet._")
   end
 
-  it "loads sample decks and rejects unknown ones" do
-    deck = Enjine::CardPool::Core.deck("izzet_spells")
-    expect(Enjine::Deck.from_h(deck)).to be_valid
-    expect { Enjine::CardPool::Core.deck("nope") }.to raise_error(ArgumentError, /unknown sample deck/)
+  it "ships valid example decks whose cards are the fixture cards" do
+    expect(CardFixtures.deck_names).to eq(%w[azorius_walkers gruul_beats izzet_spells])
+    CardFixtures.deck_names.each do |name|
+      deck = CardFixtures.deck(name)
+      expect(Enjine::Deck.from_h(deck)).to be_valid
+      expect(CardFixtures.cards).to include(*deck["cards"])
+    end
   end
 
-  it "builds random legal decks" do
-    deck = Enjine::CardPool::DeckBuilder.random(Enjine::CardPool::Core.cards, rng: Enjine::Rng.from_seed(5))
+  it "builds random legal fuzz decks" do
+    deck = Enjine::Fuzz.random_deck(CardFixtures.cards, rng: Enjine::Rng.from_seed(5))
     expect(Enjine::Deck.from_h(deck)).to be_valid
     expect(deck).not_to have_key("outside")
-    with_outside = Enjine::Deck.from_h(Enjine::CardPool::DeckBuilder.random(Enjine::CardPool::Core.cards,
-                                                                            rng: Enjine::Rng.from_seed(5), outside: 15))
+    with_outside = Enjine::Deck.from_h(Enjine::Fuzz.random_deck(CardFixtures.cards,
+                                                                rng: Enjine::Rng.from_seed(5), outside: 15))
     expect(with_outside).to be_valid
     expect([with_outside.size, with_outside.outside_size]).to eq([60, 15])
     expect(with_outside.entries).to eq(Enjine::Deck.from_h(deck).entries) # the same main deck

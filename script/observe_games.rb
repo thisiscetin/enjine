@@ -5,27 +5,25 @@
 #
 #   ruby -Ilib script/observe_games.rb [games=10] [seed=1]
 require "enjine"
-require "enjine/card_pool/core"
 require "enjine/deck_builder"
-require "enjine/sets"
+require_relative "../spec/support/card_fixtures"
 
 games = Integer(ARGV[0] || 10)
 seed = Integer(ARGV[1] || 1)
-fixtures = File.expand_path("../spec/fixtures/sets", __dir__)
-pool = Enjine::CardPool::Core
+fxa = Enjine::DeckBuilder.new(CardFixtures.pool("fxa"))
+fxb = Enjine::DeckBuilder.new(CardFixtures.pool("fxb"))
+both = Enjine::DeckBuilder.new(CardFixtures.pool("fxa") + CardFixtures.pool("fxb"))
+fixtures = Enjine::DeckBuilder.new(CardFixtures.cards)
 
 decks = lambda do |i|
   rng = Enjine::Rng.from_seed((seed * 100) + i)
-  sample = pool.deck_names
+  sample = CardFixtures.deck_names
   case i % 5
-  when 0 then [pool.deck(sample[i % 3]), pool.deck(sample[(i + 1) % 3])]
-  when 1 then [pool.deck(sample[i % 3]), Enjine::CardPool::DeckBuilder.random(pool.cards, rng: rng)]
-  when 2 then [Enjine::DeckBuilder.build(seed: i, sets: %w[fxa], colors: 1, sets_dir: fixtures),
-               Enjine::DeckBuilder.build(seed: i + 50, sets: %w[fxb], colors: 2, sets_dir: fixtures)]
-  when 3 then [Enjine::DeckBuilder.build(seed: i, sets: %w[fxa fxb], colors: 3, sets_dir: fixtures),
-               Enjine::DeckBuilder.build(seed: i + 7, sets: %w[fxa fxb], colors: 2, sets_dir: fixtures)]
-  else [Enjine::DeckBuilder.build(seed: i, cards: pool.cards, colors: 2, sets: [], sets_dir: fixtures),
-        pool.deck(sample[i % 3])]
+  when 0 then [CardFixtures.deck(sample[i % 3]), CardFixtures.deck(sample[(i + 1) % 3])]
+  when 1 then [CardFixtures.deck(sample[i % 3]), Enjine::Fuzz.random_deck(CardFixtures.cards, rng: rng)]
+  when 2 then [fxa.build(seed: i, colors: 1), fxb.build(seed: i + 50, colors: 2)]
+  when 3 then [both.build(seed: i, colors: 3), both.build(seed: i + 7, colors: 2)]
+  else [fixtures.build(seed: i, colors: 2), CardFixtures.deck(sample[i % 3])]
   end
 end
 

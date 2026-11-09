@@ -1,0 +1,797 @@
+[
+  {
+    "name": "Plains",
+    "types": [
+      "land"
+    ],
+    "supertypes": [
+      "basic"
+    ],
+    "subtypes": [
+      "plains"
+    ]
+  },
+  {
+    "name": "Island",
+    "types": [
+      "land"
+    ],
+    "supertypes": [
+      "basic"
+    ],
+    "subtypes": [
+      "island"
+    ]
+  },
+  {
+    "name": "Savannah Lions",
+    "mana_cost": "{W}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "cat"
+    ],
+    "power": 2,
+    "toughness": 1
+  },
+  {
+    "name": "Glory Seeker",
+    "mana_cost": "{1}{W}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "human",
+      "soldier"
+    ],
+    "power": 2,
+    "toughness": 2
+  },
+  {
+    "name": "Watchful Sentry",
+    "mana_cost": "{1}{W}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "human",
+      "soldier"
+    ],
+    "keywords": [
+      "flash"
+    ],
+    "power": 2,
+    "toughness": 1,
+    "rules_text": "Flash"
+  },
+  {
+    "name": "Coral Merfolk",
+    "mana_cost": "{1}{U}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "merfolk"
+    ],
+    "power": 2,
+    "toughness": 1
+  },
+  {
+    "name": "Pillarfield Ox",
+    "mana_cost": "{3}{W}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "ox"
+    ],
+    "power": 2,
+    "toughness": 4
+  },
+  {
+    "name": "Horned Turtle",
+    "mana_cost": "{2}{U}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "turtle"
+    ],
+    "power": 1,
+    "toughness": 4
+  },
+  {
+    "name": "Vessa, Rally Captain",
+    "mana_cost": "{2}{W}{W}",
+    "types": [
+      "planeswalker"
+    ],
+    "subtypes": [
+      "vessa"
+    ],
+    "loyalty": 3,
+    "abilities": [
+      {
+        "loyalty": {
+          "cost": 1,
+          "effects": [
+            {
+              "pump": {
+                "power": 1,
+                "toughness": 1,
+                "to": {
+                  "each": "creature",
+                  "controller": "you"
+                }
+              }
+            }
+          ]
+        }
+      },
+      {
+        "loyalty": {
+          "cost": -2,
+          "effects": [
+            {
+              "add_counters": {
+                "counter": "+1/+1",
+                "amount": 1,
+                "to": {
+                  "each": "creature",
+                  "controller": "you"
+                }
+              }
+            }
+          ]
+        }
+      },
+      {
+        "loyalty": {
+          "cost": -3,
+          "targets": [
+            "creature"
+          ],
+          "effects": [
+            {
+              "deal_damage": {
+                "amount": 3,
+                "to": {
+                  "target": 0
+                }
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "+1: Creatures you control get +1/+1 until end of turn.\n−2: Put a +1/+1 counter on each creature you control.\n−3: Vessa deals 3 damage to target creature."
+  },
+  {
+    "name": "Counterspell",
+    "mana_cost": "{U}{U}",
+    "types": [
+      "instant"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "targets": [
+            "spell"
+          ],
+          "effects": [
+            {
+              "counter": {
+                "to": {
+                  "target": 0
+                }
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "Counter target spell."
+  },
+  {
+    "name": "Revitalize",
+    "mana_cost": "{1}{W}",
+    "types": [
+      "instant"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "effects": [
+            {
+              "gain_life": {
+                "amount": 3
+              }
+            },
+            {
+              "draw": {
+                "amount": 1
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "You gain 3 life. Draw a card."
+  },
+  {
+    "name": "Mountain",
+    "types": [
+      "land"
+    ],
+    "supertypes": [
+      "basic"
+    ],
+    "subtypes": [
+      "mountain"
+    ]
+  },
+  {
+    "name": "Forest",
+    "types": [
+      "land"
+    ],
+    "supertypes": [
+      "basic"
+    ],
+    "subtypes": [
+      "forest"
+    ]
+  },
+  {
+    "name": "Raging Goblin",
+    "mana_cost": "{R}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "goblin",
+      "berserker"
+    ],
+    "keywords": [
+      "haste"
+    ],
+    "power": 1,
+    "toughness": 1,
+    "rules_text": "Haste"
+  },
+  {
+    "name": "Grizzly Bears",
+    "mana_cost": "{1}{G}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "bear"
+    ],
+    "power": 2,
+    "toughness": 2
+  },
+  {
+    "name": "Gray Ogre",
+    "mana_cost": "{2}{R}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "ogre"
+    ],
+    "power": 2,
+    "toughness": 2
+  },
+  {
+    "name": "Trained Armodon",
+    "mana_cost": "{1}{G}{G}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "elephant"
+    ],
+    "power": 3,
+    "toughness": 3
+  },
+  {
+    "name": "Hill Giant",
+    "mana_cost": "{3}{R}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "giant"
+    ],
+    "power": 3,
+    "toughness": 3
+  },
+  {
+    "name": "Craw Wurm",
+    "mana_cost": "{4}{G}{G}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "wurm"
+    ],
+    "power": 6,
+    "toughness": 4
+  },
+  {
+    "name": "Prodigal Pyromancer",
+    "mana_cost": "{2}{R}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "human",
+      "wizard"
+    ],
+    "power": 1,
+    "toughness": 1,
+    "abilities": [
+      {
+        "activated": {
+          "cost": [
+            "tap"
+          ],
+          "targets": [
+            "any_target"
+          ],
+          "effects": [
+            {
+              "deal_damage": {
+                "amount": 1,
+                "to": {
+                  "target": 0
+                }
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "{T}: Prodigal Pyromancer deals 1 damage to any target."
+  },
+  {
+    "name": "Lightning Bolt",
+    "mana_cost": "{R}",
+    "types": [
+      "instant"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "targets": [
+            "any_target"
+          ],
+          "effects": [
+            {
+              "deal_damage": {
+                "amount": 3,
+                "to": {
+                  "target": 0
+                }
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "Lightning Bolt deals 3 damage to any target."
+  },
+  {
+    "name": "Giant Growth",
+    "mana_cost": "{G}",
+    "types": [
+      "instant"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "targets": [
+            "creature"
+          ],
+          "effects": [
+            {
+              "pump": {
+                "power": 3,
+                "toughness": 3,
+                "to": {
+                  "target": 0
+                }
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "Target creature gets +3/+3 until end of turn."
+  },
+  {
+    "name": "Fugitive Wizard",
+    "mana_cost": "{U}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "human",
+      "wizard"
+    ],
+    "power": 1,
+    "toughness": 1
+  },
+  {
+    "name": "Divination",
+    "mana_cost": "{2}{U}",
+    "types": [
+      "sorcery"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "effects": [
+            {
+              "draw": {
+                "amount": 2
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "Draw two cards."
+  },
+  {
+    "name": "Swamp",
+    "types": [
+      "land"
+    ],
+    "supertypes": [
+      "basic"
+    ],
+    "subtypes": [
+      "swamp"
+    ]
+  },
+  {
+    "name": "Cloud Kite",
+    "mana_cost": "{1}{U}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "bird"
+    ],
+    "power": 1,
+    "toughness": 2,
+    "keywords": [
+      "flying"
+    ],
+    "rules_text": "Flying"
+  },
+  {
+    "name": "Canopy Stalker",
+    "mana_cost": "{1}{G}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "spider"
+    ],
+    "power": 1,
+    "toughness": 3,
+    "keywords": [
+      "reach"
+    ],
+    "rules_text": "Reach"
+  },
+  {
+    "name": "Vigil Knight",
+    "mana_cost": "{2}{W}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "human",
+      "knight"
+    ],
+    "power": 2,
+    "toughness": 3,
+    "keywords": [
+      "vigilance",
+      "first strike"
+    ],
+    "rules_text": "Vigilance, first strike"
+  },
+  {
+    "name": "Alley Bruiser",
+    "mana_cost": "{2}{B}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "human",
+      "rogue"
+    ],
+    "power": 3,
+    "toughness": 2,
+    "keywords": [
+      "menace"
+    ],
+    "rules_text": "Menace"
+  },
+  {
+    "name": "Marsh Viper",
+    "mana_cost": "{B}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "snake"
+    ],
+    "power": 1,
+    "toughness": 1,
+    "keywords": [
+      "deathtouch"
+    ],
+    "rules_text": "Deathtouch"
+  },
+  {
+    "name": "Tusk Charger",
+    "mana_cost": "{3}{G}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "boar"
+    ],
+    "power": 4,
+    "toughness": 3,
+    "keywords": [
+      "trample"
+    ],
+    "rules_text": "Trample"
+  },
+  {
+    "name": "Mercy Acolyte",
+    "mana_cost": "{1}{W}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "human",
+      "cleric"
+    ],
+    "power": 2,
+    "toughness": 1,
+    "keywords": [
+      "lifelink"
+    ],
+    "rules_text": "Lifelink"
+  },
+  {
+    "name": "Wall of Timber",
+    "mana_cost": "{1}{G}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "plant",
+      "wall"
+    ],
+    "power": 0,
+    "toughness": 5,
+    "keywords": [
+      "defender"
+    ],
+    "rules_text": "Defender"
+  },
+  {
+    "name": "Twinblade Duelist",
+    "mana_cost": "{3}{R}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "human",
+      "warrior"
+    ],
+    "power": 2,
+    "toughness": 2,
+    "keywords": [
+      "double strike"
+    ],
+    "rules_text": "Double strike"
+  },
+  {
+    "name": "Shrouded Lurker",
+    "mana_cost": "{2}{U}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "human",
+      "rogue"
+    ],
+    "power": 2,
+    "toughness": 2,
+    "keywords": [
+      "hexproof"
+    ],
+    "rules_text": "Hexproof"
+  },
+  {
+    "name": "Bastion Golem",
+    "mana_cost": "{4}",
+    "types": [
+      "artifact",
+      "creature"
+    ],
+    "subtypes": [
+      "golem"
+    ],
+    "power": 3,
+    "toughness": 3,
+    "keywords": [
+      "indestructible"
+    ],
+    "rules_text": "Indestructible"
+  },
+  {
+    "name": "Spectrum Golem",
+    "mana_cost": "{4}",
+    "types": [
+      "artifact",
+      "creature"
+    ],
+    "subtypes": [
+      "golem"
+    ],
+    "keywords": [
+      "sunburst"
+    ],
+    "power": 0,
+    "toughness": 0,
+    "rules_text": "Sunburst"
+  },
+  {
+    "name": "Rampaging Brute",
+    "mana_cost": "{2}{R}",
+    "types": [
+      "creature"
+    ],
+    "power": 4,
+    "toughness": 3,
+    "keywords": [
+      "cant_block",
+      "attacks_each_combat"
+    ]
+  },
+  {
+    "name": "Fogveil Stalker",
+    "mana_cost": "{3}{U}",
+    "types": [
+      "creature"
+    ],
+    "power": 2,
+    "toughness": 2,
+    "keywords": [
+      "cant_be_blocked"
+    ]
+  },
+  {
+    "name": "Timid Mastiff",
+    "mana_cost": "{2}{W}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "dog"
+    ],
+    "power": 4,
+    "toughness": 3,
+    "keywords": [
+      "cant_attack_alone"
+    ]
+  },
+  {
+    "name": "Swarm Sentinel",
+    "mana_cost": "{1}{B}",
+    "types": [
+      "artifact",
+      "creature"
+    ],
+    "subtypes": [
+      "construct"
+    ],
+    "power": {
+      "count": {
+        "each": {
+          "creature": {
+            "types": [
+              "artifact"
+            ]
+          }
+        },
+        "controller": "you"
+      }
+    },
+    "toughness": 2
+  },
+  {
+    "name": "Thornmarsh Hybrid",
+    "mana_cost": "{1}{B/G}{B/G}",
+    "types": [
+      "creature"
+    ],
+    "power": 3,
+    "toughness": 3,
+    "subtypes": [
+      "beast"
+    ]
+  },
+  {
+    "name": "Unyielding Oxen",
+    "mana_cost": "{2}{G}",
+    "types": [
+      "creature"
+    ],
+    "power": 3,
+    "toughness": 3,
+    "keywords": [
+      "cant_be_countered"
+    ]
+  },
+  {
+    "name": "Flickerwing Drake",
+    "mana_cost": "{1}{U}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "drake"
+    ],
+    "power": 2,
+    "toughness": 2,
+    "keywords": [
+      "flying",
+      "phasing"
+    ]
+  },
+  {
+    "name": "Many-Faced Wanderer",
+    "mana_cost": "{2}{U}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "shapeshifter"
+    ],
+    "keywords": [
+      "changeling"
+    ],
+    "power": 2,
+    "toughness": 2
+  },
+  {
+    "name": "Ember Pupil",
+    "mana_cost": "{1}{R}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "human",
+      "monk"
+    ],
+    "keywords": [
+      "prowess"
+    ],
+    "power": 2,
+    "toughness": 1,
+    "rules_text": "Prowess"
+  }
+]

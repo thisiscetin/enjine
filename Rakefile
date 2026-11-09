@@ -24,17 +24,16 @@ end
 desc "Play random games checking invariants: rake fuzz[games,seed]"
 task :fuzz, %i[games seed] do |_, args|
   require_relative "lib/enjine"
-  require_relative "lib/enjine/card_pool/core"
+  require_relative "spec/support/card_fixtures"
   games = Integer(args[:games] || 50)
   seed = Integer(args[:seed] || 0)
   rng = Enjine::Rng.from_seed(seed)
-  cards = Enjine::CardPool::Core.cards
-  decks = Enjine::CardPool::Core.deck_names
-  # Even seeds pit two sample decks against each other; odd seeds use random pool decks.
+  decks = CardFixtures.deck_names
+  # Even seeds pit two example decks against each other; odd seeds use random decks of the fixture cards.
   players = %w[p1 p2].map do |name|
     # Random decks own 7 cards outside the game (CR 400.11a), so play_from "outside" gets exercised.
-    deck = if seed.even? then Enjine::CardPool::Core.deck(decks[rng.rand(decks.size)])
-           else Enjine::CardPool::DeckBuilder.random(cards, rng: rng, outside: 7)
+    deck = if seed.even? then CardFixtures.deck(decks[rng.rand(decks.size)])
+           else Enjine::Fuzz.random_deck(CardFixtures.cards, rng: rng, outside: 7)
            end
     Enjine::Player.new(name: name, deck: deck)
   end
@@ -48,11 +47,10 @@ end
 desc "Benchmark random games per second (not a CI gate)"
 task :bench do
   require_relative "lib/enjine"
-  require_relative "lib/enjine/card_pool/core"
+  require_relative "spec/support/card_fixtures"
   require "benchmark/ips"
-  cards = Enjine::CardPool::Core.cards
   rng = Enjine::Rng.from_seed(1)
-  players = %w[p1 p2].map { Enjine::Player.new(name: it, deck: Enjine::CardPool::DeckBuilder.random(cards, rng: rng)) }
+  players = %w[p1 p2].map { Enjine::Player.new(name: it, deck: Enjine::Fuzz.random_deck(CardFixtures.cards, rng: rng)) }
   setup = Enjine::Setup.new(*players)
   seed = 0
   Benchmark.ips do |x|
@@ -67,11 +65,10 @@ end
 desc "Profile random games with stackprof: rake profile[games]"
 task :profile, %i[games] do |_, args|
   require_relative "lib/enjine"
-  require_relative "lib/enjine/card_pool/core"
+  require_relative "spec/support/card_fixtures"
   require "stackprof"
-  cards = Enjine::CardPool::Core.cards
   rng = Enjine::Rng.from_seed(1)
-  players = %w[p1 p2].map { Enjine::Player.new(name: it, deck: Enjine::CardPool::DeckBuilder.random(cards, rng: rng)) }
+  players = %w[p1 p2].map { Enjine::Player.new(name: it, deck: Enjine::Fuzz.random_deck(CardFixtures.cards, rng: rng)) }
   setup = Enjine::Setup.new(*players)
   StackProf.run(mode: :cpu, out: "tmp/stackprof.dump") do
     Integer(args[:games] || 20).times do |i|

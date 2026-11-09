@@ -1,0 +1,3413 @@
+[
+  {
+    "name": "Lightning Bolt",
+    "mana_cost": "{R}",
+    "types": [
+      "instant"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "targets": [
+            "any_target"
+          ],
+          "effects": [
+            {
+              "deal_damage": {
+                "amount": 3,
+                "to": {
+                  "target": 0
+                }
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "Lightning Bolt deals 3 damage to any target."
+  },
+  {
+    "name": "Giant Growth",
+    "mana_cost": "{G}",
+    "types": [
+      "instant"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "targets": [
+            "creature"
+          ],
+          "effects": [
+            {
+              "pump": {
+                "power": 3,
+                "toughness": 3,
+                "to": {
+                  "target": 0
+                }
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "Target creature gets +3/+3 until end of turn."
+  },
+  {
+    "name": "Counterspell",
+    "mana_cost": "{U}{U}",
+    "types": [
+      "instant"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "targets": [
+            "spell"
+          ],
+          "effects": [
+            {
+              "counter": {
+                "to": {
+                  "target": 0
+                }
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "Counter target spell."
+  },
+  {
+    "name": "Revitalize",
+    "mana_cost": "{1}{W}",
+    "types": [
+      "instant"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "effects": [
+            {
+              "gain_life": {
+                "amount": 3
+              }
+            },
+            {
+              "draw": {
+                "amount": 1
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "You gain 3 life. Draw a card."
+  },
+  {
+    "name": "Divination",
+    "mana_cost": "{2}{U}",
+    "types": [
+      "sorcery"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "effects": [
+            {
+              "draw": {
+                "amount": 2
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "Draw two cards."
+  },
+  {
+    "name": "Call the Watch",
+    "mana_cost": "{2}{W}",
+    "types": [
+      "sorcery"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "effects": [
+            {
+              "create_token": {
+                "token": {
+                  "name": "Watch Soldier",
+                  "types": [
+                    "creature"
+                  ],
+                  "subtypes": [
+                    "human",
+                    "soldier"
+                  ],
+                  "power": 1,
+                  "toughness": 1
+                },
+                "amount": 2
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "Create two 1/1 Human Soldier creature tokens."
+  },
+  {
+    "name": "Tidewarden Phaser",
+    "mana_cost": "{1}{W}",
+    "types": [
+      "instant"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "targets": [
+            {
+              "creature": {
+                "controller": "you"
+              }
+            }
+          ],
+          "effects": [
+            {
+              "exile": {
+                "to": {
+                  "target": 0
+                }
+              }
+            },
+            {
+              "delayed_trigger": {
+                "when": {
+                  "step_begins": {
+                    "step": "end",
+                    "whose": "each"
+                  }
+                },
+                "effects": [
+                  {
+                    "return_to_battlefield": {
+                      "to": {
+                        "result": 0
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "Exile target creature you control. At the beginning of the next end step, return that card to the battlefield under its owner's control."
+  },
+  {
+    "name": "Mirrorstep Blink",
+    "mana_cost": "{W}",
+    "types": [
+      "instant"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "targets": [
+            "creature"
+          ],
+          "effects": [
+            {
+              "exile": {
+                "to": {
+                  "target": 0
+                }
+              }
+            },
+            {
+              "return_to_battlefield": {
+                "to": {
+                  "result": 0
+                }
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "Exile target creature, then return it to the battlefield under its owner's control."
+  },
+  {
+    "name": "Gambler's Insight",
+    "mana_cost": "{1}{U}",
+    "types": [
+      "sorcery"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "effects": [
+            {
+              "draw": {
+                "amount": 1
+              }
+            },
+            {
+              "may": {
+                "effects": [
+                  {
+                    "discard": {
+                      "amount": 1
+                    }
+                  }
+                ],
+                "then": [
+                  {
+                    "draw": {
+                      "amount": 2
+                    }
+                  }
+                ],
+                "otherwise": [
+                  {
+                    "scry": {
+                      "amount": 1
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "Draw a card. You may discard a card. If you do, draw two cards. If you don't, scry 1."
+  },
+  {
+    "name": "Static Snare",
+    "mana_cost": "{1}{U}",
+    "types": [
+      "instant"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "targets": [
+            "creature"
+          ],
+          "effects": [
+            {
+              "tap": {
+                "to": {
+                  "target": 0
+                }
+              }
+            },
+            {
+              "add_counters": {
+                "counter": "stun",
+                "amount": 1,
+                "to": {
+                  "target": 0
+                }
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "The chosen creature becomes tapped and gets one stun counter."
+  },
+  {
+    "name": "Titan Snare",
+    "mana_cost": "{1}{W}",
+    "types": [
+      "instant"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "targets": [
+            {
+              "creature": {
+                "power": {
+                  "at_least": 4
+                }
+              }
+            }
+          ],
+          "effects": [
+            {
+              "destroy": {
+                "to": {
+                  "target": 0
+                }
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "Destroy the chosen creature; it must have power 4 or more."
+  },
+  {
+    "name": "Scrap Sweep",
+    "mana_cost": "{1}{B}",
+    "types": [
+      "sorcery"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "targets": [
+            {
+              "one_of": [
+                {
+                  "creature": {
+                    "mana_value": {
+                      "at_most": 2
+                    },
+                    "token": false
+                  }
+                },
+                {
+                  "creature": {
+                    "modified": true,
+                    "not_supertypes": [
+                      "legendary"
+                    ]
+                  }
+                }
+              ]
+            }
+          ],
+          "effects": [
+            {
+              "exile": {
+                "to": {
+                  "target": 0
+                }
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "Exile the chosen creature: a nontoken one of mana value 2 or less, or a nonlegendary one that is modified."
+  },
+  {
+    "name": "Ember Surge",
+    "mana_cost": "{1}{R}",
+    "types": [
+      "sorcery"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "effects": [
+            {
+              "add_mana": {
+                "produce": "{R}{R}{R}"
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "Add {R}{R}{R}."
+  },
+  {
+    "name": "Flare Torrent",
+    "mana_cost": "{X}{R}",
+    "types": [
+      "instant"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "targets": [
+            "any_target"
+          ],
+          "effects": [
+            {
+              "deal_damage": {
+                "amount": "x",
+                "to": {
+                  "target": 0
+                }
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "This spell deals X damage to any target."
+  },
+  {
+    "name": "Rally Signal",
+    "mana_cost": "{2}{W}",
+    "types": [
+      "instant"
+    ],
+    "abilities": [
+      {
+        "cost_reduction": {
+          "amount": 1,
+          "if": {
+            "attacked": true
+          }
+        }
+      },
+      {
+        "spell": {
+          "effects": [
+            {
+              "pump": {
+                "power": 1,
+                "toughness": 1,
+                "to": {
+                  "each": "creature",
+                  "controller": "you"
+                }
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "If a creature is attacking you, this spell costs {1} less to cast. Creatures you control get +1/+1 until end of turn."
+  },
+  {
+    "name": "Pinning Strike",
+    "mana_cost": "{3}{W}",
+    "types": [
+      "instant"
+    ],
+    "abilities": [
+      {
+        "cost_reduction": {
+          "amount": 2,
+          "if": {
+            "targets": {
+              "creature": {
+                "tapped": true
+              }
+            }
+          }
+        }
+      },
+      {
+        "spell": {
+          "targets": [
+            "creature"
+          ],
+          "effects": [
+            {
+              "destroy": {
+                "to": {
+                  "target": 0
+                }
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "This spell costs {2} less to cast if it targets a tapped creature. Destroy target creature."
+  },
+  {
+    "name": "Wayfinder Charm",
+    "mana_cost": "{1}{G}",
+    "types": [
+      "sorcery"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "effects": [
+            {
+              "search_library": {
+                "for": {
+                  "supertypes": [
+                    "basic"
+                  ],
+                  "types": [
+                    "land"
+                  ]
+                },
+                "put": "battlefield",
+                "tapped": true
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Forked Path",
+    "mana_cost": "{1}{U}",
+    "types": [
+      "instant"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "modes": [
+            {
+              "effects": [
+                {
+                  "draw": {
+                    "amount": 1
+                  }
+                }
+              ]
+            },
+            {
+              "targets": [
+                "creature"
+              ],
+              "effects": [
+                {
+                  "tap": {
+                    "to": {
+                      "target": 0
+                    }
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "Choose one: draw a card; or tap target creature."
+  },
+  {
+    "name": "Hive Reclaimer",
+    "mana_cost": "{3}{B}",
+    "types": [
+      "sorcery"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "targets": [
+            {
+              "graveyard_card": {
+                "any_of": [
+                  "creature"
+                ]
+              }
+            }
+          ],
+          "effects": [
+            {
+              "assimilate": {
+                "to": {
+                  "target": 0
+                }
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "Assimilate target creature card from a graveyard."
+  },
+  {
+    "name": "Shadow Passage",
+    "mana_cost": "{U}",
+    "types": [
+      "instant"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "targets": [
+            "creature"
+          ],
+          "effects": [
+            {
+              "grant": {
+                "keywords": [
+                  "cant_be_blocked"
+                ],
+                "to": {
+                  "target": 0
+                }
+              }
+            },
+            {
+              "draw": {
+                "amount": 1
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Cower in Fear",
+    "mana_cost": "{1}{R}",
+    "types": [
+      "sorcery"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "effects": [
+            {
+              "grant": {
+                "keywords": [
+                  "cant_block"
+                ],
+                "to": {
+                  "each": "creature",
+                  "controller": "opponent"
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Vault Expedition",
+    "mana_cost": "{3}{G}",
+    "types": [
+      "sorcery"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "effects": [
+            {
+              "dig": {
+                "amount": 5,
+                "reveal": "all",
+                "for": {
+                  "permanent": true,
+                  "mana_value": {
+                    "at_most": 3
+                  }
+                },
+                "count": "all",
+                "put": "battlefield",
+                "tapped": true
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Twin Pages",
+    "mana_cost": "{1}{B}",
+    "types": [
+      "sorcery"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "effects": [
+            {
+              "dig": {
+                "amount": 2,
+                "rest": "graveyard"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Seismic Survey",
+    "mana_cost": "{2}{R}",
+    "types": [
+      "sorcery"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "effects": [
+            {
+              "reveal_until": {
+                "for": {
+                  "types": [
+                    "land"
+                  ]
+                },
+                "count": 2,
+                "put": "battlefield"
+              }
+            },
+            {
+              "delayed_trigger": {
+                "when": {
+                  "step_begins": {
+                    "step": "end"
+                  }
+                },
+                "effects": [
+                  {
+                    "sacrifice": {
+                      "to": {
+                        "result": 0
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Grave Sifter",
+    "mana_cost": "{1}{G}",
+    "types": [
+      "instant"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "effects": [
+            {
+              "mill": {
+                "amount": 3
+              }
+            },
+            {
+              "choose_cards": {
+                "from": {
+                  "result": 0
+                },
+                "for": {
+                  "permanent": true
+                },
+                "optional": true,
+                "put": "hand",
+                "otherwise": [
+                  {
+                    "gain_life": {
+                      "amount": 2
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Desperate Barter",
+    "mana_cost": "{B}",
+    "types": [
+      "instant"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "effects": [
+            {
+              "may": {
+                "effects": [
+                  {
+                    "sacrifice_choice": {
+                      "filter": {
+                        "one_of": [
+                          "artifact",
+                          "creature"
+                        ]
+                      }
+                    }
+                  }
+                ],
+                "then": [
+                  {
+                    "draw": {
+                      "amount": 2
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Lost Bearings",
+    "mana_cost": "{2}{U}",
+    "types": [
+      "instant"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "targets": [
+            "creature"
+          ],
+          "effects": [
+            {
+              "put_in_library": {
+                "to": {
+                  "target": 0
+                },
+                "position": "owner_choice"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Memory Recycler",
+    "mana_cost": "{1}{U}",
+    "types": [
+      "sorcery"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "targets": [
+            "graveyard_card"
+          ],
+          "effects": [
+            {
+              "shuffle_into_library": {
+                "to": {
+                  "target": 0
+                }
+              }
+            },
+            {
+              "draw": {
+                "amount": 1
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Mind Probe",
+    "mana_cost": "{1}{B}",
+    "types": [
+      "sorcery"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "targets": [
+            "opponent"
+          ],
+          "effects": [
+            {
+              "look_at_hand": {
+                "to": {
+                  "target": 0
+                }
+              }
+            },
+            {
+              "choose_cards": {
+                "from": {
+                  "hand": {
+                    "target": 0
+                  }
+                },
+                "reveal": "all",
+                "for": {
+                  "not_types": [
+                    "land"
+                  ]
+                },
+                "optional": true,
+                "put": "exile",
+                "then": [
+                  {
+                    "draw": {
+                      "amount": 1,
+                      "to": {
+                        "target": 0
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Ash Warden",
+    "mana_cost": "{G}",
+    "types": [
+      "instant"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "choose": 1,
+          "modes": [
+            {
+              "targets": [
+                "graveyard_card"
+              ],
+              "effects": [
+                {
+                  "exile": {
+                    "to": {
+                      "target": 0
+                    }
+                  }
+                },
+                {
+                  "gain_life": {
+                    "amount": 2
+                  }
+                }
+              ]
+            },
+            {
+              "targets": [
+                {
+                  "graveyard_card": {
+                    "controller": "you",
+                    "any_of": [
+                      "creature"
+                    ]
+                  }
+                }
+              ],
+              "effects": [
+                {
+                  "return_to_hand": {
+                    "to": {
+                      "target": 0
+                    }
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Exile and Atone",
+    "mana_cost": "{1}{W}",
+    "types": [
+      "sorcery"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "targets": [
+            "creature"
+          ],
+          "effects": [
+            {
+              "exile": {
+                "to": {
+                  "target": 0
+                }
+              }
+            },
+            {
+              "search_library": {
+                "searcher": {
+                  "controller_of": {
+                    "target": 0
+                  }
+                },
+                "may": true,
+                "for": {
+                  "supertypes": [
+                    "basic"
+                  ],
+                  "types": [
+                    "land"
+                  ]
+                },
+                "put": "battlefield",
+                "tapped": true
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Muster the Veterans",
+    "mana_cost": "{3}{G}",
+    "types": [
+      "sorcery"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "effects": [
+            {
+              "search_library": {
+                "for": {
+                  "types": [
+                    "creature"
+                  ],
+                  "mana_value": {
+                    "at_most": 3
+                  }
+                },
+                "put": "battlefield",
+                "counters": {
+                  "+1/+1": 1
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Surge of Plenty",
+    "mana_cost": "{1}{G}",
+    "types": [
+      "instant"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "targets": [
+            {
+              "creature": {
+                "controller": "you"
+              }
+            }
+          ],
+          "effects": [
+            {
+              "counter_bonus": {
+                "amount": 1
+              }
+            },
+            {
+              "add_counters": {
+                "counter": "+1/+1",
+                "amount": 1,
+                "to": {
+                  "target": 0
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Doom Brand",
+    "mana_cost": "{X}{R}",
+    "types": [
+      "instant"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "targets": [
+            "creature"
+          ],
+          "effects": [
+            {
+              "deal_damage": {
+                "amount": "x",
+                "to": {
+                  "target": 0
+                }
+              }
+            },
+            {
+              "exile_if_dies": {
+                "to": {
+                  "target": 0
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Last Stand Ward",
+    "mana_cost": "{1}{W}",
+    "types": [
+      "instant"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "effects": [
+            {
+              "grant": {
+                "keywords": [
+                  "indestructible"
+                ],
+                "to": {
+                  "each": "creature",
+                  "controller": "you"
+                }
+              }
+            },
+            {
+              "player_rule": {
+                "rule": "hexproof"
+              }
+            },
+            {
+              "player_rule": {
+                "rule": "prevent_all_damage"
+              }
+            },
+            "exile_this_spell"
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Boundless Study",
+    "mana_cost": "{3}{U}",
+    "types": [
+      "sorcery"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "effects": [
+            {
+              "draw": {
+                "amount": 3
+              }
+            },
+            {
+              "player_rule": {
+                "rule": "no_max_hand_size",
+                "duration": "until_your_next_turn"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Truce Banner",
+    "mana_cost": "{1}{W}",
+    "types": [
+      "instant"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "effects": [
+            {
+              "player_rule": {
+                "rule": "cant_attack",
+                "to": "each_opponent"
+              }
+            },
+            {
+              "draw": {
+                "amount": 1
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Final Wager",
+    "mana_cost": "{3}{B}{B}",
+    "types": [
+      "sorcery"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "effects": [
+            {
+              "win_game": {
+                "if": {
+                  "life": "each_opponent",
+                  "at_most": 5
+                }
+              }
+            },
+            {
+              "lose_game": {
+                "if": {
+                  "life": "you",
+                  "at_most": 5
+                }
+              }
+            },
+            {
+              "draw": {
+                "amount": 1
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Duel at Dawn",
+    "mana_cost": "{1}{G}",
+    "types": [
+      "sorcery"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "targets": [
+            {
+              "creature": {
+                "controller": "you"
+              }
+            },
+            {
+              "creature": {
+                "controller": "opponent"
+              }
+            }
+          ],
+          "effects": [
+            {
+              "fight": {
+                "to": {
+                  "target": 0
+                },
+                "with": {
+                  "target": 1
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Pack Strike",
+    "mana_cost": "{G}",
+    "types": [
+      "instant"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "targets": [
+            {
+              "creature": {
+                "controller": "you"
+              }
+            },
+            {
+              "creature": {
+                "controller": "opponent"
+              }
+            }
+          ],
+          "effects": [
+            {
+              "bite": {
+                "from": {
+                  "target": 0
+                },
+                "to": {
+                  "target": 1
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Mend Flesh",
+    "mana_cost": "{W}",
+    "types": [
+      "instant"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "targets": [
+            "creature"
+          ],
+          "effects": [
+            {
+              "remove_damage": {
+                "to": {
+                  "target": 0
+                }
+              }
+            },
+            {
+              "remove_counters": {
+                "counter": "-1/-1",
+                "amount": 1,
+                "to": {
+                  "target": 0
+                }
+              }
+            },
+            {
+              "remove_all_counters": {
+                "counter": "stun",
+                "to": {
+                  "target": 0
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Usurp Command",
+    "mana_cost": "{3}{U}{U}",
+    "types": [
+      "sorcery"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "targets": [
+            {
+              "permanent": {
+                "controller": "opponent",
+                "not": [
+                  "land"
+                ]
+              }
+            }
+          ],
+          "effects": [
+            {
+              "gain_control": {
+                "to": {
+                  "target": 0
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Borrowed Blade",
+    "mana_cost": "{2}{R}",
+    "types": [
+      "sorcery"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "targets": [
+            "creature"
+          ],
+          "effects": [
+            {
+              "gain_control": {
+                "to": {
+                  "target": 0
+                },
+                "duration": "end_of_turn"
+              }
+            },
+            {
+              "untap": {
+                "to": {
+                  "target": 0
+                }
+              }
+            },
+            {
+              "grant": {
+                "keywords": [
+                  "haste"
+                ],
+                "to": {
+                  "target": 0
+                }
+              }
+            },
+            {
+              "add_subtypes": {
+                "subtypes": [
+                  "warrior"
+                ],
+                "to": {
+                  "target": 0
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Gift of Burden",
+    "mana_cost": "{1}{U}",
+    "types": [
+      "sorcery"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "targets": [
+            "opponent",
+            {
+              "permanent": {
+                "controller": "you",
+                "not": [
+                  "land"
+                ]
+              }
+            }
+          ],
+          "effects": [
+            {
+              "gain_control": {
+                "to": {
+                  "target": 1
+                },
+                "gains": {
+                  "target": 0
+                }
+              }
+            },
+            {
+              "draw": {
+                "amount": 2
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Oathbinder Rite",
+    "mana_cost": "{B}",
+    "types": [
+      "instant"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "targets": [
+            "creature"
+          ],
+          "effects": [
+            {
+              "pump": {
+                "power": 2,
+                "toughness": 0,
+                "to": {
+                  "target": 0
+                }
+              }
+            },
+            {
+              "delayed_trigger": {
+                "when": {
+                  "dies": {
+                    "subject": "watched"
+                  }
+                },
+                "watch": {
+                  "target": 0
+                },
+                "this_turn": true,
+                "effects": [
+                  {
+                    "draw": {
+                      "amount": 1
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Surge Pageant",
+    "mana_cost": "{1}{G}",
+    "types": [
+      "sorcery"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "effects": [
+            {
+              "draw": {
+                "amount": 1
+              }
+            },
+            {
+              "delayed_trigger": {
+                "when": {
+                  "enters": {
+                    "subject": {
+                      "each": "creature",
+                      "controller": "you"
+                    }
+                  }
+                },
+                "this_turn": true,
+                "effects": [
+                  {
+                    "add_counters": {
+                      "counter": "+1/+1",
+                      "amount": 1,
+                      "to": {
+                        "triggering": "object"
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Kinbond Ritual",
+    "mana_cost": "{G}",
+    "types": [
+      "instant"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "targets": [
+            {
+              "creature": {
+                "controller": "you"
+              }
+            }
+          ],
+          "effects": [
+            {
+              "delayed_trigger": {
+                "when": {
+                  "deals_damage": {
+                    "subject": "watched",
+                    "combat": true,
+                    "to": "player"
+                  }
+                },
+                "watch": {
+                  "target": 0
+                },
+                "this_turn": true,
+                "effects": [
+                  {
+                    "gain_life": {
+                      "amount": {
+                        "triggering": "amount"
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Gravebound Return",
+    "mana_cost": "{2}{B}",
+    "types": [
+      "sorcery"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "targets": [
+            {
+              "graveyard_card": {
+                "any_of": [
+                  "creature"
+                ],
+                "controller": "you"
+              }
+            }
+          ],
+          "effects": [
+            {
+              "return_to_battlefield": {
+                "to": {
+                  "target": 0
+                },
+                "counters": {
+                  "+1/+1": 1
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Kinship Rite",
+    "mana_cost": "{G}",
+    "types": [
+      "instant"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "targets": [
+            {
+              "creature": {
+                "controller": "you"
+              }
+            }
+          ],
+          "effects": [
+            {
+              "add_counters": {
+                "counter": "+1/+1",
+                "amount": 1,
+                "to": {
+                  "target": 0
+                }
+              }
+            },
+            {
+              "pump": {
+                "power": {
+                  "distinct_types": {
+                    "each": "creature",
+                    "controller": "you"
+                  }
+                },
+                "toughness": {
+                  "distinct_types": {
+                    "each": "creature",
+                    "controller": "you"
+                  }
+                },
+                "to": {
+                  "target": 0
+                }
+              }
+            },
+            {
+              "set_creature_types": {
+                "types": [
+                  "elf"
+                ],
+                "to": {
+                  "target": 0
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Toll of Ruin",
+    "mana_cost": "{1}{B}",
+    "types": [
+      "instant"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "targets": [
+            "creature"
+          ],
+          "effects": [
+            {
+              "destroy": {
+                "to": {
+                  "target": 0
+                }
+              }
+            },
+            {
+              "create_token": {
+                "token": {
+                  "name": "Spirit",
+                  "colors": [
+                    "B"
+                  ],
+                  "types": [
+                    "creature"
+                  ],
+                  "subtypes": [
+                    "spirit"
+                  ],
+                  "power": 1,
+                  "toughness": 1
+                },
+                "to": {
+                  "controller_of": {
+                    "target": 0
+                  }
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Grave Tally",
+    "mana_cost": "{1}{R}",
+    "types": [
+      "sorcery"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "targets": [
+            "creature"
+          ],
+          "effects": [
+            {
+              "deal_damage": {
+                "amount": {
+                  "plus": [
+                    2,
+                    {
+                      "times": [
+                        {
+                          "died_this_turn": {
+                            "each": "creature"
+                          }
+                        },
+                        2
+                      ]
+                    }
+                  ]
+                },
+                "to": {
+                  "target": 0
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Tidal Rebuke",
+    "mana_cost": "{U}",
+    "types": [
+      "instant"
+    ],
+    "abilities": [
+      {
+        "kicker": {
+          "cost": [
+            {
+              "mana": "{2}{U}"
+            }
+          ]
+        }
+      },
+      {
+        "spell": {
+          "targets": [
+            {
+              "spell": {
+                "mana_value": {
+                  "at_most": 1
+                }
+              }
+            }
+          ],
+          "kicked_targets": [
+            "spell"
+          ],
+          "effects": [
+            {
+              "counter": {
+                "to": {
+                  "target": 0
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Reactor Purge",
+    "mana_cost": "{B}",
+    "types": [
+      "instant"
+    ],
+    "abilities": [
+      {
+        "kicker": {
+          "cost": [
+            {
+              "sacrifice_permanent": {
+                "filter": {
+                  "permanent": {
+                    "any_of": [
+                      "artifact",
+                      "creature"
+                    ]
+                  }
+                }
+              }
+            }
+          ]
+        }
+      },
+      {
+        "spell": {
+          "targets": [
+            "creature"
+          ],
+          "effects": [
+            {
+              "pump": {
+                "power": -1,
+                "toughness": -1,
+                "to": {
+                  "target": 0
+                },
+                "if": {
+                  "kicked": false
+                }
+              }
+            },
+            {
+              "pump": {
+                "power": -5,
+                "toughness": -5,
+                "to": {
+                  "target": 0
+                },
+                "if": {
+                  "kicked": true
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Grim Tithe",
+    "mana_cost": "{B}",
+    "types": [
+      "sorcery"
+    ],
+    "abilities": [
+      {
+        "additional_cost": {
+          "cost": [
+            {
+              "sacrifice_permanent": {
+                "filter": "creature"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "spell": {
+          "effects": [
+            {
+              "draw": {
+                "amount": 2
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Kindled Blessing",
+    "mana_cost": "{1}{W}",
+    "types": [
+      "sorcery"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "targets": [
+            "creature",
+            {
+              "filter": "creature",
+              "optional": true,
+              "distinct_from": [
+                0
+              ]
+            }
+          ],
+          "divide": 3,
+          "effects": [
+            {
+              "distribute_counters": {
+                "counter": "+1/+1"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Toll of Reason",
+    "mana_cost": "{1}{U}",
+    "types": [
+      "instant"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "choose": 1,
+          "modes": [
+            {
+              "targets": [
+                "spell"
+              ],
+              "effects": [
+                {
+                  "counter_unless_pays": {
+                    "mana": "{2}",
+                    "to": {
+                      "target": 0
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              "targets": [
+                {
+                  "filter": "creature",
+                  "optional": true
+                }
+              ],
+              "effects": [
+                {
+                  "tap": {
+                    "to": {
+                      "target": 0
+                    }
+                  }
+                },
+                {
+                  "add_counters": {
+                    "counter": "stun",
+                    "amount": 1,
+                    "to": {
+                      "target": 0
+                    }
+                  }
+                },
+                {
+                  "draw": {
+                    "amount": 1
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Ferryman's Toll",
+    "mana_cost": "{G}",
+    "types": [
+      "sorcery"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "effects": [
+            {
+              "pay": {
+                "mana": "{1}",
+                "then": [
+                  {
+                    "draw": {
+                      "amount": 1
+                    }
+                  }
+                ],
+                "otherwise": [
+                  {
+                    "gain_life": {
+                      "amount": 2
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "may": {
+                "effects": [
+                  {
+                    "pay": {
+                      "life": 2,
+                      "then": [
+                        {
+                          "gain_life": {
+                            "amount": 1
+                          }
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Phaser Volley",
+    "mana_cost": "{1}{R}",
+    "types": [
+      "sorcery"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "targets": [
+            "any_target"
+          ],
+          "effects": [
+            {
+              "deal_damage": {
+                "amount": 2,
+                "to": {
+                  "target": 0
+                }
+              }
+            }
+          ]
+        }
+      },
+      {
+        "beam_me_up": {
+          "cost": "{2}{R}"
+        }
+      }
+    ]
+  },
+  {
+    "name": "Relay Insight",
+    "mana_cost": "{U}",
+    "types": [
+      "sorcery"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "effects": [
+            {
+              "draw": {
+                "amount": 1
+              }
+            }
+          ]
+        }
+      },
+      {
+        "beam_me_up": {
+          "cost": "{1}{U}"
+        }
+      }
+    ]
+  },
+  {
+    "name": "Hasty Insight",
+    "mana_cost": "{1}{R}",
+    "types": [
+      "sorcery"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "effects": [
+            {
+              "exile_top": {
+                "amount": 2
+              }
+            },
+            {
+              "play_permission": {
+                "to": {
+                  "result": 0
+                },
+                "duration": "end_of_your_next_turn"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Prospect Charge",
+    "mana_cost": "{R}",
+    "types": [
+      "instant"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "effects": [
+            {
+              "exile_until": {
+                "until": "nonland"
+              }
+            },
+            {
+              "play_permission": {
+                "to": {
+                  "result": 0
+                },
+                "not_types": [
+                  "land"
+                ]
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Bold Gambit",
+    "mana_cost": "{R}{R}",
+    "types": [
+      "instant"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "effects": [
+            {
+              "cast_free": {
+                "not_types": [
+                  "creature"
+                ]
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Vault Unsealing",
+    "mana_cost": "{2}{B}",
+    "types": [
+      "sorcery"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "effects": [
+            {
+              "exile_top": {
+                "amount": 4
+              }
+            },
+            {
+              "return_to_battlefield": {
+                "to": {
+                  "result": 0
+                },
+                "under": "you"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Cipher Press",
+    "mana_cost": "{1}{U}",
+    "types": [
+      "sorcery"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "effects": [
+            {
+              "create_token": {
+                "amount": 2,
+                "token": {
+                  "name": "Cipher",
+                  "types": [
+                    "artifact"
+                  ],
+                  "abilities": [
+                    {
+                      "choose_number": {
+                        "max": 2
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Fading Hex",
+    "mana_cost": "{1}{B}",
+    "types": [
+      "instant"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "effects": [
+            {
+              "pump": {
+                "power": -1,
+                "toughness": 0,
+                "duration": "until_your_next_turn",
+                "to": {
+                  "each": {
+                    "creature": {
+                      "controller": "opponent"
+                    }
+                  }
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Ambush Writ",
+    "mana_cost": "{2}{R}",
+    "types": [
+      "sorcery"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "targets": [
+            {
+              "creature": {
+                "controller": "opponent"
+              }
+            }
+          ],
+          "effects": [
+            {
+              "deal_damage": {
+                "amount": 1,
+                "to": {
+                  "target": 0
+                }
+              }
+            },
+            {
+              "delayed_trigger": {
+                "when": {
+                  "step_begins": {
+                    "step": "beginning_of_combat"
+                  }
+                },
+                "this_turn": "once",
+                "watch": {
+                  "target": 0
+                },
+                "effects": [
+                  {
+                    "gain_control": {
+                      "to": "watched",
+                      "duration": "end_of_turn"
+                    }
+                  },
+                  {
+                    "untap": {
+                      "to": "watched"
+                    }
+                  },
+                  {
+                    "grant": {
+                      "keywords": [
+                        "haste"
+                      ],
+                      "to": "watched"
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Rebuff Gambit",
+    "mana_cost": "{1}{R}",
+    "types": [
+      "instant"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "targets": [
+            {
+              "spell": {
+                "not": [
+                  "creature"
+                ],
+                "controller": "opponent"
+              }
+            }
+          ],
+          "effects": [
+            {
+              "may": {
+                "chooser": {
+                  "controller_of": {
+                    "target": 0
+                  }
+                },
+                "effects": [
+                  {
+                    "exile": {
+                      "to": {
+                        "target": 0
+                      }
+                    }
+                  }
+                ],
+                "otherwise": [
+                  {
+                    "cast_free": {
+                      "not_types": [
+                        "creature"
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Mindswap Gambit",
+    "mana_cost": "{2}{U}",
+    "types": [
+      "sorcery"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "targets": [
+            "opponent"
+          ],
+          "effects": [
+            {
+              "exile_top": {
+                "amount": 1,
+                "face_down": true,
+                "looker": {
+                  "target": 0
+                }
+              }
+            },
+            {
+              "exile_top": {
+                "amount": 2,
+                "to": {
+                  "target": 0
+                },
+                "face_down": true
+              }
+            },
+            {
+              "play_permission": {
+                "to": {
+                  "result": 0
+                },
+                "to_player": {
+                  "target": 0
+                },
+                "duration": "while_exiled",
+                "any_mana_type": true
+              }
+            },
+            {
+              "play_permission": {
+                "to": {
+                  "result": 1
+                },
+                "duration": "while_exiled",
+                "any_mana_type": true
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Temporal Fold",
+    "mana_cost": "{2}{U}",
+    "types": [
+      "sorcery"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "effects": [
+            {
+              "phase_out": {
+                "to": {
+                  "each": {
+                    "permanent": {
+                      "any_of": [
+                        "artifact",
+                        "creature"
+                      ]
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "create_token": {
+                "token": {
+                  "name": "Stasis Warden",
+                  "types": [
+                    "creature"
+                  ],
+                  "subtypes": [
+                    "human"
+                  ],
+                  "colors": [
+                    "W"
+                  ],
+                  "power": 0,
+                  "toughness": 1,
+                  "abilities": [
+                    "cant_phase_in"
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Grim Accounting",
+    "mana_cost": "{B}",
+    "types": [
+      "sorcery"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "effects": [
+            {
+              "sacrifice_choice": {
+                "filter": {
+                  "creature": {
+                    "token": true
+                  }
+                }
+              }
+            },
+            {
+              "gain_life": {
+                "amount": 5,
+                "if": {
+                  "amount": {
+                    "count": {
+                      "result": 0
+                    }
+                  },
+                  "at_least": 1
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Facet Mimic Rite",
+    "mana_cost": "{2}{U}",
+    "types": [
+      "sorcery"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "targets": [
+            {
+              "creature": {
+                "controller": "you"
+              }
+            }
+          ],
+          "effects": [
+            {
+              "create_token_copy": {
+                "of": {
+                  "target": 0
+                },
+                "except": {
+                  "legendary": false
+                }
+              }
+            },
+            {
+              "grant": {
+                "keywords": [
+                  "haste"
+                ],
+                "to": {
+                  "result": 0
+                }
+              }
+            },
+            {
+              "delayed_trigger": {
+                "when": {
+                  "step_begins": {
+                    "step": "end",
+                    "whose": "each"
+                  }
+                },
+                "effects": [
+                  {
+                    "sacrifice": {
+                      "to": {
+                        "result": 0
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Shadow Twin Raid",
+    "mana_cost": "{2}{U}{B}",
+    "types": [
+      "sorcery"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "targets": [
+            {
+              "creature": {
+                "controller": "opponent"
+              }
+            }
+          ],
+          "effects": [
+            {
+              "create_token_copy": {
+                "of": {
+                  "target": 0
+                },
+                "except": {
+                  "keywords": [
+                    "menace",
+                    "changeling"
+                  ]
+                }
+              }
+            },
+            {
+              "delayed_trigger": {
+                "when": {
+                  "step_begins": {
+                    "step": "end",
+                    "whose": "each"
+                  }
+                },
+                "effects": [
+                  {
+                    "exile": {
+                      "to": {
+                        "result": 0
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Doubled Retort",
+    "mana_cost": "{1}{U}{R}",
+    "types": [
+      "instant"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "targets": [
+            {
+              "spell": {
+                "controller": "you"
+              }
+            }
+          ],
+          "effects": [
+            {
+              "copy_spell": {
+                "of": {
+                  "target": 0
+                },
+                "new_targets": true
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Echoing Recall",
+    "mana_cost": "{3}{R}",
+    "types": [
+      "sorcery"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "targets": [
+            {
+              "graveyard_card": {
+                "controller": "you",
+                "any_of": [
+                  "instant",
+                  "sorcery"
+                ]
+              }
+            }
+          ],
+          "effects": [
+            {
+              "exile": {
+                "to": {
+                  "target": 0
+                }
+              }
+            },
+            {
+              "copy_card": {
+                "of": {
+                  "result": 0
+                },
+                "amount": 2
+              }
+            },
+            {
+              "cast_free": {
+                "to": {
+                  "result": 1
+                },
+                "count": "any"
+              }
+            },
+            {
+              "exile_this_spell": {}
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Spectrum Lash",
+    "mana_cost": "{2}{R}",
+    "types": [
+      "instant"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "targets": [
+            "any_target"
+          ],
+          "effects": [
+            {
+              "deal_damage": {
+                "amount": {
+                  "plus": [
+                    1,
+                    {
+                      "mana_spent": {
+                        "colors": true
+                      }
+                    }
+                  ]
+                },
+                "to": {
+                  "target": 0
+                }
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "Spectrum Lash deals 1 damage plus 1 for each color of mana spent to cast it to any target."
+  },
+  {
+    "name": "Thornrot Bargain",
+    "mana_cost": "{1}{B}",
+    "types": [
+      "instant"
+    ],
+    "abilities": [
+      {
+        "additional_cost": {
+          "cost": [
+            {
+              "blight": {
+                "amount": 1
+              }
+            }
+          ]
+        }
+      },
+      {
+        "spell": {
+          "targets": [
+            "creature"
+          ],
+          "effects": [
+            {
+              "add_counters": {
+                "counter": "-1/-1",
+                "amount": 3,
+                "to": {
+                  "target": 0
+                }
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "As an additional cost to cast this spell, blight 1. Put three -1/-1 counters on target creature."
+  },
+  {
+    "name": "Warren Drumbeat",
+    "mana_cost": "{2}{B}",
+    "types": [
+      "sorcery"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "effects": [
+            {
+              "amass": {
+                "subtype": "goblin",
+                "amount": 2
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "Amass Goblins 2."
+  },
+  {
+    "name": "Lecture Hall Echo",
+    "mana_cost": "{1}{U}",
+    "types": [
+      "instant"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "effects": [
+            {
+              "draw": {
+                "amount": 1
+              }
+            },
+            {
+              "empower_jace": {
+                "amount": 2
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "Draw a card. Empower Jace 2."
+  },
+  {
+    "name": "Goblin Warcry",
+    "mana_cost": "{R}",
+    "types": [
+      "kindred",
+      "instant"
+    ],
+    "subtypes": [
+      "goblin"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "targets": [
+            "creature"
+          ],
+          "effects": [
+            {
+              "pump": {
+                "power": 2,
+                "toughness": 0,
+                "to": {
+                  "target": 0
+                }
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "Target creature gets +2/+0 until end of turn."
+  },
+  {
+    "name": "Cinder Reprise",
+    "mana_cost": "{1}{R}",
+    "types": [
+      "sorcery"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "targets": [
+            "any_target"
+          ],
+          "effects": [
+            {
+              "deal_damage": {
+                "amount": 2,
+                "to": {
+                  "target": 0
+                }
+              }
+            },
+            {
+              "gain_life": {
+                "amount": 2,
+                "if": {
+                  "cast_from": "graveyard"
+                }
+              }
+            }
+          ]
+        }
+      },
+      {
+        "flashback": {
+          "cost": "{3}{R}"
+        }
+      }
+    ]
+  },
+  {
+    "name": "Hollow Chorus",
+    "mana_cost": "{1}{U}",
+    "types": [
+      "instant"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "effects": [
+            {
+              "draw": {
+                "amount": 1
+              }
+            }
+          ]
+        }
+      },
+      {
+        "flashback": {
+          "cost": [
+            {
+              "mana": "{U}"
+            },
+            {
+              "tap_permanents": {
+                "count": 2,
+                "filter": "creature"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Grove Cadence",
+    "mana_cost": "{2}{G}",
+    "types": [
+      "sorcery"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "effects": [
+            {
+              "draw": {
+                "amount": 2
+              }
+            }
+          ]
+        }
+      },
+      {
+        "harmonize": {
+          "cost": "{4}{G}"
+        }
+      }
+    ]
+  },
+  {
+    "name": "Scrapyard Riot",
+    "mana_cost": "{1}{R}",
+    "types": [
+      "sorcery"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "targets": [
+            "any_target"
+          ],
+          "effects": [
+            {
+              "deal_damage": {
+                "amount": 1,
+                "to": {
+                  "target": 0
+                }
+              }
+            },
+            {
+              "deal_damage": {
+                "amount": 2,
+                "to": {
+                  "target": 0
+                },
+                "if": {
+                  "cast_with": "mayhem"
+                }
+              }
+            }
+          ]
+        }
+      },
+      {
+        "mayhem": {
+          "cost": "{R}"
+        }
+      }
+    ]
+  },
+  {
+    "name": "Quick Rifler",
+    "mana_cost": "{R}",
+    "types": [
+      "sorcery"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "effects": [
+            {
+              "discard": {
+                "amount": 1,
+                "to": "you"
+              }
+            },
+            {
+              "draw": {
+                "amount": 1
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Crowd Uprising",
+    "mana_cost": "{3}{W}",
+    "types": [
+      "sorcery"
+    ],
+    "keywords": [
+      "convoke"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "effects": [
+            {
+              "gain_life": {
+                "amount": 3
+              }
+            },
+            {
+              "draw": {
+                "amount": 1
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Skyline Snare",
+    "mana_cost": "{1}{G}",
+    "types": [
+      "instant"
+    ],
+    "rules_text": "Destroy target creature with flying.",
+    "abilities": [
+      {
+        "spell": {
+          "targets": [
+            {
+              "creature": {
+                "keywords": [
+                  "flying"
+                ]
+              }
+            }
+          ],
+          "effects": [
+            {
+              "destroy": {
+                "to": {
+                  "target": 0
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Groundling Muster",
+    "mana_cost": "{1}{W}",
+    "types": [
+      "sorcery"
+    ],
+    "rules_text": "Creatures you control without flying get +1/+1 until end of turn.",
+    "abilities": [
+      {
+        "spell": {
+          "effects": [
+            {
+              "pump": {
+                "power": 1,
+                "toughness": 1,
+                "to": {
+                  "each": {
+                    "creature": {
+                      "not_keywords": [
+                        "flying"
+                      ]
+                    }
+                  },
+                  "controller": "you"
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Prism Reckoning",
+    "mana_cost": "{3}{B}",
+    "types": [
+      "sorcery"
+    ],
+    "rules_text": "Choose a color. Destroy each creature of the chosen color.",
+    "abilities": [
+      {
+        "spell": {
+          "effects": [
+            {
+              "choose_color": {}
+            },
+            {
+              "destroy": {
+                "to": {
+                  "each": {
+                    "creature": {
+                      "colors": "chosen"
+                    }
+                  }
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Tidal Lockdown",
+    "mana_cost": "{X}{U}",
+    "types": [
+      "sorcery"
+    ],
+    "rules_text": "Tap X target creatures.",
+    "abilities": [
+      {
+        "spell": {
+          "targets": [
+            {
+              "filter": "creature",
+              "count": "x"
+            }
+          ],
+          "effects": [
+            {
+              "tap": {
+                "to": {
+                  "target": 0
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Homeward Tide",
+    "mana_cost": "{1}{U}",
+    "types": [
+      "instant"
+    ],
+    "rules_text": "Return any number of target creatures you control to their owner's hand.",
+    "abilities": [
+      {
+        "spell": {
+          "targets": [
+            {
+              "filter": {
+                "creature": {
+                  "controller": "you"
+                }
+              },
+              "count": "any"
+            }
+          ],
+          "effects": [
+            {
+              "return_to_hand": {
+                "to": {
+                  "target": 0
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Bloomscatter",
+    "mana_cost": "{2}{G}",
+    "types": [
+      "sorcery"
+    ],
+    "rules_text": "Distribute three +1/+1 counters among any number of target creatures.",
+    "abilities": [
+      {
+        "spell": {
+          "targets": [
+            {
+              "filter": "creature",
+              "count": "any"
+            }
+          ],
+          "divide": 3,
+          "effects": [
+            {
+              "distribute_counters": {
+                "counter": "+1/+1"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Mimic Raid",
+    "mana_cost": "{X}{U}{B}",
+    "types": [
+      "sorcery"
+    ],
+    "rules_text": "Choose X target creatures your opponents control. For each of them, create a token that's a copy of that creature, except it has changeling. Those tokens gain haste. Exile those tokens at the beginning of the next end step.",
+    "abilities": [
+      {
+        "spell": {
+          "targets": [
+            {
+              "filter": {
+                "creature": {
+                  "controller": "opponent"
+                }
+              },
+              "count": "x"
+            }
+          ],
+          "effects": [
+            {
+              "create_token_copy": {
+                "of": {
+                  "target": 0
+                },
+                "except": {
+                  "keywords": [
+                    "changeling"
+                  ]
+                }
+              }
+            },
+            {
+              "grant": {
+                "keywords": [
+                  "haste"
+                ],
+                "to": {
+                  "result": 0
+                }
+              }
+            },
+            {
+              "delayed_trigger": {
+                "when": {
+                  "step_begins": {
+                    "step": "end",
+                    "whose": "each"
+                  }
+                },
+                "effects": [
+                  {
+                    "exile": {
+                      "to": {
+                        "result": 0
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+]

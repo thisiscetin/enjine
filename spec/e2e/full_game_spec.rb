@@ -1,11 +1,11 @@
 # frozen_string_literal: true
 
 RSpec.describe "Full games from Setup" do
-  let(:pool) { Enjine::CardPool::Core.cards }
+  let(:pool) { CardFixtures.cards }
 
   def random_setup(seed)
     rng = Enjine::Rng.from_seed(seed)
-    players = %w[alice bob].map { Enjine::Player.new(name: it, deck: Enjine::CardPool::DeckBuilder.random(pool, rng: rng)) }
+    players = %w[alice bob].map { Enjine::Player.new(name: it, deck: Enjine::Fuzz.random_deck(pool, rng: rng)) }
     Enjine::Setup.new(*players)
   end
 

@@ -36,7 +36,7 @@ require_relative "enjine/game"
 require_relative "enjine/setup"
 
 # Enjine: a deterministic, rules-accurate Magic: The Gathering engine.
-# Card pools are opt-in: require "enjine/card_pool/core".
+# It knows no cards: every card arrives as data, in a deck or a DeckBuilder pool.
 module Enjine
 end
 require_relative "enjine/agents/random"

@@ -1,0 +1,1429 @@
+[
+  {
+    "name": "Prodigal Pyromancer",
+    "mana_cost": "{2}{R}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "human",
+      "wizard"
+    ],
+    "power": 1,
+    "toughness": 1,
+    "abilities": [
+      {
+        "activated": {
+          "cost": [
+            "tap"
+          ],
+          "targets": [
+            "any_target"
+          ],
+          "effects": [
+            {
+              "deal_damage": {
+                "amount": 1,
+                "to": {
+                  "target": 0
+                }
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "{T}: Prodigal Pyromancer deals 1 damage to any target."
+  },
+  {
+    "name": "Aegis Initiate",
+    "mana_cost": "{1}{W}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "human",
+      "cleric"
+    ],
+    "power": 2,
+    "toughness": 1,
+    "abilities": [
+      {
+        "enters_with_counters": {
+          "counters": {
+            "shield": 1
+          }
+        }
+      }
+    ],
+    "rules_text": "Arrives on the battlefield carrying one shield counter."
+  },
+  {
+    "name": "Brood Matron",
+    "mana_cost": "{2}{G}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "elf",
+      "druid"
+    ],
+    "power": 2,
+    "toughness": 2,
+    "abilities": [
+      {
+        "enters_with_counters": {
+          "counters": {
+            "+1/+1": 1
+          },
+          "affects": {
+            "each": "creature",
+            "controller": "you",
+            "other": true
+          }
+        }
+      }
+    ],
+    "rules_text": "Each creature of yours other than this one arrives with one extra +1/+1 counter."
+  },
+  {
+    "name": "Ripple Sage",
+    "mana_cost": "{3}{G}",
+    "types": [
+      "creature"
+    ],
+    "supertypes": [
+      "legendary"
+    ],
+    "subtypes": [
+      "elf",
+      "druid"
+    ],
+    "power": 2,
+    "toughness": 4,
+    "abilities": [
+      {
+        "double_counters": {
+          "affects": {
+            "each": "creature",
+            "controller": "you"
+          }
+        }
+      },
+      {
+        "static": {
+          "affects": {
+            "each": {
+              "creature": {
+                "counters": true
+              }
+            },
+            "controller": "you"
+          },
+          "keywords": [
+            "trample"
+          ]
+        }
+      }
+    ],
+    "rules_text": "Counters you would place on your creatures are doubled. Your creatures that have any counters gain trample."
+  },
+  {
+    "name": "Oilcask Tender",
+    "mana_cost": "{2}",
+    "types": [
+      "artifact",
+      "creature"
+    ],
+    "subtypes": [
+      "construct"
+    ],
+    "power": 1,
+    "toughness": 3,
+    "abilities": [
+      {
+        "activated": {
+          "cost": [
+            "tap"
+          ],
+          "effects": [
+            {
+              "add_counters": {
+                "counter": "oil",
+                "amount": 1,
+                "to": "self"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "activated": {
+          "cost": [
+            "tap",
+            {
+              "mana": "{2}"
+            }
+          ],
+          "targets": [
+            {
+              "creature": {
+                "subtypes": [
+                  "construct"
+                ]
+              }
+            }
+          ],
+          "effects": [
+            {
+              "add_counters": {
+                "counter": "-1/-1",
+                "amount": 1,
+                "to": {
+                  "target": 0
+                }
+              }
+            },
+            {
+              "add_counters": {
+                "counter": "+1/+1",
+                "amount": 1,
+                "to": "self"
+              }
+            }
+          ],
+          "timing": "sorcery"
+        }
+      }
+    ],
+    "rules_text": "Tap: one oil counter here. Two mana and tap, sorcery speed: one -1/-1 counter on the chosen Construct and one +1/+1 counter here."
+  },
+  {
+    "name": "Ashen Revenant",
+    "mana_cost": "{2}{B}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "spirit"
+    ],
+    "power": 3,
+    "toughness": 2,
+    "abilities": [
+      {
+        "enters_with_counters": {
+          "counters": {
+            "finality": 1,
+            "menace": 1
+          }
+        }
+      }
+    ],
+    "rules_text": "Arrives carrying one finality counter and one menace counter."
+  },
+  {
+    "name": "Scrap Colossus",
+    "mana_cost": "{6}",
+    "types": [
+      "artifact",
+      "creature"
+    ],
+    "subtypes": [
+      "construct"
+    ],
+    "power": 4,
+    "toughness": 4,
+    "abilities": [
+      {
+        "cost_reduction": {
+          "amount": {
+            "count": {
+              "each": "artifact",
+              "controller": "you"
+            }
+          }
+        }
+      }
+    ],
+    "rules_text": "This spell costs {1} less to cast for each artifact you control."
+  },
+  {
+    "name": "Tidecaller Adept",
+    "mana_cost": "{1}{U}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "merfolk",
+      "wizard"
+    ],
+    "power": 1,
+    "toughness": 2,
+    "abilities": [
+      {
+        "cost_modifier": {
+          "spells": {
+            "not": [
+              "creature"
+            ]
+          },
+          "reduce": 1
+        }
+      }
+    ],
+    "rules_text": "Noncreature spells you cast cost {1} less to cast."
+  },
+  {
+    "name": "Toll Warden",
+    "mana_cost": "{1}{W}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "human",
+      "soldier"
+    ],
+    "power": 2,
+    "toughness": 2,
+    "abilities": [
+      {
+        "cost_modifier": {
+          "caster": "opponent",
+          "spells": {
+            "not": [
+              "creature"
+            ]
+          },
+          "increase": 1
+        }
+      }
+    ],
+    "rules_text": "Noncreature spells your opponents cast cost {1} more to cast."
+  },
+  {
+    "name": "Survey Drone",
+    "mana_cost": "{1}{U}",
+    "types": [
+      "artifact",
+      "creature"
+    ],
+    "subtypes": [
+      "drone"
+    ],
+    "power": 1,
+    "toughness": 1,
+    "abilities": [
+      {
+        "activated": {
+          "cost": [
+            {
+              "mana": "{4}"
+            },
+            "tap"
+          ],
+          "effects": [
+            {
+              "draw": {
+                "amount": 1
+              }
+            }
+          ],
+          "cost_reduction": {
+            "amount": {
+              "count": {
+                "each": "land",
+                "controller": "you"
+              }
+            }
+          }
+        }
+      }
+    ],
+    "rules_text": "{4}, {T}: Draw a card. This ability costs {1} less to activate for each land you control."
+  },
+  {
+    "name": "Sandsea Behemoth",
+    "mana_cost": "{5}{G}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "beast"
+    ],
+    "power": 6,
+    "toughness": 5,
+    "abilities": [
+      {
+        "cycling": {
+          "cost": "{2}",
+          "for": {
+            "supertypes": [
+              "basic"
+            ],
+            "types": [
+              "land"
+            ]
+          }
+        }
+      }
+    ]
+  },
+  {
+    "name": "Cinder Gleaner",
+    "mana_cost": "{1}{R}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "goblin"
+    ],
+    "power": 2,
+    "toughness": 1,
+    "abilities": [
+      {
+        "cycling": {
+          "cost": "{1}"
+        }
+      }
+    ]
+  },
+  {
+    "name": "Marsh Stalker",
+    "mana_cost": "{3}{B}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "horror"
+    ],
+    "power": 4,
+    "toughness": 3,
+    "abilities": [
+      {
+        "cycling": {
+          "cost": "{2}",
+          "for": {
+            "subtypes": [
+              "swamp"
+            ]
+          }
+        }
+      }
+    ]
+  },
+  {
+    "name": "Tomb Archivist",
+    "mana_cost": "{1}{W}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "human",
+      "cleric"
+    ],
+    "power": 1,
+    "toughness": 3,
+    "abilities": [
+      {
+        "activated": {
+          "cost": [
+            {
+              "mana": "{1}"
+            },
+            "tap"
+          ],
+          "targets": [
+            {
+              "graveyard_card": {
+                "controller": "you"
+              }
+            }
+          ],
+          "effects": [
+            {
+              "put_in_library": {
+                "to": {
+                  "target": 0
+                },
+                "position": "bottom"
+              }
+            },
+            {
+              "shuffle_library": {}
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Ledger Savant",
+    "mana_cost": "{2}{U}{U}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "human",
+      "wizard"
+    ],
+    "power": 2,
+    "toughness": 3,
+    "abilities": [
+      {
+        "draw_replacement": {
+          "amount": 2
+        }
+      }
+    ]
+  },
+  {
+    "name": "Vanguard Marshal",
+    "mana_cost": "{1}{R}{W}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "human",
+      "soldier"
+    ],
+    "power": 3,
+    "toughness": 3,
+    "keywords": [
+      "flash"
+    ],
+    "abilities": [
+      {
+        "enters_attacking": {
+          "affects": {
+            "each": "creature",
+            "controller": "you"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "name": "Stalking Brute",
+    "mana_cost": "{4}{G}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "lizard",
+      "warrior"
+    ],
+    "power": 4,
+    "toughness": 4,
+    "abilities": [
+      {
+        "cant_be_blocked_by": {
+          "filter": {
+            "creature": {
+              "power": {
+                "at_most": 2
+              }
+            }
+          }
+        }
+      }
+    ]
+  },
+  {
+    "name": "Void Drifter",
+    "mana_cost": "{4}{G}{G}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "horror"
+    ],
+    "power": 5,
+    "toughness": 5,
+    "abilities": [
+      {
+        "cant_be_blocked_by": {
+          "filter": {
+            "creature": {
+              "types": [
+                "artifact"
+              ]
+            }
+          }
+        }
+      },
+      {
+        "cant_be_targeted_by": {
+          "abilities_from": {
+            "types": [
+              "artifact"
+            ]
+          }
+        }
+      }
+    ]
+  },
+  {
+    "name": "Hoardling",
+    "mana_cost": "{2}{B}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "rat"
+    ],
+    "power": 1,
+    "toughness": 1,
+    "abilities": [
+      {
+        "static": {
+          "affects": "self",
+          "pump": {
+            "power": {
+              "count": {
+                "each": "artifact",
+                "controller": "you"
+              }
+            },
+            "toughness": 0
+          }
+        }
+      }
+    ]
+  },
+  {
+    "name": "Grove Speaker",
+    "mana_cost": "{2}{G}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "elf",
+      "druid"
+    ],
+    "power": 2,
+    "toughness": 2,
+    "abilities": [
+      {
+        "static": {
+          "affects": {
+            "each": "creature",
+            "controller": "you"
+          },
+          "abilities": [
+            {
+              "mana": {
+                "cost": [
+                  "tap"
+                ],
+                "produce": "{G}"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Ascendant Husk",
+    "mana_cost": "{2}",
+    "types": [
+      "artifact",
+      "creature"
+    ],
+    "subtypes": [
+      "golem"
+    ],
+    "power": 0,
+    "toughness": 3,
+    "abilities": [
+      {
+        "activated": {
+          "cost": [
+            {
+              "mana": "{3}"
+            }
+          ],
+          "timing": "sorcery",
+          "effects": [
+            {
+              "set_base_power_toughness": {
+                "power": 4,
+                "toughness": 4,
+                "duration": "indefinite",
+                "to": "self"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Wall of Gears",
+    "mana_cost": "{1}{U}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "wall"
+    ],
+    "keywords": [
+      "defender"
+    ],
+    "power": 3,
+    "toughness": 3,
+    "abilities": [
+      {
+        "static": {
+          "affects": "self",
+          "keywords": [
+            "attacks_despite_defender"
+          ],
+          "if": {
+            "amount": {
+              "spells_cast_this_turn": {
+                "by": "you",
+                "matching": {
+                  "spell": {
+                    "not": [
+                      "creature"
+                    ]
+                  }
+                }
+              }
+            },
+            "at_least": 1
+          }
+        }
+      }
+    ]
+  },
+  {
+    "name": "Warband Quartermaster",
+    "mana_cost": "{1}{B}",
+    "types": [
+      "creature"
+    ],
+    "power": 2,
+    "toughness": 2,
+    "subtypes": [
+      "warrior"
+    ],
+    "abilities": [
+      {
+        "activated": {
+          "cost": [
+            {
+              "sacrifice_permanent": {
+                "filter": "creature",
+                "other": true
+              }
+            }
+          ],
+          "effects": [
+            {
+              "grant": {
+                "keywords": [
+                  "trample"
+                ],
+                "to": "self"
+              }
+            },
+            {
+              "draw": {
+                "amount": 1,
+                "if": {
+                  "sacrificed": {
+                    "subtypes": [
+                      "warrior"
+                    ]
+                  }
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Lattice Hive",
+    "mana_cost": "{1}{B}",
+    "types": [
+      "artifact",
+      "creature"
+    ],
+    "power": 1,
+    "toughness": 1,
+    "abilities": [
+      {
+        "activated": {
+          "cost": [
+            {
+              "tap_permanents": {
+                "count": 2,
+                "filter": {
+                  "creature": {
+                    "types": [
+                      "artifact"
+                    ]
+                  }
+                }
+              }
+            }
+          ],
+          "effects": [
+            {
+              "draw": {
+                "amount": 1
+              }
+            },
+            {
+              "lose_life": {
+                "amount": 1,
+                "to": "you"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Ashbound Revenant",
+    "mana_cost": "{B}",
+    "types": [
+      "creature"
+    ],
+    "power": 1,
+    "toughness": 1,
+    "abilities": [
+      {
+        "activated": {
+          "cost": [
+            {
+              "mana": "{1}{B}"
+            },
+            "exile_self_from_graveyard"
+          ],
+          "effects": [
+            {
+              "draw": {
+                "amount": 1
+              }
+            },
+            {
+              "lose_life": {
+                "amount": 1,
+                "to": "you"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Cyclic Archivist",
+    "mana_cost": "{1}{G}",
+    "types": [
+      "creature"
+    ],
+    "power": 2,
+    "toughness": 1,
+    "abilities": [
+      {
+        "activated": {
+          "cost": [
+            {
+              "mana": "{1}"
+            },
+            "bottom_self_from_graveyard"
+          ],
+          "effects": [
+            {
+              "gain_life": {
+                "amount": 2
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Gearwright Mender",
+    "mana_cost": "{2}{W}",
+    "types": [
+      "creature"
+    ],
+    "power": 2,
+    "toughness": 3,
+    "abilities": [
+      {
+        "activated": {
+          "cost": [
+            {
+              "mana": "{W}"
+            }
+          ],
+          "targets": [
+            "creature"
+          ],
+          "timing": "sorcery",
+          "limit": "once_each_turn",
+          "effects": [
+            {
+              "untap": {
+                "to": {
+                  "target": 0
+                }
+              }
+            }
+          ]
+        }
+      },
+      {
+        "activated": {
+          "cost": [
+            {
+              "mana": "{1}"
+            }
+          ],
+          "timing": "your_turn",
+          "only_if": {
+            "life": "you",
+            "at_most": 15
+          },
+          "effects": [
+            {
+              "gain_life": {
+                "amount": 1
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Shoalguard Whale",
+    "mana_cost": "{3}{U}",
+    "types": [
+      "creature"
+    ],
+    "power": 3,
+    "toughness": 4,
+    "abilities": [
+      {
+        "ward": {
+          "cost": "{1}"
+        }
+      }
+    ]
+  },
+  {
+    "name": "Cinderbound Recruit",
+    "mana_cost": "{B}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "human",
+      "warrior"
+    ],
+    "keywords": [
+      "cant_block"
+    ],
+    "power": 2,
+    "toughness": 1,
+    "abilities": [
+      {
+        "play_from": {
+          "zone": "graveyard",
+          "enters_with": {
+            "finality": 1
+          }
+        }
+      }
+    ]
+  },
+  {
+    "name": "Banished Duelist",
+    "mana_cost": "{2}{B}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "human"
+    ],
+    "power": 4,
+    "toughness": 2,
+    "abilities": [
+      {
+        "play_from": {
+          "zone": "exile"
+        }
+      }
+    ]
+  },
+  {
+    "name": "Salvage Matrix",
+    "mana_cost": "{2}{B}",
+    "types": [
+      "artifact",
+      "creature"
+    ],
+    "subtypes": [
+      "construct"
+    ],
+    "power": 3,
+    "toughness": 3,
+    "abilities": [
+      {
+        "play_from": {
+          "zone": "graveyard",
+          "cards": {
+            "types": [
+              "artifact",
+              "creature"
+            ]
+          },
+          "once_each_turn": true,
+          "enters_with": {
+            "finality": 1
+          }
+        }
+      }
+    ]
+  },
+  {
+    "name": "Tidewatch Navigator",
+    "mana_cost": "{2}{U}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "human"
+    ],
+    "power": 2,
+    "toughness": 3,
+    "abilities": [
+      "look_at_top",
+      {
+        "play_from": {
+          "zone": "library_top",
+          "cards": {
+            "types": [
+              "artifact"
+            ]
+          },
+          "once_each_turn": true
+        }
+      }
+    ]
+  },
+  {
+    "name": "Frontier Ranger",
+    "mana_cost": "{1}{G}{G}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "human",
+      "scout"
+    ],
+    "power": 2,
+    "toughness": 3,
+    "abilities": [
+      "look_at_top",
+      {
+        "play_from": {
+          "zone": "library_top",
+          "cards": {
+            "types": [
+              "land"
+            ]
+          },
+          "play": "play"
+        }
+      }
+    ]
+  },
+  {
+    "name": "Transit Chief",
+    "mana_cost": "{1}{U}{U}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "human"
+    ],
+    "keywords": [
+      "cant_be_beamed_up"
+    ],
+    "power": 2,
+    "toughness": 3,
+    "abilities": [
+      "grants_beam_me_up"
+    ]
+  },
+  {
+    "name": "Counted Sentinel",
+    "mana_cost": "{2}",
+    "types": [
+      "artifact",
+      "creature"
+    ],
+    "subtypes": [
+      "construct"
+    ],
+    "power": 2,
+    "toughness": 2,
+    "abilities": [
+      {
+        "choose_number": {
+          "min": 0,
+          "max": 3
+        }
+      }
+    ]
+  },
+  {
+    "name": "Drowsy Sentinel",
+    "mana_cost": "{2}{W}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "human"
+    ],
+    "power": 1,
+    "toughness": 3,
+    "abilities": [
+      "may_not_untap",
+      {
+        "activated": {
+          "cost": [
+            "tap"
+          ],
+          "targets": [
+            {
+              "creature": {
+                "other": true
+              }
+            }
+          ],
+          "effects": [
+            {
+              "additional_triggers": {
+                "to": {
+                  "target": 0
+                },
+                "duration": "while_source_tapped"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Wandering Surveyor",
+    "mana_cost": "{1}{G}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "human",
+      "scout"
+    ],
+    "power": 1,
+    "toughness": 1,
+    "abilities": [
+      "additional_land_plays"
+    ]
+  },
+  {
+    "name": "Mirrorbrood Larva",
+    "mana_cost": "{2}{W}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "insect"
+    ],
+    "power": 1,
+    "toughness": 1,
+    "abilities": [
+      {
+        "activated": {
+          "cost": [
+            {
+              "mana": "{4}"
+            },
+            "tap"
+          ],
+          "timing": "sorcery",
+          "effects": [
+            {
+              "create_token_copy": {
+                "of": "self"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Shapeshift Infiltrator",
+    "mana_cost": "{3}{U}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "shapeshifter"
+    ],
+    "power": 0,
+    "toughness": 0,
+    "abilities": [
+      {
+        "enter_as_copy": {
+          "of": {
+            "permanent": {
+              "any_of": [
+                "artifact",
+                "creature"
+              ]
+            }
+          },
+          "except": {
+            "legendary": false
+          },
+          "with_counters": true
+        }
+      }
+    ]
+  },
+  {
+    "name": "Ashen Ensign",
+    "mana_cost": "{1}{R}",
+    "types": [
+      "creature"
+    ],
+    "supertypes": [
+      "legendary"
+    ],
+    "subtypes": [
+      "soldier"
+    ],
+    "keywords": [
+      "haste"
+    ],
+    "power": 2,
+    "toughness": 1,
+    "abilities": [
+      {
+        "activated": {
+          "cost": [
+            {
+              "mana": "{2}{R}"
+            },
+            "exile_self_from_graveyard"
+          ],
+          "timing": "sorcery",
+          "effects": [
+            {
+              "create_token_copy": {
+                "of": "self"
+              }
+            },
+            {
+              "delayed_trigger": {
+                "when": {
+                  "step_begins": {
+                    "step": "end",
+                    "whose": "each"
+                  }
+                },
+                "effects": [
+                  {
+                    "sacrifice": {
+                      "to": {
+                        "result": 0
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Horde Banner Bearer",
+    "mana_cost": "{2}{R}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "orc",
+      "warrior"
+    ],
+    "power": 2,
+    "toughness": 2,
+    "abilities": [
+      {
+        "mobilize": {
+          "amount": 1
+        }
+      }
+    ],
+    "rules_text": "Mobilize 1"
+  },
+  {
+    "name": "Ashfall Sentry",
+    "mana_cost": "{2}{R}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "human",
+      "soldier"
+    ],
+    "power": 2,
+    "toughness": 3,
+    "abilities": [
+      {
+        "firebending": {
+          "amount": 2
+        }
+      }
+    ],
+    "rules_text": "Firebending 2"
+  },
+  {
+    "name": "Alley Mongrel",
+    "mana_cost": "{1}{R}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "dog"
+    ],
+    "power": 2,
+    "toughness": 1,
+    "abilities": [
+      "mayhem"
+    ]
+  },
+  {
+    "name": "Rift Courier",
+    "mana_cost": "{3}{R}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "human"
+    ],
+    "power": 3,
+    "toughness": 3,
+    "abilities": [
+      {
+        "warp": {
+          "cost": "{1}{R}"
+        }
+      }
+    ]
+  },
+  {
+    "name": "Ledge Vaulter",
+    "mana_cost": "{2}{W}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "human"
+    ],
+    "power": 3,
+    "toughness": 2,
+    "abilities": [
+      {
+        "web_slinging": {
+          "cost": "{W}"
+        }
+      }
+    ]
+  },
+  {
+    "name": "Drain Lurker",
+    "mana_cost": "{3}{B}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "human"
+    ],
+    "power": 3,
+    "toughness": 3,
+    "abilities": [
+      {
+        "sneak": {
+          "cost": "{1}{B}"
+        }
+      }
+    ]
+  },
+  {
+    "name": "Pitlane Hustler",
+    "mana_cost": "{1}{R}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "goblin",
+      "pilot"
+    ],
+    "power": 2,
+    "toughness": 2,
+    "keywords": [
+      "start_your_engines"
+    ],
+    "abilities": [
+      {
+        "max_speed": {
+          "keywords": [
+            "double_strike"
+          ]
+        }
+      },
+      {
+        "max_speed": {
+          "abilities": [
+            {
+              "activated": {
+                "cost": [
+                  {
+                    "mana": "{2}"
+                  },
+                  "exile_self_from_graveyard"
+                ],
+                "effects": [
+                  {
+                    "draw": {
+                      "amount": 1
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "Start your engines! Max speed: double strike. Max speed: two mana, exile this card from your graveyard: draw a card."
+  }
+]

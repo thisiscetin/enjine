@@ -12,11 +12,14 @@ module Enjine
   # InvalidCardDefinition error.
   class CardDefinition
     KEYS = %w[name mana_cost colors types supertypes subtypes keywords power toughness loyalty abilities rules_text deck_limit].freeze
+    # Optional catalogue data beside the rules data, never read by the rules: rarity, and the set code and
+    # collector number printed on the card ({"set" => "trk", "number" => "12"}).
+    PRINT_KEYS = %w[rarity printing].freeze
     SUBTYPE_FORMAT = /\A[a-z][a-z0-9_]*\z/
     include Faces
 
     attr_reader :id, :name, :mana_cost, :types, :supertypes, :subtypes, :keywords, :power, :toughness, :loyalty,
-                :abilities, :rules_text, :type_modules, :source, :colors, :power_amount, :toughness_amount
+                :abilities, :rules_text, :type_modules, :source, :colors, :power_amount, :toughness_amount, :rarity, :printing
 
     # Canonical id derived from a card name: "Jace, the Mind Sculptor" -> "jace_the_mind_sculptor".
     # A multi-face card is named by its front face: "Alfa // Bravo" -> "alfa" (see CardDefinition::Faces).
@@ -50,18 +53,21 @@ module Enjine
 
     # `face`: [front definition, index] when building a face other than the front (CardDefinition::Faces).
     def initialize(card, errors, token_id: nil, face: nil)
+      card = read_print(card, errors) if face.nil?
       if face.nil? && card.key?("faces")
         read_faces(card, errors, token_id)
       else
         read_card(card, errors, token_id, face)
         @source = normalize(card)
       end
+      @rules_data = @source
+      @source = deep_freeze(@source.merge("rarity" => @rarity, "printing" => @printing).compact) if @rarity || @printing
       @printed_characteristics = Characteristics.printed(self) if errors.empty?
       freeze
     end
 
     def read_card(card, errors, token_id, face = nil)
-      (card.keys - KEYS).each { |k| errors << "#{k}: unknown field (allowed: #{KEYS.join(", ")})" }
+      (card.keys - KEYS).each { |k| errors << "#{k}: unknown field (allowed: #{(KEYS + PRINT_KEYS).join(", ")})" }
       @name = read_name(card, errors)
       @id = face ? "#{face[0].id}#{FACE_SEPARATOR}#{face[1]}" : token_id || self.class.slug(@name)
       @front, @face_index = face
@@ -164,10 +170,14 @@ module Enjine
     # Canonical data form; CardDefinition.from_h(defn.to_h) == defn.
     def to_h = @source
 
-    def ==(other) = other.is_a?(CardDefinition) && other.to_h == to_h
+    # The canonical data form without the PRINT_KEYS: what the rules see.
+    attr_reader :rules_data
+
+    # The same card: equal rules data, whatever its rarity or printing (a reprint is the same card).
+    def ==(other) = other.is_a?(CardDefinition) && other.rules_data == rules_data
     alias eql? ==
 
-    def hash = @source.hash
+    def hash = @rules_data.hash
 
     private
 
@@ -292,6 +302,20 @@ module Enjine
     end
 
     # CR 100.2a: "a deck can have any number of cards named ~" is `"deck_limit": "any"`; "up to seven" is 7.
+    # Reads the PRINT_KEYS of a whole card; returns the card without them.
+    def read_print(card, errors)
+      @rarity = card["rarity"]
+      errors << "rarity: must be a string" unless @rarity.nil? || @rarity.is_a?(String)
+      printing = card["printing"]
+      printing = printing.transform_keys(&:to_s) if printing.is_a?(Hash)
+      if printing.is_a?(Hash) && printing.keys.sort == %w[number set] && printing.values.all? { it.is_a?(String) || it.is_a?(Integer) }
+        @printing = printing.transform_values(&:to_s).freeze
+      elsif printing
+        errors << "printing: must be {\"set\": code, \"number\": collector number}"
+      end
+      card.except(*PRINT_KEYS)
+    end
+
     def read_deck_limit(card, errors)
       value = card["deck_limit"]
       return value if value.nil? || value == "any" || (value.is_a?(Integer) && value >= 1)

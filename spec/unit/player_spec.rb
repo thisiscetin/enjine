@@ -16,7 +16,7 @@ RSpec.describe Enjine::Player do
     game = Enjine::Setup.new(alice, bob).new_game(seed: 1)
     expect(alice).to be_playing
     expect { alice.deck.swap(out: "Forest", in: "Island") }.to raise_error(Enjine::DeckLocked, /alice/)
-    expect { alice.deck.define(Enjine::CardPool::Core.cards.first) }.to raise_error(Enjine::DeckLocked)
+    expect { alice.deck.define(CardFixtures.cards.first) }.to raise_error(Enjine::DeckLocked)
 
     game.concede("bob")
     expect(alice).not_to be_playing

@@ -30,11 +30,8 @@ listed there works, and one that isn't listed doesn't exist yet.
 2. Validate it: `bundle exec exe/enjine --validate cards.json` (section 7).
 3. Put it where you need it:
    - **In a deck document's `cards`** (section 6). This is the simplest option and needs nothing else.
-   - **In a set file** `lib/enjine/sets/<code>.json` (or your own `--sets-dir`), as
-     the same object plus optional `"rarity": "common"` and
-     `"printing": { "set": "trk", "number": "12" }`.
-     The deck builder and collections read set files. A set with an invalid card fails
-     to load and names the card and the error.
+   - **In a card pool** for the [deck builder](deck-builder.md): a JSON array of cards
+     (`--pool cards.json`), such as a set or the cards you own.
    - **In your own database** (section 8).
 
 Tips:
@@ -62,6 +59,8 @@ Tips:
 | `abilities` | no | list | Section 4. |
 | `rules_text` | no | string | Informational only (shown in the CLI). Never interpreted. |
 | `deck_limit` | no | `"any"` or integer | CR 100.2a exception: "A deck can have any number of cards named ~" is `"deck_limit": "any"`; "up to seven cards named ~" is `7`. Without it a deck may hold four (basic lands: any number). |
+| `rarity` | no | string | Catalogue data, e.g. `"rare"`. The rules never read it. |
+| `printing` | no | object | `{ "set": "trk", "number": "12" }`: the set code and collector number printed on the card (a number may be given as an integer; it is stored as a string, since numbers like `"12a"` exist). The rules never read it, and two cards differing only in `rarity`/`printing` are the same card (a reprint). On a card with faces it sits beside `faces`. |
 
 Any other field is an error. That's deliberate: a typo must never be silently ignored.
 

@@ -30,7 +30,7 @@ RSpec.describe "Creating cards of every type from data" do
   end
 
   it "creates an instant with targets and effects" do
-    bolt = card(Enjine::CardPool::Core.cards.find { it["name"] == "Lightning Bolt" })
+    bolt = card(CardFixtures.cards.find { it["name"] == "Lightning Bolt" })
     expect(bolt).to be_instant_speed
     expect(bolt).not_to be_permanent
     expect(bolt.spell_ability.targets).to eq([Enjine::Mechanics::Filters::AnyTarget])
@@ -48,7 +48,7 @@ RSpec.describe "Creating cards of every type from data" do
   end
 
   it "creates a planeswalker with loyalty abilities (CR 306, 606)" do
-    vessa = card(Enjine::CardPool::Core.cards.find { it["name"] == "Vessa, Rally Captain" })
+    vessa = card(CardFixtures.cards.find { it["name"] == "Vessa, Rally Captain" })
     expect(vessa).to be_planeswalker
     expect(vessa.loyalty).to eq(3)
     expect(vessa.abilities.map(&:loyalty_cost)).to eq([1, -2, -3])
@@ -59,7 +59,7 @@ RSpec.describe "Creating cards of every type from data" do
   end
 
   it "creates a creature with an activated ability" do
-    pyro = card(Enjine::CardPool::Core.cards.find { it["name"] == "Prodigal Pyromancer" })
+    pyro = card(CardFixtures.cards.find { it["name"] == "Prodigal Pyromancer" })
     ability = pyro.abilities.first
     expect(ability.kind).to eq(:activated)
     expect(ability.costs.map(&:to_s)).to eq(["{T}"])
@@ -75,7 +75,7 @@ RSpec.describe "Creating cards of every type from data" do
   end
 
   it "round-trips every card in the core pool" do
-    Enjine::CardPool::Core.cards.each do |data|
+    CardFixtures.cards.each do |data|
       defn = card(data)
       expect(card(defn.to_h)).to eq(defn)
     end

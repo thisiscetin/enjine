@@ -1,0 +1,1272 @@
+[
+  {
+    "name": "Vessa, Rally Captain",
+    "mana_cost": "{2}{W}{W}",
+    "types": [
+      "planeswalker"
+    ],
+    "subtypes": [
+      "vessa"
+    ],
+    "loyalty": 3,
+    "abilities": [
+      {
+        "loyalty": {
+          "cost": 1,
+          "effects": [
+            {
+              "pump": {
+                "power": 1,
+                "toughness": 1,
+                "to": {
+                  "each": "creature",
+                  "controller": "you"
+                }
+              }
+            }
+          ]
+        }
+      },
+      {
+        "loyalty": {
+          "cost": -2,
+          "effects": [
+            {
+              "add_counters": {
+                "counter": "+1/+1",
+                "amount": 1,
+                "to": {
+                  "each": "creature",
+                  "controller": "you"
+                }
+              }
+            }
+          ]
+        }
+      },
+      {
+        "loyalty": {
+          "cost": -3,
+          "targets": [
+            "creature"
+          ],
+          "effects": [
+            {
+              "deal_damage": {
+                "amount": 3,
+                "to": {
+                  "target": 0
+                }
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "+1: Creatures you control get +1/+1 until end of turn.\n−2: Put a +1/+1 counter on each creature you control.\n−3: Vessa deals 3 damage to target creature."
+  },
+  {
+    "name": "Arc Lantern",
+    "mana_cost": "{2}",
+    "types": [
+      "artifact"
+    ],
+    "abilities": [
+      {
+        "activated": {
+          "cost": [
+            {
+              "mana": "{X}"
+            },
+            "tap"
+          ],
+          "targets": [
+            "creature"
+          ],
+          "effects": [
+            {
+              "deal_damage": {
+                "amount": "x",
+                "to": {
+                  "target": 0
+                }
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "{X}, {T}: This artifact deals X damage to target creature."
+  },
+  {
+    "name": "Brasswork Cudgel",
+    "mana_cost": "{1}",
+    "types": [
+      "artifact"
+    ],
+    "subtypes": [
+      "equipment"
+    ],
+    "abilities": [
+      {
+        "static": {
+          "affects": "attached",
+          "pump": {
+            "power": 1,
+            "toughness": 1
+          },
+          "keywords": [
+            "vigilance"
+          ]
+        }
+      },
+      {
+        "equip": {
+          "cost": [
+            {
+              "mana": "{2}"
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "Equipped creature gets +1/+1 and has vigilance.\nEquip {2}"
+  },
+  {
+    "name": "Scout's Lens",
+    "mana_cost": "{1}",
+    "types": [
+      "artifact"
+    ],
+    "subtypes": [
+      "equipment"
+    ],
+    "abilities": [
+      {
+        "static": {
+          "affects": "attached",
+          "pump": {
+            "power": 0,
+            "toughness": 1
+          }
+        }
+      },
+      {
+        "triggered": {
+          "when": {
+            "attacks": {
+              "subject": "attached"
+            }
+          },
+          "effects": [
+            {
+              "scry": {
+                "amount": 1
+              }
+            }
+          ]
+        }
+      },
+      {
+        "equip": {
+          "cost": [
+            {
+              "mana": "{1}"
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "Equipped creature gets +0/+1.\nWhenever equipped creature attacks, scry 1.\nEquip {1}"
+  },
+  {
+    "name": "Emberbond Charm",
+    "mana_cost": "{R}",
+    "types": [
+      "enchantment"
+    ],
+    "subtypes": [
+      "aura"
+    ],
+    "abilities": [
+      {
+        "enchant": "creature"
+      },
+      {
+        "triggered": {
+          "when": {
+            "enters": {}
+          },
+          "effects": [
+            {
+              "grant": {
+                "keywords": [
+                  "trample"
+                ],
+                "to": "attached"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "static": {
+          "affects": "attached",
+          "pump": {
+            "power": 2,
+            "toughness": 0
+          }
+        }
+      }
+    ],
+    "rules_text": "Enchant creature\nWhen this Aura enters, enchanted creature gains trample until end of turn.\nEnchanted creature gets +2/+0."
+  },
+  {
+    "name": "Withering Grasp",
+    "mana_cost": "{1}{B}",
+    "types": [
+      "enchantment"
+    ],
+    "subtypes": [
+      "aura"
+    ],
+    "abilities": [
+      {
+        "enchant": {
+          "creature": {
+            "controller": "opponent"
+          }
+        }
+      },
+      {
+        "static": {
+          "affects": "attached",
+          "pump": {
+            "power": -1,
+            "toughness": -1
+          }
+        }
+      }
+    ],
+    "rules_text": "Enchant creature an opponent controls\nEnchanted creature gets -1/-1."
+  },
+  {
+    "name": "Chronicle of Embers",
+    "mana_cost": "{1}{R}",
+    "types": [
+      "enchantment"
+    ],
+    "subtypes": [
+      "saga"
+    ],
+    "abilities": [
+      {
+        "chapter": {
+          "chapter": 1,
+          "effects": [
+            {
+              "deal_damage": {
+                "amount": 1,
+                "to": "each_opponent"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "chapter": {
+          "chapter": 2,
+          "targets": [
+            "creature"
+          ],
+          "effects": [
+            {
+              "deal_damage": {
+                "amount": 2,
+                "to": {
+                  "target": 0
+                }
+              }
+            }
+          ]
+        }
+      },
+      {
+        "chapter": {
+          "chapter": 3,
+          "effects": [
+            {
+              "draw": {
+                "amount": 1
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "Saga. I: 1 damage to each opponent. II: 2 damage to target creature. III: draw a card."
+  },
+  {
+    "name": "Longreach Skiff",
+    "mana_cost": "{2}",
+    "types": [
+      "artifact"
+    ],
+    "subtypes": [
+      "spacecraft"
+    ],
+    "keywords": [
+      "station"
+    ],
+    "abilities": [
+      {
+        "station_symbol": {
+          "at": 3,
+          "power": 3,
+          "toughness": 3,
+          "keywords": [
+            "flying"
+          ]
+        }
+      }
+    ],
+    "rules_text": "Station. 3+: flying; a 3/3 artifact creature."
+  },
+  {
+    "name": "Terraforming Rig",
+    "mana_cost": "{2}{G}",
+    "types": [
+      "artifact"
+    ],
+    "abilities": [
+      {
+        "activated": {
+          "cost": [
+            {
+              "mana": "{1}{G}"
+            },
+            "tap",
+            "sacrifice"
+          ],
+          "timing": "sorcery",
+          "effects": [
+            {
+              "sacrifice_choice": {
+                "filter": "land",
+                "count": "any"
+              }
+            },
+            {
+              "search_library": {
+                "for": {
+                  "types": [
+                    "land"
+                  ]
+                },
+                "count": {
+                  "count": {
+                    "result": 0
+                  }
+                },
+                "put": "battlefield",
+                "tapped": true
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Stasis Cell",
+    "mana_cost": "{2}{W}",
+    "types": [
+      "artifact"
+    ],
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "enters": {}
+          },
+          "targets": [
+            {
+              "permanent": {
+                "controller": "opponent",
+                "not": [
+                  "land"
+                ]
+              }
+            }
+          ],
+          "effects": [
+            {
+              "exile": {
+                "to": {
+                  "target": 0
+                },
+                "until_source_leaves": true
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Keepsake Chronicle",
+    "mana_cost": "{2}{U}",
+    "types": [
+      "enchantment"
+    ],
+    "subtypes": [
+      "saga"
+    ],
+    "abilities": [
+      {
+        "chapter": {
+          "chapter": 1,
+          "effects": [
+            {
+              "draw": {
+                "amount": 2
+              }
+            },
+            {
+              "choose_cards": {
+                "from": {
+                  "hand": "you"
+                },
+                "put": "exile",
+                "link": true
+              }
+            }
+          ]
+        }
+      },
+      {
+        "chapter": {
+          "chapter": 2,
+          "effects": [
+            {
+              "draw": {
+                "amount": 2
+              }
+            },
+            {
+              "choose_cards": {
+                "from": {
+                  "hand": "you"
+                },
+                "put": "exile",
+                "link": true
+              }
+            }
+          ]
+        }
+      },
+      {
+        "chapter": {
+          "chapter": 3,
+          "effects": [
+            {
+              "gain_life": {
+                "amount": 6,
+                "if": {
+                  "share_card_type": "exiled_with"
+                }
+              }
+            },
+            {
+              "choose_cards": {
+                "from": "exiled_with",
+                "optional": true,
+                "put": "hand"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Swift Current Shrine",
+    "mana_cost": "{1}{G}",
+    "types": [
+      "enchantment"
+    ],
+    "abilities": [
+      {
+        "enters_untapped": {
+          "affects": {
+            "each": "land",
+            "controller": "you"
+          }
+        }
+      },
+      {
+        "triggered": {
+          "when": {
+            "enters": {}
+          },
+          "effects": [
+            {
+              "search_library": {
+                "for": {
+                  "supertypes": [
+                    "basic"
+                  ],
+                  "types": [
+                    "land"
+                  ]
+                },
+                "put": "battlefield",
+                "tapped": true
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Bargainer's Writ",
+    "mana_cost": "{1}{B}",
+    "types": [
+      "enchantment"
+    ],
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "enters": {}
+          },
+          "targets": [
+            "opponent"
+          ],
+          "effects": [
+            {
+              "may": {
+                "chooser": {
+                  "target": 0
+                },
+                "effects": [
+                  {
+                    "draw": {
+                      "amount": 1
+                    }
+                  }
+                ],
+                "otherwise": [
+                  {
+                    "lose_life": {
+                      "amount": 3,
+                      "to": {
+                        "target": 0
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Tally Engraver",
+    "mana_cost": "{2}",
+    "types": [
+      "artifact"
+    ],
+    "abilities": [
+      {
+        "activated": {
+          "cost": [
+            {
+              "mana": "{2}"
+            },
+            "tap"
+          ],
+          "timing": "sorcery",
+          "targets": [
+            {
+              "permanent": {
+                "controller": "you",
+                "counters": true
+              }
+            }
+          ],
+          "effects": [
+            {
+              "another_counter": {
+                "to": {
+                  "target": 0
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Withering Hex",
+    "mana_cost": "{1}{B}",
+    "types": [
+      "enchantment"
+    ],
+    "subtypes": [
+      "aura"
+    ],
+    "abilities": [
+      {
+        "enchant": "creature"
+      },
+      {
+        "static": {
+          "affects": "attached",
+          "pump": {
+            "power": -2,
+            "toughness": 0
+          },
+          "keywords": [
+            "cant_block",
+            "doesnt_untap"
+          ],
+          "creature_types": [
+            "salamander"
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Charge Battery",
+    "mana_cost": "{2}",
+    "types": [
+      "artifact"
+    ],
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "step_begins": {
+              "step": "precombat_main"
+            }
+          },
+          "effects": [
+            {
+              "add_counters": {
+                "counter": "charge",
+                "amount": 1,
+                "to": "self"
+              }
+            },
+            {
+              "add_mana": {
+                "produce": "{C}",
+                "amount": {
+                  "counters": {
+                    "of": "self",
+                    "kind": "charge"
+                  }
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Echo Banquet",
+    "mana_cost": "{2}",
+    "types": [
+      "artifact"
+    ],
+    "abilities": [
+      {
+        "activated": {
+          "cost": [
+            {
+              "mana": "{3}"
+            },
+            "tap"
+          ],
+          "effects": [
+            {
+              "exile_top": {
+                "amount": 3
+              }
+            },
+            {
+              "cast_free": {
+                "to": {
+                  "result": 0
+                },
+                "max_mana_value": 2,
+                "count": "any"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Dream Forge",
+    "mana_cost": "{3}",
+    "types": [
+      "artifact"
+    ],
+    "abilities": [
+      {
+        "play_from": {
+          "zones": [
+            "outside",
+            "graveyard"
+          ],
+          "cards": {
+            "permanent": true
+          },
+          "play": "play",
+          "once_each_turn": true
+        }
+      }
+    ]
+  },
+  {
+    "name": "Twinbloom Well",
+    "mana_cost": "{2}",
+    "types": [
+      "artifact"
+    ],
+    "abilities": [
+      {
+        "mana": {
+          "cost": [
+            "tap"
+          ],
+          "color": "any",
+          "amount": 2,
+          "colors": [
+            "R",
+            "G"
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Cogwork Conduit",
+    "mana_cost": "{1}",
+    "types": [
+      "artifact"
+    ],
+    "abilities": [
+      {
+        "mana": {
+          "cost": [
+            "tap"
+          ],
+          "produce": "{C}{C}",
+          "spend_only": {
+            "spells": {
+              "types": [
+                "artifact"
+              ]
+            },
+            "abilities": {
+              "types": [
+                "artifact"
+              ]
+            }
+          }
+        }
+      }
+    ]
+  },
+  {
+    "name": "Charge Lattice",
+    "mana_cost": "{2}",
+    "types": [
+      "artifact"
+    ],
+    "abilities": [
+      {
+        "activated": {
+          "cost": [
+            {
+              "mana": "{1}"
+            },
+            "tap"
+          ],
+          "effects": [
+            {
+              "add_counters": {
+                "counter": "charge",
+                "amount": 1,
+                "to": "self"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "activated": {
+          "cost": [
+            {
+              "mana": "{2}"
+            },
+            "sacrifice"
+          ],
+          "effects": [
+            {
+              "destroy": {
+                "to": {
+                  "each": {
+                    "permanent": {
+                      "not": [
+                        "land"
+                      ],
+                      "mana_value": {
+                        "equal": {
+                          "counters": {
+                            "of": "self",
+                            "kind": "charge"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Charged Relay",
+    "mana_cost": "{2}",
+    "types": [
+      "artifact"
+    ],
+    "abilities": [
+      {
+        "activated": {
+          "cost": [
+            {
+              "mana": "{1}"
+            }
+          ],
+          "effects": [
+            {
+              "add_counters": {
+                "counter": "charge",
+                "amount": 1,
+                "to": "self"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "triggered": {
+          "when": {
+            "counters_placed": {
+              "counter": "charge",
+              "first_time_this_turn": true
+            }
+          },
+          "effects": [
+            {
+              "draw": {
+                "amount": 1
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Echo Forger",
+    "mana_cost": "{2}",
+    "types": [
+      "artifact"
+    ],
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "enters": {}
+          },
+          "effects": [
+            {
+              "create_token": {
+                "token": "Food"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "activated": {
+          "cost": [
+            {
+              "mana": "{2}"
+            },
+            "tap"
+          ],
+          "targets": [
+            {
+              "permanent": {
+                "token": true,
+                "controller": "you"
+              }
+            }
+          ],
+          "effects": [
+            {
+              "create_token_copy": {
+                "of": {
+                  "target": 0
+                },
+                "tapped": true
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Signal Pin",
+    "mana_cost": "{3}",
+    "types": [
+      "artifact"
+    ],
+    "subtypes": [
+      "communicator",
+      "equipment"
+    ],
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "cast": {
+              "self": true
+            }
+          },
+          "effects": [
+            {
+              "copy_spell": {
+                "of": "self"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "static": {
+          "affects": "attached",
+          "abilities": [
+            {
+              "triggered": {
+                "when": {
+                  "attacks": {
+                    "subject": "self"
+                  }
+                },
+                "while": {
+                  "at_least": 1,
+                  "controls": {
+                    "each": {
+                      "creature": {
+                        "other": true,
+                        "attached_subtypes": [
+                          "communicator"
+                        ]
+                      }
+                    },
+                    "controller": "you"
+                  }
+                },
+                "effects": [
+                  {
+                    "grant": {
+                      "keywords": [
+                        "cant_be_blocked"
+                      ],
+                      "to": "self"
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      },
+      {
+        "equip": {
+          "cost": [
+            {
+              "mana": "{2}"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Squire's Longsword",
+    "mana_cost": "{2}",
+    "types": [
+      "artifact"
+    ],
+    "subtypes": [
+      "equipment"
+    ],
+    "keywords": [
+      "job_select"
+    ],
+    "abilities": [
+      {
+        "static": {
+          "affects": "attached",
+          "pump": {
+            "power": 1,
+            "toughness": 1
+          }
+        }
+      },
+      {
+        "equip": {
+          "cost": [
+            {
+              "mana": "{2}"
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "Job select. Equipped creature gets +1/+1. Equip {2}"
+  },
+  {
+    "name": "Rattletrap Wagon",
+    "mana_cost": "{2}",
+    "types": [
+      "artifact"
+    ],
+    "subtypes": [
+      "vehicle"
+    ],
+    "keywords": [
+      "trample"
+    ],
+    "power": 4,
+    "toughness": 3,
+    "abilities": [
+      {
+        "crew": {
+          "power": 2
+        }
+      },
+      {
+        "triggered": {
+          "when": {
+            "becomes_crewed": {}
+          },
+          "effects": [
+            {
+              "gain_life": {
+                "amount": 1
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "Trample. Whenever this Vehicle becomes crewed, you gain 1 life. Crew 2."
+  },
+  {
+    "name": "Brasswork Lurker",
+    "mana_cost": "{3}",
+    "types": [
+      "artifact"
+    ],
+    "subtypes": [
+      "vehicle"
+    ],
+    "power": 3,
+    "toughness": 3,
+    "abilities": [
+      {
+        "static": {
+          "affects": "self",
+          "if": {
+            "not": {
+              "your_turn": true
+            }
+          },
+          "types": [
+            "artifact",
+            "creature"
+          ]
+        }
+      },
+      {
+        "crew": {
+          "power": 1
+        }
+      }
+    ],
+    "rules_text": "During turns other than yours, this Vehicle is an artifact creature. Crew 1."
+  },
+  {
+    "name": "Speed Gauge",
+    "mana_cost": "{1}",
+    "types": [
+      "artifact"
+    ],
+    "keywords": [
+      "start_your_engines"
+    ],
+    "abilities": [
+      {
+        "activated": {
+          "cost": [
+            {
+              "mana": "{1}"
+            },
+            "tap"
+          ],
+          "effects": [
+            {
+              "gain_life": {
+                "amount": {
+                  "speed": "you"
+                }
+              }
+            }
+          ]
+        }
+      },
+      {
+        "static": {
+          "affects": {
+            "each": "creature",
+            "controller": "you"
+          },
+          "if": {
+            "max_speed": true
+          },
+          "pump": {
+            "power": 1,
+            "toughness": 0
+          }
+        }
+      }
+    ],
+    "rules_text": "Start your engines! One mana, tap: you gain life equal to your speed. As long as you have max speed, creatures you control get +1/+0."
+  },
+  {
+    "name": "Kinsong Pennant",
+    "mana_cost": "{2}",
+    "types": [
+      "artifact"
+    ],
+    "rules_text": "As this artifact enters, choose a creature type. Creatures you control of the chosen type get +1/+1. Whenever you cast a creature spell of the chosen type, you gain 1 life.",
+    "abilities": [
+      {
+        "choose_creature_type": {}
+      },
+      {
+        "static": {
+          "affects": {
+            "each": {
+              "creature": {
+                "subtypes": "chosen"
+              }
+            },
+            "controller": "you"
+          },
+          "pump": {
+            "power": 1,
+            "toughness": 1
+          }
+        }
+      },
+      {
+        "triggered": {
+          "when": {
+            "cast": {
+              "spell": {
+                "spell": {
+                  "subtypes": "chosen"
+                }
+              }
+            }
+          },
+          "effects": [
+            {
+              "gain_life": {
+                "amount": 1
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Twofold Omen",
+    "mana_cost": "{1}{U}",
+    "types": [
+      "enchantment"
+    ],
+    "rules_text": "As this enchantment enters, choose tides or storms. At the beginning of your upkeep, if tides was chosen, draw a card. If storms was chosen, Twofold Omen deals 1 damage to each opponent.",
+    "abilities": [
+      {
+        "choose_option": {
+          "options": [
+            "tides",
+            "storms"
+          ]
+        }
+      },
+      {
+        "triggered": {
+          "when": {
+            "step_begins": {
+              "step": "upkeep"
+            }
+          },
+          "effects": [
+            {
+              "draw": {
+                "amount": 1,
+                "if": {
+                  "chosen": "tides"
+                }
+              }
+            },
+            {
+              "deal_damage": {
+                "amount": 1,
+                "to": "each_opponent",
+                "if": {
+                  "chosen": "storms"
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+]

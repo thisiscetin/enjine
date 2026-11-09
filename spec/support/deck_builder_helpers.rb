@@ -1,12 +1,12 @@
 # frozen_string_literal: true
 
-# Fixture sets and synthetic card pools for the deck builder specs.
+# Fixture pools and synthetic card pools for the deck builder specs.
 module DeckBuilderHelpers
-  SET_FIXTURES = File.expand_path("../fixtures/sets", __dir__)
-  # A collection spanning both fixture sets, with every way to identify a card and a few unplayable entries.
-  BINDER = File.expand_path("../fixtures/collections/binder.json", __dir__)
+  # A deck builder over the named fixture pools (spec/fixtures/pools: "fxa", "fxb").
+  def builder(*pools) = Enjine::DeckBuilder.new(pools.flat_map { CardFixtures.pool(it) })
 
-  def build_deck(**) = Enjine::DeckBuilder.build(sets_dir: SET_FIXTURES, **)
+  # A deck built from the named fixture pools.
+  def build_deck(pools, **) = builder(*pools).build(**)
 
   # A vanilla creature (or, with type:, a spell that gains 1 life) named after its cost.
   def pool_card(name, cost, type: "creature")

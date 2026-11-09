@@ -2,7 +2,7 @@
 
 RSpec.describe Enjine::Characteristics do
   it "answers type, keyword and ability questions" do
-    chars = Enjine::CardDefinition.from_h(Enjine::CardPool::Core.cards.find do
+    chars = Enjine::CardDefinition.from_h(CardFixtures.cards.find do
       it["name"] == "Vessa, Rally Captain"
     end).printed_characteristics
     expect(chars).to be_planeswalker

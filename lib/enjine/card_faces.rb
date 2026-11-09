@@ -73,7 +73,7 @@ module Enjine
       def read_faces(card, errors, token_id)
         (card.keys - FACED_KEYS).each do |key|
           errors << "#{key}: a card with faces keeps its characteristics in each face (allowed beside faces: " \
-                    "#{FACED_KEYS.join(", ")})"
+                    "#{(FACED_KEYS + PRINT_KEYS).join(", ")})"
         end
         @layout = card["layout"]
         errors << "layout: required with faces, one of #{LAYOUTS.join(", ")}" unless LAYOUTS.include?(@layout)

@@ -1,0 +1,247 @@
+{
+  "name": "izzet_spells",
+  "description": "Blue-red spells: counters, burn and card draw",
+  "cards": [
+    {
+      "name": "Island",
+      "types": [
+        "land"
+      ],
+      "supertypes": [
+        "basic"
+      ],
+      "subtypes": [
+        "island"
+      ]
+    },
+    {
+      "name": "Mountain",
+      "types": [
+        "land"
+      ],
+      "supertypes": [
+        "basic"
+      ],
+      "subtypes": [
+        "mountain"
+      ]
+    },
+    {
+      "name": "Fugitive Wizard",
+      "mana_cost": "{U}",
+      "types": [
+        "creature"
+      ],
+      "subtypes": [
+        "human",
+        "wizard"
+      ],
+      "power": 1,
+      "toughness": 1
+    },
+    {
+      "name": "Coral Merfolk",
+      "mana_cost": "{1}{U}",
+      "types": [
+        "creature"
+      ],
+      "subtypes": [
+        "merfolk"
+      ],
+      "power": 2,
+      "toughness": 1
+    },
+    {
+      "name": "Horned Turtle",
+      "mana_cost": "{2}{U}",
+      "types": [
+        "creature"
+      ],
+      "subtypes": [
+        "turtle"
+      ],
+      "power": 1,
+      "toughness": 4
+    },
+    {
+      "name": "Gray Ogre",
+      "mana_cost": "{2}{R}",
+      "types": [
+        "creature"
+      ],
+      "subtypes": [
+        "ogre"
+      ],
+      "power": 2,
+      "toughness": 2
+    },
+    {
+      "name": "Prodigal Pyromancer",
+      "mana_cost": "{2}{R}",
+      "types": [
+        "creature"
+      ],
+      "subtypes": [
+        "human",
+        "wizard"
+      ],
+      "power": 1,
+      "toughness": 1,
+      "abilities": [
+        {
+          "activated": {
+            "cost": [
+              "tap"
+            ],
+            "targets": [
+              "any_target"
+            ],
+            "effects": [
+              {
+                "deal_damage": {
+                  "amount": 1,
+                  "to": {
+                    "target": 0
+                  }
+                }
+              }
+            ]
+          }
+        }
+      ],
+      "rules_text": "{T}: Prodigal Pyromancer deals 1 damage to any target."
+    },
+    {
+      "name": "Hill Giant",
+      "mana_cost": "{3}{R}",
+      "types": [
+        "creature"
+      ],
+      "subtypes": [
+        "giant"
+      ],
+      "power": 3,
+      "toughness": 3
+    },
+    {
+      "name": "Lightning Bolt",
+      "mana_cost": "{R}",
+      "types": [
+        "instant"
+      ],
+      "abilities": [
+        {
+          "spell": {
+            "targets": [
+              "any_target"
+            ],
+            "effects": [
+              {
+                "deal_damage": {
+                  "amount": 3,
+                  "to": {
+                    "target": 0
+                  }
+                }
+              }
+            ]
+          }
+        }
+      ],
+      "rules_text": "Lightning Bolt deals 3 damage to any target."
+    },
+    {
+      "name": "Counterspell",
+      "mana_cost": "{U}{U}",
+      "types": [
+        "instant"
+      ],
+      "abilities": [
+        {
+          "spell": {
+            "targets": [
+              "spell"
+            ],
+            "effects": [
+              {
+                "counter": {
+                  "to": {
+                    "target": 0
+                  }
+                }
+              }
+            ]
+          }
+        }
+      ],
+      "rules_text": "Counter target spell."
+    },
+    {
+      "name": "Divination",
+      "mana_cost": "{2}{U}",
+      "types": [
+        "sorcery"
+      ],
+      "abilities": [
+        {
+          "spell": {
+            "effects": [
+              {
+                "draw": {
+                  "amount": 2
+                }
+              }
+            ]
+          }
+        }
+      ],
+      "rules_text": "Draw two cards."
+    }
+  ],
+  "main": [
+    {
+      "card": "Island",
+      "count": 12
+    },
+    {
+      "card": "Mountain",
+      "count": 12
+    },
+    {
+      "card": "Fugitive Wizard",
+      "count": 4
+    },
+    {
+      "card": "Coral Merfolk",
+      "count": 4
+    },
+    {
+      "card": "Horned Turtle",
+      "count": 4
+    },
+    {
+      "card": "Gray Ogre",
+      "count": 4
+    },
+    {
+      "card": "Prodigal Pyromancer",
+      "count": 4
+    },
+    {
+      "card": "Hill Giant",
+      "count": 4
+    },
+    {
+      "card": "Lightning Bolt",
+      "count": 4
+    },
+    {
+      "card": "Counterspell",
+      "count": 4
+    },
+    {
+      "card": "Divination",
+      "count": 4
+    }
+  ]
+}

@@ -29,6 +29,36 @@ RSpec.describe Enjine::CardDefinition do
     expect(defn.hash).to eq(described_class.from_h(forest).hash)
   end
 
+  it "carries an optional rarity and printing, round-trips them, and ignores them for identity" do
+    alfa = { "name" => "Alfa", "mana_cost" => "{1}{U}{U}", "types" => ["instant"],
+             "abilities" => [{ "spell" => { "targets" => ["spell"], "effects" => [{ "counter" => { "to" => { "target" => 0 } } }] } }],
+             "rarity" => "rare", "printing" => { "set" => "trk", "number" => "12" } }
+    defn = described_class.from_h(alfa.merge("printing" => { set: "trk", number: 12 }))
+    expect([defn.rarity, defn.printing]).to eq(["rare", { "set" => "trk", "number" => "12" }])
+    expect(defn.to_h).to eq(alfa)
+    expect(described_class.from_h(defn.to_h).to_h).to eq(alfa)
+    reprint = described_class.from_h(alfa.merge("rarity" => "common", "printing" => { "set" => "abc", "number" => "7a" }))
+    expect(reprint).to eq(defn)
+    expect(reprint.hash).to eq(defn.hash)
+    expect(Enjine::Catalog.from_definitions([defn, reprint]).size).to eq(1)
+    expect(errors_for(alfa.merge("rarity" => 3, "printing" => { "set" => "trk" })))
+      .to eq(["rarity: must be a string", "printing: must be {\"set\": code, \"number\": collector number}"])
+    expect(errors_for(alfa.merge("printing" => "trk:12")).size).to eq(1)
+  end
+
+  it "keeps a card's rarity and printing beside its faces" do
+    adventure = { "name" => "Alfa // Bravo", "layout" => "adventure",
+                  "faces" => [{ "name" => "Alfa", "mana_cost" => "{G}", "types" => ["creature"], "power" => 1, "toughness" => 1 },
+                              { "name" => "Bravo", "mana_cost" => "{G}", "types" => ["sorcery"], "subtypes" => ["adventure"],
+                                "abilities" => [{ "spell" => { "effects" => [{ "gain_life" => { "amount" => 1 } }] } }] }],
+                  "rarity" => "uncommon", "printing" => { "set" => "trk", "number" => "3" } }
+    defn = described_class.from_h(adventure)
+    expect(defn.to_h).to eq(adventure)
+    expect(described_class.from_h(defn.to_h)).to eq(defn)
+    expect(errors_for(adventure.merge("faces" => [adventure["faces"][0].merge("rarity" => "rare"), adventure["faces"][1]])).first)
+      .to start_with("faces[0].rarity: unknown field")
+  end
+
   it "returns an existing definition unchanged" do
     defn = described_class.from_h(forest)
     expect(described_class.from_h(defn)).to be(defn)

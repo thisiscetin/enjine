@@ -78,7 +78,7 @@ RSpec.describe "Export, import, replay and restart" do
 
     it "rejects cards missing from the catalog" do
       expect(errors_for(mutate { |s| s["objects"][0]["card"] = "black_lotus" })).to match(/not in the catalog|malformed/)
-      other = Enjine::Catalog.from_definitions([Enjine::CardPool::Core.cards.first])
+      other = Enjine::Catalog.from_definitions([CardFixtures.cards.first])
       expect { Enjine::Game.import(good, catalog: other) }.to raise_error(Enjine::InvalidSnapshot, /not in the catalog/)
     end
 

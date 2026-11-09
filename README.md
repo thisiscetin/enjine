@@ -38,12 +38,10 @@ does, and Enjine validates it:
   "abilities": [ { "spell": { "targets": ["spell"], "effects": [ { "counter": { "to": { "target": 0 } } } ] } } ] }
 ```
 
-Nothing reads rules text. Put cards in a deck's `cards`, or in a set file
-`lib/enjine/sets/<code>.json` (or your own `--sets-dir`), where the
-[deck builder](docs/guides/deck-builder.md) and collections find them
-(`--random-deck sets=trk`, `--collection mine.json`). Set files ship empty, with
-their metadata only: name, release date and `standard_legal_until`, so
-`sets=standard` only uses sets legal on a given day.
+Nothing reads rules text. A card may also carry its `"rarity"` and its
+`"printing": { "set": "trk", "number": "12" }`; the rules ignore both. Put cards in a
+deck's `cards`, or hand a pool of them (a whole set, several sets, or the cards you own)
+to the [deck builder](docs/guides/deck-builder.md) for random decks.
 
 Every mechanic of **Star Trek** (`trk`) can be written in the DSL: the set is
 supported. For the other Standard sets, the mechanics that can't be written yet
@@ -54,11 +52,16 @@ are listed per set in [docs/plans/standard.md](docs/plans/standard.md#mechanics-
 ```sh
 git clone https://github.com/thisiscetin/enjine && cd enjine
 bundle install
-bundle exec exe/enjine                     # hot-seat: you play both players
-bundle exec exe/enjine --list-decks        # sample decks
-bundle exec exe/enjine --deck1 izzet_spells --deck2 gruul_beats --seed 7
-bundle exec exe/enjine --p2 random         # play against a random opponent
+# hot-seat: you play both players, with two of the example decks
+bundle exec exe/enjine --deck1 examples/decks/gruul_beats.json --deck2 examples/decks/azorius_walkers.json
+# play against a random opponent, with a random red-green deck from a card pool
+bundle exec exe/enjine --pool examples/pool.json --deck1 random:colors=RG --deck2 examples/decks/izzet_spells.json --p2 random
+bundle exec exe/enjine --pool examples/pool.json --random-deck colors=WU seed=7   # print a random deck
 ```
+
+[`examples/`](examples) holds ready-to-play deck documents (each carries the cards it
+uses) and `pool.json`, a JSON array of cards to build random decks from. They're not
+part of the gem.
 
 ```
 ━━ Turn 3 · Main 1 · active: alice · priority: alice ━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -89,10 +92,13 @@ history, `u` undoes, `s FILE` saves, `--load FILE` resumes, and `?` shows help.
 
 ```ruby
 require "enjine"
-require "enjine/card_pool/core"   # opt-in sample cards; Enjine knows no cards by default
+require "enjine/deck_builder"   # opt-in
 
-alice = Enjine::Player.new(name: "alice", deck: Enjine::CardPool::Core.deck("gruul_beats"))
-bob   = Enjine::Player.new(name: "bob",   deck: Enjine::CardPool::Core.deck("azorius_walkers"))
+# Enjine knows no cards: a deck document carries its own (see examples/decks).
+alice = Enjine::Player.new(name: "alice", deck: JSON.parse(File.read("examples/decks/gruul_beats.json")))
+# One long-lived builder over any card pool; build as many decks as you like.
+builder = Enjine::DeckBuilder.new(JSON.parse(File.read("examples/pool.json")))
+bob   = Enjine::Player.new(name: "bob", deck: builder.build(colors: %w[W U], seed: 7))
 setup = Enjine::Setup.new(alice, bob)    # compile once ...
 game  = setup.new_game(seed: 42)         # ... spawn many games cheaply
 
@@ -136,7 +142,7 @@ effect and filter with examples.
 ## Where things are
 
 ```
-lib/enjine.rb               entry point (loads everything except the opt-in card pool)
+lib/enjine.rb               entry point (the engine; deck_builder, cli and docs are opt-in requires)
 lib/enjine/
   game.rb                   public API: pending_decision, submit, apply, views, history, export/import
   setup.rb player.rb deck.rb  players, decks and the compiled two-player Setup
@@ -148,10 +154,12 @@ lib/enjine/
   state.rb snapshot.rb      plain-data game state, export/import and its consistency checks
   events.rb view.rb history.rb  typed events, per-player views and histories
   cli.rb cli/               the interactive terminal client
-  card_pool/                OPT-IN sample cards (core.json) and sample decks (decks/*.json)
+  deck_builder.rb           OPT-IN random constructed decks from a card pool
   agents/ fuzz.rb docs.rb   random player, invariant-checking fuzzer, docs generator
 exe/enjine                  CLI executable
+examples/                   ready-to-play decks and a card pool (not in the gem)
 spec/unit spec/integration spec/e2e   the three test levels; spec/support/scenario.rb is the board DSL
+spec/fixtures/cards/        the cards specs and fuzz play with, one file per mechanic family
 docs/                       design, architecture, guides, generated reference, CR coverage checklist
 SUPPORTED.md                generated list of everything the engine supports
 ```
@@ -164,7 +172,7 @@ SUPPORTED.md                generated list of everything the engine supports
 | [docs/reference/](docs/reference) | parameters and examples for every primitive and decision (generated) |
 | [docs/guides/card-data-format.md](docs/guides/card-data-format.md) | the card DSL: fields, abilities, effects, validation, DB schema |
 | [docs/guides/decision-api.md](docs/guides/decision-api.md) | playing a game through the API |
-| [docs/guides/deck-builder.md](docs/guides/deck-builder.md) | random decks from card sets or from your own collection, in chosen or random colors (`--random-deck`, `--collection`) |
+| [docs/guides/deck-builder.md](docs/guides/deck-builder.md) | random decks from any card pool (a set, your collection), in chosen or random colors (`--pool`, `--random-deck`) |
 | [docs/guides/adding-a-mechanic.md](docs/guides/adding-a-mechanic.md) | how to extend the engine |
 | [docs/MECHANICS_COVERAGE.md](docs/MECHANICS_COVERAGE.md) | the full CR checklist with milestones and priorities |
 | [docs/reviews/VERDICT.md](docs/reviews/VERDICT.md) | design review verdict and the prioritized work queue (elegance, performance, future-proofness) |

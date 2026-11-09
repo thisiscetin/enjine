@@ -15,7 +15,7 @@ Gem::Specification.new do |spec|
   spec.required_ruby_version = ">= 4.0.0"
   spec.metadata["rubygems_mfa_required"] = "true"
 
-  spec.files = Dir["lib/**/*.{rb,json}", "exe/*", "docs/**/*.md", "README.md", "LICENSE.txt"]
+  spec.files = Dir["lib/**/*.rb", "exe/*", "docs/**/*.md", "README.md", "LICENSE.txt"]
   spec.bindir = "exe"
   spec.executables = ["enjine"]
   spec.require_paths = ["lib"]

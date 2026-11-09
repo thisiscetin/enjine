@@ -42,8 +42,8 @@ that card data can reference. The categories are `type`, `supertype`, `subtype`,
    - **Integration** (`spec/integration`): a `build_game` scenario, then legal
      options, then a decision, then the resulting state and events. Cite the rule
      numbers in the example names.
-   - **End-to-end:** add a card using the mechanic to `lib/enjine/card_pool/core.json`
-     so the fuzzer (`rake fuzz`) plays it in thousands of random positions.
+   - **End-to-end:** add a card using the mechanic to the fitting family file in
+     `spec/fixtures/cards/` so the fuzzer (`rake fuzz`) plays it in thousands of random positions.
 5. `bundle exec rake` (specs, coverage gate and RuboCop) must pass.
 
 ## Where things live

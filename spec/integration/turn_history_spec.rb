@@ -87,7 +87,7 @@ RSpec.describe "Turn and game history (CR 601.2i, 700.4, 119.9, 608.2h)" do
   end
 
   it "matches entered permanents by the subtypes they had as they entered" do
-    catalog = Enjine::CardPool::Core.catalog
+    catalog = CardFixtures.catalog
     game = build_game(catalog) do
       turn 3, active: "alice", step: :precombat_main
       player("alice") do

@@ -1,0 +1,472 @@
+[
+  {
+    "name": "Dawnwatch Squire // Duskwatch Reaver",
+    "layout": "transform",
+    "faces": [
+      {
+        "name": "Dawnwatch Squire",
+        "mana_cost": "{1}{W}",
+        "types": [
+          "creature"
+        ],
+        "subtypes": [
+          "human",
+          "soldier"
+        ],
+        "power": 2,
+        "toughness": 2,
+        "abilities": [
+          {
+            "triggered": {
+              "when": {
+                "any_of": [
+                  {
+                    "enters": {}
+                  },
+                  {
+                    "transforms": {}
+                  }
+                ]
+              },
+              "effects": [
+                {
+                  "gain_life": {
+                    "amount": 1
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "activated": {
+              "cost": [
+                {
+                  "mana": "{3}"
+                }
+              ],
+              "timing": "sorcery",
+              "effects": [
+                {
+                  "transform": {}
+                }
+              ]
+            }
+          }
+        ],
+        "rules_text": "Whenever this creature enters or transforms into Dawnwatch Squire, you gain 1 life.\n{3}: Transform this creature. Activate only as a sorcery."
+      },
+      {
+        "name": "Duskwatch Reaver",
+        "colors": [
+          "W"
+        ],
+        "types": [
+          "creature"
+        ],
+        "subtypes": [
+          "human",
+          "knight"
+        ],
+        "keywords": [
+          "lifelink"
+        ],
+        "power": 3,
+        "toughness": 3,
+        "abilities": [
+          {
+            "triggered": {
+              "when": {
+                "transforms": {}
+              },
+              "effects": [
+                {
+                  "draw": {
+                    "amount": 1
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "activated": {
+              "cost": [
+                {
+                  "mana": "{2}{W}"
+                }
+              ],
+              "timing": "sorcery",
+              "effects": [
+                {
+                  "transform": {
+                    "to": "self"
+                  }
+                }
+              ]
+            }
+          }
+        ],
+        "rules_text": "Lifelink\nWhenever this creature transforms into Duskwatch Reaver, draw a card.\n{2}{W}: Transform this creature. Activate only as a sorcery."
+      }
+    ]
+  },
+  {
+    "name": "Ferryman of Mists // Mistbound Ferry",
+    "layout": "transform",
+    "faces": [
+      {
+        "name": "Ferryman of Mists",
+        "mana_cost": "{2}{U}",
+        "types": [
+          "creature"
+        ],
+        "subtypes": [
+          "human",
+          "wizard"
+        ],
+        "power": 2,
+        "toughness": 2,
+        "abilities": [
+          {
+            "activated": {
+              "cost": [
+                {
+                  "mana": "{4}{U}"
+                }
+              ],
+              "timing": "sorcery",
+              "effects": [
+                {
+                  "exile": {
+                    "to": "self"
+                  }
+                },
+                {
+                  "return_to_battlefield": {
+                    "to": {
+                      "result": 0
+                    },
+                    "transformed": true
+                  }
+                }
+              ]
+            }
+          }
+        ],
+        "rules_text": "{4}{U}: Exile this creature, then return it to the battlefield transformed under its owner's control. Activate only as a sorcery."
+      },
+      {
+        "name": "Mistbound Ferry",
+        "colors": [
+          "U"
+        ],
+        "types": [
+          "creature"
+        ],
+        "subtypes": [
+          "spirit"
+        ],
+        "keywords": [
+          "flying"
+        ],
+        "power": 4,
+        "toughness": 4,
+        "rules_text": "Flying"
+      }
+    ]
+  },
+  {
+    "name": "Grovecall Lad // Grovecall Giant",
+    "layout": "modal",
+    "faces": [
+      {
+        "name": "Grovecall Lad",
+        "mana_cost": "{G}",
+        "types": [
+          "creature"
+        ],
+        "subtypes": [
+          "elf"
+        ],
+        "power": 1,
+        "toughness": 1
+      },
+      {
+        "name": "Grovecall Giant",
+        "mana_cost": "{3}{G}{G}",
+        "types": [
+          "creature"
+        ],
+        "subtypes": [
+          "giant"
+        ],
+        "keywords": [
+          "trample"
+        ],
+        "power": 5,
+        "toughness": 5,
+        "rules_text": "Trample"
+      }
+    ]
+  },
+  {
+    "name": "Rushing Torrent // Torrent Basin",
+    "layout": "modal",
+    "faces": [
+      {
+        "name": "Rushing Torrent",
+        "mana_cost": "{1}{U}",
+        "types": [
+          "instant"
+        ],
+        "abilities": [
+          {
+            "spell": {
+              "effects": [
+                {
+                  "draw": {
+                    "amount": 2
+                  }
+                }
+              ]
+            }
+          }
+        ],
+        "rules_text": "Draw two cards."
+      },
+      {
+        "name": "Torrent Basin",
+        "types": [
+          "land"
+        ],
+        "abilities": [
+          "enters_tapped",
+          {
+            "mana": {
+              "cost": [
+                "tap"
+              ],
+              "produce": "{U}"
+            }
+          }
+        ],
+        "rules_text": "This land enters tapped.\n{T}: Add {U}."
+      }
+    ]
+  },
+  {
+    "name": "Thornhedge Knight // Clear the Thicket",
+    "layout": "adventure",
+    "faces": [
+      {
+        "name": "Thornhedge Knight",
+        "mana_cost": "{2}{G}",
+        "types": [
+          "creature"
+        ],
+        "subtypes": [
+          "human",
+          "knight"
+        ],
+        "power": 3,
+        "toughness": 2
+      },
+      {
+        "name": "Clear the Thicket",
+        "mana_cost": "{1}{G}",
+        "types": [
+          "sorcery"
+        ],
+        "subtypes": [
+          "adventure"
+        ],
+        "abilities": [
+          {
+            "spell": {
+              "targets": [
+                "creature"
+              ],
+              "effects": [
+                {
+                  "deal_damage": {
+                    "amount": 2,
+                    "to": {
+                      "target": 0
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        ],
+        "rules_text": "Clear the Thicket deals 2 damage to target creature. (Then exile this card. You may cast the creature later from exile.)"
+      }
+    ]
+  },
+  {
+    "name": "Skyreach Wyrm // Updraft Omen",
+    "layout": "omen",
+    "faces": [
+      {
+        "name": "Skyreach Wyrm",
+        "mana_cost": "{4}{R}",
+        "types": [
+          "creature"
+        ],
+        "subtypes": [
+          "dragon"
+        ],
+        "keywords": [
+          "flying"
+        ],
+        "power": 4,
+        "toughness": 4,
+        "rules_text": "Flying"
+      },
+      {
+        "name": "Updraft Omen",
+        "mana_cost": "{1}{R}",
+        "types": [
+          "instant"
+        ],
+        "subtypes": [
+          "omen"
+        ],
+        "abilities": [
+          {
+            "spell": {
+              "targets": [
+                "any_target"
+              ],
+              "effects": [
+                {
+                  "deal_damage": {
+                    "amount": 2,
+                    "to": {
+                      "target": 0
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        ],
+        "rules_text": "Updraft Omen deals 2 damage to any target. (Then shuffle this card into its owner's library.)"
+      }
+    ]
+  },
+  {
+    "name": "Inkwell Scholar // Margin Notes",
+    "layout": "prepare",
+    "faces": [
+      {
+        "name": "Inkwell Scholar",
+        "mana_cost": "{1}{U}",
+        "types": [
+          "creature"
+        ],
+        "subtypes": [
+          "human",
+          "wizard"
+        ],
+        "power": 1,
+        "toughness": 3,
+        "abilities": [
+          "enters_prepared"
+        ],
+        "rules_text": "This creature enters prepared. (While it's prepared, you may cast a copy of its spell. Doing so unprepares it.)"
+      },
+      {
+        "name": "Margin Notes",
+        "mana_cost": "{U}",
+        "types": [
+          "sorcery"
+        ],
+        "abilities": [
+          {
+            "spell": {
+              "effects": [
+                {
+                  "draw": {
+                    "amount": 1
+                  }
+                }
+              ]
+            }
+          }
+        ],
+        "rules_text": "Draw a card."
+      }
+    ]
+  },
+  {
+    "name": "Duelhall Fencer // Quick Riposte",
+    "layout": "prepare",
+    "faces": [
+      {
+        "name": "Duelhall Fencer",
+        "mana_cost": "{1}{R}",
+        "types": [
+          "creature"
+        ],
+        "subtypes": [
+          "human",
+          "warrior"
+        ],
+        "power": 2,
+        "toughness": 1,
+        "abilities": [
+          {
+            "triggered": {
+              "when": {
+                "step_begins": {
+                  "step": "upkeep",
+                  "whose": "your"
+                }
+              },
+              "if": {
+                "source": {
+                  "creature": {
+                    "prepared": false
+                  }
+                }
+              },
+              "effects": [
+                {
+                  "prepare": {}
+                }
+              ]
+            }
+          }
+        ],
+        "rules_text": "At the beginning of your upkeep, if this creature isn't prepared, it becomes prepared."
+      },
+      {
+        "name": "Quick Riposte",
+        "mana_cost": "{R}",
+        "types": [
+          "instant"
+        ],
+        "abilities": [
+          {
+            "spell": {
+              "targets": [
+                "any_target"
+              ],
+              "effects": [
+                {
+                  "deal_damage": {
+                    "amount": 1,
+                    "to": {
+                      "target": 0
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        ],
+        "rules_text": "Quick Riposte deals 1 damage to any target."
+      }
+    ]
+  }
+]

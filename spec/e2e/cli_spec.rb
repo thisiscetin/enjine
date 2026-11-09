@@ -4,31 +4,40 @@ require "stringio"
 require "tmpdir"
 
 RSpec.describe Enjine::CLI do
+  let(:examples) { File.join(CardFixtures::ROOT, "examples") }
+  let(:pool) { ["--pool", "#{examples}/pool.json"] }
+  let(:decks) { ["--deck1", "#{examples}/decks/gruul_beats.json", "--deck2", "#{examples}/decks/azorius_walkers.json"] }
+
   def run(args, input = "")
     out = StringIO.new
     code = described_class.new(args, input: StringIO.new(input), output: out).run
     [code, out.string]
   end
 
-  it "lists the sample decks" do
-    _, out = run(%w[--list-decks])
-    expect(out).to include("gruul_beats", "azorius_walkers", "izzet_spells")
+  # A game between the example decks.
+  def play(args, input = "") = run(decks + args, input)
+
+  it "plays deck files, naming them in the intro, and explains missing or broken ones" do
+    _, out = play(%w[--p1 random --p2 random --seed 3 --max-decisions 1])
+    expect(out).to include("alice: gruul_beats   bob: azorius_walkers")
+    expect(run(%w[--p1 random])).to eq([1, "error: pass --deck1: a deck file (see examples/decks) or random[:SPEC] with --pool\n"])
+    expect(run(%w[--deck1 nope.json --deck2 nope.json])[1]).to start_with("error: No such file or directory")
   end
 
   it "plays random vs random to the end, narrating every event" do
-    code, out = run(%w[--p1 random --p2 random --seed 3])
+    code, out = play(%w[--p1 random --p2 random --seed 3])
     expect(code).to eq(0)
     expect(out).to include("seed 3", "══ Turn 1", "GAME OVER")
   end
 
   it "prints only the result with --quiet" do
-    _, out = run(%w[--p1 random --p2 random --seed 3 --quiet])
+    _, out = play(%w[--p1 random --p2 random --seed 3 --quiet])
     expect(out.lines.size).to eq(1)
     expect(out).to match(/GAME OVER: (\w+ wins \(\w+\)|draw)/)
   end
 
   it "is hot-seat by default: shows the deciding player's view and numbered options" do
-    _, out = run(%w[--seed 4], "x\n99\n1\n1\n1\nq\n")
+    _, out = play(%w[--seed 4], "x\n99\n1\n1\n1\nq\n")
     expect(out).to include("must act: play or draw", " 1) Play first", "Unknown command", "Choose 1-2",
                            "must act: mulligan", "Keep hand")
     expect(out).to match(/Hand: .*\[/) # the deciding player's own hand is visible
@@ -37,7 +46,7 @@ RSpec.describe Enjine::CLI do
   it "supports fast-forward, board, observer, history, help, save, undo and concede" do
     Dir.mktmpdir do |dir|
       path = File.join(dir, "game.json")
-      _, out = run(%w[--seed 4], "1\n1\n1\nf\nb\no\nh 3\n?\ns #{path}\nu\nc\n")
+      _, out = play(%w[--seed 4], "1\n1\n1\nf\nb\no\nh 3\n?\ns #{path}\nu\nc\n")
       expect(out).to include("(passed", "Observer view on", "Library (top first)", "Commands:", "Saved to",
                              "Undid", "GAME OVER")
       expect(File).to exist(path)
@@ -46,104 +55,70 @@ RSpec.describe Enjine::CLI do
       expect(resumed).to include("GAME OVER")
       _, no_undo = run(["--load", path], "u\nq\n")
       expect(no_undo).to include("Undo needs a game started in this session")
+      File.write(path, "{}")
+      expect(run(["--load", path])).to eq([1, "error: #{path}: not a game saved with the s command\n"])
     end
   end
 
   it "concedes for the pending player when the decision limit is reached" do
-    _, out = run(%w[--p1 random --p2 random --seed 4 --max-decisions 30 --observer])
+    _, out = play(%w[--p1 random --p2 random --seed 4 --max-decisions 30 --observer])
     expect(out).to include("wins (concede)")
   end
 
-  describe "random decks" do
-    let(:sets) { ["--sets-dir", DeckBuilderHelpers::SET_FIXTURES] }
-
-    it "prints a reproducible random deck document as JSON" do
-      code, out = run(sets + %w[--random-deck sets=fxa,fxb colors=WU seed=7])
-      expect(code).to eq(0)
-      doc = JSON.parse(out)
-      expect(doc["description"]).to include("sets=fxa,fxb colors=WU seed=7")
-      expect(Enjine::Player.new(name: "p", deck: doc)).to be_ready
-      expect(run(sets + ["--random-deck", "sets=fxb,fxa colors=UW seed=7"])[1]).to eq(out)
-      expect(run(sets + %w[--random-deck sets=fxa,fxb,colors=W,U,seed=7])[1]).to eq(out)
-    end
-
-    it "picks random colors, all sets or Standard sets, and the --seed by default" do
-      two = JSON.parse(run(sets + %w[--seed 5 --random-deck colors=2])[1])
-      expect(two["description"]).to match(/sets=fxa,fxb colors=[WUBRG]{2} seed=5/)
-      allow(Date).to receive(:today).and_return(Date.new(2026, 1, 1)) # only fxa is out by then
-      expect(run(sets + %w[--random-deck sets=standard seed=1])[1]).to include("sets=fxa colors")
-      expect(JSON.parse(run(sets + %w[--random-deck sets=standard size=61 seed=1])[1])["main"].sum { it["count"] }).to eq(61)
-      expect(JSON.parse(run(sets + %w[--random-deck sets=all colors=any seed=1])[1])).to include("cards", "main")
-      expect(run(sets + %w[--seed 1 --random-deck])[0]).to eq(0)
-    end
-
-    it "reports bad specs and impossible decks with exit code 1" do
-      expect(run(sets + %w[--random-deck colors=X])).to eq([1, "error: unknown color X (use W U B R G)\n"])
-      expect(run(sets + %w[--random-deck sets=nope])[1]).to start_with("error: unknown set \"nope\"")
-      expect(run(sets + ["--random-deck", "fxa"])[1]).to include("expected key=value")
-      expect(run(sets + %w[--random-deck mood=happy])[1]).to include("unknown random deck option(s): mood")
-      expect(run(sets + %w[--random-deck sets=fxa colors=W size=200])[1]).to start_with("error: cannot build a 200-card W deck")
-    end
-
-    it "lists the sets in the sets directory" do
-      _, out = run(sets + %w[--list-sets])
-      expect(out).to include("fxa    Ashfall Reaches (2025-06-13) · 48 cards",
-                             "fxb    Tidewild Expanse")
-    end
-
-    it "plays games with random:SPEC decks" do
-      code, out = run(sets + %w[--deck1 random:sets=fxa,colors=2 --deck2 random --p1 random --p2 random --seed 3])
-      expect(code).to eq(0)
-      expect(out).to include("alice: random deck: sets=fxa colors=", "bob: random deck: sets=fxa,fxb", "seed=4", "GAME OVER")
-      expect(run(sets + %w[--deck1 random:colors=X --p1 random --p2 random])).to eq([1, "error: unknown color X (use W U B R G)\n"])
+  it "validates card data blocks, reporting each valid card's canonical form and each error" do
+    Dir.mktmpdir do |dir|
+      path = File.join(dir, "cards.json")
+      alfa = { "name" => "Alfa", "types" => ["land"], "rarity" => "common", "printing" => { "set" => "trk", "number" => 12 } }
+      File.write(path, JSON.generate([alfa, { "name" => "Bravo" }]))
+      code, out = run(["--validate", path])
+      report = JSON.parse(out)
+      expect([code, report["valid"].map { it["card"]["printing"] }]).to eq([1, [{ "set" => "trk", "number" => "12" }]])
+      expect(report["invalid"]).to eq([{ "index" => 1, "name" => "Bravo", "errors" => ["types: must be a non-empty list"] }])
+      File.write(path, JSON.generate(alfa))
+      expect(run(["--validate", path])[0]).to eq(0)
+      File.write(path, "nope")
+      expect(run(["--validate", path])[1]).to start_with('{"error":"not valid JSON')
     end
   end
 
-  describe "collections" do
-    let(:sets) { ["--sets-dir", DeckBuilderHelpers::SET_FIXTURES] }
-    let(:binder) { ["--collection", DeckBuilderHelpers::BINDER] }
-
-    it "prints random decks built only from the collection" do
-      code, out = run(sets + binder + %w[--random-deck colors=WU seed=3])
+  describe "random decks" do
+    it "prints a reproducible random deck document from --pool as JSON" do
+      code, out = run(pool + %w[--random-deck colors=WU seed=7])
       expect(code).to eq(0)
       doc = JSON.parse(out)
-      expect(doc["description"]).to start_with("random deck: collection=binder.json colors=WU seed=3")
+      expect(doc["description"]).to start_with("random deck: colors=WU seed=7")
       expect(Enjine::Player.new(name: "p", deck: doc)).to be_ready
-      owned = Enjine::Collection.load(DeckBuilderHelpers::BINDER, sets_dir: DeckBuilderHelpers::SET_FIXTURES)
-      expect(doc["main"].map { it["card"] }).to all(satisfy { owned.include?(it) || %w[Plains Island].include?(it) })
-      expect(JSON.parse(run(sets + binder + %w[--random-deck colors=WU seed=3 basics=owned])[1])["description"])
-        .to include("basics=owned")
+      expect(run(pool + ["--random-deck", "colors=UW seed=7"])[1]).to eq(out)
+      expect(run(pool + %w[--random-deck colors=W,U,seed=7])[1]).to eq(out)
     end
 
-    it "plays games with random decks from the collection, and reports problems" do
-      code, out = run(sets + binder + %w[--deck1 random:colors=R --deck2 random:colors=WU --p1 random --p2 random --seed 2 --quiet])
+    it "picks random colors, sizes, and the --seed by default" do
+      two = JSON.parse(run(pool + %w[--seed 5 --random-deck colors=2])[1])
+      expect(two["description"]).to match(/colors=[WUBRG]{2} seed=5/)
+      expect(JSON.parse(run(pool + %w[--random-deck size=61 seed=1])[1])["main"].sum { it["count"] }).to eq(61)
+      expect(run(pool + %w[--seed 1 --random-deck])[0]).to eq(0)
+    end
+
+    it "reports bad specs, impossible decks and a missing pool with exit code 1" do
+      expect(run(pool + %w[--random-deck colors=X])).to eq([1, "error: unknown color X (use W U B R G)\n"])
+      expect(run(pool + ["--random-deck", "WU"])[1]).to include("expected key=value")
+      expect(run(pool + %w[--random-deck mood=happy])[1]).to include("unknown random deck option(s): mood")
+      expect(run(pool + %w[--random-deck colors=B])[1]).to start_with("error: cannot build a 60-card B deck from 46 cards")
+      expect(run(%w[--random-deck])).to eq([1, "error: random decks need --pool FILE (a JSON array of cards)\n"])
+      expect(run(%w[--pool nope.json --random-deck])[1]).to start_with("error: No such file or directory")
+    end
+
+    it "plays games with random:SPEC decks" do
+      code, out = run(pool + %w[--deck1 random:colors=2 --deck2 random --p1 random --p2 random --seed 3])
       expect(code).to eq(0)
-      expect(out).to include("GAME OVER")
-      expect(run(sets + binder + %w[--random-deck colors=B seed=1])[1]).to start_with("error: cannot build a 60-card B deck")
-      expect(run(sets + binder + %w[--random-deck sets=fxa])[1]).to eq("error: pass either sets: or collection:, not both\n")
-      expect(run(sets + %w[--collection nope.json --random-deck])).to eq([1, "error: collection file not found: nope.json\n"])
-      expect(run(sets + %w[--collection nope.json --p1 random --p2 random --deck1 random])[1])
-        .to eq("error: collection file not found: nope.json\n")
-    end
-
-    it "prints the resolution report as JSON, exit code 1 when some cards are unknown" do
-      code, out = run(sets + ["--collection-report", DeckBuilderHelpers::BINDER])
-      expect(code).to eq(1)
-      report = JSON.parse(out)
-      expect(report.keys).to eq(%w[resolved unknown])
-      expect(report["unknown"].map { it["name"] }).to include("Prismatic Tidecaller", "Skyveil Seraph")
-      Dir.mktmpdir do |dir|
-        clean = File.join(dir, "clean.json")
-        File.write(clean, JSON.generate("format" => 1, "cards" => [{ "name" => "Dawnward Squire", "count" => 4 }]))
-        expect(run(sets + ["--collection-report", clean])[0]).to eq(0)
-        File.write(clean, "[1]")
-        expect(run(sets + ["--collection-report", clean])).to eq([1, "{\"error\":\"cards[0]: expected an object, got 1\"}\n"])
-      end
+      expect(out).to include("alice: random deck: colors=", "seed=3", "bob: random deck: colors=", "seed=4", "GAME OVER")
+      expect(run(pool + %w[--deck1 random:colors=X --deck2 random --p1 random --p2 random]))
+        .to eq([1, "error: unknown color X (use W U B R G)\n"])
     end
   end
 
   it "says when there is nothing to undo" do
-    _, out = run(%w[--seed 4], "u\nq\n")
+    _, out = play(%w[--seed 4], "u\nq\n")
     expect(out).to include("Nothing to undo")
   end
 

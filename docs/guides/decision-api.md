@@ -5,10 +5,10 @@ hidden logic. The engine asks, you answer.
 
 ```ruby
 require "enjine"
-require "enjine/card_pool/core"   # optional sample cards and decks
 
-alice = Enjine::Player.new(name: "alice", deck: Enjine::CardPool::Core.deck("gruul_beats"))
-bob   = Enjine::Player.new(name: "bob",   deck: Enjine::CardPool::Core.deck("azorius_walkers"))
+# A deck document carries the cards it uses (see examples/decks in the repository).
+alice = Enjine::Player.new(name: "alice", deck: JSON.parse(File.read("examples/decks/gruul_beats.json")))
+bob   = Enjine::Player.new(name: "bob",   deck: JSON.parse(File.read("examples/decks/azorius_walkers.json")))
 setup = Enjine::Setup.new(alice, bob)   # validated and compiled once
 game  = setup.new_game(seed: 42)        # cheap; one per game
 

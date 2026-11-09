@@ -142,10 +142,10 @@ end
 
 # Helpers available in every example.
 module ScenarioHelpers
-  def core_catalog = Enjine::CardPool::Core.catalog
+  def core_catalog = CardFixtures.catalog
 
   # A catalog of the core pool plus extra card data blocks defined in the spec.
-  def catalog_with(*cards) = Enjine::Catalog.from_definitions(Enjine::CardPool::Core.cards + cards)
+  def catalog_with(*cards) = Enjine::Catalog.from_definitions(CardFixtures.cards + cards)
 
   def obj_id(game, card, zone: :battlefield, player: nil)
     ids = zone == :battlefield ? game.state.battlefield : game.state.players[game.names.index(player)].public_send(zone)
@@ -164,7 +164,7 @@ module ScenarioHelpers
   end
 
   def basics_deck(counts = { "Forest" => 30, "Mountain" => 30 })
-    { "cards" => Enjine::CardPool::Core.cards, "main" => counts.map { |name, n| { "card" => name, "count" => n } } }
+    { "cards" => CardFixtures.cards, "main" => counts.map { |name, n| { "card" => name, "count" => n } } }
   end
 
   def basics_setup(names = %w[alice bob])
