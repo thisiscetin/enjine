@@ -198,7 +198,8 @@ module Enjine
       validate_attachment(obj, path, zone, errors)
       return if ON_BATTLEFIELD.include?(zone)
 
-      return unless counters.values.any?(&:positive?) || obj["damage"].to_i.positive?
+      # Cards in exile may have counters (time counters of suspend, CR 702.62a); only permanents have damage.
+      return unless (zone != "exile" && counters.values.any?(&:positive?)) || obj["damage"].to_i.positive?
 
       errors << "#{path}: only permanents have counters or damage"
     end

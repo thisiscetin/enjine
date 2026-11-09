@@ -175,7 +175,8 @@ module Enjine
       def completable_after_activating?(frame, option)
         id = option[:object]
         ability = chars(id).ability(option[:ability])
-        produced = option[:mana] ? Mana.parse_produce(option[:mana], [], "mana") : ability.outcomes(self, object(id)).first
+        # A mana ability that would add nothing (mana: "") produces none.
+        produced = (option[:mana] ? Mana.parse_produce(option[:mana], [], "mana") : ability.outcomes(self, object(id)).first) || []
         pool = player(frame["player"]).mana_pool.dup
         rest = player(frame["player"]).restricted_mana
         if ability.spend_only
