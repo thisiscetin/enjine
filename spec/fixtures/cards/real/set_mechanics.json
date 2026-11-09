@@ -571,5 +571,113 @@
       "set": "fin",
       "number": "165"
     }
+  },
+  {
+    "name": "Leader's Talent",
+    "mana_cost": "{1}{W}",
+    "types": [
+      "enchantment"
+    ],
+    "subtypes": [
+      "class"
+    ],
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "player_attacks": {}
+          },
+          "targets": [
+            {
+              "creature": {
+                "attacking": true
+              }
+            }
+          ],
+          "effects": [
+            {
+              "add_counters": {
+                "counter": "+1/+1",
+                "amount": 1,
+                "to": {
+                  "target": 0
+                }
+              }
+            }
+          ]
+        }
+      },
+      {
+        "class_level": {
+          "level": 2,
+          "cost": "{2}{W}",
+          "abilities": [
+            {
+              "triggered": {
+                "when": {
+                  "leaves_battlefield": {
+                    "subject": {
+                      "each": "creature",
+                      "controller": "you"
+                    }
+                  }
+                },
+                "if": {
+                  "amount": {
+                    "counters": {
+                      "of": {
+                        "triggering": "object"
+                      }
+                    }
+                  },
+                  "at_least": 1
+                },
+                "effects": [
+                  {
+                    "gain_life": {
+                      "amount": 2
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      },
+      {
+        "class_level": {
+          "level": 3,
+          "cost": "{3}{W}",
+          "abilities": [
+            {
+              "triggered": {
+                "when": {
+                  "cast": {
+                    "controller": "you"
+                  }
+                },
+                "effects": [
+                  {
+                    "add_counters": {
+                      "counter": "+1/+1",
+                      "amount": 1,
+                      "to": {
+                        "each": "creature",
+                        "controller": "you"
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "rare",
+    "printing": {
+      "set": "tmt",
+      "number": "13"
+    }
   }
 ]

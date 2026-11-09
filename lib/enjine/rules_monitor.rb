@@ -49,12 +49,18 @@ module Enjine
     end
 
     # Its station symbols it has enough charge counters for (CR 722.2a), recomputed from the raw counters, and
-    # its max speed abilities while its controller's speed is 4 (CR 702.178a, 702.179e).
+    # its max speed abilities while its controller's speed is 4 (CR 702.178a, 702.179e), and its class level
+    # bars up to its level (CR 717.2a).
     def unlocked(obj)
       charge = obj.counters.fetch("charge", 0)
       fast = state.players[obj.controller].speed == 4
+      level = obj.memory.fetch("class_level", 1) # CR 717.2a, 717.2d
       defn(obj.card).abilities.select do |ability|
-        ability.kind == :station_symbol ? charge >= ability.threshold : ability.kind == :max_speed && fast
+        case ability.kind
+        when :station_symbol then charge >= ability.threshold
+        when :max_speed then fast
+        else ability.is_a?(Mechanics::Abilities::ClassLevel) && level >= ability.level
+        end
       end
     end
 

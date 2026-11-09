@@ -98,6 +98,24 @@ Rules: CR 702.122e, CR 603.2
 }
 ```
 
+## becomes_level
+
+This permanent's level becomes `level` (a class level bar's ability resolves).
+
+Rules: CR 717.2a, CR 603.2
+
+| Parameter | Description |
+| --- | --- |
+| `level` | integer >= 2 |
+
+```json
+{
+  "becomes_level": {
+    "level": 3
+  }
+}
+```
+
 ## becomes_tapped
 
 The subject becomes tapped (for any reason: a cost, attacking, an effect). A permanent that enters tapped doesn't become tapped.

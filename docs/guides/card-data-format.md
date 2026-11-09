@@ -907,7 +907,7 @@ power"). Keyword *actions* are effects.
                 { "triggered": { "when": { "enters": {} }, "effects": [{ "connive": {} }] } }] }
 ```
 
-### 4.20 Set mechanics: power-up, teamwork, tiered, increment, extort, boast, storied, colors among, domain
+### 4.20 Set mechanics: power-up, teamwork, tiered, Class cards, increment, extort, boast, storied, colors among, domain
 
 | Oracle text | Data |
 | --- | --- |
@@ -920,6 +920,8 @@ power"). Keyword *actions* are effects.
 | "the number of colors among permanents you control" (CR 105.2) | amount `{ "distinct_colors": { "each": "permanent", "controller": "you" } }` |
 | domain: "the number of basic land types among lands you control" (CR 305.6) | amount `{ "distinct_land_types": { "each": "land", "controller": "you" } }` |
 | "Tiered" (CR 702.183): "• Fira — {2} — …" | a modal `spell` with `"choose": 1` whose modes each have a `cost`: `{ "cost": "{2}", "effects": [...] }`; the chosen mode's cost is paid in addition (modes the player can't pay for aren't offered) |
+| Class cards (CR 717): "{1}{R}: Level 2 — [abilities]" | `"subtypes": ["class"]` and one ability per level bar: `{ "class_level": { "level": 2, "cost": "{1}{R}", "abilities": [...], "keywords": [...] } }`; the abilities above the first bar are ordinary abilities. Gaining a level is activated as a sorcery, only from the level below; a permanent without a level is level 1 |
+| "When this Class becomes level 3" | trigger `{ "becomes_level": { "level": 3 } }` (listed in that level's `abilities`) |
 | "Storied" (CR 702.195) | `"keywords": ["storied"]`: once you control it and three or more artifacts, Sagas and/or legendary permanents, you have an enduring story for the rest of the game (the player view's `designations`) |
 | "as long as you have an enduring story" | condition `{ "designation": "enduring_story" }` (a static's or trigger's `if`, an activated ability's `only_if`) |
 

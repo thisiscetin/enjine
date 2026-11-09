@@ -128,6 +128,23 @@ RSpec.describe "Real cards: set mechanics" do
     expect(game.state.players[0].mana_pool[:C]).to eq(2)
   end
 
+  it "Leader's Talent: class levels are gained in order, as a sorcery, and add their abilities (CR 717.2a)" do
+    game = board(battlefield: ["Leader's Talent", "Hungry Graffalon"], hand: ["Brave Brawler"], mana: { W: 9 })
+    talent = obj_id(game, "Leader's Talent")
+    level2 = { type: "activate", object: talent, ability: "printed:1" }
+    level3 = { type: "activate", object: talent, ability: "printed:2" }
+    expect(game.legal_options).to include(level2)
+    expect(game.legal_options).not_to include(level3)
+    play(game, level2)
+    engine = game.instance_variable_get(:@engine)
+    expect(engine.class_level(engine.object(talent))).to eq(2)
+    expect(game.legal_options).not_to include(level2)
+    play(game, level3)
+    cast(game, "Brave Brawler") # level 3: whenever you cast a spell, a +1/+1 counter on each creature you control
+    expect(game.state.object(obj_id(game, "Hungry Graffalon")).counters["+1/+1"]).to eq(1)
+    expect(game.history.flat_map(&:events).map(&:type)).to include("class_level_changed")
+  end
+
   it "Luminollusk and Shimmercreep: X is the number of colors among permanents you control" do
     game = board(hand: ["Shimmercreep"], battlefield: ["The Kingpin of Crime", "Luminollusk"], mana: { B: 1, C: 4 })
     cast(game, "Shimmercreep", { type: "decline" }) # Kingpin's extort

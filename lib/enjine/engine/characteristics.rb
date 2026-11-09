@@ -42,7 +42,7 @@ module Enjine
       LAYER_EVENTS = [Events::ZoneChanged, Events::CountersChanged, Events::EffectStarted,
                       Events::EffectsEnded, Events::Attached, Events::Unattached, Events::ControlChanged,
                       Events::PhasedOut, Events::PhasedIn, Events::SpeedChanged,
-                      Events::Transformed].freeze
+                      Events::Transformed, Events::ClassLevelChanged].freeze
 
       def touch! = @epoch = @epoch.to_i + 1
       def volatile_layers? = @volatile
@@ -84,7 +84,8 @@ module Enjine
         speedy = state.players.each_index.any? { max_speed?(it) }
         state.battlefield.none? do |id|
           obj = object(id)
-          !obj.counters.empty? || printed_noncreature_pt?(obj) || (speedy && !active_max_speed(obj, obj.controller).empty?)
+          !obj.counters.empty? || printed_noncreature_pt?(obj) || (speedy && !active_max_speed(obj, obj.controller).empty?) ||
+            obj.memory.key?("class_level") # CR 717.2a
         end
       end
 
@@ -304,7 +305,7 @@ module Enjine
       # and max speed abilities (Engine::Speed).
       def own_ability_instances(obj)
         printed = catalog.fetch(obj.card).ability_instances
-        symbols = active_max_speed(obj, obj.controller)
+        symbols = active_max_speed(obj, obj.controller) + active_class_levels(obj) # CR 717.2a (Engine::ClassLevels)
         symbols += active_station_symbols(obj) if obj.counters.fetch("charge", 0).positive?
         return printed if symbols.empty?
 
@@ -316,7 +317,8 @@ module Enjine
       # assimilation (CR 701.72, 205.1b: an artifact creature whose creature types are replaced by Borg).
       def own_layers(obj, printed, effects)
         symbols = obj.counters.fetch("charge", 0).positive? ? active_station_symbols(obj) : []
-        symbols += active_max_speed(obj, obj.controller) # same shape: keywords and nested abilities (CR 702.178a)
+        # same shape: keywords and nested abilities (CR 702.178a, 717.2a)
+        symbols += active_max_speed(obj, obj.controller) + active_class_levels(obj)
         assimilated = !effects.empty? && effects.any? { it["kind"] == "assimilate" && it["affected"].include?(obj.id) }
         added = effects.empty? ? [] : added_subtypes(obj, effects)
         becomes = effects.empty? ? [] : effects.select { it["kind"] == "add_types" && it["affected"].include?(obj.id) }

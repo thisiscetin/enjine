@@ -296,6 +296,45 @@ Rules: CR 614.12, CR 607.2f, CR 614.12b
 }
 ```
 
+## class_level
+
+A class level bar: `cost` (a mana cost string or a list of costs): this permanent's level becomes `level`; activate only if its level is `level` - 1, as a sorcery. While its level is `level` or greater it has `keywords` and `abilities`. A permanent without a level is level 1.
+
+Rules: CR 717.2a, CR 717.2b, CR 717.2d, CR 717.3, CR 602.5d
+
+| Parameter | Description |
+| --- | --- |
+| `level` | integer >= 2 |
+| `cost` | mana cost string or list of costs |
+| `keywords` | list of keywords |
+| `abilities` | list of abilities |
+
+```json
+{
+  "class_level": {
+    "level": 2,
+    "cost": "{1}{R}",
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "discards": {}
+          },
+          "effects": [
+            {
+              "deal_damage": {
+                "amount": 2,
+                "to": "each_opponent"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}
+```
+
 ## cost_modifier
 
 While on the battlefield: spells cast by `caster` (you, opponent or any; default you) whose card types match `spells` ({"any_of": [types], "not": [types]}, default all spells) cost `reduce` less or `increase` more generic mana.

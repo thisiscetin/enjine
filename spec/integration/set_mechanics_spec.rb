@@ -272,6 +272,59 @@ RSpec.describe "Set mechanics: power-up, teamwork, increment, extort, boast, col
     end
   end
 
+  describe "Class cards (CR 717)" do
+    let(:dojo) do
+      { "name" => "Spec Dojo Class", "mana_cost" => "{R}", "types" => ["enchantment"], "subtypes" => ["class"],
+        "abilities" => [
+          { "class_level" => { "level" => 2, "cost" => [{ "mana" => "{1}" }],
+                               "abilities" => [{ "static" => { "affects" => { "each" => "creature", "controller" => "you" },
+                                                               "pump" => { "power" => 1, "toughness" => 0 } } }] } },
+          { "class_level" => { "level" => 3, "cost" => "{2}", "abilities" => [
+            { "triggered" => { "when" => { "becomes_level" => { "level" => 3 } },
+                               "effects" => [{ "gain_life" => { "amount" => 5 } }] } }
+          ] } }
+        ] }
+    end
+    let(:catalog) { catalog_with(dojo) }
+
+    def dojo_board(step: :precombat_main)
+      build_game(catalog) do
+        turn 3, active: "alice", step: step
+        player("alice", mana_pool: { C: 3 }) do
+          battlefield "Spec Dojo Class", "Grizzly Bears"
+          library "Forest", count: 5
+        end
+        player("bob") { library "Forest", count: 5 }
+      end
+    end
+
+    it "levels up one level at a time, at sorcery speed; each level adds its abilities; becoming level 3 triggers" do
+      game = dojo_board
+      dojo = obj_id(game, "Spec Dojo Class")
+      bears = engine(game).object(obj_id(game, "Grizzly Bears"))
+      expect(engine(game).power(bears)).to eq(2)
+      expect(game.legal_options).not_to include(type: "activate", object: dojo, ability: "printed:1")
+      play(game, { type: "activate", object: dojo, ability: "printed:0" })
+      expect(engine(game).power(bears)).to eq(3)
+      play(game, { type: "activate", object: dojo, ability: "printed:1" })
+      expect(life(game, "alice")).to eq(25)
+      expect(engine(game).power(bears)).to eq(3) # level 2's ability still applies at level 3
+      expect(catalog.fetch("spec_dojo_class").abilities.last.to_s).to start_with("{2}: Level 3 — When this becomes level 3")
+      upkeep = dojo_board(step: :upkeep)
+      expect(upkeep.legal_options).not_to include(type: "activate", object: dojo, ability: "printed:0")
+    end
+
+    it "validates its level, cost and nesting" do
+      klass = ->(bar) { dojo.merge("abilities" => [{ "class_level" => bar }]) }
+      expect(errors_for(klass.call({ "level" => 1, "cost" => "{1}" })).join).to include("class_level.level: must be an integer >= 2")
+      expect(errors_for(klass.call({ "level" => 2 })).join).to include("class_level.cost: required")
+      nested = { "level" => 2, "cost" => "{1}", "abilities" => [{ "class_level" => { "level" => 3, "cost" => "{1}" } }] }
+      expect(errors_for(klass.call(nested)).join).to include("class level bars can't be nested")
+      trigger = { "triggered" => { "when" => { "becomes_level" => { "level" => 0 } }, "effects" => [] } }
+      expect(errors_for(dojo.merge("abilities" => [trigger])).join).to include("becomes_level.level")
+    end
+  end
+
   describe "storied and the enduring story designation (CR 702.195)" do
     let(:bard) do
       { "name" => "Spec Story Bard", "mana_cost" => "{1}{R}", "types" => ["creature"], "supertypes" => ["legendary"],
