@@ -108,6 +108,8 @@ module Enjine
       view["loyalty"] = engine.loyalty(obj) if defn.planeswalker?
       view["counters"] = obj.counters.reject { |_, n| n.zero? } unless obj.counters.values.all?(&:zero?)
       view["attached_to"] = obj.attached_to if obj.attached_to
+      view["transformed"] = true if engine.transformed?(obj) # CR 701.27h
+      view["prepared"] = true if engine.prepared?(obj) # CR 723.3a
       if (attack = engine.attackers[obj.id])
         view["attacking"] = attack["target"]
       end

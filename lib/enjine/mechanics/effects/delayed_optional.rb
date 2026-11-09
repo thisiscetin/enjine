@@ -14,19 +14,21 @@ module Enjine
                   description: "Put each referenced card that is in exile or a graveyard onto the battlefield under its " \
                                "owner's control (`under: \"you\"`: under the controller's), tapped if `tapped: true`. " \
                                "A card that is no longer in the zone it was expected in, or isn't a permanent card, " \
-                               "stays where it is.",
-                  rules: %w[400.7 400.4a 110.2 111.8 603.7c 614.1c 122.6],
-                  params: { "to" => "selector (usually {\"result\": n})", "tapped" => "boolean",
+                               "stays where it is. `transformed: true`: it enters with its back face up; a card that " \
+                               "isn't double-faced, or whose back face isn't a permanent, stays where it is.",
+                  rules: %w[400.7 400.4a 110.2 111.8 603.7c 614.1c 122.6 712.11a 712.11b],
+                  params: { "to" => "selector (usually {\"result\": n})", "tapped" => "boolean", "transformed" => "boolean",
                             "under" => UNDER.join(" | "),
                             "counters" => "{counter name: n}: it enters with these counters (\"with a +1/+1 counter on it\")" },
                   example: { "return_to_battlefield" => { "to" => { "result" => 0 } } }
 
-        attr_reader :tapped, :under, :counters
+        attr_reader :tapped, :under, :counters, :transformed
 
-        def self.keys = %w[to tapped under counters if]
+        def self.keys = %w[to tapped under counters transformed if]
 
         def setup(params, errors, path)
           @tapped = Mechanics.fetch_param(params, :tapped) == true
+          @transformed = Mechanics.fetch_param(params, :transformed) == true
           @under = Mechanics.fetch_param(params, :under) || "owner"
           errors << "#{path}.under: must be one of #{UNDER.join(", ")}" unless UNDER.include?(@under)
           @counters = parse_counters(Mechanics.fetch_param(params, :counters) || {}, errors, "#{path}.counters")
@@ -46,7 +48,8 @@ module Enjine
 
         def to_s
           extra = counters.map { |kind, n| " with #{n} #{kind} counter(s)" }.join
-          "return to the battlefield#{" tapped" if tapped}#{" under your control" if under == "you"}#{extra} → #{to}"
+          status = "#{" tapped" if tapped}#{" transformed" if transformed}"
+          "return to the battlefield#{status}#{" under your control" if under == "you"}#{extra} → #{to}"
         end
 
         # CR 614.12a: each card's "as this enters" choice is made first (asked in turn), then they all
@@ -58,7 +61,8 @@ module Enjine
           entries = entries.select { engine.state.objects.key?(it[0]) }
           return :wait if engine.ask_entering_choices!(locals, entries) == :wait
 
-          enters = { "tapped" => tapped || nil, "counters" => counters.empty? ? nil : counters.dup }.compact
+          enters = { "tapped" => tapped || nil, "counters" => counters.empty? ? nil : counters.dup,
+                     "face" => transformed ? 1 : nil }.compact
           engine.enter_battlefield!(locals, entries.map { [*it, enters.empty? ? nil : enters] }, reason: "return")
           :done
         end
@@ -69,7 +73,7 @@ module Enjine
           refs(engine, ctx).select do |id|
             obj = engine.state.objects[id]
             obj && ZONES.include?(obj.zone) && !engine.token?(obj) &&
-              !(engine.chars(obj).types - %i[instant sorcery]).empty?
+              !(engine.chars(obj).types - %i[instant sorcery]).empty? && (!transformed || engine.can_enter_face?(obj, 1))
           end
         end
       end

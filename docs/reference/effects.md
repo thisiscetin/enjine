@@ -1228,6 +1228,24 @@ Rules: CR 702.11c, CR 115.4, CR 508.1c, CR 402.2, CR 514.1, CR 615.1, CR 615.1a,
 }
 ```
 
+## prepare
+
+Each referenced permanent (default: this one) becomes prepared, if it has a prepare spell and isn't prepared already: its controller creates a copy of the prepare spell in exile and may cast that copy while the permanent stays prepared. Casting it unprepares the permanent.
+
+Rules: CR 723.3a, CR 723.3c
+
+| Parameter | Description |
+| --- | --- |
+| `to` | selector (default "self") |
+
+```json
+{
+  "prepare": {
+    "to": "self"
+  }
+}
+```
+
 ## pump
 
 Each referenced creature gets +power/+toughness until end of turn (`duration: "until_your_next_turn"`: until its controller's next turn begins). The set of affected creatures is locked in when the effect starts.
@@ -1394,14 +1412,15 @@ Rules: CR 101.4, CR 400.7, CR 608.2c
 
 ## return_to_battlefield
 
-Put each referenced card that is in exile or a graveyard onto the battlefield under its owner's control (`under: "you"`: under the controller's), tapped if `tapped: true`. A card that is no longer in the zone it was expected in, or isn't a permanent card, stays where it is.
+Put each referenced card that is in exile or a graveyard onto the battlefield under its owner's control (`under: "you"`: under the controller's), tapped if `tapped: true`. A card that is no longer in the zone it was expected in, or isn't a permanent card, stays where it is. `transformed: true`: it enters with its back face up; a card that isn't double-faced, or whose back face isn't a permanent, stays where it is.
 
-Rules: CR 400.7, CR 400.4a, CR 110.2, CR 111.8, CR 603.7c, CR 614.1c, CR 122.6
+Rules: CR 400.7, CR 400.4a, CR 110.2, CR 111.8, CR 603.7c, CR 614.1c, CR 122.6, CR 712.11a, CR 712.11b
 
 | Parameter | Description |
 | --- | --- |
 | `to` | selector (usually {"result": n}) |
 | `tapped` | boolean |
+| `transformed` | boolean |
 | `under` | owner | you |
 | `counters` | {counter name: n}: it enters with these counters ("with a +1/+1 counter on it") |
 
@@ -1674,6 +1693,42 @@ Rules: CR 701.26a
     "to": {
       "target": 0
     }
+  }
+}
+```
+
+## transform
+
+Transform each referenced permanent (default: this one): turn it over so its other face is up. It stays the same object, and effects on it keep applying. Nothing happens to a permanent that isn't a double-faced card or token, or whose other face is an instant or sorcery. An ability of the permanent transforms it only if it hasn't transformed since the ability was put on the stack.
+
+Rules: CR 701.27a, CR 701.27c, CR 701.27d, CR 701.27e, CR 701.27g, CR 712.15
+
+| Parameter | Description |
+| --- | --- |
+| `to` | selector (default "self") |
+
+```json
+{
+  "transform": {
+    "to": "self"
+  }
+}
+```
+
+## unprepare
+
+Each referenced permanent (default: this one) loses the prepared designation; the copy of its prepare spell in exile ceases to exist.
+
+Rules: CR 723.3b, CR 723.3c
+
+| Parameter | Description |
+| --- | --- |
+| `to` | selector (default "self") |
+
+```json
+{
+  "unprepare": {
+    "to": "self"
   }
 }
 ```

@@ -12,6 +12,7 @@ module Enjine
 
     def initialize
       @definitions = {}
+      @faces = {} # a card's other faces, by face id ("alfa/1", see CardDefinition::Faces)
     end
 
     # Adds a definition (CardDefinition or data Hash). Raises CatalogConflict when a
@@ -22,6 +23,7 @@ module Enjine
       raise CatalogConflict, "two different definitions for #{defn.name.inspect} (#{defn.id})" if existing && existing != defn
 
       @definitions[defn.id] ||= defn
+      defn.other_faces.each { @faces[it.id] = it }
       defn.token_definitions.each { add(it) unless @definitions.key?(it.id) }
       defn
     end
@@ -34,11 +36,12 @@ module Enjine
     # Accepts an id ("lightning_bolt") or a display name ("Lightning Bolt"). Ids hit an exact
     # lookup; only names pay for slugging (Unicode normalization), so the engine's hot path stays cheap.
     def fetch(ref)
-      @definitions[ref] || @definitions.fetch(CardDefinition.slug(ref)) { raise KeyError, "unknown card #{ref.inspect}" }
+      @definitions[ref] || @faces[ref] ||
+        @definitions.fetch(CardDefinition.slug(ref)) { raise KeyError, "unknown card #{ref.inspect}" }
     end
 
-    def [](ref) = @definitions[ref] || @definitions[CardDefinition.slug(ref)]
-    def include?(ref) = @definitions.key?(ref) || @definitions.key?(CardDefinition.slug(ref))
+    def [](ref) = @definitions[ref] || @faces[ref] || @definitions[CardDefinition.slug(ref)]
+    def include?(ref) = @definitions.key?(ref) || @faces.key?(ref) || @definitions.key?(CardDefinition.slug(ref))
     def ids = @definitions.keys
     def size = @definitions.size
     def each(&) = @definitions.each_value(&)
@@ -46,6 +49,7 @@ module Enjine
 
     def freeze
       @definitions.freeze
+      @faces.freeze
       super
     end
   end

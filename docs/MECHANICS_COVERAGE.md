@@ -261,18 +261,18 @@ These rules cut across every mechanic. All numbers follow the 2026-11-06 text.
 | 709 | Split cards (fuse, aftermath); **709.5 split permanents with locked/unlocked halves (Rooms)** | M5 |
 | 710 | Flip cards | M5 |
 | 711 | Leveler cards (level up) | M5 |
-| 712 | Double-faced cards: transforming DFCs, modal DFCs; which face is up in each zone | M4 (transform/MDFC) |
+| 712 | Double-faced cards: transforming DFCs, modal DFCs; which face is up in each zone. Done (`layout`/`faces`, card-data-format 4.15). Not yet: day/night, cast transformed | M4 (transform/MDFC) |
 | 713 | Meld cards: melding a pair into one permanent; which half is which (moved out of 712) | M5 |
 | 714 | Substitute cards (checklist proxies for DFCs) | M5 |
 | 715 | Saga cards: lore counters, chapter triggers, sacrifice SBA | M4 |
-| 716 | Adventurer cards: cast as the Adventure, exile, cast the creature later | M4 |
+| 716 | Adventurer cards: cast as the Adventure, exile, cast the creature later. Done | M4 |
 | 717 | Class cards: level bars | M5 |
 | 718 | Attraction cards | OOS |
 | 719 | Prototype cards | M5 |
 | 720 | Case cards (solved) | M5 |
-| 721 | Omen cards: two-part frame; cast normally or as an Omen; an Omen spell is shuffled into the library on resolution (721.3d) | M5 |
+| 721 | Omen cards: two-part frame; cast normally or as an Omen; an Omen spell is shuffled into the library on resolution (721.3d). Done | M5 |
 | 722 | Station cards: station symbols `{N+}` grant abilities/P/T at a charge-counter threshold | M5 |
-| 723 | **Preparation cards** (new): inset "prepare spell"; prepared/unprepared designation; on becoming prepared, a copy is created in exile that may be cast (723.3a–c) | M5 |
+| 723 | **Preparation cards** (new): inset "prepare spell"; prepared/unprepared designation; on becoming prepared, a copy is created in exile that may be cast (723.3a–c). Done | M5 |
 | 724 | Controlling another player (Mindslaver) | M5 |
 | 725 | Ending turns and phases (Time Stop, Sundial) | M5 |
 | 726 | The monarch | M5 |
@@ -349,7 +349,7 @@ These rules cut across every mechanic. All numbers follow the 2026-11-06 text.
 | 701.24 | Shuffle | Randomize a library or face-down pile | M1 |
 | 701.25 | Surveil | Look at the top N; any number to the graveyard, the rest on top | M2 ★ |
 | 701.26 | Tap and Untap | Turn sideways or upright | M1 |
-| 701.27 | Transform | Turn a DFC permanent to its other face | M4 ★ |
+| 701.27 | Transform | Turn a DFC permanent to its other face. Done | M4 ★ |
 | 701.28 | Convert | Transform-equivalent wording for some DFCs (Transformers) | M5 |
 | 701.29 | Fateseal | Scry an opponent's library | M5 |
 | 701.30 | Clash | Reveal the top card, may bottom it, compare mana values | M5 |

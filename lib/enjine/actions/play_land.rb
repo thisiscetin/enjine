@@ -11,25 +11,27 @@ module Enjine
     class PlayLand
       def self.doc
         '`{type: "play_land", object: id}` — special action: your main phase, empty stack, one land per turn ' \
-          "plus additional land plays (CR 305.1, 305.2). With `via`: a land from another zone that an effect lets you play."
+          "plus additional land plays (CR 305.1, 305.2). With `via`: a land from another zone that an effect lets you play. " \
+          "With `face: 1`: a modal double-faced card played with its land back face up (CR 712.9)."
       end
 
       def self.options(engine, index)
         return [] unless engine.sorcery_timing?(index) && engine.land_play_available?(index)
 
-        engine.player(index).hand.filter_map do |id|
-          { type: "play_land", object: id } if engine.chars(id).land?
+        engine.player(index).hand.flat_map do |id|
+          (engine.chars(id).land? ? [{ type: "play_land", object: id }] : []) + engine.face_land_options(id)
         end + engine.permission_land_options(index)
       end
 
       def self.perform(engine, index, option)
         engine.use_play_method!(engine.play_method(index, option[:object], option[:via])) if option[:via]
         engine.player(index).lands_played += 1
-        if engine.entering_choice(engine.candidate_object(index, option[:object]))
+        face = option[:face] && { "face" => option[:face] } # CR 712.9
+        if !face && engine.entering_choice(engine.candidate_object(index, option[:object]))
           engine.state.frames << { "type" => "play_land", "object" => option[:object], "player" => index }
           return engine.ask!(nil)
         end
-        engine.put_played_land!(index, option[:object])
+        engine.put_played_land!(index, option[:object], enters: face)
         engine.action_taken!(index) # CR 117.3c: the player receives priority again
       end
 

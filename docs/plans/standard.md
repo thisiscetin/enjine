@@ -92,8 +92,8 @@ derived from card text is stored here.
 | Mechanic | CR | ~Cards | Sets |
 | --- | --- | ---: | ---: |
 | Vehicles / crew | 702.122, 301.7 | 67 | 9 |
-| Preparation cards / prepared | 723 | 62 | 2 |
-| Double-faced cards (transform / modal DFC) | 712, 701.27 | 53 | 5 |
+| Preparation cards / prepared — supported (card-data-format 4.15) | 723 | 62 | 2 |
+| Double-faced cards (transform / modal DFC) — supported (card-data-format 4.15) | 712, 701.27 | 53 | 5 |
 | Flashback | 702.34 | 42 | 7 |
 | Mana spent to cast a spell (converge, "if N or more mana was spent") | 601.2h, 207.2c | 42 | 6 |
 | Turn-history conditions (you attacked, a permanent left the battlefield, cards drawn / sacrificed / exiled this turn) | 508.1, 400.7 | 42 | 7 |
@@ -122,7 +122,7 @@ derived from card text is stored here.
 | Missing mechanic | CR | ~Cards | Example |
 | --- | --- | ---: | --- |
 | Empower Jace (planeswalker token) | 701.71 | 35 | Academic Ascent |
-| Preparation cards / prepared | 723 | 24 | Bloodline Recollector|
+| Preparation cards / prepared — supported (card-data-format 4.15) | 723 | 24 | Bloodline Recollector|
 | Prowess | 702.108 | 9 | Cryotheory Adept |
 | More trigger events (discard, cycle, sacrifice, scry/surveil, put into exile or a graveyard from anywhere, becomes untapped) | 603.2 | 6 | Denzilore Fatehold |
 | Noncombat damage trigger condition | 120.2b, 603.2 | 6 | Command the Stage |
@@ -156,7 +156,7 @@ derived from card text is stored here.
 
 | Missing mechanic | CR | ~Cards | Example |
 | --- | --- | ---: | --- |
-| Adventurer cards | 716 | 17 | An Unexpected Party|
+| Adventurer cards — supported (card-data-format 4.15) | 716 | 17 | An Unexpected Party|
 | Amass (Army token) | 701.47 | 14 | Along the Crooked Way |
 | Recruit | 701.70 | 10 | Bard's Company |
 | Storied (enduring story designation) | 702.195 | 9 | Balin, Loremaster |
@@ -194,7 +194,7 @@ derived from card text is stored here.
 | Teamwork | 702.194 | 12 | Atlantis Attacks |
 | Connive | 701.50 | 11 | A.I.M. Scientists |
 | Cast trigger filtered on the spell's targets | 603.2, 115.1 | 6 | Colleen Wing, Street Samurai |
-| Double-faced cards (transform / modal DFC) | 712, 701.27 | 6 | Bruce Banner|
+| Double-faced cards (transform / modal DFC) — supported (card-data-format 4.15) | 712, 701.27 | 6 | Bruce Banner|
 | Prowess | 702.108 | 5 | Agent of Atlas |
 | Ability removal (loses all abilities) | 613.1f | 3 | Frozen in Ice |
 | Filters on keyword abilities ("creature with flying") | 702.1, 115.1 | 3 | Iron Man Armor |
@@ -229,7 +229,7 @@ derived from card text is stored here.
 
 | Missing mechanic | CR | ~Cards | Example |
 | --- | --- | ---: | --- |
-| Preparation cards / prepared | 723 | 38 | Abigale, Poet Laureate|
+| Preparation cards / prepared — supported (card-data-format 4.15) | 723 | 38 | Abigale, Poet Laureate|
 | Mana spent to cast a spell (converge, "if N or more mana was spent") | 601.2h, 207.2c | 22 | Aberrant Manawurm |
 | Cast trigger filtered on the spell's targets | 603.2, 115.1 | 12 | Conciliator's Duelist |
 | Flashback | 702.34 | 9 | Antiquities on the Loose |
@@ -289,7 +289,7 @@ derived from card text is stored here.
 | Kindred card type | 308 | 13 | Ashling's Command |
 | Behold | 701.4 | 12 | Celestial Reunion |
 | Colors among permanents (amount) | 105.2, 202.2 | 12 | Aurora Awakener |
-| Double-faced cards (transform / modal DFC) | 712, 701.27 | 7 | Ashling, Rekindled|
+| Double-faced cards (transform / modal DFC) — supported (card-data-format 4.15) | 712, 701.27 | 7 | Ashling, Rekindled|
 | Evoke | 702.74 | 5 | Catharsis |
 | Mana spent to cast a spell (converge, "if N or more mana was spent") | 601.2h, 207.2c | 5 | Catharsis |
 | Trigger: leaves the battlefield | 603.6c, 603.10a | 5 | Champion of the Clachan |
@@ -322,7 +322,7 @@ derived from card text is stored here.
 | Waterbend | 701.67 | 24 | Aang's Iceberg |
 | Firebending | 702.189 | 21 | Avatar Aang|
 | Airbend | 701.65 | 10 | Aang, Swift Savior|
-| Double-faced cards (transform / modal DFC) | 712, 701.27 | 8 | Aang, at the Crossroads|
+| Double-faced cards (transform / modal DFC) — supported (card-data-format 4.15) | 712, 701.27 | 8 | Aang, at the Crossroads|
 | Exhaust (activate only once) | 702.177 | 8 | Bitter Work |
 | Prowess | 702.108 | 7 | Firebending Student |
 | More trigger events (discard, cycle, sacrifice, scry/surveil, put into exile or a graveyard from anywhere, becomes untapped) | 603.2 | 6 | Pirate Peddlers |
@@ -355,7 +355,7 @@ derived from card text is stored here.
 | Web-slinging | 702.188 | 9 | Arachne, Psionic Weaver |
 | Connive | 701.50 | 7 | Doc Ock's Henchmen |
 | Trigger: leaves the battlefield | 603.6c, 603.10a | 7 | City Pigeon |
-| Double-faced cards (transform / modal DFC) | 712, 701.27 | 5 | Eddie Brock|
+| Double-faced cards (transform / modal DFC) — supported (card-data-format 4.15) | 712, 701.27 | 5 | Eddie Brock|
 | Spells cast from anywhere other than hand (trigger / cost filter) | 601.2, 603.2 | 3 | Shadow of the Goblin |
 | Vehicles / crew | 702.122, 301.7 | 3 | Passenger Ferry |
 | Ability removal (loses all abilities) | 613.1f | 2 | Lizard, Connors's Curse |
@@ -415,13 +415,13 @@ derived from card text is stored here.
 
 | Missing mechanic | CR | ~Cards | Example |
 | --- | --- | ---: | --- |
-| Double-faced cards (transform / modal DFC) | 712, 701.27 | 27 | Balamb Garden, SeeD Academy|
+| Double-faced cards (transform / modal DFC) — supported (card-data-format 4.15) | 712, 701.27 | 27 | Balamb Garden, SeeD Academy|
 | Job select | 702.182 | 16 | Astrologian's Planisphere |
 | Flashback | 702.34 | 14 | Auron's Inspiration |
 | Mana spent to cast a spell (converge, "if N or more mana was spent") | 601.2h, 207.2c | 9 | Blazing Bomb |
 | Vehicles / crew | 702.122, 301.7 | 9 | Adventurer's Airship |
 | Tiered | 702.183 | 6 | Fire Magic |
-| Adventurer cards | 716 | 5 | Ishgard, the Holy See|
+| Adventurer cards — supported (card-data-format 4.15) | 716 | 5 | Ishgard, the Holy See|
 | Damage modification / redirection replacement | 614.1a, 616 | 4 | Ancient Adamantoise |
 | Additional combat / ending the turn | 500.8, 725 | 3 | Balthier and Fran |
 | Blocking rules (block additional creatures, must be blocked, lure) | 509.1a, 509.1c | 3 | Magitek Scythe |
@@ -449,7 +449,7 @@ derived from card text is stored here.
 
 | Missing mechanic | CR | ~Cards | Example |
 | --- | --- | ---: | --- |
-| Omen cards | 721 | 13 | Bloomvine Regent|
+| Omen cards — supported (card-data-format 4.15) | 721 | 13 | Bloomvine Regent|
 | Mobilize | 702.181 | 12 | Avenger of the Fallen |
 | Endure | 701.63 | 10 | Anafenza, Unyielding Lineage |
 | Harmonize | 702.180 | 10 | Channeled Dragonfire |

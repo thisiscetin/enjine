@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require_relative "card_faces"
+
 module Enjine
   # Immutable, validated blueprint of a card, built from a data block.
   #
@@ -11,13 +13,16 @@ module Enjine
   class CardDefinition
     KEYS = %w[name mana_cost colors types supertypes subtypes keywords power toughness loyalty abilities rules_text deck_limit].freeze
     SUBTYPE_FORMAT = /\A[a-z][a-z0-9_]*\z/
+    include Faces
 
     attr_reader :id, :name, :mana_cost, :types, :supertypes, :subtypes, :keywords, :power, :toughness, :loyalty,
                 :abilities, :rules_text, :type_modules, :source, :colors, :power_amount, :toughness_amount
 
     # Canonical id derived from a card name: "Jace, the Mind Sculptor" -> "jace_the_mind_sculptor".
+    # A multi-face card is named by its front face: "Alfa // Bravo" -> "alfa" (see CardDefinition::Faces).
     def self.slug(name)
-      name.to_s.unicode_normalize(:nfkd).gsub(/\p{Mn}/, "").downcase.delete("'’").gsub(/[^a-z0-9]+/, "_").gsub(/\A_+|_+\z/, "")
+      name.to_s.split(" // ").first.to_s.unicode_normalize(:nfkd).gsub(/\p{Mn}/, "").downcase.delete("'’")
+          .gsub(/[^a-z0-9]+/, "_").gsub(/\A_+|_+\z/, "")
     end
 
     # A token definition (CR 111.1). Its id is derived from its data so two different tokens
@@ -43,10 +48,23 @@ module Enjine
       end
     end
 
-    def initialize(card, errors, token_id: nil)
+    # `face`: [front definition, index] when building a face other than the front (CardDefinition::Faces).
+    def initialize(card, errors, token_id: nil, face: nil)
+      if face.nil? && card.key?("faces")
+        read_faces(card, errors, token_id)
+      else
+        read_card(card, errors, token_id, face)
+        @source = normalize(card)
+      end
+      @printed_characteristics = Characteristics.printed(self) if errors.empty?
+      freeze
+    end
+
+    def read_card(card, errors, token_id, face = nil)
       (card.keys - KEYS).each { |k| errors << "#{k}: unknown field (allowed: #{KEYS.join(", ")})" }
       @name = read_name(card, errors)
-      @id = token_id || self.class.slug(@name)
+      @id = face ? "#{face[0].id}#{FACE_SEPARATOR}#{face[1]}" : token_id || self.class.slug(@name)
+      @front, @face_index = face
       @token = !token_id.nil?
       @types, @type_modules = read_names(card, "types", :type, errors, required: true)
       @supertypes, = read_names(card, "supertypes", :supertype, errors)
@@ -65,10 +83,8 @@ module Enjine
       keyword_modules.each { |mod| mod.validate(card, errors) if mod.respond_to?(:validate) }
       precompute_predicates
       validate_type_specific(errors)
-      @source = normalize(card)
-      @printed_characteristics = Characteristics.printed(self) if errors.empty?
-      freeze
     end
+    private :read_card
 
     def type?(type) = @types.include?(type.to_sym)
     def supertype?(type) = @supertypes.include?(type.to_sym)
@@ -104,7 +120,8 @@ module Enjine
     # Token definitions this card's effects can create; catalogs register them with the card.
     def token_definitions
       (@all_effects.filter_map { it.definition if it.is_a?(Mechanics::Effects::CreateToken) } +
-        @abilities.filter_map { it.token_definition if it.respond_to?(:token_definition) }).compact.uniq(&:id)
+        @abilities.filter_map { it.token_definition if it.respond_to?(:token_definition) } +
+        other_faces.flat_map(&:token_definitions)).compact.uniq(&:id)
     end
 
     # Every effect of every ability, including effects nested in other effects ("may", delayed triggers).

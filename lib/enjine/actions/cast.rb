@@ -9,16 +9,19 @@ module Enjine
         '`{type: "cast", object: id}` — start casting a card from your hand (CR 601.2). ' \
           '`{type: "cast", object: id, via: method}` casts a card from another zone (graveyard, exile, the top ' \
           "of your library) by the permission or alternative cost `via` names, e.g. beam me up (CR 601.3, " \
-          "702.196). A card outside the game is named `\"outside:<card id>\"` (CR 400.11b). Offered only when timing " \
+          "702.196). A card outside the game is named `\"outside:<card id>\"` (CR 400.11b). " \
+          '`{type: "cast", object: id, face: 1}` casts another face of a card in your hand: a modal double-faced ' \
+          "card's back face, an Adventure or an Omen (CR 712.8b, 716.3, 721.3). Offered only when timing " \
           "allows, targets exist and enough mana is available."
       end
 
       def self.options(engine, index)
-        engine.player(index).hand.filter_map { |id| { type: "cast", object: id } if engine.castable?(index, id) } +
-          engine.permission_cast_options(index)
+        engine.player(index).hand.flat_map do |id|
+          (engine.castable?(index, id) ? [{ type: "cast", object: id }] : []) + engine.face_cast_options(index, id)
+        end + engine.permission_cast_options(index)
       end
 
-      def self.perform(engine, index, option) = engine.begin_cast!(index, option[:object], via: option[:via])
+      def self.perform(engine, index, option) = engine.begin_cast!(index, option[:object], via: option[:via], face: option[:face])
     end
     register("cast", Cast)
 

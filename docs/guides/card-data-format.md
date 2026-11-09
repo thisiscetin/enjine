@@ -50,7 +50,7 @@ Tips:
 
 | Field | Required | Type | Notes |
 | --- | --- | --- | --- |
-| `name` | yes | string | Unique. Its slug becomes the card id: `"Jace, the Mind Sculptor"` → `jace_the_mind_sculptor`. Two different definitions with the same name in one game raise `CatalogConflict`. |
+| `name` | yes | string | Unique (a card with faces: see 4.17). Its slug becomes the card id: `"Jace, the Mind Sculptor"` → `jace_the_mind_sculptor`. Two different definitions with the same name in one game raise `CatalogConflict`. |
 | `types` | yes | list | Card types, lowercase: `land`, `creature`, `artifact`, `enchantment`, `planeswalker`, `instant`, `sorcery`. A card can have several (`["artifact", "creature"]`). |
 | `mana_cost` | castable cards | string | `"{2}{W}{W}"`. Symbols: `{N}` generic, `{W}{U}{B}{R}{G}`, `{C}`, `{X}` (announced while casting; use the amount `"x"` in effects, see 4.7). Lands must **not** have one. A card without one can't be cast. Two-color hybrid `{R/G}` is supported (paid with either color, CR 107.4e); monocolored hybrid `{2/B}`, Phyrexian and `{S}` are not yet. |
 | `supertypes` | no | list | `basic` (exempt from the 4-copy rule). `legendary` and `snow`: not yet. |
@@ -701,6 +701,76 @@ the object has only while its controller's speed is 4 (a card in the graveyard: 
                   { "activated": { "cost": [{ "mana": "{2}" }, "exile_self_from_graveyard"],
                                    "effects": [{ "draw": { "amount": 1 } }] } }] } }] }
 ```
+
+### 4.17 Cards with faces: double-faced, Adventure, Omen and prepare cards
+
+A card with more than one set of characteristics has `layout` and `faces` instead of the
+top-level fields of section 2. Each face is a complete card block (its own `name`,
+`mana_cost`, `types`, `abilities`, …), front face first. A top-level `name` is optional;
+if given, it must be the faces' names joined by `" // "`. The card id comes from the front
+face's name (`"Alfa // Bravo"` → `alfa`), so decks may name it either way.
+
+| `layout` | Cards | Rules |
+| --- | --- | --- |
+| `transform` | nonmodal double-faced cards: cast and played front face up; they transform or enter transformed | CR 712.2, 701.27 |
+| `modal` | modal double-faced cards: choose the face to cast or play (a modal card can also transform) | CR 712.3, 712.8b, 712.9 |
+| `adventure` | adventurer cards: `faces[1]` is the Adventure (instant or sorcery with the subtype `adventure`) | CR 716 |
+| `omen` | omen cards: `faces[1]` is the Omen (instant or sorcery with the subtype `omen`) | CR 721 |
+| `prepare` | preparation cards: `faces[1]` is the prepare spell (an instant or sorcery) | CR 723 |
+
+Outside the battlefield and stack a card has only its front face's characteristics
+(CR 712.6a, 716.4, 721.4); a game object shows the face that's up by its `card`: the card
+id for the front face, `"<card id>/1"` while the back face (or the Adventure or Omen on
+the stack) is up. A copy of a permanent copies the face that's up (CR 707.8).
+
+| Oracle words | Data |
+| --- | --- |
+| "Transform this creature." | `{ "transform": {} }` (`to`: any selector; default `"self"`) |
+| "Whenever this creature transforms into [this face]" | `{ "triggered": { "when": { "transforms": {} }, … } }` on that face |
+| "When this creature enters or transforms into [this face]" | `"when": { "any_of": [{ "enters": {} }, { "transforms": {} }] }` |
+| "exile it, then return it to the battlefield transformed" | `exile`, then `{ "return_to_battlefield": { "to": { "result": 0 }, "transformed": true } }` |
+| "if this creature is transformed" / "transformed permanents you control" | filter `{ "creature": { "transformed": true } }` |
+| "This creature enters prepared." | the ability `"enters_prepared"` |
+| "… this creature becomes prepared." / "becomes unprepared" | `{ "prepare": {} }` / `{ "unprepare": {} }` |
+| "if this creature isn't prepared" | `"if": { "source": { "creature": { "prepared": false } } }` |
+
+Casting another face is a priority option with `face`: `{type: "cast", object: id,
+face: 1}` casts a modal card's back face, an Adventure or an Omen from the hand, and
+`{type: "play_land", object: id, face: 1}` plays a modal card's land face. An Adventure
+that resolves is exiled, and its owner may play the card from exile (not as an Adventure);
+an Omen that resolves is shuffled into its owner's library. A permanent that becomes
+prepared gives its controller a copy of its prepare spell in exile, which they may cast
+until the permanent stops being prepared; casting it unprepares the permanent.
+
+```json
+{ "name": "Example Squire // Example Reaver", "layout": "transform", "faces": [
+  { "name": "Example Squire", "mana_cost": "{1}{W}", "types": ["creature"], "power": 2, "toughness": 2,
+    "abilities": [{ "activated": { "cost": [{ "mana": "{3}" }], "timing": "sorcery", "effects": [{ "transform": {} }] } }] },
+  { "name": "Example Reaver", "colors": ["W"], "types": ["creature"], "keywords": ["lifelink"], "power": 3, "toughness": 3,
+    "abilities": [{ "triggered": { "when": { "transforms": {} }, "effects": [{ "draw": { "amount": 1 } }] } }] }
+] }
+```
+
+```json
+{ "name": "Example Knight // Example Errand", "layout": "adventure", "faces": [
+  { "name": "Example Knight", "mana_cost": "{2}{G}", "types": ["creature"], "power": 3, "toughness": 2 },
+  { "name": "Example Errand", "mana_cost": "{1}{G}", "types": ["sorcery"], "subtypes": ["adventure"],
+    "abilities": [{ "spell": { "effects": [{ "gain_life": { "amount": 3 } }] } }] }
+] }
+```
+
+```json
+{ "name": "Example Scholar // Example Notes", "layout": "prepare", "faces": [
+  { "name": "Example Scholar", "mana_cost": "{1}{U}", "types": ["creature"], "power": 1, "toughness": 3,
+    "abilities": ["enters_prepared"] },
+  { "name": "Example Notes", "mana_cost": "{U}", "types": ["sorcery"],
+    "abilities": [{ "spell": { "effects": [{ "draw": { "amount": 1 } }] } }] }
+] }
+```
+
+Not yet: casting another face from outside the hand, casting a card transformed, the mana
+value of a back face (CR 202.3b), day/night (CR 702.145), meld (CR 713), convert
+(CR 701.28) and an "as this enters" choice on a modal card's land face.
 
 ---
 
