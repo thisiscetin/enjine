@@ -10,6 +10,7 @@ module Enjine
       # (CR 702.171c).
       class Saddle < Crew
         def choose!(engine, option) = super.merge("saddles" => true)
+        def action = :saddle
 
         def pay_chosen!(engine, object, entries)
           entries.each { engine.emit Events::SaddledMount.new(object: it["object"], mount: object.id) }

@@ -1293,6 +1293,30 @@ Rules: CR 722.2a, CR 722.2b, CR 722.2c, CR 613.1d, CR 613.4b
 }
 ```
 
+## tapping_power
+
+When this creature is tapped to pay the cost of the abilities in `for` (crew, saddle, station), it counts its `use` (power, default; toughness; toughness_if_greater: its toughness when that's greater than its power) plus `plus`. Several of them add up their `plus`. A `static` can grant it.
+
+Rules: CR 702.122a, CR 702.171a, CR 702.184a, CR 702.184c
+
+| Parameter | Description |
+| --- | --- |
+| `for` | list of crew, saddle, station |
+| `use` | power | toughness | toughness_if_greater |
+| `plus` | integer (default 0) |
+
+```json
+{
+  "tapping_power": {
+    "for": [
+      "crew",
+      "saddle"
+    ],
+    "plus": 2
+  }
+}
+```
+
 ## teamwork
 
 Teamwork N: as you cast this spell you may also tap any number of untapped creatures you control with total power N or more (the `choose_kicker` decision, then one `choose_cost` per creature). `{"cast_with": "teamwork"}` holds if you did; `kicked_targets` are its targets then.

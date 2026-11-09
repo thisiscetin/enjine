@@ -534,5 +534,268 @@
       "set": "ecl",
       "number": "245"
     }
+  },
+  {
+    "name": "Dynamite Diver",
+    "mana_cost": "{R}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "goblin",
+      "pilot"
+    ],
+    "power": 1,
+    "toughness": 1,
+    "abilities": [
+      {
+        "tapping_power": {
+          "for": [
+            "crew",
+            "saddle"
+          ],
+          "plus": 2
+        }
+      },
+      {
+        "triggered": {
+          "when": {
+            "dies": {}
+          },
+          "targets": [
+            "any_target"
+          ],
+          "effects": [
+            {
+              "deal_damage": {
+                "amount": 1,
+                "to": {
+                  "target": 0
+                }
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "common",
+    "printing": {
+      "set": "dft",
+      "number": "123"
+    }
+  },
+  {
+    "name": "Cloudspire Captain",
+    "mana_cost": "{2}{W}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "human",
+      "pilot"
+    ],
+    "power": 2,
+    "toughness": 3,
+    "abilities": [
+      {
+        "static": {
+          "affects": {
+            "each": {
+              "permanent": {
+                "subtypes": [
+                  "mount",
+                  "vehicle"
+                ]
+              }
+            },
+            "controller": "you"
+          },
+          "pump": {
+            "power": 1,
+            "toughness": 1
+          }
+        }
+      },
+      {
+        "tapping_power": {
+          "for": [
+            "crew",
+            "saddle"
+          ],
+          "plus": 2
+        }
+      }
+    ],
+    "rarity": "uncommon",
+    "printing": {
+      "set": "dft",
+      "number": "9"
+    }
+  },
+  {
+    "name": "Tapestry Warden",
+    "mana_cost": "{3}{G}",
+    "types": [
+      "artifact",
+      "creature"
+    ],
+    "subtypes": [
+      "robot",
+      "soldier"
+    ],
+    "power": 3,
+    "toughness": 4,
+    "keywords": [
+      "vigilance"
+    ],
+    "abilities": [
+      {
+        "static": {
+          "affects": {
+            "each": "creature",
+            "controller": "you"
+          },
+          "keywords": [
+            "assigns_damage_by_toughness"
+          ],
+          "abilities": [
+            {
+              "tapping_power": {
+                "for": [
+                  "station"
+                ],
+                "use": "toughness_if_greater"
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "uncommon",
+    "printing": {
+      "set": "eoe",
+      "number": "209"
+    }
+  },
+  {
+    "name": "Possession Engine",
+    "mana_cost": "{3}{U}{U}",
+    "types": [
+      "artifact"
+    ],
+    "subtypes": [
+      "vehicle"
+    ],
+    "power": 5,
+    "toughness": 5,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "enters": {}
+          },
+          "targets": [
+            {
+              "creature": {
+                "controller": "opponent"
+              }
+            }
+          ],
+          "effects": [
+            {
+              "gain_control": {
+                "to": {
+                  "target": 0
+                },
+                "duration": "while_you_control_source"
+              }
+            },
+            {
+              "become": {
+                "keywords": [
+                  "cant_attack",
+                  "cant_block"
+                ],
+                "duration": "while_you_control_source",
+                "to": {
+                  "target": 0
+                }
+              }
+            }
+          ]
+        }
+      },
+      {
+        "crew": {
+          "power": 3
+        }
+      }
+    ],
+    "rarity": "rare",
+    "printing": {
+      "set": "dft",
+      "number": "54"
+    }
+  },
+  {
+    "name": "Ty Lee, Chi Blocker",
+    "mana_cost": "{2}{U}",
+    "types": [
+      "creature"
+    ],
+    "supertypes": [
+      "legendary"
+    ],
+    "subtypes": [
+      "human",
+      "performer",
+      "ally"
+    ],
+    "power": 2,
+    "toughness": 1,
+    "keywords": [
+      "flash",
+      "prowess"
+    ],
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "enters": {}
+          },
+          "targets": [
+            {
+              "filter": "creature",
+              "optional": true
+            }
+          ],
+          "effects": [
+            {
+              "tap": {
+                "to": {
+                  "target": 0
+                }
+              }
+            },
+            {
+              "become": {
+                "keywords": [
+                  "doesnt_untap"
+                ],
+                "duration": "while_you_control_source",
+                "to": {
+                  "target": 0
+                }
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "rare",
+    "printing": {
+      "set": "tla",
+      "number": "76"
+    }
   }
 ]

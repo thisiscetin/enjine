@@ -41,7 +41,7 @@ module Enjine
                   example: { "static" => { "affects" => { "each" => "creature", "controller" => "you" },
                                            "pump" => { "power" => 1, "toughness" => 1 } } }
 
-        GRANTABLE = %i[triggered mana activated hexproof_from protection_from].freeze
+        GRANTABLE = %i[triggered mana activated hexproof_from protection_from tapping_power].freeze
         # Data that would make the layer pass depend on its own result (CR 613.8).
         LIVE = %w[power toughness greatest_power attacking blocking tapped].freeze
         KEYS = %w[affects if pump keywords creature_types abilities types subtypes loses_abilities colors

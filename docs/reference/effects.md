@@ -223,7 +223,7 @@ Rules: CR 701.3a, CR 701.3b, CR 701.3c, CR 301.5c
 
 ## become
 
-Each referenced permanent becomes what the parameters say, for `duration` (end_of_turn, default; indefinite: as long as it stays on the battlefield; while_source_on_battlefield: for as long as this effect's source remains on the battlefield): it has the card `types`, `supertypes` and `subtypes` in addition to its other types (layer 4, "becomes an artifact creature"), its creature types are exactly `creature_types` (layer 4), its colors are `colors` (layer 5), with `loses_abilities: true` it loses all the abilities it had (layer 6; abilities granted later, keyword counters put on it later and this effect's own `keywords` and `abilities` stay, CR 613.7), it has the `keywords` and `abilities` (layer 6: triggered, activated, mana, play_from or additional_land_plays abilities) and its base power and toughness are `base_power_toughness` (layer 7b). A permanent that becomes a creature has its printed power and toughness (a Vehicle's), or 0/0.
+Each referenced permanent becomes what the parameters say, for `duration` (end_of_turn, default; indefinite: as long as it stays on the battlefield; while_source_on_battlefield: for as long as this effect's source remains on the battlefield; while_you_control_source: for as long as you control it): it has the card `types`, `supertypes` and `subtypes` in addition to its other types (layer 4, "becomes an artifact creature"), its creature types are exactly `creature_types` (layer 4), its colors are `colors` (layer 5), with `loses_abilities: true` it loses all the abilities it had (layer 6; abilities granted later, keyword counters put on it later and this effect's own `keywords` and `abilities` stay, CR 613.7), it has the `keywords` and `abilities` (layer 6: triggered, activated, mana, play_from or additional_land_plays abilities) and its base power and toughness are `base_power_toughness` (layer 7b). A permanent that becomes a creature has its printed power and toughness (a Vehicle's), or 0/0.
 
 Rules: CR 611.2a, CR 611.2b, CR 611.2c, CR 613.1d, CR 613.1e, CR 613.1f, CR 613.4b, CR 613.7b, CR 205.1a, CR 205.1b, CR 301.7b, CR 514.2
 
@@ -238,7 +238,7 @@ Rules: CR 611.2a, CR 611.2b, CR 611.2c, CR 613.1d, CR 613.1e, CR 613.1f, CR 613.
 | `keywords` | list of keywords it gains |
 | `base_power_toughness` | {"power": n, "toughness": n} |
 | `abilities` | list of abilities it gains |
-| `duration` | end_of_turn | indefinite | while_source_on_battlefield |
+| `duration` | end_of_turn | indefinite | while_source_on_battlefield | while_you_control_source |
 | `to` | selector |
 
 ```json
@@ -1238,7 +1238,7 @@ Rules: CR 705.1, CR 705.2, CR 608.2c
 
 ## gain_control
 
-The player referenced by `gains` (default you) gains control of each referenced permanent: indefinitely (`duration: "permanent"`, default), until end of turn, or for as long as this effect's source remains on the battlefield / tapped (it does nothing if that is already over). A permanent that changes control leaves combat and is newly under its controller's control (it can't attack or {T} without haste).
+The player referenced by `gains` (default you) gains control of each referenced permanent: indefinitely (`duration: "permanent"`, default), until end of turn, or for as long as this effect's source remains on the battlefield / tapped / under your control (it does nothing if that is already over). A permanent that changes control leaves combat and is newly under its controller's control (it can't attack or {T} without haste).
 
 Rules: CR 613.1b, CR 108.4, CR 506.4, CR 302.6, CR 514.2, CR 611.2b
 
@@ -1246,7 +1246,7 @@ Rules: CR 613.1b, CR 108.4, CR 506.4, CR 302.6, CR 514.2, CR 611.2b
 | --- | --- |
 | `to` | selector (permanents) |
 | `gains` | selector (a player; default "you") |
-| `duration` | permanent | end_of_turn | while_source_on_battlefield | while_source_tapped |
+| `duration` | permanent | end_of_turn | while_source_on_battlefield | while_source_tapped | while_you_control_source |
 
 ```json
 {

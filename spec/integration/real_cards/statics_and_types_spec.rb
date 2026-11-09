@@ -5,7 +5,7 @@
 # Creatures and Vehicles from creatures_combat_keywords.json and bending_and_mounts.json stand in as targets.
 RSpec.describe "Real cards: statics, types and restrictions" do
   let(:cards) do
-    %w[statics_and_types creatures_combat_keywords bending_and_mounts].flat_map { CardFixtures.real(it) }.uniq { it["name"] }
+    %w[statics_and_types creatures_combat_keywords bending_and_mounts newest_sets].flat_map { CardFixtures.real(it) }.uniq { it["name"] }
   end
   let(:catalog) { Enjine::Catalog.from_definitions(cards) }
 
@@ -45,6 +45,15 @@ RSpec.describe "Real cards: statics, types and restrictions" do
   def engine(game) = game.instance_variable_get(:@engine)
   def chars(game, id) = engine(game).chars(id)
   def player_ref(game, name) = Enjine::Mechanics::Filters.player_ref(engine(game), game.names.index(name))
+
+  # Activates the crew, saddle or station ability of alice's `card`, tapping `creatures` for its cost.
+  def tap_for(game, card, *creatures)
+    source = obj_id(game, card)
+    game.submit(game.legal_options.find { it[:type] == "activate" && it[:object] == source })
+    creatures.each { game.submit(type: "cost", object: obj_id(game, it)) }
+    expect(game.pending_decision.kind).not_to eq("choose_cost") # the cost is paid in full
+    play(game, { type: "pass" })
+  end
 
   # The targets bob is offered for a card in his hand.
   def bob_targets(game, card)
@@ -143,5 +152,52 @@ RSpec.describe "Real cards: statics, types and restrictions" do
     play(game, { type: "activate", object: obj_id(game, "Tam, Mindful First-Year"), ability: "printed:1" },
          target(game, "Vampire Nighthawk"))
     expect(bob_targets(game, "Burst Lightning")).not_to include(obj_id(game, "Vampire Nighthawk")) # now all colors
+  end
+
+  it "Dynamite Diver: crews Vehicles as though its power were 2 greater (CR 702.122a)" do
+    game = board(mine: ["Hulldrifter", "Dynamite Diver"])
+    tap_for(game, "Hulldrifter", "Dynamite Diver") # crew 3 with a 1/1
+    expect(chars(game, obj_id(game, "Hulldrifter")).creature?).to be(true)
+  end
+
+  it "Cloudspire Captain: saddles Mounts as though its power were 2 greater and pumps Mounts (CR 702.171a)" do
+    game = board(mine: ["Gilded Ghoda", "Cloudspire Captain"])
+    expect(chars(game, obj_id(game, "Gilded Ghoda")).power).to eq(3)
+    tap_for(game, "Gilded Ghoda", "Cloudspire Captain")
+    expect(engine(game).saddled?(game.state.object(obj_id(game, "Gilded Ghoda")))).to be(true)
+    expect(Enjine::Mechanics::Abilities::TappingPower.of(engine(game), game.state.object(obj_id(game, "Cloudspire Captain")), :station))
+      .to eq(2) # only for crew and saddle
+  end
+
+  it "Tapestry Warden: a creature with toughness greater than its power stations using its toughness (CR 702.184c)" do
+    game = board(mine: ["Tapestry Warden", "Oberth-Class Starship", "Gleaming Barrier", "Juggernaut"])
+    tap_for(game, "Oberth-Class Starship", "Gleaming Barrier") # 0/4
+    expect(game.state.object(obj_id(game, "Oberth-Class Starship")).counters["charge"]).to eq(4)
+    game = board(mine: ["Tapestry Warden", "Oberth-Class Starship", "Juggernaut"])
+    tap_for(game, "Oberth-Class Starship", "Juggernaut") # 5/3: its power
+    expect(game.state.object(obj_id(game, "Oberth-Class Starship")).counters["charge"]).to eq(5)
+    expect(chars(game, obj_id(game, "Juggernaut")).keywords).to include(:assigns_damage_by_toughness)
+  end
+
+  it "Possession Engine: control and 'can't attack or block' last for as long as you control it (CR 611.2b)" do
+    game = board(hand: ["Possession Engine"], theirs: ["Vampire Nighthawk"], mana: { U: 5 })
+    hawk = obj_id(game, "Vampire Nighthawk")
+    cast(game, "Possession Engine", target(game, "Vampire Nighthawk"))
+    expect(game.state.object(hawk).controller).to eq(0)
+    expect(chars(game, hawk).keywords).to include(:cant_attack, :cant_block)
+    engine(game).gain_control!(game.state.object(obj_id(game, "Possession Engine")), 1)
+    expect(game.state.object(hawk).controller).to eq(1)
+    expect(chars(game, hawk).keywords).not_to include(:cant_attack)
+    engine(game).gain_control!(game.state.object(obj_id(game, "Possession Engine")), 0) # it doesn't start again
+    expect(game.state.object(hawk).controller).to eq(1)
+  end
+
+  it "Ty Lee, Chi Blocker: the creature doesn't untap for as long as you control Ty Lee (CR 611.2b, 502.3)" do
+    game = board(hand: ["Ty Lee, Chi Blocker"], theirs: ["Vampire Nighthawk"], mana: { U: 3 })
+    hawk = obj_id(game, "Vampire Nighthawk")
+    cast(game, "Ty Lee, Chi Blocker", target(game, "Vampire Nighthawk"))
+    expect([game.state.object(hawk).tapped, chars(game, hawk).keywords]).to eq([true, %i[flying deathtouch lifelink doesnt_untap]])
+    engine(game).move!(obj_id(game, "Ty Lee, Chi Blocker"), :graveyard, reason: "destroy")
+    expect(chars(game, hawk).keywords).not_to include(:doesnt_untap)
   end
 end

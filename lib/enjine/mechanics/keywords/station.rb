@@ -32,7 +32,7 @@ module Enjine
         def choose!(engine, option)
           creature = engine.object(option[:object])
           engine.tap!(creature)
-          { "object" => creature.id, "power" => engine.power(creature), "tapped" => true }
+          { "object" => creature.id, "power" => Abilities::TappingPower.of(engine, creature, :station), "tapped" => true }
         end
 
         def choice_candidates(engine, object)
@@ -47,14 +47,15 @@ module Enjine
     module Effects
       # The effect of a station ability (CR 702.184a): put charge counters on its source equal to the
       # power of the creature tapped to pay its cost. That's the creature's current power, or, if it has
-      # left the battlefield, its power when it was tapped.
+      # left the battlefield, its power when it was tapped; an ability may make it use its toughness (CR 702.184c,
+      # Abilities::TappingPower).
       class StationCharge < Effect
         def self.keys = %w[to]
 
         def apply(engine, ctx)
           paid = engine.object(ctx.object).paid&.first or return
           creature = paid["object"]
-          n = engine.state.battlefield.include?(creature) ? engine.power(engine.object(creature)) : paid["power"]
+          n = engine.state.battlefield.include?(creature) ? Abilities::TappingPower.of(engine, engine.object(creature), :station) : paid["power"]
           objects(engine, ctx).each { engine.add_counters!(engine.object(it), "charge", n) }
         end
 

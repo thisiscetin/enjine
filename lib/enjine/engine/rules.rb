@@ -176,6 +176,7 @@ module Enjine
         obj.controller = controller
         obj.controlled_since = state.turn
         emit Events::ControlChanged.new(object: obj.id, controller: name(controller))
+        end_while_source_effects!(obj.id, %w[while_you_control_source]) # CR 611.2b: "for as long as you control"
       end
 
       # Control of `obj` for a while: until end of turn, an effect that ends in the cleanup step (CR 514.2), handing
@@ -241,8 +242,21 @@ module Enjine
         state.battlefield.include?(source) && object(source).tapped
       end
 
-      # "For as long as [source] remains tapped / on the battlefield" (CR 611.2b).
-      WHILE_SOURCE = %w[while_source_tapped while_source_on_battlefield].freeze
+      # "For as long as [source] remains tapped / on the battlefield", "for as long as you control [source]" (CR 611.2b).
+      WHILE_SOURCE = %w[while_source_tapped while_source_on_battlefield while_you_control_source].freeze
+
+      # Whether a "for as long as" duration about `source` holds now for an effect controlled by `controller`; one
+      # that has already ended never starts (CR 611.2b). Other durations always hold.
+      def source_duration_holds?(duration, source, controller)
+        return true unless WHILE_SOURCE.include?(duration)
+        return false unless state.battlefield.include?(source)
+
+        case duration
+        when "while_source_tapped" then object(source).tapped
+        when "while_you_control_source" then object(source).controller == controller
+        else true
+        end
+      end
 
       # CR 611.2b: once the duration ends (the source untaps, leaves or phases out, CR 702.26f), the effect
       # is over for good, even if the source becomes tapped again. Untapping ends only `while_source_tapped`.
