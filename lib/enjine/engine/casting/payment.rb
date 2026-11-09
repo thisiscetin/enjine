@@ -66,7 +66,21 @@ module Enjine
         plain = pl.mana_pool.filter_map do |type, n|
           { type: "pay_mana", mana: type.to_s } if n.positive? && !pay_slots(frame["remaining"], type.to_s, any: any).empty?
         end
-        plain + restricted_mana_options(frame, pl, any)
+        plain + sourced_mana_options(pl, plain) + restricted_mana_options(frame, pl, any)
+      end
+
+      # When pool mana of a type both remembers a source (an artifact's, CR 106.6) and doesn't, which one is spent
+      # matters ("if mana from a Treasure was spent"): `from: i` spends the mana entry i of pool_sources stands for.
+      # (Plain `pay_mana` spends mana without a source first.)
+      def sourced_mana_options(player, plain)
+        types = plain.map { it[:mana] }.select { unsourced_mana(player, it).positive? }
+        seen = []
+        (player.pool_sources || []).each_with_index.filter_map do |entry, i|
+          next if seen.include?(entry) || !types.include?(entry["mana"])
+
+          seen << entry
+          { type: "pay_mana", mana: entry["mana"], from: i }
+        end
       end
 
       # One option per distinct restricted mana that may be spent on this payment.
@@ -96,16 +110,26 @@ module Enjine
 
       # Spends one mana (restricted entry `restricted`, or a plain one); it pays the first slot that keeps
       # the rest payable (a hybrid symbol the other color could also pay waits for it), deterministically.
-      def pay_mana!(type, restricted = nil)
+      # `from`: the pool_sources entry of the pool mana spent (#sourced_mana_options).
+      def pay_mana!(type, restricted = nil, from = nil)
         frame = payment
         pl = player(frame["player"])
         slots = pay_slots(frame["remaining"], type, any: payment_purpose(frame)&.[]("any_type") == true)
         slot = slots.find { completable_after_paying?(frame, type, it, restricted) } || slots.first
-        restricted ? pl.restricted_mana.delete_at(restricted) : pl.mana_pool[type.to_sym] -= 1
+        entry = restricted ? pl.restricted_mana.delete_at(restricted) : spend_pool_mana!(pl, type, from)
         frame["remaining"] = after_paying(frame["remaining"], slot)
         (frame["spent"] ||= []) << type # what was spent matters later (sunburst, CR 702.44a; 609.4b: its real type)
+        (frame["spent_from"] ||= []) << entry["from"] if entry&.key?("from") # "if mana from a Treasure was spent"
         emit Events::ManaPaid.new(player: name(frame["player"]), mana: "{#{type}}", object: frame["object"])
         ask!(nil)
+      end
+
+      # Spends one pool mana of `type`: the one pool_sources entry `from` stands for, else one without a source, else
+      # one with. Returns the entry of its source, or nil.
+      def spend_pool_mana!(player, type, from)
+        from ||= (player.pool_sources || []).index { it["mana"] == type } unless unsourced_mana(player, type).positive?
+        player.mana_pool[type.to_sym] -= 1
+        from && player.pool_sources.delete_at(from)
       end
 
       def after_paying(rem, slot)
@@ -175,7 +199,7 @@ module Enjine
       def completable_after_activating?(frame, option)
         id = option[:object]
         ability = chars(id).ability(option[:ability])
-        produced = option[:mana] ? Mana.parse_produce(option[:mana], [], "mana") : ability.outcomes(self, object(id)).first
+        produced = (option[:mana] ? Mana.parse_produce(option[:mana], [], "mana") : ability.outcomes(self, object(id)).first) || [] # "": none
         pool = player(frame["player"]).mana_pool.dup
         rest = player(frame["player"]).restricted_mana
         if ability.spend_only
@@ -225,6 +249,7 @@ module Enjine
         end
         player(frame["player"]).mana_pool = Mana::TYPES.to_h { |t| [t, frame["pool"].fetch(t.to_s, 0)] }
         player(frame["player"]).restricted_mana = Snapshot.deep_copy(frame["restricted"]) if frame["restricted"]
+        player(frame["player"]).pool_sources = Snapshot.deep_copy(frame["pool_sources"]) if frame.key?("pool_sources")
         state.pending_triggers.select! { frame["triggers_before"].include?(it["id"]) }
       end
 
@@ -256,6 +281,7 @@ module Enjine
         state.frames << { "type" => "pay", "player" => index, "object" => object, "remaining" => remaining_hash(cost),
                           "pool" => player(index).mana_pool.transform_keys(&:to_s), "tapped" => [],
                           "restricted" => Snapshot.deep_copy(player(index).restricted_mana),
+                          "pool_sources" => Snapshot.deep_copy(player(index).pool_sources),
                           "triggers_before" => state.pending_triggers.map { it["id"] },
                           "waterbend" => waterbend }.compact
         ask!(nil)

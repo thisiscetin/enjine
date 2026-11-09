@@ -8,16 +8,19 @@ module Enjine
     #   {"count": selector}                           how many objects/players match ({"count": {"result": 0}}:
     #                                                 how many the first effect moved or created, e.g. cards drawn)
     #   {"power": selector} / {"toughness": ...}      total power / toughness ("Picard's power": {"power": "self"})
-    #   {"greatest_power": selector}                  the greatest power among them (0 for none)
+    #   {"greatest_power" | "greatest_toughness": selector}  the greatest power / toughness among them (0 for none)
     #   {"hand_size" | "life" | "graveyard_size": player selector}
     #   {"distinct_names": selector}                  how many different names they have (strange new worlds)
+    #   {"mana_value": selector}                      their total mana value (a spell's X counts on the stack; a spell
+    #                                                 countered by the resolving one: as it last existed, CR 608.2h)
     #   {"distinct_types": selector}                  how many different creature types they have (CR 205.3m)
     #   {"distinct_colors": selector}                 how many colors among them (CR 105.2, 202.2)
     #   {"distinct_land_types": selector}             how many basic land types among them (domain, CR 305.6)
     #   {"counters": {"of": selector, "kind": name}}  counters on them, objects or players (any kind without "kind", CR 122)
     #   {"life_gained_this_turn" | "life_lost_this_turn" | "dilemmas_this_turn" | "returned_this_turn"
     #    | "cards_drawn_this_turn" | "cards_discarded_this_turn" | "noncombat_damage_this_turn"
-    #    | "spells_cast_this_game": player selector}  this turn's (or game's) history, see Engine::TurnHistory
+    #    | "spells_cast_this_game" | "turns_taken": player selector}  this turn's (or game's) history, see
+    #                                                 Engine::TurnHistory ("turns_taken": turns begun, this one included)
     #   {"spells_cast_this_turn": {"by": player selector, "matching": spell filter}}
     #   {"died_this_turn" | "entered_this_turn" | "left_this_turn" | "sacrificed_this_turn" | "attackers_this_turn"
     #    | "exiled_this_turn": {"each": filter, "controller": you|opponent|any}}  objects in this turn's history
@@ -31,7 +34,7 @@ module Enjine
                           distinct_colors distinct_land_types
                           life_gained_this_turn life_lost_this_turn dilemmas_this_turn returned_this_turn
                           cards_drawn_this_turn cards_discarded_this_turn spells_cast_this_game speed
-                          noncombat_damage_this_turn].freeze
+                          noncombat_damage_this_turn turns_taken greatest_toughness mana_value].freeze
       ARITHMETIC = %w[times plus divide].freeze
       BASIC_LAND_TYPES = %i[plains island swamp mountain forest].freeze # CR 305.6
       # Object history lists: kind -> turn_log key (Engine::TurnHistory).
@@ -79,14 +82,17 @@ module Enjine
         freeze
       end
 
-      def reads_power? = %w[power toughness greatest_power].include?(@kind)
+      def reads_power? = %w[power toughness greatest_power greatest_toughness].include?(@kind)
 
       def value(engine, ctx)
         refs = @selector.resolve(engine, ctx) # built without errors: a selector
         case @kind
         when "count" then refs.size
         when "power", "toughness" then refs.empty? ? Amount.last_known(engine, ctx, @selector, @kind) : stats(engine, refs).sum
-        when "greatest_power" then stats(engine, refs).max.to_i
+        when "greatest_power", "greatest_toughness" then stats(engine, refs).max.to_i
+        when "mana_value" then refs.sum do
+          Amount.mana_value(engine, engine.state.objects[it]) || engine.resolving_last_known(it)&.[]("mana_value").to_i
+        end
         when "distinct_names" then live(engine, refs).map { engine.chars(it).name }.uniq.size
         when "distinct_types" then live(engine, refs).flat_map { Amount.creature_types(engine.chars(it)) }.uniq.size
         when "distinct_colors" then live(engine, refs).flat_map { engine.chars(it).colors }.uniq.size # CR 105.2
@@ -96,6 +102,15 @@ module Enjine
       end
 
       def to_s = "the #{@kind.tr("_", " ")} of #{@selector}"
+
+      # CR 202.3: the mana value of an object (0 without a mana cost); a spell on the stack counts its X (CR 202.3e).
+      # Nil for an object that's gone.
+      def self.mana_value(engine, obj)
+        return nil if obj.nil?
+
+        cost = engine.chars(obj).mana_cost or return 0
+        (obj.zone == :stack ? cost.with_x(obj.x.to_i) : cost).mana_value
+      end
 
       # CR 205.3m: a creature's or kindred's subtypes are creature types, except those of its other card types.
       def self.creature_types(chars)
@@ -119,7 +134,11 @@ module Enjine
       private
 
       def live(engine, refs) = refs.select { engine.state.objects.key?(it) }
-      def stats(engine, refs) = live(engine, refs).map { engine.public_send(@kind == "toughness" ? :toughness : :power, engine.object(it)) }
+
+      def stats(engine, refs)
+        live(engine, refs).map { engine.public_send(@kind.end_with?("toughness") ? :toughness : :power, engine.object(it)) }
+      end
+
       def players(engine, refs) = refs.filter_map { Filters.player_index(engine, it) }
 
       def player_value(engine, index)
@@ -129,6 +148,7 @@ module Enjine
         when "speed" then engine.speed(index) # CR 702.179f: 0 without speed
         when "graveyard_size" then engine.player(index).graveyard.size
         when "spells_cast_this_game" then engine.game_log(index).fetch("spells", 0)
+        when "turns_taken" then engine.game_log(index).fetch("turns", 0) # this turn included, if it's theirs
         else engine.turn_log(index).fetch(HISTORY.fetch(@kind), 0)
         end
       end
@@ -324,7 +344,8 @@ module Enjine
 
     # A yes/no test about the game, checked when an effect resolves (CR 608.2c) or, as an
     # intervening "if" (CR 603.4), both when a trigger condition is met and on resolution:
-    #   {"amount": amount, "at_least": n, "at_most": n}   any Amount compared with bounds, e.g. total power
+    #   {"amount": amount, "at_least": n, "at_most": n}   any Amount compared with bounds (each a number or an amount),
+    #                                    e.g. total power
     #                                    of creatures you control N or more: {"amount": {"power": {"each":
     #                                    "creature", "controller": "you"}}, "at_least": 8}; "if you do" after a
     #                                    mandatory effect: {"amount": {"count": {"result": 0}}, "at_least": 1}
@@ -399,7 +420,9 @@ module Enjine
           amount = Amount.build(raw, errors, "#{path}.#{subject}", targets_count: targets_count, results_count: results_count)
           bounds = %w[at_least at_most].to_h { [it, data[it]] }.compact
           errors << "#{path}: needs at_least and/or at_most" if bounds.empty?
-          bounds.each { |k, v| errors << "#{path}.#{k}: must be an integer" unless v.is_a?(Integer) }
+          bounds = bounds.to_h do |k, v| # a bound may itself be an amount ("less than its mana value")
+            [k, Amount.build(v, errors, "#{path}.#{k}", targets_count: targets_count, results_count: results_count, min: -1000)]
+          end
           new(amount, bounds["at_least"], bounds["at_most"])
         end
 
@@ -414,7 +437,7 @@ module Enjine
 
         def true?(engine, ctx)
           n = @amount.value(engine, ctx)
-          (@at_least.nil? || n >= @at_least) && (@at_most.nil? || n <= @at_most)
+          (@at_least.nil? || n >= @at_least.value(engine, ctx)) && (@at_most.nil? || n <= @at_most.value(engine, ctx))
         end
 
         def to_s = "#{@amount} is #{[@at_least && "at least #{@at_least}", @at_most && "at most #{@at_most}"].compact.join(" and ")}"

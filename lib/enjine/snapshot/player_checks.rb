@@ -44,13 +44,35 @@ module Enjine
       return errors << "#{path}: must be a list" unless list.is_a?(Array)
 
       list.each_with_index do |entry, i|
-        ok = entry.is_a?(Hash) && (entry.keys - %w[mana spend_only until]).empty? && Mana::TYPES.include?(entry["mana"].to_s.to_sym) &&
-             [nil, "end_of_combat"].include?(entry["until"]) && (entry.key?("spend_only") || entry.key?("until"))
+        ok = entry.is_a?(Hash) && (entry.keys - %w[mana spend_only until from]).empty? && Mana::TYPES.include?(entry["mana"].to_s.to_sym) &&
+             [nil, "end_of_combat"].include?(entry["until"]) && (entry.key?("spend_only") || entry.key?("until")) &&
+             (!entry.key?("from") || valid_mana_source?(entry["from"]))
         problems = []
         Mechanics::SpendOnly.build(entry["spend_only"], problems, "#{path}[#{i}].spend_only") if ok && entry.key?("spend_only")
-        errors << "#{path}[#{i}]: must be {\"mana\": W/U/B/R/G/C, \"spend_only\": restriction, \"until\": \"end_of_combat\"}" unless ok
+        unless ok
+          errors << "#{path}[#{i}]: must be {\"mana\": W/U/B/R/G/C, \"spend_only\": restriction, \"until\": \"end_of_combat\", " \
+                    "\"from\": source}"
+        end
         errors.concat(problems)
       end
+    end
+
+    # The remembered sources of pool mana: one per mana at most (Engine::ManaSources#add_mana!).
+    def validate_pool_sources(player, errors, path)
+      list = player.fetch("pool_sources", [])
+      pool = player["mana_pool"].is_a?(Hash) ? player["mana_pool"] : {}
+      ok = list.is_a?(Array) && list.all? do |entry|
+        entry.is_a?(Hash) && entry.keys.sort == %w[from mana] && Mana::TYPES.include?(entry["mana"].to_s.to_sym) &&
+          valid_mana_source?(entry["from"])
+      end
+      ok &&= list.map { it["mana"] }.tally.all? { |type, n| n <= pool.fetch(type, 0).to_i }
+      errors << "#{path}: must list {\"mana\": type, \"from\": source}, at most one per mana in the pool" unless ok
+    end
+
+    # A mana source's remembered characteristics (Engine::ManaSources#mana_provenance).
+    def valid_mana_source?(from)
+      from.is_a?(Hash) && from.keys.sort == %w[colors name subtypes supertypes types] && from["name"].is_a?(String) &&
+        %w[colors subtypes supertypes types].all? { from[it].is_a?(Array) && from[it].all?(String) }
     end
 
     # Player designations (Engine::Designations): distinct known names; absent in older snapshots.

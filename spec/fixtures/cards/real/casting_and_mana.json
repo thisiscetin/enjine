@@ -1,0 +1,169 @@
+[
+  {
+    "name": "Twin Bolt",
+    "mana_cost": "{1}{R}",
+    "types": ["instant"],
+    "abilities": [
+      { "spell": { "targets": [{ "filter": "any_target", "count": 2, "optional": true }], "divide": 2,
+                   "effects": [{ "distribute_damage": {} }] } }
+    ],
+    "rarity": "common",
+    "printing": { "set": "tdm", "number": "128" }
+  },
+  {
+    "name": "Gandalf, Spark Starter",
+    "mana_cost": "{4}{R}{R}",
+    "types": ["creature"],
+    "supertypes": ["legendary"],
+    "subtypes": ["avatar", "wizard"],
+    "keywords": ["reach"],
+    "power": 4,
+    "toughness": 3,
+    "abilities": [
+      { "triggered": { "when": { "enters": {} }, "targets": [{ "filter": "any_target", "count": 3, "optional": true }],
+                       "divide": 3, "effects": [{ "distribute_damage": {} }] } }
+    ],
+    "rarity": "uncommon",
+    "printing": { "set": "hob", "number": "97" }
+  },
+  {
+    "name": "Ureni, the Song Unending",
+    "mana_cost": "{5}{G}{U}{R}",
+    "types": ["creature"],
+    "supertypes": ["legendary"],
+    "subtypes": ["spirit", "dragon"],
+    "keywords": ["flying"],
+    "power": 10,
+    "toughness": 10,
+    "abilities": [
+      { "protection_from": { "colors": ["W"] } },
+      { "protection_from": { "colors": ["B"] } },
+      { "triggered": { "when": { "enters": {} },
+                       "targets": [{ "filter": { "creature_or_planeswalker": { "controller": "opponent" } }, "count": "any" }],
+                       "divide": { "count": { "each": "land", "controller": "you" } },
+                       "effects": [{ "distribute_damage": {} }] } }
+    ],
+    "rarity": "mythic",
+    "printing": { "set": "tdm", "number": "233" }
+  },
+  {
+    "name": "Proft, Sinister Mastermind",
+    "mana_cost": "{2}{B}",
+    "types": ["creature"],
+    "supertypes": ["legendary"],
+    "subtypes": ["human", "rogue"],
+    "keywords": ["menace"],
+    "power": 5,
+    "toughness": 5,
+    "abilities": [
+      { "cast_restriction": { "only_if": { "amount": { "graveyard_size": "you" }, "at_least": 7 } } },
+      { "activated": { "cost": [{ "mana": "{B}" }, "discard_self"], "zone": "hand", "targets": ["creature"],
+                       "effects": [{ "pump": { "power": -3, "toughness": -1, "to": { "target": 0 } } }] } }
+    ],
+    "rarity": "uncommon",
+    "printing": { "set": "fra", "number": "235" }
+  },
+  {
+    "name": "Unravel",
+    "mana_cost": "{1}{U}{U}",
+    "types": ["instant"],
+    "abilities": [
+      { "spell": { "targets": ["spell"], "effects": [
+        { "counter": { "to": { "target": 0 } } },
+        { "draw": { "amount": 1, "if": { "amount": { "mana_spent": { "of": { "target": 0 } } },
+                                         "at_most": { "plus": [{ "mana_value": { "target": 0 } }, -1] } } } }] } }
+    ],
+    "rarity": "uncommon",
+    "printing": { "set": "eoe", "number": "83" }
+  },
+  {
+    "name": "Tokka & Rahzar, Terrible Twos",
+    "mana_cost": "{B/R}{B/R}",
+    "types": ["creature"],
+    "supertypes": ["legendary"],
+    "subtypes": ["turtle", "wolf", "mutant"],
+    "keywords": ["cant_be_countered", "menace"],
+    "power": 3,
+    "toughness": 2,
+    "abilities": [
+      { "triggered": { "when": { "cast": { "controller": "any" } },
+                       "if": { "amount": { "mana_spent": { "of": { "triggering": "object" } } },
+                               "at_most": { "plus": [{ "mana_value": { "triggering": "object" } }, -1] } },
+                       "effects": [{ "deal_damage": { "amount": 3, "to": { "triggering": "player" } } }] } }
+    ],
+    "rarity": "rare",
+    "printing": { "set": "tmt", "number": "171" }
+  },
+  {
+    "name": "Quistis Trepe",
+    "mana_cost": "{2}{U}",
+    "types": ["creature"],
+    "supertypes": ["legendary"],
+    "subtypes": ["human", "wizard"],
+    "power": 2,
+    "toughness": 2,
+    "abilities": [
+      { "triggered": { "when": { "enters": {} }, "targets": [{ "graveyard_card": { "any_of": ["instant", "sorcery"] } }],
+                       "effects": [{ "cast": { "to": { "target": 0 }, "any_mana_type": true, "exile_instead": true } }] } }
+    ],
+    "rarity": "uncommon",
+    "printing": { "set": "fin", "number": "66" }
+  },
+  {
+    "name": "The Dawning Archaic",
+    "mana_cost": "{10}",
+    "types": ["creature"],
+    "supertypes": ["legendary"],
+    "subtypes": ["avatar"],
+    "keywords": ["reach"],
+    "power": 7,
+    "toughness": 7,
+    "abilities": [
+      { "cost_reduction": { "amount": { "count": { "each": { "graveyard_card": { "any_of": ["instant", "sorcery"] } }, "controller": "you" } } } },
+      { "triggered": { "when": { "attacks": {} },
+                       "targets": [{ "graveyard_card": { "any_of": ["instant", "sorcery"], "controller": "you" } }],
+                       "effects": [{ "cast_free": { "to": { "target": 0 }, "exile_instead": true } }] } }
+    ],
+    "rarity": "mythic",
+    "printing": { "set": "sos", "number": "1" }
+  },
+  {
+    "name": "Mm'menon, the Right Hand",
+    "mana_cost": "{3}{U}{U}",
+    "types": ["creature"],
+    "supertypes": ["legendary"],
+    "subtypes": ["jellyfish", "advisor"],
+    "keywords": ["flying"],
+    "power": 3,
+    "toughness": 4,
+    "abilities": [
+      "look_at_top",
+      { "play_from": { "zone": "library_top", "cards": { "types": ["artifact"] }, "play": "cast" } },
+      { "static": { "affects": { "each": "artifact", "controller": "you" },
+                    "abilities": [{ "mana": { "cost": ["tap"], "produce": "{U}", "spend_only": { "not_from": "hand" } } }] } }
+    ],
+    "rarity": "rare",
+    "printing": { "set": "eoe", "number": "68" }
+  },
+  {
+    "name": "Smaug, Wicked Worm",
+    "mana_cost": "{3}{B}{R}",
+    "types": ["creature"],
+    "supertypes": ["legendary"],
+    "subtypes": ["dragon"],
+    "keywords": ["flying"],
+    "power": 5,
+    "toughness": 5,
+    "abilities": [
+      { "triggered": { "when": { "enters": {} },
+                       "effects": [{ "create_token": { "token": "Treasure", "tapped": true,
+                                                       "amount": { "count": { "each": "artifact", "controller": "opponent" } } } }] } },
+      { "triggered": { "when": { "cast": {} },
+                       "if": { "amount": { "mana_spent": { "of": { "triggering": "object" }, "from": { "subtypes": ["treasure"] } } },
+                               "at_least": 1 },
+                       "effects": [{ "draw": { "amount": 1 } }, { "lose_life": { "amount": 1, "to": "you" } }] } }
+    ],
+    "rarity": "rare",
+    "printing": { "set": "hob", "number": "164" }
+  }
+]

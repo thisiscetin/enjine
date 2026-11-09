@@ -143,7 +143,8 @@ module Enjine
     class PayCost < Base
       def self.doc
         'While casting/activating or paying a cost: `{type: "pay_mana", mana: "R"}` spends one mana from ' \
-          'the pool (`restricted: i`: restricted mana, CR 106.6), `{type: "activate_mana", object: id, ability: ref}` ' \
+          "the pool (`restricted: i`: restricted mana, CR 106.6; `from: i`: the pool mana an artifact made that " \
+          'pool_sources[i] names), `{type: "activate_mana", object: id, ability: ref}` ' \
           '(plus `mana: "{G}{G}"` when the mana is chosen) taps a source, `{type: "cancel"}` ' \
           "rewinds (or declines a payment asked for while resolving). Cancel isn't offered once a mana ability " \
           "with a cost other than {T} (a Treasure) has been activated. `{type: \"convoke\", object: id}` taps a " \
@@ -160,7 +161,7 @@ module Enjine
       def self.submit(engine, _pending, option)
         case option[:type]
         when "cancel" then engine.cancel_payment!
-        when "pay_mana" then engine.pay_mana!(option[:mana], option[:restricted])
+        when "pay_mana" then engine.pay_mana!(option[:mana], option[:restricted], option[:from])
         when "convoke", "improvise" then engine.convoke!(option[:object], option[:type]) # CR 702.51a, 702.126a
         when "waterbend" then engine.waterbend!(option[:object]) # CR 701.67a
         else engine.tap_for_payment!(option[:object], option[:ability], option[:mana])

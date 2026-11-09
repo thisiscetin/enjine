@@ -255,16 +255,18 @@ module Enjine
         primitive :effect, :cast,
                   description: "The controller may cast referenced cards (or card copies) now, while this resolves, " \
                                "paying their costs; timing restrictions don't apply. `to`, `for`, `not_types`, " \
-                               "`max_mana_value` and `count` work as for `cast_free`.",
+                               "`max_mana_value`, `count`, `exile_instead` and `any_mana_type` work as for `cast_free`.",
                   rules: %w[608.2g 707.12 707.12a 601.2a 601.2f],
                   params: { "to" => "selector", "for" => "card spec", "not_types" => "list of card types",
-                            "max_mana_value" => "amount", "count" => "1 or \"any\"" },
+                            "max_mana_value" => "amount", "count" => "1 or \"any\"",
+                            "exile_instead" => "true or a card spec (as for cast_free)",
+                            "any_mana_type" => "boolean: mana of any type can be spent to cast it (CR 609.4b)" },
                   example: { "cast" => { "to" => { "result" => 0 } } }
 
         def to_s = super.sub(" free", "")
         def via = "resolving"
         def prompt = "You may cast a spell"
-        def castable_now?(engine, index, id) = engine.castable_while_resolving?(index, id)
+        def castable_now?(engine, index, id) = engine.castable_while_resolving?(index, id, any_mana_type: @riders["any_mana_type"])
       end
 
       # A card or permanent gains an ability (CR 113.6b, 611.2): "that card gains '...'". The ability lives

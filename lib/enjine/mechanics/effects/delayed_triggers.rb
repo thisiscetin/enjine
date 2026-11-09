@@ -66,7 +66,8 @@ module Enjine
                                "chosen as it's put on the stack; its `effects` may name the results of earlier effects " \
                                "of the creating list.",
                   rules: %w[603.12 603.12a 603.7d 603.7e 603.3d],
-                  params: { "targets" => "list of target filters", "effects" => "list of effects" },
+                  params: { "targets" => "list of target filters", "effects" => "list of effects",
+                            "divide" => "amount divided among the targets as it's put on the stack (CR 601.2d)" },
                   example: { "reflexive_trigger" => { "targets" => ["any_target"],
                                                       "effects" => [{ "deal_damage" => { "amount" => 2,
                                                                                          "to" => { "target" => 0 } } }] } }
@@ -78,7 +79,7 @@ module Enjine
 
         attr_reader :ref, :delayed_ability
 
-        def self.keys = %w[targets effects]
+        def self.keys = %w[targets effects divide]
         def self.default_to = "you"
 
         def setup(params, errors, path)
@@ -86,7 +87,10 @@ module Enjine
           targets = Abilities::StackAbility.parse_targets(params, errors, path)
           effects = Abilities::StackAbility.parse_effects(params, errors, path, targets.size, results_count: @results_count)
           errors << "#{path}.effects: needs at least one effect" if effects.empty?
-          @delayed_ability = Abilities::TriggeredAbility.new(targets: targets, effects: effects, trigger: WhenYouDo.new)
+          extras = Abilities::StackAbility.parse_extras(params.slice("divide"), errors, path)
+          Abilities::StackAbility.check_divide(extras, targets, errors, path)
+          @delayed_ability = Abilities::TriggeredAbility.new(targets: targets, effects: effects, trigger: WhenYouDo.new,
+                                                             extras: extras)
         end
 
         def nested_effects = delayed_ability.effects

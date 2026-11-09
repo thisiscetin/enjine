@@ -1626,5 +1626,25 @@
         }
       }
     ]
+  },
+  {
+    "name": "Echo Vault",
+    "mana_cost": "{2}",
+    "types": [
+      "artifact"
+    ],
+    "abilities": [
+      {
+        "mana": {
+          "cost": [
+            "tap"
+          ],
+          "produce": "{C}{C}",
+          "spend_only": {
+            "from": "exile"
+          }
+        }
+      }
+    ]
   }
 ]

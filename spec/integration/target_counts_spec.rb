@@ -242,10 +242,10 @@ RSpec.describe "Variable numbers of targets (CR 601.2c, 115.3)" do
     expect(game.state.battlefield.count { engine(game).token?(game.state.object(it)) }).to eq(0)
   end
 
-  it "divides among any number of targets: at most the amount (CR 601.2d)" do
+  it "divides among any number of targets: at least one, at most the amount (CR 601.2d)" do
     game = game_with(hand: ["Spec Blessing Fan"], board: ["Hill Giant", "Gray Ogre", "Craw Wurm", "Moss Grower"])
     cast(game, "Spec Blessing Fan")
-    expect(game.legal_options.map { it[:count] }).to eq([0, 1, 2, 3, nil])
+    expect(game.legal_options.map { it[:count] }).to eq([1, 2, 3, nil])
     game.submit(type: "count", count: 2)
     game.submit(type: "target", target: obj_id(game, "Hill Giant"))
     game.submit(type: "target", target: obj_id(game, "Gray Ogre"))

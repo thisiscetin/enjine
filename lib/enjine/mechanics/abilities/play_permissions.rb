@@ -29,6 +29,27 @@ module Enjine
       end
     end
 
+    # "If that spell would be put into a graveyard, exile it instead" (CR 614.1a), a rider of a permission or of
+    # casting while an effect resolves: `"exile_instead": true`, or a card spec the spell must match ("if an
+    # instant or sorcery spell cast this way would be put into your graveyard"). Kept as plain data in the play
+    # method and checked as the spell becomes cast (Engine::Permissions#finish_cast_method!).
+    module ExileInstead
+      module_function
+
+      # The rider's data from `params` (true or a card spec), or nil without one.
+      def build(params, errors, path)
+        raw = Mechanics.fetch_param(params, :exile_instead)
+        return nil if raw.nil? || raw == false
+        return true if raw == true
+
+        CardSpec.build(raw, errors, "#{path}.exile_instead")
+        raw
+      end
+
+      def applies?(engine, data, spell) = data == true || CardSpec.build(data, [], "exile_instead").match?(engine, spell)
+      def words(data) = "exile it#{" (#{CardSpec.build(data, [], "")})" unless data == true} instead of a graveyard"
+    end
+
     module Abilities
       # A card's own permission to be cast from a zone other than the hand (CR 113.6e-f, 601.3), or a
       # permanent's static permission for its controller's cards in a zone, possibly limited to once per
@@ -204,10 +225,12 @@ module Enjine
                   params: { "to" => "selector (usually {\"result\": n})", "duration" => DURATIONS.join(" | "),
                             "play" => "play | cast", "for" => "card spec", "not_types" => "list of card types",
                             "choose" => "one_per_owner", "to_player" => "controller | owner | player selector",
-                            "cost_increase" => "integer >= 1", "any_mana_type" => "boolean" },
+                            "cost_increase" => "integer >= 1", "any_mana_type" => "boolean",
+                            "exile_instead" => "true or a card spec: if a spell cast this way (matching it) would be put " \
+                                               "into a graveyard, it's exiled instead (CR 614.1a)" },
                   example: { "play_permission" => { "to" => { "result" => 0 }, "duration" => "end_of_your_next_turn" } }
 
-        def self.keys = %w[to duration play for not_types choose to_player cost_increase any_mana_type if]
+        def self.keys = %w[to duration play for not_types choose to_player cost_increase any_mana_type exile_instead if]
 
         def setup(params, errors, path)
           @duration = Mechanics.fetch_param(params, :duration) || "end_of_turn"
@@ -226,6 +249,7 @@ module Enjine
           who = { "controller" => "you", "owner" => "its owner" }.fetch(@to_player) { @to_player.to_s }
           more = @riders["cost_increase"] ? ", costs {#{@riders["cost_increase"]}} more" : ""
           more += ", mana of any type" if @riders["any_mana_type"]
+          more += ", #{ExileInstead.words(@riders["exile_instead"])}" if @riders["exile_instead"]
           "#{who} may #{@play} #{@filter} (#{@duration.tr("_", " ")}#{more}) → #{to}"
         end
 
@@ -255,7 +279,8 @@ module Enjine
           ok = increase.nil? || (increase.is_a?(Integer) && increase.positive?)
           errors << "#{path}.cost_increase: must be an integer >= 1" unless ok
           any_type = Mechanics.flag_param(params, :any_mana_type, errors, path)
-          { "cost_increase" => increase, "any_mana_type" => (true if any_type) }.compact
+          { "cost_increase" => increase, "any_mana_type" => (true if any_type),
+            "exile_instead" => ExileInstead.build(params, errors, path) }.compact
         end
 
         # The players who may play `id`: the effect's controller, the card's owner, or the selected players.
@@ -301,21 +326,30 @@ module Enjine
                                "(default) or \"any\" (any number, one at a time). X is 0 (CR 107.3b).",
                   rules: %w[608.2g 118.9 601.2a 107.3b 118.6a],
                   params: { "to" => "selector", "for" => "card spec", "not_types" => "list of card types",
-                            "max_mana_value" => "amount", "count" => "1 or \"any\"" },
+                            "max_mana_value" => "amount", "count" => "1 or \"any\"",
+                            "exile_instead" => "true or a card spec: if a spell cast this way (matching it) would be put " \
+                                               "into a graveyard, it's exiled instead (CR 614.1a)",
+                            "any_mana_type" => "boolean: mana of any type can be spent to cast it (CR 609.4b)" },
                   example: { "cast_free" => { "to" => { "result" => 0 }, "max_mana_value" => 3, "count" => "any" } }
 
-        def self.keys = %w[to for not_types max_mana_value count if]
+        def self.keys = %w[to for not_types max_mana_value count exile_instead any_mana_type if]
         def self.default_to = "you"
 
         def setup(params, errors, path)
           @filter = CardFilter.build(params, errors, path)
+          any_type = Mechanics.flag_param(params, :any_mana_type, errors, path)
+          @riders = { "exile_instead" => ExileInstead.build(params, errors, path), "any_mana_type" => (true if any_type) }.compact
           raw = Mechanics.fetch_param(params, :max_mana_value)
           @max = raw.nil? ? nil : Amount.build(raw, errors, "#{path}.max_mana_value", targets_count: @targets_count)
           @count = Mechanics.fetch_param(params, :count) || 1
           errors << "#{path}.count: must be 1 or \"any\"" unless [1, "any"].include?(@count)
         end
 
-        def to_s = "you may cast #{@count == "any" ? "any number of" : "a"} #{@filter} free → #{to}"
+        def to_s
+          more = @riders["any_mana_type"] ? ", mana of any type" : ""
+          more += ", #{ExileInstead.words(@riders["exile_instead"])}" if @riders["exile_instead"]
+          "you may cast #{@count == "any" ? "any number of" : "a"} #{@filter} free#{more} → #{to}"
+        end
 
         def run(engine, ctx, locals)
           return :done unless locals["asked"] || condition.nil? || condition.true?(engine, ctx)
@@ -328,7 +362,7 @@ module Enjine
             return :done if answer["type"] == "done"
 
             locals["casting"] = answer["object"]
-            engine.begin_cast!(index, answer["object"], via: via)
+            engine.begin_cast!(index, answer["object"], via: via, riders: @riders)
             return :wait
           end
           return :done if @count == 1 && locals["cast"].to_i >= 1

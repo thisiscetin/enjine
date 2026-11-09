@@ -106,6 +106,7 @@ module Enjine
       def depart!(old)
         lki = old.zone == :battlefield ? last_known_info(old) : nil # before it leaves (CR 603.10a)
         remember_last_known!(old.id, lki) if lki # CR 608.2h (see Engine::TurnHistory)
+        remember_spell!(old) if old.zone == :stack && !old.ability? # a countered spell's mana spent (Engine::TurnHistory)
         state.zone_list(old.zone, old.owner).delete(old.id)
         state.objects.delete(old.id)
         lki

@@ -23,11 +23,14 @@ module Enjine
     #   "drawn" / "discarded"  how many cards they drew (CR 121.2) / discarded (CR 701.9a)
     #   "dilemmas" dilemmas they faced (CR 700.17)
     #   "noncombat_damage"  noncombat damage dealt to them (CR 120.2b)
+    # The game log also counts the turns each player has begun ("turns").
     # Per object (GameObject#memory, stamped with the turn): "attacked" and "resolved" counts.
     module TurnHistory
       def record_history!(event)
         case event
-        when Events::TurnBegan then state.players.each { it.turn_log = {} }
+        when Events::TurnBegan
+          state.players.each { it.turn_log = {} }
+          bump!(game_log(names.index(event.active)), "turns", 1) # "your third turn of the game"
         when Events::SpellCast then cast_recorded!(event)
         when Events::LifeChanged then life_recorded!(event)
         when Events::ZoneChanged
@@ -70,6 +73,16 @@ module Enjine
         state.pending_triggers.each { (it["memory"] ||= {})["source_lki"] = info.dup if it["source"] == id }
         resolving = state.frames.rfind { it["type"] == "resolve" && it["ctx"] }
         (resolving["ctx"]["lki"] ||= {})[id] = info if resolving
+      end
+
+      # A spell leaving the stack while a spell or ability resolves ("counter target spell. If the amount of mana
+      # spent to cast that spell was less than its mana value, ..."): the resolving one remembers it as it last
+      # existed on the stack (CR 608.2h): its controller, mana spent (CR 601.2h) and mana value, X included (CR 202.3e).
+      def remember_spell!(obj)
+        resolving = state.frames.rfind { it["type"] == "resolve" && it["ctx"] } or return
+        (resolving["ctx"]["lki"] ||= {})[obj.id] = { "controller" => obj.controller, "card" => obj.card,
+                                                     "mana_spent" => obj.mana_spent&.dup, "mana_from" => obj.memory["mana_from"],
+                                                     "mana_value" => Mechanics::Amount.mana_value(self, obj) }
       end
 
       # The part of last known information an ability keeps in its memory ("source_lki"): plain data.
@@ -180,6 +193,7 @@ module Enjine
         memory["kicked"] = true if source_memory["kicked"] # CR 702.33d: a kicked permanent's "if it was kicked"
         memory.merge!(source_memory.slice("cast_from", "cast_with", "kicked_with")) # "if its evoke cost was paid" (Engine::AltCasting)
         memory["source_mana_spent"] = obj.mana_spent.dup if obj&.mana_spent
+        memory["source_mana_from"] = Snapshot.deep_copy(source_memory["mana_from"]) if source_memory["mana_from"]
         lki = last_known(source["id"])
         memory["source_lki"] = last_known_memory(lki) if lki
         memory

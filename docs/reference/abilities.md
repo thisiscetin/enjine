@@ -171,6 +171,29 @@ Rules: CR 702.26a, CR 502.1, CR 604.1
 "cant_phase_in"
 ```
 
+## cast_restriction
+
+This card can be cast only while `only_if` (a condition, checked for the player who would cast it) holds, whatever lets them cast it.
+
+Rules: CR 601.3, CR 101.2
+
+| Parameter | Description |
+| --- | --- |
+| `only_if` | condition |
+
+```json
+{
+  "cast_restriction": {
+    "only_if": {
+      "amount": {
+        "graveyard_size": "you"
+      },
+      "at_least": 7
+    }
+  }
+}
+```
+
 ## chapter
 
 A Saga's chapter ability: triggers when lore counters put on it bring their number from below `chapter` to at least `chapter`. Its targets are chosen as it's put on the stack. A Saga's final chapter number is its greatest `chapter`.
@@ -960,9 +983,9 @@ Rules: CR 606.3, CR 606.4, CR 606.5, CR 602.2b
 
 ## mana
 
-An activated mana ability: pay the cost, add the mana to your mana pool immediately. It does not use the stack and can be activated whenever you have priority. `produce`: the fixed mana (`amount` times). Or `color`: `amount` mana (default 1) of one color you choose as you activate it (`"any_one"`) or in any combination of colors (`"any"`); `colors` limits the choice. `"chosen"`: of the color chosen as this entered (choose_color). `spend_only` restricts how the mana can be spent.
+An activated mana ability: pay the cost, add the mana to your mana pool immediately. It does not use the stack and can be activated whenever you have priority. `produce`: the fixed mana (`amount` times). Or `color`: `amount` mana (default 1) of one color you choose as you activate it (`"any_one"`) or in any combination of colors (`"any"`); `colors` limits the choice. `"chosen"`: of the color chosen as this entered (choose_color). `spend_only` restricts how the mana can be spent. `only_if`: "Activate only if ...".
 
-Rules: CR 605.1a, CR 605.3a, CR 605.3b, CR 106.1a, CR 106.4, CR 106.6, CR 607.2d
+Rules: CR 605.1a, CR 605.3a, CR 605.3b, CR 106.1a, CR 106.4, CR 106.6, CR 607.2d, CR 602.5b
 
 | Parameter | Description |
 | --- | --- |
@@ -971,7 +994,8 @@ Rules: CR 605.1a, CR 605.3a, CR 605.3b, CR 106.1a, CR 106.4, CR 106.6, CR 607.2d
 | `amount` | amount (default 1; with produce: how many times) |
 | `color` | any_one | any | chosen |
 | `colors` | list of colors to choose from (default all five) |
-| `spend_only` | {"spells": card spec, "abilities": card spec} |
+| `spend_only` | {"spells": card spec, "abilities": card spec, "from" | "not_from": zone} |
+| `only_if` | condition: it can be activated only while it holds (CR 602.5b) |
 
 ```json
 {

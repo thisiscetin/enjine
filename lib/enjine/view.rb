@@ -59,14 +59,19 @@ module Enjine
         "hand_count" => player.hand.size, "library_count" => player.library.size, "outside_count" => player.outside.size,
         "graveyard" => player.graveyard.map { object_view(engine, it) }
       }
-      view["speed"] = player.speed if player.speed # CR 702.179: public; absent while they have no speed
-      view["designations"] = player.designations.dup unless player.designations.to_a.empty? # public (CR 702.195b)
-      view["counters"] = player.counters.dup unless player.counters.nil? || player.counters.empty? # CR 122.1: rad, experience
+      view.merge!(public_extras(player))
       view["hand"] = player.hand.map { object_view(engine, it) } if sees_hand
       view["outside"] = outside_view(engine, player) if sees_hand # CR 400.11a: only its owner knows their sideboard
       view["library"] = player.library.map { object_view(engine, it) } if sees_library
       view["library_top"] = object_view(engine, player.library.first) if sees_hand && looks_at_top?(engine, player)
       view
+    end
+
+    # Public player state present only when there is some: speed (CR 702.179), designations (CR 702.195b), player
+    # counters other than poison (CR 122.1) and the artifact sources of pool mana (Engine::ManaSources#add_mana!).
+    def public_extras(player)
+      { "speed" => player.speed, "designations" => player.designations&.dup, "counters" => player.counters&.dup,
+        "pool_sources" => Snapshot.deep_copy(player.pool_sources) }.reject { |_, v| v.nil? || (v.respond_to?(:empty?) && v.empty?) }
     end
 
     # The cards a player owns outside the game (CR 400.11a): not objects, so no ids (CR 400.11).

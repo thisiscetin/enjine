@@ -28,9 +28,11 @@ module Enjine
       # A rule of the whole game ("Damage can't be prevented"), whichever player it was given to.
       def game_rule?(rule) = state.players.each_index.any? { player_rule?(it, rule) }
 
-      # CR 101.2: "can't cast" beats any permission to cast. `obj`: the card (or stand-in) to be cast.
+      # CR 101.2: "can't cast" beats any permission to cast. `obj`: the card (or stand-in) to be cast. The card's own
+      # "you can't cast this spell unless ..." too (CR 601.3).
       def cast_forbidden?(index, obj)
-        player_rule?(index, "cant_cast", obj) || (obj.zone != :hand && player_rule?(index, "cant_cast_except_from_hand"))
+        player_rule?(index, "cant_cast", obj) || (obj.zone != :hand && player_rule?(index, "cant_cast_except_from_hand")) ||
+          chars(obj).abilities.any? { it.ability.kind == :cast_restriction && !it.ability.allows?(self, index, obj) }
       end
 
       # CR 602.5, 101.2: abilities of a permanent matching a `cant_activate` filter can't be activated.

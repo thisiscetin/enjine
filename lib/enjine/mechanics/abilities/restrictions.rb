@@ -73,6 +73,39 @@ module Enjine
         # Whether an ability whose source is `source` (a card object) may not target this permanent.
         def forbids?(engine, source) = spec.match?(engine, source)
       end
+
+      # "You can't cast this spell unless there are seven or more cards in your graveyard" / "You can't cast this
+      # spell during your first, second, or third turns of the game" (CR 601.3): the card can be cast, from any
+      # zone and by any permission, only while the condition holds for the player who would cast it.
+      class CastRestriction < Restriction
+        primitive :ability, :cast_restriction,
+                  description: "This card can be cast only while `only_if` (a condition, checked for the player who " \
+                               "would cast it) holds, whatever lets them cast it.",
+                  rules: %w[601.3 101.2],
+                  params: { "only_if" => "condition" },
+                  example: { "cast_restriction" => { "only_if" => { "amount" => { "graveyard_size" => "you" }, "at_least" => 7 } } }
+
+        attr_reader :condition
+
+        def self.build(params, errors, path, **)
+          Mechanics.check_keys(params, %w[only_if], errors, path)
+          raw = Mechanics.fetch_param(params, :only_if)
+          errors << "#{path}.only_if: required" if raw.nil?
+          new(raw && Condition.build(raw, errors, "#{path}.only_if"))
+        end
+
+        def initialize(condition)
+          super()
+          @condition = condition
+          freeze
+        end
+
+        def kind = :cast_restriction
+        def to_s = "You can't cast this spell unless #{condition}."
+
+        # Whether player `index` may begin to cast `obj` now.
+        def allows?(engine, index, obj) = condition.nil? || condition.true?(engine, EffectContext.new(index, obj.id, obj.id, nil, []))
+      end
     end
   end
 end
