@@ -29,7 +29,7 @@ RSpec.describe Enjine::Deck do
 
   it "reports malformed and undefined entries" do
     d = deck([{ "card" => "Bolt", "count" => 1 }, { "card" => "Forest" }, "x"])
-    expect(d.errors).to include(a_string_matching(/main\[0\]: card "Bolt" is not defined/),
+    expect(d.errors).to include(a_string_matching(/main\[0\].card: "Bolt" is not defined/),
                                 a_string_matching(/main\[1\]: must be/), a_string_matching(/main\[2\]: must be/))
   end
 
@@ -68,5 +68,50 @@ RSpec.describe Enjine::Deck do
     copy = described_class.from_h(d.to_h)
     expect(copy.entries).to eq(d.entries)
     expect(described_class.from_h(copy)).to be(copy)
+    expect(copy.to_h).not_to have_key("outside")
+  end
+
+  describe "cards outside the game (CR 400.11a, 100.4a)" do
+    let(:forests) { [{ "card" => "Forest", "count" => 56 }, { "card" => "Lone Tower", "count" => 4 }] }
+
+    def with_outside(outside, main: forests)
+      described_class.from_h("cards" => pool + [nonbasic], "main" => main, "outside" => outside)
+    end
+
+    it "keeps an outside list that isn't part of the 60 and round-trips through to_h" do
+      d = with_outside([{ "card" => "Grizzly Bears", "count" => 2 }, { "card" => "Island", "count" => 13 }])
+      expect(d).to be_valid
+      expect(d.size).to eq(60)
+      expect(d.outside_size).to eq(15)
+      expect(d.outside_entries).to eq("grizzly_bears" => 2, "island" => 13)
+      expect(d.outside_ids.count("island")).to eq(13)
+      copy = described_class.from_h(d.to_h)
+      expect(copy.to_h["outside"]).to eq([{ "card" => "grizzly_bears", "count" => 2 }, { "card" => "island", "count" => 13 }])
+      expect(copy.outside_entries).to eq(d.outside_entries)
+    end
+
+    it "holds at most 15 cards" do
+      expect(with_outside([{ "card" => "Island", "count" => 16 }]).errors)
+        .to eq(["outside: 16 cards; at most 15 are allowed (CR 100.4a)"])
+    end
+
+    it "applies the four-copy limit to the deck and the outside list together" do
+      d = with_outside([{ "card" => "Lone Tower", "count" => 1 }])
+      expect(d.errors).to eq(["Lone Tower: 5 copies; at most 4 are allowed (CR 100.2a, 100.4a)"])
+    end
+
+    it "reports path-addressed errors for bad entries" do
+      d = with_outside([{ "card" => "Grizzly Bears", "count" => 1 }, { "card" => "Black Lotus", "count" => 1 }, { "card" => "x" }])
+      expect(d.errors).to eq(["outside[1].card: \"Black Lotus\" is not defined in cards",
+                              "outside[2]: must be {\"card\": name, \"count\": positive integer}"])
+      expect { described_class.from_h("outside" => {}) }.to raise_error(Enjine::InvalidDeck, /outside: must be a list/)
+    end
+
+    it "adds cards to the outside list" do
+      d = with_outside([])
+      d.add_outside("Grizzly Bears", count: 2)
+      expect(d.outside_entries).to eq("grizzly_bears" => 2)
+      expect { d.add_outside("Black Lotus") }.to raise_error(Enjine::InvalidDeck, /not defined/)
+    end
   end
 end

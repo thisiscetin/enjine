@@ -40,13 +40,22 @@ module Enjine
         "name" => player.name, "life" => player.life, "poison" => player.poison,
         "mana_pool" => player.mana_pool.reject { |_, n| n.zero? }.transform_keys(&:to_s),
         "lands_played" => player.lands_played, "mulligans" => player.mulligans,
-        "hand_count" => player.hand.size, "library_count" => player.library.size,
+        "hand_count" => player.hand.size, "library_count" => player.library.size, "outside_count" => player.outside.size,
         "graveyard" => player.graveyard.map { object_view(engine, it) }
       }
       view["hand"] = player.hand.map { object_view(engine, it) } if sees_hand
+      view["outside"] = outside_view(engine, player) if sees_hand # CR 400.11a: only its owner knows their sideboard
       view["library"] = player.library.map { object_view(engine, it) } if sees_library
       view["library_top"] = object_view(engine, player.library.first) if sees_hand && looks_at_top?(engine, player)
       view
+    end
+
+    # The cards a player owns outside the game (CR 400.11a): not objects, so no ids (CR 400.11).
+    def outside_view(engine, player)
+      player.outside.map do |card|
+        defn = engine.catalog.fetch(card)
+        { "card" => card, "name" => defn.name, "type_line" => defn.type_line, "mana_cost" => defn.mana_cost&.to_s }.compact
+      end
     end
 
     # CR 401.5: an effect letting a player look at the top card of their library shows it to that player only.
