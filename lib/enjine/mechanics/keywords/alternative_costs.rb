@@ -283,8 +283,11 @@ module Enjine
         KEYS = %w[cast_with cast_from cast_with_this_turn].freeze
         KEYWORDS = %w[flashback harmonize mayhem warp evoke web_slinging sneak].freeze
         # Optional additional costs announced as the spell is cast (Engine::CastChoices#announce_kicker!):
-        # "if this spell was cast using teamwork" (CR 702.194b).
-        OPTIONAL = %w[teamwork].freeze
+        # "if this spell was cast using teamwork" (CR 702.194b), "if this spell's additional cost was paid" (CR 118.8b),
+        # "if the gift was promised" (CR 702.174k).
+        OPTIONAL_TEXT = { "teamwork" => "it was cast using teamwork", "additional_cost" => "its additional cost was paid",
+                          "gift" => "its gift was promised" }.freeze
+        OPTIONAL = OPTIONAL_TEXT.keys.freeze
         ZONES = %w[hand graveyard exile library outside].freeze
 
         def self.build(key, data, errors, path)
@@ -312,7 +315,7 @@ module Enjine
 
         def to_s
           case @key
-          when "cast_with" then OPTIONAL.include?(@value) ? "it was cast using #{@value}" : "its #{@value.tr("_", "-")} cost was paid"
+          when "cast_with" then OPTIONAL.include?(@value) ? OPTIONAL_TEXT.fetch(@value) : "its #{@value.tr("_", "-")} cost was paid"
           when "cast_from" then "it was cast from #{@value == "hand" ? "a hand" : "a #{@value}"}"
           else "a spell was cast with #{@value.tr("_", "-")} this turn"
           end

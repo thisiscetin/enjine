@@ -159,6 +159,35 @@ Rules: CR 601.2g, CR 601.2h, CR 602.2b
 }
 ```
 
+## one_of
+
+Pay one of the listed costs (two or more), chosen as the spell or ability is cast or activated (the `choose_cost_option` decision) or, for `pay` and ward, as it is paid. A cost that can't be paid can't be chosen.
+
+Rules: CR 118.3, CR 601.2b, CR 601.2f, CR 602.2b, CR 118.12
+
+| Parameter | Description |
+| --- | --- |
+| `(list)` | two or more costs |
+
+```json
+{
+  "one_of": [
+    {
+      "behold": {
+        "card": {
+          "subtypes": [
+            "goblin"
+          ]
+        }
+      }
+    },
+    {
+      "mana": "{2}"
+    }
+  ]
+}
+```
+
 ## pay_life
 
 Pay that much life (you lose it). Only possible while your life total is at least that much. `"X"` pays the X announced for the spell or ability (at most your life total); it may be a spell's additional cost.

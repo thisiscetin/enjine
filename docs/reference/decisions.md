@@ -16,6 +16,10 @@ Right after a mulligan, put one card from the new hand on the bottom of the libr
 
 While casting/activating: `{type: "cost", object: id}` picks the permanent (or card) a cost uses (the creature to tap for station, the creature to sacrifice, the creature beamed up, ...); `{type: "done"}` stops choosing for a cost of any number of permanents once enough are chosen (crew: total power N or more); `{type: "cancel"}` rewinds. `cost` describes the cost.
 
+## choose_cost_option
+
+While casting/activating with a choice between costs (cost `one_of`): `{type: "cost_option", option: i}` (0-based, in the order of `costs`) for one that could be paid; `{type: "cancel"}` rewinds.
+
 ## choose_kicker
 
 While casting a spell with kicker: `{type: "kick"}` pays the kicker cost too, `{type: "no_kick"}` doesn't; `{type: "cancel"}` rewinds. `cost` describes the kicker cost.

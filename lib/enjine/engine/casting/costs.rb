@@ -51,8 +51,8 @@ module Enjine
           # costs (CR 118.9, Permissions)
           cost = ctx["method"] ? alternative_base_cost(ctx) : chars(obj).mana_cost
           modes = spell_ability_of(obj)&.mode_costs(ctx["modes"] || []) || []
-          cost && Mana.sum_costs([cost, *spell_extra_mana(obj, ctx["kicked"]), *modes])
-        when "ability" then stack_ability(obj).mana_cost
+          cost && Mana.sum_costs([cost, costs_mana(frame_costs(ctx)), *modes]) # Engine::CostOptions
+        when "ability" then costs_mana(frame_costs(ctx))
         end
       end
 

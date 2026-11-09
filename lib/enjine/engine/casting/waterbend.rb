@@ -20,9 +20,6 @@ module Enjine
         n.positive? ? { "waterbend" => n } : {}
       end
 
-      # The waterbend part of a spell's additional costs (and kicker's when kicked).
-      def spell_waterbend(obj, kicked) = waterbend_purpose(spell_cost_list(obj, kicked))
-
       def spell_cost_list(obj, kicked)
         abilities = spell_cost_abilities(obj, :additional_cost)
         abilities += spell_cost_abilities(obj, :kicker) if kicked
@@ -31,11 +28,7 @@ module Enjine
 
       # CR 601.2f: as the total cost is locked in, so is the waterbend cost's generic part.
       def lock_waterbend!(ctx)
-        costs = case ctx["kind"]
-                when "ability" then stack_ability(object(ctx["object"])).costs
-                when "spell" then spell_cost_list(object(ctx["object"]), ctx["kicked"])
-                else []
-                end
+        costs = frame_costs(ctx) # Engine::CostOptions
         ctx["waterbend"] = waterbend_generic(costs, ctx["x"].to_i) if costs.any?(WATERBEND)
       end
 

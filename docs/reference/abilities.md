@@ -47,13 +47,14 @@ Rules: CR 602.1, CR 602.2, CR 602.5b, CR 602.5d, CR 702.177a, CR 702.193a, CR 70
 
 ## additional_cost
 
-As an additional cost to cast this spell, pay `cost` too (mana and/or chosen costs such as `sacrifice_permanent`). The spell can't be cast without it.
+As an additional cost to cast this spell, pay `cost` too (mana and/or chosen costs such as `sacrifice_permanent`). The spell can't be cast without it. `optional: true`: you may pay it (announced with the `choose_kicker` decision); the condition `{"cast_with": "additional_cost"}` then holds (the spell isn't kicked).
 
-Rules: CR 601.2b, CR 601.2f, CR 601.2h, CR 118.8
+Rules: CR 601.2b, CR 601.2f, CR 601.2h, CR 118.8, CR 118.8b
 
 | Parameter | Description |
 | --- | --- |
 | `cost` | list of costs |
+| `optional` | true: you may pay it |
 
 ```json
 {

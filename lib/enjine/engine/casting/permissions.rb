@@ -167,12 +167,12 @@ module Enjine
         return false if returns_creature?(method["alt"]) && return_candidates(index, method["alt"]).empty?
         return false unless additional_costs_payable?(obj) && alt_parts_payable?(obj, method) # CR 601.2f
 
-        cost = Mana.sum_costs([method_cost(obj, method), *spell_extra_mana(obj, false)])
         # CR 609.4b; a stand-in for a card outside the game is passed itself (it isn't in state.objects).
-        purpose = { "spell" => state.objects.key?(obj.id) ? obj.id : obj, "any_type" => method["any_mana_type"],
-                    **spell_waterbend(obj, false) }.compact
-        total = harmonize_reduced(total_cost(index, cost, spell: obj), best_harmonize_power(index, method))
-        ability_targetable?(spell_ability_of(obj), index, obj.id) && affordable?(index, total, nil, purpose)
+        purpose = { "spell" => state.objects.key?(obj.id) ? obj.id : obj, "any_type" => method["any_mana_type"] }.compact
+        ability_targetable?(spell_ability_of(obj), index, obj.id) &&
+          cost_variant_affordable?(index, spell_cost_list(obj, false), obj, method_cost(obj, method), nil, purpose) do
+            harmonize_reduced(total_cost(index, it, spell: obj), best_harmonize_power(index, method)) # CR 601.2b
+          end
       end
 
       # CR 608.2g: whether a card could be cast now during resolution without paying its mana cost
@@ -187,8 +187,8 @@ module Enjine
       def castable_while_resolving?(index, id)
         obj = object(id)
         own = chars(obj).mana_cost or return false # CR 118.6a: no mana cost, can't be cast paying it
-        cost = Mana.sum_costs([own, *spell_extra_mana(obj, false)])
-        free_castable?(index, id) && affordable?(index, total_cost(index, cost, spell: obj), nil)
+        free_castable?(index, id) &&
+          cost_variant_affordable?(index, spell_cost_list(obj, false), obj, own, nil, {}) { total_cost(index, it, spell: obj) }
       end
 
       # The mana cost paid with a method: the card's own, nothing (CR 118.9) or the beam me up cost, plus a
