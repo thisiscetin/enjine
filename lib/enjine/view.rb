@@ -53,6 +53,7 @@ module Enjine
         "graveyard" => player.graveyard.map { object_view(engine, it) }
       }
       view["speed"] = player.speed if player.speed # CR 702.179: public; absent while they have no speed
+      view["counters"] = player.counters.dup unless player.counters.nil? || player.counters.empty? # CR 122.1: rad, experience
       view["hand"] = player.hand.map { object_view(engine, it) } if sees_hand
       view["outside"] = outside_view(engine, player) if sees_hand # CR 400.11a: only its owner knows their sideboard
       view["library"] = player.library.map { object_view(engine, it) } if sees_library

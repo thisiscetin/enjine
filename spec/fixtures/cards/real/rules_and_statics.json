@@ -17,6 +17,171 @@
     }
   },
   {
+    "name": "Trade the Helm",
+    "mana_cost": "{4}{U}",
+    "types": [
+      "sorcery"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "targets": [
+            {
+              "permanent": {
+                "any_of": [
+                  "artifact",
+                  "creature"
+                ],
+                "controller": "you"
+              }
+            },
+            {
+              "permanent": {
+                "any_of": [
+                  "artifact",
+                  "creature"
+                ],
+                "controller": "opponent"
+              }
+            }
+          ],
+          "effects": [
+            {
+              "exchange_control": {
+                "to": {
+                  "target": 0
+                },
+                "with": {
+                  "target": 1
+                }
+              }
+            }
+          ]
+        }
+      },
+      {
+        "cycling": {
+          "cost": "{2}"
+        }
+      }
+    ],
+    "rarity": "uncommon",
+    "printing": {
+      "set": "dft",
+      "number": "69"
+    }
+  },
+  {
+    "name": "Fynn, the Fangbearer",
+    "mana_cost": "{1}{G}",
+    "types": [
+      "creature"
+    ],
+    "supertypes": [
+      "legendary"
+    ],
+    "subtypes": [
+      "human",
+      "warrior"
+    ],
+    "power": 1,
+    "toughness": 3,
+    "keywords": [
+      "deathtouch"
+    ],
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "deals_damage": {
+              "subject": {
+                "each": {
+                  "creature": {
+                    "keywords": [
+                      "deathtouch"
+                    ]
+                  }
+                },
+                "controller": "you"
+              },
+              "combat": true,
+              "to": "player"
+            }
+          },
+          "effects": [
+            {
+              "add_counters": {
+                "counter": "poison",
+                "amount": 2,
+                "to": {
+                  "triggering": "player"
+                }
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "uncommon",
+    "printing": {
+      "set": "fdn",
+      "number": "637"
+    }
+  },
+  {
+    "name": "Virulent Silencer",
+    "mana_cost": "{3}",
+    "types": [
+      "artifact",
+      "creature"
+    ],
+    "subtypes": [
+      "robot",
+      "assassin"
+    ],
+    "power": 2,
+    "toughness": 3,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "deals_damage": {
+              "subject": {
+                "each": {
+                  "creature": {
+                    "types": [
+                      "artifact"
+                    ],
+                    "token": false
+                  }
+                },
+                "controller": "you"
+              },
+              "combat": true,
+              "to": "player"
+            }
+          },
+          "effects": [
+            {
+              "add_counters": {
+                "counter": "poison",
+                "amount": 2,
+                "to": {
+                  "triggering": "player"
+                }
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "uncommon",
+    "printing": {
+      "set": "eoe",
+      "number": "248"
+    }
+  },
+  {
     "name": "Knight of Malice",
     "mana_cost": "{1}{B}",
     "types": [

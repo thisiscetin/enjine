@@ -952,6 +952,27 @@ and `base_power_toughness` (layer 7b); its `abilities` may be activated abilitie
                 { "player_rule": { "rule": "cant_gain_life", "affects": "opponents" } }] }
 ```
 
+**Life totals, exchanges and player counters** (CR 119.5, 701.12, 122.1).
+
+| Oracle words | Data |
+| --- | --- |
+| "Your life total becomes 10" | `{ "set_life": { "amount": 10 } }` (gains or loses the difference) |
+| "Exchange life totals with target opponent. If you lost life this way, draw that many cards" | `{ "exchange_life_totals": { "with": { "target": 0 } } }`, then `{ "draw": { "amount": { "this_way": 0 } } }` |
+| "Exchange control of target creature you control and target creature an opponent controls" | `{ "exchange_control": { "to": { "target": 0 }, "with": { "target": 1 } } }` |
+| "that player gets two poison counters" / "you get an experience counter" | `{ "add_counters": { "counter": "poison", "amount": 2, "to": { "triggering": "player" } } }` / `"counter": "experience", "to": "you"` |
+| "the number of experience counters you have" | amount `{ "counters": { "of": "you", "kind": "experience" } }` |
+
+A player with ten or more poison counters loses the game (CR 704.5c). An exchange that can't be
+completed doesn't happen at all (CR 701.12a).
+
+```json
+{ "name": "Example Venom Adder", "mana_cost": "{1}{G}", "types": ["creature"], "subtypes": ["snake"],
+  "power": 1, "toughness": 2, "keywords": ["deathtouch"],
+  "abilities": [{ "triggered": { "when": { "deals_damage": { "combat": true, "to": "player" } },
+                                 "effects": [{ "add_counters": { "counter": "poison", "amount": 2,
+                                                                 "to": { "triggering": "player" } } }] } }] }
+```
+
 **Hexproof from and protection from a quality** (CR 702.11d, 702.16). Abilities whose value is a
 card spec of the quality, matched against the spell, or the source of the ability or damage, as it
 is now: `{ "colors": ["B"] }` (any of those colors), `{ "types": ["instant"] }`,

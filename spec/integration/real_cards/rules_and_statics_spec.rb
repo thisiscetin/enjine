@@ -110,6 +110,26 @@ RSpec.describe "Real cards: losing abilities, restrictions and other rules effec
     expect(engine.targetable?(grace, 0, targeter: malice)).to be(true) # its own controller may
   end
 
+  it "Trade the Helm: exchange control of an artifact or creature you control and one an opponent controls (CR 701.12b)" do
+    game = board(hand: ["Trade the Helm"], mine: ["Giant Cindermaw"], theirs: ["Vampire Nighthawk"], mana: { U: 5 })
+    maw = obj_id(game, "Giant Cindermaw")
+    hawk = obj_id(game, "Vampire Nighthawk")
+    cast(game, "Trade the Helm", { type: "target", target: maw }, { type: "target", target: hawk })
+    expect([game.state.object(maw).controller, game.state.object(hawk).controller]).to eq([1, 0])
+  end
+
+  it "Virulent Silencer and Fynn: combat damage to a player gives poison counters (CR 122.1f)" do
+    game = board(mine: ["Virulent Silencer", "Fynn, the Fangbearer"])
+    engine = game.instance_variable_get(:@engine)
+    game.submit(type: "pass") until game.pending_decision.kind == "declare_attackers"
+    ["Virulent Silencer", "Fynn, the Fangbearer"].each do |card|
+      game.submit(type: "attack", object: obj_id(game, card), target: "player:bob")
+    end
+    game.submit(game.legal_options.first) until game.step == :end || game.over?
+    expect(engine.player_counters(1)).to eq("poison" => 4)
+    expect(life(game, "bob")).to eq(17)
+  end
+
   it "The Wondrous Wasp: the target loses all abilities only while the Wasp remains (CR 611.2b)" do
     game = board(hand: ["The Wondrous Wasp"], theirs: ["Vampire Nighthawk"], mana: { U: 2 })
     hawk = obj_id(game, "Vampire Nighthawk")

@@ -30,6 +30,45 @@
     "rules_text": "When this creature enters, draw a card."
   },
   {
+    "name": "Venomfang Adder",
+    "mana_cost": "{1}{G}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "snake"
+    ],
+    "power": 1,
+    "toughness": 2,
+    "keywords": [
+      "deathtouch"
+    ],
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "deals_damage": {
+              "combat": true,
+              "to": "player"
+            }
+          },
+          "effects": [
+            {
+              "add_counters": {
+                "counter": "poison",
+                "amount": 2,
+                "to": {
+                  "triggering": "player"
+                }
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "Deathtouch\nWhenever this creature deals combat damage to a player, that player gets two poison counters."
+  },
+  {
     "name": "Stillwing Moth",
     "mana_cost": "{1}{U}",
     "types": [

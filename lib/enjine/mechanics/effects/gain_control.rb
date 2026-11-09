@@ -39,6 +39,49 @@ module Enjine
 
         def to_s = "#{gains} gains control#{" until end of turn" if duration == "end_of_turn"} → #{to}"
       end
+
+      # "Exchange control of target artifact you control and target artifact an opponent controls" (CR 701.12a-b):
+      # if both permanents are still there and controlled by different players, each player gains control of
+      # the other one (indefinitely); otherwise nothing happens.
+      class ExchangeControl < Effect
+        primitive :effect, :exchange_control,
+                  description: "The permanent `to` references and the one `with` references exchange controllers. " \
+                               "If either is gone or both have the same controller, nothing happens.",
+                  rules: %w[701.12a 701.12b 613.1b],
+                  params: { "to" => "selector (a permanent)", "with" => "selector (a permanent)" },
+                  example: { "exchange_control" => { "to" => { "target" => 0 }, "with" => { "target" => 1 } } }
+
+        attr_reader :with
+
+        def self.keys = %w[to with if]
+
+        def setup(params, errors, path)
+          @with = Exchange.with(params, errors, path, @targets_count, @results_count)
+        end
+
+        def apply(engine, ctx)
+          first, second = [to, with].map { |sel| sel.resolve(engine, ctx).find { engine.state.battlefield.include?(it) } }
+          return if first.nil? || second.nil? || first == second
+
+          a = engine.object(first)
+          b = engine.object(second)
+          return if a.controller == b.controller
+
+          timestamp = engine.next_timestamp!
+          [[a, b.controller], [b, a.controller]].each { |obj, controller| engine.gain_control!(obj, controller, timestamp) }
+        end
+
+        def to_s = "exchange control of #{to} and #{with}"
+      end
+
+      # The `with` side of an exchange (CR 701.12a): a required selector.
+      module Exchange
+        def self.with(params, errors, path, targets_count, results_count)
+          raw = Mechanics.fetch_param(params, :with)
+          errors << "#{path}.with: required" if raw.nil?
+          Selector.build(raw || "you", errors, "#{path}.with", targets_count: targets_count, results_count: results_count)
+        end
+      end
     end
   end
 end

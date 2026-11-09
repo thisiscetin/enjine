@@ -4,9 +4,9 @@
 
 ## add_counters
 
-Put `amount` counters named `counter` on each referenced permanent. Any counter name works (+1/+1, -1/-1, loyalty, stun, shield, oil, a keyword, ...); see docs/reference/counters.md for the ones with rules.
+Put `amount` counters named `counter` on each referenced permanent or player. Any counter name works (+1/+1, -1/-1, loyalty, stun, shield, oil, a keyword, ...; on a player poison, experience, ...); see docs/reference/counters.md for the ones with rules. A player with ten or more poison counters loses the game.
 
-Rules: CR 122.1, CR 122.6, CR 613.4c
+Rules: CR 122.1, CR 122.1f, CR 122.6, CR 613.4c, CR 704.5c
 
 | Parameter | Description |
 | --- | --- |
@@ -845,6 +845,51 @@ Rules: CR 701.63a, CR 701.63b
 {
   "endure": {
     "amount": 2
+  }
+}
+```
+
+## exchange_control
+
+The permanent `to` references and the one `with` references exchange controllers. If either is gone or both have the same controller, nothing happens.
+
+Rules: CR 701.12a, CR 701.12b, CR 613.1b
+
+| Parameter | Description |
+| --- | --- |
+| `to` | selector (a permanent) |
+| `with` | selector (a permanent) |
+
+```json
+{
+  "exchange_control": {
+    "to": {
+      "target": 0
+    },
+    "with": {
+      "target": 1
+    }
+  }
+}
+```
+
+## exchange_life_totals
+
+The player `to` references (default you) and the one `with` references exchange life totals: each gains or loses the difference. If either can't gain life and would, no exchange happens. The life the first player lost this way is recorded for {"this_way": n}.
+
+Rules: CR 701.12a, CR 701.12c, CR 119.7
+
+| Parameter | Description |
+| --- | --- |
+| `to` | selector (a player, default you) |
+| `with` | selector (a player) |
+
+```json
+{
+  "exchange_life_totals": {
+    "with": {
+      "target": 0
+    }
   }
 }
 ```
@@ -1733,6 +1778,25 @@ Rules: CR 205.1a, CR 613.1d, CR 611.2c, CR 514.2
     "to": {
       "target": 0
     }
+  }
+}
+```
+
+## set_life
+
+Each referenced player's life total becomes `amount` (default: you): they gain or lose the difference (so "can't gain life" and life-gain triggers apply).
+
+Rules: CR 119.5, CR 119.7
+
+| Parameter | Description |
+| --- | --- |
+| `amount` | amount |
+| `to` | selector |
+
+```json
+{
+  "set_life": {
+    "amount": 10
   }
 }
 ```

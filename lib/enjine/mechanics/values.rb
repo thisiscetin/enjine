@@ -12,7 +12,7 @@ module Enjine
     #   {"hand_size" | "life" | "graveyard_size": player selector}
     #   {"distinct_names": selector}                  how many different names they have (strange new worlds)
     #   {"distinct_types": selector}                  how many different creature types they have (CR 205.3m)
-    #   {"counters": {"of": selector, "kind": name}}  counters on them (any kind without "kind", CR 122)
+    #   {"counters": {"of": selector, "kind": name}}  counters on them, objects or players (any kind without "kind", CR 122)
     #   {"life_gained_this_turn" | "life_lost_this_turn" | "dilemmas_this_turn" | "returned_this_turn"
     #    | "cards_drawn_this_turn" | "cards_discarded_this_turn"
     #    | "spells_cast_this_game": player selector}  this turn's (or game's) history, see Engine::TurnHistory
@@ -210,7 +210,7 @@ module Enjine
       end
 
       # {"counters": {"of": selector, "kind": name}}: counters of one kind (or of every kind) on the
-      # objects (CR 122). A source that has left the battlefield counts as it last existed (CR 608.2h).
+      # objects or players (CR 122). A source that has left the battlefield counts as it last existed (CR 608.2h).
       class Counters
         def self.build(data, errors, path, **context)
           data = data.is_a?(Hash) ? data.transform_keys(&:to_s) : {}
@@ -227,8 +227,10 @@ module Enjine
         end
 
         def value(engine, ctx)
-          refs = @selector.resolve(engine, ctx).select { engine.state.objects.key?(it) }
-          counters = refs.map { engine.object(it).counters }
+          all = @selector.resolve(engine, ctx)
+          refs = all.select { engine.state.objects.key?(it) }
+          counters = refs.map { engine.object(it).counters } +
+                     all.filter_map { Filters.player_index(engine, it) }.map { engine.player_counters(it) } # CR 122.1
           counters = [Amount.source_lki(engine, ctx)&.[]("counters") || {}] if refs.empty? && @selector.kind == :self
           counters.sum { @kind ? it.fetch(@kind, 0) : it.values.sum }
         end

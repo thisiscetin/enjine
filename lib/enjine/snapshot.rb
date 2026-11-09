@@ -94,6 +94,7 @@ module Enjine
         pl.restricted_mana = deep_copy(hash.fetch("restricted_mana", []))
         pl.outside = hash.fetch("outside", []).dup
         pl.speed = hash["speed"] # CR 702.179; absent: no speed
+        pl.counters = hash.fetch("counters", {}).dup # CR 122.1: counters other than poison
       end
     end
 
@@ -130,10 +131,15 @@ module Enjine
       errors << "players: names must be distinct non-empty strings" unless names.all?(String) && names.uniq.size == 2
     end
 
-    # What happened this turn and this game (Engine::TurnHistory); absent in older snapshots.
+    # What happened this turn and this game (Engine::TurnHistory) and counters on the players; absent in older
+    # snapshots.
     def validate_logs(players, errors)
       players.each_with_index.select { |pl, _| pl.is_a?(Hash) }.each do |pl, i|
         %w[turn_log game_log].each { |k| errors << "players[#{i}].#{k}: must be an object" unless pl.fetch(k, {}).is_a?(Hash) }
+        counters = pl.fetch("counters", {}) # CR 122.1: counters other than poison; absent in older snapshots
+        next if counters.is_a?(Hash) && counters.all? { |k, n| Mechanics::Counters.valid?(k) && k != "poison" && non_negative?(n) }
+
+        errors << "players[#{i}].counters: must map counter kinds other than poison to non-negative integers"
       end
     end
 

@@ -27,6 +27,85 @@
     "rules_text": "Lightning Bolt deals 3 damage to any target."
   },
   {
+    "name": "Fortune Inversion",
+    "mana_cost": "{2}{W}{B}",
+    "types": [
+      "sorcery"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "targets": [
+            "opponent"
+          ],
+          "effects": [
+            {
+              "exchange_life_totals": {
+                "with": {
+                  "target": 0
+                }
+              }
+            },
+            {
+              "draw": {
+                "amount": {
+                  "this_way": 0
+                }
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "Exchange life totals with target opponent. If you lost life this way, draw that many cards."
+  },
+  {
+    "name": "Swap Gambit",
+    "mana_cost": "{3}{U}",
+    "types": [
+      "sorcery"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "targets": [
+            {
+              "permanent": {
+                "any_of": [
+                  "artifact",
+                  "creature"
+                ],
+                "controller": "you"
+              }
+            },
+            {
+              "permanent": {
+                "any_of": [
+                  "artifact",
+                  "creature"
+                ],
+                "controller": "opponent"
+              }
+            }
+          ],
+          "effects": [
+            {
+              "exchange_control": {
+                "to": {
+                  "target": 0
+                },
+                "with": {
+                  "target": 1
+                }
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "Exchange control of target artifact or creature you control and target artifact or creature an opponent controls."
+  },
+  {
     "name": "Unshielded Blast",
     "mana_cost": "{R}",
     "types": [

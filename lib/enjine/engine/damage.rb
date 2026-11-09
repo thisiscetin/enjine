@@ -88,6 +88,21 @@ module Enjine
         emit Events::CountersChanged.new(object: object.id, counter: kind, from: before, to: before + amount)
       end
 
+      # Counters on a player (CR 122.1): poison (ten or more lose the game, CR 122.1f, 704.5c), experience, rad, ...
+      def player_counters(index)
+        pl = player(index)
+        (pl.counters || {}).merge(pl.poison.positive? ? { "poison" => pl.poison } : {})
+      end
+
+      def add_player_counters!(index, kind, amount)
+        return unless amount.positive?
+
+        pl = player(index)
+        before = player_counters(index).fetch(kind, 0)
+        kind == "poison" ? pl.poison += amount : (pl.counters ||= {})[kind] = before + amount
+        emit Events::PlayerCountersChanged.new(player: pl.name, counter: kind, from: before, to: before + amount)
+      end
+
       def remove_counters!(object, kind, amount)
         before = object.counters.fetch(kind, 0)
         after = [before - amount, 0].max
