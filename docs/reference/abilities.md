@@ -963,6 +963,24 @@ Rules: CR 702.11c, CR 115.4, CR 508.1c, CR 402.2, CR 514.1, CR 615.1, CR 615.1a,
 }
 ```
 
+## saddle
+
+Saddle N: tap any number of other untapped creatures you control with total power N or more (chosen one at a time; `done` once the total is enough): this permanent becomes saddled until end of turn. Activate only as a sorcery.
+
+Rules: CR 702.171a, CR 702.171b, CR 702.171c
+
+| Parameter | Description |
+| --- | --- |
+| `power` | integer >= 1 (the N of saddle N) |
+
+```json
+{
+  "saddle": {
+    "power": 2
+  }
+}
+```
+
 ## sneak
 
 Sneak: any time you could cast an instant during your declare blockers step, you may cast this spell by paying `cost` and returning an unblocked attacking creature you control to its owner's hand rather than its mana cost. A permanent spell cast this way enters tapped and attacking what that creature was attacking. Cast option `via: "alt:<ref>"`.
@@ -1135,13 +1153,14 @@ Rules: CR 603.2, CR 603.3, CR 603.3b, CR 603.3d
 
 ## ward
 
-Ward: whenever this permanent becomes the target of a spell or ability an opponent controls, counter that spell or ability unless its controller pays `cost`.
+Ward: whenever this permanent becomes the target of a spell or ability an opponent controls, counter that spell or ability unless its controller pays `cost` (or, with `waterbend`, waterbends that cost: "Ward—Waterbend {4}").
 
-Rules: CR 702.21a, CR 601.2c, CR 603.2, CR 701.6a
+Rules: CR 702.21a, CR 601.2c, CR 603.2, CR 701.6a, CR 701.67a
 
 | Parameter | Description |
 | --- | --- |
 | `cost` | mana cost string, e.g. "{2}" |
+| `waterbend` | mana cost string, instead of cost |
 
 ```json
 {

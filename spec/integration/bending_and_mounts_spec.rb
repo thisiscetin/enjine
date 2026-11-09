@@ -29,9 +29,10 @@ RSpec.describe "Bending, mounts and body keywords" do
                                                          "effects" => [{ "gain_life" => { "amount" => 1 } }] } }]),
       creature("Spec Geyser Diver", [{ "activated" => { "cost" => [{ "waterbend" => "{3}" }], "effects" => [draw] } }]),
       creature("Spec Tide Sentry", [{ "activated" => { "cost" => [{ "waterbend" => "{1}" }, "tap"],
-                                                      "effects" => [draw] } }]),
+                                                       "effects" => [draw] } }]),
       creature("Spec River Spirit", [], cost: "{U}", extra_keys: { "abilities" => [
-                 { "additional_cost" => { "cost" => [{ "waterbend" => "{2}" }] } }] }),
+                 { "additional_cost" => { "cost" => [{ "waterbend" => "{2}" }] } }
+               ] }),
       spell("Spec Revival Tide", [{ "draw" => { "amount" => 1, "if" => { "not" => { "kicked" => true } } } },
                                   { "draw" => { "amount" => 3, "if" => { "kicked" => true } } }],
             cost: "{U}", extra: [{ "kicker" => { "cost" => [{ "waterbend" => "{2}" }] } }]),
@@ -46,7 +47,7 @@ RSpec.describe "Bending, mounts and body keywords" do
                                                       "effects" => [draw] } },
                                    { "triggered" => { "when" => { "becomes_saddled" => {} },
                                                       "effects" => [{ "gain_life" => { "amount" => { "triggering" => "amount" } } }] } }],
-               subtypes: ["cat", "mount"]),
+               subtypes: %w[cat mount]),
       creature("Spec Eager Rider", [{ "triggered" => { "when" => { "saddles_mount" => {} },
                                                        "effects" => [{ "pump" => { "power" => 2, "toughness" => 0,
                                                                                    "to" => { "triggering" => "object" } } }] } }],
@@ -58,16 +59,18 @@ RSpec.describe "Bending, mounts and body keywords" do
       spell("Spec Air Lesson", [{ "airbend" => { "to" => { "target" => 0 } } }, draw],
             targets: [{ "permanent" => { "not" => ["land"] } }], types: ["instant"], cost: "{W}"),
       spell("Spec Gust Rebuke", [{ "airbend" => { "to" => { "target" => 0 } } }],
-            targets: [{ "one_of" => ["creature", "spell"] }], types: ["instant"], cost: "{W}"),
+            targets: [{ "one_of" => %w[creature spell] }], types: ["instant"], cost: "{W}"),
       creature("Spec Air Watcher", [{ "triggered" => { "when" => { "airbends" => { "controller" => "any" } },
                                                        "effects" => [{ "gain_life" => { "amount" => 1 } }] } }]),
       creature("Spec Thorn Wyrm", [], power: 2, toughness: 4, keywords: ["wither"]),
+      creature("Spec Kyoshi Serpent", [{ "ward" => { "waterbend" => "{2}" } }], power: 5, toughness: 5),
+      spell("Spec Exile Rite", [{ "exile" => { "to" => { "target" => 0 } } }], targets: ["creature"], types: ["instant"]),
       spell("Spec Thorn Burst", [{ "deal_damage" => { "amount" => 2, "to" => { "target" => 0 } } }],
             targets: ["any_target"], types: ["instant"], cost: "{R}").merge("keywords" => ["wither"]),
-      creature("Spec Rot Hulk", [], power: 5, toughness: 5, keywords: ["decayed", "trample"]),
+      creature("Spec Rot Hulk", [], power: 5, toughness: 5, keywords: %w[decayed trample]),
       spell("Spec Rot Renewal", [{ "add_counters" => { "counter" => "decayed", "amount" => 1, "to" => { "target" => 0 } } }],
             targets: ["creature"]),
-      creature("Spec Weary Knight", [{ "activated" => { "cost" => ["tap", "exert"], "effects" => [draw] } }],
+      creature("Spec Weary Knight", [{ "activated" => { "cost" => %w[tap exert], "effects" => [draw] } }],
                power: 2, toughness: 1),
       creature("Spec Ember Pupil", [{ "firebending" => { "amount" => 1 } },
                                     { "triggered" => { "when" => { "firebends" => {} },
@@ -134,6 +137,21 @@ RSpec.describe "Bending, mounts and body keywords" do
       expect(game.state.object(back).tapped).to be(true)
       expect(chars(game, back).creature?).to be(false)
       expect(ids_in(game, "alice", :graveyard).map { game.state.object(it).card }).not_to include("forest")
+    end
+
+    it "returns the land tapped when it's put into exile (CR 701.66a)" do
+      game = board(hand: ["Spec Earth Lesson", "Spec Exile Rite"], field: ["Forest"], pool: { C: 2 })
+      forest = obj_id(game, "Forest")
+      cast(game, "Spec Earth Lesson", target: forest)
+      pay(game)
+      pass_both(game)
+      cast(game, "Spec Exile Rite", target: forest)
+      pay(game)
+      pass_both(game)
+      pass_both(game)
+      back = mine(game, "forest").first
+      expect(game.state.object(back).tapped).to be(true)
+      expect(game.state.exile).to be_empty
     end
 
     it "names the land as its result and counts as earthbending (CR 701.66b)" do
@@ -223,6 +241,23 @@ RSpec.describe "Bending, mounts and body keywords" do
       game.submit(type: "waterbend", object: obj_id(game, "Grizzly Bears"))
       expect(ids_in(game, "alice", :hand).size).to eq(2)
       expect(game.state.stack).to be_empty
+    end
+  end
+
+  describe "waterbend costs paid while resolving (CR 118.12)" do
+    it "ward—waterbend: the targeting player may tap artifacts and creatures to pay it (CR 702.21a, 701.67a)" do
+      game = board(hand: ["Lightning Bolt"], field: ["Spec Trinket", "Grizzly Bears"], bob_field: ["Spec Kyoshi Serpent"],
+                   pool: { R: 1 })
+      serpent = obj_id(game, "Spec Kyoshi Serpent")
+      cast(game, "Lightning Bolt", target: serpent)
+      pay(game)
+      pass_both(game) # ward resolves
+      expect(game.pending_decision.kind).to eq("effect_choice")
+      game.submit(type: "pay")
+      game.submit(type: "waterbend", object: obj_id(game, "Spec Trinket"))
+      game.submit(type: "waterbend", object: obj_id(game, "Grizzly Bears"))
+      pass_both(game)
+      expect(game.state.object(serpent).damage).to eq(3)
     end
   end
 

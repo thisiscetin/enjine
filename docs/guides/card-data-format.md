@@ -899,12 +899,32 @@ power"). Keyword *actions* are effects.
 | "it endures 2" (CR 701.63) | `{ "endure": { "amount": 2 } }` (a fixed number) |
 | "create two 1/1 tokens tapped and attacking" | `create_token` with `"tapped": true, "attacking": true` |
 | "add {R}{R}; until end of combat, you don't lose this mana" | `{ "add_mana": { "produce": "{R}{R}", "until": "end_of_combat" } }` |
+| "earthbend 2" (CR 701.66) | a target `{ "land": { "controller": "you" } }` and `{ "earthbend": { "amount": 2, "to": { "target": 0 } } }` (the land is its result: "that land becomes an Island" is `become` with `{ "result": n }`) |
+| "Waterbend {3}: …" / "As an additional cost to cast this spell, waterbend {X}" (CR 701.67) | the cost `{ "waterbend": "{3}" }` in an activated ability's `cost`, an `additional_cost` or `kicker`; while paying, `{type: "waterbend", object: id}` taps an artifact or creature for {1} of it |
+| "you may waterbend {4} as an additional cost … if this spell's additional cost was paid" | `{ "kicker": { "cost": [{ "waterbend": "{4}" }] } }` and the condition `{ "kicked": true }` |
+| "discard a card unless you waterbend {2}" / "Ward—Waterbend {4}" | `{ "pay": { "waterbend": "{2}", "otherwise": [{ "discard": { "amount": 1, "to": "you" } }] } }` / `{ "ward": { "waterbend": "{4}" } }` (also `counter_unless_pays`) |
+| "airbend target creature or spell" (CR 701.65) | `{ "airbend": { "to": { "target": 0 } } }` (the owner may cast each exiled card for {2} while it stays exiled) |
+| "Whenever you waterbend, earthbend, firebend, or airbend" | `{ "any_of": [{ "waterbends": {} }, { "earthbends": {} }, { "firebends": {} }, { "airbends": {} }] }` |
+| "Saddle 2" (CR 702.171) / "becomes saddled until end of turn" | ability `{ "saddle": { "power": 2 } }` / effect `{ "become_saddled": { "to": … } }` |
+| "Whenever this creature attacks while saddled" | `"when": { "attacks": {} }, "while": { "source": { "creature": { "saddled": true } } }` (filters take `"saddled"`) |
+| "Whenever this creature becomes saddled" / "saddles a Mount" | `{ "becomes_saddled": {} }` / `{ "saddles_mount": {} }` (`{ "triggering": "object" }` is the Mount) |
+| "{W}, {T}, Exert this creature: …" (CR 701.43) | the cost `"exert"`: it doesn't untap during your next untap step |
+| "Decayed" (CR 702.147), "Wither" (CR 702.80) | `"keywords": ["decayed"]` (a `decayed` counter gives it too), `"keywords": ["wither"]` |
 
 ```json
 { "name": "Example Ember Captain", "mana_cost": "{2}{R}", "types": ["creature"], "subtypes": ["human", "soldier"],
   "power": 2, "toughness": 2, "keywords": ["prowess"],
   "abilities": [{ "mobilize": { "amount": 1 } }, { "firebending": { "amount": { "power": "self" } } },
                 { "triggered": { "when": { "enters": {} }, "effects": [{ "connive": {} }] } }] }
+```
+
+```json
+{ "name": "Example Stone Monk", "mana_cost": "{2}{G}", "types": ["creature"], "subtypes": ["human", "monk", "mount"],
+  "power": 2, "toughness": 2,
+  "abilities": [{ "triggered": { "when": { "enters": {} }, "targets": [{ "land": { "controller": "you" } }],
+                                 "effects": [{ "earthbend": { "amount": 2, "to": { "target": 0 } } }] } },
+                { "activated": { "cost": [{ "waterbend": "{3}" }], "effects": [{ "draw": { "amount": 1 } }] } },
+                { "saddle": { "power": 1 } }] }
 ```
 
 ---

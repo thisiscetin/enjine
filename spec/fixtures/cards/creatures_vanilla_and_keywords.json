@@ -503,5 +503,38 @@
     "power": 2,
     "toughness": 1,
     "rules_text": "Prowess"
+  },
+  {
+    "name": "Thornback Drake",
+    "mana_cost": "{3}{B}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "drake"
+    ],
+    "keywords": [
+      "flying",
+      "wither"
+    ],
+    "power": 2,
+    "toughness": 3,
+    "rules_text": "Flying, wither"
+  },
+  {
+    "name": "Rotting Brute",
+    "mana_cost": "{1}{B}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "zombie"
+    ],
+    "keywords": [
+      "decayed"
+    ],
+    "power": 4,
+    "toughness": 4,
+    "rules_text": "Decayed"
   }
 ]

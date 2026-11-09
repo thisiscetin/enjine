@@ -3633,5 +3633,132 @@
         }
       }
     ]
+  },
+  {
+    "name": "Stonefist Adept",
+    "mana_cost": "{2}{G}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "human",
+      "monk"
+    ],
+    "power": 2,
+    "toughness": 2,
+    "rules_text": "When this creature enters, earthbend 2.",
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "enters": {}
+          },
+          "targets": [
+            {
+              "land": {
+                "controller": "you"
+              }
+            }
+          ],
+          "effects": [
+            {
+              "earthbend": {
+                "amount": 2,
+                "to": {
+                  "target": 0
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Elemental Pilgrim",
+    "mana_cost": "{1}{W}{U}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "human",
+      "monk"
+    ],
+    "power": 2,
+    "toughness": 3,
+    "rules_text": "Whenever you waterbend, earthbend, firebend, or airbend, draw a card.",
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "any_of": [
+              {
+                "waterbends": {}
+              },
+              {
+                "earthbends": {}
+              },
+              {
+                "firebends": {}
+              },
+              {
+                "airbends": {}
+              }
+            ]
+          },
+          "effects": [
+            {
+              "draw": {
+                "amount": 1
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Dune Strider",
+    "mana_cost": "{2}{W}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "horse",
+      "mount"
+    ],
+    "power": 3,
+    "toughness": 3,
+    "rules_text": "Whenever this creature attacks while saddled, it gets +2/+2 until end of turn. Saddle 2",
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "attacks": {}
+          },
+          "while": {
+            "source": {
+              "creature": {
+                "saddled": true
+              }
+            }
+          },
+          "effects": [
+            {
+              "pump": {
+                "power": 2,
+                "toughness": 2,
+                "to": "self"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "saddle": {
+          "power": 2
+        }
+      }
+    ]
   }
 ]

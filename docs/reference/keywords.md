@@ -156,6 +156,20 @@ Rules: CR 702.2b, CR 702.2c, CR 704.5h
 }
 ```
 
+## decayed
+
+This creature can't block. When it attacks, sacrifice it at end of combat.
+
+Rules: CR 702.147a, CR 122.1b
+
+```json
+{
+  "keywords": [
+    "decayed"
+  ]
+}
+```
+
 ## defender
 
 Can't attack.
@@ -432,6 +446,20 @@ Rules: CR 702.20b
 {
   "keywords": [
     "vigilance"
+  ]
+}
+```
+
+## wither
+
+Damage this source deals to creatures is dealt as that many -1/-1 counters instead of marked damage, put by its controller.
+
+Rules: CR 702.80a, CR 702.80c, CR 702.80d, CR 120.3d
+
+```json
+{
+  "keywords": [
+    "wither"
   ]
 }
 ```

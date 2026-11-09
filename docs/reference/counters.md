@@ -54,7 +54,7 @@ Rules: CR 122.1h, CR 614.1a
 
 ## keyword
 
-A counter named after a keyword (flying, first_strike, double_strike, deathtouch, haste, hexproof, indestructible, lifelink, menace, reach, trample, vigilance) gives the permanent that keyword (layer 6). Write the keyword itself as the counter name.
+A counter named after a keyword (flying, first_strike, double_strike, deathtouch, decayed, haste, hexproof, indestructible, lifelink, menace, reach, trample, vigilance) gives the permanent that keyword (layer 6). Write the keyword itself as the counter name.
 
 Rules: CR 122.1b, CR 613.1f
 

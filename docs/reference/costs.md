@@ -40,6 +40,16 @@ Rules: CR 701.9a, CR 602.2b, CR 113.6m, CR 118.3
 "discard_self"
 ```
 
+## exert
+
+Exert this permanent: it doesn't untap during your next untap step.
+
+Rules: CR 701.43a, CR 701.43b, CR 701.43c
+
+```json
+"exert"
+```
+
 ## exile_from_hand
 
 Exile `count` cards from your hand (default 1), chosen while casting or activating, exiled as the spell or ability becomes cast. `card` (a card spec) restricts which.
@@ -180,5 +190,21 @@ Rules: CR 601.2h, CR 602.2b, CR 302.6, CR 118.3
       }
     }
   }
+}
+```
+
+## waterbend
+
+Waterbend [cost]: pay this mana cost; for each generic mana in it you may instead tap an untapped artifact or creature you control (pay_cost option `{type: "waterbend", object: id}`). Only the waterbend cost's own generic mana can be paid this way.
+
+Rules: CR 701.67a, CR 701.67b, CR 701.67c
+
+| Parameter | Description |
+| --- | --- |
+| `(value)` | mana cost string, e.g. "{3}" or "{X}" |
+
+```json
+{
+  "waterbend": "{3}"
 }
 ```

@@ -1425,5 +1425,71 @@
       }
     ],
     "rules_text": "Start your engines! Max speed: double strike. Max speed: two mana, exile this card from your graveyard: draw a card."
+  },
+  {
+    "name": "Tidecaller Initiate",
+    "mana_cost": "{2}{U}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "human",
+      "warrior"
+    ],
+    "power": 2,
+    "toughness": 3,
+    "rules_text": "Waterbend {3}: Draw a card.",
+    "abilities": [
+      {
+        "activated": {
+          "cost": [
+            {
+              "waterbend": "{3}"
+            }
+          ],
+          "effects": [
+            {
+              "draw": {
+                "amount": 1
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Weary Lancer",
+    "mana_cost": "{W}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "human",
+      "knight"
+    ],
+    "power": 2,
+    "toughness": 1,
+    "rules_text": "{W}, {T}, Exert this creature: You gain 2 life.",
+    "abilities": [
+      {
+        "activated": {
+          "cost": [
+            {
+              "mana": "{W}"
+            },
+            "tap",
+            "exert"
+          ],
+          "effects": [
+            {
+              "gain_life": {
+                "amount": 2
+              }
+            }
+          ]
+        }
+      }
+    ]
   }
 ]

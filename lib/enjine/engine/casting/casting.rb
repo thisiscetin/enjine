@@ -41,9 +41,9 @@ module Enjine
         end
 
         cost = total_cost(index, ability.mana_cost, ability: ability, source: id)
-        ability_targetable?(ability, index, nil, id,
-                            ref: ability_ref) && affordable?(index, cost, needs_tap?(ability) ? id : nil,
-                                                 { "ability" => id, **waterbend_purpose(ability.costs) })
+        purpose = { "ability" => id, **waterbend_purpose(ability.costs) } # CR 701.67a (Engine::Waterbending)
+        ability_targetable?(ability, index, nil, id, ref: ability_ref) &&
+          affordable?(index, cost, needs_tap?(ability) ? id : nil, purpose)
       end
 
       # Whether the ability can get legal targets: for modal abilities, enough modes must (CR 700.2),

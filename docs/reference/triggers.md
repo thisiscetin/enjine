@@ -23,6 +23,22 @@ Rules: CR 602.2, CR 605.1a, CR 603.2, CR 201.4, CR 702.177a
 }
 ```
 
+## airbends
+
+A player (`controller`: you (default) | opponent | any) airbends.
+
+Rules: CR 701.65b
+
+| Parameter | Description |
+| --- | --- |
+| `controller` | you | opponent | any |
+
+```json
+{
+  "airbends": {}
+}
+```
+
 ## any_of
 
 Triggers when any of the listed trigger conditions is met.
@@ -95,6 +111,22 @@ Rules: CR 702.122e, CR 603.2
 ```json
 {
   "becomes_crewed": {}
+}
+```
+
+## becomes_saddled
+
+The subject becomes saddled (its saddle ability resolved, or an effect saddled it).
+
+Rules: CR 702.171b, CR 603.2
+
+| Parameter | Description |
+| --- | --- |
+| `subject` | "self" (default) or {"each": filter, ...} |
+
+```json
+{
+  "becomes_saddled": {}
 }
 ```
 
@@ -315,6 +347,22 @@ Rules: CR 121.1, CR 121.2
 }
 ```
 
+## earthbends
+
+A player (`controller`: you (default) | opponent | any) earthbends.
+
+Rules: CR 701.66b
+
+| Parameter | Description |
+| --- | --- |
+| `controller` | you | opponent | any |
+
+```json
+{
+  "earthbends": {}
+}
+```
+
 ## enters
 
 The subject enters the battlefield. `untapped: true`: only if it entered untapped.
@@ -350,6 +398,22 @@ Rules: CR 700.17, CR 700.2, CR 601.2b, CR 603.3c
 ```json
 {
   "faces_dilemma": {}
+}
+```
+
+## firebends
+
+A player (`controller`: you (default) | opponent | any) firebends.
+
+Rules: CR 702.189b
+
+| Parameter | Description |
+| --- | --- |
+| `controller` | you | opponent | any |
+
+```json
+{
+  "firebends": {}
 }
 ```
 
@@ -497,6 +561,24 @@ Rules: CR 701.21a, CR 603.10a, CR 603.2c
 }
 ```
 
+## saddles_mount
+
+The subject (a creature) saddles a Mount: it's tapped to pay that Mount's saddle cost. {"triggering": "object"} is the Mount.
+
+Rules: CR 702.171c, CR 603.2
+
+| Parameter | Description |
+| --- | --- |
+| `subject` | "self" (default) or {"each": filter, ...} |
+
+```json
+{
+  "saddles_mount": {
+    "subject": "self"
+  }
+}
+```
+
 ## scries
 
 A player (`controller`: you (default) | opponent | any) scries (not scry 0). Triggers after the scry is complete.
@@ -571,5 +653,21 @@ Rules: CR 701.27f, CR 603.2
 ```json
 {
   "transforms": {}
+}
+```
+
+## waterbends
+
+A player (`controller`: you (default) | opponent | any) waterbends.
+
+Rules: CR 701.67c
+
+| Parameter | Description |
+| --- | --- |
+| `controller` | you | opponent | any |
+
+```json
+{
+  "waterbends": {}
 }
 ```

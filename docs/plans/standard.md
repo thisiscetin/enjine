@@ -39,13 +39,13 @@ first release is dated.
 | 4 | Marvel Super Heroes | 2026-06-26 | 2029 (est.) | 22 gaps |
 | 5 | Secrets of Strixhaven | 2026-04-24 | 2029 (est.) | 13 gaps |
 | 6 | Teenage Mutant Ninja Turtles | 2026-03-06 | 2029 (est.) | 11 gaps |
-| 7 | Lorwyn Eclipsed | 2026-01-23 | 2029 (est.) | 15 gaps |
-| 8 | Avatar: The Last Airbender | 2025-11-21 | 2028 (est.) | 14 gaps |
+| 7 | Lorwyn Eclipsed | 2026-01-23 | 2029 (est.) | 14 gaps |
+| 8 | Avatar: The Last Airbender | 2025-11-21 | 2028 (est.) | 11 gaps |
 | 9 | Spider-Man | 2025-09-26 | 2028 (est.) | 13 gaps |
 | 10 | Edge of Eternities | 2025-08-01 | 2028 (est.) | 17 gaps |
 | 11 | Final Fantasy | 2025-06-13 | 2028 (est.) | 15 gaps |
-| 12 | Tarkir: Dragonstorm | 2025-04-11 | 2028 (est.) | 17 gaps |
-| 13 | Aetherdrift | 2025-02-14 | 2028 (est.) | 14 gaps |
+| 12 | Tarkir: Dragonstorm | 2025-04-11 | 2028 (est.) | 16 gaps |
+| 13 | Aetherdrift | 2025-02-14 | 2028 (est.) | 12 gaps |
 | 14 | Foundations | 2024-11-15 | 2029 (est.) | 17 gaps |
 
 **Out of scope:** sets that are no longer Standard-legal, or that rotate out at the
@@ -85,9 +85,7 @@ derived from card text is stored here.
 
 | Mechanic | CR | ~Cards | Sets |
 | --- | --- | ---: | ---: |
-| Earthbend | 701.66 | 27 | 1 |
 | Power-up | 702.193 | 24 | 1 |
-| Waterbend | 701.67 | 24 | 1 |
 | Behold | 701.4 | 21 | 4 |
 | Cast trigger filtered on the spell's targets | 603.2, 115.1 | 21 | 4 |
 | Discard a card as a cost | 118.3, 701.9a | 20 | 9 |
@@ -96,7 +94,6 @@ derived from card text is stored here.
 | Damage modification / redirection replacement | 614.1a, 616 | 13 | 9 |
 | Pay life as a cost | 119.4, 118.3 | 13 | 9 |
 | Monocolored hybrid mana {2/W} | 107.4e | 13 | 3 |
-| Saddle (Mounts) | 702.171 | 13 | 1 |
 | Colors among permanents (amount) | 105.2, 202.2 | 12 | 1 |
 | Teamwork | 702.194 | 12 | 1 |
 | Additional combat / ending the turn | 500.8, 725 | 11 | 8 |
@@ -224,7 +221,7 @@ No listed gap remains.
 | Mana spent compared with another amount ("less than its mana value") | 601.2h, 207.2c | 1 | Tokka & Rahzar, Terrible Twos |
 | Trigger: blocks | 509.3a, 603.2 | 1 | Bebop & Rocksteady |
 
-### Lorwyn Eclipsed (ecl) — 15 gaps
+### Lorwyn Eclipsed (ecl) — 14 gaps
 
 273 cards (at the census, about 166 used no listed gap).
 
@@ -244,17 +241,13 @@ No listed gap remains.
 | Pay life as a cost | 119.4, 118.3 | 1 | Champion of the Weird |
 | Proliferate | 701.34 | 1 | High Perfect Morcant |
 | Trigger: blocks | 509.3a, 603.2 | 1 | Doran, Besieged by Time |
-| Wither | 702.80 | 1 | Spinerock Tyrant |
 
-### Avatar: The Last Airbender (tla) — 14 gaps
+### Avatar: The Last Airbender (tla) — 11 gaps
 
 286 cards (at the census, about 168 used no listed gap).
 
 | Missing mechanic | CR | ~Cards | Example |
 | --- | --- | ---: | --- |
-| Earthbend | 701.66 | 27 | Aang, at the Crossroads |
-| Waterbend | 701.67 | 24 | Aang's Iceberg |
-| Airbend | 701.65 | 10 | Aang, Swift Savior |
 | Ability removal (loses all abilities) | 613.1f | 2 | Day of Black Sun |
 | Excess damage | 120.4a | 2 | Razor Rings |
 | Additional combat / ending the turn | 500.8, 725 | 1 | Bumi, Unleashed |
@@ -333,7 +326,7 @@ No listed gap remains.
 | Random choices (discard at random) | 701.9b | 1 | Sin, Spira's Punishment |
 | Static dies-to-exile replacement (not a one-turn effect) | 614.1a | 1 | The Darkness Crystal |
 
-### Tarkir: Dragonstorm (tdm) — 17 gaps
+### Tarkir: Dragonstorm (tdm) — 16 gaps
 
 276 cards (at the census, about 189 used no listed gap).
 
@@ -348,7 +341,6 @@ No listed gap remains.
 | Additional combat / ending the turn | 500.8, 725 | 1 | All-Out Assault |
 | Damage modification / redirection replacement | 614.1a, 616 | 1 | Neriv, Heart of the Storm |
 | Damage prevention (beyond prevent all damage to you) | 615 | 1 | New Way Forward |
-| Decayed | 702.147 | 1 | Rot-Curse Rakshasa |
 | Exile cards from graveyard as a cost (not the card itself) | 118.3, 406.1 | 1 | Great Arashin City |
 | Granting activated abilities | 613.1f, 602.1 | 1 | Ringing Strike Mastery |
 | More player/game restrictions (can't cast, can't gain life, spells can't be countered, ...) | 101.2, 604.1 | 1 | Voice of Victory |
@@ -357,13 +349,12 @@ No listed gap remains.
 | Storm | 702.40 | 1 | Stormscale Scion |
 | Token doubling replacement | 614.1a, 111.1 | 1 | Elspeth, Storm Slayer |
 
-### Aetherdrift (dft) — 14 gaps
+### Aetherdrift (dft) — 12 gaps
 
 276 cards (at the census, about 139 used no listed gap).
 
 | Missing mechanic | CR | ~Cards | Example |
 | --- | --- | ---: | --- |
-| Saddle (Mounts) | 702.171 | 13 | Alacrian Jaguar |
 | Type change depending on each object ("an artifact creature if it's a Vehicle") | 613.1d, 205.1b | 1 | Alacrian Armory |
 | A chosen creature type added to other types ("is the chosen type in addition") | 614.12, 607.2 | 1 | Lifecraft Engine |
 | Discard a card as a cost | 118.3, 701.9a | 3 | Avishkar Raceway |
@@ -374,7 +365,6 @@ No listed gap remains.
 | Damage modification / redirection replacement | 614.1a, 616 | 1 | Far Fortune, End Boss |
 | Emblems | 114 | 1 | Chandra, Spark Hunter |
 | Exchange (control, life totals, P/T) | 701.12, 613.4d | 1 | Trade the Helm |
-| Exert | 701.43 | 1 | Basri, Tomorrow's Champion |
 | More player/game restrictions (can't cast, can't gain life, spells can't be countered, ...) | 101.2, 604.1 | 1 | Pyrewood Gearhulk |
 | Pay life as a cost | 119.4, 118.3 | 1 | The Last Ride |
 
@@ -430,11 +420,17 @@ closed stays under a narrower name with the cards known to need it.
 | Mobilize, firebending | 702.181, 702.189 | abilities `mobilize`, `firebending` (4.19) |
 | Blight, connive, recruit, amass, empower Jace, endure | 701.68, 701.50, 701.70, 701.47, 701.71, 701.63 | effects of the same names; cost `blight` (4.19) |
 | Kindred card type | 308 | `"types": ["kindred", …]` (4.19) |
+| Earthbend, waterbend, airbend | 701.66, 701.67, 701.65 | effects `earthbend`, `airbend`; cost `waterbend` (also in `pay`, `counter_unless_pays`, `ward`); triggers `earthbends`, `waterbends`, `airbends`, `firebends` (4.19) |
+| Saddle (Mounts), exert | 702.171, 701.43 | ability `saddle`; effect `become_saddled`; filter `saddled`; triggers `becomes_saddled`, `saddles_mount`; cost `exert` (4.19) |
+| Decayed, wither | 702.147, 702.80 | keywords `decayed` (and its counter), `wither` (4.19) |
 
 Still open in these areas (not yet counted as gaps above, since the census didn't
 separate them):
-- Pilots that crew "as though [their] power were 2 greater" or with toughness (about 13
+- Pilots that crew or saddle "as though [their] power were 2 greater" or with toughness (about 13
   Aetherdrift cards), and "can't crew Vehicles" (CR 702.122d).
+- Casting a card "by waterbending {X}" rather than paying its mana cost (Hama, the Bloodbender), an optional
+  additional cost that isn't kicker ("you may waterbend {4}" is written as `kicker`), and a spell copy gaining
+  wither (Spinerock Tyrant).
 - Granting flashback, harmonize, mayhem or web-slinging to other cards; "cost {N} less"
   for spells cast from anywhere other than your hand (the remaining "Spells cast from
   anywhere other than hand" rows); "as though exhaust abilities haven't been activated".

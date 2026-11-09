@@ -97,6 +97,26 @@ Rules: CR 603.2d, CR 611.2b, CR 611.2c
 }
 ```
 
+## airbend
+
+Airbend: exile each referenced permanent or spell; for as long as each card stays exiled, its owner may cast it by paying {2} rather than its mana cost (cast option `via: "effect:<n>"`). The exiled cards are the effect's results.
+
+Rules: CR 701.65a, CR 701.65b, CR 118.9, CR 601.2f
+
+| Parameter | Description |
+| --- | --- |
+| `to` | selector of permanents and/or spells |
+
+```json
+{
+  "airbend": {
+    "to": {
+      "target": 0
+    }
+  }
+}
+```
+
 ## amass
 
 Amass `subtype` `amount`: if you control no Army creature, create a 0/0 black [subtype] Army creature token; then put `amount` +1/+1 counters on an Army creature you control (chosen if there are several), which becomes a [subtype] too.
@@ -241,6 +261,26 @@ Rules: CR 707.2, CR 707.4, CR 613.2a, CR 613.7, CR 611.2a, CR 514.2
   "become_copy": {
     "to": "self",
     "of": {
+      "target": 0
+    }
+  }
+}
+```
+
+## become_saddled
+
+Each referenced permanent (default: this one) becomes saddled until end of turn (filters: `"saddled": true`).
+
+Rules: CR 702.171a, CR 702.171b
+
+| Parameter | Description |
+| --- | --- |
+| `to` | selector of permanents (default self) |
+
+```json
+{
+  "become_saddled": {
+    "to": {
       "target": 0
     }
   }
@@ -547,13 +587,14 @@ Rules: CR 614.1a, CR 614.16, CR 611.2a, CR 122.6, CR 616.1
 
 ## counter_unless_pays
 
-Counter each referenced spell or ability unless its controller pays `mana` as this resolves (they choose, and pay like any cost; mana abilities allowed).
+Counter each referenced spell or ability unless its controller pays `mana` (or `waterbend`s that cost, CR 701.67a) as this resolves (they choose, and pay like any cost; mana abilities allowed).
 
-Rules: CR 701.6a, CR 118.12a, CR 605.3a
+Rules: CR 701.6a, CR 118.12a, CR 605.3a, CR 701.67a
 
 | Parameter | Description |
 | --- | --- |
 | `mana` | mana cost string |
+| `waterbend` | mana cost string, instead of mana |
 | `to` | selector (usually {"target": 0}) |
 
 ```json
@@ -807,6 +848,28 @@ Rules: CR 121.1, CR 121.2
 {
   "draw": {
     "amount": 2
+  }
+}
+```
+
+## earthbend
+
+Earthbend `amount`: each referenced land (the target, `to`) becomes a 0/0 creature with haste that's still a land, gets `amount` +1/+1 counters, and when it dies or is put into exile it returns to the battlefield tapped under your control. The land is the effect's result.
+
+Rules: CR 701.66a, CR 701.66b, CR 603.7c, CR 611.2a, CR 613.1d, CR 613.4b
+
+| Parameter | Description |
+| --- | --- |
+| `amount` | amount |
+| `to` | selector (the target land, e.g. {"target": 0}) |
+
+```json
+{
+  "earthbend": {
+    "amount": 2,
+    "to": {
+      "target": 0
+    }
   }
 }
 ```
@@ -1222,14 +1285,15 @@ Rules: CR 701.17a
 
 ## pay
 
-You may pay `mana` or `life` as it resolves. If you do, `then` happens; if you don't, `otherwise`. Paying mana works like paying a spell's cost (mana abilities may be activated); life can be paid only if you have that much (CR 119.4). For another player paying, see `counter_unless_pays`.
+You may pay `mana`, `life` or `waterbend` as it resolves. If you do, `then` happens; if you don't, `otherwise`. Paying mana works like paying a spell's cost (mana abilities may be activated; a `waterbend` cost may also be paid by tapping artifacts and creatures, CR 701.67a); life can be paid only if you have that much (CR 119.4). For another player paying, see `counter_unless_pays`.
 
-Rules: CR 118.12, CR 118.12a, CR 118.3, CR 119.4, CR 605.3a
+Rules: CR 118.12, CR 118.12a, CR 118.3, CR 119.4, CR 605.3a, CR 701.67a, CR 701.67c
 
 | Parameter | Description |
 | --- | --- |
 | `mana` | mana cost string, e.g. "{1}" |
 | `life` | integer |
+| `waterbend` | mana cost string: "unless you waterbend {2}" |
 | `then` | list of effects |
 | `otherwise` | list of effects |
 

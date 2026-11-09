@@ -3408,5 +3408,136 @@
         }
       }
     ]
+  },
+  {
+    "name": "Gust of Release",
+    "mana_cost": "{1}{W}",
+    "types": [
+      "instant"
+    ],
+    "rules_text": "Airbend target creature or spell.",
+    "abilities": [
+      {
+        "spell": {
+          "targets": [
+            {
+              "one_of": [
+                "creature",
+                "spell"
+              ]
+            }
+          ],
+          "effects": [
+            {
+              "airbend": {
+                "to": {
+                  "target": 0
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Shifting Ground",
+    "mana_cost": "{1}{G}",
+    "types": [
+      "sorcery"
+    ],
+    "rules_text": "Earthbend X, where X is the number of lands you control.",
+    "abilities": [
+      {
+        "spell": {
+          "targets": [
+            {
+              "land": {
+                "controller": "you"
+              }
+            }
+          ],
+          "effects": [
+            {
+              "earthbend": {
+                "amount": {
+                  "count": {
+                    "each": "land",
+                    "controller": "you"
+                  }
+                },
+                "to": {
+                  "target": 0
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Tidal Insight",
+    "mana_cost": "{U}",
+    "types": [
+      "sorcery"
+    ],
+    "rules_text": "As an additional cost to cast this spell, waterbend {3}. Draw two cards.",
+    "abilities": [
+      {
+        "additional_cost": {
+          "cost": [
+            {
+              "waterbend": "{3}"
+            }
+          ]
+        }
+      },
+      {
+        "spell": {
+          "effects": [
+            {
+              "draw": {
+                "amount": 2
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Flowing Study",
+    "mana_cost": "{2}{U}",
+    "types": [
+      "sorcery"
+    ],
+    "rules_text": "Draw two cards. Then discard a card unless you waterbend {2}.",
+    "abilities": [
+      {
+        "spell": {
+          "effects": [
+            {
+              "draw": {
+                "amount": 2
+              }
+            },
+            {
+              "pay": {
+                "waterbend": "{2}",
+                "otherwise": [
+                  {
+                    "discard": {
+                      "amount": 1,
+                      "to": "you"
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    ]
   }
 ]

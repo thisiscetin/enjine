@@ -43,7 +43,12 @@ module Enjine
         end
 
         def nested_effects = @lists.values.flatten
-        def what = @waterbend ? "waterbend #{cost}" : (cost ? cost.to_s : "#{life} life")
+
+        def what
+          return "#{life} life" unless cost
+
+          @waterbend ? "waterbend #{cost}" : cost.to_s
+        end
 
         def to_s
           text = "you may pay #{what}"
@@ -96,22 +101,28 @@ module Enjine
       # ability's) controller may pay; if they don't, it's countered.
       class CounterUnlessPays < ChoiceEffect
         primitive :effect, :counter_unless_pays,
-                  description: "Counter each referenced spell or ability unless its controller pays `mana` as this " \
-                               "resolves (they choose, and pay like any cost; mana abilities allowed).",
-                  rules: %w[701.6a 118.12a 605.3a],
-                  params: { "mana" => "mana cost string", "to" => "selector (usually {\"target\": 0})" },
+                  description: "Counter each referenced spell or ability unless its controller pays `mana` (or " \
+                               "`waterbend`s that cost, CR 701.67a) as this resolves (they choose, and pay like any " \
+                               "cost; mana abilities allowed).",
+                  rules: %w[701.6a 118.12a 605.3a 701.67a],
+                  params: { "mana" => "mana cost string", "waterbend" => "mana cost string, instead of mana",
+                            "to" => "selector (usually {\"target\": 0})" },
                   example: { "counter_unless_pays" => { "mana" => "{3}", "to" => { "target" => 0 } } }
 
-        def self.keys = %w[mana to]
+        def self.keys = %w[mana waterbend to]
 
-        attr_reader :cost
+        attr_reader :cost, :waterbend
 
         def setup(params, errors, path)
-          raw = Mechanics.fetch_param(params, :mana)
-          @cost = raw.nil? ? ((errors << "#{path}.mana: required") && nil) : Mana.parse_cost(raw, errors, "#{path}.mana")
+          key = %w[mana waterbend].find { params.key?(it) } || "mana"
+          raw = Mechanics.fetch_param(params, key)
+          errors << "#{path}: needs exactly one of mana, waterbend" if params.key?("mana") && params.key?("waterbend")
+          @cost = raw.nil? ? ((errors << "#{path}.mana: required") && nil) : Mana.parse_cost(raw, errors, "#{path}.#{key}")
+          @waterbend = key == "waterbend" && @cost ? @cost.generic : nil
         end
 
-        def to_s = "counter #{to} unless its controller pays #{cost}"
+        def what = waterbend ? "waterbend #{cost}" : cost.to_s
+        def to_s = "counter #{to} unless its controller pays #{what}"
 
         def run(engine, ctx, locals)
           target = (locals["target"] ||= on_stack(engine, ctx).first) or return :done
@@ -119,11 +130,12 @@ module Enjine
           payer = engine.object(target).controller
           answer, payment = answers(locals)
           unless answer
-            choices = engine.affordable?(payer, cost, nil) ? [{ "type" => "pay" }, { "type" => "decline" }] : [{ "type" => "decline" }]
-            return ask(engine, locals, payer, "Pay #{cost} or #{engine.object(target).card} is countered?", choices)
+            affordable = engine.affordable?(payer, cost, nil, waterbend && { "waterbend" => waterbend })
+            choices = affordable ? [{ "type" => "pay" }, { "type" => "decline" }] : [{ "type" => "decline" }]
+            return ask(engine, locals, payer, "Pay #{what} or #{engine.object(target).card} is countered?", choices)
           end
           if answer["type"] == "pay" && payment.nil?
-            engine.begin_payment!(payer, cost, ctx.object)
+            engine.begin_payment!(payer, cost, ctx.object, waterbend: waterbend)
             return :wait
           end
           engine.counter!(target) unless payment && payment["type"] == "paid"
