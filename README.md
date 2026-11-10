@@ -21,11 +21,10 @@ simulations, bots and reinforcement learning, or for a game client.
   omniscient observer view.
 - **No runtime dependencies.** Plain Ruby 4.0.
 
-> Status: early (0.1). The core game loop, creatures, instants, sorceries,
-> planeswalkers, activated and loyalty abilities, combat, counters and
-> until-end-of-turn effects work. Many keywords and rules areas are still to come.
-> See [`SUPPORTED.md`](SUPPORTED.md) (generated from the code) and the
-> [mechanics coverage checklist](docs/MECHANICS_COVERAGE.md).
+> Status: early (0.1), but broad. The goal is that every card of the Standard-legal
+> sets can be written in the DSL and plays by the rules; most can today. Progress
+> and what's pending are in [docs/plans/standard.md](docs/plans/standard.md).
+> [`SUPPORTED.md`](SUPPORTED.md) (generated from the code) lists every primitive.
 
 ## Card sets
 
@@ -43,9 +42,9 @@ Nothing reads rules text. A card may also carry its `"rarity"` and its
 deck's `cards`, or hand a pool of them (a whole set, several sets, or the cards you own)
 to the [deck builder](docs/guides/deck-builder.md) for random decks.
 
-Every mechanic of **Star Trek** (`trk`) can be written in the DSL: the set is
-supported. For the other Standard sets, the mechanics that can't be written yet
-are listed per set in [docs/plans/standard.md](docs/plans/standard.md#mechanics-gaps).
+By the gap census, Star Trek, Reality Fracture, Avatar, Spider-Man and Aetherdrift
+have no known gaps. The other Standard sets have a few single-card gaps, listed
+per set in [docs/plans/standard.md](docs/plans/standard.md#mechanics-gaps).
 
 To check a folder of your cards, run `bundle exec exe/enjine --verify DIR` (add
 `--games N`, `--seed S` or `--json`). It validates every card, then plays
@@ -206,7 +205,7 @@ SUPPORTED.md                generated list of everything the engine supports
 | [docs/guides/deck-builder.md](docs/guides/deck-builder.md) | random decks from any card pool (a set, your collection), in chosen or random colors (`--pool`, `--random-deck`) |
 | [docs/guides/adding-a-mechanic.md](docs/guides/adding-a-mechanic.md) | how to extend the engine |
 | [docs/MECHANICS_COVERAGE.md](docs/MECHANICS_COVERAGE.md) | the full CR checklist with milestones and priorities |
-| [docs/reviews/VERDICT.md](docs/reviews/VERDICT.md) | design review verdict and the prioritized work queue (elegance, performance, future-proofness) |
+| [docs/plans/standard.md](docs/plans/standard.md) | progress: what's done, what's in progress, what's pending, and the per-set gap census |
 | [docs/DESIGN.md](docs/DESIGN.md), [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | design decisions and code layout |
 
 ## Development

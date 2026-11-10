@@ -14,6 +14,58 @@ For each set:
    and fuzz through `spec/fixtures/cards/`).
 3. Mark the set's mechanics **supported** in the table below.
 
+## Progress (as of 2026-11-10)
+
+This is the project's single progress document: where the Standard program
+stands and what is pending.
+
+**Done and on `main`:**
+- Mechanics round 1 (6 builders) and round 2 (6 builders) are merged: 62 groups of
+  mechanics and card shapes, from earthbend and saddle to Paradigm, Meld, gift,
+  divided damage and ending the turn. See "Closed since the census" below.
+- 586 real Standard cards are written in the DSL in `spec/fixtures/cards/real/`
+  (all 14 sets, every card type), each with a scenario spec, and they pass
+  `enjine --verify`.
+- `enjine --verify DIR` (`Enjine::Verify`) checks any folder of card JSON:
+  validation, rules-monitored play, and which cards were used.
+- The caller API guide (`docs/guides/api.md`); the CLI passes priority for you when
+  passing is the only choice and shows whose turn and which step it is.
+- Gate: 1888 specs, ~99.5% line / ~91.5% branch coverage, RuboCop clean, fuzz
+  and CI green (CI uses the latest Ruby 4.0.x).
+- By the census, Star Trek, Reality Fracture, Avatar, Spider-Man and Aetherdrift
+  have no known gaps; the other nine sets have 13 single-card gaps between them
+  (tables below).
+
+**In progress: round 3 ("known gaps").** It stopped at the usage limit before
+any branch was gated or merged. The work is committed on four local branches
+(worktrees in `.claude/worktrees/`):
+
+| Branch | Area | Covers |
+| --- | --- | --- |
+| `worktree-wf_e8880e22-5ec-1` | casting and permissions | Raubahn, Nita, Bilbo (Thief in the Night), Gwen Stacy, Hama, Molten Exhale, Celestial Reunion, Key to the Side-Door, Ninja Teen, Baron Zemo, the gift trigger |
+| `worktree-wf_e8880e22-5ec-2` | zones and loops | "repeat this process" (Sin), exile until total mana value (Improvisation Capstone), "exiled with" targets (The Darkness Crystal, Borg Cube), change the target (Redirect Lightning), Nth-counter trigger (Death to Our Enemies), "if it was attacking" (Desculpting Blast), meld mana value, hideaway, earthbend cleanup |
+| `worktree-wf_e8880e22-5ec-3` | statics and combat (least complete) | granter tap cost (Fishing Pole), chosen-color hexproof (Mondo Gecko), "attacks alone", sized tokens, "can't become untapped"; still to do: Spider-Punk's granted riot, Ghalta, Storm, Chandra, Flameshaper |
+| `worktree-wf_e8880e22-5ec-4` | rules correctness | entering attacking a planeswalker (508.4), choosing the order of damage replacements (616.1), prevention follow-ups for unpreventable damage (615.12), new targets firing ward and becomes-target triggers, revalidating divided spells, "a source of your choice" (609.7), ability last known information |
+
+To finish it: each branch gets completed and gated, then the branches are merged
+one at a time, the full gate plus fuzz and `--verify` runs, and the tables below
+are recounted.
+
+**Pending after round 3:**
+1. **Per-set verification.** The census checked one example card per gap per set,
+   not every card. For each set, write every card in the DSL outside the
+   repository and run `enjine --verify` on it; any card that can't be written is a
+   new gap and goes into another round. Then fill the README "Set support" table
+   with ✓.
+2. **Docs cleanup.** Reorganize `docs/guides/card-data-format.md` by concept
+   (sections 4.19 to 4.29 grew one per merge); make `SUPPORTED.md` a compact
+   index; shorten the README; check DESIGN, ARCHITECTURE and the guides against
+   the code; decide whether the informational `rules_text` field stays in the DSL,
+   the views and the example cards.
+3. The remaining "Still open" items at the end of this file that no Standard card
+   needs (lure, blocking several creatures, rad counters, 613.8 dependency loops)
+   stay deferred until a card needs them.
+
 ## Definition of "supported"
 
 A set's mechanics are supported when:
