@@ -21,7 +21,7 @@ RSpec.describe "Effects, zones and loops primitives" do
     { "name" => "Spec Unit Permanent", "mana_cost" => "{1}", "types" => ["artifact"], "abilities" => abilities }
   end
 
-  def text(card) = Enjine::CardDefinition.from_h(card).abilities.map(&:to_s).join(" | ")
+  def text(card) = Enjine::CardDefinition.from_h(card).abilities.join(" | ")
 
   let(:lands_milled) { { "amount" => { "count" => { "result" => 0, "for" => { "types" => ["land"] } } }, "at_least" => 1 } }
   let(:loop_spell) do
@@ -32,35 +32,44 @@ RSpec.describe "Effects, zones and loops primitives" do
     expect(errors_for(loop_spell)).to eq([])
     expect(errors_for(spell([{ "exile_top" => { "until" => { "total_mana_value" => 4 } } }]))).to eq([])
     expect(errors_for(spell([{ "exile_top" => { "until" => { "card" => { "not_types" => ["land"] } }, "face_down" => true } }]))).to eq([])
-    expect(errors_for(permanent([{ "activated" => { "cost" => ["tap"], "targets" => [{ "exiled_with" => { "any_of" => ["creature"] } }],
-                                                    "effects" => [{ "return_to_battlefield" => { "to" => { "target" => 0 } } }] } }]))).to eq([])
-    expect(errors_for(spell([{ "draw" => { "amount" => 1, "if" => { "attacking" => { "target" => 0 } } } }], targets: ["creature"]))).to eq([])
+    linked = { "activated" => { "cost" => ["tap"], "targets" => [{ "exiled_with" => { "any_of" => ["creature"] } }],
+                                "effects" => [{ "return_to_battlefield" => { "to" => { "target" => 0 } } }] } }
+    expect(errors_for(permanent([linked]))).to eq([])
+    expect(errors_for(spell([{ "draw" => { "amount" => 1, "if" => { "attacking" => { "target" => 0 } } } }],
+                            targets: ["creature"]))).to eq([])
     expect(errors_for(permanent([{ "cost_modifier" => { "spells" => { "colors" => ["B"] }, "reduce" => 1 } }]))).to eq([])
   end
 
   it "names the path of each mistake" do
     expect(errors_for(spell([{ "repeat" => { "effects" => [] } }])))
-      .to include("abilities[0].spell.effects[0].repeat.effects: needs at least one effect", "abilities[0].spell.effects[0].repeat.while: required")
+      .to include("abilities[0].spell.effects[0].repeat.effects: needs at least one effect",
+                  "abilities[0].spell.effects[0].repeat.while: required")
     expect(errors_for(spell([{ "exile_top" => { "until" => { "cards" => 2 } } }])))
       .to include(a_string_starting_with("abilities[0].spell.effects[0].exile_top.until: must be one of"))
     expect(errors_for(spell([{ "exile_top" => { "amount" => 2, "until" => { "total_mana_value" => 4 } } }])))
       .to include("abilities[0].spell.effects[0].exile_top: amount or until, not both")
-    expect(errors_for(spell([{ "mill" => { "amount" => 1 } }, { "draw" => { "amount" => { "count" => { "result" => 0, "for" => { "bogus" => 1 } } } } }])))
+    expect(errors_for(spell([{ "mill" => { "amount" => 1 } },
+                             { "draw" => { "amount" => { "count" => { "result" => 0, "for" => { "bogus" => 1 } } } } }])))
       .to include(a_string_starting_with("abilities[0].spell.effects[1].draw.amount.count.for"))
-    trigger = ->(params) { permanent([{ "triggered" => { "when" => { "counters_placed" => params }, "effects" => [{ "draw" => { "amount" => 1 } }] } }]) }
+    trigger = lambda { |params|
+      permanent([{ "triggered" => { "when" => { "counters_placed" => params }, "effects" => [{ "draw" => { "amount" => 1 } }] } }])
+    }
     expect(errors_for(trigger.call({ "nth" => 4 }))).to include("abilities[0].triggered.when.counters_placed.nth: needs a counter")
     expect(errors_for(trigger.call({ "counter" => "plan", "nth" => 0 })))
       .to include("abilities[0].triggered.when.counters_placed.nth: must be a positive integer")
     expect(errors_for(permanent([{ "cost_modifier" => { "spells" => { "colors" => ["P"] }, "reduce" => 1 } }])))
       .to include("abilities[0].cost_modifier.spells.colors: must be colors (W, U, B, R, G)")
     dig = ->(params) { spell([{ "dig" => { "amount" => 4, "put" => "exile" }.merge(params) }]) }
-    expect(errors_for(dig.call({ "looker" => "you" }))).to include("abilities[0].spell.effects[0].dig.looker: must be \"source_controller\"")
-    expect(errors_for(dig.call({ "looker" => "source_controller" }))).to include("abilities[0].spell.effects[0].dig.looker: needs face_down: true")
+    expect(errors_for(dig.call({ "looker" => "you" })))
+      .to include("abilities[0].spell.effects[0].dig.looker: must be \"source_controller\"")
+    expect(errors_for(dig.call({ "looker" => "source_controller" })))
+      .to include("abilities[0].spell.effects[0].dig.looker: needs face_down: true")
   end
 
   it "describes them" do
     expect(text(loop_spell)).to include("repeat while the count of the land card(s) from effect #1 is at least 1")
-    expect(text(spell([{ "exile_top" => { "until" => { "total_mana_value" => 4 } } }]))).to include("exile top cards until total mana value 4")
+    expect(text(spell([{ "exile_top" => { "until" => { "total_mana_value" => 4 } } }])))
+      .to include("exile top cards until total mana value 4")
     expect(text(spell([{ "exile_top" => { "until" => { "card" => { "types" => ["creature"] } }, "face_down" => true } }])))
       .to include("until card creature card face down")
     expect(text(spell([{ "change_target" => { "of" => { "target" => 0 } } }],
