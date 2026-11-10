@@ -2008,5 +2008,219 @@
         }
       }
     ]
+  },
+  {
+    "name": "Lure Angler's Rod",
+    "mana_cost": "{1}",
+    "types": [
+      "artifact"
+    ],
+    "subtypes": [
+      "equipment"
+    ],
+    "abilities": [
+      {
+        "static": {
+          "affects": "attached",
+          "abilities": [
+            {
+              "activated": {
+                "cost": [
+                  {
+                    "mana": "{1}"
+                  },
+                  "tap",
+                  {
+                    "tap": "granter"
+                  }
+                ],
+                "effects": [
+                  {
+                    "add_counters": {
+                      "counter": "bait",
+                      "amount": 1,
+                      "to": "granter"
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      },
+      {
+        "triggered": {
+          "when": {
+            "becomes_untapped": {
+              "subject": "attached"
+            }
+          },
+          "effects": [
+            {
+              "remove_counters": {
+                "counter": "bait",
+                "amount": 1,
+                "to": "self"
+              }
+            },
+            {
+              "create_token": {
+                "token": {
+                  "name": "Fish",
+                  "types": [
+                    "creature"
+                  ],
+                  "subtypes": [
+                    "fish"
+                  ],
+                  "colors": [
+                    "U"
+                  ],
+                  "power": 1,
+                  "toughness": 1
+                },
+                "if": {
+                  "amount": {
+                    "this_way": 0
+                  },
+                  "at_least": 1
+                }
+              }
+            }
+          ]
+        }
+      },
+      {
+        "equip": {
+          "cost": [
+            {
+              "mana": "{1}"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Silencing Lens",
+    "mana_cost": "{2}",
+    "types": [
+      "artifact"
+    ],
+    "abilities": [
+      {
+        "choose_card_name": {
+          "look_at_hand": "opponent"
+        }
+      },
+      {
+        "player_rule": {
+          "rule": "cant_activate",
+          "affects": "opponents",
+          "name": "chosen"
+        }
+      }
+    ]
+  },
+  {
+    "name": "Hollow Cairn",
+    "types": [
+      "land"
+    ],
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "enters": {}
+          },
+          "effects": [
+            {
+              "choose_card_name": {
+                "types": [
+                  "land"
+                ],
+                "remember": "source"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "static": {
+          "affects": {
+            "each": {
+              "land": {
+                "name": "chosen"
+              }
+            }
+          },
+          "abilities": [
+            {
+              "mana": {
+                "cost": [
+                  "tap"
+                ],
+                "produce": "{C}"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "mana": {
+          "cost": [
+            "tap"
+          ],
+          "produce": "{C}"
+        }
+      }
+    ]
+  },
+  {
+    "name": "Sentinel Monolith",
+    "mana_cost": "{3}",
+    "types": [
+      "artifact"
+    ],
+    "abilities": [
+      {
+        "activated": {
+          "cost": [
+            {
+              "mana": "{2}"
+            },
+            "tap",
+            "sacrifice"
+          ],
+          "timing": "sorcery",
+          "effects": [
+            {
+              "create_token": {
+                "token": {
+                  "name": "Spirit",
+                  "types": [
+                    "creature"
+                  ],
+                  "subtypes": [
+                    "spirit"
+                  ],
+                  "colors": [
+                    "W"
+                  ],
+                  "power": 0,
+                  "toughness": 0
+                },
+                "size": {
+                  "greatest_toughness": {
+                    "each": "creature",
+                    "controller": "you"
+                  }
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
   }
 ]

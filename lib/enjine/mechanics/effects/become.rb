@@ -13,7 +13,7 @@ module Enjine
       # (CardDefinition#effect_granted); on the permanent they are "granted:<card>:<ref>:<j>".
       class Become < Effect
         DURATIONS = %w[end_of_turn indefinite while_source_on_battlefield while_you_control_source].freeze
-        GRANTABLE = %i[triggered mana activated play_from additional_land_plays hexproof_from protection_from].freeze
+        GRANTABLE = %i[triggered mana activated play_from additional_land_plays hexproof_from protection_from tapping_power].freeze
         # Card types an effect can add (CR 205.1b); instants, sorceries and planeswalkers aren't permanents it makes.
         ADDABLE_TYPES = %w[artifact creature enchantment land].freeze
         CHANGES = %w[types supertypes subtypes creature_types colors loses_abilities keywords base_power_toughness
@@ -117,16 +117,21 @@ module Enjine
           creatures = affected.select { engine.chars(it).creature? } # after the types above are added
           engine.add_continuous_effect!("creature_types", ctx, creatures, { "types" => creature_types }.merge(lasting)) if creature_types
           chosen = Filters.chosen_memory(engine, ctx.source, ctx).select { |k, _| k.start_with?("chosen_") }
-          color_list = colors == "chosen" ? chosen["chosen_color"]&.then { [it] } : colors # "the color of your choice"
+          color_list = color_list(chosen)
           add.call("colors", "colors" => color_list) if color_list
           add.call("grant", "keywords" => keywords.map(&:to_s)) unless keywords.empty?
           engine.add_continuous_effect!("base_power_toughness", ctx, creatures, base_power_toughness.merge(lasting)) if base_power_toughness
-          return if granted_abilities.empty?
+          add.call("abilities", granted_details(engine, ctx, chosen)) unless granted_abilities.empty?
+        end
 
-          # What was chosen while this resolved is bound into the abilities it grants (CR 607.2d: "hexproof from
-          # that color"), so a later choice doesn't change them.
+        # "Becomes the color of your choice": the color chosen while this resolved.
+        def color_list(chosen) = colors == "chosen" ? chosen["chosen_color"]&.then { [it] } : colors
+
+        # What was chosen while this resolved is bound into the abilities it grants (CR 607.2d: "hexproof from
+        # that color"), so a later choice doesn't change them.
+        def granted_details(engine, ctx, chosen)
           granted = { "card" => engine.object(ctx.object).card, "ref" => ref }
-          add.call("abilities", chosen.empty? ? granted : granted.merge("chosen" => chosen))
+          chosen.empty? ? granted : granted.merge("chosen" => chosen)
         end
 
         def nested_effects = granted_abilities.flat_map(&:try_effects)
@@ -180,7 +185,7 @@ module Enjine
             next ability if ability.nil? || (GRANTABLE.include?(ability.kind) && !(ability.kind == :play_from && ability.self?))
 
             errors << "#{path}.abilities[#{j}]: only triggered, activated, mana, play_from (for other cards), " \
-                      "additional_land_plays, hexproof_from and protection_from abilities can be gained"
+                      "additional_land_plays, hexproof_from, protection_from and tapping_power abilities can be gained"
             nil
           end.freeze
         end

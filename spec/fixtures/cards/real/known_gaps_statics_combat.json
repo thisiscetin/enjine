@@ -101,5 +101,49 @@
                      "effects": [{ "distribute_damage": {} }] } }
     ],
     "rarity": "mythic", "printing": { "set": "fdn", "number": "81" }
+  },
+  {
+    "name": "Sorcerous Spyglass", "mana_cost": "{2}", "types": ["artifact"],
+    "abilities": [
+      { "choose_card_name": { "look_at_hand": "opponent" } },
+      { "player_rule": { "rule": "cant_activate", "affects": "each", "name": "chosen" } }
+    ],
+    "rarity": "uncommon", "printing": { "set": "fdn", "number": "679" }
+  },
+  {
+    "name": "Petrified Hamlet", "types": ["land"],
+    "abilities": [
+      { "triggered": { "when": { "enters": {} },
+                       "effects": [{ "choose_card_name": { "types": ["land"], "remember": "source" } }] } },
+      { "player_rule": { "rule": "cant_activate", "affects": "each", "name": "chosen" } },
+      { "static": { "affects": { "each": { "land": { "name": "chosen" } } },
+                    "abilities": [{ "mana": { "cost": ["tap"], "produce": "{C}" } }] } },
+      { "mana": { "cost": ["tap"], "produce": "{C}" } }
+    ],
+    "rarity": "rare", "printing": { "set": "sos", "number": "259" }
+  },
+  {
+    "name": "Spider-Punk", "mana_cost": "{1}{R}", "types": ["creature"], "supertypes": ["legendary"],
+    "subtypes": ["spider", "human", "hero"], "power": 2, "toughness": 1, "keywords": ["riot"],
+    "abilities": [
+      { "static": { "affects": { "each": { "creature": { "subtypes": ["spider"] } }, "controller": "you", "other": true },
+                    "keywords": ["riot"] } },
+      { "player_rule": { "rule": "spells_cant_be_countered", "affects": "each" } },
+      { "player_rule": { "rule": "abilities_cant_be_countered", "affects": "each" } },
+      { "player_rule": { "rule": "damage_cant_be_prevented", "affects": "each" } }
+    ],
+    "rarity": "rare", "printing": { "set": "spm", "number": "92" }
+  },
+  {
+    "name": "Storm, Windrider", "mana_cost": "{1}{G}{W}{W}", "types": ["creature"], "supertypes": ["legendary"],
+    "subtypes": ["mutant", "hero"], "power": 4, "toughness": 4, "keywords": ["flying"],
+    "abilities": [
+      { "player_rule": { "rule": "cant_be_attacked", "filter": { "creature": { "keywords": ["flying"] } } } },
+      { "static": { "affects": { "each": "creature", "controller": "you" },
+                    "abilities": [{ "cant_be_blocked_by": { "filter": { "creature": { "keywords": ["flying"] } } } }] } },
+      { "triggered": { "when": { "cast": { "targets": "creature" } },
+                       "effects": [{ "grant": { "keywords": ["flying"], "to": { "triggering": "targets" } } }] } }
+    ],
+    "rarity": "rare", "printing": { "set": "msh", "number": "230" }
   }
 ]

@@ -35,10 +35,11 @@ module Enjine
           chars(obj).abilities.any? { it.ability.kind == :cast_restriction && !it.ability.allows?(self, index, obj) }
       end
 
-      # CR 602.5, 101.2: abilities of a permanent matching a `cant_activate` filter can't be activated, nor any of a
-      # permanent whose activated abilities can't be activated (#mana_abilities_forbidden?).
+      # CR 602.5, 101.2: abilities of a source a `cant_activate` rule is about can't be activated (a filter matches
+      # only permanents; "sources with the chosen name" are in any zone), nor any of a permanent whose activated
+      # abilities can't be activated (#mana_abilities_forbidden?).
       def activation_forbidden?(index, obj)
-        obj.zone == :battlefield && (mana_abilities_forbidden?(obj) || player_rule?(index, "cant_activate", obj))
+        (obj.zone == :battlefield && mana_abilities_forbidden?(obj)) || player_rule?(index, "cant_activate", obj)
       end
 
       # CR 602.5, 605.3a: "its activated abilities can't be activated" covers its mana abilities too.

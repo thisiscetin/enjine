@@ -18,6 +18,8 @@ module Enjine
         changes = Mechanics::Counters.keywords(obj.counters).map { |kw| [counter_timestamp(obj, kw.to_s), 0, [:keywords, [kw]]] }
         # A creature cast with suspend has haste while its caster controls it (CR 702.62a); since it was cast.
         changes << [0, 0, [:keywords, [:haste]]] if obj.memory["haste_while_controlled_by"] == obj.controller
+        # Riot: "if you don't, it gains haste" as it entered (CR 702.136a), an effect with that timestamp.
+        changes << [timestamp_of(obj), 0, [:keywords, [:haste]]] if obj.memory["riot_haste"]
         statics.each do |source, ability|
           next unless ability.ability_changes? && ability.affects?(obj, source, facts(obj, base))
 

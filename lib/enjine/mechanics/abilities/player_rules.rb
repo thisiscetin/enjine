@@ -14,8 +14,10 @@ module Enjine
     #   spells_cant_be_countered    spells the player controls (matching `spells`) can't be countered (101.2, 701.6a)
     #   abilities_cant_be_countered  activated and triggered abilities the player controls can't be countered (101.2)
     #   cant_gain_life      the player can't gain life (119.7)
-    #   cant_activate       the player can't activate abilities of sources matching `filter`, except mana
-    #                       abilities (602.5)
+    #   cant_activate       the player can't activate abilities of sources matching `filter` (or, with `name:
+    #                       "chosen"`, with the name its source chose, in any zone), except mana abilities (602.5)
+    #   cant_be_attacked    creatures matching `filter` can't attack the player (their planeswalkers still can be)
+    #                       (508.1c)
     #   protection_from_opponents  the player has protection from each of their opponents: opponents' spells
     #                       and abilities can't target them and damage from opponents' sources is prevented
     #                       (702.16b, 702.16e, 702.16k)
@@ -30,11 +32,13 @@ module Enjine
         "abilities_cant_be_countered" => %w[101.2 701.6a],
         "cant_gain_life" => %w[119.7], "cant_activate" => %w[101.2 602.5],
         "damage_cant_be_prevented" => %w[615.12], "combat_damage_cant_be_prevented" => %w[615.12],
-        "protection_from_opponents" => %w[702.16b 702.16e 702.16k]
+        "protection_from_opponents" => %w[702.16b 702.16e 702.16k],
+        "cant_be_attacked" => %w[508.1c 506.3]
       }.freeze
-      # Rules that take a `filter` of permanents (required for cant_sacrifice) or a card spec of `spells`.
-      FILTERED = %w[cant_sacrifice cant_activate].freeze
-      REQUIRED_FILTER = %w[cant_sacrifice].freeze
+      # Rules that take a `filter` of permanents (required for cant_sacrifice and cant_be_attacked) or a card
+      # spec of `spells`.
+      FILTERED = %w[cant_sacrifice cant_activate cant_be_attacked].freeze
+      REQUIRED_FILTER = %w[cant_sacrifice cant_be_attacked].freeze
       SPELLS = %w[cant_cast spells_cant_be_countered].freeze
 
       def self.rule(params, errors, path)
@@ -69,34 +73,43 @@ module Enjine
                                "applies to the players in `affects` (you | opponents | each; default you). Rules: " \
                                "#{PlayerRules::RULES.keys.join(", ")}. `cant_sacrifice` takes a `filter` of the " \
                                "permanents that can't be sacrificed, `cant_activate` may take a `filter` of the " \
-                               "sources whose abilities can't be activated (mana abilities still can), and " \
+                               "sources whose abilities can't be activated (mana abilities still can) or `name: " \
+                               "\"chosen\"` (sources with the name this permanent chose, in any zone), " \
+                               "`cant_be_attacked` takes a `filter` of the creatures that can't attack them, and " \
                                "`cant_cast` and `spells_cant_be_countered` may take a card spec of the `spells`. " \
                                "The damage rules apply to all damage whichever players they name.",
                   rules: PlayerRules::RULES.values.flatten.uniq + %w[604.1 604.2 611.3a],
                   params: { "rule" => PlayerRules::RULES.keys.join(" | "), "affects" => AFFECTS.join(" | "),
                             "filter" => "permanent filter (#{PlayerRules::FILTERED.join(", ")})",
                             "spells" => "card spec of the spells (#{PlayerRules::SPELLS.join(", ")})",
+                            "name" => "\"chosen\" (cant_activate: sources with the chosen name)",
                             "if" => "condition (\"during your turn\": {\"your_turn\": true})" },
                   example: { "player_rule" => { "rule" => "cant_cast", "affects" => "opponents", "if" => { "your_turn" => true } } }
 
         attr_reader :rule, :affects, :filter, :spells, :condition
 
         def self.build(params, errors, path, **)
-          Mechanics.check_keys(params, %w[rule affects filter spells if], errors, path)
+          Mechanics.check_keys(params, %w[rule affects filter spells name if], errors, path)
           rule = PlayerRules.rule(params, errors, path)
           affects = Mechanics.fetch_param(params, :affects) || "you"
           errors << "#{path}.affects: must be one of #{AFFECTS.join(", ")}" unless AFFECTS.include?(affects)
           filter, spells = PlayerRules.qualifiers(params, rule, errors, path)
+          named = Mechanics.fetch_param(params, :name)
+          unless named.nil? || (named == "chosen" && rule == "cant_activate")
+            errors << "#{path}.name: must be \"chosen\", and only for cant_activate"
+          end
           raw_if = Mechanics.fetch_param(params, :if)
-          new(rule, affects, filter, spells: spells, condition: raw_if && Condition.build(raw_if, errors, "#{path}.if"))
+          new(rule, affects, filter, spells: spells, chosen_name: !named.nil?,
+                                     condition: raw_if && Condition.build(raw_if, errors, "#{path}.if"))
         end
 
-        def initialize(rule, affects, filter, spells: nil, condition: nil)
+        def initialize(rule, affects, filter, spells: nil, chosen_name: false, condition: nil)
           super()
           @rule = rule
           @affects = affects
           @filter = filter
           @spells = spells
+          @chosen_name = chosen_name
           @condition = condition
           freeze
         end
@@ -116,14 +129,18 @@ module Enjine
           condition.nil? || condition.true?(engine, EffectContext.new(source.controller, source.id, source.id, [], []))
         end
 
-        # Whether the object asked about (a permanent for `filter`, a card for `spells`) is one the rule is about.
+        # Whether the object asked about (a permanent for `filter`, a card for `spells`, a source in any zone with
+        # the name its source chose for `name`, CR 201.4) is one the rule is about.
         def matches?(engine, object, source)
-          (filter.nil? || filter.match?(engine, object.id, source.controller)) && (spells.nil? || spells.match?(engine, object))
+          return false if @chosen_name && engine.chars(object).name != source.memory["chosen_name"]
+
+          (filter.nil? || filter.match_for?(engine, object.id, source.controller, source.id)) &&
+            (spells.nil? || spells.match?(engine, object))
         end
 
         def to_s
           who = { "you" => "you", "opponents" => "your opponents", "each" => "each player" }.fetch(affects)
-          about = filter || spells
+          about = filter || spells || ("sources with the chosen name" if @chosen_name)
           "#{who}: #{rule.tr("_", " ")}#{" (#{about.is_a?(Class) ? about.primitive_name : about})" if about}" \
             "#{" as long as #{condition}" if condition}"
         end

@@ -47,7 +47,7 @@ module Enjine
           frame["pc"] += 1
         end
         if !obj.ability? && definition(obj).permanent? && entering_choice_pending?(obj.id, frame["enter"])
-          return ask_enter_choice!(obj.id, obj.controller) # CR 614.12: decided before it enters
+          return ask_enter_choice!(obj.id, obj.controller, frame["enter"]) # CR 614.12: decided before it enters
         end
 
         emit Events::Resolved.new(object: obj.id, card: obj.card, kind: obj.kind)

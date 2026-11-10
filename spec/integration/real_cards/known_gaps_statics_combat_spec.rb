@@ -5,29 +5,34 @@
 # choices bound into granted abilities, "can't become untapped", chosen card names, riot granted by a static
 # (CR 614.12), attacking alone and attack/block restrictions by flying. Plain stand-in cards are defined below.
 RSpec.describe "Real cards: known gaps in statics and combat" do
-  STAND_INS = [
-    { "name" => "Test Bear", "mana_cost" => "{1}{G}", "types" => ["creature"], "subtypes" => ["bear"], "power" => 2, "toughness" => 2 },
-    { "name" => "Test Wall", "mana_cost" => "{1}{W}", "types" => ["creature"], "subtypes" => ["wall"], "power" => 0,
-      "toughness" => 4, "keywords" => ["defender"] },
-    { "name" => "Test Bird", "mana_cost" => "{1}{W}", "types" => ["creature"], "subtypes" => ["bird"], "power" => 1,
-      "toughness" => 1, "keywords" => ["flying"] },
-    { "name" => "Test Spider", "mana_cost" => "{1}{G}", "types" => ["creature"], "subtypes" => ["spider"], "power" => 1,
-      "toughness" => 2 },
-    { "name" => "Test Shock", "mana_cost" => "{R}", "types" => ["instant"],
-      "abilities" => [{ "spell" => { "targets" => ["any_target"],
-                                     "effects" => [{ "deal_damage" => { "amount" => 2, "to" => { "target" => 0 } } }] } }] },
-    { "name" => "Test Frost", "mana_cost" => "{U}", "types" => ["instant"],
-      "abilities" => [{ "spell" => { "targets" => ["creature"], "effects" => [{ "tap" => { "to" => { "target" => 0 } } }] } }] },
-    { "name" => "Test Wakeup", "mana_cost" => "{W}", "types" => ["instant"],
-      "abilities" => [{ "spell" => { "targets" => ["creature"], "effects" => [{ "untap" => { "to" => { "target" => 0 } } }] } }] },
-    { "name" => "Test Relic", "mana_cost" => "{1}", "types" => ["artifact"],
-      "abilities" => [{ "activated" => { "cost" => [{ "mana" => "{1}" }], "effects" => [{ "gain_life" => { "amount" => 1 } }] } },
-                      { "mana" => { "cost" => ["tap"], "produce" => "{C}" } }] }
-  ].freeze
+  let(:stand_ins) do
+    [
+      { "name" => "Test Bear", "mana_cost" => "{1}{G}", "types" => ["creature"], "subtypes" => ["bear"], "power" => 2, "toughness" => 2 },
+      { "name" => "Test Wall", "mana_cost" => "{1}{W}", "types" => ["creature"], "subtypes" => ["wall"], "power" => 0,
+        "toughness" => 4, "keywords" => ["defender"] },
+      { "name" => "Test Bird", "mana_cost" => "{1}{W}", "types" => ["creature"], "subtypes" => ["bird"], "power" => 1,
+        "toughness" => 1, "keywords" => ["flying"] },
+      { "name" => "Test Spider", "mana_cost" => "{1}{G}", "types" => ["creature"], "subtypes" => ["spider"], "power" => 1,
+        "toughness" => 2 },
+      { "name" => "Test Shock", "mana_cost" => "{R}", "types" => ["instant"],
+        "abilities" => [{ "spell" => { "targets" => ["any_target"],
+                                       "effects" => [{ "deal_damage" => { "amount" => 2, "to" => { "target" => 0 } } }] } }] },
+      { "name" => "Test Frost", "mana_cost" => "{U}", "types" => ["instant"],
+        "abilities" => [{ "spell" => { "targets" => ["creature"], "effects" => [{ "tap" => { "to" => { "target" => 0 } } }] } }] },
+      { "name" => "Test Wakeup", "mana_cost" => "{W}", "types" => ["instant"],
+        "abilities" => [{ "spell" => { "targets" => ["creature"], "effects" => [{ "untap" => { "to" => { "target" => 0 } } }] } }] },
+      { "name" => "Test Relic", "mana_cost" => "{1}", "types" => ["artifact"],
+        "abilities" => [{ "activated" => { "cost" => [{ "mana" => "{1}" }], "effects" => [{ "gain_life" => { "amount" => 1 } }] } },
+                        { "mana" => { "cost" => ["tap"], "produce" => "{C}" } }] },
+      { "name" => "Test Cycler", "mana_cost" => "{3}", "types" => ["artifact"], "abilities" => [{ "cycling" => { "cost" => "{1}" } }] },
+      { "name" => "Test Gate", "types" => ["land"],
+        "abilities" => [{ "activated" => { "cost" => ["tap"], "effects" => [{ "gain_life" => { "amount" => 1 } }] } }] }
+    ]
+  end
 
   let(:cards) { CardFixtures.real("known_gaps_statics_combat") }
   let(:basics) { CardFixtures.real("newest_sets").select { %w[Plains Island Swamp Mountain Forest].include?(it["name"]) } }
-  let(:catalog) { Enjine::Catalog.from_definitions(cards + basics + STAND_INS) }
+  let(:catalog) { Enjine::Catalog.from_definitions(cards + basics + stand_ins) }
 
   # Alice's turn 3 (precombat main unless `step`). Permanents are names or [name, options].
   def board(hand: [], battlefield: [], graveyard: [], library: ["Island"] * 10, theirs: [], their_hand: [],
@@ -297,6 +302,148 @@ RSpec.describe "Real cards: known gaps in statics and combat" do
       play(game, { type: "target", target: shock }, pick("cast"), pick("target", target: bob))
       expect(life(game, "bob")).to eq(20 - 3 - 2 - 2)
       expect(game.state.exile.map { obj(game, it).card }).to eq(["test_shock"])
+    end
+  end
+
+  describe "Sorcerous Spyglass (CR 201.4, 602.5)" do
+    it "looks at an opponent's hand, then stops abilities of the named source in any zone, except mana abilities" do
+      game = board(hand: ["Sorcerous Spyglass"], mana: { C: 2 }, theirs: ["Test Relic"], their_hand: ["Test Cycler"],
+                   their_mana: { C: 3 })
+      cast(game, "Sorcerous Spyglass", pick("name", name: "Test Relic"))
+      looked = game.history_for("alice").flat_map { it["events"] }.select { it["type"] == "looked_at" }
+      expect(looked.flat_map { it["cards"] }).to eq(["test_cycler"])
+      relic = obj_id(game, "Test Relic")
+      e = engine(game)
+      expect(e.activatable?(1, relic, "printed:0")).to be(false)
+      expect(game.state.object(relic).tapped).to be(false)
+      expect(e.chars(relic).mana_abilities).not_to be_empty
+      cycler = obj_id(game, "Test Cycler", zone: :hand, player: "bob")
+      expect(e.activatable?(1, cycler, e.chars(cycler).abilities.find { it.ability.kind == :activated }.ref)).to be(true)
+    end
+
+    it "naming a card stops its activated abilities in the hand too (cycling)" do
+      game = board(hand: ["Sorcerous Spyglass"], mana: { C: 2 }, their_hand: ["Test Cycler"], their_mana: { C: 3 })
+      cast(game, "Sorcerous Spyglass", pick("name", name: "Test Cycler"))
+      e = engine(game)
+      cycler = obj_id(game, "Test Cycler", zone: :hand, player: "bob")
+      expect(e.activatable?(1, cycler, e.chars(cycler).abilities.find { it.ability.kind == :activated }.ref)).to be(false)
+    end
+  end
+
+  describe "Petrified Hamlet (CR 607.2d)" do
+    it "names a land card as it enters: those lands tap for {C} and their other abilities can't be activated" do
+      game = board(hand: ["Petrified Hamlet"], theirs: ["Test Gate"])
+      play(game, { type: "play_land", object: obj_id(game, "Petrified Hamlet", zone: :hand, player: "alice") },
+           pick("card_name", card_name: "Test Gate"))
+      gate = obj_id(game, "Test Gate")
+      e = engine(game)
+      expect(e.activatable?(1, gate, "printed:0")).to be(false)
+      expect(e.chars(gate).mana_abilities.size).to eq(1)
+      expect(game.state.object(obj_id(game, "Petrified Hamlet")).memory["chosen_name"]).to eq("Test Gate")
+    end
+
+    it "only land card names are offered" do
+      game = board(hand: ["Petrified Hamlet"], theirs: ["Test Gate", "Test Relic"])
+      game.submit(type: "play_land", object: obj_id(game, "Petrified Hamlet", zone: :hand, player: "alice"))
+      game.submit(type: "pass") until game.pending_decision.kind != "priority"
+      names = game.legal_options.map { it[:card_name] }
+      expect(Enjine::CLI::Text.new(game).option(game.legal_options.first)).to start_with("Name ")
+      expect(names).to include("Test Gate", "Petrified Hamlet", "Island")
+      expect(names).not_to include("Test Relic")
+    end
+  end
+
+  describe "Spider-Punk (CR 614.12, 702.136)" do
+    it "another Spider entering gets riot's choice from Spider-Punk's static ability" do
+      game = board(hand: ["Test Spider"], battlefield: ["Spider-Punk"], mana: { G: 2 })
+      cast(game, "Test Spider", pick("option", option: "counter"))
+      spider = obj_id(game, "Test Spider")
+      expect(counters_of = obj(game, spider).counters).to eq("+1/+1" => 1)
+      expect(counters_of).not_to be_empty
+    end
+
+    it "haste chosen with riot stays after Spider-Punk leaves" do
+      game = board(hand: ["Test Spider"], battlefield: ["Spider-Punk"], mana: { G: 2 })
+      cast(game, "Test Spider", pick("option", option: "haste"))
+      spider = obj_id(game, "Test Spider")
+      expect(chars(game, spider).keyword?(:haste)).to be(true)
+      engine(game).move!(obj_id(game, "Spider-Punk"), :graveyard, reason: "test")
+      expect(chars(game, spider).keyword?(:riot)).to be(false)
+      expect(chars(game, spider).keyword?(:haste)).to be(true)
+    end
+
+    it "a non-Spider gets no choice; a Spider with riot of its own chooses for each instance (CR 702.136b)" do
+      game = board(hand: ["Test Bear", "Spider-Punk"], battlefield: ["Spider-Punk"], mana: { G: 2 })
+      cast(game, "Test Bear")
+      expect(obj(game, obj_id(game, "Test Bear")).counters).to be_empty
+      e = engine(game)
+      punk = obj_id(game, "Spider-Punk", zone: :hand, player: "alice")
+      expect(e.entering_choices(punk).size).to eq(2)
+      e.move!(obj_id(game, "Spider-Punk"), :graveyard, reason: "test")
+      expect(e.entering_choices(punk).size).to eq(1)
+    end
+
+    it "makes damage unpreventable and spells uncounterable" do
+      game = board(battlefield: ["Spider-Punk"])
+      e = engine(game)
+      expect(e.unpreventable?(false)).to be(true)
+      expect(e.player_rule?(1, "spells_cant_be_countered")).to be(true)
+    end
+  end
+
+  describe "Storm, Windrider (CR 508.1c, 509.1b)" do
+    it "creatures with flying can't attack you, but can attack your planeswalkers" do
+      game = board(battlefield: ["Storm, Windrider", ["Chandra, Flameshaper", { loyalty: 6 }]],
+                   theirs: ["Test Bird", "Test Bear"], step: :beginning_of_combat, active: "bob")
+      game.submit(type: "pass") until game.pending_decision.kind == "declare_attackers"
+      bird = obj_id(game, "Test Bird")
+      bear = obj_id(game, "Test Bear")
+      targets = ->(id) { game.legal_options.select { it[:object] == id }.map { it[:target] } }
+      expect(targets.call(bird)).to eq([obj_id(game, "Chandra, Flameshaper")])
+      expect(targets.call(bear)).to include("player:alice")
+    end
+
+    it "a flier with nothing it may attack isn't offered" do
+      game = board(battlefield: ["Storm, Windrider"], theirs: ["Test Bird"], step: :beginning_of_combat, active: "bob")
+      expect(engine(game).eligible_attackers).to be_empty
+    end
+
+    it "creatures with flying can't block your creatures" do
+      game = board(battlefield: ["Storm, Windrider", "Test Bear"], theirs: ["Test Bird", "Test Spider"],
+                   step: :beginning_of_combat)
+      game.submit(type: "pass") until game.pending_decision.kind == "declare_attackers"
+      bear = obj_id(game, "Test Bear")
+      play(game, { type: "attack", object: bear, target: bob }, pick("done"), resolve: false)
+      game.submit(type: "pass") until game.pending_decision.kind == "declare_blockers"
+      blockers = game.legal_options.select { it[:type] == "block" }.map { it[:object] }
+      expect(blockers).to eq([obj_id(game, "Test Spider")])
+    end
+
+    it "creatures your spells target gain flying" do
+      game = board(hand: ["Test Frost"], battlefield: ["Storm, Windrider"], theirs: ["Test Bear"], mana: { U: 1 })
+      cast(game, "Test Frost", aim("Test Bear"))
+      expect(chars(game, obj_id(game, "Test Bear")).keyword?(:flying)).to be(true)
+    end
+  end
+
+  describe "tapping_power granted by become" do
+    it "a creature that becomes one that crews using its toughness" do
+      grant = { "name" => "Test Crew Lesson", "mana_cost" => "{W}", "types" => ["instant"],
+                "abilities" => [{ "spell" => { "targets" => ["creature"], "effects" => [{ "become" => {
+                  "abilities" => [{ "tapping_power" => { "for" => ["crew"], "use" => "toughness" } }], "to" => { "target" => 0 }
+                } }] } }] }
+      game = build_game(Enjine::Catalog.from_definitions(cards + basics + stand_ins + [grant])) do
+        turn 3, active: "alice", step: :precombat_main
+        player("alice", mana_pool: { W: 1 }) do
+          hand "Test Crew Lesson"
+          battlefield "Test Wall"
+          library "Island", count: 3
+        end
+        player("bob") { library "Island", count: 3 }
+      end
+      cast(game, "Test Crew Lesson", aim("Test Wall"))
+      wall = game.state.object(obj_id(game, "Test Wall"))
+      expect(Enjine::Mechanics::Abilities::TappingPower.of(engine(game), wall, :crew)).to eq(4)
     end
   end
 

@@ -14,11 +14,13 @@ module Enjine
       end
 
       def self.options(engine, _pending)
-        targets = engine.attack_targets
         legal = engine.attack_declaration_legal?
         done = engine.unmet_attack_requirements.empty? && legal ? [DONE] : [] # CR 508.1c-d
         withdraw = legal ? [] : engine.attackers.keys.map { { type: "withdraw", object: it } }
-        done + engine.attack_candidates.flat_map { |id| targets.map { { type: "attack", object: id, target: it } } } + withdraw
+        attacks = engine.attack_candidates.flat_map do |id|
+          engine.attack_targets_for(id).map { { type: "attack", object: id, target: it } }
+        end
+        done + attacks + withdraw
       end
 
       def self.submit(engine, _pending, option)

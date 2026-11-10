@@ -21,7 +21,33 @@ module Enjine
         abilities = if id.is_a?(GameObject) || state.objects.key?(id) then chars(id).abilities
                     else token_to_create(id).printed_characteristics.abilities
                     end
-        abilities.map(&:ability).select { it.kind == :entering_choice }
+        abilities.map(&:ability).select { it.kind == :entering_choice } + granted_entering_choices(id)
+      end
+
+      # CR 614.12: "as this enters" choices of keywords that static abilities on the battlefield would grant the
+      # permanent once it's there ("Other Spiders you control have riot"), judged as it would exist there, under
+      # its controller (or its owner's, for a card that has none). A token about to be created isn't judged yet.
+      def granted_entering_choices(id)
+        obj = id.is_a?(GameObject) ? id : state.objects[id]
+        return [] if obj.nil? || obj.zone == :battlefield
+
+        granting = board_abilities(:static).select { |_, ability| ability.keywords.any? { Entering.entering_keyword?(it) } }
+        return [] if granting.empty?
+
+        stand_in = obj.dup.tap { it.controller ||= it.owner }
+        current = chars(obj)
+        granting.flat_map do |source, ability|
+          next [] unless ability.active?(self, source) && ability.affects?(stand_in, source, facts(obj, current))
+
+          ability.keywords.flat_map { CardDefinition.keyword_instances(it) }.map(&:ability).select { it.kind == :entering_choice }
+        end
+      end
+
+      # Whether a keyword brings an "as this enters" choice (riot).
+      def self.entering_keyword?(keyword)
+        (@entering_keywords ||= {}).fetch(keyword) do
+          @entering_keywords[keyword] = CardDefinition.keyword_instances(keyword).any? { it.ability.kind == :entering_choice }
+        end
       end
 
       def entering_choice(id) = entering_choices(id).first
@@ -51,9 +77,16 @@ module Enjine
         ask!(nil)
       end
 
-      def ask_enter_choice!(id, controller)
+      def ask_enter_choice!(id, controller, given = nil)
+        before_entering_choice!(id, controller, given)
         ask!("kind" => "enter_choice", "player" => controller, "object" => id)
         :wait
+      end
+
+      # What happens just before a choice is asked ("look at an opponent's hand, then choose", CR 701.20e).
+      def before_entering_choice!(id, controller, given)
+        choice = entering_choices(id)[Entering.answers(given).size]
+        choice.before_choice(self, controller) if choice.respond_to?(:before_choice)
       end
 
       def enters_from_answer(id, frame) = entering_statuses(id, Entering.answers(frame["enter"]))
@@ -101,6 +134,7 @@ module Enjine
         return nil unless id
 
         token = state.objects.key?(id) ? {} : { "card" => token_to_create(id).id }
+        before_entering_choice!(id, controller, answers[id])
         ask!({ "kind" => "enter_choice", "player" => controller, "object" => id, "effect" => true }.merge(token))
         :wait
       end
