@@ -6,3 +6,4 @@
 Gemfile.lock.bak
 /.claude/
 /.ruby-lsp/
+*.gem
