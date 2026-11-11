@@ -8,6 +8,8 @@ change the public API; the stable surface is described in
 
 ## [Unreleased]
 
+## [0.1.0] - 2026-11-11
+
 ### Added
 - Two-player game engine pinned to the 2026-11-06 Comprehensive Rules: turn
   structure, priority, the stack, casting with manual mana payment, combat,
@@ -21,3 +23,6 @@ change the public API; the stable surface is described in
   `Enjine::Fuzz` and `Enjine::Verify`.
 - `enjine` CLI: hot-seat and random play, `--validate`, `--verify`,
   `--random-deck`, save and load.
+
+[Unreleased]: https://github.com/thisiscetin/enjine/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/thisiscetin/enjine/releases/tag/v0.1.0

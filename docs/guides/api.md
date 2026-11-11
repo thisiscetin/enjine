@@ -22,9 +22,13 @@ saving and replaying, the deck builder and the testing tools.
 - [15. Errors](#15-errors)
 - [16. Guarantees and limits](#16-guarantees-and-limits)
 
+```sh
+gem install enjine
+```
+
 ```ruby
 # Gemfile
-gem "enjine", git: "https://github.com/thisiscetin/enjine"
+gem "enjine"
 ```
 
 ```ruby
@@ -275,15 +279,16 @@ then `{type: "done"}`. `done` is only offered when the declaration is legal
 | `priority` | most of the game | `pass`, `play_land`, `cast`, `activate`, `activate_mana` |
 | `choose_mode` | modal spell or ability | `{type: "mode", mode: i}`, `done`, `cancel` |
 | `choose_x` | {X} in a cost | `{type: "x", value: n}`, `cancel` |
-| `choose_kicker` | spell with kicker | `kick`, `no_kick`, `cancel` |
+| `choose_kicker` | an optional cost: kicker, optional additional cost, gift, teamwork | `kick`, `no_kick`, `cancel` |
+| `choose_cost_option` | a choice between costs ("behold a Goblin or pay {2}") | `{type: "cost_option", option: i}`, `cancel` |
 | `choose_target_count` | "X target ...", "any number of target ..." | `{type: "count", count: n}`, `cancel` |
 | `choose_target` | each target | `{type: "target", target: ref}`, `done` (for "up to"), `cancel` |
 | `distribute` | dividing damage/counters | `{type: "assign", target: ref}`, `cancel` |
 | `choose_cost` | a cost that picks permanents/cards (sacrifice, crew, station, ...) | `{type: "cost", object:}`, `done`, `cancel` |
-| `pay_cost` | paying mana | `activate_mana`, `pay_mana`, `convoke`, `cancel` |
+| `pay_cost` | paying mana | `activate_mana`, `pay_mana`, `convoke`, `improvise`, `waterbend`, `cancel` |
 | `order_triggers` | several of your triggers at once | `{type: "trigger", trigger: id}` |
 | `effect_choice` | a choice while something resolves (scry, surveil, "you may", choose a card, ...) | one of the listed `choices`; `prompt` describes it |
-| `enter_choice` | as a permanent enters ("choose a color", "pay 2 life or enters tapped") | `color`, `creature_type`, `number`, `name`, `option`, `pay_life`, `enter_tapped`, ... |
+| `enter_choice` | as a permanent enters ("choose a color", "pay 2 life or enters tapped", "behold or enters tapped") | `color`, `creature_type`, `number`, `name`, `option`, `pay_life`, `behold`, `enter_tapped`, ... |
 | `untap_choice` | "you may choose not to untap" | `untap`, `keep_tapped` |
 | `legend_rule` | two legends with one name | `{type: "keep", object:}` |
 | `declare_attackers` | your combat | `attack`, `withdraw`, `done` |
@@ -552,6 +557,8 @@ The same folder, `games` and `seed` give the same report. Two cards with the sam
 name but different rules data count as invalid; an identical reprint counts once.
 
 ## 14. The command line
+
+With the gem installed the command is `enjine`; from a checkout, `bundle exec exe/enjine`.
 
 ```sh
 exe/enjine --deck1 a.json --deck2 b.json                 # hot-seat: you play both sides

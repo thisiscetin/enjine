@@ -28,8 +28,9 @@ numbers.
   omniscient observer view.
 - **No runtime dependencies.** Plain Ruby 4.0.
 
-> **Status: 0.1, pre-release.** Progress and what's pending are in
-> [docs/plans/standard.md](docs/plans/standard.md).
+> **Status: 0.1.** Start with the [API guide](docs/guides/api.md) and the
+> [card DSL guide](docs/guides/card-data-format.md). Progress and what's pending
+> are in [docs/plans/standard.md](docs/plans/standard.md).
 
 ## Set support
 
@@ -104,6 +105,12 @@ picks an option, `o` toggles the observer view (both hands and library order), `
 history, `u` undoes, `s FILE` saves, `--load FILE` resumes, and `?` shows help.
 
 ## Use it as a library
+
+```sh
+gem install enjine        # or in a Gemfile: gem "enjine"
+```
+
+**[→ API guide for callers](docs/guides/api.md)**: games, the decision loop, views, events, save/replay, bots and RL, the deck builder, errors.
 
 ```ruby
 require "enjine"

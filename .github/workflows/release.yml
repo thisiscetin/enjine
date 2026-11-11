@@ -21,10 +21,14 @@ jobs:
         with:
           ruby-version: "4.0"
           bundler-cache: true
-      - name: Tag matches the gem version
+      - name: Tag matches the gem version; skip if already published
+        id: check
         run: |
           version=$(ruby -Ilib -e 'require "enjine/version"; print Enjine::VERSION')
           test "v$version" = "$GITHUB_REF_NAME" || { echo "tag $GITHUB_REF_NAME != v$version"; exit 1; }
+          status=$(curl -s -o /dev/null -w "%{http_code}" "https://rubygems.org/api/v2/rubygems/enjine/versions/$version.json")
+          echo "published=$([ "$status" = 200 ] && echo true || echo false)" >> "$GITHUB_OUTPUT"
       - name: Gate
         run: bundle exec rake
-      - uses: rubygems/release-gem@v1
+      - if: steps.check.outputs.published != 'true'
+        uses: rubygems/release-gem@v1
