@@ -7,6 +7,11 @@ agents in a separate project later) drive it through an atomic decision API.
 
 ## 1. Scope
 
+- **Standard.** The target is every mechanic on the cards of the current
+  Standard-legal sets, plus the core rules (CR 1–6) every game needs. Mechanics
+  found only on cards outside Standard, multiplayer and casual variants are out of
+  scope until a Standard card needs them. New Standard sets add mechanics; rotated
+  sets keep theirs.
 - Two-player constructed: 20 life, deck ≥ 60 cards, max 4 copies of a card
   (basic lands and "any number" cards exempt). No sideboard tracking.
 - Single games, start to finish. No best-of-3 / match object.

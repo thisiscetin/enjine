@@ -591,6 +591,9 @@ A failed call never changes a game: `submit` and `apply` validate first, and
 
 - **Rules**: two-player games by the Comprehensive Rules pinned in
   `Enjine::RULES_VERSION` (2026-11-06). Code and tests cite rule numbers.
+- **Scope**: the mechanics of the Standard-legal sets (see the README's Scope
+  section). Mechanics found only outside Standard (morph, madness, infect, ...)
+  are not available.
 - **Stable surface**: everything in this guide. `game.state` and the engine's
   internals are for tests and debugging and may change.
 - **Determinism**: the RNG is a seeded PCG32 (`Enjine::Rng`); nothing reads the

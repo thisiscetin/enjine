@@ -1,12 +1,17 @@
 # Enjine
 
-**A deterministic, rules-accurate Magic: The Gathering game engine for Ruby.**
+**A deterministic, rules-accurate Magic: The Gathering engine for Ruby, built for the Standard format.**
 
 Enjine runs two-player Magic: The Gathering games by the
 [Comprehensive Rules](https://magic.wizards.com/en/rules) (pinned to the version
 effective **2026-11-06**). It turns every moment of the game into an explicit,
 atomic decision with a list of legal options. That makes it a solid base for
 simulations, bots and reinforcement learning, or for a game client.
+
+**Scope: Standard.** The target is every mechanic used by the cards of the current
+Standard-legal sets, plus the core rules every game needs. Mechanics that exist
+only on cards outside Standard are out of scope until a Standard card needs them
+(see [Scope](#scope) below).
 
 - **Strict rules.** Turn structure, priority, the stack, casting with manual mana
   payment, combat, state-based actions, London mulligan. Code and tests cite rule
@@ -25,6 +30,28 @@ simulations, bots and reinforcement learning, or for a game client.
 > sets can be written in the DSL and plays by the rules; most can today. Progress
 > and what's pending are in [docs/plans/standard.md](docs/plans/standard.md).
 > [`SUPPORTED.md`](SUPPORTED.md) (generated from the code) lists every primitive.
+
+## Scope
+
+Enjine targets **two-player Standard**. Coverage against the 2026-11-06
+Comprehensive Rules:
+
+| Part of the rules | Coverage |
+| --- | --- |
+| Core game rules (CR 1–6: turns, priority, the stack, casting, combat, state-based actions, layers, replacement and prevention, copies) | essentially complete for two players |
+| Mechanics on Standard-legal cards (14 sets, Foundations to Star Trek) | the goal: nearly all expressible today; the remaining gaps are listed per set in [docs/plans/standard.md](docs/plans/standard.md#mechanics-gaps) |
+| Keyword actions (CR 701), all of Magic's history | about half (36 of 71): every one used in Standard |
+| Keyword abilities (CR 702), all of Magic's history | about a third (62 of 195): every one used in Standard |
+| Special card rules (CR 703–734) | those Standard uses (double-faced, meld, Sagas, Adventures, Classes, Omens, station, prepare); not face-down cards, split or flip cards, levelers, Prototype, Cases, mutate, day/night, the monarch or the initiative |
+
+**Not supported:** mechanics that appear only on cards outside Standard (for
+example morph, madness, delve, persist, infect, ninjutsu, cumulative upkeep),
+battles and dungeons, multiplayer and casual variants (Commander, Planechase,
+Archenemy), ante, matches and sideboarding. A card using an unsupported mechanic
+can't be written: validation rejects it with an error naming the unknown key.
+Some older keywords can still be written from existing primitives (investigate is
+"create a Clue token"). When a set enters Standard, its new mechanics are added;
+when a set rotates out, its mechanics stay.
 
 ## Card sets
 

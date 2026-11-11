@@ -2,9 +2,11 @@
 
 Rules version: Comprehensive Rules effective 2026-11-06.
 
-A source-backed checklist of every game mechanic a fully rules-accurate
-**two-player** engine must eventually support, organised by the Comprehensive
-Rules (CR) section structure. Each line gives the rule number, a one-line
+A source-backed checklist of the game mechanics in the Comprehensive Rules,
+organised by its section structure. Enjine targets **two-player Standard**: it
+implements the core rules and every mechanic used by Standard-legal cards. The
+rest of this list is reference, not a commitment; a mechanic found only outside
+Standard is built when a Standard card needs it. Each line gives the rule number, a one-line
 description and a suggested milestone. This is a planning document; it is not
 generated, and it does not claim anything is implemented (see `SUPPORTED.md`
 for that).

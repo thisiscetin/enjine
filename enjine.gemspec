@@ -8,9 +8,10 @@ Gem::Specification.new do |spec|
   spec.authors = ["Mehmet Cetin"]
   spec.email = ["thisiscetin@gmail.com"]
 
-  spec.summary = "A deterministic, rules-accurate Magic: The Gathering game engine."
+  spec.summary = "A deterministic, rules-accurate Magic: The Gathering engine for the Standard format."
   spec.description = "Enjine runs two-player Magic: The Gathering games following the " \
-                     "Comprehensive Rules, exposing every step as an atomic decision API."
+                     "Comprehensive Rules, exposing every step as an atomic decision API. " \
+                     "It targets the mechanics of the Standard-legal sets."
   spec.license = "MIT"
   spec.required_ruby_version = ">= 4.0.0"
   spec.metadata["rubygems_mfa_required"] = "true"
