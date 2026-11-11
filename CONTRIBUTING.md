@@ -18,9 +18,14 @@ way, because development dependencies go in the `Gemfile`.
 
 ## What to work on
 
-- **Mechanics:** pick an item from [docs/MECHANICS_COVERAGE.md](docs/MECHANICS_COVERAGE.md).
-  Do ★ mechanics that appear in current Standard first. Mechanics that only exist on
-  cards no longer in Standard are low priority.
+- **Scope is Standard.** Enjine implements the mechanics of the current
+  Standard-legal sets ([docs/MECHANICS_COVERAGE.md](docs/MECHANICS_COVERAGE.md)).
+  The open gaps are listed per set in [docs/plans/standard.md](docs/plans/standard.md#mechanics-gaps);
+  start there. A mechanic found only outside Standard is welcome when it's small and
+  fits the existing primitives, but it isn't on the roadmap.
+- **No card text.** Never add oracle, flavor or reminder text, and never generate
+  card data from it. Cards are written by hand in the DSL; test cards are
+  structured data only.
 - **Bugs:** anything that differs from the Comprehensive Rules. Open an issue with the
   rule number, the seed and the decision log (`game.decision_log`), or a snapshot
   saved with the CLI's `s FILE` command.

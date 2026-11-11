@@ -23,7 +23,7 @@ stands and what is pending.
 - Mechanics round 1 (6 builders) and round 2 (6 builders) are merged: 62 groups of
   mechanics and card shapes, from earthbend and saddle to Paradigm, Meld, gift,
   divided damage and ending the turn. See "Closed since the census" below.
-- 586 real Standard cards are written in the DSL in `spec/fixtures/cards/real/`
+- 591 real Standard cards are written in the DSL in `spec/fixtures/cards/real/`
   (all 14 sets, every card type), each with a scenario spec, and they pass
   `enjine --verify`.
 - `enjine --verify DIR` (`Enjine::Verify`) checks any folder of card JSON:
@@ -33,23 +33,21 @@ stands and what is pending.
 - Gate: 1888 specs, ~99.5% line / ~91.5% branch coverage, RuboCop clean, fuzz
   and CI green (CI uses the latest Ruby 4.0.x).
 - By the census, Star Trek, Reality Fracture, Avatar, Spider-Man and Aetherdrift
-  have no known gaps; the other nine sets have 13 single-card gaps between them
+  have no known gaps; the other nine sets have 14 single-card gaps between them
   (tables below).
 
-**In progress: round 3 ("known gaps").** It stopped at the usage limit before
-any branch was gated or merged. The work is committed on four local branches
-(worktrees in `.claude/worktrees/`):
+**In progress: round 3 ("known gaps").** Implemented on unmerged branches, not
+yet gated or merged:
 
-| Branch | Area | Covers |
-| --- | --- | --- |
-| `worktree-wf_e8880e22-5ec-1` | casting and permissions | Raubahn, Nita, Bilbo (Thief in the Night), Gwen Stacy, Hama, Molten Exhale, Celestial Reunion, Key to the Side-Door, Ninja Teen, Baron Zemo, the gift trigger |
-| `worktree-wf_e8880e22-5ec-2` | zones and loops | "repeat this process" (Sin), exile until total mana value (Improvisation Capstone), "exiled with" targets (The Darkness Crystal, Borg Cube), change the target (Redirect Lightning), Nth-counter trigger (Death to Our Enemies), "if it was attacking" (Desculpting Blast), meld mana value, hideaway, earthbend cleanup |
-| `worktree-wf_e8880e22-5ec-3` | statics and combat (least complete) | granter tap cost (Fishing Pole), chosen-color hexproof (Mondo Gecko), "attacks alone", sized tokens, "can't become untapped"; still to do: Spider-Punk's granted riot, Ghalta, Storm, Chandra, Flameshaper |
-| `worktree-wf_e8880e22-5ec-4` | rules correctness | entering attacking a planeswalker (508.4), choosing the order of damage replacements (616.1), prevention follow-ups for unpreventable damage (615.12), new targets firing ward and becomes-target triggers, revalidating divided spells, "a source of your choice" (609.7), ability last known information |
+| Area | Covers |
+| --- | --- |
+| Casting and permissions | Raubahn, Nita, Bilbo (Thief in the Night), Gwen Stacy, Hama, Molten Exhale, Celestial Reunion, Key to the Side-Door, Ninja Teen, Baron Zemo, the gift trigger |
+| Zones and loops | "repeat this process" (Sin), exile until total mana value (Improvisation Capstone), "exiled with" targets (The Darkness Crystal, Borg Cube), change the target (Redirect Lightning), Nth-counter trigger (Death to Our Enemies), "if it was attacking" (Desculpting Blast), meld mana value, hideaway, earthbend cleanup |
+| Statics and combat (least complete) | granter tap cost (Fishing Pole), chosen-color hexproof (Mondo Gecko), "attacks alone", sized tokens, "can't become untapped"; still to do: Spider-Punk's granted riot, Ghalta, Storm, Chandra, Flameshaper, Elspeth, Storm Slayer |
+| Rules correctness | entering attacking a planeswalker (508.4), choosing the order of damage replacements (616.1), prevention follow-ups for unpreventable damage (615.12), new targets firing ward and becomes-target triggers, revalidating divided spells, "a source of your choice" (609.7), ability last known information |
 
-To finish it: each branch gets completed and gated, then the branches are merged
-one at a time, the full gate plus fuzz and `--verify` runs, and the tables below
-are recounted.
+To finish it: complete and gate each area, merge them one at a time, run the
+full gate plus fuzz and `--verify`, and recount the tables below.
 
 **Pending after round 3:**
 1. **Per-set verification.** The census checked one example card per gap per set,
@@ -96,7 +94,7 @@ first release is dated.
 | 9 | Spider-Man | 2025-09-26 | 2028 (est.) | supported |
 | 10 | Edge of Eternities | 2025-08-01 | 2028 (est.) | 1 gap |
 | 11 | Final Fantasy | 2025-06-13 | 2028 (est.) | 2 gaps |
-| 12 | Tarkir: Dragonstorm | 2025-04-11 | 2028 (est.) | 1 gap |
+| 12 | Tarkir: Dragonstorm | 2025-04-11 | 2028 (est.) | 2 gaps |
 | 13 | Aetherdrift | 2025-02-14 | 2028 (est.) | supported |
 | 14 | Foundations | 2024-11-15 | 2029 (est.) | 1 gap |
 
@@ -231,7 +229,7 @@ and `lands_played_this_turn`).
 | "Repeat this process" loops | 608.2c | 1 | Sin, Spira's Punishment |
 | Target filter: a card exiled with this permanent (the dies-to-exile replacement is supported) | 607.2a, 115.1 | 1 | The Darkness Crystal |
 
-### Tarkir: Dragonstorm (tdm) — 1 gap
+### Tarkir: Dragonstorm (tdm) — 2 gaps
 
 276 cards. The census listed Stalwart Successor under suspend; it has no suspend (Taigam, Master
 Opportunist is the set's suspend card, and is supported).
@@ -239,6 +237,7 @@ Opportunist is the set's suspend card, and is supported).
 | Missing mechanic | CR | ~Cards | Example |
 | --- | --- | ---: | --- |
 | Flash that depends on an optional cost ("as though it had flash if you behold a Dragon") | 601.3c, 702.8 | 1 | Molten Exhale |
+| Keywords granted "until your next turn" (`grant` and `become` last until end of turn or longer, not until your next turn) | 611.2a | 1 | Elspeth, Storm Slayer |
 
 ### Aetherdrift (dft) — supported
 

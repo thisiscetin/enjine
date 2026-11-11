@@ -14,9 +14,15 @@ Gem::Specification.new do |spec|
                      "It targets the mechanics of the Standard-legal sets."
   spec.license = "MIT"
   spec.required_ruby_version = ">= 4.0.0"
+  spec.homepage = "https://github.com/thisiscetin/enjine"
+  spec.metadata["homepage_uri"] = spec.homepage
+  spec.metadata["source_code_uri"] = spec.homepage
+  spec.metadata["bug_tracker_uri"] = "#{spec.homepage}/issues"
+  spec.metadata["changelog_uri"] = "#{spec.homepage}/blob/main/CHANGELOG.md"
+  spec.metadata["documentation_uri"] = "#{spec.homepage}/blob/main/docs/guides/api.md"
   spec.metadata["rubygems_mfa_required"] = "true"
 
-  spec.files = Dir["lib/**/*.rb", "exe/*", "docs/**/*.md", "README.md", "LICENSE.txt"]
+  spec.files = Dir["lib/**/*.rb", "exe/*", "docs/**/*.md", "README.md", "SUPPORTED.md", "CHANGELOG.md", "LICENSE.txt"]
   spec.bindir = "exe"
   spec.executables = ["enjine"]
   spec.require_paths = ["lib"]

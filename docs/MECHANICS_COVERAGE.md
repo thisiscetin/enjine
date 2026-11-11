@@ -11,6 +11,33 @@ description and a suggested milestone. This is a planning document; it is not
 generated, and it does not claim anything is implemented (see `SUPPORTED.md`
 for that).
 
+## Scope and coverage summary
+
+Enjine targets **two-player Standard**. Coverage against the 2026-11-06
+Comprehensive Rules (measured by the rule numbers the code implements and cites,
+2026-11-11):
+
+| Part of the rules | Coverage |
+| --- | --- |
+| Core game rules (CR 1–6: turns, priority, the stack, casting, combat, state-based actions, layers, replacement and prevention, copies) | essentially complete for two players |
+| Mechanics on Standard-legal cards (14 sets, Foundations to Star Trek) | the goal; nearly all can be written today, with the remaining gaps listed per set in [plans/standard.md](plans/standard.md#mechanics-gaps) |
+| Keyword actions (CR 701), all of Magic's history | about half (36 of 71), including every one used in Standard |
+| Keyword abilities (CR 702), all of Magic's history | about a third (62 of 195), including every one used in Standard |
+| Special card rules (CR 703–734) | those Standard uses: double-faced, meld, Sagas, Adventures, Classes, Omens, station, prepare, coin flips and dice, ending the turn |
+
+**Not supported:**
+- Mechanics found only on cards outside Standard, for example morph and other
+  face-down cards (CR 708), madness, delve, persist, undying, infect, toxic,
+  ninjutsu, cumulative upkeep, echo, bestow, mutate, split and flip cards,
+  levelers, Prototype, Cases, day/night, the monarch and the initiative.
+- Battles and dungeons; multiplayer and casual variants (Commander, Planechase,
+  Archenemy, Conspiracy); ante; matches and sideboarding.
+
+A card that uses an unsupported mechanic can't be written: validation rejects it
+with an error naming the unknown key. Some older keywords can still be written
+from existing primitives (investigate is "create a Clue token"). When a set enters
+Standard its new mechanics are added; when a set rotates out, its mechanics stay.
+
 ## Priority: Standard first
 
 The project builds mechanics in this order:

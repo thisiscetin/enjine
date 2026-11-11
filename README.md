@@ -8,98 +8,56 @@ effective **2026-11-06**). It turns every moment of the game into an explicit,
 atomic decision with a list of legal options. That makes it a solid base for
 simulations, bots and reinforcement learning, or for a game client.
 
-**Scope: Standard.** The target is every mechanic used by the cards of the current
-Standard-legal sets, plus the core rules every game needs. Mechanics that exist
-only on cards outside Standard are out of scope until a Standard card needs them
-(see [Scope](#scope) below).
+**Scope: Standard.** Enjine implements the core rules and the mechanics of the
+current Standard-legal sets. Mechanics found only outside Standard (morph,
+madness, infect, ...) are out of scope until a Standard card needs them. The
+[mechanics coverage](docs/MECHANICS_COVERAGE.md) page has the details and the
+numbers.
 
-- **Strict rules.** Turn structure, priority, the stack, casting with manual mana
-  payment, combat, state-based actions, London mulligan. Code and tests cite rule
+- **Strict rules.** Turn structure, priority, the stack, layers, replacement
+  effects, combat, state-based actions, London mulligan. Code and tests cite rule
   numbers.
-- **Data-first cards.** Cards are JSON data blocks, not code. Unknown mechanics
-  are rejected with precise, path-addressed errors.
+- **Cards are data.** You write each card as a JSON block in the
+  [card DSL](docs/guides/card-data-format.md); Enjine validates it and never
+  reads card text. Unknown mechanics are rejected with path-addressed errors.
 - **Atomic decisions.** One small choice at a time (cast → target → tap → pay),
   each one cancellable until the costs are paid.
-- **Deterministic.** Seeded PCG32 RNG: the same seed and the same decisions give
-  the same game, bit for bit. Export or import any moment, even mid-cast.
+- **Deterministic.** Seeded PCG32 RNG: the same seed and decisions give the same
+  game, bit for bit. Export or import any moment, even mid-cast.
 - **Hidden information handled properly.** Per-player views and histories, plus an
   omniscient observer view.
 - **No runtime dependencies.** Plain Ruby 4.0.
 
-> Status: early (0.1), but broad. The goal is that every card of the Standard-legal
-> sets can be written in the DSL and plays by the rules; most can today. Progress
-> and what's pending are in [docs/plans/standard.md](docs/plans/standard.md).
-> [`SUPPORTED.md`](SUPPORTED.md) (generated from the code) lists every primitive.
-
-## Scope
-
-Enjine targets **two-player Standard**. Coverage against the 2026-11-06
-Comprehensive Rules:
-
-| Part of the rules | Coverage |
-| --- | --- |
-| Core game rules (CR 1–6: turns, priority, the stack, casting, combat, state-based actions, layers, replacement and prevention, copies) | essentially complete for two players |
-| Mechanics on Standard-legal cards (14 sets, Foundations to Star Trek) | the goal: nearly all expressible today; the remaining gaps are listed per set in [docs/plans/standard.md](docs/plans/standard.md#mechanics-gaps) |
-| Keyword actions (CR 701), all of Magic's history | about half (36 of 71): every one used in Standard |
-| Keyword abilities (CR 702), all of Magic's history | about a third (62 of 195): every one used in Standard |
-| Special card rules (CR 703–734) | those Standard uses (double-faced, meld, Sagas, Adventures, Classes, Omens, station, prepare); not face-down cards, split or flip cards, levelers, Prototype, Cases, mutate, day/night, the monarch or the initiative |
-
-**Not supported:** mechanics that appear only on cards outside Standard (for
-example morph, madness, delve, persist, infect, ninjutsu, cumulative upkeep),
-battles and dungeons, multiplayer and casual variants (Commander, Planechase,
-Archenemy), ante, matches and sideboarding. A card using an unsupported mechanic
-can't be written: validation rejects it with an error naming the unknown key.
-Some older keywords can still be written from existing primitives (investigate is
-"create a Clue token"). When a set enters Standard, its new mechanics are added;
-when a set rotates out, its mechanics stay.
-
-## Card sets
-
-Enjine ships no real cards. You write each card yourself in the
-[card DSL](docs/guides/card-data-format.md), a JSON block naming what the card
-does, and Enjine validates it:
-
-```json
-{ "name": "Alfa", "mana_cost": "{1}{U}{U}", "types": ["instant"],
-  "abilities": [ { "spell": { "targets": ["spell"], "effects": [ { "counter": { "to": { "target": 0 } } } ] } } ] }
-```
-
-Nothing reads rules text. A card may also carry its `"rarity"` and its
-`"printing": { "set": "trk", "number": "12" }`; the rules ignore both. Put cards in a
-deck's `cards`, or hand a pool of them (a whole set, several sets, or the cards you own)
-to the [deck builder](docs/guides/deck-builder.md) for random decks.
-
-By the gap census, Star Trek, Reality Fracture, Avatar, Spider-Man and Aetherdrift
-have no known gaps. The other Standard sets have a few single-card gaps, listed
-per set in [docs/plans/standard.md](docs/plans/standard.md#mechanics-gaps).
-
-To check a folder of your cards, run `bundle exec exe/enjine --verify DIR` (add
-`--games N`, `--seed S` or `--json`). It validates every card, then plays
-rules-monitored games with random decks built from them, and reports invalid cards,
-cards that were never used in play, and any rules finding.
+> **Status: 0.1, pre-release.** Progress and what's pending are in
+> [docs/plans/standard.md](docs/plans/standard.md).
 
 ## Set support
 
+Enjine ships no card data. These are the Standard sets and the card types for
+which real cards are written in the DSL and tested
+(`spec/fixtures/cards/real/`, each card with a scenario spec and rules-monitored
+play):
+
 | Set | Creature | Instant | Sorcery | Artifact | Enchantment | Land | Planeswalker | Battle | Kindred |
 |---|---|---|---|---|---|---|---|---|---|
-| Star Trek (`trk`) | — | — | — | — | — | — | n/a | n/a | n/a |
-| Reality Fracture (`fra`) | — | — | — | — | — | — | — | n/a | n/a |
-| The Hobbit (`hob`) | — | — | — | — | — | — | n/a | n/a | n/a |
-| Marvel Super Heroes (`msh`) | — | — | — | — | — | — | n/a | n/a | n/a |
-| Secrets of Strixhaven (`sos`) | — | — | — | — | — | — | — | n/a | n/a |
-| Teenage Mutant Ninja Turtles (`tmt`) | — | — | — | — | — | — | n/a | n/a | n/a |
-| Lorwyn Eclipsed (`ecl`) | — | — | — | — | — | — | — | n/a | — |
-| Avatar: The Last Airbender (`tla`) | — | — | — | — | — | — | n/a | n/a | n/a |
-| Spider-Man (`spm`) | — | — | — | — | — | — | n/a | n/a | n/a |
-| Edge of Eternities (`eoe`) | — | — | — | — | — | — | — | n/a | n/a |
-| Final Fantasy (`fin`) | — | — | — | — | — | — | n/a | n/a | n/a |
-| Tarkir: Dragonstorm (`tdm`) | — | — | — | — | — | — | — | n/a | n/a |
-| Aetherdrift (`dft`) | — | — | — | — | — | — | — | n/a | n/a |
-| Foundations (`fdn`) | — | — | — | — | — | — | — | n/a | n/a |
+| Star Trek (`trk`) | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | n/a | n/a | n/a |
+| Reality Fracture (`fra`) | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | n/a | n/a |
+| The Hobbit (`hob`) | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | n/a | n/a | n/a |
+| Marvel Super Heroes (`msh`) | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | n/a | n/a | n/a |
+| Secrets of Strixhaven (`sos`) | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | n/a | n/a |
+| Teenage Mutant Ninja Turtles (`tmt`) | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | n/a | n/a | n/a |
+| Lorwyn Eclipsed (`ecl`) | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | n/a | ✓ |
+| Avatar: The Last Airbender (`tla`) | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | n/a | n/a | n/a |
+| Spider-Man (`spm`) | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | n/a | n/a | n/a |
+| Edge of Eternities (`eoe`) | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | n/a | n/a |
+| Final Fantasy (`fin`) | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | n/a | n/a | n/a |
+| Tarkir: Dragonstorm (`tdm`) | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | n/a | n/a |
+| Aetherdrift (`dft`) | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | n/a | n/a |
+| Foundations (`fdn`) | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | n/a | n/a |
 
-✓ means every card of that type in the set was written in the DSL, validated, and
-used in rules-monitored play with `enjine --verify`. The card data used for these
-checks is kept outside this repository. n/a means the set has no card of that type.
+✓: at least one real card of that type from that set is written and tested.
+—: none yet. n/a: the set has no card of that type. Known gaps are listed per
+set in [docs/plans/standard.md](docs/plans/standard.md#mechanics-gaps).
 
 ## Try it: play both sides in your terminal
 
@@ -178,47 +136,15 @@ The full API for callers (decisions, views, events, saving and replaying, bots a
 { "name": "Lightning Bolt", "mana_cost": "{R}", "types": ["instant"],
   "abilities": [{ "spell": {
     "targets": ["any_target"],
-    "effects": [{ "deal_damage": { "amount": 3, "to": { "target": 0 } } }] } }] }
+    "effects": [{ "deal_damage": { "amount": 3, "to": { "target": 0 } } }] } }],
+  "rarity": "common", "printing": { "set": "fdn", "number": "1" } }
 ```
 
-```json
-{ "name": "Vessa, Rally Captain", "mana_cost": "{2}{W}{W}", "types": ["planeswalker"], "loyalty": 3,
-  "abilities": [{ "loyalty": { "cost": 1, "effects": [
-    { "pump": { "power": 1, "toughness": 1, "to": { "each": "creature", "controller": "you" } } }] } }] }
-```
-
-Validate cards in bulk:
+`rarity` and `printing` are optional and ignored by the rules. Check your cards:
 
 ```sh
-bundle exec exe/enjine --validate cards.json   # JSON report, exit code 1 if any card is invalid
-```
-
-The [card DSL guide](docs/guides/card-data-format.md) lists every field, ability,
-effect and filter with examples.
-
-## Where things are
-
-```
-lib/enjine.rb               entry point (the engine; deck_builder, cli and docs are opt-in requires)
-lib/enjine/
-  game.rb                   public API: pending_decision, submit, apply, views, history, export/import
-  setup.rb player.rb deck.rb  players, decks and the compiled two-player Setup
-  card_definition.rb        card data block -> validated, immutable definition
-  engine.rb engine/         the rules state machine: turns, priority, casting, stack, combat, damage, layers
-  steps.rb                  the 12 steps of a turn and their turn-based actions
-  decisions/ actions/       every kind of question a player is asked / every action at priority
-  mechanics/                one primitive per mechanic: types, keywords, abilities, costs, effects, filters
-  state.rb snapshot.rb      plain-data game state, export/import and its consistency checks
-  events.rb view.rb history.rb  typed events, per-player views and histories
-  cli.rb cli/               the interactive terminal client
-  deck_builder.rb           OPT-IN random constructed decks from a card pool
-  agents/ fuzz.rb docs.rb   random player, invariant-checking fuzzer, docs generator
-exe/enjine                  CLI executable
-examples/                   ready-to-play decks and a card pool (not in the gem)
-spec/unit spec/integration spec/e2e   the three test levels; spec/support/scenario.rb is the board DSL
-spec/fixtures/cards/        the cards specs and fuzz play with, one file per mechanic family
-docs/                       design, architecture, guides, generated reference, CR coverage checklist
-SUPPORTED.md                generated list of everything the engine supports
+bundle exec exe/enjine --validate cards.json   # JSON report; exit 1 if any card is invalid
+bundle exec exe/enjine --verify my_cards/      # validate, then play-test them in rules-monitored games
 ```
 
 ## Documentation
@@ -231,9 +157,9 @@ SUPPORTED.md                generated list of everything the engine supports
 | [docs/guides/api.md](docs/guides/api.md) | the library API for callers: games, decisions, views, events, save/replay, bots and RL, deck builder, errors |
 | [docs/guides/deck-builder.md](docs/guides/deck-builder.md) | random decks from any card pool (a set, your collection), in chosen or random colors (`--pool`, `--random-deck`) |
 | [docs/guides/adding-a-mechanic.md](docs/guides/adding-a-mechanic.md) | how to extend the engine |
-| [docs/MECHANICS_COVERAGE.md](docs/MECHANICS_COVERAGE.md) | the full CR checklist with milestones and priorities |
+| [docs/MECHANICS_COVERAGE.md](docs/MECHANICS_COVERAGE.md) | scope and coverage against the Comprehensive Rules, and the full CR checklist |
 | [docs/plans/standard.md](docs/plans/standard.md) | progress: what's done, what's in progress, what's pending, and the per-set gap census |
-| [docs/DESIGN.md](docs/DESIGN.md), [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | design decisions and code layout |
+| [docs/DESIGN.md](docs/DESIGN.md), [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | design decisions, code layout and where things are |
 
 ## Development
 
@@ -252,16 +178,17 @@ Every mechanic is tested at three levels:
 
 ## Contributing
 
-Contributions are welcome. Read [CONTRIBUTING.md](CONTRIBUTING.md), then
-[adding a mechanic](docs/guides/adding-a-mechanic.md), and pick a ★ item that's
-in current Standard from the [coverage checklist](docs/MECHANICS_COVERAGE.md).
-Bugs and rules questions go to
-[GitHub issues](https://github.com/thisiscetin/enjine/issues). When something
-behaves differently from the Comprehensive Rules, include the seed and the
-decision log (or a saved snapshot).
+Contributions are welcome: see [CONTRIBUTING.md](CONTRIBUTING.md) and the
+[code of conduct](CODE_OF_CONDUCT.md). Report rules bugs in
+[GitHub issues](https://github.com/thisiscetin/enjine/issues) with the seed and
+the decision log (or a saved snapshot). Security issues: [SECURITY.md](SECURITY.md).
 
 ## License
 
-MIT. Magic: The Gathering is a trademark of Wizards of the Coast. Enjine is an
-unofficial fan project, not affiliated with or endorsed by Wizards of the Coast.
-Card names in the sample pool are used for illustration only.
+MIT, see [LICENSE.txt](LICENSE.txt). Changes are in [CHANGELOG.md](CHANGELOG.md).
+
+Enjine is unofficial Fan Content, not approved or endorsed by Wizards of the
+Coast. Magic: The Gathering, card names and the Comprehensive Rules are property
+of Wizards of the Coast LLC. The repository contains no card text, art or rules
+text: test cards are structured data written by hand, and only rule numbers are
+cited.

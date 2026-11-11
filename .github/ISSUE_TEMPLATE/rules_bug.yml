@@ -1,0 +1,23 @@
+name: Rules bug
+description: The engine does something the Comprehensive Rules don't allow (or doesn't allow something they do)
+labels: [rules-bug]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened, and what should have happened
+      description: Cite the rule numbers (CR 2026-11-06) if you can.
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: How to reproduce
+      description: The seed and decision log (`game.decision_log`), a snapshot saved with the CLI's `s FILE`, or a spec board. Include the card JSON involved.
+      render: json
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Enjine version or commit

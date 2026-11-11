@@ -1,0 +1,17 @@
+name: A Standard card can't be written
+description: A card from a Standard-legal set can't be expressed in the card DSL
+labels: [mechanic]
+body:
+  - type: input
+    id: card
+    attributes:
+      label: Card name and set code
+    validations:
+      required: true
+  - type: textarea
+    id: missing
+    attributes:
+      label: What can't be written
+      description: The part of the card the DSL has no shape for, and your best attempt at the JSON. Please don't paste the card's full rules text.
+    validations:
+      required: true

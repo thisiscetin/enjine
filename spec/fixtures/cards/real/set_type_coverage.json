@@ -1,0 +1,503 @@
+[
+  {
+    "name": "A.I.M. Labs",
+    "types": [
+      "land"
+    ],
+    "abilities": [
+      "enters_tapped",
+      {
+        "triggered": {
+          "when": {
+            "enters": {}
+          },
+          "effects": [
+            {
+              "gain_life": {
+                "amount": 1
+              }
+            }
+          ]
+        }
+      },
+      {
+        "mana": {
+          "cost": [
+            "tap"
+          ],
+          "color": "any_one",
+          "colors": [
+            "U",
+            "B"
+          ]
+        }
+      }
+    ],
+    "rarity": "common",
+    "printing": {
+      "set": "msh",
+      "number": "257"
+    }
+  },
+  {
+    "name": "Sandsteppe Citadel",
+    "types": [
+      "land"
+    ],
+    "abilities": [
+      "enters_tapped",
+      {
+        "mana": {
+          "cost": [
+            "tap"
+          ],
+          "color": "any_one",
+          "colors": [
+            "W",
+            "B",
+            "G"
+          ]
+        }
+      }
+    ],
+    "rarity": "uncommon",
+    "printing": {
+      "set": "tdm",
+      "number": "266"
+    }
+  },
+  {
+    "name": "Professor Dellian Fel",
+    "mana_cost": "{2}{B}{G}",
+    "types": [
+      "planeswalker"
+    ],
+    "supertypes": [
+      "legendary"
+    ],
+    "subtypes": [
+      "dellian"
+    ],
+    "loyalty": 5,
+    "abilities": [
+      {
+        "loyalty": {
+          "cost": 2,
+          "effects": [
+            {
+              "gain_life": {
+                "amount": 3
+              }
+            }
+          ]
+        }
+      },
+      {
+        "loyalty": {
+          "cost": 0,
+          "effects": [
+            {
+              "draw": {
+                "amount": 1
+              }
+            },
+            {
+              "lose_life": {
+                "amount": 1,
+                "to": "you"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "loyalty": {
+          "cost": -3,
+          "targets": [
+            "creature"
+          ],
+          "effects": [
+            {
+              "destroy": {
+                "to": {
+                  "target": 0
+                }
+              }
+            }
+          ]
+        }
+      },
+      {
+        "loyalty": {
+          "cost": -6,
+          "effects": [
+            {
+              "create_emblem": {
+                "abilities": [
+                  {
+                    "triggered": {
+                      "when": {
+                        "gains_life": {}
+                      },
+                      "targets": [
+                        "opponent"
+                      ],
+                      "effects": [
+                        {
+                          "lose_life": {
+                            "amount": {
+                              "triggering": "amount"
+                            },
+                            "to": {
+                              "target": 0
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "mythic",
+    "printing": {
+      "set": "sos",
+      "number": "214"
+    }
+  },
+  {
+    "name": "Tezzeret, Cruel Captain",
+    "mana_cost": "{3}",
+    "types": [
+      "planeswalker"
+    ],
+    "supertypes": [
+      "legendary"
+    ],
+    "subtypes": [
+      "tezzeret"
+    ],
+    "loyalty": 4,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "enters": {
+              "subject": {
+                "each": "artifact",
+                "controller": "you"
+              }
+            }
+          },
+          "effects": [
+            {
+              "add_counters": {
+                "counter": "loyalty",
+                "amount": 1,
+                "to": "self"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "loyalty": {
+          "cost": 0,
+          "targets": [
+            {
+              "filter": {
+                "one_of": [
+                  "artifact",
+                  "creature"
+                ]
+              }
+            }
+          ],
+          "effects": [
+            {
+              "untap": {
+                "to": {
+                  "target": 0
+                }
+              }
+            },
+            {
+              "add_counters": {
+                "counter": "+1/+1",
+                "amount": 1,
+                "to": {
+                  "target": 0
+                },
+                "if": {
+                  "targets": {
+                    "artifact": {
+                      "types": [
+                        "creature"
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          ]
+        }
+      },
+      {
+        "loyalty": {
+          "cost": -3,
+          "effects": [
+            {
+              "search_library": {
+                "for": {
+                  "types": [
+                    "artifact"
+                  ],
+                  "mana_value": {
+                    "at_most": 1
+                  }
+                },
+                "put": "hand",
+                "reveal": true
+              }
+            }
+          ]
+        }
+      },
+      {
+        "loyalty": {
+          "cost": -7,
+          "effects": [
+            {
+              "create_emblem": {
+                "abilities": [
+                  {
+                    "triggered": {
+                      "when": {
+                        "step_begins": {
+                          "step": "beginning_of_combat",
+                          "whose": "your"
+                        }
+                      },
+                      "targets": [
+                        {
+                          "filter": {
+                            "artifact": {
+                              "controller": "you"
+                            }
+                          }
+                        }
+                      ],
+                      "effects": [
+                        {
+                          "add_counters": {
+                            "counter": "+1/+1",
+                            "amount": 3,
+                            "to": {
+                              "target": 0
+                            }
+                          }
+                        },
+                        {
+                          "become": {
+                            "types": [
+                              "artifact",
+                              "creature"
+                            ],
+                            "creature_types": [
+                              "robot"
+                            ],
+                            "base_power_toughness": {
+                              "power": 0,
+                              "toughness": 0
+                            },
+                            "duration": "indefinite",
+                            "to": {
+                              "target": 0
+                            },
+                            "if": {
+                              "not": {
+                                "targets": {
+                                  "creature": {}
+                                }
+                              }
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "mythic",
+    "printing": {
+      "set": "eoe",
+      "number": "2"
+    }
+  },
+  {
+    "name": "Chandra, Spark Hunter",
+    "mana_cost": "{3}{R}",
+    "types": [
+      "planeswalker"
+    ],
+    "supertypes": [
+      "legendary"
+    ],
+    "subtypes": [
+      "chandra"
+    ],
+    "loyalty": 4,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "step_begins": {
+              "step": "beginning_of_combat",
+              "whose": "your"
+            }
+          },
+          "targets": [
+            {
+              "filter": {
+                "artifact": {
+                  "subtypes": [
+                    "vehicle"
+                  ],
+                  "controller": "you"
+                }
+              },
+              "optional": true
+            }
+          ],
+          "effects": [
+            {
+              "become": {
+                "types": [
+                  "artifact",
+                  "creature"
+                ],
+                "keywords": [
+                  "haste"
+                ],
+                "to": {
+                  "target": 0
+                }
+              }
+            }
+          ]
+        }
+      },
+      {
+        "loyalty": {
+          "cost": 2,
+          "effects": [
+            {
+              "pay": {
+                "cost": [
+                  {
+                    "one_of": [
+                      {
+                        "sacrifice_permanent": {
+                          "filter": "artifact"
+                        }
+                      },
+                      "discard"
+                    ]
+                  }
+                ],
+                "then": [
+                  {
+                    "draw": {
+                      "amount": 1
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      },
+      {
+        "loyalty": {
+          "cost": 0,
+          "effects": [
+            {
+              "create_token": {
+                "token": {
+                  "name": "Vehicle",
+                  "types": [
+                    "artifact"
+                  ],
+                  "subtypes": [
+                    "vehicle"
+                  ],
+                  "power": 3,
+                  "toughness": 2,
+                  "abilities": [
+                    {
+                      "crew": {
+                        "power": 1
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      },
+      {
+        "loyalty": {
+          "cost": -7,
+          "effects": [
+            {
+              "create_emblem": {
+                "abilities": [
+                  {
+                    "triggered": {
+                      "when": {
+                        "enters": {
+                          "subject": {
+                            "each": "artifact",
+                            "controller": "you"
+                          }
+                        }
+                      },
+                      "targets": [
+                        "any_target"
+                      ],
+                      "effects": [
+                        {
+                          "deal_damage": {
+                            "amount": 3,
+                            "to": {
+                              "target": 0
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "mythic",
+    "printing": {
+      "set": "dft",
+      "number": "116"
+    }
+  }
+]
