@@ -1,0 +1,30 @@
+name: Release
+
+# Push a version tag (e.g. v0.1.0) matching lib/enjine/version.rb to publish the gem.
+# Publishing uses RubyGems trusted publishing (OIDC): no API key is stored in GitHub.
+on:
+  push:
+    tags: ["v*"]
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    environment: release
+    permissions:
+      contents: write   # rake release pushes the tag and git refs
+      id-token: write   # OIDC token for RubyGems trusted publishing
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "4.0"
+          bundler-cache: true
+      - name: Tag matches the gem version
+        run: |
+          version=$(ruby -Ilib -e 'require "enjine/version"; print Enjine::VERSION')
+          test "v$version" = "$GITHUB_REF_NAME" || { echo "tag $GITHUB_REF_NAME != v$version"; exit 1; }
+      - name: Gate
+        run: bundle exec rake
+      - uses: rubygems/release-gem@v1
