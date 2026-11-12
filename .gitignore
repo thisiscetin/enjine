@@ -7,3 +7,6 @@ Gemfile.lock.bak
 /.claude/
 /.ruby-lsp/
 *.gem
+
+# MCP server config (local only)
+/.mcp.json

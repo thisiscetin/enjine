@@ -107,6 +107,9 @@ rotation is announced, drop the rotating sets from this table.
 
 ## Mechanics gaps
 
+For the gaps behind deckfinder's DSL FAIL and PARTIAL cards, ranked by how many
+cards each blocks, with a quick-wins list, see [dsl-gaps.md](dsl-gaps.md).
+
 Census taken 2026-11-09 against `SUPPORTED.md` at this commit. It lists what can't
 yet be written in the card DSL. Card lists came from the Scryfall API (main sets,
 `unique=cards`, no bonus sheets) and were checked outside the repository; nothing
