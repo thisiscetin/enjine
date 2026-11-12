@@ -76,20 +76,22 @@ module Enjine
                                "`amount` mana (default 1) of one color you choose as you activate it " \
                                "(`\"any_one\"`) or in any combination of colors (`\"any\"`); `colors` limits " \
                                "the choice. `\"chosen\"`: of the color chosen as this entered (choose_color). " \
-                               "`spend_only` restricts how the mana can be spent. `only_if`: \"Activate only if ...\".",
+                               "`spend_only` restricts how the mana can be spent. `only_if`: \"Activate only if ...\". " \
+                               "`limit: \"once_each_turn\"`: \"Activate only once each turn.\"",
                   rules: %w[605.1a 605.3a 605.3b 106.1a 106.4 106.6 607.2d 602.5b],
                   params: { "cost" => "list of costs (e.g. [\"tap\"])",
                             "produce" => "mana symbols added, e.g. \"{G}\" or \"{C}{C}\"",
                             "amount" => "amount (default 1; with produce: how many times)",
                             "color" => CHOICES.join(" | "), "colors" => "list of colors to choose from (default all five)",
                             "spend_only" => "{\"spells\": card spec, \"abilities\": card spec, \"from\" | \"not_from\": zone}",
-                            "only_if" => "condition: it can be activated only while it holds (CR 602.5b)" },
+                            "only_if" => "condition: it can be activated only while it holds (CR 602.5b)",
+                            "limit" => "\"once_each_turn\" (CR 602.5b)" },
                   example: { "mana" => { "cost" => ["tap"], "produce" => "{C}" } }
 
         attr_reader :costs, :produce, :color, :colors, :amount, :spend_only
 
         def self.build(params, errors, path, **)
-          Mechanics.check_keys(params, %w[cost produce amount color colors spend_only only_if], errors, path)
+          Mechanics.check_keys(params, %w[cost produce amount color colors spend_only only_if limit], errors, path)
           costs = build_costs(Mechanics.fetch_param(params, :cost), errors, path)
           raw = Mechanics.fetch_param(params, :produce)
           color = Mechanics.fetch_param(params, :color)
@@ -103,7 +105,8 @@ module Enjine
           raw_if = Mechanics.fetch_param(params, :only_if)
           only_if = raw_if && Condition.build(raw_if, errors, "#{path}.only_if")
           new(costs.compact.freeze, produce, color: color, colors: build_colors(params, color, errors, path),
-                                             amount: amount, spend_only: spend_only, only_if: only_if)
+                                             amount: amount, spend_only: spend_only, only_if: only_if,
+                                             per_turn: build_limit(params, errors, path))
         end
 
         # CR 605.3a: a mana ability is paid for and resolves at once, so none of its costs can wait for a
@@ -126,6 +129,14 @@ module Enjine
             (cost.respond_to?(:mana_cost) && cost.mana_cost.hybrid.any? { Mana.mono_hybrid?(it) })
         end
 
+        LIMITS = { "once_each_turn" => 1 }.freeze
+
+        def self.build_limit(params, errors, path)
+          limit = Mechanics.fetch_param(params, :limit)
+          errors << "#{path}.limit: must be one of #{LIMITS.keys.join(", ")}" unless limit.nil? || LIMITS.key?(limit)
+          LIMITS[limit]
+        end
+
         def self.build_colors(params, color, errors, path)
           raw = Mechanics.fetch_param(params, :colors)
           return COLORS if raw.nil?
@@ -137,8 +148,9 @@ module Enjine
           COLORS
         end
 
-        def initialize(costs, produce, color: nil, colors: COLORS, amount: nil, spend_only: nil, only_if: nil)
+        def initialize(costs, produce, color: nil, colors: COLORS, amount: nil, spend_only: nil, only_if: nil, per_turn: nil)
           super()
+          @per_turn = per_turn
           @costs = costs
           @produce = produce
           @color = color
@@ -163,6 +175,9 @@ module Enjine
 
           costs.all? { |c| c.payable?(engine, object) } && (mana_cost.nil? || engine.pool_covers?(object.controller, mana_cost))
         end
+
+        # How many times it may be activated each turn (nil: no limit, CR 602.5b); kept by Engine#record_activation!.
+        attr_reader :per_turn
 
         # The sum of its mana costs, or nil.
         attr_reader :mana_cost
@@ -201,7 +216,7 @@ module Enjine
                    "#{" (#{colors.join("/")})" unless colors == COLORS}"
                  end
           "#{costs.join(", ")}: #{what}.#{" #{spend_only.to_s.capitalize}." if spend_only}" \
-            "#{" Activate only if #{@only_if}." if @only_if}"
+            "#{" Activate only if #{@only_if}." if @only_if}#{" Activate only once each turn." if per_turn}"
         end
       end
     end

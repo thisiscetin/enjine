@@ -154,7 +154,7 @@ takes `spend_only` too ("Add {C}{C}. Spend this mana only to cast spells.").
 ```
 
 - `cost`: costs before the colon. `"tap"` is `{T}`; `{ "mana": "{1}{R}" }` is a mana
-  cost; `"sacrifice"` sacrifices this permanent; `{ "sacrifice_permanent": { "filter": "creature", "other": true } }`,
+  cost; `"sacrifice"` sacrifices this permanent and `"exile_self"` exiles it; `{ "sacrifice_permanent": { "filter": "creature", "other": true } }`,
   `{ "tap_permanents": { "count": 3, "filter": ... } }` and `{ "remove_counters": { "count": 3 } }` are chosen while
   activating; `"exile_self_from_graveyard"` / `"bottom_self_from_graveyard"` make it a graveyard ability. `{Q}` is
   not supported yet. More costs (each also usable in a spell's `additional_cost`):
@@ -311,6 +311,7 @@ is a flicker ("exile …, then return it to the battlefield under its owner's co
 | optional A; if it was done, a reflexive trigger B with its own target | `{ "may": { "effects": [A], "then": [{ "reflexive_trigger": { "targets": [...], "effects": [B] } }] } }` |
 | a targeted opponent decides whether A happens; B if not | `{ "may": { "chooser": { "target": 0 }, "effects": [A], "otherwise": [B] } }` |
 | your life gain makes your permanents' triggered abilities trigger one extra time | `{ "additional_triggers": { "cause": "you_gain_life" } }` |
+| "If a triggered ability of an Ally you control triggers, it triggers an additional time" | `{ "additional_triggers": { "of": { "creature": { "subtypes": ["ally"] } } } }` (`"other": true`, `"subtypes": "chosen"` work in the filter; combine with `cause`) |
 | tapped unless its controller has two other lands / a trigger only if it came in untapped | `{ "enters_tapped_unless": { "condition": { "controls": { "each": "land", "controller": "you" }, "at_least": 2 } } }` / `{ "enters": { "untapped": true } }` |
 | returned to the battlefield carrying a +1/+1 counter | `"counters": { "+1/+1": 1 }` on `return_to_battlefield` |
 
@@ -350,6 +351,7 @@ See `docs/reference/effects.md` for the generated list. Currently:
 | `deal_damage` | "deals N damage to …" | `{ "deal_damage": { "amount": N, "to": … } }` |
 | `pump` | "gets +X/+Y until end of turn" | `{ "pump": { "power": X, "toughness": Y, "to": … } }` |
 | `pump` | "get -1/-0 until your next turn" | `{ "pump": { "power": -1, "toughness": 0, "duration": "until_your_next_turn", "to": … } }` (ends as your next turn begins, CR 611.2a) |
+| `grant`, `become` | "gain flying until your next turn", "until your next turn, it becomes a land" | `"duration": "until_your_next_turn"` on `grant` or `become` |
 | `add_counters` | "put N +1/+1 counters on …" | `{ "add_counters": { "counter": "+1/+1", "amount": N, "to": … } }` (any counter name: `+1/+1`, `stun`, `shield`, `oil`, a keyword; see `docs/reference/counters.md`) |
 | `gain_life` | "you gain N life" | `{ "gain_life": { "amount": N } }` (`to` defaults to `"you"`) |
 | `lose_life` | "each opponent loses N life" | `{ "lose_life": { "amount": N, "to": "each_opponent" } }` |
@@ -371,6 +373,7 @@ See `docs/reference/effects.md` for the generated list. Currently:
 | "Affinity for artifacts" | `{ "cost_reduction": { "amount": { "count": { "each": "artifact", "controller": "you" } } } }` |
 | "Noncreature spells you cast cost {1} less to cast." | `{ "cost_modifier": { "spells": { "not": ["creature"] }, "reduce": 1 } }` |
 | "Spells your opponents cast cost {1} more to cast." | `{ "cost_modifier": { "caster": "opponent", "increase": 1 } }` |
+| "Dragon spells you cast cost {1} less" / "Red spells you cast cost {1} less" | `{ "cost_modifier": { "spells": { "subtypes": ["dragon"] }, "reduce": 1 } }` / `"spells": { "colors": ["R"] }` (combine with `any_of` / `not`) |
 | "This ability costs {1} less to activate for each land you control." | `"cost_reduction": { "amount": {...} }` inside the `activated` ability |
 
 An activated ability without targets that adds mana is a *mana ability* (CR 605.1a):
@@ -624,6 +627,7 @@ Generic shapes (N, [quality] and [zone] stand for whatever the card says):
 | exile the top N; the permanent cards exiled this way enter the battlefield | `exile_top`, then `{ "return_to_battlefield": { "to": { "result": 0 }, "under": "you" } }` |
 | mill N; you may put a [quality] card from among them into your hand | `mill`, then `{ "choose_cards": { "from": { "result": 0 }, "for": spec, "optional": true, "put": "hand" } }` |
 | return a [quality] card from your graveyard to your hand; if you can't, [effect] | `{ "choose_cards": { "from": { "graveyard": "you" }, "for": spec, "put": "hand", "otherwise": [ … ] } }` |
+| target opponent reveals their hand; you choose a [quality] card from it; that player discards that card | `{ "choose_cards": { "from": { "hand": { "target": 0 } }, "for": spec, "reveal": "all", "put": "discard" } }` (a discard: discard triggers see it) |
 | look at a player's hand; you may choose a [quality] card; if you do, [effect] | `{ "choose_cards": { "from": { "hand": { "target": 0 } }, "look": true, "for": spec, "optional": true, "put": "exile", "then": [ … ] } }` |
 | each player sacrifices a [quality] permanent of their choice | `{ "sacrifice_choice": { "filter": filter, "to": { "each": "player" } } }` (`"count": "any"`: any number) |
 | exile a target card in a graveyard; return a target card from your graveyard to your hand | `exile` / `return_to_hand` with a `graveyard_card` target |
@@ -1191,6 +1195,7 @@ but cards already revealed for a behold or permanents tapped for a cost stay so.
 | "costs {X} less to cast, where X is the greatest toughness among creatures you control" | `{ "cost_reduction": { "amount": { "greatest_toughness": { "each": "creature", "controller": "you" } } } }` |
 | "Spend this mana only to cast a spell from anywhere other than your hand" / "only to cast spells from exile" | `"spend_only": { "not_from": "hand" }` / `{ "from": "exile" }` (also with `spells`) |
 | "{T}: Add {G}{G}. Activate only if there is an Elf card in your graveyard." (CR 602.5b) | `{ "mana": { "cost": ["tap"], "produce": "{G}{G}", "only_if": condition } }` |
+| "{1}: Add {B}, {G}, or {W}. Activate only once each turn." (CR 602.5b) | `{ "mana": { "cost": [{ "mana": "{1}" }], "color": "any_one", "colors": ["W", "B", "G"], "limit": "once_each_turn" } }` |
 | "If that spell would be put into a graveyard, exile it instead" (CR 614.1a) | `"exile_instead": true` on `cast_free`, `cast` or `play_permission`; a card spec instead of `true` limits it ("if an instant or sorcery spell cast this way …": `{ "any_of": [{ "types": ["instant"] }, { "types": ["sorcery"] }] }`) |
 | "you may cast it, and mana of any type can be spent to cast that spell" (while resolving) | `{ "cast": { "to": { "target": 0 }, "any_mana_type": true } }` |
 

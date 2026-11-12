@@ -55,7 +55,7 @@ RSpec.describe "Turn structure primitives validation" do
       expect(errors_for(become({}))).to include(a_string_matching(/become: needs at least one of types/))
       expect(errors_for(become("creature_types" => [], "duration" => "forever")))
         .to include(a_string_matching(/become\.creature_types: must be a non-empty list/),
-                    a_string_matching(/become\.duration: must be one of end_of_turn, indefinite/))
+                    a_string_matching(/become\.duration: must be one of end_of_turn, until_your_next_turn, indefinite/))
       expect(errors_for(become("base_power_toughness" => 3)))
         .to include(a_string_matching(/become\.base_power_toughness: must be/))
       expect(errors_for(become("base_power_toughness" => { "power" => 1, "toughness" => -1, "x" => 0 })))

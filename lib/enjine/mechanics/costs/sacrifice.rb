@@ -25,6 +25,31 @@ module Enjine
         def to_s = "Sacrifice this"
       end
 
+      # "Exile this permanent" as a cost (CR 406.1, 602.2b): it leaves the battlefield for exile. Unlike a
+      # sacrifice, nothing that watches sacrifices sees it.
+      class ExileSelf < Primitive
+        primitive :cost, :exile_self,
+                  description: "Exile the permanent the ability belongs to (\"Exile this enchantment: ...\").",
+                  rules: %w[406.1 602.2b 118.3],
+                  example: "exile_self"
+
+        INSTANCE = new.freeze
+
+        def self.build(params, errors, path, **)
+          Mechanics.check_keys(params, [], errors, path)
+          INSTANCE
+        end
+
+        def mana? = false
+        def uses_source? = true
+        def payable?(engine, object) = engine.state.battlefield.include?(object.id)
+        def pay!(engine, object) = engine.move!(object.id, :exile, reason: "cost")
+        def to_s = "Exile this"
+      end
+
+      # The costs that take the permanent itself off the battlefield (CR 113.6m: not from another zone).
+      LEAVING_SELF = [SacrificeSelf, ExileSelf].freeze
+
       # "Sacrifice a creature" / "Sacrifice another creature or artifact" as a cost (CR 701.21a, 601.2h).
       # The permanent is chosen while casting and sacrificed as the spell or ability becomes cast; what
       # it was (types, subtypes, power) is kept for "if you sacrificed a Klingon this way" (CR 608.2h).

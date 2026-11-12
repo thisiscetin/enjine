@@ -224,7 +224,7 @@ Rules: CR 701.3a, CR 701.3b, CR 701.3c, CR 301.5c
 
 ## become
 
-Each referenced permanent becomes what the parameters say, for `duration` (end_of_turn, default; indefinite: as long as it stays on the battlefield; while_source_on_battlefield: for as long as this effect's source remains on the battlefield; while_you_control_source: for as long as you control it): it has the card `types`, `supertypes` and `subtypes` in addition to its other types (layer 4, "becomes an artifact creature"), its creature types are exactly `creature_types` (layer 4), its colors are `colors` (layer 5), with `loses_abilities: true` it loses all the abilities it had (layer 6; abilities granted later, keyword counters put on it later and this effect's own `keywords` and `abilities` stay, CR 613.7), it has the `keywords` and `abilities` (layer 6: triggered, activated, mana, play_from or additional_land_plays abilities) and its base power and toughness are `base_power_toughness` (layer 7b). A permanent that becomes a creature has its printed power and toughness (a Vehicle's), or 0/0.
+Each referenced permanent becomes what the parameters say, for `duration` (end_of_turn, default; until_your_next_turn: until your next turn begins; indefinite: as long as it stays on the battlefield; while_source_on_battlefield: for as long as this effect's source remains on the battlefield; while_you_control_source: for as long as you control it): it has the card `types`, `supertypes` and `subtypes` in addition to its other types (layer 4, "becomes an artifact creature"), its creature types are exactly `creature_types` (layer 4), its colors are `colors` (layer 5), with `loses_abilities: true` it loses all the abilities it had (layer 6; abilities granted later, keyword counters put on it later and this effect's own `keywords` and `abilities` stay, CR 613.7), it has the `keywords` and `abilities` (layer 6: triggered, activated, mana, play_from or additional_land_plays abilities) and its base power and toughness are `base_power_toughness` (layer 7b). A permanent that becomes a creature has its printed power and toughness (a Vehicle's), or 0/0.
 
 Rules: CR 611.2a, CR 611.2b, CR 611.2c, CR 613.1d, CR 613.1e, CR 613.1f, CR 613.4b, CR 613.7b, CR 205.1a, CR 205.1b, CR 301.7b, CR 514.2
 
@@ -239,7 +239,7 @@ Rules: CR 611.2a, CR 611.2b, CR 611.2c, CR 613.1d, CR 613.1e, CR 613.1f, CR 613.
 | `keywords` | list of keywords it gains |
 | `base_power_toughness` | {"power": n, "toughness": n} |
 | `abilities` | list of abilities it gains |
-| `duration` | end_of_turn | indefinite | while_source_on_battlefield | while_you_control_source |
+| `duration` | end_of_turn | until_your_next_turn | indefinite | while_source_on_battlefield | while_you_control_source |
 | `to` | selector |
 
 ```json
@@ -461,9 +461,9 @@ Rules: CR 205.2a, CR 607.2d, CR 608.2c
 
 ## choose_cards
 
-You choose `count` (default 1; "any": any number) cards matching `for` from `from`: a selector (e.g. {"result": 0}, the cards an earlier effect milled) or a player's zone, {"hand": selector} / {"graveyard": selector}. `optional`: you may choose fewer. Then they are put into `put` (`tapped` onto the battlefield, under your control; exiled cards `link`ed to the source). `look`: you look at the whole zone first; `reveal`: "chosen" reveals what you chose, "all" the whole set. `then` runs if a card was chosen, `otherwise` if none was ("if you can't"). `random: true`: the cards are picked at random (the game's random number generator) instead of chosen.
+You choose `count` (default 1; "any": any number) cards matching `for` from `from`: a selector (e.g. {"result": 0}, the cards an earlier effect milled) or a player's zone, {"hand": selector} / {"graveyard": selector}. `optional`: you may choose fewer. Then they are put into `put` (`discard`: from a hand, its owner discards them; `tapped` onto the battlefield, under your control; exiled cards `link`ed to the source). `look`: you look at the whole zone first; `reveal`: "chosen" reveals what you chose, "all" the whole set. `then` runs if a card was chosen, `otherwise` if none was ("if you can't"). `random: true`: the cards are picked at random (the game's random number generator) instead of chosen.
 
-Rules: CR 701.20a, CR 701.20e, CR 400.7j, CR 608.2c, CR 607.2a, CR 118.12, CR 701.9b
+Rules: CR 701.20a, CR 701.20e, CR 400.7j, CR 608.2c, CR 607.2a, CR 118.12, CR 701.9a, CR 701.9b
 
 | Parameter | Description |
 | --- | --- |
@@ -471,7 +471,7 @@ Rules: CR 701.20a, CR 701.20e, CR 400.7j, CR 608.2c, CR 607.2a, CR 118.12, CR 70
 | `for` | card spec |
 | `count` | integer or "any" |
 | `optional` | boolean |
-| `put` | hand | graveyard | exile | battlefield | library_top | library_bottom |
+| `put` | hand | graveyard | exile | battlefield | library_top | library_bottom | discard |
 | `tapped` | boolean |
 | `link` | boolean |
 | `look` | boolean |
@@ -1361,14 +1361,15 @@ Rules: CR 119.3
 
 ## grant
 
-Each referenced permanent (or spell on the stack) gains the `keywords` until end of turn.
+Each referenced permanent (or spell on the stack) gains the `keywords` until end of turn (`duration: "until_your_next_turn"`: until its controller's next turn begins).
 
-Rules: CR 611.2a, CR 611.2c, CR 613.1f, CR 514.2
+Rules: CR 611.2a, CR 611.2c, CR 613.1f, CR 514.2, CR 500.1
 
 | Parameter | Description |
 | --- | --- |
 | `keywords` | list of keywords |
 | `to` | selector |
+| `duration` | end_of_turn | until_your_next_turn |
 
 ```json
 {

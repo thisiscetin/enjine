@@ -12,6 +12,13 @@ change the public API; the stable surface is described in
 - Amounts `card_types` (how many card types among cards: delirium, "*" power),
   `greatest_mana_value` and `library_size` ("half their library, rounded up").
 - Amount `sacrificed` (`power`, `toughness` or `mana_value` of the permanents sacrificed to pay the cost).
+- `choose_cards` `put: discard`: the owner discards the cards chosen from their hand ("you choose a
+  nonland card from it; that player discards that card").
+- `mana` abilities take `limit: "once_each_turn"`.
+- `cost_modifier` `spells` takes `subtypes` and `colors` ("Dragon spells", "red spells").
+- `grant` and `become` take `duration: "until_your_next_turn"`.
+- Cost `exile_self` ("Exile this enchantment: …").
+- `additional_triggers` takes `of`, a filter of the permanent whose ability triggers; `cause` is optional.
 - `search_library` `put: graveyard`, and `put: library_top` ("then shuffle and put that card on top").
 
 ### Fixed

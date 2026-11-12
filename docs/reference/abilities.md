@@ -82,18 +82,25 @@ Rules: CR 305.2, CR 305.2a, CR 305.2b, CR 604.1
 
 ## additional_triggers
 
-While this permanent is on the battlefield, a triggered ability of a permanent its controller controls that triggers because of `cause` triggers an additional time. `cause`: you_gain_life (its controller gaining life).
+While this permanent is on the battlefield, a triggered ability of a permanent its controller controls triggers an additional time if it triggers because of `cause` (you_gain_life: its controller gaining life) and/or its permanent matches `of` (a filter: "triggered abilities of Allies you control", {"creature": {"other": true, "subtypes": "chosen"}}). At least one of them.
 
-Rules: CR 603.2d, CR 119.9
+Rules: CR 603.2d, CR 119.9, CR 607.2d
 
 | Parameter | Description |
 | --- | --- |
 | `cause` | you_gain_life |
+| `of` | filter of the permanent whose ability triggers |
 
 ```json
 {
   "additional_triggers": {
-    "cause": "you_gain_life"
+    "of": {
+      "creature": {
+        "subtypes": [
+          "ally"
+        ]
+      }
+    }
   }
 }
 ```
@@ -397,13 +404,13 @@ Rules: CR 717.2a, CR 717.2b, CR 717.2d, CR 717.3, CR 602.5d
 
 ## cost_modifier
 
-While on the battlefield: spells cast by `caster` (you, opponent or any; default you) whose card types match `spells` ({"any_of": [types], "not": [types]}, default all spells) cost `reduce` less or `increase` more generic mana. `from` / `not_from`: only spells cast from (not from) that zone (hand | graveyard | exile | library | outside).
+While on the battlefield: spells cast by `caster` (you, opponent or any; default you) whose card types match `spells` ({"any_of": [types], "not": [types]}, default all spells; `subtypes` and `colors` narrow it: "Dragon spells", "red spells") cost `reduce` less or `increase` more generic mana. `from` / `not_from`: only spells cast from (not from) that zone (hand | graveyard | exile | library | outside).
 
 Rules: CR 601.2f, CR 118.7a, CR 604.1, CR 601.2a
 
 | Parameter | Description |
 | --- | --- |
-| `spells` | {"any_of": [types], "not": [types]} (optional) |
+| `spells` | {"any_of": [types], "not": [types], "subtypes": [subtypes], "colors": [colors]} (optional) |
 | `caster` | you | opponent | any |
 | `reduce` | amount |
 | `increase` | amount |
@@ -1107,7 +1114,7 @@ Rules: CR 606.3, CR 606.4, CR 606.5, CR 602.2b
 
 ## mana
 
-An activated mana ability: pay the cost, add the mana to your mana pool immediately. It does not use the stack and can be activated whenever you have priority. `produce`: the fixed mana (`amount` times). Or `color`: `amount` mana (default 1) of one color you choose as you activate it (`"any_one"`) or in any combination of colors (`"any"`); `colors` limits the choice. `"chosen"`: of the color chosen as this entered (choose_color). `spend_only` restricts how the mana can be spent. `only_if`: "Activate only if ...".
+An activated mana ability: pay the cost, add the mana to your mana pool immediately. It does not use the stack and can be activated whenever you have priority. `produce`: the fixed mana (`amount` times). Or `color`: `amount` mana (default 1) of one color you choose as you activate it (`"any_one"`) or in any combination of colors (`"any"`); `colors` limits the choice. `"chosen"`: of the color chosen as this entered (choose_color). `spend_only` restricts how the mana can be spent. `only_if`: "Activate only if ...". `limit: "once_each_turn"`: "Activate only once each turn."
 
 Rules: CR 605.1a, CR 605.3a, CR 605.3b, CR 106.1a, CR 106.4, CR 106.6, CR 607.2d, CR 602.5b
 
@@ -1120,6 +1127,7 @@ Rules: CR 605.1a, CR 605.3a, CR 605.3b, CR 106.1a, CR 106.4, CR 106.6, CR 607.2d
 | `colors` | list of colors to choose from (default all five) |
 | `spend_only` | {"spells": card spec, "abilities": card spec, "from" | "not_from": zone} |
 | `only_if` | condition: it can be activated only while it holds (CR 602.5b) |
+| `limit` | "once_each_turn" (CR 602.5b) |
 
 ```json
 {

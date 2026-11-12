@@ -63,7 +63,7 @@ RSpec.describe "Costs, kicker, targets and payments: card data (unit)" do
     expect(errors_for(activated("timing" => "never"))).to include(a_string_matching(/timing: must be one of instant, sorcery, your_turn/))
     expect(errors_for(activated("limit" => "twice"))).to include(a_string_matching(/limit: must be one of once_each_turn/))
     expect(errors_for(activated("cost" => %w[tap exile_self_from_graveyard])))
-      .to include(a_string_matching(/a cost paid from the graveyard can't be combined with tap or sacrifice/))
+      .to include(a_string_matching(/a cost paid from the graveyard can't be combined with tap, sacrifice or exile/))
     expect(errors_for(activated("cost" => %w[discard_self exile_self_from_graveyard])))
       .to include(a_string_matching(/costs can't be paid from both hand and graveyard/))
   end

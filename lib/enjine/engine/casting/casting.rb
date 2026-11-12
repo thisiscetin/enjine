@@ -277,12 +277,12 @@ module Enjine
       end
 
       # The non-mana costs (CR 602.2b): its own ({T}, sacrifice it, exile it from the graveyard), then
-      # the chosen ones (sacrifice another creature, remove counters). A source sacrificed as a cost is
+      # the chosen ones (sacrifice another creature, remove counters). A source sacrificed or exiled as a cost is
       # remembered as it last existed (its counters, CR 608.2h).
       def pay_ability_costs!(ctx, obj)
         source = object(ctx["source"])
         ability = chars(source).ability(ctx["ability"])
-        obj.memory["source_counters"] = source.counters.dup if ability.costs.any?(Mechanics::Costs::SacrificeSelf)
+        obj.memory["source_counters"] = source.counters.dup if ability.costs.any? { Mechanics::Costs::LEAVING_SELF.include?(it.class) }
         frame_costs(ctx).reject(&:mana?).each { it.pay!(self, source) } # the chosen option of a one_of (CR 601.2b)
         pay_chosen_costs!(ctx)
         return unless ability.kind == :loyalty

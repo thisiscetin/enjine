@@ -12,7 +12,8 @@ module Enjine
       # on the battlefield. Granted abilities are part of this card's data, referenced "<this effect's ref>:<j>"
       # (CardDefinition#effect_granted); on the permanent they are "granted:<card>:<ref>:<j>".
       class Become < Effect
-        DURATIONS = %w[end_of_turn indefinite while_source_on_battlefield while_you_control_source].freeze
+        DURATIONS = %w[end_of_turn until_your_next_turn indefinite while_source_on_battlefield
+                       while_you_control_source].freeze
         GRANTABLE = %i[triggered mana activated play_from additional_land_plays hexproof_from protection_from].freeze
         # Card types an effect can add (CR 205.1b); instants, sorceries and planeswalkers aren't permanents it makes.
         ADDABLE_TYPES = %w[artifact creature enchantment land].freeze
@@ -21,7 +22,8 @@ module Enjine
 
         primitive :effect, :become,
                   description: "Each referenced permanent becomes what the parameters say, for `duration` " \
-                               "(end_of_turn, default; indefinite: as long as it stays on the battlefield; " \
+                               "(end_of_turn, default; until_your_next_turn: until your next turn begins; indefinite: " \
+                               "as long as it stays on the battlefield; " \
                                "while_source_on_battlefield: for as long as this effect's source remains on the " \
                                "battlefield; while_you_control_source: for as long as you control it): it has " \
                                "the card `types`, `supertypes` and `subtypes` in addition to its other types (layer 4, " \
@@ -51,6 +53,8 @@ module Enjine
 
         attr_reader :ref, :creature_types, :base_power_toughness, :granted_abilities, :duration, :card_types,
                     :supertypes, :subtypes, :colors, :keywords
+
+        UNTIL = { "end_of_turn" => " until end of turn", "until_your_next_turn" => " until your next turn" }.freeze
 
         def self.keys = CHANGES + %w[duration to if]
 
@@ -96,7 +100,7 @@ module Enjine
         def duration_details(engine, ctx)
           case @duration
           when "indefinite" then { "duration" => "permanent" }
-          when "end_of_turn" then { "duration" => "end_of_turn" }
+          when "end_of_turn", "until_your_next_turn" then { "duration" => @duration } # CR 611.2a, 500.1
           else
             holds = engine.source_duration_holds?(@duration, ctx.source, ctx.controller)
             holds ? { "duration" => @duration, "source" => ctx.source } : nil
@@ -132,7 +136,7 @@ module Enjine
           bits << "base #{base_power_toughness.values.join("/")}" if base_power_toughness
           bits << keywords.join(", ") unless keywords.empty?
           bits << "\"#{granted_abilities.join("; ")}\"" unless granted_abilities.empty?
-          "becomes #{bits.join(", ")}#{" until end of turn" if duration == "end_of_turn"} → #{to}"
+          "becomes #{bits.join(", ")}#{UNTIL[duration]} → #{to}"
         end
 
         def self.parse_colors(raw, errors, path)

@@ -94,9 +94,15 @@ module Enjine
           obj = object(id)
           next unless obj.controller == index && !mana_abilities_forbidden?(obj) # Engine::Rules
 
-          chars(obj).mana_abilities.each { |inst| out << [id, inst.ref] if inst.ability.activatable?(self, obj) }
+          chars(obj).mana_abilities.each { |inst| out << [id, inst.ref] if mana_ability_usable?(obj, inst) }
         end
         out
+      end
+
+      # CR 602.5b: "Activate only once each turn" counts on the source, as for other activated abilities.
+      def mana_ability_usable?(obj, inst)
+        per_turn = inst.ability.per_turn
+        (per_turn.nil? || activations_this_turn(obj, inst.ref) < per_turn) && inst.ability.activatable?(self, obj)
       end
 
       # Activation options for mana abilities: one per source, or one per mana it could add when the
@@ -118,6 +124,7 @@ module Enjine
         ability = chars(obj).ability(ability_ref) or raise ArgumentError, "#{id} has no ability #{ability_ref}"
         chosen = mana && Mana.parse_produce(mana, [], "mana")
         from = mana_provenance(id) # before a cost sacrifices it (a Treasure)
+        record_activation!("source" => id, "ability" => ability_ref) if ability.per_turn
         pay_from_pool!(index, ability.mana_cost, id) if ability.mana_cost
         ability.costs.each { |cost| cost.pay!(self, obj) }
         produced = chosen || ability.outcomes(self, obj).first # CR 605.3b: a fixed amount is counted as it resolves

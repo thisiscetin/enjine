@@ -350,8 +350,8 @@ module Enjine
 
           own = costs.filter_map { it.zone if it.respond_to?(:zone) }.first
           errors << "#{path}.zone: its costs are paid from the #{own}" if own && own.to_s != zone
-          if costs.any? { it.is_a?(Costs::Tap) || it.is_a?(Costs::SacrificeSelf) }
-            errors << "#{path}.zone: an ability of a card in the #{zone} can't tap or sacrifice it"
+          if costs.any? { it.is_a?(Costs::Tap) || Costs::LEAVING_SELF.include?(it.class) }
+            errors << "#{path}.zone: an ability of a card in the #{zone} can't tap, sacrifice or exile it"
           end
           zone.to_sym
         end
@@ -386,9 +386,9 @@ module Enjine
         def self.check_cost_zones(costs, errors, path)
           zones = costs.filter_map { it.zone if it.respond_to?(:zone) }.uniq
           errors << "#{path}.cost: costs can't be paid from both #{zones.join(" and ")}" if zones.size > 1
-          return if zones.empty? || costs.none? { it.is_a?(Costs::Tap) || it.is_a?(Costs::SacrificeSelf) }
+          return if zones.empty? || costs.none? { it.is_a?(Costs::Tap) || Costs::LEAVING_SELF.include?(it.class) }
 
-          errors << "#{path}.cost: a cost paid from the #{zones.first} can't be combined with tap or sacrifice"
+          errors << "#{path}.cost: a cost paid from the #{zones.first} can't be combined with tap, sacrifice or exile"
         end
 
         attr_reader :cost_reduction

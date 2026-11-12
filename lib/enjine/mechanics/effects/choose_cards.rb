@@ -10,7 +10,7 @@ module Enjine
       class ChooseCards < ChoiceEffect
         include NestedList
 
-        PUT = %w[hand graveyard exile battlefield library_top library_bottom].freeze
+        PUT = %w[hand graveyard exile battlefield library_top library_bottom discard].freeze
         ZONES = %w[hand graveyard].freeze
         REVEAL = %w[chosen all].freeze
         LISTS = %w[then otherwise].freeze
@@ -19,12 +19,12 @@ module Enjine
                   description: "You choose `count` (default 1; \"any\": any number) cards matching `for` from `from`: a " \
                                "selector (e.g. {\"result\": 0}, the cards an earlier effect milled) or a player's zone, " \
                                "{\"hand\": selector} / {\"graveyard\": selector}. `optional`: you may choose fewer. Then " \
-                               "they are put into `put` (`tapped` onto the battlefield, under your control; exiled cards " \
-                               "`link`ed to the source). `look`: you look at the whole zone first; `reveal`: \"chosen\" " \
-                               "reveals what you chose, \"all\" the whole set. `then` runs if a card was chosen, " \
-                               "`otherwise` if none was (\"if you can't\"). `random: true`: the cards are picked at random " \
-                               "(the game's random number generator) instead of chosen.",
-                  rules: %w[701.20a 701.20e 400.7j 608.2c 607.2a 118.12 701.9b],
+                               "they are put into `put` (`discard`: from a hand, its owner discards them; `tapped` onto the " \
+                               "battlefield, under your control; exiled cards `link`ed to the source). `look`: you look at the " \
+                               "whole zone first; `reveal`: \"chosen\" reveals what you chose, \"all\" the whole set. " \
+                               "`then` runs if a card was chosen, `otherwise` if none was (\"if you can't\"). `random: true`: the " \
+                               "cards are picked at random (the game's random number generator) instead of chosen.",
+                  rules: %w[701.20a 701.20e 400.7j 608.2c 607.2a 118.12 701.9a 701.9b],
                   params: { "from" => "selector or {\"hand\"|\"graveyard\": player selector}", "for" => "card spec",
                             "count" => "integer or \"any\"", "optional" => "boolean", "put" => PUT.join(" | "),
                             "tapped" => "boolean", "link" => "boolean", "look" => "boolean", "random" => "boolean",
@@ -47,6 +47,7 @@ module Enjine
           @optional = Mechanics.flag_param(params, "optional", errors, path)
           @put = Mechanics.fetch_param(params, :put).to_s
           errors << "#{path}.put: must be one of #{PUT.join(", ")}" unless PUT.include?(@put)
+          errors << "#{path}.put: discard takes cards from a hand" if @put == "discard" && @from_zone != "hand"
           @flags = %w[tapped link look random].to_h { [it, Mechanics.flag_param(params, it, errors, path)] }
           errors << "#{path}.count: must be a number to pick at random" if @flags["random"] && @count == "any"
           @reveal = Mechanics.fetch_param(params, :reveal)
@@ -154,6 +155,7 @@ module Enjine
 
         def move(engine, ctx, id)
           case put
+          when "discard" then engine.move!(id, :graveyard, reason: "discard") # CR 701.9a: the owner discards it
           when "library_top", "library_bottom"
             engine.move!(id, :library, reason: "put", position: put == "library_top" ? :top : :bottom)
           else

@@ -5263,5 +5263,76 @@
         }
       }
     ]
+  },
+  {
+    "name": "Pried Secrets",
+    "mana_cost": "{1}{B}",
+    "types": [
+      "sorcery"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "targets": [
+            "opponent"
+          ],
+          "effects": [
+            {
+              "choose_cards": {
+                "from": {
+                  "hand": {
+                    "target": 0
+                  }
+                },
+                "for": {
+                  "not_types": [
+                    "creature",
+                    "land"
+                  ]
+                },
+                "reveal": "all",
+                "put": "discard"
+              }
+            },
+            {
+              "draw": {
+                "amount": 1
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Updraft Vigil",
+    "mana_cost": "{1}{W}",
+    "types": [
+      "instant"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "effects": [
+            {
+              "grant": {
+                "keywords": [
+                  "flying",
+                  "vigilance"
+                ],
+                "to": {
+                  "each": {
+                    "creature": {
+                      "controller": "you"
+                    }
+                  }
+                },
+                "duration": "until_your_next_turn"
+              }
+            }
+          ]
+        }
+      }
+    ]
   }
 ]

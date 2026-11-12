@@ -77,8 +77,8 @@ RSpec.describe "Statics, types and restrictions" do
     expect(errors_for("player_rule" => { "rule" => "protection_from_opponents" })).to eq([])
     expect(errors_for("triggered" => { "when" => { "enters" => {} }, "effects" => [{ "become" => { "keywords" => ["flying"],
                                                                                                    "duration" => "while_tapped" } }] }))
-      .to include(a_string_including("duration: must be one of end_of_turn, indefinite, while_source_on_battlefield, " \
-                                     "while_you_control_source"))
+      .to include(a_string_including("duration: must be one of end_of_turn, until_your_next_turn, indefinite, " \
+                                     "while_source_on_battlefield, while_you_control_source"))
   end
 
   it "describes the new abilities" do

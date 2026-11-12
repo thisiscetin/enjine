@@ -66,7 +66,7 @@ RSpec.describe "Cycling, card specs and library search: validation (unit)" do
 
   it "a hand-only cost can't be combined with tap or sacrifice (CR 113.6m)" do
     expect(errors_for({ "activated" => { "cost" => %w[discard_self tap], "effects" => [{ "draw" => { "amount" => 1 } }] } }))
-      .to eq(["a.activated.cost: a cost paid from the hand can't be combined with tap or sacrifice"])
+      .to eq(["a.activated.cost: a cost paid from the hand can't be combined with tap, sacrifice or exile"])
     expect(errors_for({ "activated" => { "cost" => [{ "discard_self" => { "x" => 1 } }], "effects" => [] } }))
       .to eq(['a.activated.cost[0].discard_self: unknown parameter "x"'])
     expect(Enjine::Mechanics::Costs::DiscardSelf::INSTANCE.to_s).to eq("Discard this card")

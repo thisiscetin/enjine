@@ -180,6 +180,6 @@ RSpec.describe "Losing all abilities and granted activated abilities (CR 613.1f,
     become = { "spell" => { "effects" => [{ "become" => { "loses_abilities" => "yes", "duration" => "forever" } }] } }
     expect(validate.call({ "name" => "Y", "mana_cost" => "{U}", "types" => ["instant"], "abilities" => [become] }))
       .to include("abilities[0].spell.effects[0].become.loses_abilities: must be true (or absent)",
-                  a_string_matching(/become\.duration: must be one of end_of_turn, indefinite, while_source_on_battlefield/))
+                  a_string_matching(/become\.duration: must be one of end_of_turn, until_your_next_turn, indefinite, /))
   end
 end

@@ -90,7 +90,7 @@ RSpec.describe "Library, hand and graveyard effects, edicts and linked exile: ca
   it "checks choose_cards' from, count, put, reveal and nested lists" do
     expect(errors_for([{ "choose_cards" => {} }])).to eq(["#{base}.choose_cards.from: required",
                                                           "#{base}.choose_cards.put: must be one of hand, graveyard, exile, " \
-                                                          "battlefield, library_top, library_bottom"])
+                                                          "battlefield, library_top, library_bottom, discard"])
     expect(errors_for([{ "choose_cards" => { "from" => { "hand" => { "target" => 0 } }, "count" => "few", "put" => "hand",
                                              "reveal" => "some", "otherwise" => [{ "exile" => { "to" => { "result" => 0 } } }] } }]))
       .to eq(["#{base}.choose_cards.from.hand.target: must refer to one of the 0 declared targets",

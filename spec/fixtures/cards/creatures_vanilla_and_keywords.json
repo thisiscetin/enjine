@@ -678,5 +678,46 @@
         "controller": "any"
       }
     }
+  },
+  {
+    "name": "Oathbound Herald",
+    "mana_cost": "{3}{W}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "human",
+      "ally"
+    ],
+    "power": 3,
+    "toughness": 3,
+    "abilities": [
+      {
+        "additional_triggers": {
+          "of": {
+            "creature": {
+              "subtypes": [
+                "ally"
+              ],
+              "other": true
+            }
+          }
+        }
+      },
+      {
+        "triggered": {
+          "when": {
+            "enters": {}
+          },
+          "effects": [
+            {
+              "gain_life": {
+                "amount": 2
+              }
+            }
+          ]
+        }
+      }
+    ]
   }
 ]

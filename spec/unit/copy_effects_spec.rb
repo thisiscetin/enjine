@@ -137,7 +137,7 @@ RSpec.describe "Copy primitives (validation)" do
       end
       expect(bad.call([{ "mana" => "{1}" }], "library")).to include("#{path}.zone: must be one of exile, graveyard, hand")
       expect(bad.call(["discard_self"], "exile")).to include("#{path}.zone: its costs are paid from the hand")
-      expect(bad.call(["tap"], "exile")).to include("#{path}.zone: an ability of a card in the exile can't tap or sacrifice it")
+      expect(bad.call(["tap"], "exile")).to include("#{path}.zone: an ability of a card in the exile can't tap, sacrifice or exile it")
       expect(bad.call([{ "exile_from_hand" => { "bogus" => 1 } }], nil))
         .to include("#{path}.cost[0].exile_from_hand: unknown parameter \"bogus\"")
     end

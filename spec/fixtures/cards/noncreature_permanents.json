@@ -2055,5 +2055,94 @@
         }
       }
     ]
+  },
+  {
+    "name": "Tri-Hued Sieve",
+    "mana_cost": "{2}",
+    "types": [
+      "artifact"
+    ],
+    "abilities": [
+      {
+        "mana": {
+          "cost": [
+            {
+              "mana": "{1}"
+            }
+          ],
+          "color": "any_one",
+          "colors": [
+            "U",
+            "R",
+            "G"
+          ],
+          "limit": "once_each_turn"
+        }
+      }
+    ]
+  },
+  {
+    "name": "Scalecaller's Brazier",
+    "mana_cost": "{2}",
+    "types": [
+      "artifact"
+    ],
+    "abilities": [
+      {
+        "cost_modifier": {
+          "spells": {
+            "subtypes": [
+              "dragon"
+            ]
+          },
+          "reduce": 1
+        }
+      },
+      {
+        "mana": {
+          "cost": [
+            "tap"
+          ],
+          "produce": "{R}"
+        }
+      }
+    ]
+  },
+  {
+    "name": "Mossback Arbor",
+    "mana_cost": "{1}{G}",
+    "types": [
+      "enchantment"
+    ],
+    "abilities": [
+      {
+        "activated": {
+          "cost": [
+            {
+              "mana": "{2}{G}"
+            },
+            "exile_self"
+          ],
+          "effects": [
+            {
+              "create_token": {
+                "amount": 2,
+                "token": {
+                  "name": "Moss Sprout",
+                  "types": [
+                    "creature"
+                  ],
+                  "colors": [
+                    "G"
+                  ],
+                  "power": 1,
+                  "toughness": 1
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
   }
 ]

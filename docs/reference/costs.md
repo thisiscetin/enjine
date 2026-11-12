@@ -133,6 +133,16 @@ Rules: CR 406.1, CR 601.2h, CR 602.2b, CR 118.3
 }
 ```
 
+## exile_self
+
+Exile the permanent the ability belongs to ("Exile this enchantment: ...").
+
+Rules: CR 406.1, CR 602.2b, CR 118.3
+
+```json
+"exile_self"
+```
+
 ## exile_self_from_graveyard
 
 Exile this card from your graveyard. An ability with this cost is activated from your graveyard.

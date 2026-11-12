@@ -19,13 +19,13 @@ full text when writing it.
 |---|---|---|---|---|---|
 | 1 | New amounts in `Mechanics::Amount` (`values.rb`, same pattern as `distinct_colors`): `library_size`, `card_types` (distinct card types among cards; kindred and battle nameable in filters), `greatest_mana_value` | S | 9 | Tarmogoyf, Fear of Missing Out, Keen-Eyed Curator, Kitsune's Technique; PARTIAL to exact: Patchwork Beastie, Violent Urge, Wildfire Wickerfolk, Singularity Rupture, Ill-Timed Explosion | Done (Unreleased): `card_types`, `greatest_mana_value`, `library_size` |
 | 2 | Last-known `mana_value` and power for destroyed or sacrificed permanents: add `mana_value` to `TurnHistory#last_known_memory` and read LKI through `{result}` / sacrificed objects | S-M | 5 | Feed the Swarm, Seedship Impact, Tainted Treats, Bolg of the North, Rhovanion Rampager, Repurposing Bay | Done (Unreleased): LKI mana value/power for destroyed targets and `{result}` of sacrifices; `{"sacrificed": ...}` for costs. Bolg stays blocked: a reflexive trigger ("when you do") doesn't carry the last known information of what its parent moved |
-| 3 | `discard` with `chooser: you` (reveal, then the caster picks the card, with a filter) | M | 6 | Duress, Deceit, Down Down to Goblin-town, Solve for Disappointment; PARTIAL to exact: Oildeep Gearhulk, Thought-Stalker Warlock  Open |
+| 3 | `discard` with `chooser: you` (reveal, then the caster picks the card, with a filter) | M | 6 | Duress, Deceit, Down Down to Goblin-town, Solve for Disappointment; PARTIAL to exact: Oildeep Gearhulk, Thought-Stalker Warlock | Done (Unreleased): `choose_cards` `put: discard` (with `from: {"hand": …}`, `reveal: "all"`) |
 | 4 | `search_library` `put: graveyard` and `put: library_top` (after the shuffle) | S | 4 | Carnivorous Cultivator // Enroot, Loyal Tutor, Old Thrush; PARTIAL to exact: Insatiable Avarice | Done (Unreleased): `put: graveyard`, `put: library_top`; computed `for` bounds now work |
-| 5 | `limit: once_each_turn` on `mana_ability` (reuse `LIMITS` from `stack_abilities.rb`) | S | 2 | Abzan Devotee, Barrels of Blasting Jelly | Open |
-| 6 | `cost_modifier` `spells` filter by subtype and color | S | 2 | Dragonlord's Servant, The Fire Crystal | Open |
-| 7 | `until_your_next_turn` duration on `become` and keyword grants (already on `pump`, player rules, damage replacements) | S | 2 | Elspeth, Storm Slayer; PARTIAL to exact: Hydro-Man | Open |
-| 8 | Exile-this-permanent cost | S | 2 | Sapling Nursery; PARTIAL to exact: The Echoverse Fulcrum | Open |
-| 9 | `additional_triggers` with an `of` filter for any cause (CAUSES is only `you_gain_life`) | S | 1-3 | Katara; partly Roaming Throne, Wizard's Staff | Open |
+| 5 | `limit: once_each_turn` on `mana_ability` (reuse `LIMITS` from `stack_abilities.rb`) | S | 2 | Abzan Devotee, Barrels of Blasting Jelly | Done (Unreleased): `mana` `limit: "once_each_turn"` |
+| 6 | `cost_modifier` `spells` filter by subtype and color | S | 2 | Dragonlord's Servant, The Fire Crystal | Done (Unreleased): `spells` takes `subtypes` and `colors` |
+| 7 | `until_your_next_turn` duration on `become` and keyword grants (already on `pump`, player rules, damage replacements) | S | 2 | Elspeth, Storm Slayer; PARTIAL to exact: Hydro-Man | Done (Unreleased): `grant` and `become` `duration: "until_your_next_turn"` |
+| 8 | Exile-this-permanent cost | S | 2 | Sapling Nursery; PARTIAL to exact: The Echoverse Fulcrum | Done (Unreleased): cost `"exile_self"` |
+| 9 | `additional_triggers` with an `of` filter for any cause (CAUSES is only `you_gain_life`) | S | 1-3 | Katara; partly Roaming Throne, Wizard's Staff | Done (Unreleased): `of` filter (with `other`, `"subtypes": "chosen"`); `cause` optional |
 
 Larger but high impact, next in line: **plot** (7 cards, M), a **static that grants loyalty abilities** (about 5, M),
 and the **play-permission** extensions (19 cards, but a mix of separate gaps, L).

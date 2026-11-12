@@ -272,17 +272,22 @@ module Enjine
     module Effects
       # "gains flying until end of turn" (CR 611.2, 613.1f): grant keywords to a locked set.
       class Grant < Effect
+        DURATIONS = %w[end_of_turn until_your_next_turn].freeze
+
         primitive :effect, :grant,
-                  description: "Each referenced permanent (or spell on the stack) gains the `keywords` until end of turn.",
-                  rules: %w[611.2a 611.2c 613.1f 514.2],
-                  params: { "keywords" => "list of keywords", "to" => "selector" },
+                  description: "Each referenced permanent (or spell on the stack) gains the `keywords` until end of turn " \
+                               "(`duration: \"until_your_next_turn\"`: until its controller's next turn begins).",
+                  rules: %w[611.2a 611.2c 613.1f 514.2 500.1],
+                  params: { "keywords" => "list of keywords", "to" => "selector", "duration" => DURATIONS.join(" | ") },
                   example: { "grant" => { "keywords" => ["flying"], "to" => { "target" => 0 } } }
 
         attr_reader :keywords
 
-        def self.keys = %w[keywords to if]
+        def self.keys = %w[keywords to duration if]
 
         def setup(params, errors, path)
+          @duration = Mechanics.fetch_param(params, :duration) || "end_of_turn"
+          errors << "#{path}.duration: must be one of #{DURATIONS.join(", ")}" unless DURATIONS.include?(@duration)
           @keywords = Array(Mechanics.fetch_param(params, :keywords)).map { it.to_s.downcase.tr(" -", "__") }
           errors << "#{path}.keywords: needs at least one keyword" if @keywords.empty?
           @keywords.each { errors << "#{path}.keywords: unknown keyword #{it.inspect}" unless Enjine.registry.fetch(:keyword, it) }
@@ -291,10 +296,11 @@ module Enjine
         # A spell on the stack can gain keywords too ("those spells gain wither", Engine::SpellGrants).
         def apply(engine, ctx)
           spells = refs(engine, ctx).select { (obj = engine.state.objects[it]) && obj.zone == :stack && !obj.ability? }
-          engine.add_continuous_effect!("grant", ctx, objects(engine, ctx) + spells, "keywords" => keywords)
+          engine.add_continuous_effect!("grant", ctx, objects(engine, ctx) + spells, "keywords" => keywords,
+                                                                                     "duration" => @duration)
         end
 
-        def to_s = "gains #{keywords.join(", ")} until end of turn → #{to}"
+        def to_s = "gains #{keywords.join(", ")} until #{@duration.delete_prefix("until_").tr("_", " ")} → #{to}"
       end
 
       # Setting a creature's creature types until end of turn; its other creature types are lost (CR 205.1a, 613.1d).
