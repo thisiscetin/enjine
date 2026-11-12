@@ -288,7 +288,7 @@ module Enjine
         return unless ability.kind == :loyalty
 
         source.loyalty_turn = state.turn
-        cost = ability.loyalty_cost
+        cost = ability.x_loyalty? ? -ctx["x"].to_i : ability.loyalty_cost
         cost.negative? ? remove_counters!(source, "loyalty", -cost) : add_counters!(source, "loyalty", cost)
       end
 

@@ -28,7 +28,8 @@ full text when writing it.
 | 9 | `additional_triggers` with an `of` filter for any cause (CAUSES is only `you_gain_life`) | S | 1-3 | Katara; partly Roaming Throne, Wizard's Staff | Done (Unreleased): `of` filter (with `other`, `"subtypes": "chosen"`); `cause` optional |
 
 Larger but high impact, next in line: **plot** (7 cards, M; done, Unreleased: ability and effect `plot`; Doc Aurlock's
-"plotting costs {2} less" is still open), a **static that grants loyalty abilities** (about 5, M),
+"plotting costs {2} less" is still open), a **static that grants loyalty abilities** (about 5, M; done, Unreleased, with `"-X"` loyalty costs and
+`activates_ability` `loyalty: true`; instant-speed loyalty and the 0-loyalty rule are still open),
 and the **play-permission** extensions (19 cards, but a mix of separate gaps, L).
 
 ## Ranking

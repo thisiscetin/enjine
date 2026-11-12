@@ -75,7 +75,7 @@ module Enjine
       # the mana cost or a cost such as "pay X life" or "exile X cards", X is 0.
       def ask_x!(ctx)
         return false unless ctx["x"].nil?
-        return (ctx["x"] = 0) && false unless base_cost(ctx)&.x_symbols.to_i.positive? || x_costs(ctx).any?
+        return (ctx["x"] = 0) && false unless base_cost(ctx)&.x_symbols.to_i.positive? || x_costs(ctx).any? || x_loyalty?(ctx)
 
         ask!("kind" => "choose_x", "player" => ctx["player"], "max" => x_limit(ctx))
         true
@@ -84,6 +84,9 @@ module Enjine
       # The costs paid while casting that define X: "pay X life" (Costs::PayLife), "exile X cards from your
       # graveyard" (Costs::CardsCost).
       def x_costs(ctx) = casting_costs(ctx).select { it.respond_to?(:x?) && it.x? }
+
+      # A "-X" loyalty ability being activated (CR 606.4, 107.3).
+      def x_loyalty?(ctx) = ctx["kind"] == "ability" && casting_ability.respond_to?(:x_loyalty?) && casting_ability.x_loyalty?
 
       # A {T} ability's own source can't pay for it.
       def payment_excluded_source(ctx)
@@ -94,6 +97,7 @@ module Enjine
       # "pay X life" no more than their life total (CR 119.4), for "exile X cards" no more than there are (CR 118.3).
       def x_limit(ctx)
         limits = x_costs(ctx).map { it.x_limit(self, cost_payer(ctx)) }
+        limits << loyalty(object(ctx["source"])) if x_loyalty?(ctx) # CR 118.3: no more counters than it has
         symbols = base_cost(ctx)&.x_symbols.to_i
         return limits.min if symbols.zero?
 

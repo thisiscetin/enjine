@@ -27,9 +27,9 @@ Rules: CR 603.2, CR 603.3b, CR 508.1, CR 707.10
 
 ## activates_ability
 
-A player (`controller`: you (default) | opponent | any) activates an ability that isn't a mana ability. `source`: optional filter on the source's card; `name: "chosen"`: only a source with the name chosen as this permanent entered. `exhaust: true`: only an exhaust ability ("whenever you activate an exhaust ability", CR 702.177). `boast: true`: only a boast ability ("whenever a creature you control boasts", CR 702.142b).
+A player (`controller`: you (default) | opponent | any) activates an ability that isn't a mana ability. `source`: optional filter on the source's card; `name: "chosen"`: only a source with the name chosen as this permanent entered. `exhaust: true`: only an exhaust ability ("whenever you activate an exhaust ability", CR 702.177). `boast: true`: only a boast ability ("whenever a creature you control boasts", CR 702.142b). `loyalty: true`: only a loyalty ability (CR 606).
 
-Rules: CR 602.2, CR 605.1a, CR 603.2, CR 201.4, CR 702.177a, CR 702.142b
+Rules: CR 602.2, CR 605.1a, CR 603.2, CR 201.4, CR 702.177a, CR 702.142b, CR 606.1
 
 | Parameter | Description |
 | --- | --- |
@@ -38,6 +38,7 @@ Rules: CR 602.2, CR 605.1a, CR 603.2, CR 201.4, CR 702.177a, CR 702.142b
 | `name` | "chosen" |
 | `exhaust` | true: only exhaust abilities |
 | `boast` | true: only boast abilities |
+| `loyalty` | true: only loyalty abilities |
 
 ```json
 {

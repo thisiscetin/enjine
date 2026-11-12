@@ -21,6 +21,8 @@ change the public API; the stable surface is described in
 - `additional_triggers` takes `of`, a filter of the permanent whose ability triggers; `cause` is optional.
 - Plot (CR 702.170): ability `plot` (a special action from the hand) and effect `plot` ("it becomes
   plotted"); a plotted card is cast from exile for free on a later turn with `via: "plotted"`.
+- Statics can grant loyalty abilities; loyalty abilities take `cost: "-X"`; `activates_ability` takes
+  `loyalty: true`.
 - `search_library` `put: graveyard`, and `put: library_top` ("then shuffle and put that card on top").
 
 ### Fixed

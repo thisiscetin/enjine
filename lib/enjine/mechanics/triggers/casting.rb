@@ -173,14 +173,16 @@ module Enjine
                                "mana ability. `source`: optional filter on the source's card; `name: \"chosen\"`: only a " \
                                "source with the name chosen as this permanent entered. `exhaust: true`: only an exhaust " \
                                "ability (\"whenever you activate an exhaust ability\", CR 702.177). `boast: true`: only a " \
-                               "boast ability (\"whenever a creature you control boasts\", CR 702.142b).",
-                  rules: %w[602.2 605.1a 603.2 201.4 702.177a 702.142b],
+                               "boast ability (\"whenever a creature you control boasts\", CR 702.142b). `loyalty: " \
+                               "true`: only a loyalty ability (CR 606).",
+                  rules: %w[602.2 605.1a 603.2 201.4 702.177a 702.142b 606.1],
                   params: { "controller" => PLAYERS.join(" | "), "source" => "card filter", "name" => "\"chosen\"",
-                            "exhaust" => "true: only exhaust abilities", "boast" => "true: only boast abilities" },
+                            "exhaust" => "true: only exhaust abilities", "boast" => "true: only boast abilities",
+                            "loyalty" => "true: only loyalty abilities" },
                   example: { "activates_ability" => { "controller" => "opponent" } }
 
-        def self.keys = %w[controller source name exhaust boast]
-        KINDS = { "exhaust" => :exhaust?, "boast" => :boast? }.freeze
+        def self.keys = %w[controller source name exhaust boast loyalty]
+        KINDS = { "exhaust" => :exhaust?, "boast" => :boast?, "loyalty" => :loyalty? }.freeze
         def event_class = Events::AbilityActivated
 
         def setup(params, errors, path)
@@ -202,7 +204,7 @@ module Enjine
 
         def to_s
           what = "#{@kinds.map { "#{it.to_s.delete("?")} " }.join}ability"
-          "Whenever #{who} activate#{"s" unless @controller == "you"} #{what.start_with?("b") ? "a" : "an"} #{what}#{chosen_words}"
+          "Whenever #{who} activate#{"s" unless @controller == "you"} #{what.match?(/\A[aeiou]/) ? "an" : "a"} #{what}#{chosen_words}"
         end
 
         private

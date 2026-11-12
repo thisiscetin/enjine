@@ -219,8 +219,11 @@ is fixed) and then chooses that many different objects; `{ "target": n }` then m
                "effects": [{ "deal_damage": { "amount": 3, "to": { "target": 0 } } }] } }
 ```
 
-`cost` is the signed number: `+1` → `1`, `−2` → `-2`, `0` → `0`. Sorcery timing and
-once-per-turn are automatic.
+`cost` is the signed number: `+1` → `1`, `−2` → `-2`, `0` → `0`, or `"-X"` (X is announced as
+it's activated, at most the planeswalker's loyalty; effects read it as `"x"`). Sorcery timing and
+once-per-turn are automatic. A static grants one like any other ability: "Planeswalkers you control
+have '[−2]: …'" is `{ "static": { "affects": { "each": "planeswalker", "controller": "you" },
+"abilities": [{ "loyalty": { "cost": -2, "effects": [ … ] } }] } }`.
 
 ### 4.4 Target filters
 
@@ -297,6 +300,7 @@ is a flicker ("exile …, then return it to the battlefield under its owner's co
 | one of your creatures is targeted by an opponent's spell or ability | `{ "becomes_target": { "subject": { "each": "creature", "controller": "you" }, "by": "opponent" } }` |
 | "Whenever a card leaves your graveyard" / "one or more cards leave" | `{ "leaves_graveyard": {} }` / `{ "leaves_graveyard": { "batched": true } }` |
 | "Whenever an opponent activates an ability" (not mana abilities) | `{ "activates_ability": { "controller": "opponent" } }` |
+| "Whenever an opponent activates a loyalty ability" | `{ "activates_ability": { "controller": "opponent", "loyalty": true } }` |
 | "When you cast this spell" | `{ "cast": { "self": true } }` |
 | you cast a spell that is a creature or a Spacecraft | `{ "cast": { "spell": { "one_of": [{ "spell": { "any_of": ["creature"] } }, { "spell": { "subtypes": ["spacecraft"] } }] } } }` |
 | a number chosen as it enters (0 to 10) / spells whose mana value is that number | ability `{ "choose_number": { "min": 0, "max": 10 } }` / `"cast": { "mana_value": "chosen" }` |

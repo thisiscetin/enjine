@@ -1087,7 +1087,7 @@ Rules: CR 606.3, CR 606.4, CR 606.5, CR 602.2b
 
 | Parameter | Description |
 | --- | --- |
-| `cost` | integer, e.g. 1 for +1 or -2 |
+| `cost` | integer, e.g. 1 for +1 or -2; or "-X" (X is announced, at most its loyalty) |
 | `targets` | list of target filters |
 | `effects` | list of effects |
 

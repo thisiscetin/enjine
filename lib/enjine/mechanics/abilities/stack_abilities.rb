@@ -513,7 +513,8 @@ module Enjine
                                "and is paid on activation. Sorcery speed, and only one loyalty ability per " \
                                "planeswalker per turn.",
                   rules: %w[606.3 606.4 606.5 602.2b],
-                  params: { "cost" => "integer, e.g. 1 for +1 or -2", "targets" => "list of target filters",
+                  params: { "cost" => "integer, e.g. 1 for +1 or -2; or \"-X\" (X is announced, at most its loyalty)",
+                            "targets" => "list of target filters",
                             "effects" => "list of effects" },
                   example: { "loyalty" => { "cost" => -3, "targets" => ["creature"],
                                             "effects" => [{ "deal_damage" => { "amount" => 3, "to" => { "target" => 0 } } }] } }
@@ -521,8 +522,8 @@ module Enjine
         def self.build(params, errors, path, **)
           Mechanics.check_keys(params, %w[cost] + BODY_KEYS, errors, path)
           cost = Mechanics.fetch_param(params, :cost)
-          errors << "#{path}.cost: must be an integer loyalty change" unless cost.is_a?(Integer)
-          new(**parse_body(params, errors, path), loyalty: cost.to_i)
+          errors << "#{path}.cost: must be an integer loyalty change or \"-X\"" unless cost.is_a?(Integer) || cost == "-X"
+          new(**parse_body(params, errors, path), loyalty: cost == "-X" ? cost : cost.to_i)
         end
 
         def initialize(loyalty:, **)
@@ -531,11 +532,14 @@ module Enjine
         end
 
         def kind = :loyalty
-        def loyalty_cost = @loyalty
+        def loyalty? = true
+        # The fixed loyalty change; a "-X" ability's is chosen as it's activated (CR 107.3, 601.2b), so it's 0 here.
+        def loyalty_cost = x_loyalty? ? 0 : @loyalty
+        def x_loyalty? = @loyalty == "-X"
         def sorcery_speed? = true
         def allowed_types = [:planeswalker]
 
-        def to_s = "#{"+" if @loyalty.positive?}#{@loyalty}: #{effects_text}"
+        def to_s = "#{"+" if !x_loyalty? && @loyalty.positive?}#{@loyalty}: #{effects_text}"
       end
     end
   end
