@@ -1658,6 +1658,26 @@ Rules: CR 702.11c, CR 115.4, CR 508.1c, CR 402.2, CR 514.1, CR 615.1, CR 615.1a,
 }
 ```
 
+## plot
+
+Each referenced card or spell is exiled (if it isn't already) and becomes plotted: its owner may cast it from exile without paying its mana cost during their main phase while the stack is empty, on any later turn (cast option `via: "plotted"`).
+
+Rules: CR 702.170c, CR 702.170d, CR 406.1
+
+| Parameter | Description |
+| --- | --- |
+| `to` | selector (a spell, a card, or an exiled card such as {"result": 0}) |
+
+```json
+{
+  "plot": {
+    "to": {
+      "target": 0
+    }
+  }
+}
+```
+
 ## prepare
 
 Each referenced permanent (default: this one) becomes prepared, if it has a prepare spell and isn't prepared already: its controller creates a copy of the prepare spell in exile and may cast that copy while the permanent stays prepared. Casting it unprepares the permanent.

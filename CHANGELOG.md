@@ -19,6 +19,8 @@ change the public API; the stable surface is described in
 - `grant` and `become` take `duration: "until_your_next_turn"`.
 - Cost `exile_self` ("Exile this enchantment: …").
 - `additional_triggers` takes `of`, a filter of the permanent whose ability triggers; `cause` is optional.
+- Plot (CR 702.170): ability `plot` (a special action from the hand) and effect `plot` ("it becomes
+  plotted"); a plotted card is cast from exile for free on a later turn with `via: "plotted"`.
 - `search_library` `put: graveyard`, and `put: library_top` ("then shuffle and put that card on top").
 
 ### Fixed

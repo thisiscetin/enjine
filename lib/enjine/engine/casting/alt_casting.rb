@@ -8,7 +8,8 @@ module Enjine
     #   {"via" => "alt:<ref>", "play" => "cast" | "play", "keyword" => "flashback", "instant" => true (sneak),
     #    "alt" => {"cost" => "{2}{R}", "ref" => ref, "exile" => true, "returns" => "tapped" | "unblocked",
     #              "harmonize" => true}}
-    # and a warped card in exile has the method {"via" => "warped", "play" => "cast"} (CR 702.185a).
+    # and a warped card in exile has the method {"via" => "warped", "play" => "cast"} (CR 702.185a); a plotted one
+    # {"via" => "plotted", "play" => "cast", "alt" => {"free" => true}, "sorcery" => true} (CR 702.170d).
     #
     # How a spell was cast is remembered on the spell (memory "cast_from": the zone, "cast_with": the keyword)
     # and on the permanent it becomes (CR 400.7d), and each player's turn log keeps the keywords of the
@@ -32,7 +33,14 @@ module Enjine
           ability = inst.ability
           ability.method_for(inst.ref) if ability.kind == :alternative_cost && ability.functions?(self, obj, index)
         end
-        own + warped_methods(index, obj)
+        own + warped_methods(index, obj) + plotted_methods(obj)
+      end
+
+      # CR 702.170d: a plotted card may be cast without paying its mana cost during its owner's main phase while
+      # the stack is empty, on any turn after the one it became plotted in (a sorcery's timing, whatever its type).
+      def plotted_methods(obj)
+        turn = obj.zone == :exile && obj.memory["plotted"]
+        turn && state.turn > turn ? [{ "via" => "plotted", "play" => "cast", "alt" => Permissions::FREE, "sorcery" => true }] : []
       end
 
       # CR 702.185a: "Its owner may cast this card after the current turn has ended for as long as it remains
@@ -40,6 +48,14 @@ module Enjine
       def warped_methods(_index, obj)
         turn = obj.zone == :exile && obj.memory["warped"]
         turn && state.turn > turn ? [{ "via" => "warped", "play" => "cast" }] : []
+      end
+
+      # CR 304.1, 307.1: an instant or flash spell (or a method cast "any time you could cast an instant") at
+      # instant timing; anything else, and a plotted card whatever its type (CR 702.170d), at sorcery timing.
+      def method_timing?(index, chars, method)
+        return true if sorcery_timing?(index)
+
+        !method["sorcery"] && (chars.type?(:instant) || chars.keyword?(:flash) || method["instant"])
       end
 
       # CR 702.187b: mayhem needs the card to have been discarded this turn (TurnHistory stamps it).

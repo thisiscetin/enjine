@@ -27,7 +27,8 @@ full text when writing it.
 | 8 | Exile-this-permanent cost | S | 2 | Sapling Nursery; PARTIAL to exact: The Echoverse Fulcrum | Done (Unreleased): cost `"exile_self"` |
 | 9 | `additional_triggers` with an `of` filter for any cause (CAUSES is only `you_gain_life`) | S | 1-3 | Katara; partly Roaming Throne, Wizard's Staff | Done (Unreleased): `of` filter (with `other`, `"subtypes": "chosen"`); `cause` optional |
 
-Larger but high impact, next in line: **plot** (7 cards, M), a **static that grants loyalty abilities** (about 5, M),
+Larger but high impact, next in line: **plot** (7 cards, M; done, Unreleased: ability and effect `plot`; Doc Aurlock's
+"plotting costs {2} less" is still open), a **static that grants loyalty abilities** (about 5, M),
 and the **play-permission** extensions (19 cards, but a mix of separate gaps, L).
 
 ## Ranking

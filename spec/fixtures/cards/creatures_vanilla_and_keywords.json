@@ -719,5 +719,28 @@
         }
       }
     ]
+  },
+  {
+    "name": "Canyon Drifter",
+    "mana_cost": "{2}{R}{R}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "human",
+      "rogue"
+    ],
+    "power": 4,
+    "toughness": 2,
+    "abilities": [
+      {
+        "plot": {
+          "cost": "{2}{R}"
+        }
+      }
+    ],
+    "keywords": [
+      "haste"
+    ]
   }
 ]

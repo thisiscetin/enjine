@@ -1272,6 +1272,24 @@ Rules: CR 702.11c, CR 115.4, CR 508.1c, CR 402.2, CR 514.1, CR 615.1, CR 615.1a,
 }
 ```
 
+## plot
+
+Plot `cost`: during your main phase, while the stack is empty, you may pay `cost` and exile this card from your hand (special action `{type: "special_action"}`). It becomes plotted: on a later turn you may cast it from exile without paying its mana cost, during your main phase while the stack is empty (cast option `via: "plotted"`).
+
+Rules: CR 702.170a, CR 702.170b, CR 702.170d, CR 116.2k
+
+| Parameter | Description |
+| --- | --- |
+| `cost` | mana cost string |
+
+```json
+{
+  "plot": {
+    "cost": "{1}{R}"
+  }
+}
+```
+
 ## prevent_damage
 
 While this permanent is on the battlefield, all damage from sources in `by` to recipients in `to` (damage scopes as in damage_replacement, both optional; `combat`: combat | noncombat) is prevented. "To and by this creature" is two of them. `then`: effects right after it prevents damage ("prevent that damage and put that many +1/+1 counters on him"), reading {"triggering": "amount"} (the damage prevented), "object" (the source) and "player" (its controller).

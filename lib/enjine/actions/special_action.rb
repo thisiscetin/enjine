@@ -2,7 +2,8 @@
 
 module Enjine
   module Actions
-    # CR 116.2f, 116.2h: special actions that pay a cost and exile a card from your hand (foretell, suspend).
+    # CR 116.2f, 116.2h, 116.2k: special actions that pay a cost and exile a card from your hand (foretell,
+    # suspend, plot).
     # The card's ability names the cost, when the action is allowed and what it does; the cost is paid in a
     # "pay" frame (Engine::Payment#begin_payment!), which can be cancelled, and the player gets priority
     # again afterwards (CR 116.3).
@@ -10,7 +11,8 @@ module Enjine
       def self.doc
         '`{type: "special_action", object: id, ability: ref}` — a special action of a card in your hand: foretell ' \
           "(during your turn, pay {2} and exile it face down, CR 116.2h) or suspend (when you could begin to cast it, " \
-          "pay its suspend cost and exile it with time counters, CR 116.2f)."
+          "pay its suspend cost and exile it with time counters, CR 116.2f) or plot (in your main phase with an empty " \
+          "stack, pay its plot cost and exile it, CR 116.2k)."
       end
 
       def self.options(engine, index)
