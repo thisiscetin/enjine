@@ -45,7 +45,16 @@ RSpec.describe "Last known power and mana value of permanents that left (CR 608.
         { "gain_life" => { "amount" => { "power" => { "result" => 2 } } } }
       ] } }] }
   end
-  let(:catalog) { catalog_with(last_rites, grim_feast, altar, graveyard_count, token_feast) }
+  let(:blood_rite) do
+    { "name" => "Spec Blood Rite", "mana_cost" => "{B}", "types" => ["sorcery"],
+      "abilities" => [{ "spell" => { "effects" => [
+        { "sacrifice_choice" => { "filter" => "creature" } },
+        { "reflexive_trigger" => { "effects" => [
+          { "lose_life" => { "to" => "each_opponent", "amount" => { "power" => { "result" => 0 } } } }
+        ] } }
+      ] } }] }
+  end
+  let(:catalog) { catalog_with(last_rites, grim_feast, altar, graveyard_count, token_feast, blood_rite) }
 
   def life(game, name) = game.state.players[game.names.index(name)].life
 
@@ -107,6 +116,12 @@ RSpec.describe "Last known power and mana value of permanents that left (CR 608.
     game = cast(board(hand: ["Spec Token Feast"], mana: { B: 1 }), "Spec Token Feast")
     expect(game.state.battlefield).to be_empty
     expect(life(game, "alice")).to eq(25) # 3/3 with two +1/+1 counters
+  end
+
+  it "a reflexive trigger reads what its parent sacrificed as it last existed (CR 603.12, 608.2h)" do
+    game = board(alice: [["Grizzly Bears", { counters: { "+1/+1" => 2 } }]], hand: ["Spec Blood Rite"], mana: { B: 1 })
+    cast(game, "Spec Blood Rite")
+    expect(life(game, "bob")).to eq(16) # power 4, not the printed 2
   end
 
   it "reads a permanent sacrificed to pay a cost (CR 601.2h)" do

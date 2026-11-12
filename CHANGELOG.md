@@ -28,7 +28,7 @@ change the public API; the stable surface is described in
 ### Fixed
 - Power, toughness and mana value of a permanent that left the battlefield while the spell or ability
   resolves are read as it last existed (CR 608.2h): a destroyed target, or `{"result": n}` of a sacrifice.
-  They read 0 or the card's printed values before.
+  They read 0 or the card's printed values before. A reflexive trigger ("when you do") reads them too.
 - `search_library` works out computed bounds in `for` ("mana value equal to 1 plus …"); such a search
   found nothing before.
 - A characteristic-defining power/toughness that counts cards in graveyards no longer recurses forever

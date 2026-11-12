@@ -67,6 +67,7 @@ module Enjine
                          "object" => obj.id, "targets" => targets, "results" => {} }
         frame["ctx"]["linked"] = obj.memory["results"] if obj.memory.key?("results") # a delayed trigger's (CR 603.7c)
         frame["ctx"]["linked_amounts"] = obj.memory["amounts"] if obj.memory.key?("amounts") # a reflexive trigger's
+        frame["ctx"].merge!(Snapshot.deep_copy(obj.memory["departed"])) if obj.memory.key?("departed") # and its LKI
       end
 
       # CR 400.7j / 608.2c: objects an effect moves or creates, so later effects can refer to them

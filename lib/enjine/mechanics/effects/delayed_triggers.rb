@@ -104,7 +104,8 @@ module Enjine
           source = { "id" => ctx.source, "card" => card, "controller" => ctx.controller, "ability" => ref }
           engine.queue_pending_trigger!(source, nil, { "results" => Snapshot.deep_copy(ctx.results || []),
                                                        "amounts" => (ctx.amounts || []).dup,
-                                                       "triggering" => memory["triggering"]&.dup }.compact)
+                                                       "triggering" => memory["triggering"]&.dup,
+                                                       "departed" => engine.departed_snapshot }.compact)
         end
       end
     end

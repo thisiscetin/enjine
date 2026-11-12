@@ -126,6 +126,14 @@ module Enjine
         (resolving["ctx"]["departed"] ||= {})[new_id] = old_id
       end
 
+      # What the resolving spell or ability knows of permanents that left (their last known information and the
+      # new objects they became), for a reflexive trigger it creates ("when you do", CR 603.12, 608.2h).
+      def departed_snapshot
+        ctx = state.frames.rfind { it["type"] == "resolve" && it["ctx"] }&.fetch("ctx") or return nil
+        snapshot = ctx.slice("lki", "departed")
+        snapshot.empty? ? nil : Snapshot.deep_copy(snapshot)
+      end
+
       # The last known information of the permanent a new object was, if it left the battlefield during the
       # resolving spell or ability.
       def departed_last_known(new_id)
