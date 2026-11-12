@@ -33,7 +33,7 @@ module Enjine
                   description: "Sacrifice `count` permanents you control matching `filter` (`other: true`: not the " \
                                "source). Chosen while casting or activating, sacrificed as it becomes cast; the " \
                                "sacrificed permanent's last known types and subtypes are remembered (condition " \
-                               "`sacrificed`).",
+                               "`sacrificed`), and its power, toughness and mana value (amount `sacrificed`).",
                   rules: %w[701.21a 601.2h 602.2b 118.3 608.2h],
                   params: { "filter" => "filter (default permanent)", "count" => "integer (default 1)",
                             "other" => "true: not the source itself" },
@@ -44,7 +44,8 @@ module Enjine
             perm = engine.object(entry["object"])
             facts = engine.chars(perm)
             entry.merge!("types" => facts.types.map(&:to_s), "subtypes" => facts.subtypes.map(&:to_s),
-                         "power" => engine.power(perm))
+                         "power" => engine.power(perm), "toughness" => engine.toughness(perm),
+                         "mana_value" => Amount.mana_value(engine, perm))
             engine.move!(perm.id, :graveyard, reason: "sacrifice")
           end
         end

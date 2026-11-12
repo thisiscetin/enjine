@@ -647,5 +647,36 @@
         }
       }
     ]
+  },
+  {
+    "name": "Graveyard Grazer",
+    "mana_cost": "{2}{G}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "beast"
+    ],
+    "power": {
+      "plus": [
+        {
+          "card_types": {
+            "each": {
+              "graveyard_card": {}
+            },
+            "controller": "any"
+          }
+        },
+        -1
+      ]
+    },
+    "toughness": {
+      "card_types": {
+        "each": {
+          "graveyard_card": {}
+        },
+        "controller": "any"
+      }
+    }
   }
 ]

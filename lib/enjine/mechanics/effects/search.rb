@@ -6,7 +6,8 @@ module Enjine
   module Mechanics
     module Effects
       # Search your library (CR 701.23), optionally reveal what was found (CR 701.20a), put it
-      # into your hand or onto the battlefield, then shuffle (CR 701.24).
+      # into your hand, onto the battlefield or into your graveyard, then shuffle (CR 701.24); or shuffle
+      # and put the found card on top ("then shuffle and put that card on top").
       #
       # The searcher picks one card at a time. Copies of the same card in a library are
       # interchangeable, so each distinct card is offered once. Only the searcher sees the
@@ -17,7 +18,9 @@ module Enjine
 
         primitive :effect, :search_library,
                   description: "Search your library for up to `count` cards matching `for`, then put them into your " \
-                               "hand (or onto the battlefield, tapped if `tapped`, with `counters`) and shuffle. With a " \
+                               "hand (or onto the battlefield, tapped if `tapped`, with `counters`; or into your " \
+                               "graveyard) and shuffle. `put: library_top`: shuffle, then put the found card (one) on top. " \
+                               "Computed bounds in `for` are worked out as the effect resolves. With a " \
                                "stated quality you may find fewer (or none); a search for just \"a card\" must find one " \
                                "if it can. `reveal` shows the found cards to every player. `searcher` names another " \
                                "player who searches their own library (e.g. {\"controller_of\": {\"target\": 0}}); " \
@@ -27,7 +30,7 @@ module Enjine
                   params: { "for" => "card spec: \"card\" (default), {\"types\"|\"subtypes\"|\"supertypes\": [...], " \
                                      "\"name\": \"...\"} or {\"any_of\": [spec, ...]}",
                             "count" => "integer (default 1), \"any\" (any number), \"x\" or an amount (\"up to that many\")",
-                            "put" => "\"hand\" (default) or \"battlefield\"",
+                            "put" => "\"hand\" (default), \"battlefield\", \"graveyard\" or \"library_top\" (count 1)",
                             "tapped" => "true: the cards enter tapped (with put: battlefield)",
                             "counters" => "{counter name: n}: the cards enter with these counters (with put: battlefield)",
                             "reveal" => "true: reveal the found cards",
@@ -37,7 +40,7 @@ module Enjine
                   example: { "search_library" => { "for" => { "supertypes" => ["basic"], "types" => ["land"] },
                                                    "reveal" => true } }
 
-        ZONES = %w[hand battlefield].freeze
+        ZONES = %w[hand battlefield graveyard library_top].freeze
 
         attr_reader :spec, :count, :put, :tapped, :reveal
 
@@ -54,6 +57,7 @@ module Enjine
           @may = Mechanics.flag_param(params, :may, errors, path)
           @different_names = Mechanics.flag_param(params, :different_names, errors, path)
           errors << "#{path}.tapped: only cards put onto the battlefield can enter tapped" if @tapped && @put != "battlefield"
+          errors << "#{path}.count: put library_top takes one card" if @put == "library_top" && @count != 1
           @counters = parse_counters(Mechanics.fetch_param(params, :counters), errors, path)
           raw = Mechanics.fetch_param(params, :searcher) || "you"
           @searcher = Selector.build(raw, errors, "#{path}.searcher", targets_count: @targets_count, results_count: @results_count)
@@ -101,7 +105,7 @@ module Enjine
           end
           found = answers(locals).select { it["type"] == "find" }.map { it["object"] }
           unless stop?(engine, ctx, locals, found)
-            choices = candidates(engine, index, found)
+            choices = candidates(engine, ctx, index, found)
             return ask(engine, locals, index, "Search your library (#{spec}): find a card", choices) unless choices.empty?
           end
           return :wait if entering_choices?(engine, index, locals, found)
@@ -127,10 +131,11 @@ module Enjine
 
         # One option per distinct matching card (CR 701.23a); "done" stops looking unless the
         # search is for just a quantity of cards (CR 701.23b, 701.23d).
-        def candidates(engine, index, found)
+        # Computed bounds ("mana value equal to 1 plus the sacrificed artifact's") are worked out now (CR 608.2h).
+        def candidates(engine, ctx, index, found)
           names = @different_names ? found.map { engine.chars(it).name } : []
           ids = (engine.player(index).library - found).sort.select do
-            spec.match?(engine, engine.object(it)) && !names.include?(engine.chars(it).name)
+            spec.match?(engine, engine.object(it), ctx) && !names.include?(engine.chars(it).name)
           end
           choices = ids.uniq { engine.object(it).card }.map { { "type" => "find", "object" => it } }
           return choices if choices.empty? || (spec.any? && count != "any")
@@ -139,11 +144,13 @@ module Enjine
         end
 
         def finish!(engine, index, found, locals)
-          if reveal && put == "hand"
+          if reveal && %w[hand library_top].include?(put)
             found.each do |id|
               engine.emit Events::CardRevealed.new(player: engine.name(index), object: id, card: engine.object(id).card)
             end
           end
+          return engine.shuffle_library!(index, then_on_top: found) if put == "library_top" # CR 701.24a
+
           enters = {}
           enters["tapped"] = true if tapped
           enters["counters"] = @counters.dup unless @counters.empty?

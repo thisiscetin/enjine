@@ -579,6 +579,11 @@ The full lists are in `lib/enjine/mechanics/values.rb` (`Amount`, `Condition`).
 | "the number of creature types among …" | `{ "distinct_types": <selector> }` |
 | "the number of counters on it" | `{ "counters": { "of": "self", "kind": "quest" } }` (no `kind`: every counter) |
 | "cards in your graveyard", "greatest power among …" | `{ "graveyard_size": "you" }`, `{ "greatest_power": <selector> }` |
+| "cards in your library", "half their library, rounded up" | `{ "library_size": "you" }`, `{ "divide": [{ "plus": [{ "library_size": <player> }, 1] }, 2] }` |
+| "the greatest mana value among …" | `{ "greatest_mana_value": <selector> }` (0 for none) |
+| "its mana value" / "its power" of a target destroyed earlier in the same effects; "the sacrificed creature's power" after a `sacrifice_choice` | `{ "mana_value": { "target": 0 } }`, `{ "power": { "result": n } }`: read as it last existed on the battlefield (CR 608.2h) |
+| "the sacrificed artifact's mana value" when the sacrifice is a cost | `{ "sacrificed": "mana_value" }` (also `"power"`, `"toughness"`; CR 601.2h) |
+| delirium: "four or more card types among cards in your graveyard" | `{ "amount": { "card_types": { "each": { "graveyard_card": {} }, "controller": "you" } }, "at_least": 4 }` |
 | "life you gained / that player lost this turn" | `{ "life_gained_this_turn": "you" }`, `{ "life_lost_this_turn": "each_opponent" }` |
 | an amount an earlier effect changed (life it made a player lose) | `{ "this_way": n }` (effect n of the same list) |
 | N or more cards drawn by an earlier effect; "if you do" after a mandatory effect | `{ "amount": { "count": { "result": n } }, "at_least": 3 }` |
@@ -1294,6 +1299,9 @@ grants its abilities.
 | "you may copy it. If you do, those spells gain wither" | `copy_spell` with `"except": { "keywords": ["wither"] }`, then `{ "grant": { "keywords": ["wither"], "to": { "triggering": "object" } } }` (a spell on the stack can gain keywords) |
 | "Instant and sorcery spells you cast from your hand have cascade" | ability `{ "spell_keywords": { "spells": { "spell": { "any_of": ["instant", "sorcery"] } }, "from": "hand", "keywords": ["cascade"] } }` |
 | "search your library for up to X basic land cards with different names" | `{ "search_library": { "for": { "supertypes": ["basic"], "types": ["land"] }, "count": "x", "different_names": true } }` |
+| "search your library for a creature card, put it into your graveyard, then shuffle" | `{ "search_library": { "for": { "types": ["creature"] }, "put": "graveyard" } }` |
+| "search your library for a card, then shuffle and put that card on top" | `{ "search_library": { "put": "library_top" } }` (one card; add `"reveal": true` if it's revealed) |
+| "an artifact card with mana value equal to 1 plus the sacrificed artifact's mana value" | `"for": { "types": ["artifact"], "mana_value": { "equal": { "plus": [{ "sacrificed": "mana_value" }, 1] } } }` |
 | "The first time you flip one or more coins each turn, those coins come up heads and you win those flips" (CR 705.3) | ability `"first_flips_win"` |
 | "Roll a d20" / "roll two six-sided dice" (CR 706) | `{ "roll_dice": { "sides": 20 } }` / `{ "roll_dice": { "amount": 2 } }`; the total is `{ "this_way": n }` (a results table is effects with an `if` on it) |
 

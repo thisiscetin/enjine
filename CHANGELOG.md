@@ -8,6 +8,21 @@ change the public API; the stable surface is described in
 
 ## [Unreleased]
 
+### Added
+- Amounts `card_types` (how many card types among cards: delirium, "*" power),
+  `greatest_mana_value` and `library_size` ("half their library, rounded up").
+- Amount `sacrificed` (`power`, `toughness` or `mana_value` of the permanents sacrificed to pay the cost).
+- `search_library` `put: graveyard`, and `put: library_top` ("then shuffle and put that card on top").
+
+### Fixed
+- Power, toughness and mana value of a permanent that left the battlefield while the spell or ability
+  resolves are read as it last existed (CR 608.2h): a destroyed target, or `{"result": n}` of a sacrifice.
+  They read 0 or the card's printed values before.
+- `search_library` works out computed bounds in `for` ("mana value equal to 1 plus …"); such a search
+  found nothing before.
+- A characteristic-defining power/toughness that counts cards in graveyards no longer recurses forever
+  while its own card is in a graveyard.
+
 ## [0.1.0] - 2026-11-11
 
 ### Added

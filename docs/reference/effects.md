@@ -2054,7 +2054,7 @@ Rules: CR 701.22a
 
 ## search_library
 
-Search your library for up to `count` cards matching `for`, then put them into your hand (or onto the battlefield, tapped if `tapped`, with `counters`) and shuffle. With a stated quality you may find fewer (or none); a search for just "a card" must find one if it can. `reveal` shows the found cards to every player. `searcher` names another player who searches their own library (e.g. {"controller_of": {"target": 0}}); `may: true` lets the searcher decline (then nothing is shuffled). `different_names: true`: the cards found must all have different names ("basic land cards with different names").
+Search your library for up to `count` cards matching `for`, then put them into your hand (or onto the battlefield, tapped if `tapped`, with `counters`; or into your graveyard) and shuffle. `put: library_top`: shuffle, then put the found card (one) on top. Computed bounds in `for` are worked out as the effect resolves. With a stated quality you may find fewer (or none); a search for just "a card" must find one if it can. `reveal` shows the found cards to every player. `searcher` names another player who searches their own library (e.g. {"controller_of": {"target": 0}}); `may: true` lets the searcher decline (then nothing is shuffled). `different_names: true`: the cards found must all have different names ("basic land cards with different names").
 
 Rules: CR 701.23a, CR 701.23b, CR 701.23d, CR 701.23e, CR 701.20a, CR 701.24a, CR 701.24b, CR 118.12, CR 110.2a
 
@@ -2062,7 +2062,7 @@ Rules: CR 701.23a, CR 701.23b, CR 701.23d, CR 701.23e, CR 701.20a, CR 701.24a, C
 | --- | --- |
 | `for` | card spec: "card" (default), {"types"|"subtypes"|"supertypes": [...], "name": "..."} or {"any_of": [spec, ...]} |
 | `count` | integer (default 1), "any" (any number), "x" or an amount ("up to that many") |
-| `put` | "hand" (default) or "battlefield" |
+| `put` | "hand" (default), "battlefield", "graveyard" or "library_top" (count 1) |
 | `tapped` | true: the cards enter tapped (with put: battlefield) |
 | `counters` | {counter name: n}: the cards enter with these counters (with put: battlefield) |
 | `reveal` | true: reveal the found cards |

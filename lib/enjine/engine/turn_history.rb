@@ -109,13 +109,29 @@ module Enjine
       # The part of last known information an ability keeps in its memory ("source_lki"): plain data.
       def last_known_memory(lki)
         info = { "controller" => lki["controller"], "power" => lki["power"], "toughness" => lki["toughness"],
-                 "counters" => lki["counters"].dup, "card" => lki["card"], "keywords" => lki["keywords"].dup }
+                 "mana_value" => lki["mana_value"], "counters" => lki["counters"].dup, "card" => lki["card"],
+                 "keywords" => lki["keywords"].dup }
         info["except"] = lki["except"] if lki["except"] # what a copy of it copies (CR 707.2, Engine::Copies)
         info.merge(lki.slice(Mechanics::Linked::EXILED).transform_values(&:dup)) # CR 607.2a (Linked.exiled_with)
       end
 
       # What the resolving spell or ability remembers about an object that left the battlefield during it.
       def resolving_last_known(id) = state.frames.rfind { it["type"] == "resolve" && it["ctx"] }&.dig("ctx", "lki", id)
+
+      # A permanent that left the battlefield while a spell or ability resolves becomes a new object (CR 400.7);
+      # the resolving one links the new object to the permanent it was, so "the sacrificed creature's power"
+      # ({"power": {"result": n}}) is read as the permanent last existed (CR 608.2h).
+      def remember_departed!(new_id, old_id)
+        resolving = state.frames.rfind { it["type"] == "resolve" && it["ctx"] } or return
+        (resolving["ctx"]["departed"] ||= {})[new_id] = old_id
+      end
+
+      # The last known information of the permanent a new object was, if it left the battlefield during the
+      # resolving spell or ability.
+      def departed_last_known(new_id)
+        ctx = state.frames.rfind { it["type"] == "resolve" && it["ctx"] }&.fetch("ctx") or return nil
+        (old_id = ctx.dig("departed", new_id)) && ctx.dig("lki", old_id)
+      end
 
       # CR 702.171b: a permanent becomes saddled until the end of the turn; leaving the battlefield ends it (the
       # card is a new object, CR 400.7), and it isn't copiable (it lives on the object, not its characteristics).

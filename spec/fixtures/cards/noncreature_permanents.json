@@ -2008,5 +2008,52 @@
         }
       }
     ]
+  },
+  {
+    "name": "Salvage Foundry",
+    "mana_cost": "{3}",
+    "types": [
+      "artifact"
+    ],
+    "abilities": [
+      {
+        "activated": {
+          "cost": [
+            {
+              "mana": "{1}"
+            },
+            {
+              "sacrifice_permanent": {
+                "filter": "artifact",
+                "other": true
+              }
+            }
+          ],
+          "effects": [
+            {
+              "search_library": {
+                "for": {
+                  "types": [
+                    "artifact"
+                  ],
+                  "mana_value": {
+                    "at_most": {
+                      "plus": [
+                        {
+                          "sacrificed": "mana_value"
+                        },
+                        2
+                      ]
+                    }
+                  }
+                },
+                "put": "hand",
+                "reveal": true
+              }
+            }
+          ]
+        }
+      }
+    ]
   }
 ]

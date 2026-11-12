@@ -43,7 +43,8 @@ RSpec.describe "Cycling, card specs and library search: validation (unit)" do
   it "search_library validates count, put, tapped and reveal" do
     expect(errors_for(search({ "count" => 0 })))
       .to eq(['a.spell.effects[0].search_library.count: must be a positive integer, "any" or an amount'])
-    expect(errors_for(search({ "put" => "exile" }))).to eq(["a.spell.effects[0].search_library.put: must be one of hand, battlefield"])
+    expect(errors_for(search({ "put" => "exile" })))
+      .to eq(["a.spell.effects[0].search_library.put: must be one of hand, battlefield, graveyard, library_top"])
     expect(errors_for(search({ "reveal" => "yes" }))).to eq(["a.spell.effects[0].search_library.reveal: must be true or false"])
     expect(errors_for(search({ "tapped" => true })))
       .to eq(["a.spell.effects[0].search_library.tapped: only cards put onto the battlefield can enter tapped"])

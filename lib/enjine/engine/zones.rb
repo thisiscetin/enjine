@@ -120,10 +120,7 @@ module Enjine
         face_down = to == :exile ? data["face_down"] : nil
         fresh = create_object(card_after_move(old, to), old.owner, to, hidden: !face_down.nil?) # front face up (Engine::Faces)
         carry_copy_status!(fresh, old, to) # a token or copy stays one (Engine::Copies)
-        if old.zone == :battlefield
-          leave_combat!(id)
-          end_while_source_effects!(id) # CR 611.2b
-        end
+        left_battlefield!(fresh, old) if lki
         arrive!(fresh, old, data)
         fresh.memory.merge!("face_down" => true, "may_look" => face_down.uniq.sort) if face_down
         list = state.zone_list(to, old.owner)
@@ -138,6 +135,14 @@ module Enjine
         prepare!(fresh) if to == :battlefield && data["enters"]["prepared"] # "enters prepared" (CR 723.3a)
         run_follow_ups!(data, "object" => fresh.id) # "exile it instead. When you do, ..." (Engine::FollowUps)
         fresh
+      end
+
+      # A permanent that left the battlefield: the resolving spell or ability links the new object to it (CR 400.7,
+      # 608.2h; Engine::TurnHistory), it leaves combat, and effects lasting while it stays end (CR 611.2b).
+      def left_battlefield!(fresh, old)
+        remember_departed!(fresh.id, old.id)
+        leave_combat!(old.id)
+        end_while_source_effects!(old.id)
       end
 
       # Status of the new object in its new zone (CR 110.2, 614.12 entering status).
@@ -225,8 +230,13 @@ module Enjine
         end
       end
 
-      def shuffle_library!(index)
-        state.rng.shuffle!(player(index).library)
+      # `then_on_top`: cards set aside while the rest is shuffled, then put on top in that order ("then shuffle and
+      # put that card on top"; they stay in the library, CR 701.24a).
+      def shuffle_library!(index, then_on_top: [])
+        library = player(index).library
+        library.reject! { then_on_top.include?(it) }
+        state.rng.shuffle!(library)
+        library.unshift(*then_on_top)
         emit Events::LibraryShuffled.new(player: name(index))
       end
 

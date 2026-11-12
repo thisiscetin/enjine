@@ -134,12 +134,6 @@ module Enjine
         granted.empty? ? base : base.with(abilities: (base.abilities + granted).freeze)
       end
 
-      # CR 604.3, 707.9d: a characteristic-defining power/toughness, unless a copy exception sets them.
-      def defined_pt_copied?(obj)
-        except = copy_exceptions(obj)
-        definition(obj).defined_pt? && !(except&.key?("power") || except&.key?("toughness"))
-      end
-
       # Layers 1-4: the object's own changes and resolved effects that add types (#own_layers),
       # then static abilities that add card types ("this Vehicle is an artifact creature", CR 205.1b), then effects
       # that set its creature types (CR 205.1a, 613.1d), statics before resolved effects, each in timestamp order.
@@ -237,13 +231,6 @@ module Enjine
           sets << [effect["timestamp"], effect.values_at("power", "toughness")]
         end
         sets.max_by(&:first)&.last
-      end
-
-      # CR 604.3, 613.4a: power/toughness from a characteristic-defining ability, in every zone.
-      def defined_power_toughness(obj, base, defn)
-        ctx = Mechanics::EffectContext.new(obj.controller, obj.id, obj.id, [], [])
-        base.with(power: defn.power_amount ? defn.power_amount.value(self, ctx) : base.power,
-                  toughness: defn.toughness_amount ? defn.toughness_amount.value(self, ctx) : base.toughness)
       end
 
       # [[source object, StaticAbility], ...] for permanents on the battlefield (printed abilities:

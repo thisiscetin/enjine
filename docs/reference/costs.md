@@ -256,7 +256,7 @@ Rules: CR 701.21a, CR 602.2b, CR 118.3
 
 ## sacrifice_permanent
 
-Sacrifice `count` permanents you control matching `filter` (`other: true`: not the source). Chosen while casting or activating, sacrificed as it becomes cast; the sacrificed permanent's last known types and subtypes are remembered (condition `sacrificed`).
+Sacrifice `count` permanents you control matching `filter` (`other: true`: not the source). Chosen while casting or activating, sacrificed as it becomes cast; the sacrificed permanent's last known types and subtypes are remembered (condition `sacrificed`), and its power, toughness and mana value (amount `sacrificed`).
 
 Rules: CR 701.21a, CR 601.2h, CR 602.2b, CR 118.3, CR 608.2h
 

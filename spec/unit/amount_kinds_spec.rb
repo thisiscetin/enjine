@@ -33,6 +33,11 @@ RSpec.describe "Amount kinds, condition forms and selectors (CR 107.1a, 205.3m, 
     expect(amount({ "greatest_power" => yours })).to eq(5)
     expect(amount({ "greatest_power" => { "each" => "planeswalker" } })).to eq(0)
     expect(amount({ "graveyard_size" => "you" })).to eq(3)
+    expect(amount({ "library_size" => "you" })).to eq(0)
+    expect(amount({ "card_types" => { "each" => { "graveyard_card" => {} }, "controller" => "you" } })).to eq(1) # three Forests
+    expect(amount({ "card_types" => yours })).to eq(1)
+    expect(amount({ "greatest_mana_value" => yours })).to eq(4) # Hill Giant {3}{R}
+    expect(amount({ "greatest_mana_value" => { "each" => "planeswalker" } })).to eq(0)
     expect(amount({ "distinct_types" => yours })).to eq(3) # giant, bear, cat (CR 205.3m)
     expect(amount({ "distinct_types" => { "each" => "land" } })).to eq(0)
     expect(amount({ "counters" => { "of" => "self" } })).to eq(3)

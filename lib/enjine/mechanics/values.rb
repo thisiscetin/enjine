@@ -9,10 +9,14 @@ module Enjine
     #                                                 how many the first effect moved or created, e.g. cards drawn)
     #   {"power": selector} / {"toughness": ...}      total power / toughness ("Picard's power": {"power": "self"})
     #   {"greatest_power" | "greatest_toughness": selector}  the greatest power / toughness among them (0 for none)
-    #   {"hand_size" | "life" | "graveyard_size": player selector}
+    #   {"hand_size" | "life" | "graveyard_size" | "library_size": player selector}
     #   {"distinct_names": selector}                  how many different names they have (strange new worlds)
     #   {"mana_value": selector}                      their total mana value (a spell's X counts on the stack; a spell
     #                                                 countered by the resolving one: as it last existed, CR 608.2h)
+    #   {"greatest_mana_value": selector}             the greatest mana value among them (0 for none, CR 202.3)
+    #   {"sacrificed": "power" | "toughness" | "mana_value"}  of the permanents sacrificed to pay the resolving
+    #                                                 spell's or ability's cost, as they last existed (CR 601.2h, 608.2h)
+    #   {"card_types": selector}                      how many different card types among them (delirium, CR 205.2a)
     #   {"distinct_types": selector}                  how many different creature types they have (CR 205.3m)
     #   {"distinct_colors": selector}                 how many colors among them (CR 105.2, 202.2)
     #   {"distinct_land_types": selector}             how many basic land types among them (domain, CR 305.6)
@@ -31,14 +35,16 @@ module Enjine
     #   {"mana_spent": {"of": ..., "color" | "colors": ...}}  mana spent to cast a spell (CR 601.2h), see mana_spent.rb
     #   {"times": [a, b]} / {"plus": [a, b]} / {"divide": [a, b]}   arithmetic on amounts; division rounds down
     #                                                 (CR 107.1a). "-X" is {"times": ["x", -1]}.
-    # A source that has left the battlefield is used as it last existed (CR 608.2h).
+    # A source that has left the battlefield is used as it last existed (CR 608.2h), and so is any object the
+    # power, toughness or mana value of which is read after it left the battlefield during the resolving
+    # spell or ability (a destroyed target, or {"result": n} of a sacrifice).
     class Amount
       SELECTOR_KINDS = %w[count power toughness greatest_power hand_size life graveyard_size distinct_names distinct_types
                           distinct_colors distinct_land_types distinct_planeswalker_types
                           life_gained_this_turn life_lost_this_turn dilemmas_this_turn returned_this_turn
                           cards_drawn_this_turn cards_discarded_this_turn spells_cast_this_game speed
                           noncombat_damage_this_turn noncombat_damage_last_turn turns_taken greatest_toughness
-                          mana_value].freeze
+                          mana_value greatest_mana_value card_types library_size].freeze
       ARITHMETIC = %w[times plus divide].freeze
       BASIC_LAND_TYPES = %i[plains island swamp mountain forest].freeze # CR 305.6
       # Object history lists: kind -> turn_log key (Engine::TurnHistory).
@@ -46,7 +52,7 @@ module Enjine
                    "sacrificed_this_turn" => "sacrificed", "attackers_this_turn" => "attackers",
                    "exiled_this_turn" => "exiled" }.freeze
       KINDS = (SELECTOR_KINDS + ARITHMETIC + DEPARTED.keys + %w[counters spells_cast_this_turn lands_played_this_turn this_way
-                                                                mana_spent]).freeze
+                                                                mana_spent sacrificed]).freeze
       # Player history counters: kind -> turn_log/game_log key.
       HISTORY = { "life_gained_this_turn" => "life_gained", "life_lost_this_turn" => "life_lost",
                   "dilemmas_this_turn" => "dilemmas", "returned_this_turn" => "returned",
@@ -74,6 +80,7 @@ module Enjine
         return Departed.build(kind, ref, errors, "#{path}.#{kind}") if DEPARTED.key?(kind)
         return ThisWay.build(ref, errors, "#{path}.#{kind}", results_count) if kind == "this_way"
         return ManaSpent.build(ref, errors, "#{path}.#{kind}", **context) if kind == "mana_spent" # mana_spent.rb
+        return Sacrificed.build(ref, errors, "#{path}.#{kind}") if kind == "sacrificed"
 
         new(kind, Selector.build(ref, errors, "#{path}.#{kind}", **context))
       end
@@ -96,15 +103,9 @@ module Enjine
         when "count" then refs.size
         when "power", "toughness" then refs.empty? ? Amount.last_known(engine, ctx, @selector, @kind) : stats(engine, refs).sum
         when "greatest_power", "greatest_toughness" then stats(engine, refs).max.to_i
-        when "mana_value" then refs.sum do
-          Amount.mana_value(engine, engine.state.objects[it]) || engine.resolving_last_known(it)&.[]("mana_value").to_i
-        end
-        when "distinct_names" then live(engine, refs).map { engine.chars(it).name }.uniq.size
-        when "distinct_types" then live(engine, refs).flat_map { Amount.creature_types(engine.chars(it)) }.uniq.size
-        when "distinct_colors" then live(engine, refs).flat_map { engine.chars(it).colors }.uniq.size # CR 105.2
-        when "distinct_land_types" then (live(engine, refs).flat_map { engine.chars(it).subtypes } & BASIC_LAND_TYPES).size
-        when "distinct_planeswalker_types" # CR 205.3j: a planeswalker's subtypes are planeswalker types
-          live(engine, refs).flat_map { (c = engine.chars(it)).type?(:planeswalker) ? c.subtypes : [] }.uniq.size
+        when "mana_value" then mana_values(engine, refs).sum
+        when "greatest_mana_value" then mana_values(engine, refs).max.to_i
+        when *DISTINCT then distinct(live(engine, refs).map { engine.chars(it) })
         else players(engine, refs).sum { player_value(engine, it) }
         end
       end
@@ -133,6 +134,17 @@ module Enjine
         lki ? lki[key].to_i : 0
       end
 
+      # How an object last existed on the battlefield if it left during the resolving spell or ability: by its
+      # old id (a destroyed target), or, for what an earlier effect moved (`moved`: a {"result": n} selector), as
+      # the new object it became (CR 400.7). A spell countered by the resolving one, as it last existed on the
+      # stack (Engine::TurnHistory#remember_spell!). Nil otherwise: a card in a graveyard looked at for itself is
+      # the card there.
+      def self.left_battlefield(engine, ref, moved: false)
+        return engine.departed_last_known(ref) if moved && engine.departed_last_known(ref)
+
+        engine.state.objects.key?(ref) ? nil : engine.resolving_last_known(ref)
+      end
+
       # How a source that has left the battlefield last existed: remembered by the resolving ability, or,
       # while its leaves-the-battlefield trigger is being checked (CR 603.4, 603.10a), the engine's.
       def self.source_lki(engine, ctx)
@@ -141,10 +153,42 @@ module Enjine
 
       private
 
+      DISTINCT = %w[card_types distinct_names distinct_types distinct_colors distinct_land_types
+                    distinct_planeswalker_types].freeze
+      private_constant :DISTINCT
+
+      # How many different card types, names, creature types, colors, basic land types or planeswalker types
+      # the objects with these characteristics have between them.
+      def distinct(chars)
+        case @kind
+        when "card_types" then chars.flat_map(&:types).uniq.size # CR 205.2a
+        when "distinct_names" then chars.map(&:name).uniq.size
+        when "distinct_types" then chars.flat_map { Amount.creature_types(it) }.uniq.size
+        when "distinct_colors" then chars.flat_map(&:colors).uniq.size # CR 105.2
+        when "distinct_land_types" then (chars.flat_map(&:subtypes) & BASIC_LAND_TYPES).size
+        else chars.flat_map { it.type?(:planeswalker) ? it.subtypes : [] }.uniq.size # CR 205.3j
+        end
+      end
+
       def live(engine, refs) = refs.select { engine.state.objects.key?(it) }
 
+      # Each one's mana value; one that has left as it last existed (CR 608.2h).
+      def mana_values(engine, refs)
+        refs.map do |ref|
+          lki = Amount.left_battlefield(engine, ref, moved: @selector.kind == :result)
+          lki ? lki["mana_value"].to_i : Amount.mana_value(engine, engine.state.objects[ref]) || 0
+        end
+      end
+
+      # Each one's power or toughness; one that left the battlefield during the resolving spell or ability as it
+      # last existed (CR 608.2h), one that's simply gone not at all.
       def stats(engine, refs)
-        live(engine, refs).map { engine.public_send(@kind.end_with?("toughness") ? :toughness : :power, engine.object(it)) }
+        key = @kind.end_with?("toughness") ? "toughness" : "power"
+        refs.filter_map do |ref|
+          if (lki = Amount.left_battlefield(engine, ref, moved: @selector.kind == :result)) then lki[key].to_i
+          elsif engine.state.objects.key?(ref) then engine.public_send(key, engine.object(ref))
+          end
+        end
       end
 
       def players(engine, refs) = refs.filter_map { Filters.player_index(engine, it) }
@@ -155,6 +199,7 @@ module Enjine
         when "life" then engine.player(index).life
         when "speed" then engine.speed(index) # CR 702.179f: 0 without speed
         when "graveyard_size" then engine.player(index).graveyard.size
+        when "library_size" then engine.player(index).library.size # CR 401.1
         when "spells_cast_this_game" then engine.game_log(index).fetch("spells", 0)
         when "turns_taken" then engine.game_log(index).fetch("turns", 0) # this turn included, if it's theirs
         when *LAST_TURN.keys then engine.last_turn_log(index).fetch(LAST_TURN.fetch(@kind), 0)
@@ -178,6 +223,29 @@ module Enjine
 
         def value(engine, ctx) = Selector.memory(engine, ctx).fetch("triggering", {})["amount"].to_i
         def to_s = "that many"
+      end
+
+      # {"sacrificed": "power" | "toughness" | "mana_value"}: "the sacrificed creature's power" — the total of the
+      # permanents sacrificed to pay the resolving spell's or ability's cost, as they last existed (CR 601.2h,
+      # 608.2h; recorded by Costs::SacrificePermanent). 0 when none was.
+      class Sacrificed
+        KEYS = %w[power toughness mana_value].freeze
+
+        def self.build(key, errors, path)
+          return new(key) if KEYS.include?(key)
+
+          errors << "#{path}: must be #{KEYS[0..-2].join(", ")} or #{KEYS.last}"
+          Fixed.new(0)
+        end
+
+        def initialize(key)
+          @key = key
+          freeze
+        end
+
+        def reads_power? = @key != "mana_value"
+        def value(engine, ctx) = (engine.state.objects[ctx.object]&.paid || []).sum { it[@key].to_i }
+        def to_s = "the sacrificed permanent's #{@key.tr("_", " ")}"
       end
 
       # A fixed number.
