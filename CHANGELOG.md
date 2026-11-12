@@ -8,6 +8,8 @@ change the public API; the stable surface is described in
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-11-12
+
 ### Added
 - Amounts `card_types` (how many card types among cards: delirium, "*" power),
   `greatest_mana_value` and `library_size` ("half their library, rounded up").
@@ -50,5 +52,6 @@ change the public API; the stable surface is described in
 - `enjine` CLI: hot-seat and random play, `--validate`, `--verify`,
   `--random-deck`, save and load.
 
-[Unreleased]: https://github.com/thisiscetin/enjine/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/thisiscetin/enjine/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/thisiscetin/enjine/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/thisiscetin/enjine/releases/tag/v0.1.0

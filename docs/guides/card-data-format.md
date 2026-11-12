@@ -1438,7 +1438,7 @@ bundle exec exe/enjine --validate cards.json
 `cards.json` is a JSON array of card blocks (or a single block). The report:
 
 ```json
-{ "rules_version": "2026-11-06", "engine_version": "0.1.0",
+{ "rules_version": "2026-11-06", "engine_version": "0.2.0",
   "valid":   [ { "index": 0, "id": "lightning_bolt", "name": "Lightning Bolt", "card": { ...canonical... } } ],
   "invalid": [ { "index": 1, "name": "Gale Drifter", "errors": ["keywords[0]: unknown keyword \"flyng\" ..."] } ] }
 ```
