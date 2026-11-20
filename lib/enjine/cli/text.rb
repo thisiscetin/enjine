@@ -79,6 +79,7 @@ module Enjine
         lines << "    Lands:     #{lands.empty? ? "-" : lands.map { permanent(it) }.join(", ")}"
         lines << "    Permanents: #{"-" if others.empty?}"
         others.each { lines << "      #{permanent(it)}" }
+        lines.concat(commander_lines(view, player)) if player["commander"]
         lines << "    Hand:      #{player["hand"].map { card(it) }.join(", ")}" if player["hand"]
         if player["library"]
           lines << "    Library (top first): #{player["library"].first(5).map do
@@ -87,6 +88,23 @@ module Enjine
         end
         lines << "    Graveyard: #{player["graveyard"].map { it["name"] }.join(", ")}" unless player["graveyard"].empty?
         lines
+      end
+
+      # A Commander game: the commander, where it waits, its tax and the damage it has taken from commanders.
+      def commander_lines(view, player)
+        waiting = view["command"].select { it["owner"] == player["name"] && it["kind"] != "emblem" }
+        damage = player["commander_damage"].map { |name, n| "#{n} from #{name}" }.join(", ")
+        ["    Commander: #{player["commander"]}#{" [#{waiting.first["id"]}] in the command zone" unless waiting.empty?}" \
+         "#{" · tax {#{player["commander_tax"]}}" if player["commander_tax"].positive?}" \
+         "#{" · commander damage taken: #{damage}" unless damage.empty?}"]
+      end
+
+      # " from the command zone (+{2})" on a cast option of a commander.
+      def commander_tax(opt)
+        return "" unless opt[:via] == "command"
+
+        tax = Engine::Commander::TAX * @game.state.players[@game.state.object(opt[:object]).owner].commander_casts.to_i
+        " from the command zone#{" (+{#{tax}})" if tax.positive?}"
       end
 
       def permanent(obj)
@@ -120,6 +138,7 @@ module Enjine
                 when "bottom" then " — put #{decision.details["count"]} more on the bottom"
                 when "assign_damage" then " — #{name_of(decision.details["attacker"])}: #{decision.details["remaining"]} damage left"
                 when "choose_target" then " — target ##{decision.details["index"] + 1}"
+                when "commander_zone" then " — #{name_of(decision.details["object"])} (your commander)"
                 when "choose_target_count" then " — how many for target ##{decision.details["index"] + 1}"
                 else ""
                 end
@@ -132,7 +151,9 @@ module Enjine
         case opt[:type]
         when "pass" then "Pass priority"
         when "play_land" then "Play land #{name_of(opt[:object])}"
-        when "cast" then "Cast #{name_of(opt[:object])} #{cost_of(opt[:object])}".rstrip
+        when "cast" then "Cast #{name_of(opt[:object])} #{cost_of(opt[:object])}#{commander_tax(opt)}".rstrip
+        when "command" then "Put #{name_of(opt[:object])} into the command zone"
+        when "stay" then "Leave #{name_of(opt[:object])} where it is"
         when "activate" then "Activate #{name_of(opt[:object])}: #{ability_text(opt[:object], opt[:ability])}"
         when "special_action" then "#{ability_text(opt[:object], opt[:ability])}: #{name_of(opt[:object])} (special action)"
         when "activate_mana"
@@ -260,6 +281,7 @@ module Enjine
         when "sba_toughness" then "#{what} dies (0 toughness)"
         when "sba_loyalty" then "#{what} is put into the graveyard (0 loyalty)"
         when "countered" then "#{what} is countered"
+        when "commander" then "#{ev["owner"]} puts #{what} into the command zone"
         when "mulligan_bottom" then "#{ev["owner"]} puts #{what} on the bottom of their library (mulligan)"
         else "#{ev["owner"]}'s #{what}: #{ev["from"]} → #{ev["to"]} (#{ev["reason"]})"
         end

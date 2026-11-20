@@ -41,7 +41,7 @@ module Enjine
       # distinct card) while something lets them play those.
       def permission_candidates(index, sources = permission_sources(index))
         pl = player(index)
-        ids = alt_cost_hand(pl) + pl.graveyard + state.exile
+        ids = alt_cost_hand(pl) + pl.graveyard + state.exile + commander_candidates(index)
         ids += [pl.library.first] unless pl.library.empty?
         return ids unless sources.any? { |_, inst| inst.ability.kind == :play_from && inst.ability.outside? }
 
@@ -143,7 +143,7 @@ module Enjine
       def play_methods(index, id, sources = permission_sources(index))
         obj = id.is_a?(GameObject) ? id : candidate_object(index, id)
         granted_methods(index, obj) + own_methods(index, obj) + static_methods(index, obj, sources) +
-          beam_methods(index, obj, sources) + alt_methods(index, obj)
+          beam_methods(index, obj, sources) + alt_methods(index, obj) + command_methods(index, obj)
       end
 
       # The method named `via`, or an error (the option was offered from this list).

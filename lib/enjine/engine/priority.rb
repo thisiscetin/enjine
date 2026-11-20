@@ -9,6 +9,7 @@ module Enjine
         check_state_based_actions!
         return if state.over?
         return if legend_rule_first!(index)
+        return if commander_choice_first!(index) # CR 903.9
         return if put_triggers_first!(index)
 
         state.priority = index

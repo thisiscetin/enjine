@@ -21,23 +21,25 @@ task :cr_citations, %i[cr] do |_, args|
   abort "cited CR rule numbers are missing from the CR" unless status.zero?
 end
 
-desc "Play random games checking invariants: rake fuzz[games,seed]"
-task :fuzz, %i[games seed] do |_, args|
+desc "Play random games checking invariants: rake fuzz[games,seed,format] (format: constructed or duel_commander)"
+task :fuzz, %i[games seed format] do |_, args|
   require_relative "lib/enjine"
   require_relative "spec/support/card_fixtures"
   games = Integer(args[:games] || 50)
   seed = Integer(args[:seed] || 0)
   rng = Enjine::Rng.from_seed(seed)
   decks = CardFixtures.deck_names
+  format = Enjine::Format.fetch(args[:format] || "constructed")
   # Even seeds pit two example decks against each other; odd seeds use random decks of the fixture cards.
   players = %w[p1 p2].map do |name|
     # Random decks own 7 cards outside the game (CR 400.11a), so play_from "outside" gets exercised.
-    deck = if seed.even? then CardFixtures.deck(decks[rng.rand(decks.size)])
+    deck = if format.commander? then Enjine::Fuzz.random_commander_deck(CardFixtures.cards, rng: rng)
+           elsif seed.even? then CardFixtures.deck(decks[rng.rand(decks.size)])
            else Enjine::Fuzz.random_deck(CardFixtures.cards, rng: rng, outside: 7)
            end
     Enjine::Player.new(name: name, deck: deck)
   end
-  result = Enjine::Fuzz.run(Enjine::Setup.new(*players), games: games, seed: seed, roundtrip_every: 251)
+  result = Enjine::Fuzz.run(Enjine::Setup.new(*players, format: format), games: games, seed: seed, roundtrip_every: 251)
   puts format("%<g>d games, %<d>d decisions, %<s>.2fs (%<r>.0f decisions/s) outcomes=%<o>s",
               g: result.games, d: result.decisions, s: result.seconds, r: result.decisions / result.seconds,
               o: result.outcomes)

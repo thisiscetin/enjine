@@ -12,7 +12,8 @@ simulations, bots and reinforcement learning, or for a game client.
 current Standard-legal sets. Mechanics found only outside Standard (morph,
 madness, infect, ...) are out of scope until a Standard card needs them. The
 [mechanics coverage](docs/MECHANICS_COVERAGE.md) page has the details and the
-numbers.
+numbers. Games are constructed by default; two-player **Duel Commander** (CR 903)
+is a `format:` away (`--format duel_commander` in the CLI).
 
 - **Strict rules.** Turn structure, priority, the stack, layers, replacement
   effects, combat, state-based actions, London mulligan. Code and tests cite rule

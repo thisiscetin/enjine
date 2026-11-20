@@ -126,6 +126,7 @@ module Enjine
         list = state.zone_list(to, old.owner)
         data["position"] == :bottom ? list.push(fresh.id) : list.unshift(fresh.id)
         record_result!(fresh.id)
+        note_commander_move!(fresh) # CR 903.9
         event = Events::ZoneChanged.new(card: old.card, old_id: id, new_id: fresh.id, owner: name(old.owner),
                                         from: old.zone.to_s, to: to.to_s, reason: data["reason"],
                                         lookers: face_down&.map { name(it) })

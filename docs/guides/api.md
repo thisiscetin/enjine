@@ -138,6 +138,9 @@ A **deck document** carries the cards it uses, so it is self-contained:
 - `outside` (optional): cards the player owns outside the game — the sideboard
   that "from outside the game" effects use (CR 400.11). At most 15 (CR 100.4a);
   the copy limit counts both lists.
+- `commander` (optional): the name of the card that leads a Commander deck
+  (CR 903.3). It is one of `cards` but not part of `main`, which then holds the
+  other 99. See "Commander" below.
 
 ```ruby
 player = Enjine::Player.new(name: "alice", deck: doc)   # doc: Hash or Enjine::Deck
@@ -155,6 +158,20 @@ reference) raises `Enjine::InvalidDeck`.
 While a player is seated in an unfinished game, editing their deck raises
 `Enjine::DeckLocked`.
 
+**Commander.** Whether a deck is legal depends on the format the game uses
+(`Enjine::Format`). `deck.errors(format)` and `player.ready?(format)` take it;
+both default to constructed. A Duel Commander deck (`Enjine::Format::DUEL_COMMANDER`)
+has exactly 100 cards with its commander, one copy of each card but basic lands
+(CR 903.5b: "any number" cards are limited to one too), and only cards whose color
+identity is inside the commander's (CR 903.5c). `CardDefinition#color_identity` is
+derived from the card's data, never its text (see the card data format). The engine
+knows no banlist: that is the caller's business.
+
+```ruby
+doc = { "cards" => [...], "main" => [{ "card" => "Forest", "count" => 40 }, ...], "commander" => "Wort, the Raidmother" }
+Enjine::Player.new(name: "alice", deck: doc).ready?(:duel_commander)   # => true
+```
+
 ## 4. Setups and games
 
 ```ruby
@@ -168,6 +185,17 @@ games from it is cheap, so keep one `Setup` per matchup and create games from it
 ```ruby
 game = setup.new_game(seed: 42)   # Integer seed; drives every random event of the game
 ```
+
+`format:` picks the rules: `Enjine::Setup.new(alice, bob, format: :duel_commander)`
+plays Duel Commander (CR 903). Each commander starts in the command zone and both
+players start at 40 life. Leaving `format:` out plays constructed, exactly as before.
+In a Commander game:
+
+- A commander in the command zone is cast with `{type: "cast", object: id, via: "command"}`.
+  Its cost includes the commander tax, {2} for each earlier cast from the command zone (CR 903.8).
+- When a commander goes to a graveyard, exile, hand or library, its owner gets a
+  `commander_zone` decision before anyone gets priority: put it into the command zone or leave it (CR 903.9).
+- 21 combat damage from one commander loses the game, with the result reason `"commander_damage"` (CR 903.10a).
 
 The game starts at its very first decision: the die-roll winner chooses to play
 or draw (CR 103.1), then each player decides on a mulligan.
@@ -291,6 +319,7 @@ then `{type: "done"}`. `done` is only offered when the declaration is legal
 | `enter_choice` | as a permanent enters ("choose a color", "pay 2 life or enters tapped", "behold or enters tapped") | `color`, `creature_type`, `number`, `name`, `option`, `pay_life`, `behold`, `enter_tapped`, ... |
 | `untap_choice` | "you may choose not to untap" | `untap`, `keep_tapped` |
 | `legend_rule` | two legends with one name | `{type: "keep", object:}` |
+| `commander_zone` | Commander: your commander went to a graveyard, exile, hand or library (CR 903.9) | `{type: "command", object:}`, `{type: "stay", object:}` |
 | `declare_attackers` | your combat | `attack`, `withdraw`, `done` |
 | `declare_blockers` | opponent's combat | `block`, `unblock`, `done` |
 | `assign_damage` | splitting combat damage | `{type: "assign", object:}` |
@@ -344,6 +373,11 @@ A player entry:
  "mulligans":0,"hand_count":6,"library_count":43,"outside_count":0,"graveyard":[ ... ],
  "hand":[ ... ], "outside":[ ... ]}
 ```
+
+In a Commander game, a player entry also has `"commander"` (the card's name),
+`"commander_tax"` (the extra generic mana their next cast from the command zone
+costs) and `"commander_damage"` (`{commander name => combat damage it dealt them}`).
+The view's `"command"` list holds emblems and the commanders waiting there.
 
 `hand` and `outside` appear only for their owner (and the observer); `library`
 (in order, top first) only for the observer; `speed` once the player has one.

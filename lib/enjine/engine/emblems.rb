@@ -29,7 +29,7 @@ module Enjine
       end
 
       # The emblems in the command zone, as objects.
-      def emblems = (state.command || []).map { object(it) }
+      def emblems = state.emblem_ids.map { object(it) }
     end
 
     include Emblems

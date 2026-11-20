@@ -36,6 +36,10 @@ class Scenario
   end
 
   def seed(value) = @seed = value
+
+  # Plays Duel Commander (CR 903): each player then names a `commander` (it is put into the command zone).
+  def duel_commander = @format = "duel_commander"
+
   def priority(name) = @priority = name
   def pending(kind, player:, **details) = @pending = { "kind" => kind.to_s, "player" => player, **details.transform_keys(&:to_s) }
 
@@ -46,10 +50,17 @@ class Scenario
     @players << spec
   end
 
-  %i[hand library graveyard exile].each do |zone|
+  %i[hand library graveyard exile command].each do |zone|
     define_method(zone) do |*cards, count: 1|
       cards.each { |c| count.times { @current.zones[zone] << { card: c } } }
     end
+  end
+
+  # The player's commander, waiting in the command zone (CR 903.6). Use `battlefield`, `graveyard`, ... to place it
+  # elsewhere instead: pass `zone:`.
+  def commander(card, zone: :command)
+    @current.attrs[:commander] = Enjine::CardDefinition.slug(card)
+    @current.zones[zone] << { card: card }
   end
 
   # Cards the player owns outside the game (CR 400.11a): definition ids, not objects.
@@ -73,12 +84,10 @@ class Scenario
     active = index.call(@active || names.first)
     @next_id = 1
     @objects = []
-    battlefield = []
-    exile = []
+    shared = %i[battlefield exile command].to_h { [it, []] } # shared zones: each owned by the player listing it
     players = @players.each_with_index.map do |spec, owner|
       zones = %i[library hand graveyard].to_h { |zone| [zone.to_s, spec.zones[zone].map { new_object(it, owner, zone) }] }
-      battlefield.concat(spec.zones[:battlefield].map { new_object(it, owner, :battlefield) }) # shared zones: owned by this player
-      exile.concat(spec.zones[:exile].map { new_object(it, owner, :exile) })
+      shared.each { |zone, ids| ids.concat(spec.zones[zone].map { new_object(it, owner, zone) }) }
       player_h(spec, zones)
     end
     priority = @priority ? index.call(@priority) : active
@@ -91,8 +100,14 @@ class Scenario
       "priority" => pending["kind"] == "priority" ? pending["player"] : nil, "passes" => 0,
       "next_id" => @next_id, "starting_player" => 0, "pending" => pending, "result" => nil,
       "outside_lists" => @players.map { it.zones[:outside].dup },
-      "players" => players, "objects" => @objects, "battlefield" => battlefield, "stack" => [], "exile" => exile
-    }
+      "players" => players, "objects" => @objects, "stack" => [], **shared.transform_keys(&:to_s)
+    }.merge(format_h)
+  end
+
+  def format_h
+    return {} unless @format
+
+    { "format" => @format, "commanders" => @players.map { it.attrs[:commander] } }
   end
 
   def game = Enjine::Game.import({ "state" => to_h }, catalog: @catalog)
@@ -127,7 +142,7 @@ class Scenario
       **zones, "mana_pool" => Enjine::Mana::TYPES.to_h { |t| [t.to_s, attrs.fetch(:mana_pool, {}).fetch(t, 0)] },
       "lands_played" => attrs.fetch(:lands_played, 0), "drew_from_empty" => attrs.fetch(:drew_from_empty, false),
       "lost" => nil, "mulligans" => 0, "kept" => true, "mulligan_choice" => nil, "outside" => spec.zones[:outside].dup,
-      **attrs.slice(:speed).transform_keys(&:to_s) }
+      **attrs.slice(:speed, :commander_casts, :commander_damage).transform_keys(&:to_s) }
   end
 end
 

@@ -12,6 +12,8 @@ require_relative "enjine/mechanics"
 end
 Dir[File.join(__dir__, "enjine/mechanics/**/*.rb")].each { |f| require f }
 require_relative "enjine/characteristics"
+require_relative "enjine/format"
+require_relative "enjine/color_identity"
 require "json"
 require "digest"
 require_relative "enjine/tokens"

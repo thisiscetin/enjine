@@ -57,7 +57,7 @@ module Enjine
           @board_abilities_state = state
           @board_abilities = {}
         end
-        @board_abilities[kind] ||= (state.battlefield + (state.command || [])).flat_map do |id|
+        @board_abilities[kind] ||= (state.battlefield + state.emblem_ids).flat_map do |id|
           source = object(id)
           chars(source).abilities.filter_map { [source, it.ability] if it.ability.kind == kind }
         end

@@ -18,6 +18,7 @@ module Enjine
           reason = if loses_for_life?(i) then "life" # CR 704.5a (unless an effect says otherwise)
                    elsif pl.drew_from_empty then "empty_library" # CR 704.5b
                    elsif pl.poison >= 10 then "poison" # CR 704.5c
+                   elsif loses_to_commander_damage?(i) then "commander_damage" # CR 903.10a
                    end
           pl.drew_from_empty = false
           lose!(i, reason) if reason

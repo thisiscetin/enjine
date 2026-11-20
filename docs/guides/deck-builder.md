@@ -36,6 +36,24 @@ The same pool, arguments and seed always give the same deck, whatever the order
 of the pool. The `description` records the colors (including ones picked at
 random) and the seed, so you can rebuild any deck.
 
+## Commander decks
+
+`commander:` builds a Duel Commander deck (CR 903) around a pool card that may lead
+one: 99 distinct cards whose color identity fits the commander's, plus basic lands
+of its colors. The colors and the size come from the commander, so don't pass
+`colors:` or `size:`. Play it with `format: :duel_commander`.
+
+```ruby
+doc = builder.build(commander: "Wort, the Raidmother", seed: 3)
+doc["commander"]   # => "Wort, the Raidmother"
+Enjine::Setup.new(Enjine::Player.new(name: "a", deck: doc), Enjine::Player.new(name: "b", deck: other),
+                  format: :duel_commander)
+```
+
+The proportions are the same ranges as for 60 cards, scaled to 99 (about 40 lands).
+A colorless commander isn't supported: it would need Wastes, which the builder
+doesn't add.
+
 ## The pool
 
 Each entry is a card data block (the [card DSL](card-data-format.md), optionally

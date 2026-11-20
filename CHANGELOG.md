@@ -8,6 +8,28 @@ change the public API; the stable surface is described in
 
 ## [Unreleased]
 
+### Added
+- Duel Commander (CR 903): `Enjine::Setup.new(alice, bob, format: :duel_commander)`
+  (`Enjine::Format`). Commanders start in the command zone, players start at 40 life,
+  a commander is cast from the command zone with `via: "command"` and pays the commander
+  tax, a new `commander_zone` decision lets its owner return it to the command zone
+  (903.9a–b), and 21 combat damage from one commander loses the game (reason
+  `"commander_damage"`).
+- Deck documents take `"commander"`. `Deck#errors(format)`, `Deck#valid?(format)` and
+  `Player#ready?(format)` check a deck against a format. Commander decks need exactly
+  100 cards, singleton, and color identity.
+- `CardDefinition#color_identity`, derived from the card's data across all faces;
+  the card field `color_identity` overrides it.
+- `DeckBuilder#build(commander:)` builds Duel Commander decks; `Fuzz.random_commander_deck`;
+  `rake fuzz[games,seed,duel_commander]`; the CLI's `--format`.
+- Views show the command zone's commanders and, per player, `commander`,
+  `commander_tax` and `commander_damage`.
+
+### Changed
+- Only emblems' abilities function from the command zone (CR 113.6, 114.4); the
+  command zone may now also hold commanders.
+- `State::STARTING_LIFE` is gone: starting life comes from the format.
+
 ## [0.2.0] - 2026-11-12
 
 ### Added

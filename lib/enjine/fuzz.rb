@@ -39,6 +39,23 @@ module Enjine
       doc
     end
 
+    # A random legal Duel Commander deck (CR 903.5) from `cards`: a random legendary commander, then random
+    # distinct cards inside its color identity, filled up with basic lands of its colors. The cards need a
+    # legendary creature of at least one color and a basic land of each color.
+    def random_commander_deck(cards, rng:)
+      definitions = cards.map { CardDefinition.from_h(it) }.reject(&:token?)
+      leaders = definitions.select { Format.commander_card?(it) && !it.color_identity.empty? }
+      commander = leaders[rng.rand(leaders.size)]
+      identity = commander.color_identity
+      fitting = definitions.reject { it.supertype?(:basic) || it.id == commander.id || !(it.color_identity - identity).empty? }
+      chosen = rng.shuffle!(fitting).first(Format::DUEL_COMMANDER.deck_size.min / 2)
+      basics = identity.map { |color| definitions.find { it.supertype?(:basic) && ColorIdentity.land_colors(it) == [color] } }
+      counts = (Format::DUEL_COMMANDER.deck_size.min - 1 - chosen.size).times.map { basics[rng.rand(basics.size)] }.tally
+      { "cards" => (chosen + [commander] + counts.keys).map(&:to_h),
+        "main" => chosen.map { { "card" => it.id, "count" => 1 } } + counts.map { |card, n| { "card" => card.id, "count" => n } },
+        "commander" => commander.id }
+    end
+
     # Picks `number` random cards that still fit the four-copy rule, yielding each one's id.
     def draw(definitions, counts, rng, number)
       number.times do

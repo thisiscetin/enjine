@@ -9,11 +9,18 @@ agents in a separate project later) drive it through an atomic decision API.
 
 - **Standard.** The target is every mechanic on the cards of the current
   Standard-legal sets, plus the core rules (CR 1–6) every game needs. Mechanics
-  found only on cards outside Standard, multiplayer and casual variants are out of
-  scope until a Standard card needs them. New Standard sets add mechanics; rotated
-  sets keep theirs.
-- Two-player constructed: 20 life, deck ≥ 60 cards, max 4 copies of a card
-  (basic lands and "any number" cards exempt). No sideboard tracking.
+  found only on cards outside Standard and multiplayer variants are out of scope
+  until a Standard card needs them. New Standard sets add mechanics; rotated sets
+  keep theirs.
+- Two-player constructed by default: 20 life, deck ≥ 60 cards, max 4 copies of a
+  card (basic lands and "any number" cards exempt). No sideboard tracking.
+- **Duel Commander** (CR 903, two players) is in scope as a game-setup variant,
+  chosen with `Setup.new(..., format: :duel_commander)` (`Enjine::Format`): 40
+  life, 100-card singleton decks led by a commander, the command zone, commander
+  tax, returning to the command zone and 21 commander damage. Which *card*
+  mechanics exist is still decided by Standard; partner, companion and cards that
+  refer to "your commander" wait for a card that needs them. See
+  [plans/commander.md](plans/commander.md).
 - Single games, start to finish. No best-of-3 / match object.
 - The engine knows **no cards**: every card arrives as data, in a deck document or a
   `DeckBuilder` pool. The test and fuzz cards live in `spec/fixtures/cards/`.

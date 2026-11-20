@@ -143,6 +143,7 @@ module Enjine
       # trigger (CR 702.185a); the creatures that convoked it (CR 702.51c).
       def record_cast_how!(obj, ctx)
         obj.memory["cast_from"] = ctx.dig("origin", "zone") || "hand"
+        record_commander_cast!(ctx["player"], ctx["method"]) # CR 903.8 (Engine::Commander)
         obj.memory["convoked"] = ctx["convoked"].dup if ctx["convoked"]
         return unless ctx.dig("method", "alt") # mayhem without a cost: no keyword cost was paid
 

@@ -18,6 +18,11 @@ module Enjine
   # never holds more than n copies (and never more than CR 100.2a allows). Basic lands are always
   # available: the pool's own, else built-in ones.
   #
+  # With `commander:` it builds a Duel Commander deck (CR 903) instead: 99 distinct cards inside that
+  # commander's color identity, plus basic lands of its colors:
+  #
+  #   builder.build(commander: "Wort, the Raidmother", seed: 3)
+  #
   # #build returns a deck document ({"name", "description", "cards", "main"}) that
   # Enjine::Player.new(name:, deck:) accepts. Same pool, arguments and seed, same deck: randomness
   # comes only from Enjine::Rng, and the pool is sorted by card id, so its order doesn't matter.
@@ -136,8 +141,11 @@ module Enjine
     # including: pool cards (names or ids) the deck must hold, as many copies as allowed up to 4; they must fit
     #            the colors (a land: produce only deck colors). They define the deck, so a chosen color then
     #            needs no card of its own: it may only bring basics.
-    def build(seed:, colors: :any, size: BASE_SIZE, profile: {}, including: [])
-      Draft.new(self, seed: seed, colors: colors, size: size, profile: profile, including: including).deck
+    # commander: a pool card (name or id) that may lead a deck (CR 903.3): the deck is a legal Duel Commander
+    #            deck inside its color identity (CR 903.5), and `colors` and `size` come from it.
+    def build(seed:, colors: :any, size: BASE_SIZE, profile: {}, including: [], commander: nil)
+      Draft.new(self, seed: seed, colors: colors, size: size, profile: profile, including: including,
+                      commander: commander).deck
     end
 
     # Copies of a card the pool holds: nil when uncapped, 0 when it isn't in the pool.
@@ -165,21 +173,23 @@ module Enjine
 
     # One #build call: the seed-dependent choices for one deck.
     class Draft
-      def initialize(builder, seed:, colors:, size:, profile:, including:)
-        raise ArgumentError, "size must be an Integer of at least #{Deck::MIN_SIZE}" unless size.is_a?(Integer) && size >= Deck::MIN_SIZE
-
+      def initialize(builder, seed:, colors:, size:, profile:, including:, commander: nil)
         @builder = builder
         @pool = builder.cards
         @rng = Rng.from_seed(seed)
         @seed = seed
-        @size = size
-        @profile = merge_profile(profile)
-        @colors = resolve_colors(colors)
+        @commander = commander && lead_with(commander, colors, size)
+        @size = @commander ? Format::DUEL_COMMANDER.deck_size.min - 1 : check_size(size) # the commander is the 100th card
+        @profile = merge_profile(@commander ? profile.merge(copies: SINGLETON_COPIES) : profile)
+        @colors = @commander ? @commander.color_identity : resolve_colors(colors)
         @creatures = {}
         @others = {}
         @lands = {}
         include_cards(including)
       end
+
+      # CR 903.5b: one copy of each card.
+      SINGLETON_COPIES = { 4 => 0, 3 => 0, 2 => 0, 1 => 1 }.freeze
 
       def deck
         check_colors! if @creatures.empty? && @others.empty? && @lands.empty?
@@ -192,6 +202,34 @@ module Enjine
       private
 
       # --- inputs -------------------------------------------------------------------------------------
+
+      def check_size(size)
+        raise ArgumentError, "size must be an Integer of at least #{Deck::MIN_SIZE}" unless size.is_a?(Integer) && size >= Deck::MIN_SIZE
+
+        size
+      end
+
+      # The pool card that leads the deck (CR 903.3). Its colors and the deck's size come from the format.
+      def lead_with(card, colors, size)
+        raise ArgumentError, "a Commander deck's colors and size come from its commander" unless colors == :any && size == BASE_SIZE
+
+        id = CardDefinition.slug(card)
+        raise ArgumentError, "#{card.inspect} is not in the pool" if @builder.count(id)&.zero?
+
+        @builder.definition(id).tap do |defn|
+          raise ArgumentError, "#{defn.name} can't be a commander (CR 903.3)" unless Format.commander_card?(defn)
+          if defn.color_identity.empty?
+            raise ArgumentError,
+                  "#{defn.name} is colorless: a colorless commander needs Wastes, which the builder doesn't add"
+          end
+        end
+      end
+
+      # Whether a card may go in a deck of these colors; a Commander deck needs its color identity inside the
+      # commander's (CR 903.5c-d) too.
+      def fits?(definition, colors = @colors)
+        DeckBuilder.fits?(definition, colors) && (@commander.nil? || (definition.color_identity - @colors).empty?)
+      end
 
       def merge_profile(overrides)
         unknown = overrides.keys.map(&:to_sym) - DEFAULT_PROFILE.keys
@@ -229,12 +267,12 @@ module Enjine
           capacity(spells) >= @size - scaled(@profile[:lands][:outliers].max)
       end
 
-      def spells_for(colors) = @pool.select { it.castable? && DeckBuilder.fits?(it, colors) }
+      def spells_for(colors) = @pool.select { it.castable? && fits?(it, colors) && it != @commander }
       def capacity(definitions) = definitions.sum { limit(it) }
 
       # Most copies of a card the deck may hold: 4 (CR 100.2a) or any number if exempt, and never
       # more than the pool holds.
-      def limit(definition) = [definition.deck_limit || @size, @builder.count(definition.id) || @size].min
+      def limit(definition) = [@commander ? 1 : definition.deck_limit || @size, @builder.count(definition.id) || @size].min
 
       # Puts each required card in the deck with as many copies as it may hold, up to 4 (basics come anyway).
       def include_cards(cards)
@@ -243,7 +281,7 @@ module Enjine
           raise ArgumentError, "#{card.inspect} is not in the pool" if @builder.count(id)&.zero?
 
           defn = @builder.definition(id)
-          fits = defn.land? ? DeckBuilder.produced_colors(defn).all? { @colors.include?(it) } : DeckBuilder.fits?(defn, @colors)
+          fits = defn.land? ? lands_fit?(defn) : fits?(defn)
           raise ArgumentError, "#{defn.name} does not fit a #{@colors.join} deck" unless fits
           next if DeckBuilder.basic?(defn) # every deck has its basics
 
@@ -376,8 +414,11 @@ module Enjine
       end
 
       def nonbasic_land?(definition)
-        definition.land? && !definition.supertype?(:basic) && !definition.mana_abilities.empty? &&
-          DeckBuilder.produced_colors(definition).all? { @colors.include?(it) }
+        definition.land? && !definition.supertype?(:basic) && !definition.mana_abilities.empty? && lands_fit?(definition)
+      end
+
+      def lands_fit?(definition)
+        DeckBuilder.produced_colors(definition).all? { @colors.include?(it) } && fits?(definition)
       end
 
       # Weight 4 for lands that produce two or more deck colors (duals), 2 for one color, 1 for colorless-only.
@@ -408,11 +449,14 @@ module Enjine
         nonbasic = pick_nonbasic_lands(lands)
         basics = split_basics(lands - nonbasic.values.sum)
         main = basics.map { |color, n| [basic_land(color), n] } + sorted(nonbasic) + spell_entries
-        { "name" => "Random #{@colors.join} deck",
-          "description" => "random deck: colors=#{@colors.join} seed=#{@seed} — #{lands} lands, " \
-                           "#{@creatures.values.sum} creatures, #{@others.values.sum} other spells, #{main.size} distinct cards",
-          "cards" => main.map { it[0].to_h },
-          "main" => main.map { |defn, n| { "card" => defn.name, "count" => n } } }
+        doc = { "name" => "Random #{@colors.join} deck",
+                "description" => "random deck: colors=#{@colors.join} seed=#{@seed} — #{lands} lands, " \
+                                 "#{@creatures.values.sum} creatures, #{@others.values.sum} other spells, #{main.size} distinct cards",
+                "cards" => main.map { it[0].to_h },
+                "main" => main.map { |defn, n| { "card" => defn.name, "count" => n } } }
+        return doc unless @commander
+
+        doc.merge("cards" => doc["cards"] + [@commander.to_h], "commander" => @commander.name)
       end
 
       def sorted(chosen)

@@ -9,6 +9,7 @@ module Enjine
         state.decklists.each_with_index do |list, owner|
           list.each { |card| state.players[owner].library << create_object(card, owner, :library).id }
         end
+        place_commanders! # CR 903.6
         emit Events::GameStarted.new(players: names, seed: state.seed)
         winner = state.rng.rand(state.players.size)
         emit Events::DieRolled.new(winner: name(winner))

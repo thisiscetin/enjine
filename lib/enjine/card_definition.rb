@@ -11,7 +11,8 @@ module Enjine
   # Enjine.registry. Anything unknown is reported (with its path) in a single
   # InvalidCardDefinition error.
   class CardDefinition
-    KEYS = %w[name mana_cost colors types supertypes subtypes keywords power toughness loyalty abilities rules_text deck_limit].freeze
+    KEYS = %w[name mana_cost colors types supertypes subtypes keywords power toughness loyalty abilities rules_text deck_limit
+              color_identity].freeze
     # Optional catalogue data beside the rules data, never read by the rules: rarity, and the set code and
     # collector number printed on the card ({"set" => "trk", "number" => "12"}).
     PRINT_KEYS = %w[rarity printing].freeze
@@ -63,6 +64,7 @@ module Enjine
       @rules_data = @source
       @source = deep_freeze(@source.merge("rarity" => @rarity, "printing" => @printing).compact) if @rarity || @printing
       @printed_characteristics = Characteristics.printed(self) if errors.empty?
+      @color_identity = ColorIdentity.of(self) if face.nil? && errors.empty? # a face has its card's (see #color_identity)
       freeze
     end
 
@@ -79,6 +81,7 @@ module Enjine
       @keywords, keyword_modules = read_names(card, "keywords", :keyword, errors)
       @colors = read_colors(card, errors)
       @deck_limit = read_deck_limit(card, errors)
+      @declared_color_identity = read_color_identity(card, errors)
       @power, @power_amount = read_pt(card, "power", errors)
       @toughness, @toughness_amount = read_pt(card, "toughness", errors)
       @loyalty = read_stat(card, "loyalty", errors)
@@ -166,6 +169,12 @@ module Enjine
     def creature? = @creature
     def planeswalker? = @planeswalker
     def deck_limit_exempt? = @deck_limit_exempt
+
+    # The colors a Commander deck must hold to include this card (CR 903.4), WUBRG-ordered, over every face.
+    def color_identity = @front ? @front.color_identity : @color_identity
+
+    # The identity this face states by hand ("color_identity": ["R"]), nil when derived from its data.
+    attr_reader :declared_color_identity
 
     # Most copies a constructed deck may hold (CR 100.2a): nil for any number (basic lands, or a card that
     # says "a deck can have any number of cards named ~").
@@ -319,6 +328,16 @@ module Enjine
       ok ? Mana::COLORS.select { |c| list.map { it.to_s.upcase }.include?(c.to_s) }.freeze : [].freeze
     end
 
+    # "color_identity": colors W U B R G; states a face's color identity instead of deriving it (CR 903.4).
+    def read_color_identity(card, errors)
+      return nil unless card.key?("color_identity")
+
+      list = card["color_identity"]
+      ok = list.is_a?(Array) && list.all? { Mana::COLORS.include?(it.to_s.upcase.to_sym) }
+      errors << "color_identity: must be a list of W, U, B, R, G" unless ok
+      ok ? Mana::COLORS.select { |c| list.map { it.to_s.upcase }.include?(c.to_s) }.freeze : nil
+    end
+
     # CR 100.2a: "a deck can have any number of cards named ~" is `"deck_limit": "any"`; "up to seven" is 7.
     # Reads the PRINT_KEYS of a whole card; returns the card without them.
     def read_print(card, errors)
@@ -415,9 +434,11 @@ module Enjine
       out["loyalty"] = @loyalty unless @loyalty.nil?
       out["abilities"] = Snapshot.deep_stringify(card["abilities"]) if card["abilities"].is_a?(Array) && !card["abilities"].empty?
       out["rules_text"] = @rules_text if @rules_text
-      out["deck_limit"] = @deck_limit if @deck_limit
-      deep_freeze(out)
+      deep_freeze(out.merge!(deck_building_h))
     end
+
+    # What deck construction reads beyond the card's characteristics (CR 100.2a, 903.4).
+    def deck_building_h = { "deck_limit" => @deck_limit, "color_identity" => @declared_color_identity&.map(&:to_s) }.compact
 
     # An integer, or the amount of a characteristic-defining ability as given.
     def normalized_stat(card, key) = card[key].is_a?(Hash) ? Snapshot.deep_stringify(card[key]) : instance_variable_get("@#{key}")

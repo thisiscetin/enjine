@@ -29,6 +29,7 @@ module Enjine
       validate_extra_turns(data, errors)
       validate_extra_phases(data, errors)
       validate_outside(data, catalog, errors)
+      validate_commanders(data, catalog, errors)
       errors
     end
 
@@ -59,6 +60,7 @@ module Enjine
       state.extra_turns = deep_copy(data.fetch("extra_turns", { "queue" => [], "begun" => [] }))
       state.extra_phases = deep_copy(data.fetch("extra_phases", State.no_extra_phases))
       state.outside_lists = data.fetch("outside_lists", [[], []]).map { |l| l.dup.freeze }.freeze
+      build_commanders(state, data)
       state.repeat_cleanup = data.fetch("repeat_cleanup", false)
       state.combat_damage_pass = data["combat_damage_pass"]
       state.attacks_declared = data.fetch("attacks_declared", 0)
@@ -100,6 +102,8 @@ module Enjine
         pl.designations = hash.fetch("designations", []).dup # CR 702.195b (Engine::Designations)
         pl.counters = hash.fetch("counters", {}).dup # CR 122.1: counters other than poison
         pl.pool_sources = deep_copy(hash.fetch("pool_sources", [])) # Engine::ManaSources#add_mana!
+        pl.commander_casts = hash["commander_casts"] # CR 903.8; absent: never cast from the command zone
+        pl.commander_damage = hash["commander_damage"]&.dup # CR 903.10a; absent: none dealt
       end
     end
 
@@ -192,7 +196,6 @@ module Enjine
         errors << "#{path}: #{kind}s can only exist in the #{home} zone" unless zone == home
         errors << "#{path}.ability: must be an ability reference" unless obj["ability"].is_a?(String)
       end
-      errors << "#{path}: only emblems are in the command zone (CR 114.1)" if zone == "command" && kind != "emblem"
       counters = obj.fetch("counters", {})
       unless counters.is_a?(Hash) && counters.all? { |k, v| Mechanics::Counters.valid?(k) && non_negative?(v) }
         errors << "#{path}.counters: must map counter kinds to non-negative integers"

@@ -38,6 +38,53 @@ module Enjine
       end
     end
 
+    # The format and the commanders (CR 903.3): constructed has none; a Commander game has one per player, and
+    # only a player's own commander card (besides emblems, CR 114.1) is ever in the command zone. Absent in
+    # snapshots of constructed games.
+    def build_commanders(state, data)
+      state.format = Format.fetch(data.fetch("format", Format::CONSTRUCTED.name))
+      state.commanders = data.fetch("commanders", [nil, nil]).dup.freeze
+      state.commander_returns = data.fetch("commander_returns", []).dup
+    end
+
+    def validate_commanders(data, catalog, errors)
+      format = Format::ALL.find { it.name == data.fetch("format", Format::CONSTRUCTED.name) }
+      return errors << "format: unknown #{data["format"].inspect}" unless format
+
+      commanders = data.fetch("commanders", [nil, nil])
+      listed = commanders.is_a?(Array) && commanders.size == 2 && commanders.all? { it.nil? || (it.is_a?(String) && catalog[it]&.id == it) }
+      return errors << "commanders: must be a list of 2 card ids or nulls" unless listed
+
+      errors << "commanders: a Commander game has one each (CR 903.3)" if format.commander? && commanders.any?(&:nil?)
+      errors << "commanders: only a Commander game has them (CR 903.3)" if !format.commander? && commanders.any?
+      return unless errors.empty? # the objects and players are well formed
+
+      validate_commander_zone(data, commanders, errors)
+      validate_commander_progress(data, commanders, errors)
+    end
+
+    def validate_commander_zone(data, commanders, errors)
+      data["objects"].each do |obj|
+        next unless obj["zone"].to_s == "command" && obj.fetch("kind", "card") == "card"
+
+        unless commanders[obj["owner"]] == obj["card"]
+          errors << "#{obj["id"]}: only emblems and its owner's commander are in the command zone (CR 114.1, 903.6)"
+        end
+      end
+    end
+
+    # Casts from the command zone (CR 903.8) and combat damage by each commander (CR 903.10a).
+    def validate_commander_progress(data, commanders, errors)
+      data["players"].each_with_index do |pl, i|
+        path = "players[#{i}]"
+        casts = pl.fetch("commander_casts", 0)
+        errors << "#{path}.commander_casts: must be a non-negative integer" unless non_negative?(casts)
+        damage = pl.fetch("commander_damage", {})
+        ok = damage.is_a?(Hash) && damage.all? { |card, n| commanders.include?(card) && non_negative?(n) }
+        errors << "#{path}.commander_damage: must map commander card ids to non-negative integers" unless ok
+      end
+    end
+
     # Pool mana kept apart: restricted (CR 106.6) and/or kept until end of combat (CR 702.189a):
     # [{"mana" => "C", "spend_only" => {...}, "until" => "end_of_combat"}]; absent in older snapshots.
     def validate_restricted_mana(list, errors, path)

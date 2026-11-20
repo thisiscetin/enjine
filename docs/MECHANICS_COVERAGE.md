@@ -30,8 +30,9 @@ Comprehensive Rules (measured by the rule numbers the code implements and cites,
   face-down cards (CR 708), madness, delve, persist, undying, infect, toxic,
   ninjutsu, cumulative upkeep, echo, bestow, mutate, split and flip cards,
   levelers, Prototype, Cases, day/night, the monarch and the initiative.
-- Battles and dungeons; multiplayer and casual variants (Commander, Planechase,
-  Archenemy, Conspiracy); ante; matches and sideboarding.
+- Battles and dungeons; multiplayer and casual variants (multiplayer Commander,
+  Planechase, Archenemy, Conspiracy); ante; matches and sideboarding. Two-player
+  **Duel Commander** is supported (CR 903, see below).
 
 A card that uses an unsupported mechanic can't be written: validation rejects it
 with an error naming the unknown key. Some older keywords can still be written
@@ -343,7 +344,8 @@ These rules cut across every mechanic. All numbers follow the 2026-11-06 text.
 | 704.5y | A battle with an illegal protector is reassigned or goes to the graveyard | M5 |
 | 704.5z | Multiple Roles from the same controller on one permanent: only the newest stays | M5 |
 | 704.5aa | A controller of a start-your-engines! permanent who has no speed gets speed 1 | M5 |
-| 704.6a–f | Variant SBAs (Two-Headed Giant, Commander, Archenemy, Planechase) | OOS |
+| 704.6c | Commander: 21 or more combat damage from one commander loses the game (903.10a) | ✓ |
+| 704.6a–b, d–f | Other variant SBAs (Two-Headed Giant, Archenemy, Planechase) | OOS |
 
 ---
 
@@ -648,10 +650,36 @@ replacement/prevention (614–616), "dies" and leaves-the-battlefield triggers
 
 ---
 
+## Commander (903)
+
+Two-player Duel Commander, chosen with `format: :duel_commander` (`Enjine::Format`, `Engine::Commander`).
+
+| CR | Rule | Status |
+| --- | --- | --- |
+| 903.3 | A commander is a legendary creature, Vehicle or Spacecraft with P/T; the designation belongs to the card (copies and tokens aren't commanders) | ✓ |
+| 903.3 | Cards that say "can be your commander" | OOS until a card needs it |
+| 903.4, 903.4c–e | Color identity from the card's data (never its text), every face included; `color_identity` overrides | ✓ |
+| 903.4b | Choosing a commander's color before the game | OOS |
+| 903.5a–d | Exactly 100 cards, singleton (basic lands exempt), color identity, basic land types | ✓ |
+| 903.6 | Commanders start in the command zone; their abilities don't function there (113.6) | ✓ |
+| 903.7 | 40 starting life | ✓ |
+| 903.8 | Casting a commander from the command zone, {2} more per earlier cast | ✓ |
+| 903.9a | A commander put into a graveyard or exile may go to the command zone (state-based action, a choice) | ✓ |
+| 903.9b | A commander that would go to its owner's hand or library may go to the command zone instead | ✓ (offered right after the move, see below) |
+| 903.9c | Melded or merged commanders | OOS |
+| 903.10a | 21 combat damage from one commander loses the game | ✓ |
+| 702.124 | Partner and Background (two commanders); commander ninjutsu; cards that refer to "your commander" | OOS until a card needs them |
+
+903.9b is a replacement effect, but replacement effects in the engine can't stop to ask a player. The
+commander moves to its owner's hand or library, and before anyone gets priority its owner chooses whether to
+put it into the command zone (the same `commander_zone` decision as 903.9a). The difference shows only if the
+rest of the effect that moved it acts on that hand or library.
+
 ## Out of scope (listed for completeness)
 
 - **Section 8, Multiplayer Rules (800–811)**: range of influence, attack multiple players, Two-Headed Giant, Emperor, and the other team variants.
-- **Section 9, Casual Variants (900–905)**: Planechase, Vanguard, Commander, Archenemy, Conspiracy Draft.
+- **Section 9, Casual Variants (900–905)**: Planechase, Vanguard, Archenemy, Conspiracy Draft, and multiplayer
+  Commander. Two-player Duel Commander is supported (see "Commander (903)").
 - Variant-only card types (311–315), ante (407), stickers (123), Attractions (718, 701.51–52, 702.159), Contraptions (701.45), Space Sculptor (702.158, 704.5u), and the variant SBAs and turn-based actions (704.6, 703.4e, 703.4h).
 - Mechanics that are legal in two-player games but rare (goad, vote, monarch, initiative, companion, dethrone) are kept as **M5**, not OOS.
 

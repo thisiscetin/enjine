@@ -22,3 +22,5 @@ jobs:
         run: bundle exec rubocop
       - name: Fuzz
         run: bundle exec rake "fuzz[40,${{ github.run_number }}]"
+      - name: Fuzz Duel Commander
+        run: bundle exec rake "fuzz[6,${{ github.run_number }},duel_commander]"

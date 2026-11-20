@@ -23,12 +23,17 @@ module Enjine
         "stack" => state.stack.map { object_view(engine, it) },
         "exile" => state.exile.map { exiled_view(engine, it, viewer) },
         "phased_out" => state.phased_out.map { object_view(engine, it) },
-        "command" => engine.emblems.map { emblem_view(engine, it) },
+        "command" => state.command.map { command_view(engine, it) },
         "pending" => pending_view(engine, viewer),
         "result" => state.result&.dup,
         "effects" => state.effects.map { it.except("controller").merge("controller" => engine.name(it["controller"])) },
         "delayed_triggers" => state.delayed_triggers.map { delayed_view(engine, it) }
       }
+    end
+
+    # What is in the command zone, all public: emblems (CR 114) and commanders (CR 903.6).
+    def command_view(engine, id)
+      engine.object(id).kind == "emblem" ? emblem_view(engine, engine.object(id)) : object_view(engine, id)
     end
 
     # An emblem in the command zone (CR 114): public, with its owner and abilities.
@@ -60,6 +65,7 @@ module Enjine
         "graveyard" => player.graveyard.map { object_view(engine, it) }
       }
       view.merge!(public_extras(player))
+      view.merge!(commander_view(engine, engine.state.players.index(player)))
       view["hand"] = player.hand.map { object_view(engine, it) } if sees_hand
       view["outside"] = outside_view(engine, player) if sees_hand # CR 400.11a: only its owner knows their sideboard
       view["library"] = player.library.map { object_view(engine, it) } if sees_library
@@ -72,6 +78,17 @@ module Enjine
     def public_extras(player)
       { "speed" => player.speed, "designations" => player.designations&.dup, "counters" => player.counters&.dup,
         "pool_sources" => Snapshot.deep_copy(player.pool_sources) }.reject { |_, v| v.nil? || (v.respond_to?(:empty?) && v.empty?) }
+    end
+
+    # A Commander game's public facts about a player (CR 903): their commander, what it would cost to cast from
+    # the command zone (CR 903.8) and the combat damage each commander has dealt them (CR 903.10a).
+    def commander_view(engine, index)
+      card = engine.state.commanders[index]
+      return {} unless card
+
+      damage = engine.player(index).commander_damage || {}
+      { "commander" => engine.catalog.fetch(card).name, "commander_tax" => engine.commander_tax(index),
+        "commander_damage" => damage.to_h { |id, n| [engine.catalog.fetch(id).name, n] } }
     end
 
     # The cards a player owns outside the game (CR 400.11a): not objects, so no ids (CR 400.11).

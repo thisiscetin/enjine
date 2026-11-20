@@ -68,6 +68,7 @@ module Enjine
         o.on("--random-deck [SPEC]", "Print a random deck from --pool as JSON, e.g. \"colors=WU seed=7\"") do
           @options[:random_deck] = it
         end
+        o.on("--format NAME", "constructed (default) or duel_commander: decks then name a \"commander\"") { @options[:format] = it }
         o.on("--names A,B", Array, "Player names (default alice,bob)") { @options[:names] = it }
         o.on("--validate FILE", "Validate a JSON array of card data blocks; prints a JSON report") { @options[:validate] = it }
         o.on("--verify DIR", "Validate and play-test every card in DIR's JSON files; exit 1 on any problem") do
@@ -161,7 +162,7 @@ module Enjine
     def new_game
       decks = [@options[:deck1], @options[:deck2]].each_with_index.map { |deck, i| deck_for(deck, i) }
       players = @options[:names].zip(decks).map { |name, deck| Player.new(name: name, deck: deck) }
-      @setup = Setup.new(*players)
+      @setup = Setup.new(*players, format: @options.fetch(:format, Format::CONSTRUCTED))
       @setup.new_game(seed: @options[:seed])
     end
 

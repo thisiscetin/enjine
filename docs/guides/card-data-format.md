@@ -59,6 +59,7 @@ Tips:
 | `abilities` | no | list | Section 4. |
 | `rules_text` | no | string | Informational only (shown in the CLI). Never interpreted. |
 | `deck_limit` | no | `"any"` or integer | CR 100.2a exception: "A deck can have any number of cards named ~" is `"deck_limit": "any"`; "up to seven cards named ~" is `7`. Without it a deck may hold four (basic lands: any number). |
+| `color_identity` | no | list of `W U B R G` | Commander only (CR 903.4): states the color identity of this card (or face) instead of deriving it. Rarely needed: the identity is derived from the card's data, see "Commander decks" in §6. |
 | `rarity` | no | string | Catalogue data, e.g. `"rare"`. The rules never read it. |
 | `printing` | no | object | `{ "set": "trk", "number": "12" }`: the set code and collector number printed on the card (a number may be given as an integer; it is stored as a string, since numbers like `"12a"` exist). The rules never read it, and two cards differing only in `rarity`/`printing` are the same card (a reprint). On a card with faces it sits beside `faces`. |
 
@@ -1424,6 +1425,25 @@ During a game these cards aren't objects (CR 400.11). Each player's list is
 view. A `play_from` ability with `"outside"` among its zones offers them as
 `{ "type": "cast", "object": "outside:hill_giant", "via": ... }` (or `play_land`). The
 object is created as the card enters the game, and that player owns it (CR 108.3).
+
+**Commander decks** (CR 903). A deck that names a `commander` is played with
+`format: :duel_commander`. The commander is one of `cards` but isn't listed in
+`main`, which holds the other 99 cards:
+
+```json
+{ "cards": [ ... ],
+  "main":  [ { "card": "Forest", "count": 38 }, { "card": "Grizzly Bears", "count": 1 }, "..." ],
+  "commander": "Wort, the Raidmother" }
+```
+
+It must be a legendary creature, Vehicle, or Spacecraft with power and toughness
+(CR 903.3). There is one copy of each card, except basic lands (CR 903.5b), and
+every card's **color identity** must be inside the commander's (CR 903.5c). A card's
+identity is the colors of every mana symbol in its data (mana cost, ability costs,
+produced mana, kicker, and so on), plus `colors`, the colors of its basic land types
+(CR 903.5d) and those of all its faces (CR 903.4d–e). `rules_text` is never read
+(reminder text doesn't count, CR 903.4c). For the odd card whose identity the data
+can't show, a card or face may state it with `"color_identity"`.
 
 ---
 

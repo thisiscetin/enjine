@@ -31,7 +31,9 @@ module Enjine
                            :speed, # nil (no speed) or 1-4 (CR 702.179), see Engine::Speed
                            :designations, # player designations, e.g. "enduring_story" (CR 702.195b), see Engine::Designations
                            :counters, # nil or {kind => n}: counters other than poison (CR 122.1), see Engine#add_player_counters!
-                           :pool_sources) do # nil or [{"mana", "from"}]: sources of pool mana made by artifacts (Engine#add_mana!)
+                           :pool_sources, # nil or [{"mana", "from"}]: sources of pool mana made by artifacts (Engine#add_mana!)
+                           :commander_casts, # nil or n: times they cast their commander from the command zone (CR 903.8)
+                           :commander_damage) do # nil or {commander card id => n}: combat damage dealt to them by each (CR 903.10a)
     def zone(name)
       case name
       when :library then library
@@ -57,14 +59,15 @@ module Enjine
     def optional_h
       { "speed" => speed, "designations" => designations.to_a.empty? ? nil : designations.dup,
         "counters" => counters.nil? || counters.empty? ? nil : counters.dup,
-        "pool_sources" => pool_sources.nil? || pool_sources.empty? ? nil : deep(pool_sources) }.compact
+        "pool_sources" => pool_sources.nil? || pool_sources.empty? ? nil : deep(pool_sources),
+        "commander_casts" => commander_casts&.positive? ? commander_casts : nil,
+        "commander_damage" => commander_damage.nil? || commander_damage.empty? ? nil : commander_damage.dup }.compact
     end
   end
 
   # The complete, mutable state of one game. Plain data only: everything here
   # round-trips through #to_h / Snapshot.load, and Marshal copies it cheaply.
   class State
-    STARTING_LIFE = 20
     PLAYER_ZONES = %i[library hand graveyard].freeze
     # `phased_out` is not a zone of the rules: phased-out permanents are on the battlefield but treated as
     # though they don't exist (CR 702.26b, 702.26d), so they are kept apart from `battlefield`. The command
@@ -82,20 +85,25 @@ module Enjine
     # The definition ids each player started the game with outside it (CR 400.11a, 100.4), like
     # `decklists`: a restart begins from these again. What is still outside is PlayerState#outside.
     attr_accessor :outside_lists
+    # The rules the game was set up with (Enjine::Format), and each player's commander card id or nil (CR 903.3).
+    # Like `decklists`, a restart begins from these again.
+    attr_accessor :format, :commanders
+    # Object ids of commanders put into a graveyard, exile, hand or library since state-based actions were last
+    # checked, whose owner may still send them to the command zone (CR 903.9, Engine::Commander).
+    attr_accessor :commander_returns
 
-    def self.initial(names:, decklists:, seed:, outside: nil)
+    def self.initial(names:, decklists:, seed:, outside: nil, format: Format::CONSTRUCTED, commanders: nil)
       state = new
+      state.format = format
+      state.commanders = (commanders || names.map { nil }).freeze
+      state.commander_returns = []
       state.seed = seed
       state.rng = Rng.from_seed(seed)
       state.decklists = decklists.map { |l| l.dup.freeze }.freeze
       state.outside_lists = (outside || names.map { [] }).map { |l| l.dup.freeze }.freeze
-      state.players = names.each_with_index.map { |name, i| new_player(name, state.outside_lists[i]) }
+      state.players = names.each_with_index.map { |name, i| new_player(name, state.outside_lists[i], format.starting_life) }
       state.objects = {}
-      state.battlefield = []
-      state.stack = []
-      state.exile = []
-      state.phased_out = []
-      state.command = []
+      SHARED_ZONES.each { state.public_send("#{it}=", []) }
       state.attackers = {}
       state.blockers = {}
       state.effects = []
@@ -119,8 +127,8 @@ module Enjine
     # with after them (Engine::TurnStructure); "combats" counts combat phases begun this turn.
     def self.no_extra_phases = { "pending" => [], "queue" => [], "combats" => 0 }
 
-    def self.new_player(name, outside = [])
-      PlayerState.new(name: name, life: STARTING_LIFE, poison: 0, library: [], hand: [], graveyard: [],
+    def self.new_player(name, outside = [], life = Format::CONSTRUCTED.starting_life)
+      PlayerState.new(name: name, life: life, poison: 0, library: [], hand: [], graveyard: [],
                       mana_pool: Mana.empty_pool, lands_played: 0, drew_from_empty: false, lost: nil,
                       mulligans: 0, kept: false, mulligan_choice: nil, turn_log: {}, game_log: {}, last_turn_log: {}, restricted_mana: [],
                       outside: outside.dup)
@@ -131,6 +139,10 @@ module Enjine
     end
 
     def object(id) = objects.fetch(id)
+
+    # The emblems in the command zone: the only objects there whose abilities function (CR 114.4, 113.6). A
+    # commander waiting there (CR 903.6) has none that do.
+    def emblem_ids = (command || []).select { objects[it]&.kind == "emblem" }
     def opponent(index) = 1 - index
     def over? = !result.nil?
 
@@ -145,7 +157,14 @@ module Enjine
         "attackers" => attackers.dup, "blockers" => blockers.dup, "effects" => effects.map { deep_dup(it) },
         **DEEP_FIELDS.to_h { [it, deep_dup(public_send(it))] },
         "repeat_cleanup" => repeat_cleanup, "combat_damage_pass" => combat_damage_pass,
-        "attacks_declared" => attacks_declared }.merge("outside_lists" => (outside_lists || []).map(&:dup))
+        "attacks_declared" => attacks_declared }.merge("outside_lists" => (outside_lists || []).map(&:dup)).merge(format_h)
+    end
+
+    # What a Commander game adds to a snapshot; a constructed game's is unchanged.
+    def format_h
+      return {} unless format.commander?
+
+      { "format" => format.name, "commanders" => commanders.dup, "commander_returns" => commander_returns.dup }
     end
 
     # Nested fields #to_h deep-copies as they are.

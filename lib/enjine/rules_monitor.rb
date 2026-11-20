@@ -22,6 +22,8 @@ module Enjine
       @stats = Hash.new(0)
       @lands_this_turn = Hash.new(0)
       @loyalty_activations = Hash.new(0)
+      @commander_casts = Hash.new(0)
+      @cast_from_command = []
     end
 
     def state = @game.state
@@ -109,6 +111,7 @@ module Enjine
 
     def zone_changed!(event)
       land_played!(event) if event.reason == "play_land"
+      @cast_from_command << event.new_id if event.reason == "cast" && event.from == "command"
       return unless event.reason == "resolve" && event.to == "graveyard" && defn(event.card).permanent?
 
       finding("608.3", "permanent spell #{event.card} went to the graveyard on resolution")
@@ -144,6 +147,7 @@ module Enjine
     def spell_cast!(event)
       card = defn(event.card)
       @stats["cast:#{event.card}"] += 1
+      @commander_casts[event.player] += 1 if @cast_from_command.delete(event.object) # CR 903.8
       return if card.instant_speed? || event.during_resolution # CR 608.2g: timing doesn't apply
 
       caster = event.player
@@ -181,7 +185,7 @@ module Enjine
     end
 
     # Permanents and emblems, whose static abilities function in the command zone (CR 114.4).
-    def static_holders = state.battlefield + (state.command || [])
+    def static_holders = state.battlefield + state.emblem_ids
 
     # The static abilities of permanents on the battlefield and emblems that apply to `obj` now, matched on printed types.
     def applying_statics(obj)
@@ -252,6 +256,26 @@ module Enjine
       check_damage_life!
       check_sba! if @game.pending_decision&.kind == "priority"
       check_hand_size!
+      check_commander!
+    end
+
+    # CR 903.8, 903.10a, independently of the engine's counters: the casts from the command zone seen as events
+    # are the tax's count, and nobody survives 21 combat damage from one commander.
+    def check_commander!
+      return unless state.format.commander?
+
+      state.players.each do |pl|
+        casts = @commander_casts[pl.name]
+        if pl.commander_casts.to_i != casts
+          finding("903.8",
+                  "#{pl.name} has cast their commander #{casts} times but the tax counts #{pl.commander_casts.to_i}")
+        end
+        next if pl.lost || state.over?
+
+        finding("903.10a", "#{pl.name} survived 21 combat damage from one commander") if (pl.commander_damage || {}).values.any? do
+          it >= 21
+        end
+      end
     end
 
     # CR 613.4, recomputed independently: printed (or a 7b setting effect) + counters + active pump effects

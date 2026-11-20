@@ -27,6 +27,7 @@ module Enjine
         index = Mechanics::Filters.player_index(self, ref)
         if index
           emit Events::DamageDealt.new(source: source, target: ref, amount: amount, combat: combat)
+          note_commander_damage!(source, index, amount) if combat # CR 903.10a
           change_life!(index, -amount) # CR 120.3a
         else
           return 0 unless state.battlefield.include?(ref)

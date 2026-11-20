@@ -17,7 +17,8 @@ module Enjine
       }
     end
 
-    def ready? = @deck.valid?
+    # Whether the deck is legal for `format` (Enjine::Format).
+    def ready?(format = Format::CONSTRUCTED) = @deck.valid?(format)
 
     # True while any game this player is seated in has not ended.
     def playing? = @games.keys.any? { |game| !game.over? }

@@ -20,8 +20,9 @@ module Enjine
 
     attr_reader :catalog, :history
 
-    def self.start(catalog:, names:, decklists:, seed:, outside: nil)
-      new(catalog, State.initial(names: names, decklists: decklists, seed: seed, outside: outside)).tap(&:start!)
+    def self.start(catalog:, names:, decklists:, seed:, outside: nil, format: Format::CONSTRUCTED, commanders: nil)
+      state = State.initial(names: names, decklists: decklists, seed: seed, outside: outside, format: format, commanders: commanders)
+      new(catalog, state).tap(&:start!)
     end
 
     # Resumes a game from #export output (a JSON String or the parsed Hash).
@@ -125,7 +126,7 @@ module Enjine
     # Starts this game over from its opening, with the same or a new seed.
     def restart(seed: nil)
       fresh = State.initial(names: names, decklists: state.decklists, seed: seed.nil? ? state.seed : seed,
-                            outside: state.outside_lists)
+                            outside: state.outside_lists, format: state.format, commanders: state.commanders)
       @engine.state = fresh
       @history = []
       @buffer.clear
