@@ -17,7 +17,8 @@ module Enjine
         Mechanics.check_keys(data, %w[each controller other], errors, path)
         controller = data.fetch("controller", "any")
         errors << "#{path}.controller: must be one of #{CONTROLLERS.join(", ")}" unless CONTROLLERS.include?(controller)
-        new(Mechanics.build_entry(:filter, data["each"], errors, "#{path}.each"), controller, data["other"] == true)
+        new(Mechanics.characteristic_filter(data["each"], errors, "#{path}.each"),
+            controller, data["other"] == true)
       end
 
       def initialize(filter, controller, other)

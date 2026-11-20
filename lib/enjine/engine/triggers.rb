@@ -15,7 +15,8 @@ module Enjine
       # types it had then, not its printed ones.
       def last_known_info(obj)
         current = chars(obj)
-        { "controller" => obj.controller, "card" => obj.card, "types" => current.types, "subtypes" => current.subtypes,
+        { "controller" => obj.controller, "owner" => obj.owner, "card" => obj.card, "types" => current.types,
+          "subtypes" => current.subtypes,
           "power" => current.power, "toughness" => current.toughness, "counters" => obj.counters.dup,
           "mana_value" => Mechanics::Amount.mana_value(self, obj), # CR 202.3
           "keywords" => current.keywords.map(&:to_s), # deathtouch, lifelink, wither (CR 702.2e, 702.15c, 702.80b)

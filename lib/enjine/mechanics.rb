@@ -7,6 +7,11 @@ module Enjine
 
     # Builds a primitive from a data entry. An entry is either a bare name ("tap")
     # or a single-key Hash ({"mana" => {...params}}).
+    # A filter matched by characteristics only (Filters::Facts): `owner` can't be honoured there and is an error.
+    def characteristic_filter(data, errors, path)
+      Filters.without_owner!(build_entry(:filter, data, errors, path), errors, path)
+    end
+
     def build_entry(category, entry, errors, path, **context)
       name, params = split_entry(entry)
       unless name

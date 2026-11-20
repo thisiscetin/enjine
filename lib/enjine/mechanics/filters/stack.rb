@@ -37,7 +37,7 @@ module Enjine
           unless controller.nil? || CONTROLLERS.include?(controller)
             errors << "#{path}.controller: must be one of #{CONTROLLERS.join(", ")}"
           end
-          source &&= Mechanics.build_entry(:filter, source, errors, "#{path}.source")
+          source &&= Mechanics.characteristic_filter(source, errors, "#{path}.source")
           Narrowed.new(kind, controller, source)
         end
 

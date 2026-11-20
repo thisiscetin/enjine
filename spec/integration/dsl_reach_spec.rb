@@ -124,6 +124,39 @@ RSpec.describe "DSL reach: counters you put, ownership, card qualities, turn dur
       expect(filter.to_s).to eq("creature you control an opponent owns")
     end
 
+    it "follows a creature you own that died under an opponent's control (CR 108.3, 603.10a)" do
+      dies = { "dies" => { "subject" => { "each" => { "creature" => { "owner" => "you" } } } } }
+      mourner = { "name" => "Owner's Mourner", "mana_cost" => "{1}{B}", "types" => ["enchantment"],
+                  "abilities" => [{ "triggered" => { "when" => dies, "effects" => [{ "gain_life" => { "amount" => 3 } }] } }] }
+      game = build_game(catalog_with(mourner)) do
+        turn 3, active: "alice", step: :precombat_main
+        player("alice") do
+          battlefield "Owner's Mourner", "Grizzly Bears"
+          library "Forest", count: 5
+        end
+        player("bob") do
+          battlefield "Cloud Kite"
+          library "Forest", count: 5
+        end
+      end
+      context = ->(index) { Enjine::Mechanics::EffectContext.new(index, nil, nil, []) }
+      bears = obj_id(game, "Grizzly Bears")
+      kite = obj_id(game, "Cloud Kite")
+      engine(game).gain_control_for!(engine(game).object(bears), 1, context.call(1))
+      engine(game).gain_control_for!(engine(game).object(kite), 0, context.call(0))
+      engine(game).move!(kite, :graveyard, reason: "destroy")
+      engine(game).move!(bears, :graveyard, reason: "destroy")
+      game.submit(type: "pass") until (game.state.stack.empty? && game.state.pending_triggers.empty? && game.state.players[0].life > 20) ||
+                                      game.history.size > 20
+      expect(game.state.players[0].life).to eq(23) # one trigger: the Bears, not the Kite
+    end
+
+    it "is refused where only characteristics are matched" do
+      card = { "name" => "Owned Lands Untapped", "types" => ["enchantment"],
+               "abilities" => [{ "enters_untapped" => { "affects" => { "each" => { "land" => { "owner" => "you" } } } } }] }
+      expect { Enjine::CardDefinition.from_h(card) }.to raise_error(Enjine::InvalidCardDefinition, /owner can't be used here yet/)
+    end
+
     it "rejects other values" do
       bad = reclaim.merge("abilities" => [{ "spell" => { "targets" => [{ "creature" => { "owner" => "me" } }], "effects" => [] } }])
       expect { Enjine::CardDefinition.from_h(bad) }.to raise_error(Enjine::InvalidCardDefinition, /owner: must be you or opponent/)

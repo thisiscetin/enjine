@@ -19,6 +19,13 @@ module Enjine
       # What is known about an object without computing its current characteristics: its printed
       # (or last known) characteristics, its counters and whether it is a token. `chosen`: the memory of
       # the object whose choice "the chosen color/type" refers to (CR 607.2d), when the filter needs one.
+      # A filter matched on characteristics only (Facts) can't know who owns the object: `owner` there is an error,
+      # never silently ignored (CR 108.3). Returns the filter.
+      def self.without_owner!(filter, errors, path)
+        errors << "#{path}: owner can't be used here yet" if filter.respond_to?(:owner) && filter.owner
+        filter
+      end
+
       Facts = Data.define(:chars, :counters, :token, :chosen) do
         def initialize(chars:, counters:, token:, chosen: nil) = super
       end

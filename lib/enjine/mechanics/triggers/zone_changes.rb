@@ -227,7 +227,7 @@ module Enjine
           super
           @batched = params.fetch("batched", false)
           errors << "#{path}.batched: must be true or false" unless [true, false].include?(@batched)
-          @card = params["card"] && Mechanics.build_entry(:filter, params["card"], errors, "#{path}.card")
+          @card = params["card"] && Mechanics.characteristic_filter(params["card"], errors, "#{path}.card")
         end
 
         def match?(engine, event, source)

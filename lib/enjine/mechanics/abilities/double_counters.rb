@@ -28,7 +28,7 @@ module Enjine
             affects = { "each" => "permanent" }
           end
           Mechanics.check_keys(affects, %w[each controller], errors, "#{path}.affects")
-          filter = Mechanics.build_entry(:filter, affects["each"], errors, "#{path}.affects.each")
+          filter = Mechanics.characteristic_filter(affects["each"], errors, "#{path}.affects.each")
           live = filter ? filter.live_keys : []
           errors << "#{path}.affects.each: #{live.join(", ")} can't be used here yet" unless live.empty?
           controller = affects.fetch("controller", "any")

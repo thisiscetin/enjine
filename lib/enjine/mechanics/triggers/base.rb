@@ -100,6 +100,8 @@ module Enjine
           defn = engine.catalog.fetch(card)
           chars = types ? defn.printed_characteristics.with(types: types) : defn.printed_characteristics
           lki = engine.last_known(object_id) || {}
+          return false unless owner_ok?(lki.fetch("owner", object_controller), source["controller"]) # CR 108.3
+
           token = lki.fetch("token") { defn.token? } # a token copy of a card (CR 111.1)
           @filter.matches_facts?(Filters::Facts.new(chars: chars, counters: lki.fetch("counters", nil) || {}, token: token,
                                                     chosen: engine.state.objects[source["id"]]&.memory))
@@ -107,6 +109,12 @@ module Enjine
 
         def controller_ok?(object_controller, you)
           @controller == "any" || (@controller == "you") == (object_controller == you)
+        end
+
+        # "A creature you own" (CR 108.3), for an object that left: its owner as it last existed.
+        def owner_ok?(owner, you)
+          wanted = @filter.respond_to?(:owner) && @filter.owner
+          !wanted || (wanted == "you") == (owner == you)
         end
 
         def to_s
@@ -211,7 +219,7 @@ module Enjine
       # Matching a card (not a permanent) by its printed characteristics.
       module CardMatch
         def setup_card(params, errors, path)
-          @card = params["card"] && Mechanics.build_entry(:filter, params["card"], errors, "#{path}.card")
+          @card = params["card"] && Mechanics.characteristic_filter(params["card"], errors, "#{path}.card")
         end
 
         def card_ok?(engine, card)

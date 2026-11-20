@@ -187,7 +187,7 @@ module Enjine
 
         def setup(params, errors, path)
           super
-          @source = params["source"] && Mechanics.build_entry(:filter, params["source"], errors, "#{path}.source")
+          @source = params["source"] && Mechanics.characteristic_filter(params["source"], errors, "#{path}.source")
           setup_chosen(params, errors, path)
           @kinds = KINDS.select { |key, _| params[key] == true }.values
           KINDS.each_key { errors << "#{path}.#{it}: must be true or false" unless [nil, true, false].include?(params[it]) }

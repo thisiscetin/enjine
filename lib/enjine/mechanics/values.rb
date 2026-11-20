@@ -354,7 +354,7 @@ module Enjine
           data = data.is_a?(Hash) ? data.transform_keys(&:to_s) : {}
           Mechanics.check_keys(data, %w[by matching from not_from], errors, path)
           casters = Selector.build(data.fetch("by", "you"), errors, "#{path}.by", **context)
-          filter = data["matching"] && Mechanics.build_entry(:filter, data["matching"], errors, "#{path}.matching")
+          filter = data["matching"] && Mechanics.characteristic_filter(data["matching"], errors, "#{path}.matching")
           new(casters, filter, CastFrom.build(data, errors, path), LOGS.fetch(kind))
         end
 
@@ -401,7 +401,7 @@ module Enjine
           errors << "#{path}: must be an object {\"each\": filter, \"controller\": ...}" unless data.is_a?(Hash)
           data = data.is_a?(Hash) ? data.transform_keys(&:to_s) : {}
           Mechanics.check_keys(data, %w[each controller], errors, path)
-          filter = data.key?("each") ? Mechanics.build_entry(:filter, data["each"], errors, "#{path}.each") : nil
+          filter = data.key?("each") ? Mechanics.characteristic_filter(data["each"], errors, "#{path}.each") : nil
           controller = data.fetch("controller", "any")
           errors << "#{path}.controller: must be one of you, opponent, any" unless %w[you opponent any].include?(controller)
           new(DEPARTED.fetch(kind), filter, controller)
@@ -697,7 +697,7 @@ module Enjine
       class TriggeringIs
         def self.build(data, errors, path)
           Mechanics.check_keys(data, %w[triggering], errors, path)
-          new(Mechanics.build_entry(:filter, data["triggering"], errors, "#{path}.triggering"))
+          new(Mechanics.characteristic_filter(data["triggering"], errors, "#{path}.triggering"))
         end
 
         def initialize(filter)
