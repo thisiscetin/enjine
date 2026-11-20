@@ -8,6 +8,8 @@ change the public API; the stable surface is described in
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-11-20
+
 ### Added
 - Duel Commander (CR 903): `Enjine::Setup.new(alice, bob, format: :duel_commander)`
   (`Enjine::Format`). Commanders start in the command zone, players start at 40 life,
@@ -74,6 +76,7 @@ change the public API; the stable surface is described in
 - `enjine` CLI: hot-seat and random play, `--validate`, `--verify`,
   `--random-deck`, save and load.
 
-[Unreleased]: https://github.com/thisiscetin/enjine/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/thisiscetin/enjine/compare/v0.3.0...HEAD
+[0.3.0]: https://github.com/thisiscetin/enjine/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/thisiscetin/enjine/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/thisiscetin/enjine/releases/tag/v0.1.0
