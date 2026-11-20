@@ -1,5 +1,61 @@
 # DSL gaps: mechanics missing for FAIL and PARTIAL cards
 
+## Ranking of 2026-11-20 (enjine 0.3.0)
+
+Source: deckfinder `card_scripts`, all 303 PARTIAL and 60 FAIL scripts (365 cards with the
+"missing" note of each). Every card was tagged by hand with **every** gap its note names, so a card
+counts as made exact only when all of its gaps are closed. The order is greedy: at each step, the change
+that makes the most cards exact per unit of effort (S = 1, M = 2, L = 3+, from a skim of `lib/`).
+
+- 81 cards have only a one-off gap (no change below helps them); 284 share at least one listed gap.
+- The first 4 changes (all S) make **30** cards exact; the first 20 make about **95**; the first 30
+  about **150**.
+- Notes that look stale (written before 0.2.0, worth re-scripting first, no engine work): The Wind Crystal
+  (cost_modifier colors exist), Armor Wars chapter III (`greatest_mana_value`), Fblthp (`library_size`),
+  Dina's Guidance (`search_library put: graveyard`), Terror of the Peaks and Bolg of the North (0.2.0
+  last-known-information work; check in a game).
+
+| # | Change | Effort | Cards made exact | Cumulative effort → exact | Examples |
+|---|---|---|---|---|---|
+| 1 | `counters_placed` `by: you`; a "you put counters on it this turn" filter (CountersChanged carries who put them) | S | 9 | 1 → 9 | Ant-Man, Beast, Exemplar of Light, Inspired Tethermage |
+| 2 | `owner: you/opponent` on permanent filters and selectors ("creature you own") | S | 9 | 2 → 18 | Boiling Rock Rioter, Charming Prince, Clash of Elements, Get Out |
+| 3 | card-spec filters: keyword, Adventure/prepared layout, kindred, non-subtype, power/toughness in `play_from` | S | 6 | 3 → 24 | April O'Neil, Bandit's Talent, Codie, Hearth Elemental |
+| 4 | `until_your_next_turn` / until-your-next-end-step on `become_copy`, `gain_control`, permissions | S | 6 | 4 → 30 | Absorbing Man, Dragonhawk, Evil's Thrall, Haste Magic |
+| 5 | `become` `set_types` (and lose creature types/add supertype/set name); fix the monitor's CR 613.4c recompute | M | 10 | 6 → 40 | Brilliance Unleashed, Enduring Courage, Enduring Curiosity, Enduring Innocence |
+| 6 | cost_modifier: condition, first spell each turn, one-turn effect, keyword or chosen-type spells | M | 6 | 8 → 46 | Arachne, Armor Wars, Don & Raph, Eluge |
+| 7 | last-known counters and combat status of a creature that left; move every counter kind | M | 6 | 10 → 52 | Aerith Gainsborough, Ares, Donatello, Essence Channeler |
+| 8 | "descended this turn" (a permanent card put into your graveyard from anywhere) | S | 3 | 11 → 55 | Corpses of the Lost, Molten Collapse, Stalactite Stalker |
+| 9 | "one or two targets": a minimum target count | S | 3 | 12 → 58 | Atlantis Attacks, Heroes' Hangout, Leonardo's Technique |
+| 10 | must-change form of `choose_new_targets`; single-target stack filter | S | 4 | 13 → 62 | Bolt Bend, Redirect Lightning, Return the Favor, Untimely Malfunction |
+| 11 | offspring keyword (CR 702.175) | S | 3 | 14 → 65 | Coruscation Mage, Iridescent Vinelasher, Starscape Cleric |
+| 12 | attack triggers know whether a player or a planeswalker is attacked | S | 3 | 15 → 68 | Attuma, Garruk, Preacher of the Schism |
+| 13 | `remove_counters` cost from this permanent | S | 3 | 16 → 71 | Drake Hatcher, Flitterwing Nuisance, Leatherhead |
+| 14 | `enters_with_counters` with a condition or computed count for others | M | 6 | 18 → 77 | Dust Animus, Gev, Giada, Myojin of Night's Reach |
+| 15 | `add_mana` `until: end_of_turn` (mana not lost as steps end) | S | 3 | 19 → 80 | Electro, Raphael, The Last Agni Kai |
+| 16 | "you've scried or surveilled this turn" condition | S | 3 | 20 → 83 | Desperate Futurescribe, Proctor of Potential, Surveillance Phantasm |
+| 17 | `deal_damage` with a `source` selector | S | 3 | 21 → 86 | Compel Brutality, Hawkeye's Bow, Ingris Stingerquill |
+| 18 | one-turn / conditional additional land plays as an effect | S | 3 | 22 → 89 | Beorn, Thranduil's Company, Way of the Paradox |
+| 19 | static "that many plus one" counter replacement | S | 3 | 23 → 92 | Doc Samson, Michelangelo, Yoshimaru |
+| 20 | "put into a graveyard from the battlefield / library this turn" filters and amounts | S | 3 | 24 → 95 | Bringer of the Last Gift, Cruel Calculations, Supper for Spiders |
+| 21 | equip: once each turn, creature filter, cost reduction by target, alternative cost | M | 5 | 26 → 100 | Dark Knight's Greatsword, Dragonfire Blade, Kíli the Resourceful, Shredder's Armor |
+| 22 | search destinations: choose per card (hand or graveyard, battlefield and hand), exile | M | 5 | 28 → 105 | Dina's Guidance, Part in Friendship, Roads Go Ever, Town Greeter |
+| 23 | attach to the entering / enchanted / triggering creature without targeting | M | 5 | 30 → 110 | Doc Ock's Tentacles, Quintessential Katana, Super-Soldier Serum, Thorin |
+| 24 | choose a card name; same-name filters across zones | L | 7 | 33 → 117 | Ancestral Anger, Ancient Vendetta, Key to the Side-Door, Maelstrom Pulse |
+| 25 | cost modifiers for activated abilities of other permanents (equip, power-up, plot) | M | 5 | 35 → 122 | Doc Aurlock, Dwarven Mauler, Hulk, Mutagen Man |
+| 26 | costs: put stun/page counter, exile a permanent, return a tapped creature, sacrifice the Aura, computed life, variable count | L | 7 | 38 → 129 | Jessica Jones, Madame Null, Mazemind Tome, Rottenmouth Viper |
+| 27 | attack tax, can't be attacked, max attackers, block-count limits | L | 7 | 41 → 136 | Archangel of Tithes, Dáin, Meltstrider's Resolve, Storm |
+| 28 | simultaneous per-player actions (wheel, mass discard/return/sacrifice) | L | 9 | 45 → 145 | Deadly Brew, Garruk, Raphael's Technique, Rush of Dread |
+| 29 | copy exceptions that add abilities or types | M | 4 | 47 → 149 | Ardyn, Electroduplicate, Face Yourself, Likeness Looter |
+| 30 | "attacks alone" trigger | M | 4 | 49 → 153 | Black Widow, Jiang Yanggu, Luke Cage, Spider-Man Noir |
+
+Further down (2–4 cards each): Cases, total-mana-value limits on chosen cards, entering attacking from a
+return or reveal, impending, token-type replacements, draw/life replacements, counter doubling, "once each
+turn" on may-abilities, hone counters, attacks-alone triggers. Large, low-yield: face-down permanents
+(manifest dread, disguise; 4 cards, L), split and Room layouts (3, L), another player choosing (End of the
+Hunt, Taster of Wares; 9 cards but L).
+
+## Snapshot of 2026-11-11 (history)
+
 Snapshot of 2026-11-11, taken from deckfinder through its MCP connection (`dsl_status scope: all`).
 Of 1,025 cards in scope (the user's collection, decks and imported opponent decklists), 192 are
 DSL FAIL (no script possible yet) and 87 are DSL PARTIAL (a best-effort script that leaves something out).
