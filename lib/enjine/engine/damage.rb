@@ -136,7 +136,8 @@ module Enjine
         # CR 613.7c: keyword counters of this kind get the new counter's timestamp (Engine::Characteristics#ability_layers).
         # The next timestamp isn't taken: an effect created later gets this number too and sorts after it.
         (object.memory["counter_timestamps"] ||= {})[kind] = state.next_id if Mechanics::Counters.keyword?(kind)
-        emit Events::CountersChanged.new(object: object.id, counter: kind, from: before, to: before + amount)
+        emit Events::CountersChanged.new(object: object.id, counter: kind, from: before, to: before + amount,
+                                         by: name(data["player"]))
       end
 
       # Counters on a player (CR 122.1): poison (ten or more lose the game, CR 122.1f, 704.5c), experience, rad, ...

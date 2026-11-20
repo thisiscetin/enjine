@@ -235,6 +235,7 @@ have '[−2]: …'" is `{ "static": { "affects": { "each": "planeswalker", "cont
 | Oracle words | Data |
 | --- | --- |
 | "you control" / "an opponent controls" | `{ "creature": { "controller": "you" } }` |
+| "you own" / "an opponent owns", "you control but don't own" | `{ "creature": { "owner": "you" } }`, `{ "creature": { "controller": "you", "owner": "opponent" } }` (CR 108.3; also in a `static`'s `affects.each`) |
 | "another" | `{ "creature": { "other": true } }` |
 | "nonland", "artifact or creature" | `{ "permanent": { "not": ["land"] } }`, `{ "permanent": { "any_of": ["artifact", "creature"] } }` |
 | "artifact creature" | `{ "creature": { "types": ["artifact"] } }` |
@@ -251,6 +252,21 @@ have '[−2]: …'" is `{ "static": { "affects": { "each": "planeswalker", "cont
 
 | "with flying", "with flying or reach", "without flying" | `{ "creature": { "keywords": ["flying"] } }`, `{ "creature": { "keywords": ["flying", "reach"] } }`, `{ "creature": { "not_keywords": ["flying"] } }` (current keywords: granted ones count, CR 702.1) |
 | "of the chosen color / creature type / card type", "not of the chosen type" | `{ "creature": { "subtypes": "chosen" } }`, `{ "spell": { "colors": "chosen" } }`, `{ "permanent": { "types": "chosen" } }`, `{ "creature": { "not_subtypes": "chosen" } }` (see 4.15) |
+
+**Card specs.** Effects that look at cards in any zone (graveyard, hand, library, exile; `for`,
+`card`, `cards`, `spells`) describe the card with a card spec: `"card"` (any card) or an object
+whose qualities must all match:
+
+| Card words | Card spec |
+| --- | --- |
+| "a basic land card", "a Swamp card", "a card named X" | `{ "types": ["land"], "supertypes": ["basic"] }`, `{ "subtypes": ["swamp"] }`, `{ "name": "X" }` |
+| "a noncreature, nonland card", "a permanent card" | `{ "not_types": ["creature", "land"] }`, `{ "permanent": true }` |
+| "a non-Avatar creature card" | `{ "types": ["creature"], "not_subtypes": ["avatar"] }` |
+| "a creature card with flying" | `{ "types": ["creature"], "keywords": ["flying"] }` (any listed keyword) |
+| "with mana value 3 or less", "with power or toughness 1 or less" | `{ "mana_value": { "at_most": 3 } }`, `{ "any_of": [{ "power": { "at_most": 1 } }, { "toughness": { "at_most": 1 } }] }` |
+| "a black card", "a monocolored card" | `{ "colors": ["B"] }`, `{ "color_count": { "equal": 1 } }` |
+| "a card that has an Adventure" | `{ "layout": "adventure" }` (any card layout: adventure, omen, prepare, transform, modal, meld) |
+| "an instant or sorcery card" | `{ "any_of": [{ "types": ["instant"] }, { "types": ["sorcery"] }] }` |
 
 ### 4.5 Who an effect applies to: the `to` selector
 
@@ -298,6 +314,7 @@ is a flicker ("exile …, then return it to the battlefield under its owner's co
 | --- | --- |
 | "Whenever ~ becomes tapped" | `{ "becomes_tapped": {} }` |
 | "Whenever one or more +1/+1 counters are put on ~" | `{ "counters_placed": { "counter": "+1/+1" } }` |
+| "Whenever you put one or more +1/+1 counters on a creature you control" | `{ "counters_placed": { "subject": { "each": "creature", "controller": "you" }, "counter": "+1/+1", "by": "you" } }` (who put them, CR 122.6a; a permanent's controller puts the counters it enters with) |
 | one of your creatures is targeted by an opponent's spell or ability | `{ "becomes_target": { "subject": { "each": "creature", "controller": "you" }, "by": "opponent" } }` |
 | "Whenever a card leaves your graveyard" / "one or more cards leave" | `{ "leaves_graveyard": {} }` / `{ "leaves_graveyard": { "batched": true } }` |
 | "Whenever an opponent activates an ability" (not mana abilities) | `{ "activates_ability": { "controller": "opponent" } }` |
@@ -357,6 +374,9 @@ See `docs/reference/effects.md` for the generated list. Currently:
 | `pump` | "gets +X/+Y until end of turn" | `{ "pump": { "power": X, "toughness": Y, "to": … } }` |
 | `pump` | "get -1/-0 until your next turn" | `{ "pump": { "power": -1, "toughness": 0, "duration": "until_your_next_turn", "to": … } }` (ends as your next turn begins, CR 611.2a) |
 | `grant`, `become` | "gain flying until your next turn", "until your next turn, it becomes a land" | `"duration": "until_your_next_turn"` on `grant` or `become` |
+| `become_copy` | "it becomes a copy of that creature until your next turn" | `"duration": "until_your_next_turn"` |
+| `gain_control` | "gain control of it until the end of your next turn" | `"duration": "end_of_your_next_turn"` (control returns at that turn's cleanup) |
+| `play_permission` | "you may play that card until your next end step" | `"duration": "until_your_next_end_step"` (ends as your next end step begins; made during your own end step, it lasts until next turn's) |
 | `add_counters` | "put N +1/+1 counters on …" | `{ "add_counters": { "counter": "+1/+1", "amount": N, "to": … } }` (any counter name: `+1/+1`, `stun`, `shield`, `oil`, a keyword; see `docs/reference/counters.md`) |
 | `gain_life` | "you gain N life" | `{ "gain_life": { "amount": N } }` (`to` defaults to `"you"`) |
 | `lose_life` | "each opponent loses N life" | `{ "lose_life": { "amount": N, "to": "each_opponent" } }` |

@@ -79,6 +79,7 @@ module Enjine
 
       # A filter narrowed by restrictions (CR 115.1, 109.2), e.g.
       #   {"creature": {"controller": "you"}}            {"creature": {"other": true}}
+      #   {"creature": {"owner": "you"}}                 "a creature you own" (CR 108.3); with controller: "you control but don't own"
       #   {"permanent": {"not": ["land"]}}               {"permanent": {"any_of": ["artifact", "creature"]}}
       #   {"creature": {"attacking": true}}              {"creature": {"power": {"at_least": 4}}}
       #   {"permanent": {"mana_value": {"at_most": 3}}}  {"creature": {"subtypes": ["human"]}}
@@ -99,7 +100,7 @@ module Enjine
         TYPE_LISTS = %w[not any_of types].freeze
         NAME_LISTS = %w[subtypes not_subtypes supertypes not_supertypes attached_subtypes].freeze
         KEYWORD_LISTS = %w[keywords not_keywords].freeze
-        KEYS = (%w[controller counters colors] + BOOLEANS + RANGES + TYPE_LISTS + NAME_LISTS + KEYWORD_LISTS).freeze
+        KEYS = (%w[controller owner counters colors] + BOOLEANS + RANGES + TYPE_LISTS + NAME_LISTS + KEYWORD_LISTS).freeze
         # Lists that may be "chosen": the choice remembered under that memory key (CR 607.2d).
         CHOSEN = { "colors" => "chosen_color", "types" => "chosen_card_type", "not" => "chosen_card_type",
                    "subtypes" => "chosen_type", "not_subtypes" => "chosen_type" }.freeze
@@ -112,6 +113,7 @@ module Enjine
         def self.build(base, params, errors, path)
           controller = params["controller"]
           errors << "#{path}.controller: must be you or opponent" if controller && !%w[you opponent].include?(controller)
+          errors << "#{path}.owner: must be you or opponent" unless [nil, "you", "opponent"].include?(params["owner"])
           validate_lists(params, errors, path)
           BOOLEANS.each do |key|
             errors << "#{path}.#{key}: must be true or false" unless params[key].nil? || [true, false].include?(params[key])
@@ -195,6 +197,8 @@ module Enjine
 
         def primitive_name = base.primitive_name
         def uses_chosen? = !@chosen.empty?
+        # Who must own it (CR 108.3); the layer pass checks it too (Abilities::Static#owner_ok?).
+        def owner = @params["owner"]
 
         # A computed bound depends on the game, so (like power) it isn't usable in the layer pass.
         def live_keys = LIVE.select { @params.key?(it) } + (@computed ? ["computed_range"] : [])
@@ -234,7 +238,7 @@ module Enjine
           words.concat(@lists["types"] + @lists["subtypes"]).concat(@lists["not_subtypes"].map { "non-#{it}" })
           words.concat(chosen_words)
           words << (@lists["any_of"].empty? ? base.primitive_name.tr("_", " ") : @lists["any_of"].join(" or "))
-          words << { "you" => "you control", "opponent" => "an opponent controls" }[@controller]
+          words.concat(ownership_words)
           words.concat(@ranges.map { |key, range| "with #{key.tr("_", " ")} #{range_words(range)}" })
           words << "with a #{@lists["attached_subtypes"].join(" or ")} attached" unless @lists["attached_subtypes"].empty?
           (words + [counter_words] + keyword_words).compact.join(" ")
@@ -250,6 +254,11 @@ module Enjine
           words = @params["modified"] ? ["modified"] : []
           words += %w[transformed prepared saddled].reject { @params[it].nil? }.map { @params[it] ? it : "un#{it}" }
           words + { true => ["that entered this turn"], false => ["that didn't enter this turn"] }.fetch(@params["entered_this_turn"], [])
+        end
+
+        def ownership_words
+          [{ "you" => "you control", "opponent" => "an opponent controls" }[@controller],
+           { "you" => "you own", "opponent" => "an opponent owns" }[@params["owner"]]]
         end
 
         def range_words(range) = range.map { |k, n| format(RANGE_WORDS.fetch(k), n) }.join(" and ")
@@ -285,6 +294,7 @@ module Enjine
           owner = index || engine.state.objects[ref]&.controller
           return false if @controller && (@controller == "you") != (owner == controller)
           return true if index
+          return false if @params["owner"] && (@params["owner"] == "you") != (engine.object(ref).owner == controller) # CR 108.3
 
           object_allowed?(engine, ref, bounds, uses_chosen? ? Filters.chosen_memory(engine, source, ctx) : nil)
         end

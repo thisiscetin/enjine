@@ -229,8 +229,15 @@ module Enjine
           return object.id == source.id if @filter == :self
           return false if @other && object.id == source.id
           return false unless @controller == "any" || (@controller == "you") == (object.controller == source.controller)
+          return false unless owner_ok?(object, source)
 
           @filter.matches_facts?(@filter.uses_chosen? ? facts.with(chosen: source.memory) : facts) # CR 607.2d
+        end
+
+        # "Creatures you control but don't own" (CR 108.3): ownership isn't a characteristic, so it's read here.
+        def owner_ok?(object, source)
+          owner = @filter.respond_to?(:owner) && @filter.owner
+          !owner || (owner == "you") == (object.owner == source.controller)
         end
 
         def to_s

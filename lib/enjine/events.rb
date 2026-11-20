@@ -76,7 +76,10 @@ module Enjine
       def gain = [to - from, 0].max
       def loss = [from - to, 0].max
     end
-    CountersChanged = define(:counters_changed, :object, :counter, :from, :to)
+    # `by`: the player who put the counters on (CR 122.6a), nil for removals; absent in older histories.
+    CountersChanged = define(:counters_changed, :object, :counter, :from, :to, :by) do
+      def initialize(by: nil, **) = super # rubocop:disable Naming/MethodParameterName -- the event field
+    end
     PlayerCountersChanged = define(:player_counters_changed, :player, :counter, :from, :to) # poison, rad, ... (CR 122.1)
     EmblemCreated = define(:emblem_created, :player, :object, :card) # CR 114.2
     # CR 705: a coin flip; `won` is nil for a flip no one wins or loses (CR 705.2).

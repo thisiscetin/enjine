@@ -209,13 +209,14 @@ module Enjine
       # Riders like these are stored on the permission (`state.effects` entry) and copied into the play
       # method, so only casts that use this permission (`via: "effect:<timestamp>"`) see them.
       class PlayPermission < ChoiceEffect
-        DURATIONS = %w[end_of_turn end_of_your_next_turn while_exiled].freeze
+        DURATIONS = %w[end_of_turn end_of_your_next_turn until_your_next_end_step while_exiled].freeze
         PLAYERS = %w[controller owner].freeze
 
         primitive :effect, :play_permission,
                   description: "A player may play (`play: \"play\"`, default) or cast (`\"cast\"`) each referenced " \
                                "exiled card matching `for`/`not_types`, paying its costs and following timing rules, " \
-                               "for `duration`: end_of_turn (default), end_of_your_next_turn or while_exiled. With " \
+                               "for `duration`: end_of_turn (default), end_of_your_next_turn, until_your_next_end_step " \
+                               "or while_exiled. With " \
                                "`choose: \"one_per_owner\"` only one chosen card per owner. `to_player`: who may " \
                                "play it, \"controller\" (default, the effect's controller), \"owner\" (the card's " \
                                "owner) or a player selector (a face-down card: only someone who may look at it). " \

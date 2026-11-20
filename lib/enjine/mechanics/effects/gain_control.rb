@@ -6,7 +6,8 @@ module Enjine
       # "Gain control of target permanent" / "... until end of turn" / "Target opponent gains control of
       # target permanent you control" (CR 613.1b, 108.4, 506.4, 302.6).
       class GainControl < Effect
-        DURATIONS = %w[permanent end_of_turn while_source_on_battlefield while_source_tapped while_you_control_source].freeze
+        DURATIONS = %w[permanent end_of_turn end_of_your_next_turn while_source_on_battlefield while_source_tapped
+                       while_you_control_source].freeze
 
         primitive :effect, :gain_control,
                   description: "The player referenced by `gains` (default you) gains control of each referenced " \
@@ -40,11 +41,13 @@ module Enjine
             next engine.gain_control!(obj, player) if duration == "permanent"
 
             engine.gain_control_for!(obj, player, ctx, duration: duration,
-                                                       source: duration == "end_of_turn" ? nil : ctx.source)
+                                                       source: %w[end_of_turn end_of_your_next_turn].include?(duration) ? nil : ctx.source)
           end
         end
 
-        def to_s = "#{gains} gains control#{" until end of turn" if duration == "end_of_turn"} → #{to}"
+        UNTIL = { "end_of_turn" => " until end of turn", "end_of_your_next_turn" => " until the end of your next turn" }.freeze
+
+        def to_s = "#{gains} gains control#{UNTIL[duration]} → #{to}"
       end
 
       # "Exchange control of target artifact you control and target artifact an opponent controls" (CR 701.12a-b):

@@ -292,7 +292,7 @@ module Enjine
 
         state.effects << { "kind" => "permission", "timestamp" => next_timestamp!, "controller" => index,
                            "affected" => ids, "duration" => duration, "turn" => state.turn, "play" => play,
-                           **riders.transform_keys(&:to_s).slice(*RIDERS) }
+                           **end_step_timing(index, duration), **riders.transform_keys(&:to_s).slice(*RIDERS) }
         emit Events::EffectStarted.new(kind: "permission", affected: ids, details: { "duration" => duration, "play" => play })
       end
 

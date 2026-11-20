@@ -15,14 +15,21 @@ module Enjine
     #   {"colors": ["B"]}                               a black card: it has any of the listed colors (CR 105.2)
     #   {"color_count": {"equal": 1}}                   monocolored (1), multicolored (at least 2), colorless (0)
     #   {"any_of": [spec, spec, ...]}                   at least one spec must match
+    #   {"keywords": ["flying"]}                        "a creature card with flying": any listed keyword (CR 702.1)
+    #   {"not_subtypes": ["avatar"]}                    "a non-Avatar card"
+    #   {"power": {"at_most": 1}}                       also toughness: its power/toughness as the card is (CR 208.1)
+    #   {"layout": "adventure"}                         "a card that has an Adventure": the card's layout (CR 716,
+    #                                                   CardDefinition::Faces)
     class CardSpec
-      KEYS = %w[types not_types subtypes supertypes name any_of permanent mana_value colors color_count].freeze
+      KEYS = %w[types not_types subtypes supertypes name any_of permanent mana_value colors color_count keywords
+                not_subtypes power toughness layout].freeze
       SUBTYPE = /\A[a-z][a-z0-9_]*\z/
       # CR 110.4a: the permanent card types (battles have no primitive yet, so none matches that way).
       PERMANENT_TYPES = %i[artifact battle creature enchantment land planeswalker].freeze
       BOUNDS = %w[at_least at_most equal].freeze
 
-      attr_reader :types, :not_types, :subtypes, :supertypes, :name, :any_of, :permanent, :mana_value, :colors, :color_count
+      attr_reader :types, :not_types, :subtypes, :supertypes, :name, :any_of, :permanent, :mana_value, :colors, :color_count,
+                  :keywords, :not_subtypes, :stats, :layout
 
       def self.build(data, errors, path)
         return ANY if data.nil? || data == "card"
@@ -35,7 +42,18 @@ module Enjine
             subtypes: subtype_list(data, errors, path), name: name_param(data, errors, path),
             any_of: alternatives(data, errors, path), not_types: names(data, "not_types", :type, errors, path),
             permanent: permanent_param(data, errors, path), mana_value: bounds_param(data, "mana_value", errors, path),
-            colors: colors_param(data, errors, path), color_count: bounds_param(data, "color_count", errors, path))
+            colors: colors_param(data, errors, path), color_count: bounds_param(data, "color_count", errors, path),
+            keywords: names(data, "keywords", :keyword, errors, path), not_subtypes: subtype_list(data, errors, path, "not_subtypes"),
+            stats: %w[power toughness].to_h { [it, bounds_param(data, it, errors, path)] }.reject { |_, b| b.empty? },
+            layout: layout_param(data, errors, path))
+      end
+
+      def self.layout_param(data, errors, path)
+        value = data["layout"]
+        unless value.nil? || CardDefinition::Faces::LAYOUTS.include?(value)
+          errors << "#{path}.layout: must be one of #{CardDefinition::Faces::LAYOUTS.join(", ")}"
+        end
+        value
       end
 
       def self.colors_param(data, errors, path)
@@ -58,12 +76,12 @@ module Enjine
         end
       end
 
-      def self.subtype_list(data, errors, path)
-        list(data, "subtypes", errors, path).filter_map do |raw|
+      def self.subtype_list(data, errors, path, key = "subtypes")
+        list(data, key, errors, path).filter_map do |raw|
           sub = raw.to_s.downcase.tr(" -", "__")
           next sub.to_sym if SUBTYPE.match?(sub)
 
-          errors << "#{path}.subtypes: invalid subtype #{raw.inspect}"
+          errors << "#{path}.#{key}: invalid subtype #{raw.inspect}"
           nil
         end
       end
@@ -109,7 +127,11 @@ module Enjine
       end
 
       def initialize(types: [], subtypes: [], supertypes: [], name: nil, any_of: [], not_types: [], permanent: false,
-                     mana_value: {}, colors: [], color_count: {})
+                     mana_value: {}, colors: [], color_count: {}, keywords: [], not_subtypes: [], stats: {}, layout: nil)
+        @keywords = keywords.freeze
+        @not_subtypes = not_subtypes.freeze
+        @stats = stats.freeze
+        @layout = layout
         @colors = colors.freeze
         @color_count = color_count.freeze
         @types = types.freeze
@@ -126,12 +148,16 @@ module Enjine
       # True when the spec states no quality: "a card" (CR 701.23d).
       def any?
         types.empty? && not_types.empty? && subtypes.empty? && supertypes.empty? && name.nil? && any_of.empty? &&
-          !permanent && mana_value.empty? && colors.empty? && color_count.empty?
+          !permanent && mana_value.empty? && colors.empty? && color_count.empty? && keywords.empty? && not_subtypes.empty? &&
+          stats.empty? && layout.nil?
       end
 
       # Whether a card object matches, by its current characteristics (CR 109.3). `ctx` (an EffectContext)
       # computes mana value bounds given as amounts; without one, only fixed bounds can be met.
-      def match?(engine, object, ctx = nil) = object.kind == "card" && chars_match?(engine, engine.chars(object), ctx)
+      def match?(engine, object, ctx = nil)
+        object.kind == "card" && chars_match?(engine, engine.chars(object), ctx) &&
+          (layout.nil? || engine.catalog.fetch(engine.own_card(object)).layout == layout)
+      end
 
       # Whether characteristics match (an object's, or remembered ones such as a mana source's, CR 106.6).
       def chars_match?(engine, chars, ctx = nil)
@@ -139,20 +165,38 @@ module Enjine
           subtypes.all? { chars.subtypes.include?(it) } && supertypes.all? { chars.supertypes.include?(it) } &&
           (name.nil? || chars.name == name) && (!permanent || chars.types.intersect?(PERMANENT_TYPES)) &&
           (colors.empty? || colors.intersect?(chars.colors)) && bounded?(mana_value, chars.mana_cost&.mana_value.to_i, engine, ctx) &&
-          bounded?(color_count, chars.colors.size, engine, ctx) && (any_of.empty? || any_of.any? { it.chars_match?(engine, chars, ctx) })
+          bounded?(color_count, chars.colors.size, engine, ctx) && (any_of.empty? || any_of.any? { it.chars_match?(engine, chars, ctx) }) &&
+          other_qualities?(engine, chars, ctx)
+      end
+
+      # Keywords (CR 702.1), non-subtypes and power/toughness (CR 208.1; a "*" with no value is 0 off the battlefield,
+      # CR 208.2b).
+      def other_qualities?(engine, chars, ctx)
+        (keywords.empty? || keywords.any? { chars.keyword?(it) }) && not_subtypes.none? { chars.subtypes.include?(it) } &&
+          stats.all? { |stat, bounds| bounded?(bounds, chars.public_send(stat).to_i, engine, ctx) }
       end
 
       def to_s
         return "#{any_of.map { it.to_s.delete_suffix(" card") }.join(" or ")} card" unless any_of.empty?
         return "card named #{name}" if name
 
-        words = not_types.map { "non#{it}" } + colors + supertypes + subtypes.map { it.to_s.capitalize } + types
+        words = not_types.map { "non#{it}" } + not_subtypes.map { "non-#{it.to_s.capitalize}" } + colors + supertypes +
+                subtypes.map { it.to_s.capitalize } + types
         words << "permanent" if permanent
-        text = (words.map { it.to_s.tr("_", " ") } + ["card"]).join(" ")
-        bounds = { "mana value" => mana_value, "number of colors" => color_count }.reject { |_, b| b.empty? }
+        text = (words.map { it.to_s.tr("_", " ") } + ["card"]).join(" ") + quality_words
+        bounds = { "mana value" => mana_value, "number of colors" => color_count, "power" => stats["power"] || {},
+                   "toughness" => stats["toughness"] || {} }.reject { |_, b| b.empty? }
         return text if bounds.empty?
 
         "#{text} with #{bounds.map { |what, b| "#{what} #{b.map { |bound, n| "#{bound.tr("_", " ")} #{n}" }.join(" and ")}" }.join(", ")}"
+      end
+
+      # " with flying", " that has an Adventure".
+      def quality_words
+        text = keywords.empty? ? "" : " with #{keywords.join(" or ").tr("_", " ")}"
+        return text unless layout
+
+        "#{text} that has #{"aeiou".include?(layout[0]) ? "an" : "a"} #{layout.capitalize}"
       end
 
       private

@@ -83,7 +83,7 @@ RSpec.describe "Play permissions, beam me up, free casts: card data validation (
   it "checks play_permission, cast_free, exile_until and discover parameters" do
     expect(spell_errors([{ "play_permission" => { "to" => "you", "duration" => "forever", "play" => "borrow",
                                                   "choose" => "all", "not_types" => ["goblin"] } }]))
-      .to eq(["#{base}.play_permission.duration: must be one of end_of_turn, end_of_your_next_turn, while_exiled",
+      .to eq(["#{base}.play_permission.duration: must be one of end_of_turn, end_of_your_next_turn, until_your_next_end_step, while_exiled",
               "#{base}.play_permission.play: must be play or cast", "#{base}.play_permission.choose: must be one_per_owner",
               "#{base}.play_permission.not_types: must be a list of card types"])
     errors = spell_errors([{ "cast_free" => { "count" => 2, "max_mana_value" => "lots" } }])

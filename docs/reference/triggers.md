@@ -298,11 +298,13 @@ Rules: CR 122.6, CR 603.2, CR 603.2c
 | `subject` | "self" (default) or {"each": filter, ...} |
 | `counter` | counter name |
 | `first_time_this_turn` | true: only the first time each turn such counters are put on that permanent (an earlier placement counts even if nothing could trigger then) |
+| `by` | you | opponent: only counters that player puts ("whenever you put ...", CR 122.6a; a permanent's controller puts the counters it enters with) |
 
 ```json
 {
   "counters_placed": {
-    "counter": "+1/+1"
+    "counter": "+1/+1",
+    "by": "you"
   }
 }
 ```

@@ -8,6 +8,16 @@ change the public API; the stable surface is described in
 
 ## [Unreleased]
 
+### Added
+- `counters_placed` takes `by: you | opponent` ("whenever you put counters", CR 122.6a); the
+  `counters_changed` event carries `by`, the player who put them.
+- Filters take `owner: you | opponent` ("a creature you own", "creatures you control but don't own",
+  CR 108.3), in targets, selectors and statics.
+- Card specs take `keywords`, `not_subtypes`, `power`, `toughness` and `layout` ("a creature card with
+  flying", "a non-Avatar card", "power 1 or less", "a card that has an Adventure").
+- Durations counted in your own turns: `become_copy` `until_your_next_turn`, `gain_control`
+  `end_of_your_next_turn`, `play_permission` `until_your_next_end_step` (CR 611.2a).
+
 ## [0.3.0] - 2026-11-20
 
 ### Added

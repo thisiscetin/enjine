@@ -79,6 +79,7 @@ module Enjine
       # CR 514.2: remove marked damage and end "until end of turn" effects (control returns first).
       def finish(engine)
         engine.revert_temporary_control!
+        engine.end_next_turn_control! # Engine::Durations
         engine.cleanup_turn!
       end
 
@@ -94,6 +95,14 @@ module Enjine
       end
     end
 
+    # CR 513: "until your next end step" effects end as the end step begins (Engine::Durations).
+    class EndStep < Step
+      def begin(engine)
+        engine.expire_end_step_effects!
+        super
+      end
+    end
+
     ORDER = [
       Untap.new(:untap, :beginning),
       Step.new(:upkeep, :beginning),
@@ -105,7 +114,7 @@ module Enjine
       CombatDamage.new(:combat_damage, :combat),
       Step.new(:end_of_combat, :combat),
       Step.new(:postcombat_main, :postcombat_main),
-      Step.new(:end, :ending),
+      EndStep.new(:end, :ending),
       Cleanup.new(:cleanup, :ending)
     ].freeze
     BY_NAME = ORDER.to_h { [it.name, it] }.freeze

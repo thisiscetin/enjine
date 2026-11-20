@@ -62,21 +62,25 @@ module Enjine
                   params: { "subject" => "\"self\" (default) or {\"each\": filter, ...}", "counter" => "counter name",
                             "first_time_this_turn" => "true: only the first time each turn such counters are put on " \
                                                       "that permanent (an earlier placement counts even if nothing " \
-                                                      "could trigger then)" },
-                  example: { "counters_placed" => { "counter" => "+1/+1" } }
+                                                      "could trigger then)",
+                            "by" => "you | opponent: only counters that player puts (\"whenever you put ...\", CR 122.6a; " \
+                                    "a permanent's controller puts the counters it enters with)" },
+                  example: { "counters_placed" => { "counter" => "+1/+1", "by" => "you" } }
 
-        def self.keys = %w[subject counter first_time_this_turn]
+        def self.keys = %w[subject counter first_time_this_turn by]
         def watches?(event) = event.is_a?(Events::CountersChanged) || event.is_a?(Events::ZoneChanged)
 
         def setup(params, errors, path)
           @counter = params["counter"] && Counters.parse(params["counter"], errors, "#{path}.counter")
           @first_time = params["first_time_this_turn"]
           errors << "#{path}.first_time_this_turn: must be true or false" unless [nil, true, false].include?(@first_time)
+          @by = params["by"]
+          errors << "#{path}.by: must be you or opponent" unless [nil, "you", "opponent"].include?(@by)
         end
 
         def occurrences(engine, event, source)
           id, amount = placed(engine, event)
-          return [] unless amount&.positive?
+          return [] unless amount&.positive? && put_by_ok?(engine, event, id, source)
           return [] if @first_time && engine.counter_placements_this_turn(id, @counter) != 1
 
           obj = engine.object(id)
@@ -89,10 +93,22 @@ module Enjine
 
         def to_s
           first = " for the first time each turn" if @first_time
-          "Whenever one or more #{"#{@counter} " if @counter}counters are put on #{@subject}#{first}"
+          return "Whenever one or more #{"#{@counter} " if @counter}counters are put on #{@subject}#{first}" unless @by
+
+          who = @by == "you" ? "you put" : "an opponent puts"
+          "Whenever #{who} one or more #{"#{@counter} " if @counter}counters on #{@subject}#{first}"
         end
 
         private
+
+        # CR 122.6a: who put the counters, relative to the source's controller. Counters a permanent enters with are
+        # put by its controller.
+        def put_by_ok?(engine, event, id, source)
+          return true unless @by
+
+          putter = event.is_a?(Events::CountersChanged) ? engine.names.index(event.by) : engine.object(id).controller
+          (@by == "you") == (putter == source["controller"])
+        end
 
         # [object id, how many matching counters were put on it] for this event, or nil.
         def placed(engine, event)

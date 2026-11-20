@@ -268,7 +268,7 @@ Rules: CR 611.2a, CR 611.2b, CR 611.2c, CR 613.1d, CR 613.1e, CR 613.1f, CR 613.
 
 ## become_copy
 
-Each referenced permanent becomes a copy of the (first) object `of` refers to, with the `except` modifications, until end of turn (default) or for as long as it stays on the battlefield (`duration: "permanent"`). It keeps its counters, status and other effects; nothing enters or leaves, so no enter or leave abilities trigger. Several copy effects apply in timestamp order.
+Each referenced permanent becomes a copy of the (first) object `of` refers to, with the `except` modifications, until end of turn (default), until your next turn (`until_your_next_turn`) or for as long as it stays on the battlefield (`duration: "permanent"`). It keeps its counters, status and other effects; nothing enters or leaves, so no enter or leave abilities trigger. Several copy effects apply in timestamp order.
 
 Rules: CR 707.2, CR 707.4, CR 613.2a, CR 613.7, CR 611.2a, CR 514.2
 
@@ -277,7 +277,7 @@ Rules: CR 707.2, CR 707.4, CR 613.2a, CR 613.7, CR 611.2a, CR 514.2
 | `to` | selector (the permanents that become copies) |
 | `of` | selector (what they copy) |
 | `except` | {"legendary": false, "keywords": [...], "types": [...], "subtypes": [...], "supertypes": [...], "name": ..., "power": n, "toughness": n, "colors": [...]} |
-| `duration` | end_of_turn | permanent |
+| `duration` | end_of_turn | until_your_next_turn | permanent |
 
 ```json
 {
@@ -1327,7 +1327,7 @@ Rules: CR 613.1b, CR 108.4, CR 506.4, CR 302.6, CR 514.2, CR 611.2b
 | --- | --- |
 | `to` | selector (permanents) |
 | `gains` | selector (a player; default "you") |
-| `duration` | permanent | end_of_turn | while_source_on_battlefield | while_source_tapped | while_you_control_source |
+| `duration` | permanent | end_of_turn | end_of_your_next_turn | while_source_on_battlefield | while_source_tapped | while_you_control_source |
 
 ```json
 {
@@ -1609,14 +1609,14 @@ Rules: CR 702.26a, CR 702.26b, CR 702.26d, CR 702.26g, CR 702.26h, CR 502.1, CR 
 
 ## play_permission
 
-A player may play (`play: "play"`, default) or cast (`"cast"`) each referenced exiled card matching `for`/`not_types`, paying its costs and following timing rules, for `duration`: end_of_turn (default), end_of_your_next_turn or while_exiled. With `choose: "one_per_owner"` only one chosen card per owner. `to_player`: who may play it, "controller" (default, the effect's controller), "owner" (the card's owner) or a player selector (a face-down card: only someone who may look at it). `cost_increase`: spells cast this way cost that much generic mana more. `any_mana_type: true`: mana of any type can be spent to cast those spells.
+A player may play (`play: "play"`, default) or cast (`"cast"`) each referenced exiled card matching `for`/`not_types`, paying its costs and following timing rules, for `duration`: end_of_turn (default), end_of_your_next_turn, until_your_next_end_step or while_exiled. With `choose: "one_per_owner"` only one chosen card per owner. `to_player`: who may play it, "controller" (default, the effect's controller), "owner" (the card's owner) or a player selector (a face-down card: only someone who may look at it). `cost_increase`: spells cast this way cost that much generic mana more. `any_mana_type: true`: mana of any type can be spent to cast those spells.
 
 Rules: CR 611.2a, CR 601.3, CR 305.1, CR 400.7, CR 514.2, CR 601.2f, CR 108.3, CR 406.3b, CR 609.4b
 
 | Parameter | Description |
 | --- | --- |
 | `to` | selector (usually {"result": n}) |
-| `duration` | end_of_turn | end_of_your_next_turn | while_exiled |
+| `duration` | end_of_turn | end_of_your_next_turn | until_your_next_end_step | while_exiled |
 | `play` | play | cast |
 | `for` | card spec |
 | `not_types` | list of card types |

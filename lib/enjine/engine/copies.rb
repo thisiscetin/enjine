@@ -13,7 +13,8 @@ module Enjine
     #                                 resolve against that card's data)
     #   memory["own_card"]            the card the object really is, while a copy effect changed obj.card
     #   memory["copy_effects"]        copy effects on a permanent, in timestamp order (CR 613.7): each
-    #                                 {"card", "except", "duration" ("permanent" | "end_of_turn"), "timestamp"}
+    #                                 {"card", "except", "duration" ("permanent" | "end_of_turn" |
+    #                                 "until_your_next_turn", with its "controller"), "timestamp"}
     #   memory["copy_except"]         the exceptions of an object created as a copy (a token copy, CR 707.9)
     #   memory["token"]               true for a token that is a copy of a card (CR 111.1, 608.3f)
     #   memory["copy"]                "spell" for a copy of a spell (CR 707.10), "card" for a copy of a card
@@ -79,11 +80,13 @@ module Enjine
 
       # CR 707.4, 613.2a: `obj` becomes a copy of [card, except]; no enter or leave triggers. A
       # "permanent" copy effect lasts as long as the object stays on the battlefield.
-      def become_copy!(obj, values, duration: "permanent")
+      # `controller`: whose next turn ends an "until your next turn" copy effect (CR 611.2a).
+      def become_copy!(obj, values, duration: "permanent", controller: nil)
         card, except = values
         obj.memory["own_card"] ||= obj.card
-        (obj.memory["copy_effects"] ||= []) << { "card" => card, "except" => except, "duration" => duration,
-                                                 "timestamp" => next_timestamp! }
+        entry = { "card" => card, "except" => except, "duration" => duration, "timestamp" => next_timestamp! }
+        entry["controller"] = controller if duration == "until_your_next_turn"
+        (obj.memory["copy_effects"] ||= []) << entry
         obj.card = card
         emit Events::EffectStarted.new(kind: "copy", affected: [obj.id], details: { "card" => card })
       end
@@ -165,15 +168,19 @@ module Enjine
         end
       end
 
-      # CR 514.2: "until end of turn" copy effects end; the permanent has the copiable values of the
-      # newest copy effect left, or its own.
-      def end_copy_effects!
+      # CR 514.2: "until end of turn" copy effects end (with `controller`: that player's "until your next turn"
+      # ones, as their turn begins, CR 611.2a); the permanent has the copiable values of the newest copy effect
+      # left, or its own.
+      def end_copy_effects!(controller: nil)
+        ending = lambda do |e|
+          controller.nil? ? e["duration"] == "end_of_turn" : e["duration"] == "until_your_next_turn" && e["controller"] == controller
+        end
         state.battlefield.each do |id|
           obj = object(id)
           effects = obj.memory["copy_effects"] or next
-          next unless effects.any? { it["duration"] == "end_of_turn" }
+          next unless effects.any?(&ending)
 
-          effects.reject! { it["duration"] == "end_of_turn" }
+          effects.reject!(&ending)
           obj.card = effects.last&.fetch("card") || obj.memory["own_card"]
           obj.memory.delete("copy_effects") if effects.empty?
           obj.memory.delete("own_card") if effects.empty?

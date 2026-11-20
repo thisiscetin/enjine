@@ -125,12 +125,13 @@ module Enjine
       class BecomeCopy < Effect
         include CopyOf
 
-        DURATIONS = %w[end_of_turn permanent].freeze
+        DURATIONS = %w[end_of_turn until_your_next_turn permanent].freeze
 
         primitive :effect, :become_copy,
                   description: "Each referenced permanent becomes a copy of the (first) object `of` refers to, with the " \
-                               "`except` modifications, until end of turn (default) or for as long as it stays on the " \
-                               "battlefield (`duration: \"permanent\"`). It keeps its counters, status and other " \
+                               "`except` modifications, until end of turn (default), until your next turn " \
+                               "(`until_your_next_turn`) or for as long as it stays on the battlefield " \
+                               "(`duration: \"permanent\"`). It keeps its counters, status and other " \
                                "effects; nothing enters or leaves, so no enter or leave abilities trigger. Several copy " \
                                "effects apply in timestamp order.",
                   rules: %w[707.2 707.4 613.2a 613.7 611.2a 514.2],
@@ -152,7 +153,9 @@ module Enjine
         def apply(engine, ctx)
           first = copy_values(engine, ctx).first or return
           values = [first[0], Engine::Copies.merge_except(first[1], @except)]
-          objects(engine, ctx).each { engine.become_copy!(engine.object(it), values, duration: @duration) }
+          objects(engine, ctx).each do
+            engine.become_copy!(engine.object(it), values, duration: @duration, controller: ctx.controller)
+          end
         end
       end
 

@@ -83,6 +83,7 @@ module Enjine
 
       # "Until your next turn" effects end as that player's next turn begins (CR 611.2a, 500.1).
       def end_effects_until_turn_of!(index)
+        end_copy_effects!(controller: index) # Engine::Copies
         ending = state.effects.count { it["duration"] == "until_your_next_turn" && it["controller"] == index }
         return if ending.zero?
 
@@ -202,7 +203,7 @@ module Enjine
         gain_control!(obj, controller, timestamp)
         state.effects << { "kind" => "control", "timestamp" => timestamp, "controller" => ctx.controller,
                            "affected" => [obj.id], "duration" => duration, "previous" => previous,
-                           "source" => source }.compact
+                           "source" => source, "turn" => duration == "end_of_your_next_turn" ? state.turn : nil }.compact
         emit Events::EffectStarted.new(kind: "control", affected: [obj.id], details: { "controller" => controller })
       end
 

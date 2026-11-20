@@ -73,7 +73,7 @@ RSpec.describe "Copy primitives (validation)" do
     it "reports bad durations, flags and abilities" do
       path = "abilities[0].spell.effects[0]"
       expect(errors_for(spell({ "become_copy" => { "to" => "self", "of" => "self", "duration" => "forever" } })))
-        .to include("#{path}.become_copy.duration: must be one of end_of_turn, permanent")
+        .to include("#{path}.become_copy.duration: must be one of end_of_turn, until_your_next_turn, permanent")
       expect(errors_for(spell({ "copy_spell" => { "of" => "self", "new_targets" => "yes" } })))
         .to include("#{path}.copy_spell.new_targets: must be true or false")
       expect(errors_for(spell({ "grant_ability" => { "to" => "self", "duration" => "a_while" } })))
