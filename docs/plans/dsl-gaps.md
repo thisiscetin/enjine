@@ -7,6 +7,18 @@ Source: deckfinder `card_scripts`, all 303 PARTIAL and 60 FAIL scripts (365 card
 counts as made exact only when all of its gaps are closed. The order is greedy: at each step, the change
 that makes the most cards exact per unit of effort (S = 1, M = 2, L = 3+, from a skim of `lib/`).
 
+- **Batch 1 done (Unreleased), verified:** `counters_placed by`, filter `owner`, card-spec keywords/
+  not_subtypes/power/toughness/layout, and the turn-counted durations. Re-scripted and passing
+  `enjine --verify` (10–12 rules-monitored games each): Ant-Man, Exemplar of Light, Inspired Tethermage,
+  Knight of Wundagore, Mikey & Leo, The Great Goblin, Charming Prince, Get Out, Northampton Farm,
+  The Eagles Are Coming!, Laughing Jasper Flint, Steamcore Scholar, Absorbing Man, Haste Magic, Inti
+  (**15 exact**, against the 30 the tag count promised). Still blocked by a second gap: Beast and Kid
+  Loki (a live static), Invisible Woman (batching across permanents), Terrasymbiosis (once-each-turn
+  may), Boiling Rock Rioter and Starfall Invocation (owner on exiled/destroyed card specs), Clash of
+  Elements (the owner decides and is dealt the damage), Iroh (computed enters-with counters), April
+  O'Neil and Codie (kindred / prepared spell filters), Hearth Elemental (the graveyard count uses a
+  permanent-style filter, not a card spec), Leonardo (play_from has no "during your turn"),
+  Evil's Thrall (mana-value comparison condition), Dragonhawk ("still exiled").
 - 81 cards have only a one-off gap (no change below helps them); 284 share at least one listed gap.
 - The first 4 changes (all S) make **30** cards exact; the first 20 make about **95**; the first 30
   about **150**.
