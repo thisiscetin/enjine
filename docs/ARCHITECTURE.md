@@ -19,6 +19,7 @@ lib/enjine/
   card_definition.rb              # immutable, validated blueprint built from a data Hash
   catalog.rb                      # id -> CardDefinition, conflict detection
   deck.rb  player.rb  setup.rb    # decklists, players, compiled pairings
+  format.rb  color_identity.rb    # game formats (constructed, duel_commander); CR 903.4 color identity
 
   mechanics/                      # ONE PLACE PER MECHANIC: <category>/<mechanic>.rb, all registered primitives
     types/ supertypes/ subtypes/  card types, supertypes, subtypes (permanent_types spell_types land saga auras_and_equipment ...)
@@ -50,6 +51,7 @@ lib/enjine/
     state_based_actions.rb        # CR 704 and game end (CR 104)
     characteristics.rb            # CR 613 layer pipeline for P/T, continuous effects, cleanup
     rules.rb copies.rb faces.rb ...   # player rules and control; copies (CR 707); faces; sagas, phasing, speed ...
+    commander.rb                  # CR 903 (Duel Commander): command zone, tax, 903.9 returns, commander damage
   steps.rb                        # 12 step objects with turn-based actions
   events.rb                       # typed, serializable events + per-viewer redaction
   decisions/                      # one class per decision kind

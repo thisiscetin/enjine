@@ -197,6 +197,23 @@ In a Commander game:
   `commander_zone` decision before anyone gets priority: put it into the command zone or leave it (CR 903.9).
 - 21 combat damage from one commander loses the game, with the result reason `"commander_damage"` (CR 903.10a).
 
+```ruby
+alice = Enjine::Player.new(name: "alice", deck: alice_doc)   # each doc names its "commander"
+bob   = Enjine::Player.new(name: "bob", deck: bob_doc)
+game  = Enjine::Setup.new(alice, bob, format: :duel_commander).new_game(seed: 1)
+
+game.state.command                        # ids of both commanders, waiting in the command zone
+game.legal_options                        # at sorcery speed, with enough mana for cost + tax:
+# => [..., {type: "cast", object: "wort_the_raidmother#3", via: "command"}, ...]
+
+# After the commander dies (or is exiled, bounced, tucked) its owner decides:
+game.pending_decision.kind                # => "commander_zone"
+game.submit(type: "command", object: id)  # back to the command zone ({type: "stay", ...} leaves it)
+
+game.view_for("alice")["players"][0].slice("commander", "commander_tax", "commander_damage")
+# => {"commander" => "Wort, the Raidmother", "commander_tax" => 2, "commander_damage" => {}}
+```
+
 The game starts at its very first decision: the die-roll winner chooses to play
 or draw (CR 103.1), then each player decides on a mulligan.
 
