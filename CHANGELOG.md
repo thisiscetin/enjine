@@ -8,6 +8,17 @@ change the public API; the stable surface is described in
 
 ## [Unreleased]
 
+### Added
+- `become` takes `set_types` ("it's an artifact, not a creature", CR 205.1a), `"creature_types": []` ("loses
+  all creature types") and `all_creature_types: true` (CR 205.3d).
+- `return_to_battlefield` takes `as`: the `become` changes it has from the moment it enters ("It's an
+  enchantment. (It's not a creature.)", CR 614.1c), seen by abilities that trigger on it entering.
+
+### Fixed
+- The trigger condition `{"triggering": filter}` matches a permanent that left the battlefield with the card
+  types it last had ("if it was a creature", CR 603.10a), not its printed ones.
+- The rules monitor's power/toughness check (CR 613.4c) leaves out permanents whose card types were set.
+
 ## [0.4.0] - 2026-11-21
 
 ### Added

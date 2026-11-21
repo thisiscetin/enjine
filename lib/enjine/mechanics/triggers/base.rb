@@ -10,11 +10,14 @@ module Enjine
       # the battlefield it describes the object as it last existed, CR 603.10a).
       # What an event tells a triggered ability about itself (CR 603.2): the object and player it is
       # about and a number ("that many"). Effects name them with {"triggering": "object" | "player"}
-      # and the amount {"triggering": "amount"}; "card" is the object's card, for conditions.
+      # and the amount {"triggering": "amount"}; "card" is the object's card, for conditions, and "types" the card
+      # types a permanent that left had as it last existed ("if it was a creature", CR 603.10a).
       def self.event_facts(engine, event)
         facts = {}
         case event
-        when Events::ZoneChanged then facts.merge!("object" => event.new_id, "player" => engine.names.index(event.owner))
+        when Events::ZoneChanged
+          facts.merge!("object" => event.new_id, "player" => engine.names.index(event.owner))
+          facts["types"] = engine.last_known(event.old_id)&.fetch("types")&.map(&:to_s) if event.from == "battlefield"
         when Events::SpellCast, Events::DilemmaFaced, Events::Tapped, Events::AttackerDeclared, Events::BecameBlocked,
              Events::BlockerDeclared
           facts["object"] = event.object

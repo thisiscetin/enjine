@@ -813,6 +813,22 @@ Elemental creature with haste until end of turn. It's still a land.":
 "becomes a legendary Spider Hero in addition to its other types" is `"supertypes": ["legendary"],
 "subtypes": ["spider", "hero"]`. Static abilities take `types` the same way.
 
+**Setting card types and creature types** (CR 205.1a, 205.3d). `set_types` replaces the card types
+(applied in timestamp order with types added by other effects, CR 613.7a); subtypes correlated with a
+card type it no longer has are lost (creature types without creature, Treasure without artifact), and
+a permanent that is no longer a creature has no power or toughness. `"creature_types": []` removes
+every creature type; `"all_creature_types": true` gives them all (not the changeling ability).
+`return_to_battlefield` takes the same changes as `as`: what the card is from the moment it enters, so
+abilities that trigger on it entering see it so (CR 614.1c).
+
+| Card text | Script |
+|---|---|
+| "When this dies, if it was a creature, return it to the battlefield under its owner's control. It's an enchantment. (It's not a creature.)" | trigger `{ "dies": {} }` with `"if": { "triggering": "creature" }` (the card types it last had, CR 603.10a) and `{ "return_to_battlefield": { "to": { "triggering": "object" }, "as": { "set_types": ["enchantment"] } } }` |
+| "the chosen permanents become Treasure artifacts with '…' and lose all other abilities" | `{ "become": { "set_types": ["artifact"], "subtypes": ["treasure"], "loses_abilities": true, "abilities": [ … ], "to": { "target": 0 } } }` |
+| "Until your next turn, he becomes a land and gains '{T}: Add {U}.' (He's not a creature during that time.)" | `become` with `"set_types": ["land"]`, `"duration": "until_your_next_turn"` |
+| "gets +3/-3 and loses all creature types until end of turn" | `pump`, then `{ "become": { "creature_types": [], "to": { "target": 0 } } }` |
+| "becomes a 3/3 creature with vigilance and all creature types" | `become` with `"types": ["creature"]`, `"all_creature_types": true`, `"keywords": ["vigilance"]`, `base_power_toughness` |
+
 **Exhaust** (CR 702.177). "Exhaust — {2}{G}: …" is an activated ability with `"exhaust": true`: it
 can be activated only once for as long as the permanent stays. "Whenever you activate an exhaust
 ability" is `{ "activates_ability": { "exhaust": true } }`.

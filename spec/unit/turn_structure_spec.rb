@@ -52,9 +52,9 @@ RSpec.describe "Turn structure primitives validation" do
     end
 
     it "reports path-addressed errors" do
-      expect(errors_for(become({}))).to include(a_string_matching(/become: needs at least one of types/))
-      expect(errors_for(become("creature_types" => [], "duration" => "forever")))
-        .to include(a_string_matching(/become\.creature_types: must be a non-empty list/),
+      expect(errors_for(become({}))).to include(a_string_matching(/become: needs at least one of set_types, types/))
+      expect(errors_for(become("creature_types" => ["Not Lowercase"], "duration" => "forever")))
+        .to include(a_string_matching(/become\.creature_types: must be a list of lowercase creature types/),
                     a_string_matching(/become\.duration: must be one of end_of_turn, until_your_next_turn, indefinite/))
       expect(errors_for(become("base_power_toughness" => 3)))
         .to include(a_string_matching(/become\.base_power_toughness: must be/))

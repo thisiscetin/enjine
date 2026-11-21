@@ -152,7 +152,8 @@ module Enjine
           base = with_added_types(base, ability.card_types) unless ability.card_types.empty?
           subtypes |= ability.added_subtypes(source)
         end
-        effects.each { types = it["types"].map(&:to_sym) if it["kind"] == "creature_types" && it["affected"].include?(obj.id) }
+        setting = effects.select { it["kind"] == "creature_types" && it["affected"].include?(obj.id) }.last
+        types = Mechanics::Effects::Become.creature_types_of(setting) if setting
         base = base.with(subtypes: ((base.subtypes & Characteristics::NON_CREATURE_SUBTYPES) | types).freeze) if types
         base = with_gained_subtypes(base, subtypes - base.subtypes) unless (subtypes - base.subtypes).empty?
         base.creature? || base.power.nil? ? base : base.with(power: nil, toughness: nil)
@@ -178,12 +179,16 @@ module Enjine
       # "Is a black Skeleton creature" (CR 205.1a): the card types are exactly these, and subtypes correlated with
       # a card type it no longer has are lost (creature types without creature, an Equipment without artifact).
       def with_set_types(base, set)
-        kept = base.subtypes.select do |sub|
+        base = base.with(types: set, subtypes: subtypes_of_types(base.subtypes, set))
+        base.creature? && base.power.nil? ? base.with(power: 0, toughness: 0) : base
+      end
+
+      # The subtypes still correlated with one of the card types `set` (CR 205.1a).
+      def subtypes_of_types(subtypes, set)
+        subtypes.select do |sub|
           correlated = CORRELATED_SUBTYPES.find { |_, list| list.include?(sub) }&.first || :creature
           set.include?(correlated)
-        end
-        base = base.with(types: set, subtypes: kept.freeze)
-        base.creature? && base.power.nil? ? base.with(power: 0, toughness: 0) : base
+        end.freeze
       end
 
       def printed_noncreature_pt?(obj) = definition(obj).then { !it.creature? && !it.power.nil? }
@@ -284,6 +289,8 @@ module Enjine
                  urzas]
       }.freeze
       NON_CREATURE_SUBTYPES = CORRELATED_SUBTYPES.values.flatten.freeze
+      # Resolved effects that change card types in layer 4, applied in timestamp order (CR 613.7a).
+      TYPE_EFFECTS = %w[add_types set_types].freeze
 
       # ---- layers 4 and 7b from the object's own state ------------------------------------
 
@@ -314,7 +321,7 @@ module Enjine
         symbols += active_max_speed(obj, obj.controller) + active_class_levels(obj)
         assimilated = !effects.empty? && effects.any? { it["kind"] == "assimilate" && it["affected"].include?(obj.id) }
         added = effects.empty? ? [] : added_subtypes(obj, effects)
-        becomes = effects.empty? ? [] : effects.select { it["kind"] == "add_types" && it["affected"].include?(obj.id) }
+        becomes = effects.empty? ? [] : effects.select { TYPE_EFFECTS.include?(it["kind"]) && it["affected"].include?(obj.id) }
         return printed if symbols.empty? && !assimilated && added.empty? && becomes.empty?
 
         attrs = printed.to_h
@@ -326,15 +333,24 @@ module Enjine
       end
 
       # "Becomes an artifact creature", "becomes a legendary Spider Hero in addition to its other types" (CR 205.1b):
-      # card types, supertypes and subtypes are added, none lost. Power/toughness: see Characteristics#with_added_types.
+      # card types, supertypes and subtypes are added, none lost. "It's an enchantment. (It's not a creature.)"
+      # (CR 205.1a): the card types are set, losing the subtypes of the others. In timestamp order (CR 613.7a).
+      # Power/toughness: see Characteristics#with_added_types.
       def added_type_layers(attrs, effect)
+        if effect["kind"] == "set_types"
+          attrs[:types] = effect["types"].map(&:to_sym)
+          attrs[:subtypes] = subtypes_of_types(attrs[:subtypes], attrs[:types])
+          return become_creature_pt(attrs)
+        end
         attrs[:types] = attrs[:types] | effect["types"].map(&:to_sym)
         attrs[:supertypes] = attrs[:supertypes] | effect["supertypes"].map(&:to_sym)
         attrs[:subtypes] = attrs[:subtypes] | effect["subtypes"].map(&:to_sym)
-        return unless attrs[:types].include?(:creature) && attrs[:power].nil?
+        become_creature_pt(attrs)
+      end
 
-        attrs[:power] = 0
-        attrs[:toughness] = 0
+      # A permanent that becomes a creature without power and toughness is 0/0 (CR 301.7b).
+      def become_creature_pt(attrs)
+        attrs.merge!(power: 0, toughness: 0) if attrs[:types].include?(:creature) && attrs[:power].nil?
       end
 
       def station_symbol_layers(attrs, inst, defn)

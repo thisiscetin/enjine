@@ -705,12 +705,15 @@ module Enjine
           freeze
         end
 
+        # A permanent that left is matched with the card types it last had (CR 603.10a: "if it was a creature").
         def true?(engine, ctx)
-          card = Selector.memory(engine, ctx).fetch("triggering", {})["card"]
-          return false unless card && @filter
+          facts = Selector.memory(engine, ctx).fetch("triggering", {})
+          return false unless facts["card"] && @filter
 
-          defn = engine.catalog.fetch(card)
-          @filter.matches_facts?(Filters::Facts.new(chars: defn.printed_characteristics, counters: {}, token: defn.token?))
+          defn = engine.catalog.fetch(facts["card"])
+          chars = defn.printed_characteristics
+          chars = chars.with(types: facts["types"].map(&:to_sym)) if facts["types"]
+          @filter.matches_facts?(Filters::Facts.new(chars: chars, counters: {}, token: defn.token?))
         end
 
         def to_s = "it's a #{@filter.respond_to?(:primitive_name) ? @filter.primitive_name.tr("_", " ") : @filter}"

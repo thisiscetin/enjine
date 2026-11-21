@@ -123,8 +123,7 @@ module Enjine
         left_battlefield!(fresh, old) if lki
         arrive!(fresh, old, data)
         fresh.memory.merge!("face_down" => true, "may_look" => face_down.uniq.sort) if face_down
-        list = state.zone_list(to, old.owner)
-        data["position"] == :bottom ? list.push(fresh.id) : list.unshift(fresh.id)
+        place!(fresh, data)
         record_result!(fresh.id)
         note_commander_move!(fresh) # CR 903.9
         event = Events::ZoneChanged.new(card: old.card, old_id: id, new_id: fresh.id, owner: name(old.owner),
@@ -136,6 +135,19 @@ module Enjine
         prepare!(fresh) if to == :battlefield && data["enters"]["prepared"] # "enters prepared" (CR 723.3a)
         run_follow_ups!(data, "object" => fresh.id) # "exile it instead. When you do, ..." (Engine::FollowUps)
         fresh
+      end
+
+      # Puts the new object into its zone's list; on the battlefield, as what it enters as (#enter_as!).
+      def place!(fresh, data)
+        list = state.zone_list(data["to"], fresh.owner)
+        data["position"] == :bottom ? list.push(fresh.id) : list.unshift(fresh.id)
+        enter_as!(fresh, data["enters"]["as"]) if data["to"] == :battlefield && data["enters"]["as"]
+      end
+
+      # "Return it to the battlefield. It's an enchantment. (It's not a creature.)": what it is from the moment it
+      # enters (CR 614.1c, 205.1a), applied before the event, so abilities triggering on it entering see it so.
+      def enter_as!(obj, become)
+        become.apply(self, Mechanics::EffectContext.new(obj.controller, obj.id, obj.id, [], []))
       end
 
       # A permanent that left the battlefield: the resolving spell or ability links the new object to it (CR 400.7,

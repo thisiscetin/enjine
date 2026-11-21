@@ -307,9 +307,11 @@ module Enjine
       card.creature? && !card.defined_pt? && applying_statics(obj).none?(&:base_power_toughness) && !types_replaced?(obj)
     end
 
-    # Creature types an effect replaced (layer 4): the monitor matches statics against printed types.
+    # Creature types or card types an effect or static replaced (layer 4, CR 205.1a): the monitor matches statics
+    # against printed types, and a permanent that is no longer a creature has no power or toughness.
     def types_replaced?(obj)
-      state.effects.any? { %w[creature_types assimilate].include?(it["kind"]) && Array(it["affected"]).include?(obj.id) }
+      applying_statics(obj).any?(&:set_types) ||
+        state.effects.any? { %w[creature_types assimilate set_types].include?(it["kind"]) && Array(it["affected"]).include?(obj.id) }
     end
 
     # CR 613.4b: the latest setting effect, else as printed, or as a copy's exceptions or a token's creating

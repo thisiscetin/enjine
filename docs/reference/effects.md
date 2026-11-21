@@ -224,16 +224,18 @@ Rules: CR 701.3a, CR 701.3b, CR 701.3c, CR 301.5c
 
 ## become
 
-Each referenced permanent becomes what the parameters say, for `duration` (end_of_turn, default; until_your_next_turn: until your next turn begins; indefinite: as long as it stays on the battlefield; while_source_on_battlefield: for as long as this effect's source remains on the battlefield; while_you_control_source: for as long as you control it): it has the card `types`, `supertypes` and `subtypes` in addition to its other types (layer 4, "becomes an artifact creature"), its creature types are exactly `creature_types` (layer 4), its colors are `colors` (layer 5), with `loses_abilities: true` it loses all the abilities it had (layer 6; abilities granted later, keyword counters put on it later and this effect's own `keywords` and `abilities` stay, CR 613.7), it has the `keywords` and `abilities` (layer 6: triggered, activated, mana, play_from or additional_land_plays abilities) and its base power and toughness are `base_power_toughness` (layer 7b). A permanent that becomes a creature has its printed power and toughness (a Vehicle's), or 0/0.
+Each referenced permanent becomes what the parameters say, for `duration` (end_of_turn, default; until_your_next_turn: until your next turn begins; indefinite: as long as it stays on the battlefield; while_source_on_battlefield: for as long as this effect's source remains on the battlefield; while_you_control_source: for as long as you control it): it has the card `types`, `supertypes` and `subtypes` in addition to its other types (layer 4, "becomes an artifact creature"; with `set_types` its card types are exactly those first, "it's an enchantment, not a creature", and subtypes of a card type it loses go), its creature types are exactly `creature_types` ([] for "loses all creature types"; `all_creature_types: true` for "all creature types") (layer 4), its colors are `colors` (layer 5), with `loses_abilities: true` it loses all the abilities it had (layer 6; abilities granted later, keyword counters put on it later and this effect's own `keywords` and `abilities` stay, CR 613.7), it has the `keywords` and `abilities` (layer 6: triggered, activated, mana, play_from or additional_land_plays abilities) and its base power and toughness are `base_power_toughness` (layer 7b). A permanent that becomes a creature has its printed power and toughness (a Vehicle's), or 0/0.
 
 Rules: CR 611.2a, CR 611.2b, CR 611.2c, CR 613.1d, CR 613.1e, CR 613.1f, CR 613.4b, CR 613.7b, CR 205.1a, CR 205.1b, CR 301.7b, CR 514.2
 
 | Parameter | Description |
 | --- | --- |
+| `set_types` | card types it has instead of its others: artifact, creature, enchantment, land |
 | `types` | card types it also has: artifact, creature, enchantment, land |
 | `supertypes` | supertypes it also has ("legendary") |
 | `subtypes` | subtypes it also has ("in addition to its other types") |
-| `creature_types` | list of creature types (replaces the others) |
+| `creature_types` | list of creature types (replaces the others; [] removes them all) |
+| `all_creature_types` | true: it has every creature type |
 | `colors` | list of W, U, B, R, G (replaces its colors) |
 | `loses_abilities` | true: it loses all abilities ("loses all abilities") |
 | `keywords` | list of keywords it gains |
@@ -1924,9 +1926,9 @@ Rules: CR 101.4, CR 400.7, CR 608.2c
 
 ## return_to_battlefield
 
-Put each referenced card that is in exile or a graveyard onto the battlefield under its owner's control (`under: "you"`: under the controller's), tapped if `tapped: true`. A card that is no longer in the zone it was expected in, or isn't a permanent card, stays where it is. `transformed: true`: it enters with its back face up; a card that isn't double-faced, or whose back face isn't a permanent, stays where it is.
+Put each referenced card that is in exile or a graveyard onto the battlefield under its owner's control (`under: "you"`: under the controller's), tapped if `tapped: true`. A card that is no longer in the zone it was expected in, or isn't a permanent card, stays where it is. `transformed: true`: it enters with its back face up; a card that isn't double-faced, or whose back face isn't a permanent, stays where it is. `as`: what it is as it enters, for as long as it stays (the `become` changes, without abilities): "It's an enchantment. (It's not a creature.)" is `{"set_types": ["enchantment"]}`; abilities that trigger on it entering see it so.
 
-Rules: CR 400.7, CR 400.4a, CR 110.2, CR 111.8, CR 603.7c, CR 614.1c, CR 122.6, CR 712.11a, CR 712.11b
+Rules: CR 400.7, CR 400.4a, CR 110.2, CR 111.8, CR 603.7c, CR 614.1c, CR 122.6, CR 712.11a, CR 712.11b, CR 205.1a
 
 | Parameter | Description |
 | --- | --- |
@@ -1935,6 +1937,7 @@ Rules: CR 400.7, CR 400.4a, CR 110.2, CR 111.8, CR 603.7c, CR 614.1c, CR 122.6, 
 | `transformed` | boolean |
 | `under` | owner | you |
 | `counters` | {counter name: n}: it enters with these counters ("with a +1/+1 counter on it") |
+| `as` | {set_types, types, supertypes, subtypes, creature_types, all_creature_types, colors, loses_abilities, keywords, base_power_toughness}: as `become`, from the moment it enters |
 
 ```json
 {

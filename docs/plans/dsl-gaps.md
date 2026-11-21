@@ -19,6 +19,12 @@ that makes the most cards exact per unit of effort (S = 1, M = 2, L = 3+, from a
   O'Neil and Codie (kindred / prepared spell filters), Hearth Elemental (the graveyard count uses a
   permanent-style filter, not a card spec), Leonardo (play_from has no "during your turn"),
   Evil's Thrall (mana-value comparison condition), Dragonhawk ("still exiled").
+- **Batch 2 done (Unreleased), verified:** `become` `set_types`, `"creature_types": []`,
+  `all_creature_types`, `return_to_battlefield` `as`, and `{"triggering": filter}` reading last-known card
+  types. Re-scripted and passing `enjine --verify` (seeds 0 and 7): Enduring Courage, Enduring Curiosity,
+  Enduring Innocence, Tom, Bert, and William, Kitesail Larcenist, Hydro-Man, Nameless Inversion, Soulstone
+  Sanctuary (**8 exact**, of the 10 change 5 promised). Still blocked: The Irencrag (become a named
+  Equipment with equip), Brilliance Unleashed (its own return effect, not yet re-scripted with `as`).
 - 81 cards have only a one-off gap (no change below helps them); 284 share at least one listed gap.
 - The first 4 changes (all S) make **30** cards exact; the first 20 make about **95**; the first 30
   about **150**.
