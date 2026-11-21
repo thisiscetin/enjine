@@ -8,6 +8,8 @@ change the public API; the stable surface is described in
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-11-21
+
 ### Added
 - `counters_placed` takes `by: you | opponent` ("whenever you put counters", CR 122.6a); the
   `counters_changed` event carries `by`, the player who put them.
@@ -17,6 +19,10 @@ change the public API; the stable surface is described in
   flying", "a non-Avatar card", "power 1 or less", "a card that has an Adventure").
 - Durations counted in your own turns: `become_copy` `until_your_next_turn`, `gain_control`
   `end_of_your_next_turn`, `play_permission` `until_your_next_end_step` (CR 611.2a).
+
+### Changed
+- `owner` is refused, with a validation error, where a filter matches characteristics only (card specs
+  in zone-change triggers, cost modifiers, replacement effects, counted values), instead of being ignored.
 
 ## [0.3.0] - 2026-11-20
 
@@ -86,7 +92,8 @@ change the public API; the stable surface is described in
 - `enjine` CLI: hot-seat and random play, `--validate`, `--verify`,
   `--random-deck`, save and load.
 
-[Unreleased]: https://github.com/thisiscetin/enjine/compare/v0.3.0...HEAD
+[Unreleased]: https://github.com/thisiscetin/enjine/compare/v0.4.0...HEAD
+[0.4.0]: https://github.com/thisiscetin/enjine/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/thisiscetin/enjine/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/thisiscetin/enjine/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/thisiscetin/enjine/releases/tag/v0.1.0
