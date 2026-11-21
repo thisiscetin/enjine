@@ -33,7 +33,7 @@ jobs:
       # The tag is already pushed, so build and push the gem directly instead of `rake release`
       # (which also pushes git refs and failed without checkout credentials on 0.2.0 and 0.3.0).
       - if: steps.check.outputs.published != 'true'
-        uses: rubygems/configure-rubygems-credentials@v1.0.0
+        uses: rubygems/configure-rubygems-credentials@dc5a8d8553e6ee01fc26761a49e99e733d17954a # v2.1.0
       - name: Publish
         if: steps.check.outputs.published != 'true'
         run: |
