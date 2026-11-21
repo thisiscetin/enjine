@@ -25,6 +25,8 @@ that makes the most cards exact per unit of effort (S = 1, M = 2, L = 3+, from a
   Enduring Innocence, Tom, Bert, and William, Kitesail Larcenist, Hydro-Man, Nameless Inversion, Soulstone
   Sanctuary (**8 exact**, of the 10 change 5 promised). Still blocked: The Irencrag (become a named
   Equipment with equip), Brilliance Unleashed (its own return effect, not yet re-scripted with `as`).
+  Known gap: layer 4 applies resolved type effects (in timestamp order) before statics that change types,
+  whatever their timestamps (CR 613.7a wants one order for both).
 - 81 cards have only a one-off gap (no change below helps them); 284 share at least one listed gap.
 - The first 4 changes (all S) make **30** cards exact; the first 20 make about **95**; the first 30
   about **150**.
