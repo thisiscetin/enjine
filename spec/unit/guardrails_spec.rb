@@ -10,7 +10,6 @@ RSpec.describe "Guardrails" do
       "lib/enjine/engine/defined_power_toughness.rb" => "the printed characteristic-defining amount (layer 7a)",
       "lib/enjine/engine/casting/casting.rb" => "spells in hand/stack (printed) and stack abilities (CR 113.7a)",
       "lib/enjine/engine/resolution.rb" => "spell abilities and permanence of the printed spell",
-      "lib/enjine/engine/casting/alt_casting.rb" => "a printed-ability precheck, only while nothing grants abilities",
       "lib/enjine/replacements.rb" => "entering status from printed card types",
       "lib/enjine/view.rb" => "printed name, cost and rules text",
       "lib/enjine/deck_builder.rb" => "deck construction works on printed cards, not game objects",

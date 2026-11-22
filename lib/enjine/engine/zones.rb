@@ -88,6 +88,10 @@ module Enjine
         data && execute_zone_change!(data)
       end
 
+      # Changes whenever an object appears or moves (as a new object, CR 400.7, advancing state.next_id) or ceases
+      # to exist, and when the whole state is replaced: what is in which zone holds while it stays the same.
+      def zones_version = [state.object_id, state.next_id, state.objects.size]
+
       # The zone change `move!` would make, after replacement effects (CR 614), not yet executed; nil if a
       # replacement cancelled it. Planning several before executing any lets them happen at once (CR 614.12).
       def plan_move(id, to, reason:, position: :top, controller: nil, enters: nil, face_down: nil)

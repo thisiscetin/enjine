@@ -179,14 +179,20 @@ module Enjine
 
       # CR 113.6k: triggered abilities that function from a graveyard, controlled by the card's owner.
       def watch_graveyards!(event)
-        state.players.each_with_index do |pl, owner|
-          pl.graveyard.each do |id|
-            instances = graveyard_triggers(object(id).card)
-            next if instances.empty?
+        graveyard_trigger_holders.each do |id, owner, instances|
+          source = { "id" => id, "card" => object(id).card, "controller" => owner }
+          instances.each { queue_trigger(it, event, source) }
+        end
+      end
 
-            source = { "id" => id, "card" => object(id).card, "controller" => owner }
-            instances.each { queue_trigger(it, event, source) }
-          end
+      # [[id, owner, instances]] of the cards in graveyards with such abilities, in graveyard order; kept while
+      # no object appears, moves or ceases to exist (Engine::Zones#zones_version).
+      def graveyard_trigger_holders
+        return @graveyard_holders if @graveyard_holders_version == zones_version
+
+        @graveyard_holders_version = zones_version
+        @graveyard_holders = state.players.each_with_index.flat_map do |pl, owner|
+          pl.graveyard.map { [it, owner, graveyard_triggers(object(it).card)] }.reject { it[2].empty? }
         end
       end
 

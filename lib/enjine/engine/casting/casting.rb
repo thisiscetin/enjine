@@ -36,7 +36,15 @@ module Enjine
       # (CardDefinition#activation_zones, CR 113.6): nothing of it can be activated there.
       def no_activations_here?(obj)
         !obj.memory.key?("copy_except") && !obj.memory.key?("copy_effects") &&
-          definition(obj).faces.none? { it.activation_zones.include?(obj.zone) }
+          !card_off_board(obj.card)[:activation_zones].include?(obj.zone)
+      end
+
+      # What a card's faces can do off the battlefield (CardDefinition#plays_itself?, #activation_zones), once per
+      # card: printed facts that never change.
+      def card_off_board(card)
+        (@card_off_board ||= {})[card] ||= catalog.fetch(card).faces.then do |faces|
+          { plays_itself: faces.any?(&:plays_itself?), activation_zones: faces.flat_map(&:activation_zones).uniq }
+        end
       end
 
       def activatable?(index, id, ability_ref)

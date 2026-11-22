@@ -29,7 +29,7 @@ module Enjine
       # Exiled cards (permissions, plot, warp, foretell) and a commander always get the full look.
       def unplayable_elsewhere?(obj)
         %i[graveyard library].include?(obj.zone) && !obj.memory.key?("copy_except") && !obj.memory.key?("copy_effects") &&
-          definition(obj).faces.none?(&:plays_itself?)
+          !card_off_board(obj.card)[:plays_itself]
       end
 
       # The alternative-cost methods of `obj` (a card `index` owns) that function now. A face-down card its owner
