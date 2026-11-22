@@ -24,12 +24,13 @@ module Enjine
 
         # layer 1 (CR 613.2a-c): its copiable values
         return board_characteristics.fetch(object.id) { copy_base(object) } if object.zone == :battlefield
-        return @options_memo[object.id] ||= off_board_chars(object) if @options_memo && object.zone == :hand
+        return @options_memo[object.id] ||= off_board_chars(object) if @options_memo # the state holds still meanwhile
 
         off_board_chars(object)
       end
 
-      # Off the battlefield. The options of one decision ask about each card in hand often (Engine#options).
+      # Off the battlefield. The options of one decision ask about each card in hand, graveyard and exile often
+      # (Engine#options).
       def off_board_chars(object)
         defn = definition(object)
         base = copy_base(object)

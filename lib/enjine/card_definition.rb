@@ -165,6 +165,9 @@ module Enjine
     attr_reader :all_effects
 
     def triggered? = @triggered
+    # This face has an ability of its own to be played from outside its owner's hand: "you may cast this card
+    # from your graveyard" (CR 113.6e), beam me up (CR 702.196a) or an alternative cost (Engine::Permissions).
+    def plays_itself? = @plays_itself
     def land? = @land
     def creature? = @creature
     def planeswalker? = @planeswalker
@@ -219,6 +222,7 @@ module Enjine
       @spell_ability = @abilities.find { it.kind == :spell } || aura_spell_ability
       every = @abilities + @nested_instances.map(&:ability)
       @triggered = every.any? { it.kind == :triggered }
+      @plays_itself = every.any? { %i[beam_me_up alternative_cost].include?(it.kind) || (it.kind == :play_from && it.self?) }
       @all_effects = nested(every.flat_map do |ability|
         ability.respond_to?(:modes) && ability.modal? ? ability.modes.flat_map(&:effects) : ability.try_effects
       end).freeze

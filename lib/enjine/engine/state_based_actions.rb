@@ -93,15 +93,24 @@ module Enjine
 
       # CR 704.5d / 111.7: a token in a zone other than the battlefield ceases to exist. Phased-out tokens are
       # still on the battlefield (CR 702.26d), see Engine::Copies#ceases_to_exist?.
+      # An object only appears or changes zone as a new object (CR 400.7), which advances state.next_id, so
+      # the scan is skipped until it does (or a prepared copy loses its permanent, Engine::Faces#unprepare!).
       def remove_tokens_outside_battlefield!
+        return false if @tokens_scanned == state.next_id && @tokens_state.equal?(state)
+
         gone = state.objects.values.select { ceases_to_exist?(it) } # and copies, CR 707.10a (Engine::Copies)
         gone.each do |obj|
           state.zone_list(obj.zone, obj.owner).delete(obj.id)
           state.objects.delete(obj.id)
           emit Events::TokenCeased.new(object: obj.id, card: obj.card, zone: obj.zone.to_s)
         end
+        @tokens_scanned = state.next_id
+        @tokens_state = state
         !gone.empty?
       end
+
+      # The next state-based action check looks for tokens and copies to remove again.
+      def rescan_tokens! = @tokens_scanned = nil
 
       # CR 704.5j: the legend rule needs a choice, so it runs as a frame before priority.
       def legend_rule_first!(index)

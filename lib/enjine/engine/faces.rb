@@ -201,6 +201,8 @@ module Enjine
       def unprepare!(obj)
         return false unless obj.memory.delete("prepared")
 
+        rescan_tokens! # its prepare spell copy ceases to exist (CR 723.3c)
+
         emit Events::PreparedChanged.new(object: obj.id, prepared: false)
         true
       end

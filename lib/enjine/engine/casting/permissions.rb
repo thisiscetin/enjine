@@ -51,8 +51,11 @@ module Enjine
       # Priority options: `{type: "cast", object: id, via: method}` for every castable card and method.
       def permission_cast_options(index)
         sources = permission_sources(index)
+        plain = plain_candidates?(sources)
         permission_candidates(index, sources).flat_map do |ref|
           obj = candidate_object(index, ref)
+          next [] if plain && unplayable_elsewhere?(obj)
+
           play_methods(index, obj, sources).filter_map do |method|
             { type: "cast", object: ref, via: method["via"] } if castable_via?(index, obj, method)
           end
@@ -62,14 +65,27 @@ module Enjine
       # Priority options: lands `index` may play from outside their hand (CR 305.1, 305.2).
       def permission_land_options(index)
         sources = permission_sources(index)
+        plain = plain_candidates?(sources)
         permission_candidates(index, sources).flat_map do |ref|
           obj = candidate_object(index, ref)
-          next [] unless face_up(obj.id) { chars(obj).land? } # a face-down card is played face up (CR 406.3a)
+          next [] if (plain && unplayable_elsewhere?(obj)) || !face_up(obj.id) { chars(obj).land? } # a face-down card is played face up (CR 406.3a)
 
           play_methods(index, obj, sources).filter_map do |method|
             { type: "play_land", object: ref, via: method["via"] } if method["play"] == "play"
           end
         end
+      end
+
+      # No permanent lets `index` play cards from other zones and no card was granted an ability: a card in a
+      # graveyard or library can then only be played by an ability of its own (see #unplayable_elsewhere?).
+      def plain_candidates?(sources) = sources.empty? && state.effects.none? { it["kind"] == "card_ability" }
+
+      # A card in a graveyard or library, not a copy, with no face that has an ability to play itself
+      # (CardDefinition#plays_itself?) has no play method (#play_methods): a quick no for most candidates.
+      # Exiled cards (permissions, plot, warp, foretell) and a commander always get the full look.
+      def unplayable_elsewhere?(obj)
+        %i[graveyard library].include?(obj.zone) && !obj.memory.key?("copy_except") && !obj.memory.key?("copy_effects") &&
+          definition(obj).faces.none?(&:plays_itself?)
       end
 
       # ---- cards outside the game (CR 400.11, 400.11b, 108.3) -------------------------------------
