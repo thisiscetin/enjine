@@ -8,6 +8,10 @@ change the public API; the stable surface is described in
 
 ## [Unreleased]
 
+## [0.4.1] - 2026-11-22
+
+Includes 0.4.0, which was tagged but never published to RubyGems.
+
 ### Added
 - `become` takes `set_types` ("it's an artifact, not a creature", CR 205.1a), `"creature_types": []` ("loses
   all creature types") and `all_creature_types: true` (CR 205.3d).
@@ -110,7 +114,8 @@ change the public API; the stable surface is described in
 - `enjine` CLI: hot-seat and random play, `--validate`, `--verify`,
   `--random-deck`, save and load.
 
-[Unreleased]: https://github.com/thisiscetin/enjine/compare/v0.4.0...HEAD
+[Unreleased]: https://github.com/thisiscetin/enjine/compare/v0.4.1...HEAD
+[0.4.1]: https://github.com/thisiscetin/enjine/compare/v0.4.0...v0.4.1
 [0.4.0]: https://github.com/thisiscetin/enjine/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/thisiscetin/enjine/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/thisiscetin/enjine/compare/v0.1.0...v0.2.0
