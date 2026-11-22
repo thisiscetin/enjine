@@ -24,6 +24,14 @@ module Enjine
       # The cards in a hand with an alternative cost (only those can be cast from it with a method).
       def alt_cost_hand(player) = player.hand.select { |id| chars(id).abilities.any? { it.ability.kind == :alternative_cost } }
 
+      # A card in a graveyard or library, not a copy, with no face that has an ability to play itself
+      # (CardDefinition#plays_itself?) has no play method (Engine::Permissions#play_methods): a quick no for most candidates.
+      # Exiled cards (permissions, plot, warp, foretell) and a commander always get the full look.
+      def unplayable_elsewhere?(obj)
+        %i[graveyard library].include?(obj.zone) && !obj.memory.key?("copy_except") && !obj.memory.key?("copy_effects") &&
+          definition(obj).faces.none?(&:plays_itself?)
+      end
+
       # The alternative-cost methods of `obj` (a card `index` owns) that function now. A face-down card its owner
       # may look at is seen face up (a foretold card, CR 702.143a, 406.3a).
       def alt_methods(index, obj)
