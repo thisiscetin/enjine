@@ -14,6 +14,13 @@ change the public API; the stable surface is described in
 - `return_to_battlefield` takes `as`: the `become` changes it has from the moment it enters ("It's an
   enchantment. (It's not a creature.)", CR 614.1c), seen by abilities that trigger on it entering.
 
+### Changed
+- Faster legal options and state-based actions, same behaviour: a random-agent game runs about 2.3x as many
+  decisions per second on the fixture pool and 1.7x on the real-card fixtures. Off-board characteristics are
+  memoized per decision; cards that can't be played or activated from their zone are skipped
+  (`CardDefinition#plays_itself?`, `#activation_zones`); the token scan and graveyard trigger watch are cached
+  while no object appears, moves or ceases to exist.
+
 ### Fixed
 - The trigger condition `{"triggering": filter}` matches a permanent that left the battlefield with the card
   types it last had ("if it was a creature", CR 603.10a), not its printed ones.
