@@ -39,10 +39,17 @@ module Enjine
         engine.state.battlefield.each do |id|
           add_options(engine, index, id, out) if engine.object(id).controller == index
         end
-        engine.player(index).hand.each { add_options(engine, index, it, out) } # CR 602.2: the owner activates
-        engine.player(index).graveyard.each { add_options(engine, index, it, out) } # CR 113.6m: e.g. "exile this card from your graveyard"
-        engine.state.exile.each { add_options(engine, index, it, out) if engine.object(it).owner == index } # CR 113.6b
+        off_board(engine, index).each { add_options(engine, index, it, out) }
         out
+      end
+
+      # Cards whose abilities may function off the battlefield (CR 113.6b): the hand (the owner activates, CR 602.2),
+      # graveyard ("exile this card from your graveyard", CR 113.6m) and exiled cards `index` owns, less those with
+      # no activated ability for their zone.
+      def self.off_board(engine, index)
+        pl = engine.player(index)
+        ids = pl.hand + pl.graveyard + engine.state.exile.select { engine.object(it).owner == index }
+        engine.own_abilities_only? ? ids.reject { engine.no_activations_here?(engine.object(it)) } : ids
       end
 
       def self.add_options(engine, index, id, out)

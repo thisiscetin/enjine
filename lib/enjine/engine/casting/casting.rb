@@ -28,6 +28,17 @@ module Enjine
         kicked_castable?(index, obj) # CR 702.33g: only the kicked spell has legal targets
       end
 
+      # No effect gives a card off the battlefield an ability (CR 113.6b): each has only its own (and its copiable
+      # values'), so the quick nos below hold.
+      def own_abilities_only? = state.effects.none? { it["kind"] == "card_ability" }
+
+      # A card that isn't a copy, none of whose faces has an activated ability functioning from the zone it's in
+      # (CardDefinition#activation_zones, CR 113.6): nothing of it can be activated there.
+      def no_activations_here?(obj)
+        !obj.memory.key?("copy_except") && !obj.memory.key?("copy_effects") &&
+          definition(obj).faces.none? { it.activation_zones.include?(obj.zone) }
+      end
+
       def activatable?(index, id, ability_ref)
         obj = object(id)
         ability = chars(obj).ability(ability_ref)

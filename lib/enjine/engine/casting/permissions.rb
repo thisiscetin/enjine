@@ -68,7 +68,7 @@ module Enjine
       # be played by an ability of its own (#unplayable_elsewhere?).
       def candidate_methods(index, land: false, &)
         sources = permission_sources(index)
-        plain = sources.empty? && state.effects.none? { it["kind"] == "card_ability" }
+        plain = sources.empty? && own_abilities_only?
         permission_candidates(index, sources).flat_map do |ref|
           obj = candidate_object(index, ref)
           next [] if (plain && unplayable_elsewhere?(obj)) || (land && !face_up(obj.id) { chars(obj).land? })

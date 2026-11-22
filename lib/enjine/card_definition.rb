@@ -168,6 +168,9 @@ module Enjine
     # This face has an ability of its own to be played from outside its owner's hand: "you may cast this card
     # from your graveyard" (CR 113.6e), beam me up (CR 702.196a) or an alternative cost (Engine::Permissions).
     def plays_itself? = @plays_itself
+    # The zones this face's activated abilities function from (CR 113.6): [:battlefield], or [:hand] for cycling.
+    attr_reader :activation_zones
+
     def self.self_play?(ability) = %i[beam_me_up alternative_cost].include?(ability.kind) || (ability.kind == :play_from && ability.self?)
     def land? = @land
     def creature? = @creature
@@ -212,6 +215,13 @@ module Enjine
 
     private
 
+    # What lets this face be used off the battlefield, from all its abilities (keyword abilities and nested ones too).
+    def precompute_off_board
+      own = @ability_instances.map(&:ability) + @nested_instances.map(&:ability)
+      @plays_itself = own.any? { CardDefinition.self_play?(it) }
+      @activation_zones = own.filter_map { it.zone if %i[activated loyalty].include?(it.kind) }.uniq.freeze
+    end
+
     def precompute_predicates
       @land = @types.include?(:land)
       @creature = @types.include?(:creature)
@@ -223,7 +233,7 @@ module Enjine
       @spell_ability = @abilities.find { it.kind == :spell } || aura_spell_ability
       every = @abilities + @nested_instances.map(&:ability)
       @triggered = every.any? { it.kind == :triggered }
-      @plays_itself = every.any? { CardDefinition.self_play?(it) }
+      precompute_off_board
       @all_effects = nested(every.flat_map do |ability|
         ability.respond_to?(:modes) && ability.modal? ? ability.modes.flat_map(&:effects) : ability.try_effects
       end).freeze
