@@ -89,14 +89,15 @@ Rules: CR 603.2, CR 603.2c
 
 ## attacks
 
-The subject is declared as an attacker. `first_time_this_turn: true`: only the first time that creature attacks this turn (later combats of the turn don't trigger it).
+The subject is declared as an attacker. `first_time_this_turn: true`: only the first time that creature attacks this turn (later combats of the turn don't trigger it). `alone: true`: only when it is the only creature declared as an attacker (it triggers as the declaration is complete).
 
-Rules: CR 508.3a, CR 603.2
+Rules: CR 508.3a, CR 603.2, CR 506.5
 
 | Parameter | Description |
 | --- | --- |
 | `subject` | "self" (default) or {"each": filter, ...} |
 | `first_time_this_turn` | boolean |
+| `alone` | boolean |
 
 ```json
 {

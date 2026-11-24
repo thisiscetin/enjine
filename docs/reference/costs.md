@@ -300,9 +300,13 @@ Rules: CR 701.21a, CR 601.2h, CR 602.2b, CR 118.3, CR 608.2h
 
 ## tap
 
-{T} — tap the permanent the ability belongs to. Requires it to be untapped.
+{T} — tap the permanent the ability belongs to. Requires it to be untapped. `{"tap": "granter"}` instead taps the permanent whose static ability granted this ability ("Tap Fishing Pole"; not {T}, so summoning sickness doesn't matter).
 
-Rules: CR 107.5, CR 602.5a
+Rules: CR 107.5, CR 602.5a, CR 602.2b, CR 607.1a, CR 302.6
+
+| Parameter | Description |
+| --- | --- |
+| `(value)` | "granter": tap the granting permanent instead |
 
 ```json
 "tap"

@@ -12,7 +12,7 @@ module Enjine
     module Chosen
       # What is chosen -> [memory key, option key].
       MEMORY = { "color" => "chosen_color", "creature_type" => "chosen_type", "card_type" => "chosen_card_type",
-                 "basic_land_type" => "chosen_type", "option" => "chosen_option" }.freeze
+                 "basic_land_type" => "chosen_type", "option" => "chosen_option", "card_name" => "chosen_name" }.freeze
       # CR 105.4: one of the five colors.
       COLORS = %w[W U B R G].freeze
       # CR 205.2a: the card types of traditional Magic cards.
@@ -124,14 +124,23 @@ module Enjine
     module Effects
       # "Choose a creature type." while resolving: the choice is remembered on the resolving spell or
       # ability, so its later effects' filters ("of the chosen type") and conditions read it (CR 607.2d).
+      # `remember: "source"` also remembers it on the source permanent, for its other abilities ("When this
+      # land enters, choose a land card name. ... Lands with the chosen name have ...", CR 607.2d).
       class ResolvingChosen < ChoiceEffect
         def self.kind_name = raise(NotImplementedError)
         def self.default_to = "you"
-        def self.keys = kind_name == "option" ? %w[options to if] : %w[to if]
+        def self.keys = (kind_name == "option" ? %w[options] : []) + %w[remember to if]
 
-        def setup(params, errors, path) = @words = Chosen.words(self.class.kind_name, params, errors, path)
+        def setup(params, errors, path)
+          @words = Chosen.words(self.class.kind_name, params, errors, path)
+          @remember = Mechanics.fetch_param(params, :remember)
+          errors << "#{path}.remember: must be \"source\"" unless [nil, "source"].include?(@remember)
+        end
 
-        def to_s = "choose #{Chosen.words_text(self.class.kind_name, @words)}"
+        def to_s = "choose #{Chosen.words_text(self.class.kind_name, @words)}#{" (remembered by the source)" if @remember}"
+
+        # The values offered.
+        def choice_values(_engine) = Chosen.values(self.class.kind_name, @words)
 
         def run(engine, ctx, locals)
           return :done unless locals["asked"] || condition.nil? || condition.true?(engine, ctx)
@@ -141,10 +150,21 @@ module Enjine
           unless answer
             chooser = players(engine, ctx).first || ctx.controller
             return ask(engine, locals, chooser, "Choose #{Chosen.words_text(kind, @words)}",
-                       Chosen.values(kind, @words).map { { "type" => kind, kind => it } })
+                       choice_values(engine).map { { "type" => kind, kind => it } })
           end
-          engine.state.objects[ctx.object]&.memory&.merge!(Chosen.memory(kind, answer[kind]))
+          remember!(engine, ctx, Chosen.memory(kind, answer[kind]))
           :done
+        end
+
+        private
+
+        def remember!(engine, ctx, memory)
+          engine.state.objects[ctx.object]&.memory&.merge!(memory)
+          source = @remember && engine.state.objects[ctx.source]
+          return unless source&.zone == :battlefield
+
+          source.memory.merge!(memory)
+          engine.touch! # its static abilities may now apply to other permanents (the layer pass is cached)
         end
       end
 
@@ -176,6 +196,29 @@ module Enjine
                   rules: %w[205.2a 607.2d 608.2c], params: { "to" => "player selector (default you)" },
                   example: { "choose_card_type" => {} }
         def self.kind_name = "card_type"
+      end
+
+      # "Choose a land card name." among the cards in the game (CR 201.4, as Abilities::ChooseCardName).
+      class ChooseCardNameEffect < ResolvingChosen
+        primitive :effect, :choose_card_name,
+                  description: "The player (`to`, default you) chooses a card name among the cards in the game (`types`: " \
+                               "the named card has one of these; `not`: it has none of these); \"the chosen name\" " \
+                               "(`name: \"chosen\"` in filters) reads it. `remember: \"source\"`: the source permanent " \
+                               "remembers it for its other abilities.",
+                  rules: %w[201.4 607.2d 608.2c],
+                  params: { "types" => "list of card types", "not" => "list of card types",
+                            "remember" => "\"source\"", "to" => "player selector (default you)" },
+                  example: { "choose_card_name" => { "types" => ["land"], "remember" => "source" } }
+        def self.kind_name = "card_name"
+        def self.keys = super + %w[types not]
+
+        def setup(params, errors, path)
+          super
+          @types = Abilities::ChooseCardName.type_list(params, :types, errors, path)
+          @excluded = Abilities::ChooseCardName.type_list(params, :not, errors, path)
+        end
+
+        def choice_values(engine) = Abilities::ChooseCardName.names(engine, @types, @excluded)
       end
 
       # "Choose odd or even." Later effects check the word with {"if": {"chosen": word}}.

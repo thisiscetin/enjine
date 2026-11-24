@@ -99,13 +99,14 @@ module Enjine
 
       # Without effects, every permanent is as printed: none has counters or is a noncreature with printed
       # power and toughness (an uncrewed Vehicle has none, CR 208.3).
-      # A max speed ability applying changes it too (Engine::Speed).
+      # A max speed ability applying changes it too (Engine::Speed), and so do a class level (CR 717.2a), haste while
+      # controlled (CR 702.62a) and haste chosen with riot (CR 702.136a).
       def printed_board?
         speedy = state.players.each_index.any? { max_speed?(it) }
         state.battlefield.none? do |id|
           obj = object(id)
           !obj.counters.empty? || printed_noncreature_pt?(obj) || (speedy && !active_max_speed(obj, obj.controller).empty?) ||
-            obj.memory.key?("class_level") || obj.memory.key?("haste_while_controlled_by") # CR 717.2a, 702.62a
+            obj.memory.key?("class_level") || obj.memory.key?("haste_while_controlled_by") || obj.memory.key?("riot_haste")
         end
       end
 

@@ -27,7 +27,7 @@ module Enjine
           obj.controller == state.active && !obj.tapped && current.creature? &&
             (!current.keyword?(:defender) || current.keyword?(:attacks_despite_defender)) &&
             !current.keyword?(:cant_attack) && !attackers.key?(id) && !summoning_sick_for_tap?(obj) &&
-            (only.nil? || only.match?(self, id, state.active))
+            (only.nil? || only.match?(self, id, state.active)) && !attack_targets_for(id).empty?
         end
       end
 
@@ -40,6 +40,16 @@ module Enjine
         defender = defending_player
         [Mechanics::Filters.player_ref(self, defender)] +
           state.battlefield.select { |id| object(id).controller == defender && chars(id).planeswalker? }
+      end
+
+      # What creature `id` may attack: not a player with "creatures with flying can't attack you" matching it
+      # (CR 508.1c; their planeswalkers still can be attacked).
+      def attack_targets_for(id)
+        defender = defending_player
+        targets = attack_targets
+        return targets unless player_rule?(defender, "cant_be_attacked", object(id))
+
+        targets - [Mechanics::Filters.player_ref(self, defender)]
       end
 
       # Creatures that may be declared next. CR 506.5, 508.1c: one that can't attack alone is offered

@@ -5474,5 +5474,45 @@
         }
       }
     ]
+  },
+  {
+    "name": "Lone Duelist",
+    "mana_cost": "{2}{R}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "human",
+      "knight"
+    ],
+    "power": 2,
+    "toughness": 3,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "attacks": {
+              "subject": {
+                "each": "creature",
+                "controller": "you"
+              },
+              "alone": true
+            }
+          },
+          "effects": [
+            {
+              "grant": {
+                "keywords": [
+                  "double_strike"
+                ],
+                "to": {
+                  "triggering": "object"
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
   }
 ]

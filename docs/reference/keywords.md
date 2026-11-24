@@ -128,6 +128,20 @@ Rules: CR 701.6a, CR 101.2
 }
 ```
 
+## cant_become_untapped
+
+This permanent can't become untapped: not in its controller's untap step nor by an effect ("untap it" does nothing).
+
+Rules: CR 701.26b, CR 502.3, CR 101.2
+
+```json
+{
+  "keywords": [
+    "cant become untapped"
+  ]
+}
+```
+
 ## cant_block
 
 Restriction: this creature can't block.
@@ -508,9 +522,9 @@ Rules: CR 702.17b
 
 ## riot
 
-As this permanent enters, its controller chooses an additional +1/+1 counter or haste (an enter_choice: `{type: "option", option: "counter" | "haste"}`).
+As this permanent enters, its controller chooses an additional +1/+1 counter or haste (an enter_choice: `{type: "option", option: "counter" | "haste"}`). Riot granted by a static ability ("Other Spiders you control have riot") is chosen as it enters too, and haste chosen this way stays if it later loses riot.
 
-Rules: CR 702.136a, CR 614.12
+Rules: CR 702.136a, CR 702.136b, CR 614.12
 
 ```json
 {

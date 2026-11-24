@@ -1433,6 +1433,34 @@ These need no new data: the shapes above play by these rules.
 | `create_token` with `attacking: true` (CR 508.4) | When the defending player controls a planeswalker, the controller chooses for each token what it attacks: an `effect_choice` of `{type: "attack", target: ref}` |
 | `copy_spell` of `{"triggering": "ability"}` after that ability left the stack (CR 707.10, 608.2h) | The engine's reading for "copy that ability" (Firebender Ascension): it is copied as it last existed on the stack, with its targets, modes and X |
 
+### 4.32 Statics, grants and combat: granted costs, bound choices, chosen names, riot grants, attacking alone
+
+| Oracle text | Data |
+| --- | --- |
+| "Equipped creature has '{1}, {T}, Tap Fishing Pole: Put a bait counter on Fishing Pole.'" (CR 602.2b, 607.1a) | granted `activated` with `"cost": [{ "mana": "{1}" }, "tap", { "tap": "granter" }]` and `"to": "granter"` (the cost taps the permanent that granted this ability; not {T}, so summoning sickness doesn't matter) |
+| "remove a bait counter from this Equipment. If you do, create …" | `remove_counters`, then the effect with `"if": { "amount": { "this_way": 0 }, "at_least": 1 }` (how many were removed) |
+| "Until end of turn, ~ becomes the color of your choice and gains hexproof from that color" (CR 607.2d) | `{ "choose_color": {} }`, then `{ "become": { "colors": "chosen", "abilities": [{ "hexproof_from": "chosen_color" }], "to": "self" } }`: the color is bound into the granted ability as it resolves, so a second activation with another color adds a second hexproof (`"chosen_color"` on a permanent that chose as it entered reads its own choice) |
+| "That creature can't become untapped for as long as you control ~" (CR 701.26b) | `{ "become": { "keywords": ["cant_become_untapped"], "duration": "while_you_control_source", "to": { "target": 0 } } }` (neither the untap step nor "untap it" untaps it; `doesnt_untap` only stops the untap step); "Enchanted creature can't become untapped" is a `static` handing out the same keyword |
+| "As this artifact enters, look at an opponent's hand, then choose any card name" | `{ "choose_card_name": { "look_at_hand": "opponent" } }` (`types`: `["land"]` for "a land card name") |
+| "When this land enters, choose a land card name." (a triggered ability, linked to the land's other abilities) | effect `{ "choose_card_name": { "types": ["land"], "remember": "source" } }` (`remember: "source"` works for every resolving `choose_*`) |
+| "Activated abilities of sources with the chosen name can't be activated unless they're mana abilities" (CR 201.4, 602.5) | `{ "player_rule": { "rule": "cant_activate", "affects": "each", "name": "chosen" } }` (sources in any zone: cycling from a hand is stopped too) |
+| "Lands with the chosen name have '{T}: Add {C}.'" | `static` with `"affects": { "each": { "land": { "name": "chosen" } } }` (filter key `"name": "chosen"`) |
+| "Other Spiders you control have riot" (CR 614.12, 702.136b) | `static` with `"keywords": ["riot"]`: a Spider entering while it applies makes riot's choice as it enters (a Spider with its own riot chooses twice); haste chosen this way stays after the riot is gone |
+| "Whenever a creature you control attacks alone, it gains double strike until end of turn" (CR 506.5) | trigger `{ "attacks": { "subject": { "each": "creature", "controller": "you" }, "alone": true } }` (once attackers are declared), effect `grant` to `{ "triggering": "object" }` |
+| "Creatures with flying can't attack you" (CR 508.1c) | `{ "player_rule": { "rule": "cant_be_attacked", "filter": { "creature": { "keywords": ["flying"] } } } }` (your planeswalkers can still be attacked) |
+| "… or block creatures you control" | `static` granting creatures you control `{ "cant_be_blocked_by": { "filter": { "creature": { "keywords": ["flying"] } } } }` |
+| "Create an X/X white Spirit creature token, where X is the greatest toughness among creatures you control" | `create_token` with `"size": { "greatest_toughness": { "each": "creature", "controller": "you" } }` (the token data says 0/0) |
+| "Each creature you control with toughness greater than its power assigns combat damage equal to its toughness" (CR 510.1a) | `static` handing out `assigns_damage_by_toughness` (attacking and blocking) |
+| "This creature saddles Mounts and crews Vehicles using its toughness" gained by an effect | `become` with `"abilities": [{ "tapping_power": … }]` |
+
+```json
+{ "name": "Example Lure Angler", "mana_cost": "{1}", "types": ["artifact"], "subtypes": ["equipment"],
+  "abilities": [{ "static": { "affects": "attached", "abilities": [
+                   { "activated": { "cost": ["tap", { "tap": "granter" }],
+                                    "effects": [{ "add_counters": { "counter": "bait", "amount": 1, "to": "granter" } }] } }] } },
+                { "equip": { "cost": [{ "mana": "{1}" }] } }] }
+```
+
 ---
 
 ## 5. Worked examples

@@ -18,6 +18,8 @@ module Enjine
         changes = Mechanics::Counters.keywords(obj.counters).map { |kw| [counter_timestamp(obj, kw.to_s), 0, [:keywords, [kw]]] }
         # A creature cast with suspend has haste while its caster controls it (CR 702.62a); since it was cast.
         changes << [0, 0, [:keywords, [:haste]]] if obj.memory["haste_while_controlled_by"] == obj.controller
+        # Riot: "if you don't, it gains haste" as it entered (CR 702.136a), an effect with that timestamp.
+        changes << [timestamp_of(obj), 0, [:keywords, [:haste]]] if obj.memory["riot_haste"]
         statics.each do |source, ability|
           next unless ability.ability_changes? && ability.affects?(obj, source, facts(obj, base))
 
@@ -94,9 +96,12 @@ module Enjine
       end
 
       # Abilities a resolved effect grants (layer 6, CR 613.1f): the effect's card holds them under its ref.
+      # What was chosen as the effect resolved is bound into them ("hexproof from that color", CR 607.2d).
       def effect_granted_instances(effect)
+        chosen = effect["chosen"]
         catalog.fetch(effect["card"]).effect_granted(effect["ref"]).map do |inst|
-          AbilityInstance.new(ref: "granted:#{effect["card"]}:#{inst.ref}", ability: inst.ability)
+          ability = chosen && inst.ability.respond_to?(:with_chosen) ? inst.ability.with_chosen(chosen) : inst.ability
+          AbilityInstance.new(ref: "granted:#{effect["card"]}:#{inst.ref}", ability: ability)
         end
       end
 

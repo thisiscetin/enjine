@@ -180,7 +180,12 @@ module Enjine
 
       defn(obj.card).keyword?(keyword) || unlocked(obj).any? { it.keywords.include?(keyword) } ||
         granted_keywords(obj.id).include?(keyword.to_sym) || static_keyword?(obj, keyword) ||
-        (keyword.to_sym == :haste && obj.memory["haste_while_controlled_by"] == obj.controller) # cast with suspend, CR 702.62a
+        (keyword.to_sym == :haste && gained_haste?(obj))
+    end
+
+    # Haste a permanent gained as it was cast with suspend (CR 702.62a) or chose with riot (CR 702.136a).
+    def gained_haste?(obj)
+      obj.memory["haste_while_controlled_by"] == obj.controller || obj.memory["riot_haste"] == true
     end
 
     # Whether an effect or an applying static ability makes it lose all abilities (CR 613.1f).

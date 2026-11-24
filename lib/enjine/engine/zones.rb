@@ -265,9 +265,10 @@ module Enjine
       end
 
       # CR 701.26b: only tapped permanents can be untapped. Replacement effects (a stun counter,
-      # CR 122.1d) may stop it.
+      # CR 122.1d) may stop it, and "can't become untapped" forbids it (CR 101.2).
       def untap!(object)
         return unless object.tapped
+        return if chars(object).keyword?(:cant_become_untapped)
         return if propose("untap", { "object" => object.id }).data["cancelled"]
 
         object.tapped = false

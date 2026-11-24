@@ -97,6 +97,7 @@ module Enjine
       #   {"creature": {"keywords": ["flying"]}}         with flying (any listed); "not_keywords": without (CR 702.1)
       #   {"creature": {"subtypes": "chosen"}}           of the chosen creature type; also "colors", "types", "not",
       #                                                  "not_subtypes": "chosen" (CR 607.2d, see Filters.chosen_memory)
+      #   {"land": {"name": "chosen"}}                   with the chosen card name (CR 201.4)
       #   {"creature": {"transformed": true}}            back face up (CR 701.27h); {"prepared": true} (CR 723.3a)
       #   {"creature": {"saddled": true}}                saddled this turn (CR 702.171b)
       #   {"creature": {"entered_this_turn": true}}      entered the battlefield this turn
@@ -107,10 +108,11 @@ module Enjine
         TYPE_LISTS = %w[not any_of types].freeze
         NAME_LISTS = %w[subtypes not_subtypes supertypes not_supertypes attached_subtypes].freeze
         KEYWORD_LISTS = %w[keywords not_keywords].freeze
-        KEYS = (%w[controller owner counters colors] + BOOLEANS + RANGES + TYPE_LISTS + NAME_LISTS + KEYWORD_LISTS).freeze
-        # Lists that may be "chosen": the choice remembered under that memory key (CR 607.2d).
+        KEYS = (%w[controller owner counters colors name] + BOOLEANS + RANGES + TYPE_LISTS + NAME_LISTS + KEYWORD_LISTS).freeze
+        # Lists that may be "chosen": the choice remembered under that memory key (CR 607.2d). "name" is only
+        # "chosen" ("with the chosen name", CR 201.4).
         CHOSEN = { "colors" => "chosen_color", "types" => "chosen_card_type", "not" => "chosen_card_type",
-                   "subtypes" => "chosen_type", "not_subtypes" => "chosen_type" }.freeze
+                   "subtypes" => "chosen_type", "not_subtypes" => "chosen_type", "name" => "chosen_name" }.freeze
         # Keys that need current characteristics or combat/tapped status: not usable in the layer pass.
         LIVE = %w[power toughness attacking blocking tapped attached_subtypes transformed prepared saddled
                   entered_this_turn].freeze
@@ -135,6 +137,7 @@ module Enjine
                  (colors.is_a?(Array) && !colors.empty? && colors.all? { Mana::COLORS.include?(it.to_s.to_sym) })
             errors << "#{path}.colors: must be a non-empty list of W, U, B, R, G (any of them) or \"chosen\""
           end
+          errors << "#{path}.name: must be \"chosen\"" unless [nil, "chosen"].include?(params["name"])
           new(base, params, ranges)
         end
 
@@ -346,6 +349,7 @@ module Enjine
             have = case key
                    when "colors" then chars.colors
                    when "types", "not" then chars.types
+                   when "name" then [chars.name.to_sym]
                    else chars.subtypes
                    end
             hit = !value.nil? && have.include?(value.to_sym)

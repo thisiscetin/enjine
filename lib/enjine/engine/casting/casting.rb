@@ -63,8 +63,9 @@ module Enjine
         end
 
         # CR 118.3, 601.2b: some way of paying its costs (Engine::CostOptions); waterbend: CR 701.67a
+        costs = granter_costs(ability.costs, AbilityLayers.granted_parts(ability_ref)&.last)
         ability_targetable?(ability, index, nil, id, ref: ability_ref) &&
-          cost_variant_affordable?(index, ability.costs, obj, nil, needs_tap?(ability) ? id : nil, { "ability" => id }) do
+          cost_variant_affordable?(index, costs, obj, nil, needs_tap?(ability) ? id : nil, { "ability" => id }) do
             total_cost(index, it, ability: ability, source: id)
           end
       end
@@ -111,6 +112,14 @@ module Enjine
       def stack_ability(obj) = definition(obj).ability(obj.ability)
 
       def needs_tap?(ability) = ability.costs.any?(Mechanics::Costs::Tap)
+
+      # A granted ability's costs that name the granting permanent ("Tap Fishing Pole", CR 607.1a), bound to
+      # `granter` (the permanent whose static ability granted it).
+      def granter_costs(costs, granter)
+        return costs unless granter && costs.any? { it.respond_to?(:for_granter) }
+
+        costs.map { it.respond_to?(:for_granter) ? it.for_granter(granter) : it }
+      end
 
       # The spell ability of a spell (printed, CR 113.3a).
       def spell_ability_of(obj) = definition(obj).spell_ability

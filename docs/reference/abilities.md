@@ -298,13 +298,15 @@ Rules: CR 614.12, CR 305.6, CR 607.2d
 
 ## choose_card_name
 
-As this permanent enters, its controller chooses a card name among the cards in the game (`not`: card types the named card mustn't have, e.g. ["land"]); abilities of it that say "the chosen name" use it.
+As this permanent enters, its controller chooses a card name among the cards in the game (`not`: card types the named card mustn't have, e.g. ["land"]; `types`: it must have one of these, ["land"] for "a land card name"); abilities of it that say "the chosen name" use it. `look_at_hand: "opponent"`: first they look at an opponent's hand.
 
-Rules: CR 614.12, CR 614.12a, CR 201.4, CR 201.4a, CR 607.2
+Rules: CR 614.12, CR 614.12a, CR 201.4, CR 201.4a, CR 607.2, CR 701.20e
 
 | Parameter | Description |
 | --- | --- |
 | `not` | list of card types |
+| `types` | list of card types |
+| `look_at_hand` | "opponent" |
 
 ```json
 {
@@ -1041,13 +1043,13 @@ Rules: CR 702.180a, CR 702.180b, CR 118.9, CR 601.2b, CR 601.2f, CR 601.2h
 
 ## hexproof_from
 
-Hexproof from the quality: this permanent can't be the target of spells with the quality, or abilities from sources with it, that its controller's opponents control. The quality is a card spec (`{"colors": ["B"]}`, `{"types": ["instant"]}`, `{"color_count": {"equal": 1}}` for monocolored), or "its_colors" (hexproof from each of its colors: whatever shares a color with it).
+Hexproof from the quality: this permanent can't be the target of spells with the quality, or abilities from sources with it, that its controller's opponents control. The quality is a card spec (`{"colors": ["B"]}`, `{"types": ["instant"]}`, `{"color_count": {"equal": 1}}` for monocolored), or "its_colors" (hexproof from each of its colors: whatever shares a color with it), or "chosen_color" (the chosen color; granted by `become`, the color chosen as it resolved).
 
-Rules: CR 702.11d, CR 702.11f, CR 702.11g, CR 115.4
+Rules: CR 702.11d, CR 702.11f, CR 702.11g, CR 115.4, CR 607.2d
 
 | Parameter | Description |
 | --- | --- |
-| `(value)` | card spec of the quality, or "its_colors" |
+| `(value)` | card spec of the quality, "its_colors" or "chosen_color" |
 
 ```json
 {
@@ -1278,16 +1280,17 @@ Rules: CR 601.3, CR 113.6e, CR 113.6f, CR 305.1, CR 401.5, CR 122.1, CR 614.12, 
 
 ## player_rule
 
-While this permanent is on the battlefield (and its `if` condition holds), `rule` applies to the players in `affects` (you | opponents | each; default you). Rules: hexproof, cant_attack, no_max_hand_size, prevent_all_damage, cant_lose_for_life, cant_sacrifice, cant_cast, cant_cast_except_from_hand, spells_cant_be_countered, abilities_cant_be_countered, cant_gain_life, cant_activate, damage_cant_be_prevented, combat_damage_cant_be_prevented, protection_from_opponents. `cant_sacrifice` takes a `filter` of the permanents that can't be sacrificed, `cant_activate` may take a `filter` of the sources whose abilities can't be activated (mana abilities still can), and `cant_cast` and `spells_cant_be_countered` may take a card spec of the `spells`. The damage rules apply to all damage whichever players they name.
+While this permanent is on the battlefield (and its `if` condition holds), `rule` applies to the players in `affects` (you | opponents | each; default you). Rules: hexproof, cant_attack, no_max_hand_size, prevent_all_damage, cant_lose_for_life, cant_sacrifice, cant_cast, cant_cast_except_from_hand, spells_cant_be_countered, abilities_cant_be_countered, cant_gain_life, cant_activate, damage_cant_be_prevented, combat_damage_cant_be_prevented, protection_from_opponents, cant_be_attacked. `cant_sacrifice` takes a `filter` of the permanents that can't be sacrificed, `cant_activate` may take a `filter` of the sources whose abilities can't be activated (mana abilities still can) or `name: "chosen"` (sources with the name this permanent chose, in any zone), `cant_be_attacked` takes a `filter` of the creatures that can't attack them, and `cant_cast` and `spells_cant_be_countered` may take a card spec of the `spells`. The damage rules apply to all damage whichever players they name.
 
-Rules: CR 702.11c, CR 115.4, CR 508.1c, CR 402.2, CR 514.1, CR 615.1, CR 615.1a, CR 704.5a, CR 104.3b, CR 701.21a, CR 614.17b, CR 101.2, CR 601.3, CR 701.6a, CR 119.7, CR 602.5, CR 615.12, CR 702.16b, CR 702.16e, CR 702.16k, CR 604.1, CR 604.2, CR 611.3a
+Rules: CR 702.11c, CR 115.4, CR 508.1c, CR 402.2, CR 514.1, CR 615.1, CR 615.1a, CR 704.5a, CR 104.3b, CR 701.21a, CR 614.17b, CR 101.2, CR 601.3, CR 701.6a, CR 119.7, CR 602.5, CR 615.12, CR 702.16b, CR 702.16e, CR 702.16k, CR 506.3, CR 604.1, CR 604.2, CR 611.3a
 
 | Parameter | Description |
 | --- | --- |
-| `rule` | hexproof | cant_attack | no_max_hand_size | prevent_all_damage | cant_lose_for_life | cant_sacrifice | cant_cast | cant_cast_except_from_hand | spells_cant_be_countered | abilities_cant_be_countered | cant_gain_life | cant_activate | damage_cant_be_prevented | combat_damage_cant_be_prevented | protection_from_opponents |
+| `rule` | hexproof | cant_attack | no_max_hand_size | prevent_all_damage | cant_lose_for_life | cant_sacrifice | cant_cast | cant_cast_except_from_hand | spells_cant_be_countered | abilities_cant_be_countered | cant_gain_life | cant_activate | damage_cant_be_prevented | combat_damage_cant_be_prevented | protection_from_opponents | cant_be_attacked |
 | `affects` | you | opponents | each |
-| `filter` | permanent filter (cant_sacrifice, cant_activate) |
+| `filter` | permanent filter (cant_sacrifice, cant_activate, cant_be_attacked) |
 | `spells` | card spec of the spells (cant_cast, spells_cant_be_countered) |
+| `name` | "chosen" (cant_activate: sources with the chosen name) |
 | `if` | condition ("during your turn": {"your_turn": true}) |
 
 ```json
@@ -1354,7 +1357,7 @@ Rules: CR 702.16a, CR 702.16b, CR 702.16c, CR 702.16d, CR 702.16e, CR 702.16f, C
 
 | Parameter | Description |
 | --- | --- |
-| `(value)` | card spec of the quality, "everything", "each_opponent" or "its_colors" |
+| `(value)` | card spec of the quality, "everything", "each_opponent", "its_colors" or "chosen_color" |
 
 ```json
 {

@@ -1,0 +1,149 @@
+[
+  {
+    "name": "Fishing Pole", "mana_cost": "{1}", "types": ["artifact"], "subtypes": ["equipment"],
+    "abilities": [
+      { "static": { "affects": "attached", "abilities": [
+        { "activated": { "cost": [{ "mana": "{1}" }, "tap", { "tap": "granter" }],
+                         "effects": [{ "add_counters": { "counter": "bait", "amount": 1, "to": "granter" } }] } }] } },
+      { "triggered": { "when": { "becomes_untapped": { "subject": "attached" } },
+                       "effects": [{ "remove_counters": { "counter": "bait", "amount": 1, "to": "self" } },
+                                   { "create_token": { "token": { "name": "Fish", "types": ["creature"], "subtypes": ["fish"],
+                                                                  "colors": ["U"], "power": 1, "toughness": 1 },
+                                                       "if": { "amount": { "this_way": 0 }, "at_least": 1 } } }] } },
+      { "equip": { "cost": [{ "mana": "{2}" }] } }
+    ],
+    "rarity": "uncommon", "printing": { "set": "fdn", "number": "128" }
+  },
+  {
+    "name": "Mondo Gecko", "mana_cost": "{1}{U}{U}", "types": ["creature"], "supertypes": ["legendary"],
+    "subtypes": ["lizard", "mutant"], "power": 2, "toughness": 3,
+    "abilities": [
+      { "activated": { "cost": [{ "mana": "{1}" }, "discard"],
+                       "effects": [{ "choose_color": {} },
+                                   { "become": { "colors": "chosen", "abilities": [{ "hexproof_from": "chosen_color" }],
+                                                 "to": "self" } }] } },
+      { "triggered": { "when": { "deals_damage": { "combat": true, "to": "player" } },
+                       "effects": [{ "draw": { "amount": { "distinct_colors": { "each": "permanent", "controller": "you" } } } }] } }
+    ],
+    "rarity": "mythic", "printing": { "set": "tmt", "number": "46" }
+  },
+  {
+    "name": "Spider-Woman, Secret Agent", "mana_cost": "{3}{W/U}", "types": ["creature"], "supertypes": ["legendary"],
+    "subtypes": ["spider", "human", "spy", "hero"], "power": 1, "toughness": 4, "keywords": ["flash"],
+    "abilities": [
+      { "triggered": { "when": { "enters": {} }, "targets": [{ "creature": { "controller": "opponent" } }],
+                       "effects": [{ "tap": { "to": { "target": 0 } } },
+                                   { "become": { "keywords": ["cant_become_untapped"], "duration": "while_you_control_source",
+                                                 "to": { "target": 0 } } }] } }
+    ],
+    "rarity": "uncommon", "printing": { "set": "msh", "number": "229" }
+  },
+  {
+    "name": "Interface Ace", "mana_cost": "{1}{W}", "types": ["artifact", "creature"], "subtypes": ["robot", "pilot"],
+    "power": 0, "toughness": 4,
+    "abilities": [
+      { "tapping_power": { "for": ["crew", "saddle"], "use": "toughness" } },
+      { "triggered": { "when": { "becomes_tapped": {} }, "while": { "your_turn": true }, "limit": "once_each_turn",
+                       "effects": [{ "untap": { "to": "self" } }] } }
+    ],
+    "rarity": "common", "printing": { "set": "dft", "number": "17" }
+  },
+  {
+    "name": "Ghalta the Immovable", "mana_cost": "{8}{W}", "types": ["creature"], "supertypes": ["legendary"],
+    "subtypes": ["elder", "dinosaur"], "power": 0, "toughness": 7,
+    "abilities": [
+      { "cost_reduction": { "amount": { "greatest_toughness": { "each": "creature", "controller": "you" } } } },
+      { "static": { "affects": { "each": "creature", "controller": "you" }, "keywords": ["attacks_despite_defender"] } },
+      { "static": { "affects": { "each": "creature", "controller": "you" }, "keywords": ["assigns_damage_by_toughness"] } }
+    ],
+    "rarity": "uncommon", "printing": { "set": "fra", "number": "197" }
+  },
+  {
+    "name": "Abzan Monument", "mana_cost": "{2}", "types": ["artifact"],
+    "abilities": [
+      { "triggered": { "when": { "enters": {} },
+                       "effects": [{ "search_library": { "for": { "supertypes": ["basic"], "any_of": [
+                         { "subtypes": ["plains"] }, { "subtypes": ["swamp"] }, { "subtypes": ["forest"] }] },
+                                                         "reveal": true } }] } },
+      { "activated": { "cost": [{ "mana": "{1}{W}{B}{G}" }, "tap", "sacrifice"], "timing": "sorcery",
+                       "effects": [{ "create_token": { "token": { "name": "Spirit", "types": ["creature"], "subtypes": ["spirit"],
+                                                                  "colors": ["W"], "power": 0, "toughness": 0 },
+                                                       "size": { "greatest_toughness": { "each": "creature", "controller": "you" } } } }] } }
+    ],
+    "rarity": "uncommon", "printing": { "set": "tdm", "number": "238" }
+  },
+  {
+    "name": "Seifer Almasy", "mana_cost": "{3}{R}", "types": ["creature"], "supertypes": ["legendary"],
+    "subtypes": ["human", "knight"], "power": 3, "toughness": 4,
+    "abilities": [
+      { "triggered": { "when": { "attacks": { "subject": { "each": "creature", "controller": "you" }, "alone": true } },
+                       "effects": [{ "grant": { "keywords": ["double_strike"], "to": { "triggering": "object" } } }] } },
+      { "triggered": { "when": { "deals_damage": { "combat": true, "to": "player" } },
+                       "targets": [{ "graveyard_card": { "any_of": ["instant", "sorcery"], "controller": "you",
+                                                         "mana_value": { "at_most": 3 } } }],
+                       "effects": [{ "cast_free": { "to": { "target": 0 }, "exile_instead": true } }] } }
+    ],
+    "rarity": "rare", "printing": { "set": "fin", "number": "156" }
+  },
+  {
+    "name": "Chandra, Flameshaper", "mana_cost": "{5}{R}{R}", "types": ["planeswalker"], "supertypes": ["legendary"],
+    "subtypes": ["chandra"], "loyalty": 6,
+    "abilities": [
+      { "loyalty": { "cost": 2, "effects": [{ "add_mana": { "produce": "{R}{R}{R}" } },
+                                            { "exile_top": { "amount": 3 } },
+                                            { "play_permission": { "to": { "result": 1 }, "choose": "one_per_owner" } }] } },
+      { "loyalty": { "cost": 1, "targets": [{ "creature": { "controller": "you" } }],
+                     "effects": [{ "create_token_copy": { "of": { "target": 0 }, "except": { "keywords": ["haste"] } } },
+                                 { "grant_ability": { "to": { "result": 0 }, "ability": {
+                                   "triggered": { "when": { "step_begins": { "step": "end", "whose": "each" } },
+                                                  "effects": [{ "sacrifice": { "to": "self" } }] } } } }] } },
+      { "loyalty": { "cost": -4, "targets": [{ "filter": "creature_or_planeswalker", "count": "any" }], "divide": 8,
+                     "effects": [{ "distribute_damage": {} }] } }
+    ],
+    "rarity": "mythic", "printing": { "set": "fdn", "number": "81" }
+  },
+  {
+    "name": "Sorcerous Spyglass", "mana_cost": "{2}", "types": ["artifact"],
+    "abilities": [
+      { "choose_card_name": { "look_at_hand": "opponent" } },
+      { "player_rule": { "rule": "cant_activate", "affects": "each", "name": "chosen" } }
+    ],
+    "rarity": "uncommon", "printing": { "set": "fdn", "number": "679" }
+  },
+  {
+    "name": "Petrified Hamlet", "types": ["land"],
+    "abilities": [
+      { "triggered": { "when": { "enters": {} },
+                       "effects": [{ "choose_card_name": { "types": ["land"], "remember": "source" } }] } },
+      { "player_rule": { "rule": "cant_activate", "affects": "each", "name": "chosen" } },
+      { "static": { "affects": { "each": { "land": { "name": "chosen" } } },
+                    "abilities": [{ "mana": { "cost": ["tap"], "produce": "{C}" } }] } },
+      { "mana": { "cost": ["tap"], "produce": "{C}" } }
+    ],
+    "rarity": "rare", "printing": { "set": "sos", "number": "259" }
+  },
+  {
+    "name": "Spider-Punk", "mana_cost": "{1}{R}", "types": ["creature"], "supertypes": ["legendary"],
+    "subtypes": ["spider", "human", "hero"], "power": 2, "toughness": 1, "keywords": ["riot"],
+    "abilities": [
+      { "static": { "affects": { "each": { "creature": { "subtypes": ["spider"] } }, "controller": "you", "other": true },
+                    "keywords": ["riot"] } },
+      { "player_rule": { "rule": "spells_cant_be_countered", "affects": "each" } },
+      { "player_rule": { "rule": "abilities_cant_be_countered", "affects": "each" } },
+      { "player_rule": { "rule": "damage_cant_be_prevented", "affects": "each" } }
+    ],
+    "rarity": "rare", "printing": { "set": "spm", "number": "92" }
+  },
+  {
+    "name": "Storm, Windrider", "mana_cost": "{1}{G}{W}{W}", "types": ["creature"], "supertypes": ["legendary"],
+    "subtypes": ["mutant", "hero"], "power": 4, "toughness": 4, "keywords": ["flying"],
+    "abilities": [
+      { "player_rule": { "rule": "cant_be_attacked", "filter": { "creature": { "keywords": ["flying"] } } } },
+      { "static": { "affects": { "each": "creature", "controller": "you" },
+                    "abilities": [{ "cant_be_blocked_by": { "filter": { "creature": { "keywords": ["flying"] } } } }] } },
+      { "triggered": { "when": { "cast": { "targets": "creature" } },
+                       "effects": [{ "grant": { "keywords": ["flying"], "to": { "triggering": "targets" } } }] } }
+    ],
+    "rarity": "rare", "printing": { "set": "msh", "number": "230" }
+  }
+]

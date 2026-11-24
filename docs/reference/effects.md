@@ -236,7 +236,7 @@ Rules: CR 611.2a, CR 611.2b, CR 611.2c, CR 613.1d, CR 613.1e, CR 613.1f, CR 613.
 | `subtypes` | subtypes it also has ("in addition to its other types") |
 | `creature_types` | list of creature types (replaces the others; [] removes them all) |
 | `all_creature_types` | true: it has every creature type |
-| `colors` | list of W, U, B, R, G (replaces its colors) |
+| `colors` | list of W, U, B, R, G (replaces its colors), or "chosen": the color chosen earlier while this resolved (choose_color); abilities it grants that say "chosen_color" keep that color |
 | `loses_abilities` | true: it loses all abilities ("loses all abilities") |
 | `keywords` | list of keywords it gains |
 | `base_power_toughness` | {"power": n, "toughness": n} |
@@ -443,6 +443,30 @@ Rules: CR 608.2g, CR 118.9, CR 601.2a, CR 107.3b, CR 118.6a, CR 305.2a, CR 305.3
     },
     "max_mana_value": 3,
     "count": "any"
+  }
+}
+```
+
+## choose_card_name
+
+The player (`to`, default you) chooses a card name among the cards in the game (`types`: the named card has one of these; `not`: it has none of these); "the chosen name" (`name: "chosen"` in filters) reads it. `remember: "source"`: the source permanent remembers it for its other abilities.
+
+Rules: CR 201.4, CR 607.2d, CR 608.2c
+
+| Parameter | Description |
+| --- | --- |
+| `types` | list of card types |
+| `not` | list of card types |
+| `remember` | "source" |
+| `to` | player selector (default you) |
+
+```json
+{
+  "choose_card_name": {
+    "types": [
+      "land"
+    ],
+    "remember": "source"
   }
 }
 ```
@@ -732,9 +756,9 @@ Rules: CR 114.1, CR 114.2, CR 114.3, CR 114.4, CR 113.6p
 
 ## create_token
 
-Create `amount` tokens under the referenced player's control (default: you). `token` is a predefined token name (Treasure, Clue, Food) or an inline card definition. `tapped: true` creates them tapped; `attacking: true` attacking (only for the attacking player during combat, CR 506.3b); when the defending player controls a planeswalker, the controller chooses for each token whether it attacks that player or one of their planeswalkers (CR 508.4).
+Create `amount` tokens under the referenced player's control (default: you). `token` is a predefined token name (Treasure, Clue, Food) or an inline card definition. `tapped: true` creates them tapped; `attacking: true` attacking (only for the attacking player during combat, CR 506.3b); when the defending player controls a planeswalker, the controller chooses for each token whether it attacks that player or one of their planeswalkers (CR 508.4). `size` (an amount, fixed as the effect starts) makes them N/N ("an X/X Spirit token, where X is ..."; part of their copiable values).
 
-Rules: CR 111.1, CR 111.10, CR 701.7a, CR 704.5d, CR 508.4, CR 506.3b
+Rules: CR 111.1, CR 111.10, CR 701.7a, CR 704.5d, CR 508.4, CR 506.3b, CR 707.2
 
 | Parameter | Description |
 | --- | --- |
@@ -743,6 +767,7 @@ Rules: CR 111.1, CR 111.10, CR 701.7a, CR 704.5d, CR 508.4, CR 506.3b
 | `tapped` | boolean |
 | `attacking` | boolean |
 | `to` | selector (default "you") |
+| `size` | amount: the tokens are N/N |
 
 ```json
 {
@@ -1647,7 +1672,7 @@ Rules: CR 611.2a, CR 611.2b, CR 601.3, CR 305.1, CR 400.7, CR 514.2, CR 601.2f, 
 
 Each referenced player (default you) gets `rule` for the `duration`: end_of_turn (default) or until_your_next_turn (until the controller's next turn begins). Rules: hexproof, cant_attack, no_max_hand_size, prevent_all_damage, cant_lose_for_life, cant_cast, cant_cast_except_from_hand, spells_cant_be_countered, abilities_cant_be_countered, cant_gain_life, cant_activate, damage_cant_be_prevented, combat_damage_cant_be_prevented, protection_from_opponents.
 
-Rules: CR 702.11c, CR 115.4, CR 508.1c, CR 402.2, CR 514.1, CR 615.1, CR 615.1a, CR 704.5a, CR 104.3b, CR 701.21a, CR 614.17b, CR 101.2, CR 601.3, CR 701.6a, CR 119.7, CR 602.5, CR 615.12, CR 702.16b, CR 702.16e, CR 702.16k, CR 611.2a, CR 514.2
+Rules: CR 702.11c, CR 115.4, CR 508.1c, CR 402.2, CR 514.1, CR 615.1, CR 615.1a, CR 704.5a, CR 104.3b, CR 701.21a, CR 614.17b, CR 101.2, CR 601.3, CR 701.6a, CR 119.7, CR 602.5, CR 615.12, CR 702.16b, CR 702.16e, CR 702.16k, CR 506.3, CR 611.2a, CR 514.2
 
 | Parameter | Description |
 | --- | --- |
@@ -1866,7 +1891,7 @@ Rules: CR 122.8
 
 ## remove_counters
 
-Remove up to `amount` counters named `counter` from each referenced permanent.
+Remove up to `amount` counters named `counter` from each referenced permanent. How many were removed is {"this_way": n} ("remove a bait counter ... If you do, ...").
 
 Rules: CR 122.8
 

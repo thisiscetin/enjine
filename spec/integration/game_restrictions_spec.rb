@@ -118,7 +118,7 @@ RSpec.describe "Player and game restrictions (CR 101.2, 119.7, 602.5, 604.2, 615
     expect(errors.call("player_rule" => { "rule" => "cant_gain_life", "spells" => "card" }))
       .to include("abilities[0].player_rule.spells: only for cant_cast, spells_cant_be_countered")
     expect(errors.call("player_rule" => { "rule" => "cant_cast", "filter" => "creature" }))
-      .to include("abilities[0].player_rule.filter: only for cant_sacrifice, cant_activate")
+      .to include("abilities[0].player_rule.filter: only for cant_sacrifice, cant_activate, cant_be_attacked")
     expect(errors.call("player_rule" => { "rule" => "cant_cast", "spells" => { "colour" => ["R"] } }))
       .to include(a_string_starting_with("abilities[0].player_rule.spells: unknown parameter"))
     expect(errors.call("player_rule" => { "rule" => "cant_cast", "if" => { "sometimes" => true } }))

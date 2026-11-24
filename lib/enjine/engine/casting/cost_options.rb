@@ -52,7 +52,9 @@ module Enjine
       # additional costs (and kicker's when kicked).
       def frame_cost_list(ctx)
         case ctx["kind"]
-        when "ability" then stack_ability(object(ctx["object"])).costs
+        when "ability"
+          obj = object(ctx["object"])
+          granter_costs(stack_ability(obj).costs, obj.memory["granter"]) # "Tap Fishing Pole" (CR 607.1a)
         when "spell" then spell_cost_list(object(ctx["object"]), ctx["kicked"])
         else []
         end

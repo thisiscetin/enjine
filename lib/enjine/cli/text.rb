@@ -180,6 +180,7 @@ module Enjine
         when "call" then "Call #{opt[:call]}"
         when "mulligan" then "Mulligan"
         when "play", "draw" then "#{opt[:type].capitalize} first"
+        when "card_name", "name" then "Name #{opt[:card_name] || opt[:name]}"
         else opt.inspect
         end
       end

@@ -3307,5 +3307,216 @@
         }
       }
     ]
+  },
+  {
+    "name": "Riot Chorus Spider",
+    "mana_cost": "{1}{R}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "spider"
+    ],
+    "power": 2,
+    "toughness": 1,
+    "keywords": [
+      "riot"
+    ],
+    "abilities": [
+      {
+        "static": {
+          "affects": {
+            "each": {
+              "creature": {
+                "subtypes": [
+                  "spider"
+                ]
+              }
+            },
+            "controller": "you",
+            "other": true
+          },
+          "keywords": [
+            "riot"
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Webling Scout",
+    "mana_cost": "{G}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "spider"
+    ],
+    "power": 1,
+    "toughness": 2
+  },
+  {
+    "name": "Skyward Bulwark",
+    "mana_cost": "{2}{G}{W}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "bird"
+    ],
+    "power": 3,
+    "toughness": 4,
+    "keywords": [
+      "flying"
+    ],
+    "abilities": [
+      {
+        "player_rule": {
+          "rule": "cant_be_attacked",
+          "filter": {
+            "creature": {
+              "keywords": [
+                "flying"
+              ]
+            }
+          }
+        }
+      },
+      {
+        "static": {
+          "affects": {
+            "each": "creature",
+            "controller": "you"
+          },
+          "abilities": [
+            {
+              "cant_be_blocked_by": {
+                "filter": {
+                  "creature": {
+                    "keywords": [
+                      "flying"
+                    ]
+                  }
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Chameleon Gecko",
+    "mana_cost": "{1}{U}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "lizard"
+    ],
+    "power": 1,
+    "toughness": 3,
+    "abilities": [
+      {
+        "activated": {
+          "cost": [
+            {
+              "mana": "{1}"
+            }
+          ],
+          "effects": [
+            {
+              "choose_color": {}
+            },
+            {
+              "become": {
+                "colors": "chosen",
+                "abilities": [
+                  {
+                    "hexproof_from": "chosen_color"
+                  }
+                ],
+                "to": "self"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Frostbind Sentry",
+    "mana_cost": "{2}{W}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "human"
+    ],
+    "power": 1,
+    "toughness": 3,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "enters": {}
+          },
+          "targets": [
+            {
+              "creature": {
+                "controller": "opponent"
+              }
+            }
+          ],
+          "effects": [
+            {
+              "tap": {
+                "to": {
+                  "target": 0
+                }
+              }
+            },
+            {
+              "become": {
+                "keywords": [
+                  "cant_become_untapped"
+                ],
+                "duration": "while_you_control_source",
+                "to": {
+                  "target": 0
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Stalwart Bastion",
+    "mana_cost": "{2}{W}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "human",
+      "soldier"
+    ],
+    "power": 1,
+    "toughness": 5,
+    "abilities": [
+      {
+        "static": {
+          "affects": {
+            "each": "creature",
+            "controller": "you"
+          },
+          "keywords": [
+            "assigns_damage_by_toughness"
+          ]
+        }
+      }
+    ],
+    "rules_text": "Each creature you control assigns combat damage equal to its toughness rather than its power if its toughness is greater."
   }
 ]
