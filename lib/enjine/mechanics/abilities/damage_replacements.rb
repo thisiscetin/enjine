@@ -67,17 +67,124 @@ module Enjine
     # The damage pass of the replacement step (CR 614.1a, 614.9, 615, 616.1): redirection, prevention and
     # damage modification, from static abilities of permanents and from resolved prevention effects.
     #
-    # The affected player (or the affected permanent's controller) chooses the order (CR 616.1). The engine
-    # applies them in the order that player would choose to take the least damage: redirections first (the
-    # damage then affects the new recipient), then prevention, then multiplying, then adding.
+    # Redirections apply first (the damage then affects the new recipient, whose controller chooses the rest). The
+    # other effects apply one at a time, each once, rechecking which still apply after each (CR 616.1e-f, 616.2),
+    # in the order the affected player (or the affected permanent's controller) chose (CR 616.1): Engine::Damage
+    # asks before the damage is dealt when two orders lead to different results (#orders), and otherwise applies
+    # them in the order that takes the least damage: prevention, then multiplying, then adding; static abilities
+    # before resolved effects.
     module DamageEvents
       module_function
 
+      # One prevention or modification effect that applies to the damage: `key` names it in proposal.applied and
+      # in a chosen order. kind: :rule (a game rule or protection), :prevent / :modify (a static ability of
+      # `holder`), :shield / :effect (a resolved effect, `effect` in state.effects).
+      Candidate = Data.define(:key, :kind, :holder, :ability, :effect)
+
       def replace!(engine, proposal)
+        hit = Engine::Damage.hit_key(proposal.data["source"], proposal.data["target"])
         redirect!(engine, proposal)
         proposal.data["unpreventable"] = true if unpreventable?(engine, proposal.data) # CR 615.12 (also shield counters)
-        prevent!(engine, proposal)
-        modify!(engine, proposal)
+        apply_in_order!(engine, proposal, engine.damage_order(hit))
+      end
+
+      # CR 616.1e-f: the effect chosen next is the first one of `order` that applies now, else the default first.
+      def apply_in_order!(engine, proposal, order)
+        until (found = candidates(engine, proposal)).empty?
+          chosen = Array(order).lazy.filter_map { |key| found.find { it.key == key } }.first || found.first
+          apply!(engine, proposal, chosen)
+        end
+      end
+
+      # The effects that apply to the damage now and haven't applied to it yet (CR 614.5), in the default order.
+      def candidates(engine, proposal)
+        data = proposal.data
+        return [] if data["amount"].zero?
+
+        applied = proposal.applied
+        rule = !data["unpreventable"] && !applied.include?("rule") &&
+               (engine.damage_prevented?(data["target"]) || protected?(engine, data)) # "prevent all damage to you", CR 702.16e
+        shields = engine.state.effects.select do
+          it["kind"] == "prevent_damage" && !applied.include?("effect:#{it["timestamp"]}") && PreventionEffect.applies?(engine, it, data)
+        end
+        modifiers = applicable(engine, proposal, :damage_replacement).reject { |_, ability| ability.redirect }
+        effects = engine.state.effects.select do
+          it["kind"] == "damage_replacement" && !applied.include?("effect:#{it["timestamp"]}") && ModifyingEffect.applies?(engine, it, data)
+        end
+        [*(Candidate.new("rule", :rule, nil, nil, nil) if rule),
+         *applicable(engine, proposal, :prevent_damage).map { |h, a| Candidate.new("#{h.id}:prevent_damage", :prevent, h, a, nil) },
+         *shields.map { Candidate.new("effect:#{it["timestamp"]}", :shield, nil, nil, it) },
+         *modifiers.sort_by { |_, a| a.multiply ? 0 : 1 }.map { |h, a| Candidate.new("#{h.id}:damage_replacement", :modify, h, a, nil) },
+         *effects.sort_by { it["multiply"] ? 0 : 1 }.map { Candidate.new("effect:#{it["timestamp"]}", :effect, nil, nil, it) }]
+      end
+
+      # CR 615.12: damage that can't be prevented still passes through prevention effects: their additional effects
+      # happen, nothing is prevented and shields aren't used up.
+      def apply!(engine, proposal, candidate)
+        data = proposal.data
+        proposal.applied << candidate.key
+        case candidate.kind
+        when :rule then data["amount"] = 0
+        when :prevent
+          prevented = data["unpreventable"] ? 0 : data["amount"]
+          holder = candidate.holder
+          follow_up!(engine, data, candidate.ability.follow_up&.entry(holder.card, holder.controller, holder.id, {}), prevented)
+          data["amount"] -= prevented
+        when :shield
+          before = data["amount"]
+          PreventionEffect.use!(engine, candidate.effect, data) unless data["unpreventable"]
+          follow_up!(engine, data, candidate.effect["follow_up"], before - data["amount"])
+        when :modify then data["amount"] = candidate.ability.modified(engine, data["amount"], candidate.holder)
+        else
+          effect = candidate.effect
+          data["amount"] = effect["multiply"] ? data["amount"] * effect["multiply"] : data["amount"] + effect["plus"]
+        end
+      end
+
+      # The affected player and the distinct results they can get by ordering the effects that apply to `source`'s
+      # damage to `target` (CR 616.1): [player, [[[[key, label], ...], final amount], ...]], one order per distinct
+      # result (the final recipient, amount, follow-ups and the shields left); nil when the order can't matter.
+      # A dry run: nothing changes.
+      def orders(engine, source, target, amount, combat)
+        probe = Proposal.new("damage", { "source" => source, "target" => target, "amount" => amount, "combat" => combat }, [])
+        redirect!(engine, probe)
+        probe.data["unpreventable"] = true if unpreventable?(engine, probe.data)
+        return if candidates(engine, probe).size < 2
+
+        outcomes = {}
+        explore(engine, probe, [], outcomes)
+        return if outcomes.size < 2
+
+        affected = probe.data["target"]
+        chooser = Filters.player_index(engine, affected) || engine.state.objects[affected]&.controller
+        chooser && [chooser, outcomes.values]
+      end
+
+      def explore(engine, proposal, path, outcomes)
+        keys = candidates(engine, proposal).map(&:key)
+        if keys.empty?
+          result = [proposal.data.slice("target", "amount", "follow_ups"), engine.state.effects]
+          outcomes[Marshal.dump(result)] ||= [path, proposal.data["amount"]]
+          return
+        end
+        saved = Snapshot.deep_copy(engine.state.effects)
+        labels = candidates(engine, proposal).to_h { [it.key, label(engine, it)] }
+        keys.each do |key|
+          engine.state.effects.replace(Snapshot.deep_copy(saved))
+          branch = Proposal.new("damage", Snapshot.deep_copy(proposal.data), proposal.applied.dup)
+          apply!(engine, branch, candidates(engine, branch).find { it.key == key })
+          explore(engine, branch, path + [[key, labels[key]]], outcomes)
+        end
+        engine.state.effects.replace(saved)
+      end
+
+      # What a player sees of an effect in the order they choose.
+      def label(engine, candidate)
+        return "the rules (prevent all)" if candidate.kind == :rule
+
+        card = candidate.holder ? candidate.holder.card : engine.state.objects[candidate.effect["source"]]&.card
+        name = card ? engine.catalog.fetch(card).name : "an effect"
+        "#{name}: #{%i[prevent shield].include?(candidate.kind) ? "prevent" : "modify"}"
       end
 
       def statics(engine, kind)
@@ -108,37 +215,16 @@ module Enjine
         to && to != from && engine.state.battlefield.include?(to) && (engine.chars(to).creature? || engine.chars(to).planeswalker?)
       end
 
-      # CR 615: prevention effects of static abilities, then shields from resolved effects (CR 615.7).
-      # Damage that can't be prevented still passes through them without being prevented (CR 615.12).
-      def prevent!(engine, proposal)
-        data = proposal.data
-        return if data["amount"].zero? || data["unpreventable"]
-
-        data["amount"] = 0 if engine.damage_prevented?(data["target"]) # "prevent all damage to you" (player_rule)
-        data["amount"] = 0 if protected?(engine, data) # CR 702.16e
-        applicable(engine, proposal, :prevent_damage).each do |holder, ability|
-          break if data["amount"].zero?
-
-          follow_up!(engine, data, ability.follow_up&.entry(holder.card, holder.controller, holder.id, {}), data["amount"])
-          data["amount"] = 0
-        end
-        engine.state.effects.select { it["kind"] == "prevent_damage" }.each do |effect|
-          break if data["amount"].zero?
-          next unless PreventionEffect.applies?(engine, effect, data)
-
-          before = data["amount"]
-          PreventionEffect.use!(engine, effect, data)
-          follow_up!(engine, data, effect["follow_up"], before - data["amount"])
-        end
-      end
-
       # CR 615.5: the rest of a prevention effect happens right after the event (Engine#run_follow_ups!), seeing
-      # the damage prevented, its source and the source's controller.
+      # the damage prevented, its source and the source's controller. For damage that can't be prevented it happens
+      # too, with 0 prevented, except a reflexive "when damage is prevented this way" (CR 615.12).
       def follow_up!(engine, data, entry, prevented)
-        return unless entry && prevented.positive?
+        return unless entry && (prevented.positive? || data["unpreventable"])
 
         facts = { "amount" => prevented, "object" => data["source"], "player" => engine.damage_source_controller(data["source"]) }
-        (data["follow_ups"] ||= []) << entry.merge("facts" => facts.compact)
+        entry = entry.merge("facts" => facts.compact)
+        entry["unprevented"] = true unless prevented.positive?
+        (data["follow_ups"] ||= []) << entry
       end
 
       # Protection from the source's quality prevents the damage (CR 702.16e), also a player's protection from each
@@ -161,33 +247,6 @@ module Enjine
           engine.state.effects.any? do
             it["kind"] == "damage_unpreventable" && (it["combat"].nil? || it["combat"] == (data["combat"] ? "combat" : "noncombat"))
           end
-      end
-
-      # "Deals double that damage instead" and "that much damage plus N instead" (CR 614.1a).
-      def modify!(engine, proposal)
-        data = proposal.data
-        return if data["amount"].zero?
-
-        found = applicable(engine, proposal, :damage_replacement).reject { |_, ability| ability.redirect }
-        found.sort_by { |_, ability| ability.multiply ? 0 : 1 }.each do |holder, ability|
-          proposal.applied << "#{holder.id}:damage_replacement"
-          data["amount"] = ability.modified(engine, data["amount"], holder)
-        end
-        modify_by_effects!(engine, proposal)
-      end
-
-      # Resolved "until your next turn, if a source would deal damage to that player or a permanent that player
-      # controls, it deals double that damage instead" effects (Effects::DamageReplacementEffect): doubling first.
-      def modify_by_effects!(engine, proposal)
-        data = proposal.data
-        found = engine.state.effects.select do |effect|
-          effect["kind"] == "damage_replacement" && !proposal.applied.include?("effect:#{effect["timestamp"]}") &&
-            ModifyingEffect.applies?(engine, effect, data)
-        end
-        found.sort_by { it["multiply"] ? 0 : 1 }.each do |effect|
-          proposal.applied << "effect:#{effect["timestamp"]}"
-          data["amount"] = effect["multiply"] ? data["amount"] * effect["multiply"] : data["amount"] + effect["plus"]
-        end
       end
 
       # Damage replacement effects of resolved spells and abilities (state.effects, kind "damage_replacement"):
@@ -296,8 +355,9 @@ module Enjine
                                "to instead). A scope is \"self\", \"attached\" or {\"each\": filter, \"controller\": " \
                                "you|opponent|any, \"other\": bool}; `each` is optional and players match too, so " \
                                "{\"controller\": \"opponent\"} is \"an opponent or a permanent an opponent controls\". " \
-                               "Several apply in the order the affected player would pick: redirections, then " \
-                               "prevention, then multiplying, then adding.",
+                               "Redirections apply first; when the order of the others changes the result, the " \
+                               "affected player chooses it (a damage_order decision), else prevention, then " \
+                               "multiplying, then adding.",
                   rules: %w[614.1a 614.5 614.9 616.1 616.1e 616.1f 120.2b],
                   params: { "by" => "damage scope", "to" => "damage scope", "combat" => "combat | noncombat",
                             "multiply" => "integer >= 2", "plus" => "amount", "redirect" => "\"self\" | \"attached\"" },
@@ -460,7 +520,7 @@ module Enjine
 
         def nested_effects = [follow_up].compact
 
-        # A source of the controller's choice (CR 609.7a): a permanent or a spell on the stack, chosen as it resolves.
+        # A source of the controller's choice, chosen as it resolves (CR 609.7a).
         def run(engine, ctx, locals)
           return :done unless locals["asked"] || condition.nil? || condition.true?(engine, ctx)
           return start(engine, ctx, nil) unless @chosen_source
@@ -468,10 +528,21 @@ module Enjine
           answer = answers(locals).first
           return start(engine, ctx, [answer["object"]]) if answer
 
-          sources = engine.state.battlefield + engine.state.stack.reject { it == ctx.object }
+          sources = self.class.sources(engine, ctx.object)
           return :done if sources.empty?
 
           ask(engine, locals, ctx.controller, "Choose a source of damage", sources.map { { "type" => "source", "object" => it } })
+        end
+
+        # CR 609.7a: a permanent, a spell on the stack, an object a spell or ability on the stack refers to (its
+        # targets, an ability's source; even one that has left its zone) or a face-up object in the command zone.
+        def self.sources(engine, resolving)
+          stack = engine.state.stack.reject { it == resolving }
+          referred = stack.flat_map do |id|
+            obj = engine.object(id)
+            Array(obj.targets).flatten.compact.reject { Filters.player_index(engine, it) } + (obj.ability? ? [obj.source] : [])
+          end
+          (engine.state.battlefield + stack + referred.compact + engine.state.command).uniq - [resolving]
         end
 
         def start(engine, ctx, chosen)
@@ -536,7 +607,8 @@ module Enjine
 
         def apply(engine, ctx)
           to = refs(engine, ctx)
-          details = { "to" => to, "permanents" => @permanents == true, "combat" => combat, "duration" => duration }
+          details = { "to" => to, "permanents" => @permanents == true, "combat" => combat, "duration" => duration,
+                      "source" => ctx.source }
           multiply ? details["multiply"] = multiply : details["plus"] = [plus.value(engine, ctx), 0].max
           engine.add_continuous_effect!("damage_replacement", ctx, to, details)
         end

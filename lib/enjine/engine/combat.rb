@@ -70,9 +70,10 @@ module Enjine
         state.pending_triggers.reject! { it["event"]["type"] == "attacker_declared" && it["event"]["object"] == id }
       end
 
-      # CR 508.4: a creature put onto the battlefield attacking attacks the defending player. (Choosing one
-      # of their planeswalkers instead isn't offered yet.) It was never declared, so it never "attacked".
-      # Only called while its controller controls an attacking creature (see Abilities::EntersAttacking).
+      # CR 508.4: a creature put onto the battlefield attacking attacks `target` when one was chosen (a token's
+      # controller picks a planeswalker in Effects::CreateToken; ninjutsu keeps the attacker's), else the defending
+      # player. It was never declared, so it never "attacked". A permanent made to enter attacking by
+      # Abilities::EntersAttacking attacks the defending player (no choice can be asked mid-move).
       def enter_attacking!(obj, target = nil)
         target = Mechanics::Filters.player_ref(self, state.opponent(obj.controller)) unless target.is_a?(String) # CR 506.3a
         attackers[obj.id] = { "target" => target, "blocked" => false }
@@ -243,7 +244,10 @@ module Enjine
           end
           frame["queue"].shift
         end
-        deal_combat_damage!(frame["assigned"])
+        hits = combat_hits(frame["assigned"])
+        return :wait if ask_damage_orders!(hits, frame, combat: true) == :wait # CR 616.1 (Engine::Damage)
+
+        with_damage_orders(frame["damage_orders"]) { deal_combat_damage!(hits) }
         :done
       end
 
@@ -269,8 +273,8 @@ module Enjine
         ask!(nil)
       end
 
-      # CR 510.2: all combat damage in a step is dealt simultaneously.
-      def deal_combat_damage!(assigned)
+      # The combat damage of this step, as assigned: [[source, recipient, amount]] (CR 510.1).
+      def combat_hits(assigned)
         hits = []
         attackers.each do |id, info|
           next unless deals_damage_now?(id)
@@ -286,6 +290,11 @@ module Enjine
         state.blockers.each do |blocker, attacker|
           hits << [blocker, attacker, combat_damage_amount(blocker)] if deals_damage_now?(blocker)
         end
+        hits
+      end
+
+      # CR 510.2: all combat damage in a step is dealt simultaneously.
+      def deal_combat_damage!(hits)
         simultaneous_damage do # CR 510.2
           dealt = Hash.new(0)
           lifelinked = hits.map(&:first).uniq.select { damage_source_keyword?(it, :lifelink) }

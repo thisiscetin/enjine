@@ -23,8 +23,9 @@ module Enjine
   # several effects apply. The engine applies them in the order that player would always choose:
   # effects that let a permanent stay ("instead remove all +1/+1 counters", a shield counter) before
   # effects that send it elsewhere ("exile it instead"), "+1 counter" bonuses before doubling, and
-  # "enters untapped" after every "enters tapped". No pair implemented so far has two orders that
-  # each benefit that player, so no decision is asked; a frame will when one does.
+  # "enters untapped" after every "enters tapped". No pair of these has two orders that each benefit
+  # that player, so no decision is asked. Damage is where orders matter: the affected player chooses
+  # one before the damage is dealt (Mechanics::DamageEvents, a damage_order decision).
   module Replacements
     module_function
 

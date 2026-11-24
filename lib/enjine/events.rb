@@ -88,6 +88,8 @@ module Enjine
     RolledDie = define(:rolled_die, :player, :sides, :result)
     # CR 707.10: a copy of a spell put on the stack (not cast).
     SpellCopied = define(:spell_copied, :player, :object, :card, :original, :targets)
+    # New targets chosen for a spell or ability (CR 115.7); `player`: its controller, `targets`: the added ones.
+    TargetsChanged = define(:targets_changed, :player, :object, :targets)
     EffectStarted = define(:effect_started, :kind, :affected, :details)
     EffectsEnded = define(:effects_ended, :count)
     AttackerDeclared = define(:attacker_declared, :object, :target)

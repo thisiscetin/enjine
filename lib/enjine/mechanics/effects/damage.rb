@@ -16,6 +16,11 @@ module Enjine
 
         # The excess damage it deals (beyond lethal damage to a creature, or a planeswalker's loyalty) is
         # what {"this_way": n} reads ("if excess damage was dealt this way", CR 120.4a, 120.10).
+        def damage_hits(engine, ctx)
+          n = amount_for(engine, ctx)
+          refs(engine, ctx).map { [ctx.source || ctx.object, it, n] }
+        end
+
         def apply(engine, ctx)
           n = amount_for(engine, ctx)
           source = ctx.source || ctx.object
@@ -42,6 +47,12 @@ module Enjine
         def self.default_to = "you"
 
         def to_s = "deal the divided damage to the targets"
+
+        def damage_hits(engine, ctx)
+          engine.object(ctx.object).memory.fetch("division", {}).filter_map do |ref, n|
+            [ctx.source || ctx.object, ref, n] if ctx.targets.flatten.include?(ref)
+          end
+        end
 
         def apply(engine, ctx)
           source = ctx.source || ctx.object

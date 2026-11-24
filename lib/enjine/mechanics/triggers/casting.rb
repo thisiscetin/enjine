@@ -124,17 +124,18 @@ module Enjine
 
       # "Whenever a creature you control becomes the target of a spell or ability an opponent controls"
       # (CR 115.1, 603.2): checked once the spell is cast, the ability activated or the triggered ability
-      # put on the stack with its targets, so a cancelled cast never triggers it. Each matching object
+      # put on the stack with its targets, so a cancelled cast never triggers it; also a copy put on the stack with
+      # its targets (CR 707.10) and new targets chosen for one (CR 115.7). Each matching object
       # that became a target is one occurrence.
       class BecomesTarget < Trigger
         BY = %w[opponent you any].freeze
-        EVENTS = %i[SpellCast AbilityActivated TriggerPutOnStack].freeze
+        EVENTS = %i[SpellCast AbilityActivated TriggerPutOnStack SpellCopied TargetsChanged].freeze
 
         primitive :trigger, :becomes_target,
                   description: "The subject becomes the target of a spell or ability (controlled by `by`: opponent | you | " \
                                "any (default), relative to the source's controller). One trigger per matching object " \
                                "targeted.",
-                  rules: %w[115.1 601.2c 603.2 603.2c],
+                  rules: %w[115.1 115.7 601.2c 603.2 603.2c 707.10],
                   params: { "subject" => "\"self\" (default) or {\"each\": filter, ...}", "by" => BY.join(" | ") },
                   example: { "becomes_target" => { "subject" => { "each" => "creature", "controller" => "you" },
                                                    "by" => "opponent" } }
@@ -151,7 +152,7 @@ module Enjine
           player = engine.names.index(event.player)
           return [] unless @by == "any" || (@by == "you") == (player == source["controller"])
 
-          Array(event.targets).uniq.filter_map do |ref|
+          Array(event.targets).flatten.uniq.filter_map do |ref|
             obj = engine.state.objects[ref]
             next unless obj && obj.zone == :battlefield
             next unless @subject.match?(engine, ref, obj.controller, obj.card, source, types: engine.chars(obj).types)

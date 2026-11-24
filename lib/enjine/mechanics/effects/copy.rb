@@ -57,16 +57,18 @@ module Enjine
           i = chosen.size
           current, spec = slots[i]
           keep = [{ "type" => "target", "target" => current }]
-          others = spec ? new_target_choices(engine, spec, legal_for, spell, current) : []
+          # A divided spell's targets stay distinct, so each still receives at least one (CR 115.7f, 601.2d).
+          taken = spell.memory.key?("division") ? chosen + slots.drop(i + 1).map(&:first) : []
+          others = spec ? new_target_choices(engine, spec, legal_for, spell, [current, *taken]) : []
           ask(engine, locals, chooser, "Choose target ##{i + 1} for #{engine.catalog.fetch(spell.card).name}", keep + others)
         end
 
         private
 
-        def new_target_choices(engine, spec, controller, spell, current)
+        def new_target_choices(engine, spec, controller, spell, taken)
           source = spell.ability? ? spell.source : nil # an ability's copy has the same source (CR 707.10b)
           spec.candidates_for(engine, controller, source).filter_map do |ref|
-            next if ref == current || ref == spell.id || !engine.targetable?(ref, controller, source, targeter: source || spell.id)
+            next if taken.include?(ref) || ref == spell.id || !engine.targetable?(ref, controller, source, targeter: source || spell.id)
 
             { "type" => "target", "target" => ref }
           end
@@ -203,7 +205,7 @@ module Enjine
 
           locals["plan"] ||= plan(engine, ctx)
           while (spell_id, controller = locals["plan"].first)
-            spell = engine.state.objects[spell_id]
+            spell = spell_id == REMEMBERED ? engine.remembered_ability(Selector.memory(engine, ctx)) : engine.state.objects[spell_id]
             if spell&.zone == :stack
               targets = @new_targets ? choose_new_targets(engine, spell, controller, locals) : spell.targets&.dup
               return :wait if targets == :wait
@@ -217,11 +219,18 @@ module Enjine
           :done
         end
 
+        # "Copy that ability" when it has already left the stack copies it as it last existed there, with the
+        # choices made for it (CR 707.10, 608.2h): the engine's reading, since the copy needs no object on the stack.
+        REMEMBERED = "remembered"
+
         private
 
         def plan(engine, ctx)
           n = amount_for(engine, ctx)
           spells = of_refs(engine, ctx).select { engine.state.objects[it]&.zone == :stack }
+          if spells.empty? && @of.kind == :triggering && @of.value == "ability" && engine.remembered_ability(Selector.memory(engine, ctx))
+            spells = [REMEMBERED]
+          end
           players(engine, ctx).flat_map { |index| spells.flat_map { |id| Array.new(n) { [id, index] } } }
         end
       end
@@ -256,7 +265,7 @@ module Enjine
               targets = choose_new_targets(engine, spell, spell.controller, locals, chooser: ctx.controller)
               return :wait if targets == :wait
 
-              engine.change_targets!(spell, targets, ctx.controller)
+              engine.change_targets!(spell, targets)
             end
             locals["spells"].shift
             locals.delete("answers")

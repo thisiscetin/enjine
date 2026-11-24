@@ -529,7 +529,7 @@ Rules: CR 702.29a, CR 702.29b, CR 702.29e, CR 702.29f, CR 113.6m, CR 602.2a
 
 ## damage_replacement
 
-While this permanent is on the battlefield, damage from sources in `by` to recipients in `to` (both optional; `combat`: combat | noncombat) is changed: `multiply` (2 = "double that damage"), `plus` an amount ("that much damage plus 1"), or `redirect` ("self" | "attached": dealt to this permanent or the one it's attached to instead). A scope is "self", "attached" or {"each": filter, "controller": you|opponent|any, "other": bool}; `each` is optional and players match too, so {"controller": "opponent"} is "an opponent or a permanent an opponent controls". Several apply in the order the affected player would pick: redirections, then prevention, then multiplying, then adding.
+While this permanent is on the battlefield, damage from sources in `by` to recipients in `to` (both optional; `combat`: combat | noncombat) is changed: `multiply` (2 = "double that damage"), `plus` an amount ("that much damage plus 1"), or `redirect` ("self" | "attached": dealt to this permanent or the one it's attached to instead). A scope is "self", "attached" or {"each": filter, "controller": you|opponent|any, "other": bool}; `each` is optional and players match too, so {"controller": "opponent"} is "an opponent or a permanent an opponent controls". Redirections apply first; when the order of the others changes the result, the affected player chooses it (a damage_order decision), else prevention, then multiplying, then adding.
 
 Rules: CR 614.1a, CR 614.5, CR 614.9, CR 616.1, CR 616.1e, CR 616.1f, CR 120.2b
 

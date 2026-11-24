@@ -5464,5 +5464,86 @@
         }
       }
     ]
+  },
+  {
+    "name": "Unstoppable Bolt",
+    "mana_cost": "{1}{R}",
+    "types": [
+      "instant"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "targets": [
+            "any_target"
+          ],
+          "effects": [
+            "damage_unpreventable",
+            {
+              "deal_damage": {
+                "amount": 2,
+                "to": {
+                  "target": 0
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Ward of the Chosen",
+    "mana_cost": "{1}{W}",
+    "types": [
+      "instant"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "effects": [
+            {
+              "prevent_damage": {
+                "to": "you",
+                "by": "chosen_source",
+                "next": 3,
+                "then": [
+                  {
+                    "gain_life": {
+                      "amount": 1
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Redirected Fury",
+    "mana_cost": "{1}{U}",
+    "types": [
+      "instant"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "targets": [
+            "spell"
+          ],
+          "effects": [
+            {
+              "choose_new_targets": {
+                "of": {
+                  "target": 0
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
   }
 ]

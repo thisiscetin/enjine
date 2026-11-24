@@ -134,7 +134,7 @@ RSpec.describe "Triggers, turn history and the stack" do
     expect(life(game, 1)).to eq(18)
   end
 
-  it "has nothing to copy once the triggered ability has left the stack" do
+  it "copies the triggered ability as it last existed once it has left the stack (CR 707.10, 608.2h)" do
     game = board(battlefield: ["Echoing Drillmaster"], step: :beginning_of_combat)
     pass_both(game)
     game.submit(type: "attack", object: obj_id(game, "Echoing Drillmaster"), target: "player:bob")
@@ -142,8 +142,8 @@ RSpec.describe "Triggers, turn history and the stack" do
     copier = game.state.pending_triggers.find { it["ability"] == "printed:1" }
     game.submit(type: "trigger", trigger: copier["id"]) # the attack trigger resolves first
     play(game, nil, { type: "yes" })
-    expect(life(game, 1)).to eq(19)
-    expect(events(game).map { it["type"] }).not_to include("spell_copied")
+    expect(life(game, 1)).to eq(18)
+    expect(events(game).map { it["type"] }).to include("spell_copied")
   end
 
   it "Mimic Lens copies the next ability activated this turn" do

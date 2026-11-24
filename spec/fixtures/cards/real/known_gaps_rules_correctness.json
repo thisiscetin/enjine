@@ -1,0 +1,163 @@
+[
+  {
+    "name": "Mica, Reader of Ruins",
+    "mana_cost": "{3}{R}",
+    "types": [
+      "creature"
+    ],
+    "supertypes": [
+      "legendary"
+    ],
+    "subtypes": [
+      "human",
+      "artificer"
+    ],
+    "power": 4,
+    "toughness": 4,
+    "abilities": [
+      {
+        "ward": {
+          "cost": [
+            {
+              "pay_life": 3
+            }
+          ]
+        }
+      },
+      {
+        "triggered": {
+          "when": {
+            "cast": {
+              "spell": "instant_or_sorcery"
+            }
+          },
+          "effects": [
+            {
+              "pay": {
+                "cost": [
+                  {
+                    "sacrifice_permanent": {
+                      "filter": "artifact"
+                    }
+                  }
+                ],
+                "then": [
+                  {
+                    "copy_spell": {
+                      "of": {
+                        "triggering": "object"
+                      },
+                      "new_targets": true
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "uncommon",
+    "printing": {
+      "set": "sos",
+      "number": "124"
+    }
+  },
+  {
+    "name": "Gratuitous Violence",
+    "mana_cost": "{2}{R}{R}{R}",
+    "types": [
+      "enchantment"
+    ],
+    "abilities": [
+      {
+        "damage_replacement": {
+          "by": {
+            "each": "creature",
+            "controller": "you"
+          },
+          "multiply": 2
+        }
+      }
+    ],
+    "rarity": "rare",
+    "printing": {
+      "set": "fdn",
+      "number": "715"
+    }
+  },
+  {
+    "name": "Kavaron Harrier",
+    "mana_cost": "{R}",
+    "types": [
+      "artifact",
+      "creature"
+    ],
+    "subtypes": [
+      "robot",
+      "soldier"
+    ],
+    "power": 2,
+    "toughness": 1,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "attacks": {}
+          },
+          "effects": [
+            {
+              "pay": {
+                "mana": "{2}",
+                "then": [
+                  {
+                    "create_token": {
+                      "tapped": true,
+                      "attacking": true,
+                      "token": {
+                        "name": "Robot",
+                        "types": [
+                          "artifact",
+                          "creature"
+                        ],
+                        "subtypes": [
+                          "robot"
+                        ],
+                        "power": 2,
+                        "toughness": 2
+                      }
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "delayed_trigger": {
+                "when": {
+                  "step_begins": {
+                    "step": "end_of_combat",
+                    "whose": "each"
+                  }
+                },
+                "effects": [
+                  {
+                    "sacrifice": {
+                      "to": {
+                        "result": 0
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rarity": "uncommon",
+    "printing": {
+      "set": "eoe",
+      "number": "139"
+    }
+  }
+]

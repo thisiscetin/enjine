@@ -198,7 +198,7 @@ Rules: CR 603.2e, CR 701.26a, CR 702.194a
 
 The subject becomes the target of a spell or ability (controlled by `by`: opponent | you | any (default), relative to the source's controller). One trigger per matching object targeted.
 
-Rules: CR 115.1, CR 601.2c, CR 603.2, CR 603.2c
+Rules: CR 115.1, CR 115.7, CR 601.2c, CR 603.2, CR 603.2c, CR 707.10
 
 | Parameter | Description |
 | --- | --- |
