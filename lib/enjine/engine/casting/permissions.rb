@@ -30,8 +30,8 @@ module Enjine
       BEAM_COST_TEXT = "Return a creature you control to its owner's hand"
       OUTSIDE = "outside:"
       # Permission effect fields copied into the play method (see Effects::PlayPermission); "alt" is an
-      # alternative cost, {"cost" => "{2}"} (airbend, CR 701.65a, 118.9).
-      RIDERS = %w[cost_increase any_mana_type alt exile_instead].freeze
+      # alternative cost, {"cost" => "{2}"} (airbend, CR 701.65a, 118.9); "during" and "waterbend": Engine::Waterbending.
+      RIDERS = %w[cost_increase any_mana_type alt exile_instead during waterbend].freeze
 
       # ---- legal actions --------------------------------------------------------------------
 
@@ -41,7 +41,7 @@ module Enjine
       # distinct card) while something lets them play those.
       def permission_candidates(index, sources = permission_sources(index))
         pl = player(index)
-        ids = alt_cost_hand(pl) + pl.graveyard + state.exile + commander_candidates(index)
+        ids = alt_cost_hand(index) + pl.graveyard + state.exile + commander_candidates(index)
         ids += [pl.library.first] unless pl.library.empty?
         return ids unless sources.any? { |_, inst| inst.ability.kind == :play_from && inst.ability.outside? }
 
@@ -65,10 +65,10 @@ module Enjine
 
       # The options the block makes of each [candidate ref, object, play method]. While no permanent lets `index`
       # play cards from other zones and no card was granted an ability, a card in a graveyard or library can only
-      # be played by an ability of its own (#unplayable_elsewhere?).
+      # be played by an ability of its own (#unplayable_elsewhere?); nor while one gives cards an alternative cost.
       def candidate_methods(index, land: false, &)
         sources = permission_sources(index)
-        plain = sources.empty? && own_abilities_only?
+        plain = sources.empty? && own_abilities_only? && granted_alt_zones(index).empty?
         permission_candidates(index, sources).flat_map do |ref|
           obj = candidate_object(index, ref)
           next [] if (plain && unplayable_elsewhere?(obj)) || (land && !face_up(obj.id) { chars(obj).land? })
@@ -172,8 +172,7 @@ module Enjine
         return false if returns_creature?(method["alt"]) && return_candidates(index, method["alt"]).empty?
         return false unless additional_costs_payable?(obj) && alt_parts_payable?(obj, method) # CR 601.2f
 
-        # CR 609.4b; a stand-in for a card outside the game is passed itself (it isn't in state.objects).
-        purpose = { "spell" => state.objects.key?(obj.id) ? obj.id : obj, "any_type" => method["any_mana_type"] }.compact
+        purpose = cast_purpose(obj, method) # Engine::Waterbending
         ability_targetable?(spell_ability_of(obj), index, obj.id) &&
           cost_variant_affordable?(index, spell_cost_list(obj, false), obj, method_cost(obj, method), nil, purpose) do
             harmonize_reduced(total_cost(index, it, spell: obj), best_harmonize_power(index, method)) # CR 601.2b
@@ -221,9 +220,9 @@ module Enjine
       def granted_methods(index, obj)
         state.effects.filter_map do |e|
           next unless e["kind"] == "permission" && e["controller"] == index && e["affected"].include?(obj.id)
-          next unless obj.zone == :exile && may_look?(obj, index)
+          next unless obj.zone == :exile && may_look?(obj, index) && (e["during"] != "your_turn" || state.active == index)
 
-          { "via" => "effect:#{e["timestamp"]}", "play" => e["play"], **e.slice(*RIDERS) }
+          with_waterbend_alt(obj, { "via" => "effect:#{e["timestamp"]}", "play" => e["play"], **e.slice(*RIDERS) })
         end
       end
 
@@ -291,13 +290,13 @@ module Enjine
 
       # Permission to play exiled cards for a duration (CR 611.2): a continuous effect for the exiled
       # objects (a card that leaves exile is a new object, CR 400.7, so the permission ends with it).
-      # `riders` (RIDERS) change how a card is played with this permission, and only then.
-      def grant_play_permission!(index, ids, duration:, play:, **riders)
+      # `riders` (RIDERS) change how a card is played with this permission, and only then (`source`: CR 611.2b).
+      def grant_play_permission!(index, ids, duration:, play:, source: nil, **riders)
         return if ids.empty?
 
-        state.effects << { "kind" => "permission", "timestamp" => next_timestamp!, "controller" => index,
-                           "affected" => ids, "duration" => duration, "turn" => state.turn, "play" => play,
-                           **end_step_timing(index, duration), **riders.transform_keys(&:to_s).slice(*RIDERS) }
+        state.effects << { "kind" => "permission", "timestamp" => next_timestamp!, "controller" => index, "affected" => ids,
+                           "duration" => duration, "turn" => state.turn, "play" => play, "source" => source,
+                           **end_step_timing(index, duration), **riders.transform_keys(&:to_s).slice(*RIDERS) }.compact
         emit Events::EffectStarted.new(kind: "permission", affected: ids, details: { "duration" => duration, "play" => play })
       end
 

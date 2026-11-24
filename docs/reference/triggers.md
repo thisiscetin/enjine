@@ -262,9 +262,9 @@ Rules: CR 509.3a, CR 509.3b, CR 509.3f, CR 603.2
 
 ## cast
 
-A player casts a spell. `controller`: you (default) | opponent | any; `spell`: creature | noncreature | instant_or_sorcery, or any spell filter, e.g. {"spell": {"subtypes": ["saga"]}} or {"one_of": [...]} for "creature or Spacecraft spell"; `name` / `mana_value`: "chosen" (the source's as-it-entered choice); `self: true`: "when you cast this spell" (it functions on the stack). `targets`: only a spell that targets something matching this filter ("self": this permanent), e.g. {"creature": {"controller": "you"}}. `from` / `not_from`: only a spell cast from (not from) that zone: hand | graveyard | exile | library | outside. `single_target: true`: only a spell with exactly one target.
+A player casts a spell. `controller`: you (default) | opponent | any; `spell`: creature | noncreature | instant_or_sorcery, or any spell filter, e.g. {"spell": {"subtypes": ["saga"]}} or {"one_of": [...]} for "creature or Spacecraft spell"; `name` / `mana_value`: "chosen" (the source's as-it-entered choice); `self: true`: "when you cast this spell" (it functions on the stack). `targets`: only a spell that targets something matching this filter ("self": this permanent), e.g. {"creature": {"controller": "you"}}. `from` / `not_from`: only a spell cast from (not from) that zone: hand | graveyard | exile | library | outside. `single_target: true`: only a spell with exactly one target. `owner`: "not_you" only a spell you don't own, "you" only one you own.
 
-Rules: CR 603.2, CR 601.2i, CR 113.6, CR 202.3e, CR 201.4, CR 607.2, CR 115.1, CR 601.2a, CR 601.2c
+Rules: CR 603.2, CR 601.2i, CR 113.6, CR 202.3e, CR 201.4, CR 607.2, CR 115.1, CR 601.2a, CR 601.2c, CR 108.3
 
 | Parameter | Description |
 | --- | --- |
@@ -277,6 +277,7 @@ Rules: CR 603.2, CR 601.2i, CR 113.6, CR 202.3e, CR 201.4, CR 607.2, CR 115.1, C
 | `from` | zone |
 | `not_from` | zone |
 | `single_target` | true |
+| `owner` | you | not_you |
 
 ```json
 {
@@ -533,6 +534,22 @@ Rules: CR 119.9, CR 120.3f
   "gains_life": {
     "controller": "you"
   }
+}
+```
+
+## gives_gift
+
+A player (`controller`: you (default) | opponent | any) gives a gift: an instant or sorcery spell they control whose gift was promised resolves, or the gift triggered ability (an enters trigger under `{"cast_with": "gift"}`) of a permanent they control resolves.
+
+Rules: CR 702.174c, CR 702.174b
+
+| Parameter | Description |
+| --- | --- |
+| `controller` | you | opponent | any |
+
+```json
+{
+  "gives_gift": {}
 }
 ```
 

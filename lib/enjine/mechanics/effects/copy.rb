@@ -306,11 +306,13 @@ module Enjine
       class Cast < CastFree
         primitive :effect, :cast,
                   description: "The controller may cast referenced cards (or card copies) now, while this resolves, " \
-                               "paying their costs; timing restrictions don't apply. `to`, `for`, `not_types`, " \
-                               "`max_mana_value`, `count`, `exile_instead` and `any_mana_type` work as for `cast_free`.",
+                               "paying their costs; timing restrictions don't apply. `to`, `from`, `for`, `not_types`, " \
+                               "`max_mana_value`, `count`, `exile_instead` and `any_mana_type` work as for `cast_free` " \
+                               "(\"you may cast an artifact spell from your graveyard\": `from: \"graveyard\"`).",
                   rules: %w[608.2g 707.12 707.12a 601.2a 601.2f],
-                  params: { "to" => "selector", "for" => "card spec", "not_types" => "list of card types",
-                            "max_mana_value" => "amount", "count" => "1 or \"any\"",
+                  params: { "to" => "selector", "from" => "hand | graveyard", "for" => "card spec",
+                            "not_types" => "list of card types",
+                            "max_mana_value" => "amount", "count" => "integer >= 1 (default 1) or \"any\"",
                             "exile_instead" => "true or a card spec (as for cast_free)",
                             "any_mana_type" => "boolean: mana of any type can be spent to cast it (CR 609.4b)" },
                   example: { "cast" => { "to" => { "result" => 0 } } }

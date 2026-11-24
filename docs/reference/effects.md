@@ -392,17 +392,18 @@ Rules: CR 701.68a, CR 701.68b, CR 701.68c
 
 ## cast
 
-The controller may cast referenced cards (or card copies) now, while this resolves, paying their costs; timing restrictions don't apply. `to`, `for`, `not_types`, `max_mana_value`, `count`, `exile_instead` and `any_mana_type` work as for `cast_free`.
+The controller may cast referenced cards (or card copies) now, while this resolves, paying their costs; timing restrictions don't apply. `to`, `from`, `for`, `not_types`, `max_mana_value`, `count`, `exile_instead` and `any_mana_type` work as for `cast_free` ("you may cast an artifact spell from your graveyard": `from: "graveyard"`).
 
 Rules: CR 608.2g, CR 707.12, CR 707.12a, CR 601.2a, CR 601.2f
 
 | Parameter | Description |
 | --- | --- |
 | `to` | selector |
+| `from` | hand | graveyard |
 | `for` | card spec |
 | `not_types` | list of card types |
 | `max_mana_value` | amount |
-| `count` | 1 or "any" |
+| `count` | integer >= 1 (default 1) or "any" |
 | `exile_instead` | true or a card spec (as for cast_free) |
 | `any_mana_type` | boolean: mana of any type can be spent to cast it (CR 609.4b) |
 
@@ -418,7 +419,7 @@ Rules: CR 608.2g, CR 707.12, CR 707.12a, CR 601.2a, CR 601.2f
 
 ## cast_free
 
-The controller may cast referenced cards without paying their mana costs while this resolves. `to` names the cards ({"result": n}), or a player for the cards in their hand (default: your hand). Only cards matching `for`/`not_types` with mana value up to `max_mana_value` (optional amount) that could be cast now (legal targets). `count`: 1 (default) or "any" (any number, one at a time). X is 0 (CR 107.3b). `play: true` ("you may play"): a land among them may be played, on your turn with a land play left (`{type: "play_land"}`). A face-down card is judged face up.
+The controller may cast referenced cards without paying their mana costs while this resolves. `to` names the cards ({"result": n}), or a player for the cards in their hand (default: your hand), or in the zone `from` (hand | graveyard). Only cards matching `for`/`not_types` with mana value up to `max_mana_value` (optional amount) that could be cast now (legal targets). `count`: 1 (default), up to N (an integer), or "any" (any number, one at a time). X is 0 (CR 107.3b). `play: true` ("you may play"): a land among them may be played, on your turn with a land play left (`{type: "play_land"}`). A face-down card is judged face up.
 
 Rules: CR 608.2g, CR 118.9, CR 601.2a, CR 107.3b, CR 118.6a, CR 305.2a, CR 305.3, CR 406.3a
 
@@ -428,7 +429,8 @@ Rules: CR 608.2g, CR 118.9, CR 601.2a, CR 107.3b, CR 118.6a, CR 305.2a, CR 305.3
 | `for` | card spec |
 | `not_types` | list of card types |
 | `max_mana_value` | amount |
-| `count` | 1 or "any" |
+| `count` | integer >= 1 (default 1) or "any" |
+| `from` | hand | graveyard |
 | `play` | boolean |
 | `exile_instead` | true or a card spec: if a spell cast this way (matching it) would be put into a graveyard, it's exiled instead (CR 614.1a) |
 | `any_mana_type` | boolean: mana of any type can be spent to cast it (CR 609.4b) |
@@ -1611,14 +1613,14 @@ Rules: CR 702.26a, CR 702.26b, CR 702.26d, CR 702.26g, CR 702.26h, CR 502.1, CR 
 
 ## play_permission
 
-A player may play (`play: "play"`, default) or cast (`"cast"`) each referenced exiled card matching `for`/`not_types`, paying its costs and following timing rules, for `duration`: end_of_turn (default), end_of_your_next_turn, until_your_next_end_step or while_exiled. With `choose: "one_per_owner"` only one chosen card per owner. `to_player`: who may play it, "controller" (default, the effect's controller), "owner" (the card's owner) or a player selector (a face-down card: only someone who may look at it). `cost_increase`: spells cast this way cost that much generic mana more. `any_mana_type: true`: mana of any type can be spent to cast those spells.
+A player may play (`play: "play"`, default) or cast (`"cast"`) each referenced exiled card matching `for`/`not_types`, paying its costs and following timing rules, for `duration`: end_of_turn (default), end_of_your_next_turn, until_your_next_end_step, while_exiled or while_you_control_source ("for as long as you control this creature"). With `choose: "one_per_owner"` only one chosen card per owner. `to_player`: who may play it, "controller" (default, the effect's controller), "owner" (the card's owner) or a player selector (a face-down card: only someone who may look at it). `cost_increase`: spells cast this way cost that much generic mana more. `any_mana_type: true`: mana of any type can be spent to cast those spells. `during: "your_turn"`: only during your turn. `waterbend: "mana_value"`: cast it by waterbending {X} rather than paying its mana cost, where X is its mana value.
 
-Rules: CR 611.2a, CR 601.3, CR 305.1, CR 400.7, CR 514.2, CR 601.2f, CR 108.3, CR 406.3b, CR 609.4b
+Rules: CR 611.2a, CR 611.2b, CR 601.3, CR 305.1, CR 400.7, CR 514.2, CR 601.2f, CR 108.3, CR 406.3b, CR 609.4b, CR 118.9, CR 701.67a
 
 | Parameter | Description |
 | --- | --- |
 | `to` | selector (usually {"result": n}) |
-| `duration` | end_of_turn | end_of_your_next_turn | until_your_next_end_step | while_exiled |
+| `duration` | end_of_turn | end_of_your_next_turn | until_your_next_end_step | while_exiled | while_you_control_source |
 | `play` | play | cast |
 | `for` | card spec |
 | `not_types` | list of card types |
@@ -1627,6 +1629,8 @@ Rules: CR 611.2a, CR 601.3, CR 305.1, CR 400.7, CR 514.2, CR 601.2f, CR 108.3, C
 | `cost_increase` | integer >= 1 |
 | `any_mana_type` | boolean |
 | `exile_instead` | true or a card spec: if a spell cast this way (matching it) would be put into a graveyard, it's exiled instead (CR 614.1a) |
+| `during` | your_turn |
+| `waterbend` | mana_value |
 
 ```json
 {
@@ -2078,9 +2082,9 @@ Rules: CR 701.22a
 
 ## search_library
 
-Search your library for up to `count` cards matching `for`, then put them into your hand (or onto the battlefield, tapped if `tapped`, with `counters`; or into your graveyard) and shuffle. `put: library_top`: shuffle, then put the found card (one) on top. Computed bounds in `for` are worked out as the effect resolves. With a stated quality you may find fewer (or none); a search for just "a card" must find one if it can. `reveal` shows the found cards to every player. `searcher` names another player who searches their own library (e.g. {"controller_of": {"target": 0}}); `may: true` lets the searcher decline (then nothing is shuffled). `different_names: true`: the cards found must all have different names ("basic land cards with different names").
+Search your library for up to `count` cards matching `for`, then put them into your hand (or onto the battlefield, tapped if `tapped`, with `counters`; or into your graveyard) and shuffle. `put: library_top`: shuffle, then put the found card (one) on top. Computed bounds in `for` are worked out as the effect resolves. With a stated quality you may find fewer (or none); a search for just "a card" must find one if it can. `reveal` shows the found cards to every player. `searcher` names another player who searches their own library (e.g. {"controller_of": {"target": 0}}); `may: true` lets the searcher decline (then nothing is shuffled). `different_names: true`: the cards found must all have different names ("basic land cards with different names"). `battlefield_instead`: {"if": condition, "for": card spec}: a found card matching `for` goes onto the battlefield instead of into your hand while the condition holds.
 
-Rules: CR 701.23a, CR 701.23b, CR 701.23d, CR 701.23e, CR 701.20a, CR 701.24a, CR 701.24b, CR 118.12, CR 110.2a
+Rules: CR 701.23a, CR 701.23b, CR 701.23d, CR 701.23e, CR 701.20a, CR 701.24a, CR 701.24b, CR 118.12, CR 110.2a, CR 614.1a
 
 | Parameter | Description |
 | --- | --- |
@@ -2093,6 +2097,7 @@ Rules: CR 701.23a, CR 701.23b, CR 701.23d, CR 701.23e, CR 701.20a, CR 701.24a, C
 | `searcher` | selector of the searching player (default "you") |
 | `may` | true: the searcher may choose not to search |
 | `different_names` | true: each card found has a different name |
+| `battlefield_instead` | {"if": condition, "for": card spec} (with put: hand) |
 
 ```json
 {

@@ -40,8 +40,20 @@ module Enjine
         obj = object(ctx["object"])
         spell = spell_ability_of(obj)
         kick = kicked_castable?(ctx["player"], obj)
-        plain = ability_targetable?(spell, ctx["player"], obj.id)
+        plain = !ctx["flash_by_cost"] && ability_targetable?(spell, ctx["player"], obj.id) # CR 601.3c
         (kick ? [{ type: "kick" }] : []) + (plain ? [{ type: "no_kick" }] : [])
+      end
+
+      # CR 601.3c: "you may cast this spell as though it had flash if you [pay an optional additional cost]".
+      def flash_by_cost?(obj)
+        optional = spell_cost_abilities(obj, :kicker).first
+        optional.respond_to?(:flash?) && optional.flash?
+      end
+
+      # Whether casting `card` now relies on that cost rather than on its own timing.
+      def flash_cost_needed?(index, card)
+        c = chars(card)
+        !c.type?(:instant) && !c.keyword?(:flash) && !sorcery_timing?(index) && flash_by_cost?(card)
       end
 
       # Whether the spell could be cast kicked: kicker payable, the kicked total affordable and its

@@ -25,8 +25,10 @@ module Enjine
                                "if it can. `reveal` shows the found cards to every player. `searcher` names another " \
                                "player who searches their own library (e.g. {\"controller_of\": {\"target\": 0}}); " \
                                "`may: true` lets the searcher decline (then nothing is shuffled). `different_names: true`: " \
-                               "the cards found must all have different names (\"basic land cards with different names\").",
-                  rules: %w[701.23a 701.23b 701.23d 701.23e 701.20a 701.24a 701.24b 118.12 110.2a],
+                               "the cards found must all have different names (\"basic land cards with different names\"). " \
+                               "`battlefield_instead`: {\"if\": condition, \"for\": card spec}: a found card matching " \
+                               "`for` goes onto the battlefield instead of into your hand while the condition holds.",
+                  rules: %w[701.23a 701.23b 701.23d 701.23e 701.20a 701.24a 701.24b 118.12 110.2a 614.1a],
                   params: { "for" => "card spec: \"card\" (default), {\"types\"|\"subtypes\"|\"supertypes\": [...], " \
                                      "\"name\": \"...\"} or {\"any_of\": [spec, ...]}",
                             "count" => "integer (default 1), \"any\" (any number), \"x\" or an amount (\"up to that many\")",
@@ -36,7 +38,8 @@ module Enjine
                             "reveal" => "true: reveal the found cards",
                             "searcher" => "selector of the searching player (default \"you\")",
                             "may" => "true: the searcher may choose not to search",
-                            "different_names" => "true: each card found has a different name" },
+                            "different_names" => "true: each card found has a different name",
+                            "battlefield_instead" => "{\"if\": condition, \"for\": card spec} (with put: hand)" },
                   example: { "search_library" => { "for" => { "supertypes" => ["basic"], "types" => ["land"] },
                                                    "reveal" => true } }
 
@@ -44,8 +47,20 @@ module Enjine
 
         attr_reader :spec, :count, :put, :tapped, :reveal
 
-        def self.keys = %w[for count put tapped counters reveal searcher may different_names if]
+        def self.keys = %w[for count put tapped counters reveal searcher may different_names battlefield_instead if]
         def self.default_to = "you"
+
+        # "If [condition] and the revealed card is [a quality], put it onto the battlefield instead" (CR 614.1a).
+        def parse_instead(raw, errors, path)
+          return nil if raw.nil?
+          return (errors << "#{path}: must be {\"if\": condition, \"for\": card spec}") && nil unless raw.is_a?(Hash)
+
+          Mechanics.check_keys(raw.transform_keys(&:to_s), %w[if for], errors, path)
+          errors << "#{path}: only a search that puts cards into a hand" unless @put == "hand"
+          cond = Mechanics.fetch_param(raw, :if)
+          { "if" => cond && Condition.build(cond, errors, "#{path}.if", targets_count: @targets_count),
+            "for" => CardSpec.build(Mechanics.fetch_param(raw, :for), errors, "#{path}.for") }
+        end
 
         def setup(params, errors, path)
           @spec = CardSpec.build(Mechanics.fetch_param(params, :for), errors, "#{path}.for")
@@ -61,6 +76,7 @@ module Enjine
           @counters = parse_counters(Mechanics.fetch_param(params, :counters), errors, path)
           raw = Mechanics.fetch_param(params, :searcher) || "you"
           @searcher = Selector.build(raw, errors, "#{path}.searcher", targets_count: @targets_count, results_count: @results_count)
+          @instead = parse_instead(Mechanics.fetch_param(params, :battlefield_instead), errors, "#{path}.battlefield_instead")
         end
 
         def parse_count(raw, errors, path)
@@ -108,7 +124,8 @@ module Enjine
             choices = candidates(engine, ctx, index, found)
             return ask(engine, locals, index, "Search your library (#{spec}): find a card", choices) unless choices.empty?
           end
-          return :wait if entering_choices?(engine, index, locals, found)
+          locals["instead"] ||= found.select { instead?(engine, ctx, it) }
+          return :wait if engine.ask_entering_choices!(locals, entering(found, locals).map { [it, index] }) == :wait
 
           finish!(engine, index, found, locals)
           :done
@@ -154,8 +171,19 @@ module Enjine
           enters = {}
           enters["tapped"] = true if tapped
           enters["counters"] = @counters.dup unless @counters.empty?
-          put_cards!(engine, locals, found, index, reason: "search", enters: enters.empty? ? nil : enters)
+          instead = locals["instead"]
+          engine.enter_battlefield!(locals, instead.map { [it, index, nil] }, reason: "search") unless instead.empty?
+          put_cards!(engine, locals, found - instead, index, reason: "search", enters: enters.empty? ? nil : enters)
           engine.shuffle_library!(index) # CR 701.24b: the found cards have left; the rest is shuffled
+        end
+
+        # The cards entering the battlefield (their "as this enters" choices are asked first, CR 614.12).
+        def entering(found, locals) = put == "battlefield" ? found : locals["instead"]
+
+        def instead?(engine, ctx, id)
+          return false unless @instead && (@instead["if"].nil? || @instead["if"].true?(engine, ctx))
+
+          @instead["for"].match?(engine, engine.object(id), ctx)
         end
       end
     end

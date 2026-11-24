@@ -3096,5 +3096,216 @@
         }
       }
     ]
+  },
+  {
+    "name": "Shadow Sensei",
+    "mana_cost": "{2}{B}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "human",
+      "ninja"
+    ],
+    "power": 2,
+    "toughness": 2,
+    "abilities": [
+      {
+        "cards_have": {
+          "cards": {
+            "types": [
+              "creature"
+            ]
+          },
+          "ability": {
+            "sneak": {
+              "cost": "{2}{B}"
+            }
+          }
+        }
+      }
+    ]
+  },
+  {
+    "name": "Hollow Warden",
+    "mana_cost": "{1}{R}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "human",
+      "warrior"
+    ],
+    "power": 3,
+    "toughness": 1,
+    "abilities": [
+      {
+        "ward": {
+          "cost": [
+            {
+              "pay_life": {
+                "power": "self"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Gloom Archivist",
+    "mana_cost": "{B}{B}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "vampire",
+      "noble"
+    ],
+    "power": 2,
+    "toughness": 2,
+    "abilities": [
+      {
+        "activated": {
+          "cost": [
+            {
+              "mana": "{1}"
+            },
+            {
+              "exile_from_graveyard": {
+                "count": "any",
+                "card": {
+                  "colors": [
+                    "B"
+                  ]
+                },
+                "symbols": {
+                  "color": "B",
+                  "at_least": 3
+                }
+              }
+            }
+          ],
+          "timing": "sorcery",
+          "effects": [
+            {
+              "copy_card": {
+                "of": "exiled_for_cost"
+              }
+            },
+            {
+              "cast_free": {
+                "to": {
+                  "result": 0
+                },
+                "count": 2
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Twin Banner Herald",
+    "mana_cost": "{2}{W}",
+    "supertypes": [
+      "legendary"
+    ],
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "human",
+      "advisor"
+    ],
+    "power": 2,
+    "toughness": 3,
+    "abilities": [
+      {
+        "activated": {
+          "cost": [
+            {
+              "mana": "{1}"
+            },
+            "tap",
+            {
+              "discard": {
+                "card": {
+                  "supertypes": [
+                    "legendary"
+                  ],
+                  "same_name_as": {
+                    "permanent": {
+                      "supertypes": [
+                        "legendary"
+                      ],
+                      "controller": "you"
+                    }
+                  }
+                }
+              }
+            }
+          ],
+          "effects": [
+            {
+              "draw": {
+                "amount": 2
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Spider Acrobat",
+    "mana_cost": "{1}{G}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "spider",
+      "human"
+    ],
+    "power": 2,
+    "toughness": 2,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "attacks": {}
+          },
+          "effects": [
+            {
+              "add_counters": {
+                "counter": "+1/+1",
+                "amount": 1,
+                "to": "self"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "activated": {
+          "cost": [
+            {
+              "remove_counters": {
+                "count": 2,
+                "self": true
+              }
+            }
+          ],
+          "effects": [
+            {
+              "draw": {
+                "amount": 1
+              }
+            }
+          ]
+        }
+      }
+    ]
   }
 ]

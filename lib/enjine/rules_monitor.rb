@@ -151,7 +151,7 @@ module Enjine
       return if card.instant_speed? || event.during_resolution # CR 608.2g: timing doesn't apply
 
       caster = event.player
-      return if sneaked?(event, caster)
+      return if sneaked?(event, caster) || flashed_by_cost?(event, card)
 
       # The stack was empty as casting began (CR 601.2a) when the spell is at its bottom; what went on it since
       # ("whenever you cast" triggers, even one still waiting for its targets, CR 603.3d) doesn't count.
@@ -159,6 +159,12 @@ module Enjine
              state.stack.last == event.object
         finding("307.1", "#{caster} cast sorcery-speed #{event.card} at #{state.step} (stack #{state.stack.size})")
       end
+    end
+
+    # CR 601.3c: "you may cast this spell as though it had flash if you [pay an optional additional cost]", paid.
+    def flashed_by_cost?(event, card)
+      paid = state.objects[event.object]&.memory&.[]("kicked_with") or return false
+      card.ability_instances.any? { it.ability.respond_to?(:flash?) && it.ability.flash? && it.ability.keyword == paid }
     end
 
     # CR 702.190a: a spell cast for its sneak cost, at instant speed during its caster's declare blockers step.

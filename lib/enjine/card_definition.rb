@@ -332,10 +332,11 @@ module Enjine
       end.uniq.freeze
     end
 
-    # CR 202.2: a card's colors come from its mana cost, unless it has a color indicator (CR 204) or is a
-    # token whose creating effect gives its colors (CR 111.4): `"colors": ["G"]` (`[]` for colorless).
+    # CR 202.2: a card's colors come from its mana cost (a hybrid symbol is each of its colors, CR 202.2d), unless it
+    # has a color indicator (CR 204) or is a token whose creating effect gives its colors (CR 111.4): `"colors": ["G"]`
+    # (`[]` for colorless).
     def read_colors(card, errors)
-      return (@mana_cost.is_a?(Mana::Cost) ? Mana::COLORS.select { @mana_cost.colored.key?(it) } : []).freeze unless card.key?("colors")
+      return (@mana_cost.is_a?(Mana::Cost) ? @mana_cost.colors : []).freeze unless card.key?("colors")
 
       list = card["colors"]
       ok = list.is_a?(Array) && list.all? { Mana::COLORS.include?(it.to_s.upcase.to_sym) }

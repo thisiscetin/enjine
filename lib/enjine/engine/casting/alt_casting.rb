@@ -21,8 +21,14 @@ module Enjine
 
       # ---- methods ------------------------------------------------------------------------------
 
-      # The cards in a hand with an alternative cost (only those can be cast from it with a method).
-      def alt_cost_hand(player) = player.hand.select { |id| chars(id).abilities.any? { it.ability.kind == :alternative_cost } }
+      # The cards in `index`'s hand with an alternative cost (only those can be cast from it with a method): all of
+      # them while a permanent of theirs gives cards in their hand one (Abilities::CardsHave).
+      def alt_cost_hand(index)
+        hand = player(index).hand
+        return hand if granted_alt_zones(index).include?(:hand)
+
+        hand.select { |id| chars(id).abilities.any? { it.ability.kind == :alternative_cost } }
+      end
 
       # A card in a graveyard or library, not a copy, with no face that has an ability to play itself
       # (CardDefinition#plays_itself?) has no play method (Engine::Permissions#play_methods): a quick no for most candidates.
@@ -41,7 +47,7 @@ module Enjine
           ability = inst.ability
           ability.method_for(inst.ref) if ability.kind == :alternative_cost && ability.functions?(self, obj, index)
         end
-        own + warped_methods(index, obj) + plotted_methods(obj)
+        own + granted_alt_methods(index, obj) + warped_methods(index, obj) + plotted_methods(obj)
       end
 
       # CR 702.170d: a plotted card may be cast without paying its mana cost during its owner's main phase while
@@ -49,6 +55,32 @@ module Enjine
       def plotted_methods(obj)
         turn = obj.zone == :exile && obj.memory["plotted"]
         turn && state.turn > turn ? [{ "via" => "plotted", "play" => "cast", "alt" => Permissions::FREE, "sorcery" => true }] : []
+      end
+
+      GRANTED = "cards_have:"
+
+      # Alternative costs a permanent `index` controls gives their cards (Abilities::CardsHave, CR 611.3a): the ref
+      # "cards_have:<permanent>:<ref>" names the granting ability.
+      def granted_alt_methods(index, obj)
+        return [] if obj.zone == :outside
+
+        board_abilities(:cards_have).filter_map do |perm, grant|
+          next unless perm.controller == index && grant.functions?(self, obj, index)
+
+          inst = chars(perm).abilities.find { it.ability.equal?(grant) }
+          grant.granted.method_for("#{GRANTED}#{perm.id}:#{inst.ref}")
+        end
+      end
+
+      # The zones in which permanents `index` controls give cards an alternative cost (Abilities::CardsHave).
+      def granted_alt_zones(index) = board_abilities(:cards_have).filter_map { |perm, grant| grant.zone if perm.controller == index }
+
+      # The alternative cost ability a method's ref names: the card's own, or one a permanent grants.
+      def alt_cost_ability(obj, ref)
+        return chars(obj).ability(ref) unless ref.start_with?(GRANTED)
+
+        perm, inst = ref.delete_prefix(GRANTED).split(":", 2)
+        state.objects[perm] && chars(perm).ability(inst)&.granted
       end
 
       # CR 702.185a: "Its owner may cast this card after the current turn has ended for as long as it remains
@@ -72,7 +104,7 @@ module Enjine
       # The non-mana parts of the alternative cost being paid (a list of costs, CR 601.2h).
       def alt_cost_parts(obj, method)
         ref = method&.dig("alt", "ref") or return []
-        chars(obj).ability(ref).choosing_costs
+        alt_cost_ability(obj, ref)&.choosing_costs || []
       end
 
       def alt_parts_payable?(obj, method) = alt_cost_parts(obj, method).all? { it.payable?(self, obj) }

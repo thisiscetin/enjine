@@ -14,9 +14,10 @@ module Enjine
         obj = object(id)
         defn = definition(obj)
         return false unless defn.castable?
-        return false unless defn.instant_speed? || sorcery_timing?(index)
+        return false unless defn.instant_speed? || sorcery_timing?(index) || flash_by_cost?(obj)
         return false if cast_forbidden?(index, obj) # CR 101.2 (Engine::Rules)
         return false unless additional_costs_payable?(obj) # CR 601.2f: e.g. "sacrifice a creature"
+        return kicked_castable?(index, obj) if flash_cost_needed?(index, obj) # CR 601.3c (Engine::CastChoices)
 
         if ability_targetable?(defn.spell_ability, index, id) && # CR 601.2b: some way of paying its costs (Engine::CostOptions)
            cost_variant_affordable?(index, spell_cost_list(obj, false), obj, defn.mana_cost, nil, { "spell" => id }) do
@@ -130,9 +131,11 @@ module Enjine
                    "index" => state.zone_list(card.zone, card.owner).index(card_id) }
         origin["memory"] = card.memory.slice("face_down", "may_look") if face_down?(card) # turned face up (CR 406.3a)
         origin["memory"] = card.memory.slice("prepared_for") if card.memory["prepared_for"] # a prepare spell (CR 723.3c)
+        flash_cost = !via && !face && flash_cost_needed?(index, card) # CR 601.3c: the optional cost must be paid
         obj = move!(card_id, :stack, controller: index, reason: "cast")
         turn_spell_face!(obj, face) # CR 712.8b, 716.3b, 721.3b
         extra = method ? { "method" => method } : {}
+        extra["flash_by_cost"] = true if flash_cost
         extra["no_priority"] = true if %w[free resolving].include?(via) # cast while resolving (CR 608.2g)
         start_casting!(index, obj.id, "spell", origin: origin, extra: extra)
       end

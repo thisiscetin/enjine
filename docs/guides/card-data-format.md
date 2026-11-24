@@ -1389,6 +1389,36 @@ grants its abilities.
                 { "foretell": { "cost": "{1}{R}" } }] }
 ```
 
+### 4.30 Casting permissions: "for as long as you control", flash by a cost, granted sneak, costs that read the board
+
+| Oracle text | Data |
+| --- | --- |
+| "You may play that card for as long as you control this creature" (CR 611.2b) | `{ "play_permission": { "to": { "result": 0 }, "duration": "while_you_control_source" } }` (ends when the source leaves or changes control; never starts if that already happened) |
+| "For as long as you control Hama, you may cast the exiled card during your turn by waterbending {X} rather than paying its mana cost, where X is its mana value" (CR 701.67a, 118.9) | the same with `"play": "cast", "during": "your_turn", "waterbend": "mana_value"` (pay_cost `{type: "waterbend", object: id}` taps an artifact or creature for {1}) |
+| "You may cast this spell as though it had flash if you behold a Dragon as an additional cost" (CR 601.3c) | `{ "additional_cost": { "cost": [{ "behold": { "card": { "subtypes": ["dragon"] } } }], "optional": true, "flash": true } }`: at instant speed only `kick` is offered |
+| "As an additional cost to cast this spell, you may choose a creature type and behold two creatures of that type" (CR 601.2b, 607.2d) | `"cost": [{ "choose_creature_type": {} }, { "behold": { "card": { "types": ["creature"], "subtypes": "chosen" }, "count": 2 } }]` with `"optional": true` (`choose_cost` option `{type: "cost", creature_type: "elf"}`; the spell remembers the type) |
+| "If this spell's additional cost was paid and the revealed card is the chosen type, put that card onto the battlefield instead" | `search_library` with `"battlefield_instead": { "if": { "cast_with": "additional_cost" }, "for": { "subtypes": "chosen" } }` |
+| "Discard a legendary card with the same name as a legendary permanent you control" (CR 201.2a) | `{ "discard": { "card": { "supertypes": ["legendary"], "same_name_as": { "permanent": { "supertypes": ["legendary"], "controller": "you" } } } } }` (a card spec relation, read for whoever pays) |
+| "Exile any number of black cards from your graveyard with fifteen or more black mana symbols among their mana costs: Copy those exiled cards. You may cast up to three of the copies without paying their mana costs." (CR 107.4e, 707.12) | cost `{ "exile_from_graveyard": { "count": "any", "card": { "colors": ["B"] }, "symbols": { "color": "B", "at_least": 15 } } }` (choose cards, `done` once enough symbols are chosen); effects `{ "copy_card": { "of": "exiled_for_cost" } }`, `{ "cast_free": { "to": { "result": 0 }, "count": 3 } }` |
+| "Whenever Bilbo attacks, you may cast an artifact, instant, or sorcery spell from your graveyard. If an instant or sorcery spell cast this way would be put into your graveyard, exile it instead." (CR 608.2g) | `{ "cast": { "from": "graveyard", "for": { "any_of": [...] }, "exile_instead": { "any_of": [{ "types": ["instant"] }, { "types": ["sorcery"] }] } } }` (`from` also on `cast_free`; `count` takes an integer: "up to N") |
+| "Creature cards in your graveyard have sneak {3}{B}. You may cast creature spells from your graveyard using their sneak abilities." (CR 611.3a) | `{ "cards_have": { "zone": "graveyard", "cards": { "types": ["creature"] }, "ability": { "sneak": { "cost": "{3}{B}" } } } }` (flashback, harmonize, mayhem, web-slinging or sneak; cast option `via: "alt:cards_have:<permanent>:<ref>"`) |
+| "Whenever you cast a spell you don't own" (CR 108.3) | trigger `{ "cast": { "owner": "not_you" } }` (`"you"`: one you own) |
+| "Ward—Pay life equal to Raubahn's power" (CR 702.21a) | `{ "ward": { "cost": [{ "pay_life": { "power": "self" } }] } }` (`pay_life` takes an amount, computed as it's paid) |
+| "Whenever you give a gift" (CR 702.174c) | trigger `{ "gives_gift": {} }`: a gift-promised instant or sorcery you control resolves, or a permanent's gift trigger (`"if": { "cast_with": "gift" }`) resolves |
+| "Remove two counters from Ghost-Spider" | `{ "remove_counters": { "count": 2, "self": true } }` |
+
+A card's colors include those of its hybrid symbols (CR 202.2d), so a `{U/B}` card is a black card for `"colors": ["B"]`.
+
+```json
+{ "name": "Example Bloodwater Adept", "mana_cost": "{2}{U}{B}", "types": ["creature"], "subtypes": ["human", "warlock"],
+  "power": 3, "toughness": 3,
+  "abilities": [{ "triggered": { "when": { "enters": {} },
+                                 "effects": [{ "exile_top": { "amount": 1 } },
+                                             { "play_permission": { "to": { "result": 0 }, "play": "cast",
+                                                                    "duration": "while_you_control_source",
+                                                                    "during": "your_turn", "waterbend": "mana_value" } }] } }] }
+```
+
 ---
 
 ## 5. Worked examples

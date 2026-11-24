@@ -33,6 +33,9 @@ module Enjine
       # The cost with X replaced by `value` (CR 107.3a): each {X} adds that much generic mana.
       def with_x(value) = with(generic: generic + (x_symbols * value), x_symbols: 0)
 
+      # How many of its mana symbols are of `color`: colored ones and hybrid ones with that color (CR 107.4e).
+      def symbols_of(color) = colored.fetch(color, 0) + hybrid.count { it.include?(color) }
+
       # The colors of the cost's colored and hybrid symbols, in WUBRG order (CR 202.2, 202.2d, 107.4e).
       def colors = COLORS.select { |c| colored.key?(c) || hybrid.any? { it.include?(c) } }
 

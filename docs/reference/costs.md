@@ -55,6 +55,18 @@ Rules: CR 401.1, CR 113.6m, CR 602.2b, CR 118.3
 "bottom_self_from_graveyard"
 ```
 
+## choose_creature_type
+
+Choose a creature type as part of the cost (a `choose_cost` decision with options `{type: "cost", creature_type: t}`). The spell remembers it as its chosen type: later costs and its effects read it with `"subtypes": "chosen"`.
+
+Rules: CR 601.2b, CR 205.3m, CR 607.2d
+
+```json
+{
+  "choose_creature_type": {}
+}
+```
+
 ## discard
 
 Discard `count` cards (default 1) from your hand, never this card, matching the card spec `card` if given: chosen while casting or activating and discarded as the spell or ability becomes cast. `random: true` discards them at random instead.
@@ -220,13 +232,13 @@ Rules: CR 118.3, CR 601.2b, CR 601.2f, CR 602.2b, CR 118.12
 
 ## pay_life
 
-Pay that much life (you lose it). Only possible while your life total is at least that much. `"X"` pays the X announced for the spell or ability (at most your life total); it may be a spell's additional cost.
+Pay that much life (you lose it). Only possible while your life total is at least that much. `"X"` pays the X announced for the spell or ability (at most your life total); it may be a spell's additional cost. An amount (e.g. {"power": "self"}, "pay life equal to its power") is computed as the cost is paid.
 
-Rules: CR 119.4, CR 119.4b, CR 118.3b, CR 601.2b, CR 107.3a
+Rules: CR 119.4, CR 119.4b, CR 118.3b, CR 601.2b, CR 107.3a, CR 702.21a
 
 | Parameter | Description |
 | --- | --- |
-| `(value)` | integer >= 1, or "X" |
+| `(value)` | integer >= 1, "X", or an amount |
 
 ```json
 {
@@ -236,7 +248,7 @@ Rules: CR 119.4, CR 119.4b, CR 118.3b, CR 601.2b, CR 107.3a
 
 ## remove_counters
 
-Remove `count` counters (of kind `counter`, or any kind) from among permanents you control matching `filter` (default creature), one counter per choice. Removed as it becomes cast.
+Remove `count` counters (of kind `counter`, or any kind) from among permanents you control matching `filter` (default creature), one counter per choice. Removed as it becomes cast. `self: true`: only from this permanent ("Remove two counters from Ghost-Spider").
 
 Rules: CR 602.2b, CR 601.2h, CR 118.3, CR 122.1
 
@@ -245,6 +257,7 @@ Rules: CR 602.2b, CR 601.2h, CR 118.3, CR 122.1
 | `count` | integer |
 | `filter` | filter (default creature) |
 | `counter` | counter name (optional) |
+| `self` | true: from this permanent only |
 
 ```json
 {

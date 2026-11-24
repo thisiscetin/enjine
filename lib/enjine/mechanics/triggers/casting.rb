@@ -17,17 +17,18 @@ module Enjine
                                "matching this filter (\"self\": this permanent), e.g. {\"creature\": {\"controller\": " \
                                "\"you\"}}. `from` / `not_from`: only a spell cast from (not from) that zone: hand | " \
                                "graveyard | exile | library | outside. `single_target: true`: only a spell with exactly " \
-                               "one target.",
-                  rules: %w[603.2 601.2i 113.6 202.3e 201.4 607.2 115.1 601.2a 601.2c],
+                               "one target. `owner`: \"not_you\" only a spell you don't own, \"you\" only one you own.",
+                  rules: %w[603.2 601.2i 113.6 202.3e 201.4 607.2 115.1 601.2a 601.2c 108.3],
                   params: { "controller" => "you | opponent | any", "spell" => "creature | noncreature | instant_or_sorcery | filter",
                             "name" => "\"chosen\"", "mana_value" => "\"chosen\"", "self" => "true",
                             "targets" => "\"self\" or a target filter", "from" => "zone", "not_from" => "zone",
-                            "single_target" => "true" },
+                            "single_target" => "true", "owner" => "you | not_you" },
                   example: { "cast" => { "controller" => "you", "spell" => "noncreature" } }
 
         SPELLS = %w[creature noncreature instant_or_sorcery].freeze
+        OWNERS = %w[you not_you].freeze
 
-        def self.keys = %w[controller spell name mana_value self targets from not_from single_target]
+        def self.keys = %w[controller spell name mana_value self targets from not_from single_target owner]
         def event_class = Events::SpellCast
         def own_spell? = @self
 
@@ -46,6 +47,8 @@ module Enjine
           @single = params["single_target"] == true
           errors << "#{path}.single_target: must be true" unless params["single_target"].nil? || @single
           @zones = CastFrom.build(params, errors, path)
+          @owner = params["owner"]
+          errors << "#{path}.owner: must be one of #{OWNERS.join(", ")}" unless @owner.nil? || OWNERS.include?(@owner)
         end
 
         def match?(engine, event, source)
@@ -55,6 +58,8 @@ module Enjine
           return false unless @controller == "any" || (@controller == "you") == (caster == source["controller"])
           return false unless spell_ok?(engine, event, caster, source) && targets_ok?(engine, event, source)
           return false unless @zones.match?((spell = engine.state.objects[event.object]) && engine.cast_origin(spell))
+          # "A spell you don't own" (CR 108.3): its owner against this source's controller.
+          return false unless @owner.nil? || (spell&.owner == source["controller"]) == (@owner == "you")
 
           chosen_ok?(engine, source, event.card, engine.state.objects[event.object]&.x)
         end
@@ -105,7 +110,7 @@ module Enjine
 
           kind = Triggers.filter_words(@filter) || @spell || "spell"
           "Whenever #{{ "you" => "you cast", "opponent" => "an opponent casts" }.fetch(@controller, "a player casts")} a #{kind}" \
-            "#{@zones}#{target_words}#{chosen_words}"
+            "#{{ "you" => " you own", "not_you" => " you don't own" }[@owner]}#{@zones}#{target_words}#{chosen_words}"
         end
 
         def target_words

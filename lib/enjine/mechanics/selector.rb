@@ -29,7 +29,9 @@ module Enjine
     #                                               event was about ("copy that ability", CR 707.10)
     #   "watched"                                   what a delayed triggered ability watches (CR 603.7c)
     #   "exiled_with"                               cards in exile exiled with the source (linked abilities, CR 607.2a)
-    #   "gift_recipient"                            the opponent chosen for the spell's gift (CR 702.174a)
+    #   "exiled_for_cost"                           cards this spell or ability exiled to pay its cost, still in exile
+    #                                               ("copy those exiled cards", CR 607.2a)
+    #   "gift_recipient"                           the opponent chosen for the spell's gift (CR 702.174a)
     #   "granter"                                   the permanent whose static ability granted this ability ("Return
     #                                               Trusty Boomerang to its owner's hand", CR 607.1a), while it's still
     #                                               on the battlefield; the source itself for an ability it has printed
@@ -43,7 +45,8 @@ module Enjine
 
       def self.build(data, errors, path, targets_count:, results_count: 0)
         case data
-        when "self", "you", "each_opponent", "attached", "watched", "exiled_with", "gift_recipient", "granter" then new(data.to_sym)
+        when "self", "you", "each_opponent", "attached", "watched", "exiled_with", "exiled_for_cost", "gift_recipient", "granter"
+          new(data.to_sym)
         when Hash
           data = data.transform_keys(&:to_s)
           return build_result(data, errors, path, results_count) if data.key?("result")
@@ -119,6 +122,7 @@ module Enjine
         when :you then "you"
         when :each_opponent then "each opponent"
         when :exiled_with then "the cards exiled with it"
+        when :exiled_for_cost then "the cards exiled to pay its cost"
         when :gift_recipient then "the chosen opponent"
         when :granter then "the permanent granting it"
         when :each then "each #{value.primitive_name.tr("_",
@@ -141,7 +145,7 @@ module Enjine
           engine.state.players.each_index.reject { it == ctx.controller }.map { Filters.player_ref(engine, it) }
         when :each then each(engine, ctx)
         when :controller_of then controllers(engine, ctx)
-        when :exiled_with then Linked.exiled_with(engine, ctx.source, ctx)
+        when :exiled_with, :exiled_for_cost then Linked.exiled(engine, kind, ctx)
         when :granter then granter(engine, ctx)
         end
       end

@@ -6,10 +6,11 @@ module Enjine
     # [quality] permanent you control. Whether a [quality] was beheld looks at the object as it was beheld
     # (CR 701.4b).
     module Beholding
-      # The cards in `index`'s hand and the permanents they control matching the card spec.
-      def self.candidates(engine, index, spec)
+      # The cards in `index`'s hand and the permanents they control matching the card spec (in `ctx`, e.g. "of the
+      # chosen type").
+      def self.candidates(engine, index, spec, ctx = nil)
         perms = engine.state.battlefield.select { engine.object(it).controller == index }
-        (perms + engine.player(index).hand).select { spec.match?(engine, engine.object(it)) }
+        (perms + engine.player(index).hand).select { spec.match?(engine, engine.object(it), ctx) }
       end
 
       # Reveals a card from the hand (CR 701.4a); the entry remembers what was beheld (CR 701.4b).
@@ -53,8 +54,23 @@ module Enjine
           super
         end
 
-        # Not the card being cast (it is on the stack once casting begins).
-        def candidates(engine, object) = Beholding.candidates(engine, object.controller, filter) - [object.id]
+        # Not the card being cast (it is on the stack once casting begins). "Of the chosen type" reads the type chosen
+        # for it (Costs::ChooseCreatureType).
+        def candidates(engine, object)
+          ctx = EffectContext.new(object.controller, object.id, object.id, [])
+          Beholding.candidates(engine, object.controller, filter, ctx) - [object.id]
+        end
+
+        # Before a type is chosen for "behold two creatures of that type", whether some type would do (CR 601.2b).
+        def payable?(engine, object)
+          return super unless filter.relations["chosen_subtype"] && !object.memory["chosen_type"]
+
+          others = Beholding.candidates(engine, object.controller, filter.unrelated) - [object.id]
+          others.flat_map { engine.chars(it).subtypes.uniq }.tally.any? do |type, n|
+            n >= count && Keywords::Changeling::CREATURE_TYPES.include?(type)
+          end
+        end
+
         def choose!(engine, option) = Beholding.behold!(engine, engine.object(option[:object]).controller, option[:object])
 
         def pay_chosen!(engine, object, entries)
