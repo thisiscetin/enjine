@@ -112,10 +112,13 @@ module Enjine
 
       def to_s = "the #{@kind.tr("_", " ")} of #{@selector}"
 
-      # CR 202.3: the mana value of an object (0 without a mana cost); a spell on the stack counts its X (CR 202.3e).
-      # Nil for an object that's gone.
+      # CR 202.3: the mana value of an object (0 without a mana cost); a spell on the stack counts its X (CR 202.3e);
+      # a melded permanent adds up its front faces (CR 713.5c, Engine::Faces). Nil for an object that's gone.
       def self.mana_value(engine, obj)
         return nil if obj.nil?
+
+        melded = engine.melded_mana_value(obj)
+        return melded if melded
 
         cost = engine.chars(obj).mana_cost or return 0
         (obj.zone == :stack ? cost.with_x(obj.x.to_i) : cost).mana_value
@@ -463,6 +466,8 @@ module Enjine
     #   {"share_card_type": selector | [selectors]}  the referenced objects share a card type ("exiled_with": linked cards)
     #   {"chosen": word}           that word was chosen for this object (choose_option, CR 607.2f)
     #   {"meld_with": name}        you both own and control the source and a creature named so (CR 713.1a)
+    #   {"attacking": selector}    a referenced permanent is attacking, or was as it last existed ("if it was
+    #                              attacking", CR 608.2h)
     #   {"not": condition}, {"all": [conditions]}, {"any": [conditions]}
     class Condition
       FLAGS = %w[your_turn was_cast attacked attacked_this_turn max_speed
@@ -472,6 +477,8 @@ module Enjine
       KEYED = { "targets" => :Targets, "triggering" => :TriggeringIs, "source" => :Source,
                 "nth_resolution" => :NthResolution, "chosen" => :ChosenIs, "designation" => :Designation,
                 "first_combat_phase" => :FirstCombatPhase, "meld_with" => :MeldWith }.freeze # MeldWith: effects/meld.rb
+      # Kinds about the objects a selector names (both in linked.rb).
+      SELECTED = { "share_card_type" => :ShareCardType, "attacking" => :Attacking }.freeze
 
       def self.build(data, errors, path, targets_count: 0, results_count: 0)
         unless data.is_a?(Hash)
@@ -489,7 +496,7 @@ module Enjine
         elsif data.key?("sacrificed") then Sacrificed.build(data, errors, path)
         elsif (flag = FLAGS.find { data.key?(it) }) then Flag.new(flag, data[flag] != false)
         elsif data.key?("began_extra_turn") then BeganExtraTurn.new(data["began_extra_turn"] != false) # CR 500.7
-        elsif data.key?("share_card_type") then ShareCardType.build(data, errors, path, targets_count) # linked.rb
+        elsif (key = SELECTED.keys.find { data.key?(it) }) then const_get(SELECTED[key]).build(data, errors, path, **context)
         elsif (key = KEYED.keys.find { data.key?(it) }) then const_get(KEYED[key]).build(data, errors, path)
         else build_more(data, errors, path, context)
         end

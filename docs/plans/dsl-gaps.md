@@ -27,6 +27,29 @@ that makes the most cards exact per unit of effort (S = 1, M = 2, L = 3+, from a
   Equipment with equip), Brilliance Unleashed (its own return effect, not yet re-scripted with `as`).
   Known gap: layer 4 applies resolved type effects (in timestamp order) before statics that change types,
   whatever their timestamps (CR 613.7a wants one order for both).
+- **Batch 3 done (0.5.0), engine side:** each gap is covered by real-card specs
+  (`spec/integration/real_cards/known_gaps_*_spec.rb`) and invented fuzz cards; the cards still need re-scripting in
+  deckfinder and an `enjine --verify` run before they count as exact.
+  - Casting and permissions (change 24 in part, cluster 2): `play_permission` `while_you_control_source`, `during`,
+    `waterbend` (Hama); flash by an optional additional cost (Molten Exhale); `choose_creature_type` cost and
+    `battlefield_instead` (Celestial Reunion); card spec `same_name_as` (Key to the Side-Door); `exile_from_graveyard`
+    by mana symbols and `copy_card` (Baron Helmut Zemo); `cast` from the graveyard with `exile_instead` (Bilbo);
+    `cards_have` (Ninja Teen level 3); `cast` trigger `owner` (Nita); computed `pay_life` in ward (Raubahn);
+    `remove_counters` `self`/`count` (Gwen Stacy // Ghost-Spider); `gives_gift`.
+  - Effects, zones and loops (changes 9 and 10): `repeat` (Sin, Spira's Punishment); `exile_top` `until`
+    (Improvisation Capstone); `exiled_with` targets (The Darkness Crystal, Borg Cube); `attacking` condition
+    (Desculpting Blast); `counters_placed` `nth` (Death to Our Enemies); `change_target` and `single_target`
+    (Redirect Lightning); meld mana value, hideaway under another controller, earthbend's return ending.
+  - Statics, grants and combat (change 30, change 27 in part, change 24): `{"tap": "granter"}` (Fishing Pole);
+    `colors: "chosen"` with bound `hexproof_from` (Mondo Gecko); `cant_become_untapped` (Spider-Woman);
+    `choose_card_name` and `"name": "chosen"` (Sorcerous Spyglass, Petrified Hamlet); granted riot (Spider-Punk);
+    `attacks` `alone` (Seifer Almasy); `cant_be_attacked` by filter and grantable `cant_be_blocked_by` (Storm,
+    Windrider); `create_token` `size` (Abzan Monument); `assigns_damage_by_toughness` (Ghalta); `tapping_power`
+    granted by `become`.
+  - Rules correctness (no new data): the `damage_order` decision (CR 616.1), unpreventable damage against prevention
+    with `then` (CR 615.12), new targets and copy targets becoming targets (ward, `becomes_target`), divided new
+    targets, chosen sources on the stack, tokens entering attacking a planeswalker, "copy that ability" by last
+    known information.
 - 81 cards have only a one-off gap (no change below helps them); 284 share at least one listed gap.
 - The first 4 changes (all S) make **30** cards exact; the first 20 make about **95**; the first 30
   about **150**.

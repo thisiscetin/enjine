@@ -103,6 +103,23 @@ module Enjine
       # Called by zone changes and token creation while an effect runs.
       def record_result!(id) = @recorded&.push(id)
 
+      # Runs the block recording apart what it moves or creates and how much it changes (an effect of a nested
+      # list with results of its own, Effects::Repeat); returns [the block's value, those objects, that amount].
+      # They also count for the effect running the nested list.
+      def recording_apart
+        outer = @recorded
+        outer_amount = @recorded_amount
+        @recorded = []
+        @recorded_amount = 0
+        value = yield
+        [value, @recorded, @recorded_amount]
+      ensure
+        inner = @recorded
+        inner_amount = @recorded_amount
+        @recorded = outer && (outer + inner)
+        @recorded_amount = outer_amount && (outer_amount + inner_amount)
+      end
+
       # The context for one effect; a modal ability's effects see only their mode's targets.
       # CR 603.4: a triggered ability whose intervening "if" is false on resolution does nothing.
       def intervening_if_holds?(obj, ability)

@@ -10,20 +10,6 @@ module Enjine
       # A permanent that left earlier in the same simultaneous zone change is remembered too (#simultaneously).
       def last_known(id) = @last_known&.[](id) || @departed_together&.dig(id, "lki")
 
-      # What a permanent looked like as it last existed on the battlefield (CR 603.10a, 608.2h):
-      # controller and current characteristics, so "a creature you control dies" checks the
-      # types it had then, not its printed ones.
-      def last_known_info(obj)
-        current = chars(obj)
-        { "controller" => obj.controller, "owner" => obj.owner, "card" => obj.card, "types" => current.types,
-          "subtypes" => current.subtypes,
-          "power" => current.power, "toughness" => current.toughness, "counters" => obj.counters.dup,
-          "mana_value" => Mechanics::Amount.mana_value(self, obj), # CR 202.3
-          "keywords" => current.keywords.map(&:to_s), # deathtouch, lifelink, wither (CR 702.2e, 702.15c, 702.80b)
-          "token" => token?(obj), "except" => copy_exceptions(obj), "abilities" => current.abilities }
-          .merge(obj.memory.slice(Mechanics::Linked::EXILED)) # the cards exiled with it (CR 607.2a)
-      end
-
       def with_last_known(id, info)
         (@last_known ||= {})[id] = info
         yield
@@ -85,13 +71,15 @@ module Enjine
 
       # CR 603.7: creates a delayed triggered ability. `entry` names the card and the ability ref
       # (see Effects::DelayedTrigger) plus what it remembers ("results", "watched" objects) and, for
-      # one with a duration ("this turn"), the turn it lasts for ("turn").
+      # one with a duration ("this turn"), the turn it lasts for ("turn"). "while_watched": it can only ever
+      # trigger on its watched permanent, so it ends once that permanent has left the battlefield (earthbend).
       def create_delayed_trigger!(entry)
         state.delayed_triggers << entry.merge("id" => "d#{next_timestamp!}")
       end
 
       # CR 603.7b: a delayed triggered ability triggers only once, the next time its event occurs, unless
       # it has a stated duration ("whenever ... this turn"): then it triggers each time until the turn ends.
+      # CR 400.7, 603.7c: one "while_watched" ends when the permanent it watches leaves to any zone.
       def watch_delayed!(event)
         state.delayed_triggers.reject! { it["turn"] && it["turn"] != state.turn } # "this turn" has ended
         fired = []
@@ -107,6 +95,8 @@ module Enjine
           end
         end
         state.delayed_triggers -= fired.reject { repeats?(it) }
+        gone = event.old_id if event.is_a?(Events::ZoneChanged) && event.from == "battlefield"
+        state.delayed_triggers.reject! { it["while_watched"] && Array(it["watched"]).include?(gone) } if gone
       end
 
       # "Whenever ... this turn" triggers each time; "the next ... this turn" ("once") only the first time; one

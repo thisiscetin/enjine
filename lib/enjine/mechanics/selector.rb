@@ -7,7 +7,8 @@ module Enjine
     # moved or created (CR 400.7j: "the card exiled this way"); see Selector {"result": n}.
     # `amounts`: per earlier effect, how much it changed (life an earlier effect took); see Amount {"this_way": n}.
     # `memory`: stands in for the resolving ability's memory while a trigger condition is checked (CR 603.4).
-    EffectContext = Struct.new(:controller, :source, :object, :targets, :results, :amounts, :memory)
+    # `result_cards`: the card each result object was, for results that have since left their zone (Effects::Repeat).
+    EffectContext = Struct.new(:controller, :source, :object, :targets, :results, :amounts, :memory, :result_cards)
 
     # Data form of "who/what does this effect apply to":
     #   {"target": 0}                               the first chosen target
@@ -19,6 +20,7 @@ module Enjine
     #   "attached"                                  what the source is attached to ("enchanted creature", CR 303.4m)
     #   {"each": "creature", "controller": "you"}  every matching object (you | opponent | any)
     #   {"result": 0}                               what effect 0 of this list moved or created (CR 400.7j)
+    #   {"result": 0, "for": card spec}             only those that match ("if the exiled card is a land card")
     #   {"controller_of": selector}                 the controller of each referenced object ("its controller");
     #                                               one that has left the battlefield as it last existed (CR 608.2h)
     #   {"triggering": "object" | "player"}        what the trigger event was about ("that creature",
@@ -62,12 +64,12 @@ module Enjine
 
       # {"result": n}: n must name an earlier effect of the same list (a nested list sees its parent's).
       def self.build_result(data, errors, path, results_count)
-        Mechanics.check_keys(data, %w[result], errors, path)
+        Mechanics.check_keys(data, %w[result for], errors, path)
         index = data["result"]
         unless index.is_a?(Integer) && index >= 0 && index < results_count
           errors << "#{path}.result: must refer to one of the #{results_count} earlier effects"
         end
-        new(:result, index)
+        new(:result, index, spec: data.key?("for") ? CardSpec.build(data["for"], errors, "#{path}.for") : nil)
       end
 
       def self.build_controller_of(data, errors, path, targets_count, results_count)
@@ -103,17 +105,18 @@ module Enjine
         end
       end
 
-      def initialize(kind, value = nil, controller = nil)
+      def initialize(kind, value = nil, controller = nil, spec: nil)
         @kind = kind
         @value = value
         @controller = controller
+        @spec = spec
         freeze
       end
 
       def to_s
         case kind
         when :target then "target ##{value + 1}"
-        when :result then "the object(s) from effect ##{value + 1}"
+        when :result then "the #{@spec ? "#{@spec}(s)" : "object(s)"} from effect ##{value + 1}"
         when :controller_of then "the controller of #{value}"
         when :self then "itself"
         when :attached then "the attached permanent"
@@ -135,7 +138,7 @@ module Enjine
       def resolve(engine, ctx)
         case kind
         when :target then Array(ctx.targets[value]).compact # a counted target's slot holds a list (CR 601.2c)
-        when :result then Array(ctx.results&.[](value))
+        when :result then results(engine, ctx)
         when :self then SELF_ZONES.include?(engine.state.objects[ctx.source]&.zone) ? [ctx.source] : []
         when :attached then attached(engine, ctx)
         when :triggering then triggering(engine, ctx)
@@ -162,6 +165,22 @@ module Enjine
       end
 
       private
+
+      def results(engine, ctx)
+        found = Array(ctx.results&.[](value))
+        @spec ? found.select { result_matches?(engine, ctx, it) } : found
+      end
+
+      # A result still in its zone is matched as it is now; one that has since moved (a new object, CR 400.7) as
+      # the card it was when the effect moved it, if the context remembers it (CR 608.2h: "if it's a land card"
+      # after "return it to the battlefield").
+      def result_matches?(engine, ctx, id)
+        obj = engine.state.objects[id]
+        return @spec.match?(engine, obj, ctx) if obj
+
+        card = ctx.result_cards&.[](id) or return false
+        @spec.chars_match?(engine, engine.catalog.fetch(card).printed_characteristics, ctx)
+      end
 
       def controllers(engine, ctx)
         Array(value&.resolve(engine, ctx)).filter_map do |ref|

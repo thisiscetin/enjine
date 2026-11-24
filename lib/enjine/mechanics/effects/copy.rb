@@ -45,22 +45,31 @@ module Enjine
 
       # Choosing new targets for a spell or ability on the stack, one target at a time: keep the old one (even if
       # it's illegal now) or pick a legal new one (CR 115.7d, 707.10c). `legal_for`: whose targets they are
-      # (legality, CR 115.7); `chooser`: who decides.
+      # (legality, CR 115.7); `chooser`: who decides. `change: true` is "change the target(s)" (CR 115.7a): each
+      # target must change to another legal target; if one can't, it stays, and then none of them change.
       module NewTargets
-        def choose_new_targets(engine, spell, legal_for, locals, chooser: legal_for)
+        def choose_new_targets(engine, spell, legal_for, locals, chooser: legal_for, change: false)
           old = spell.targets || []
           specs = engine.resolving_ability(spell)&.targets_for(spell.modes || [], kicked: spell.memory.key?("kicked_with")) || []
           slots = engine.target_slots(old, specs) # each target of a counted slot in turn; same number (CR 707.10c)
-          chosen = answers(locals).map { it["target"] }
-          return engine.regroup_targets(chosen, old) if chosen.size >= slots.size
+          loop do
+            chosen = answers(locals).map { it["target"] }
+            return locals["unchanged"] ? old : engine.regroup_targets(chosen, old) if chosen.size >= slots.size
 
-          i = chosen.size
-          current, spec = slots[i]
-          keep = [{ "type" => "target", "target" => current }]
-          # A divided spell's targets stay distinct, so each still receives at least one (CR 115.7f, 601.2d).
-          taken = spell.memory.key?("division") ? chosen + slots.drop(i + 1).map(&:first) : []
-          others = spec ? new_target_choices(engine, spec, legal_for, spell, [current, *taken]) : []
-          ask(engine, locals, chooser, "Choose target ##{i + 1} for #{engine.catalog.fetch(spell.card).name}", keep + others)
+            i = chosen.size
+            current, spec = slots[i]
+            keep = [{ "type" => "target", "target" => current }]
+            # A divided spell's targets stay distinct, so each still receives at least one (CR 115.7f, 601.2d).
+            taken = spell.memory.key?("division") ? chosen + slots.drop(i + 1).map(&:first) : []
+            others = spec ? new_target_choices(engine, spec, legal_for, spell, [current, *taken]) : []
+            unless change && others.empty?
+              return ask(engine, locals, chooser, "Choose target ##{i + 1} for #{engine.catalog.fetch(spell.card).name}",
+                         change ? others : keep + others)
+            end
+
+            locals["unchanged"] = true # CR 115.7a: no other legal target
+            answers(locals).concat(keep)
+          end
         end
 
         private
@@ -254,6 +263,7 @@ module Enjine
         def self.default_to = "you"
         def setup(params, errors, path) = @of = setup_of(params, errors, path)
         def to_s = "you may choose new targets for #{@of}"
+        def change? = false
 
         def run(engine, ctx, locals)
           return :done unless locals["spells"] || condition.nil? || condition.true?(engine, ctx)
@@ -262,16 +272,32 @@ module Enjine
           while (id = locals["spells"].first)
             spell = engine.state.objects[id]
             if spell&.zone == :stack && !Array(spell.targets).flatten.compact.empty?
-              targets = choose_new_targets(engine, spell, spell.controller, locals, chooser: ctx.controller)
+              targets = choose_new_targets(engine, spell, spell.controller, locals, chooser: ctx.controller, change: change?)
               return :wait if targets == :wait
 
               engine.change_targets!(spell, targets)
             end
             locals["spells"].shift
             locals.delete("answers")
+            locals.delete("unchanged")
           end
           :done
         end
+      end
+
+      # "Change the target of target spell or ability" (CR 115.7a): its controller must change each target to
+      # another legal target (legal for that spell's controller); a target with no other legal target stays, and
+      # then none change.
+      class ChangeTarget < ChooseNewTargets
+        primitive :effect, :change_target,
+                  description: "Change the target(s) of each spell or ability on the stack `of` refers to: each target " \
+                               "becomes another legal target you choose for that spell; if one can't, none change.",
+                  rules: %w[115.7 115.7a 115.7e],
+                  params: { "of" => "selector (spells or abilities on the stack)" },
+                  example: { "change_target" => { "of" => { "target" => 0 } } }
+
+        def to_s = "change the target of #{@of}"
+        def change? = true
       end
 
       # "Copy that card" / "create a copy of this card" (CR 707.12): copies of cards, in the zone the card is in.

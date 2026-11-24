@@ -1372,7 +1372,7 @@ grants its abilities.
 | "Suspend 3—{2}{W}" (CR 702.62a) | ability `{ "suspend": { "amount": 3, "cost": "{2}{W}" } }`: the special action exiles it with three time counters whenever you could begin to cast it |
 | "exile it with four time counters on it. If it doesn't have suspend, it gains suspend" | effect `{ "suspend": { "to": …, "amount": 4 } }` (a spell, a card or a permanent); a card that has suspend from the start is `"keywords": ["suspend"]` |
 | suspended cards (CR 702.62b) | automatic: at the beginning of its owner's upkeep a time counter is removed; when the last is removed they may play it without paying its mana cost (`effect_choice` `{type: "cast"}` / `{type: "play_land"}`), and a creature spell cast this way has haste while they control it |
-| "Hideaway 4" (CR 702.75a) | ability `{ "hideaway": { "amount": 4 } }`: the exiled card is `"exiled_with"` the permanent, face down, and only its controller may look at it |
+| "Hideaway 4" (CR 702.75a) | ability `{ "hideaway": { "amount": 4 } }`: the exiled card is `"exiled_with"` the permanent, face down, and only the player who controls the permanent may look at it |
 | "You may play the exiled card without paying its mana cost" | `{ "cast_free": { "to": "exiled_with", "play": true } }` (`play: true` also plays a land, on your turn with a land play left, CR 305.2a, 305.3) |
 | "look at the top N cards, exile one face down" | `{ "dig": { "amount": N, "put": "exile", "face_down": true, "link": true } }` (`link`: exiled with the source) |
 | "Devour land 3" (CR 702.82c) / "Devour 2" | ability `{ "devour": { "amount": 3, "each": "land" } }` / `{ "devour": { "amount": 2 } }`: as it enters, `enter_choice` `{type: "devour", object: id}` picks permanents one at a time, then `{type: "done"}`; it enters with N +1/+1 counters for each and remembers how many it devoured |
@@ -1459,6 +1459,39 @@ These need no new data: the shapes above play by these rules.
                    { "activated": { "cost": ["tap", { "tap": "granter" }],
                                     "effects": [{ "add_counters": { "counter": "bait", "amount": 1, "to": "granter" } }] } }] } },
                 { "equip": { "cost": [{ "mana": "{1}" }] } }] }
+
+### 4.33 Loops, exiling until, cards exiled with a permanent, changing targets and the Nth counter
+
+| Oracle text | Data |
+| --- | --- |
+| "[effects]. If the exiled card is a land card, repeat this process." (CR 608.2c) | `{ "repeat": { "effects": [...], "while": condition } }`: the effects run, then run again while `while` holds. Each pass has results of its own: `{ "result": n }` in the list and in `while` is what effect n did during this pass (at most 100 passes) |
+| "the exiled card is a land card" | selector `{ "result": 0, "for": { "types": ["land"] } }` (only the results matching a card spec), e.g. `"while": { "amount": { "count": { "result": 0, "for": { "types": ["land"] } } }, "at_least": 1 }` |
+| "exile a permanent card from your graveyard at random" | `{ "choose_cards": { "from": { "graveyard": "you" }, "for": { "permanent": true }, "random": true, "put": "exile" } }` |
+| "Exile cards from the top of your library until you exile cards with total mana value 4 or greater" (CR 406.1) | `{ "exile_top": { "until": { "total_mana_value": 4 } } }` (`until` replaces `amount`; the cards are the effect's result) |
+| "… until they exile a nonland card" | `{ "exile_top": { "to": "each_opponent", "until": { "card": { "not_types": ["land"] } } } }` |
+| "You may cast any number of spells from among them without paying their mana costs" | `{ "cast_free": { "to": { "result": 0 }, "count": "any" } }` |
+| "target creature card exiled with [this]" (CR 607.2a) | target filter `{ "exiled_with": { "any_of": ["creature"] } }`: a card in exile that one of this object's abilities exiled (`link: true` on `exile`, `choose_cards`, `dig`, `exile_top`; `exile_if_dies`) |
+| "Black spells you cast cost {1} less" | `{ "cost_modifier": { "spells": { "colors": ["B"] }, "reduce": 1 } }` |
+| "If it was attacking, …" (CR 608.2h) | condition `{ "attacking": { "target": 0 } }`: it's attacking, or, if it left the battlefield during this resolution, it was as it last existed |
+| "When the fourth plan counter is put on this enchantment" (CR 122.6) | trigger `{ "counters_placed": { "counter": "plan", "nth": 4 } }`: the event that takes it from fewer than four plan counters to four or more |
+| "sacrifice it. When you do, it deals 7 damage divided as you choose among one or two targets" | `[{ "sacrifice": { "to": "self" } }, { "reflexive_trigger": { "if": { "amount": { "count": { "result": 0 } }, "at_least": 1 }, "targets": [{ "filter": "any_target", "count": 2, "optional": true }], "divide": 7, "effects": [{ "distribute_damage": {} }] } }]` |
+| "target spell or ability with a single target" | `{ "one_of": [{ "spell": { "single_target": true } }, { "stack_ability": { "single_target": true } }] }` |
+| "Change the target of target spell or ability" (CR 115.7a) | `{ "change_target": { "of": { "target": 0 } } }`: you choose another legal target for each of its targets (`effect_choice` `{type: "target"}`); a target with no other legal target stays, and then none change. "You may choose new targets" is `choose_new_targets` (CR 115.7d) |
+| "Assimilate a creature card exiled with it. If you can't, exile up to one target creature." (CR 701.72b, 607.2a) | `[{ "assimilate": { "to": "exiled_with", "for": { "types": ["creature"] }, "choose": true } }, { "exile": { "to": { "target": 0 }, "link": true, "if": { "amount": { "count": { "result": 0 } }, "at_most": 0 } } }]`, with the target `{ "filter": "creature", "optional": true }` |
+
+Also automatic:
+- A melded permanent's mana value is the total of its two front faces' (CR 713.5c). As the pair is melded, the second
+  card's move from exile is an event of its own (`zone_changed` with `new_id: null`).
+- A hidden-away card (hideaway, CR 702.75a) may be looked at, and played, by whoever controls the permanent now
+  (`dig` with `looker: "source_controller"`).
+- Earthbend's "when that land dies or is put into exile" ends when the land leaves the battlefield for any other zone.
+
+```json
+{ "name": "Example Echo of the Depths", "mana_cost": "{3}{B}", "types": ["sorcery"],
+  "abilities": [{ "spell": { "effects": [{ "repeat": {
+    "effects": [{ "mill": { "amount": 1 } },
+                { "return_to_battlefield": { "to": { "result": 0, "for": { "types": ["land"] } }, "tapped": true } }],
+    "while": { "amount": { "count": { "result": 0, "for": { "types": ["land"] } } }, "at_least": 1 } } }] } }] }
 ```
 
 ---

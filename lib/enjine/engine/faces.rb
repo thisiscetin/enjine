@@ -103,8 +103,20 @@ module Enjine
 
         state.exile.delete(second.id)
         state.objects.delete(second.id)
-        move!(first.id, :battlefield, controller: controller, reason: "meld",
-                                      enters: { "face" => 1, "memory" => { "melded" => second.card } })
+        melded = move!(first.id, :battlefield, controller: controller, reason: "meld",
+                                               enters: { "face" => 1, "memory" => { "melded" => second.card } })
+        # The second card leaves exile too; it's part of the melded permanent, not an object of its own.
+        emit Events::ZoneChanged.new(card: second.card, old_id: second.id, new_id: nil, owner: name(second.owner),
+                                     from: "exile", to: "battlefield", reason: "meld")
+        melded
+      end
+
+      # CR 713.5c, 202.3c: a melded permanent's mana value is the sum of its front faces' mana values. Nil for any
+      # other object (a copy of a melded permanent has the back face's copiable values, so its mana value is 0).
+      def melded_mana_value(obj)
+        return nil unless obj.zone == :battlefield && obj.memory["melded"] && !obj.memory["own_card"]
+
+        [obj.card, obj.memory["melded"]].sum { catalog.fetch(it).card.mana_cost&.mana_value.to_i }
       end
 
       # CR 713.8, 713.8c: a melded permanent that leaves the battlefield puts its two cards into the new zone;

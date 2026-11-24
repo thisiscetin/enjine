@@ -48,7 +48,8 @@ module Enjine
             engine.record_result!(id)
             engine.add_counters!(engine.object(id), "+1/+1", n, by_player: ctx.controller)
             engine.create_delayed_trigger!("controller" => ctx.controller, "source" => ctx.source,
-                                           "card" => engine.object(ctx.object).card, "ability" => ref, "watched" => [id])
+                                           "card" => engine.object(ctx.object).card, "ability" => ref, "watched" => [id],
+                                           "while_watched" => true) # gone with the land (any zone)
             engine.emit Events::KeywordAction.new(player: engine.name(ctx.controller), action: "earthbend", amount: n)
           end
         end

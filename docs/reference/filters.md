@@ -42,6 +42,22 @@ Rules: CR 115.1
 "creature_or_planeswalker"
 ```
 
+## exiled_with
+
+A card in exile that one of this object's abilities exiled (linked abilities: "the cards exiled with it"); restrict with `any_of`/`not` for its card types.
+
+Rules: CR 607.2a, CR 406.6, CR 115.1
+
+```json
+{
+  "exiled_with": {
+    "any_of": [
+      "creature"
+    ]
+  }
+}
+```
+
 ## graveyard_card
 
 A card in a graveyard (any player's, in seat order; restrict with `controller` for its owner and `any_of`/`not` for its card types).
@@ -152,15 +168,16 @@ Rules: CR 112.1, CR 115.1
 
 ## stack_ability
 
-An activated or triggered ability on the stack. `kind`: "activated" or "triggered" for only one of them; `controller`: you | opponent; `source`: a filter its source matches (e.g. "creature", "artifact").
+An activated or triggered ability on the stack. `kind`: "activated" or "triggered" for only one of them; `controller`: you | opponent; `source`: a filter its source matches (e.g. "creature", "artifact"); `single_target: true`: one with a single target.
 
-Rules: CR 113.1b, CR 115.1, CR 605.3b, CR 113.7
+Rules: CR 113.1b, CR 115.1, CR 605.3b, CR 113.7, CR 115.7
 
 | Parameter | Description |
 | --- | --- |
 | `kind` | activated | triggered |
 | `controller` | you | opponent |
 | `source` | filter |
+| `single_target` | boolean |
 
 ```json
 {

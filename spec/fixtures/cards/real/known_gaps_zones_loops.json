@@ -1,0 +1,98 @@
+[
+  {
+    "name": "Sin, Spira's Punishment",
+    "mana_cost": "{4}{B}{G}{U}",
+    "types": ["creature"],
+    "supertypes": ["legendary"],
+    "subtypes": ["leviathan", "avatar"],
+    "keywords": ["flying"],
+    "power": 7,
+    "toughness": 7,
+    "abilities": [
+      { "triggered": { "when": { "any_of": [{ "enters": {} }, { "attacks": {} }] },
+                       "effects": [{ "repeat": {
+                         "effects": [{ "choose_cards": { "from": { "graveyard": "you" }, "for": { "permanent": true },
+                                                         "random": true, "put": "exile" } },
+                                     { "create_token_copy": { "of": { "result": 0 }, "tapped": true } }],
+                         "while": { "amount": { "count": { "result": 0, "for": { "types": ["land"] } } }, "at_least": 1 } } }] } }
+    ],
+    "rarity": "rare",
+    "printing": { "set": "fin", "number": "242" }
+  },
+  {
+    "name": "Improvisation Capstone",
+    "mana_cost": "{5}{R}{R}",
+    "types": ["sorcery"],
+    "subtypes": ["lesson"],
+    "keywords": ["paradigm"],
+    "abilities": [
+      { "spell": { "effects": [{ "exile_top": { "until": { "total_mana_value": 4 } } },
+                               { "cast_free": { "to": { "result": 0 }, "count": "any" } }] } }
+    ],
+    "rarity": "mythic",
+    "printing": { "set": "sos", "number": "120" }
+  },
+  {
+    "name": "The Darkness Crystal",
+    "mana_cost": "{2}{B}{B}",
+    "types": ["artifact"],
+    "supertypes": ["legendary"],
+    "abilities": [
+      { "cost_modifier": { "spells": { "colors": ["B"] }, "reduce": 1 } },
+      { "exile_if_dies": { "affects": { "each": { "creature": { "token": false } }, "controller": "opponent" },
+                           "then": [{ "gain_life": { "amount": 2 } }] } },
+      { "activated": { "cost": [{ "mana": "{4}{B}{B}" }, "tap"],
+                       "targets": [{ "exiled_with": { "any_of": ["creature"] } }],
+                       "effects": [{ "return_to_battlefield": { "to": { "target": 0 }, "tapped": true, "under": "you",
+                                                                "counters": { "+1/+1": 2 } } }] } }
+    ],
+    "rarity": "rare",
+    "printing": { "set": "fin", "number": "96" }
+  },
+  {
+    "name": "Desculpting Blast",
+    "mana_cost": "{1}{U}",
+    "types": ["instant"],
+    "abilities": [
+      { "spell": { "targets": [{ "permanent": { "not": ["land"] } }],
+                   "effects": [{ "return_to_hand": { "to": { "target": 0 } } },
+                               { "create_token": { "if": { "attacking": { "target": 0 } }, "token": {
+                                 "name": "Drone", "types": ["artifact", "creature"], "subtypes": ["drone"], "power": 1, "toughness": 1,
+                                 "keywords": ["flying"],
+                                 "abilities": [{ "can_block_only": { "filter": { "creature": { "keywords": ["flying"] } } } }] } } }] } }
+    ],
+    "rarity": "uncommon",
+    "printing": { "set": "eoe", "number": "54" }
+  },
+  {
+    "name": "Death to Our Enemies",
+    "mana_cost": "{2}{R}",
+    "types": ["enchantment"],
+    "subtypes": ["plan"],
+    "abilities": [
+      { "triggered": { "when": { "cast": { "spell": "noncreature" } },
+                       "effects": [{ "create_token": { "token": "Treasure", "tapped": true } },
+                                   { "add_counters": { "counter": "plan", "amount": 1, "to": "self" } }] } },
+      { "triggered": { "when": { "counters_placed": { "counter": "plan", "nth": 4 } },
+                       "effects": [{ "sacrifice": { "to": "self" } },
+                                   { "reflexive_trigger": { "if": { "amount": { "count": { "result": 0 } }, "at_least": 1 },
+                                                            "targets": [{ "filter": "any_target", "count": 2, "optional": true }],
+                                                            "divide": 7, "effects": [{ "distribute_damage": {} }] } }] } }
+    ],
+    "rarity": "uncommon",
+    "printing": { "set": "msh", "number": "127" }
+  },
+  {
+    "name": "Redirect Lightning",
+    "mana_cost": "{R}",
+    "types": ["instant"],
+    "subtypes": ["lesson"],
+    "abilities": [
+      { "additional_cost": { "cost": [{ "one_of": [{ "pay_life": 5 }, { "mana": "{2}" }] }] } },
+      { "spell": { "targets": [{ "one_of": [{ "spell": { "single_target": true } }, { "stack_ability": { "single_target": true } }] }],
+                   "effects": [{ "change_target": { "of": { "target": 0 } } }] } }
+    ],
+    "rarity": "rare",
+    "printing": { "set": "tla", "number": "151" }
+  }
+]

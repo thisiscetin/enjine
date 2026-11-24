@@ -106,11 +106,26 @@ module Enjine
                                                      "mana_value" => Mechanics::Amount.mana_value(self, obj) }
       end
 
+      # What a permanent looked like as it last existed on the battlefield (CR 603.10a, 608.2h):
+      # controller and current characteristics, so "a creature you control dies" checks the
+      # types it had then, not its printed ones.
+      def last_known_info(obj)
+        current = chars(obj)
+        { "controller" => obj.controller, "owner" => obj.owner, "card" => obj.card, "types" => current.types,
+          "subtypes" => current.subtypes,
+          "power" => current.power, "toughness" => current.toughness, "counters" => obj.counters.dup,
+          "mana_value" => Mechanics::Amount.mana_value(self, obj), # CR 202.3
+          "keywords" => current.keywords.map(&:to_s), # deathtouch, lifelink, wither (CR 702.2e, 702.15c, 702.80b)
+          "token" => token?(obj), "except" => copy_exceptions(obj), "abilities" => current.abilities,
+          "attacking" => attackers.key?(obj.id) } # "if it was attacking" (CR 506.4, 608.2h)
+          .merge(obj.memory.slice(Mechanics::Linked::EXILED)) # the cards exiled with it (CR 607.2a)
+      end
+
       # The part of last known information an ability keeps in its memory ("source_lki"): plain data.
       def last_known_memory(lki)
         info = { "controller" => lki["controller"], "power" => lki["power"], "toughness" => lki["toughness"],
                  "mana_value" => lki["mana_value"], "counters" => lki["counters"].dup, "card" => lki["card"],
-                 "keywords" => lki["keywords"].dup }
+                 "keywords" => lki["keywords"].dup, "attacking" => lki["attacking"] }
         info["except"] = lki["except"] if lki["except"] # what a copy of it copies (CR 707.2, Engine::Copies)
         info.merge(lki.slice(Mechanics::Linked::EXILED).transform_values(&:dup)) # CR 607.2a (Linked.exiled_with)
       end
