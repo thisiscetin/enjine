@@ -8,6 +8,56 @@ change the public API; the stable surface is described in
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-11-24
+
+### Added
+- Casting permissions: `play_permission` `duration: "while_you_control_source"` ("for as long as you control this
+  creature", CR 611.2b), `during: "your_turn"` and `waterbend: "mana_value"` (cast by waterbending {X}, CR 701.67a);
+  `cast` and `cast_free` take `from` (e.g. `"graveyard"`), `cast` takes `exile_instead` (CR 608.2g), `cast_free` takes
+  `count` as an integer ("up to three").
+- Ability `cards_have`: cards you own in a zone have a keyword alternative cost (flashback, harmonize, mayhem,
+  web_slinging or sneak) and may be cast with it ("Creature cards in your graveyard have sneak {3}{B}", CR 611.3a);
+  cast option `via: "alt:cards_have:<permanent>:<ref>"`.
+- Costs: an optional `additional_cost` with `flash: true` ("as though it had flash if you behold a Dragon", CR 601.3c);
+  `choose_creature_type` before `behold` with `"subtypes": "chosen"` (CR 607.2d); `exile_from_graveyard` with
+  `count: "any"` and `symbols` (a mana-symbol total, CR 107.4e), and `copy_card` `of: "exiled_for_cost"`; `pay_life`
+  with a computed amount (`{"power": "self"}`, e.g. in ward); `remove_counters` with `self: true` and `count`.
+- Card specs take `same_name_as` (a filter: "with the same name as a legendary permanent you control", CR 201.2a)
+  and `"subtypes": "chosen"`. `search_library` takes `battlefield_instead` (`if`, `for`).
+- Triggers: `gives_gift` ("whenever you give a gift", CR 702.174c); `cast` with `owner: you | not_you` ("a spell you
+  don't own", CR 108.3); `attacks` with `alone: true` (CR 506.5); `counters_placed` with `nth` ("when the fourth plan
+  counter is put on it", CR 122.6).
+- Effects, zones and loops: `repeat` (`effects`, `while`: "repeat this process", CR 608.2c), with `{"result": n,
+  "for": card spec}` selectors; `exile_top` `until` (`{"total_mana_value": n}` or `{"card": spec}`, CR 406.1);
+  `cast_free` `count: "any"`; `choose_cards` `random: true`; target filter `exiled_with` (a card this object's
+  abilities exiled, with `link: true` on `exile`, `choose_cards`, `dig`, `exile_top` and `exile_if_dies`, CR 607.2a);
+  condition `attacking` ("if it was attacking", CR 608.2h); stack filters `single_target`; effect `change_target`
+  (CR 115.7a); `dig` `looker: "source_controller"`.
+- Statics, grants and combat: cost `{"tap": "granter"}` in a granted ability (CR 602.2b, 607.1a); `become`
+  `colors: "chosen"` with `hexproof_from: "chosen_color"` bound into the granted ability (CR 607.2d); keyword
+  `cant_become_untapped` (CR 701.26b); the `choose_card_name` ability takes `types` and `look_at_hand`, and is now
+  an effect too (`remember: "source"` for every resolving `choose_*`); `"name": "chosen"` in filters and in
+  `player_rule` `cant_activate` (CR 201.4, 602.5); `player_rule` `cant_be_attacked` with a `filter` (CR 508.1c);
+  statics can grant `cant_be_blocked_by`, and `become` can grant `tapping_power`; `create_token` `size` (an N/N
+  token, CR 707.2); riot granted by a static ability is chosen as the permanent enters (CR 614.12, 702.136b).
+- Decision `damage_order` (CR 616.1): when the order of replacement and prevention effects on one damage event
+  changes the result, the affected player chooses it. Agents must answer this new decision kind.
+
+### Changed
+- `choose_new_targets` and `copy_spell` targets become targets (ward and `becomes_target` trigger, CR 115.7, 707.10);
+  new targets of a divided spell keep each target's share (CR 115.7f); `prevent_damage` `by: "chosen_source"` may
+  choose spells, abilities and command-zone objects (CR 609.7a-b); tokens created attacking choose a planeswalker to
+  attack when there is one (CR 508.4); "copy that ability" after it left the stack copies it as it last existed.
+- A hidden-away card may be looked at and played by whoever controls the permanent now (CR 702.75a); earthbend's
+  return ends when the land leaves for another zone; a melded permanent's mana value is its front faces' total
+  (CR 713.5c).
+
+### Fixed
+- A card's colors include those of its hybrid symbols (CR 202.2d): a `{U/B}` card is black for `"colors": ["B"]`.
+- "Damage can't be prevented" against a prevention effect with `then`: it still applies once without preventing
+  anything (CR 615.12).
+- The rules monitor accepts a spell cast at instant speed through its paid flash-granting additional cost (CR 601.3c).
+
 ## [0.4.1] - 2026-11-22
 
 Includes 0.4.0, which was tagged but never published to RubyGems.
