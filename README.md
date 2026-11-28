@@ -9,8 +9,10 @@ atomic decision with a list of legal options. That makes it a solid base for
 simulations, bots and reinforcement learning, or for a game client.
 
 **Scope: Standard.** Enjine implements the core rules and the mechanics of the
-current Standard-legal sets. Mechanics found only outside Standard (morph,
-madness, infect, ...) are out of scope until a Standard card needs them. The
+current Standard-legal sets, plus a growing set of older mechanics that real
+decks ask for (face-down cards, persist and undying, ninjutsu, miracle, battles,
+Rooms, Cases, ...). Mechanics nothing supports yet (madness, infect, mutate, ...)
+are rejected at validation. The
 [mechanics coverage](docs/MECHANICS_COVERAGE.md) page has the details and the
 numbers. Games are constructed by default; two-player **Duel Commander** (CR 903)
 is a `format:` away (`--format duel_commander` in the CLI).
@@ -29,7 +31,9 @@ is a `format:` away (`--format duel_commander` in the CLI).
   omniscient observer view.
 - **No runtime dependencies.** Plain Ruby 4.0.
 
-> **Status: 0.1.** Start with the [API guide](docs/guides/api.md) and the
+> **Status: 0.6, pre-1.0.** The public API is described in the
+> [API guide](docs/guides/api.md); minor versions may still change it (see
+> [CHANGELOG.md](CHANGELOG.md)). Start there and with the
 > [card DSL guide](docs/guides/card-data-format.md). Progress and what's pending
 > are in [docs/plans/standard.md](docs/plans/standard.md).
 
@@ -175,6 +179,8 @@ bundle exec exe/enjine --verify my_cards/      # validate, then play-test them i
 bundle exec rake            # specs (with coverage gate + docs drift check) and RuboCop
 bundle exec rake docs       # regenerate SUPPORTED.md and docs/reference after changing a primitive
 bundle exec rake fuzz[50,1] # 50 random games, invariants checked after every decision
+bundle exec rake "fuzz[40,3,duel_commander]"  # the same in Duel Commander
+bundle exec ruby -Ilib script/determinism_digest.rb 80 tmp/a.txt  # per-game digests; diff two runs around a speedup
 bundle exec rake bench      # games per second (benchmark-ips)
 bundle exec rake profile    # stackprof CPU profile
 ```
@@ -183,6 +189,9 @@ Every mechanic is tested at three levels:
 - **Unit:** the primitive and its validation.
 - **Integration:** scenario boards built with a small DSL, then legal options, then a decision, then the resulting state and events.
 - **End-to-end:** full 60-card games, scripted and fuzzed, with export/import round-trips.
+
+Rules-monitored play (`Enjine::Verify`, `--verify`) reruns an independent check of
+the layer system and state-based actions against every game it plays.
 
 ## Contributing
 

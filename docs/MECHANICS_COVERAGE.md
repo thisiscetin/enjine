@@ -21,16 +21,18 @@ Comprehensive Rules (measured by the rule numbers the code implements and cites,
 | --- | --- |
 | Core game rules (CR 1–6: turns, priority, the stack, casting, combat, state-based actions, layers, replacement and prevention, copies) | essentially complete for two players |
 | Mechanics on Standard-legal cards (14 sets, Foundations to Star Trek) | the goal; nearly all can be written today, with the remaining gaps listed per set in [plans/standard.md](plans/standard.md#mechanics-gaps) |
-| Keyword actions (CR 701), all of Magic's history | about half (36 of 71), including every one used in Standard |
-| Keyword abilities (CR 702), all of Magic's history | about a third (62 of 195), including every one used in Standard |
-| Special card rules (CR 703–734) | those Standard uses: double-faced, meld, Sagas, Adventures, Classes, Omens, station, prepare, coin flips and dice, ending the turn |
+| Keyword actions (CR 701), all of Magic's history | more than half (about 40 of 71), including every one used in Standard, plus manifest, manifest dread, cloak and collect evidence |
+| Keyword abilities (CR 702), all of Magic's history | over a third (about 70 of 195), including every one used in Standard, plus split second, persist, undying, miracle, ninjutsu, morph, disguise, craft, offspring and impending |
+| Special card rules (CR 703–734) | those Standard uses: double-faced, meld, Sagas, Adventures, Classes, Omens, station, prepare, coin flips and dice, ending the turn; also face-down spells and permanents (708), Rooms (709.5) and Cases (720) |
 
 **Not supported:**
-- Mechanics found only on cards outside Standard, for example morph and other
-  face-down cards (CR 708), madness, delve, persist, undying, infect, toxic,
-  ninjutsu, cumulative upkeep, echo, bestow, mutate, split and flip cards,
-  levelers, Prototype, Cases, day/night, the monarch and the initiative.
-- Battles and dungeons; multiplayer and casual variants (multiplayer Commander,
+- Mechanics found only on cards outside Standard, for example madness, delve,
+  infect, toxic, cumulative upkeep, echo, bestow, mutate, megamorph, split and
+  flip cards, levelers, Prototype, day/night, the monarch and the initiative.
+- Partly supported: face-down cards (no megamorph, non-mana morph costs or
+  "as this is turned face up"), Rooms (no effects that lock or unlock doors),
+  miracle (the reveal is automatic).
+- Dungeons; multiplayer and casual variants (multiplayer Commander,
   Planechase, Archenemy, Conspiracy); ante; matches and sideboarding. Two-player
   **Duel Commander** is supported (CR 903, see below).
 

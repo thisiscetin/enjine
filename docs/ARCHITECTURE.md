@@ -52,21 +52,26 @@ lib/enjine/
     characteristics.rb            # CR 613 layer pipeline for P/T, continuous effects, cleanup
     rules.rb copies.rb faces.rb ...   # player rules and control; copies (CR 707); faces; sagas, phasing, speed ...
     commander.rb                  # CR 903 (Duel Commander): command zone, tax, 903.9 returns, commander damage
+    face_down_permanents.rb       # CR 708: face-down spells and permanents (manifest, cloak, morph, disguise), turning up
+    rooms.rb permanent_designations.rb crimes.rb   # CR 709.5 doors; solved/harnessed designations; CR 700.13 crimes
+    options_memo.rb               # per-decision memo and quick nos while legal options are computed (same answers)
   steps.rb                        # 12 step objects with turn-based actions
   events.rb                       # typed, serializable events + per-viewer redaction
   decisions/                      # one class per decision kind
     priority play_or_draw mulligan bottom discard casting(choose_target, pay_cost) combat(...)
   actions/                        # options offered at priority
-    pass play_land activate_mana_ability cast(cast, activate)
-  snapshot.rb                     # export/import + full consistency validation (also the fuzz invariant)
+    pass play_land activate_mana_ability cast(cast, activate) turn_face_up unlock
+  snapshot.rb snapshot/deep_copy.rb   # export/import + full consistency validation (also the fuzz invariant)
   view.rb  history.rb             # per-viewer views and histories
 
   # ---- tooling (no game logic) ----
   docs.rb                         # generates docs/reference/*.md + SUPPORTED.md from the Registry
   agents/random.rb  fuzz.rb       # random legal player, invariant-checking fuzzer
+  rules_monitor.rb  verify.rb     # independent rules checks during play; --verify play-tests a folder of cards
   cli.rb  cli/text.rb             # interactive hot-seat CLI + text renderer, --validate
   deck_builder.rb                 # OPT-IN random constructed decks from a card pool
 exe/enjine
+script/determinism_digest.rb      # per-game digests of seeded games: a speedup must leave them unchanged
 examples/                         # ready-to-play decks and a card pool (not in the gem)
 spec/ unit/ integration/ e2e/ support/scenario.rb  fixtures/cards/ (the test and fuzz cards)
 docs/ DESIGN.md ARCHITECTURE.md MECHANICS_COVERAGE.md SUPPORTED.md(root) reference/ guides/

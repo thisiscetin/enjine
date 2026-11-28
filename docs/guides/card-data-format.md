@@ -39,7 +39,8 @@ Tips:
   report) is normalized and round-trips exactly.
 - **Record the printing, not a vendor id.** The set code and collector number printed on
   the card (`trk`, `12`) can be looked up in any card source.
-- **Multi-face cards** (split, adventure, MDFC, transform) aren't modelled yet.
+- **Multi-face cards** (transform, modal double-faced, adventure, omen, prepare, meld,
+  Rooms) have a `layout` and `faces` (section 4.17).
 
 ---
 
@@ -1631,7 +1632,7 @@ bundle exec exe/enjine --validate cards.json
 `cards.json` is a JSON array of card blocks (or a single block). The report:
 
 ```json
-{ "rules_version": "2026-11-06", "engine_version": "0.3.0",
+{ "rules_version": "2026-11-06", "engine_version": "0.6.0",
   "valid":   [ { "index": 0, "id": "lightning_bolt", "name": "Lightning Bolt", "card": { ...canonical... } } ],
   "invalid": [ { "index": 1, "name": "Gale Drifter", "errors": ["keywords[0]: unknown keyword \"flyng\" ..."] } ] }
 ```
