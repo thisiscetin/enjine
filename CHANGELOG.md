@@ -8,6 +8,8 @@ change the public API; the stable surface is described in
 
 ## [Unreleased]
 
+## [0.6.0] - 2026-11-28
+
 ### Added
 - An activated ability's `cost_reduction` amount may name its targets (`{"counters": {"of": {"target": 0}, "kind":
   "+1/+1"}}`: "costs {1} less for each +1/+1 counter on the target", CR 601.2f); before targets are chosen, it counts as
@@ -305,7 +307,9 @@ Includes 0.4.0, which was tagged but never published to RubyGems.
 - `enjine` CLI: hot-seat and random play, `--validate`, `--verify`,
   `--random-deck`, save and load.
 
-[Unreleased]: https://github.com/thisiscetin/enjine/compare/v0.4.1...HEAD
+[Unreleased]: https://github.com/thisiscetin/enjine/compare/v0.6.0...HEAD
+[0.6.0]: https://github.com/thisiscetin/enjine/compare/v0.5.0...v0.6.0
+[0.5.0]: https://github.com/thisiscetin/enjine/compare/v0.4.1...v0.5.0
 [0.4.1]: https://github.com/thisiscetin/enjine/compare/v0.4.0...v0.4.1
 [0.4.0]: https://github.com/thisiscetin/enjine/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/thisiscetin/enjine/compare/v0.2.0...v0.3.0
