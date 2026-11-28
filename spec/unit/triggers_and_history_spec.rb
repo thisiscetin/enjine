@@ -44,7 +44,7 @@ RSpec.describe "Trigger, history and stack primitives: validation" do
     expect(amount_errors({ "spells_cast_this_turn" => { "where" => "hand" } }))
       .to eq(["x.spells_cast_this_turn: unknown parameter \"where\""])
     expect(errors_of(:effect, { "draw" => { "amount" => 1, "to" => { "triggering" => "spell" } } }))
-      .to eq(["x.draw.to.triggering: must be one of object, player, targets, ability"])
+      .to eq(["x.draw.to.triggering: must be one of object, objects, player, targets, ability"])
   end
 
   it "describes the amounts" do

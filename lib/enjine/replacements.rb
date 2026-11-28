@@ -37,6 +37,7 @@ module Enjine
       when "draw" then drawing!(engine, proposal)
       when "damage" then Mechanics::DamageEvents.replace!(engine, proposal) # abilities/damage_replacements.rb
       when "create_token" then creating_token!(engine, proposal)
+      when "life" then gaining_life!(engine, proposal)
       end
       Mechanics::Counters.replace!(engine, proposal) unless proposal.data["cancelled"]
       dying!(engine, proposal) if proposal.kind == "zone_change" && !proposal.data["cancelled"]
@@ -64,6 +65,22 @@ module Enjine
     def drawing!(engine, proposal)
       _, ability = next_controlled(engine, proposal, :replace_draw, proposal.data["player"])
       proposal.data["count"] = ability.amount if ability
+    end
+
+    # "If you would gain life, you gain twice that much / that much plus 1 instead" and "if an opponent would gain
+    # life, that player loses that much life instead" (CR 614.1a, 119.10). Each applies once (CR 614.5), in the
+    # order the affected player would always choose (CR 616.1): losing instead first (then nothing else applies,
+    # it's no longer a life gain), then adding, then multiplying.
+    def gaining_life!(engine, proposal)
+      data = proposal.data
+      return unless data["delta"].positive?
+
+      found = battlefield_abilities(engine, :replaces_gain?).select { |source, ability| ability.replaces_gain?(data["player"], source) }
+      loser = found.find { |_, ability| ability.lose? }
+      return data["delta"] = -data["delta"] if loser
+
+      doubling, adding = found.partition { |_, ability| ability.multiply }
+      (adding + doubling).each { |source, ability| data["delta"] = ability.gained(engine, data["delta"], source) }
     end
 
     # "If one or more tokens would be created under your control, that many [tokens] are created
@@ -171,6 +188,7 @@ module Enjine
       engine.chars(obj).subtypes.each do |sub| # e.g. a Saga enters with a lore counter (CR 715.3a)
         mod = Enjine.registry.fetch(:subtype, sub)
         mod.entering(engine.definition(obj), proposal.data["enters"]) if mod.respond_to?(:entering)
+        mod.entering_for(engine, controller, enters) if mod.respond_to?(:entering_for) # a Siege's protector (CR 310.12)
       end
       entering_status!(engine, obj, controller, facts, enters)
     end

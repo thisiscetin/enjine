@@ -23,7 +23,7 @@ module Enjine
         return Enjine::Characteristics::FACE_DOWN if face_down?(object) && @face_up != object.id # CR 406.3a
 
         # layer 1 (CR 613.2a-c): its copiable values
-        return board_characteristics.fetch(object.id) { copy_base(object) } if object.zone == :battlefield
+        return board_chars(object) if object.zone == :battlefield # Engine::OptionsMemo
         return @options_memo[object.id] ||= off_board_chars(object) if @options_memo # the state holds still meanwhile
 
         off_board_chars(object)
@@ -49,10 +49,10 @@ module Enjine
       # detected separately by identity. While a static ability has a condition or a computed bonus, or a
       # permanent has a characteristic-defining power/toughness, any event may change the result, so every
       # event drops the cache (`@volatile`, see Engine#emit).
-      LAYER_EVENTS = [Events::ZoneChanged, Events::CountersChanged, Events::EffectStarted,
-                      Events::EffectsEnded, Events::Attached, Events::Unattached, Events::ControlChanged,
-                      Events::PhasedOut, Events::PhasedIn, Events::SpeedChanged,
-                      Events::Transformed, Events::ClassLevelChanged, Events::EmblemCreated].freeze
+      LAYER_EVENTS = [Events::ZoneChanged, Events::CountersChanged, Events::EffectStarted, Events::EffectsEnded, Events::Attached,
+                      Events::Unattached, Events::ControlChanged, Events::PhasedOut, Events::PhasedIn, Events::SpeedChanged,
+                      Events::Transformed, Events::ClassLevelChanged, Events::EmblemCreated, Events::PermanentDesignated,
+                      Events::DoorUnlocked, Events::DoorLocked, Events::TurnedFaceUp].freeze
 
       def touch! = @epoch = @epoch.to_i + 1
       def volatile_layers? = @volatile
@@ -70,13 +70,14 @@ module Enjine
       def apply_layers
         statics = static_sources
         effects = state.effects
-        @volatile = statics.any? { |_, ability| ability.condition || ability.computed? } || defined_on_battlefield?
+        @volatile = statics.any? { |_, ability| ability.volatile? } || defined_on_battlefield?
         return {} if statics.empty? && effects.empty? && !@volatile && printed_board?
 
         @layering = {}
         ids = state.battlefield
         active = statics.select { |source, ability| ability.active?(self, source) }
-        ids.each { @layering[it] = type_layers(object(it), active, effects) }
+        # CR 702.176a: an impending permanent's own "it's not a creature" comes first (Abilities::Impending.effects).
+        ids.each { @layering[it] = type_layers(object(it), active, Mechanics::Abilities::Impending.effects(self, object(it)) + effects) }
         later_layers(ids, statics, ids.select { losing_abilities?(object(it), active, effects) }, effects)
         @layering.reject { |id, c| c.equal?(definition(object(id)).printed_characteristics) }
       ensure
@@ -111,8 +112,6 @@ module Enjine
       end
 
       def defined_on_battlefield? = state.battlefield.any? { definition(object(it)).defined_pt? }
-
-      def facts(obj, current) = Mechanics::Filters::Facts.new(chars: current, counters: obj.counters, token: token?(obj))
 
       # ---- layer 1 (CR 613.2a-c, 707.2) ---------------------------------------------------------
 

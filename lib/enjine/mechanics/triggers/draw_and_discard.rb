@@ -59,26 +59,39 @@ module Enjine
 
         primitive :trigger, :cycles,
                   description: "A player (`controller`: you (default) | opponent | any) cycles a card (activates its " \
-                               "cycling or typecycling ability; optional `card` filter).",
-                  rules: %w[702.29a 702.29e],
-                  params: { "controller" => PLAYERS.join(" | "), "card" => "card filter" },
+                               "cycling or typecycling ability; optional `card` filter). `self: true`: \"when you " \
+                               "cycle this card\", an ability of the card with `zone: \"graveyard\"` (where the cycled " \
+                               "card is); its X is the cycling ability's X.",
+                  rules: %w[702.29a 702.29c 702.29e 113.6k],
+                  params: { "controller" => PLAYERS.join(" | "), "card" => "card filter", "self" => "true" },
                   example: { "cycles" => { "controller" => "you" } }
 
-        def self.keys = %w[controller card]
+        def self.keys = %w[controller card self]
         def event_class = Events::AbilityActivated
 
         def setup(params, errors, path)
           super
           setup_card(params, errors, path)
+          @self = params["self"] == true
+          errors << "#{path}.self: must be true" unless params["self"].nil? || @self
         end
 
         def match?(engine, event, source)
           ability = engine.catalog.fetch(event.card).ability(event.ability)
           ability.respond_to?(:cycling?) && ability.cycling? && player_ok?(engine, event.player, source) &&
-            card_ok?(engine, event.card)
+            card_ok?(engine, event.card) && (!@self || cycled_self?(engine, event, source))
         end
 
-        def to_s = "Whenever #{who} cycle#{"s" unless @controller == "you"} a #{card_words}"
+        # CR 702.29c: the source is the very card cycled (Costs::CycleSelf remembers the hand object it was).
+        def cycled_self?(engine, event, source)
+          engine.state.objects[source["id"]]&.memory&.[]("cycled_from") == event.source
+        end
+
+        def to_s
+          return "When you cycle this card" if @self
+
+          "Whenever #{who} cycle#{"s" unless @controller == "you"} a #{card_words}"
+        end
       end
     end
   end

@@ -10,13 +10,21 @@ module Enjine
     def validate_object_id(obj, path, catalog, next_id, errors)
       id = obj["id"]
       match = /\A([a-z0-9_]+)#(\d+)\z/.match(id.to_s)
-      own = (obj["memory"].is_a?(Hash) && obj["memory"]["own_card"]) || obj["card"]
-      face_down = match && match[1] == Engine::FACE_DOWN_ID && obj["zone"].to_s == "exile" && obj.dig("memory", "face_down") == true
+      own = (obj["memory"].is_a?(Hash) && (obj["memory"]["face_down_card"] || obj["memory"]["own_card"])) || obj["card"]
+      memory = obj["memory"].is_a?(Hash) ? obj["memory"] : {}
+      face_down = match && match[1] == Engine::FACE_DOWN_ID &&
+                  ((obj["zone"].to_s == "exile" && memory["face_down"] == true) || hidden_on_board?(obj, memory))
       named = own.to_s.split(CardDefinition::FACE_SEPARATOR).first
       errors << "#{path}.id: malformed #{id.inspect}" unless match && (match[1] == named || face_down)
       errors << "#{path}.memory.own_card: #{own.inspect} is not in the catalog" unless catalog.include?(own.to_s)
       errors << "#{path}.id: #{id} is not below next_id #{next_id}" if match && match[2].to_i >= next_id.to_i
       errors << "#{path}.card: #{obj["card"].inspect} is not in the catalog" unless catalog.include?(obj["card"].to_s)
+    end
+
+    # A face-down spell or permanent, or one turned face up (the same object, CR 708.8): its id doesn't name its
+    # card (Engine::FaceDownPermanents).
+    def hidden_on_board?(obj, memory)
+      %w[battlefield stack phased_out].include?(obj["zone"].to_s) && (memory.key?("face_down_card") || memory.key?("turned_face_up"))
     end
 
     # Cards outside the game (CR 400.11a): definition ids only (they aren't objects, CR 400.11), each in the

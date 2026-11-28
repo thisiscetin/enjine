@@ -67,6 +67,22 @@ Rules: CR 601.2b, CR 205.3m, CR 607.2d
 }
 ```
 
+## collect_evidence
+
+Collect evidence `N`: exile any number of other cards from your graveyard with total mana value N or greater, chosen one at a time (`choose_cost`; `done` once they total N). Not payable without that much mana value in your graveyard. "If evidence was collected": make it an optional `additional_cost` and read `{"cast_with": "additional_cost"}`.
+
+Rules: CR 701.59a, CR 701.59b, CR 701.59c, CR 202.3, CR 601.2h, CR 118.3
+
+| Parameter | Description |
+| --- | --- |
+| `(value)` | integer >= 1: N |
+
+```json
+{
+  "collect_evidence": 6
+}
+```
+
 ## discard
 
 Discard `count` cards (default 1) from your hand, never this card, matching the card spec `card` if given: chosen while casting or activating and discarded as the spell or ability becomes cast. `random: true` discards them at random instead.
@@ -141,6 +157,26 @@ Rules: CR 406.1, CR 601.2h, CR 602.2b, CR 118.3
 {
   "exile_from_hand": {
     "count": 1
+  }
+}
+```
+
+## exile_permanent
+
+Exile `count` permanents you control matching `filter` (`other: true`: not the source). Chosen while casting or activating, exiled as it becomes cast; the exiled cards are `exiled_for_cost`, and their last known power, toughness and mana value are amount `sacrificed`.
+
+Rules: CR 406.1, CR 601.2h, CR 602.2b, CR 118.3, CR 608.2h
+
+| Parameter | Description |
+| --- | --- |
+| `filter` | filter (default permanent) |
+| `count` | integer (default 1) |
+| `other` | true: not the source itself |
+
+```json
+{
+  "exile_permanent": {
+    "filter": "creature"
   }
 }
 ```

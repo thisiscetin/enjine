@@ -13,7 +13,7 @@ module Enjine
     #   memory["melded"]          on a melded permanent (its object is one card of the pair, back face up): the
     #                             other card's id (CR 713.1a)
     module Faces
-      ALTERNATIVE_SPELLS = %w[modal adventure omen].freeze
+      ALTERNATIVE_SPELLS = %w[modal adventure omen room].freeze
 
       # ---- reading -----------------------------------------------------------------------------
 
@@ -31,6 +31,7 @@ module Enjine
       def card_after_move(old, to)
         own = own_card(old)
         return own if old.memory["copy"] || (old.zone == :stack && to == :battlefield)
+        return room_locked_face(own) if to == :battlefield && catalog.fetch(own).layout == "room" # CR 709.5d (Engine::Rooms)
 
         catalog.fetch(own).card.id
       end
@@ -63,7 +64,7 @@ module Enjine
       # face is an instant or sorcery (CR 701.27e). It stays the same object (CR 701.27c, 712.15).
       def transform!(obj)
         own = catalog.fetch(own_card(obj))
-        return false unless obj.zone == :battlefield && own.double_faced?
+        return false unless obj.zone == :battlefield && own.double_faced? && !face_down_object?(obj)
 
         into = own.other_face
         return false if into.type?(:instant) || into.type?(:sorcery)
@@ -133,10 +134,12 @@ module Enjine
       # ---- casting another face (CR 712.8b, 716.3, 721.3) ----------------------------------------------
 
       # The faces other than the front a card can be cast as: a modal card's nonland faces, an Adventure, an
-      # Omen. A preparation card's spell is cast only as a copy (CR 723.3).
+      # Omen, a Room's doors. A preparation card's spell is cast only as a copy (CR 723.3).
       def alternative_faces(obj)
         defn = catalog.fetch(obj.card)
         return [] if obj.memory["copy"] || defn.face_index.positive? || !ALTERNATIVE_SPELLS.include?(defn.layout)
+
+        return Rooms::DOOR_FACE.values if defn.layout == "room" # CR 709.3: either door, never both (Engine::Rooms)
 
         (1...defn.faces.size).reject { defn.face(it).land? }
       end

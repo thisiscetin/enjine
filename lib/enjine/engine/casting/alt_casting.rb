@@ -27,7 +27,14 @@ module Enjine
         hand = player(index).hand
         return hand if granted_alt_zones(index).include?(:hand)
 
-        hand.select { |id| chars(id).abilities.any? { it.ability.kind == :alternative_cost } }
+        own = own_abilities_only?
+        hand.select do |id|
+          obj = object(id)
+          # no face with an alternative cost (CardDefinition#plays_itself?): a quick no (Casting#printed_faces_only?)
+          next false if printed_faces_only?(obj, own) && !card_off_board(obj.card)[:plays_itself]
+
+          chars(obj).abilities.any? { it.ability.kind == :alternative_cost }
+        end
       end
 
       # A card in a graveyard or library, not a copy, with no face that has an ability to play itself
@@ -45,7 +52,7 @@ module Enjine
 
         own = face_up(obj.id) { chars(obj).abilities }.filter_map do |inst|
           ability = inst.ability
-          ability.method_for(inst.ref) if ability.kind == :alternative_cost && ability.functions?(self, obj, index)
+          ability.method_for(inst.ref, engine: self, obj: obj) if ability.kind == :alternative_cost && ability.functions?(self, obj, index)
         end
         own + granted_alt_methods(index, obj) + warped_methods(index, obj) + plotted_methods(obj)
       end
@@ -68,7 +75,7 @@ module Enjine
           next unless perm.controller == index && grant.functions?(self, obj, index)
 
           inst = chars(perm).abilities.find { it.ability.equal?(grant) }
-          grant.granted.method_for("#{GRANTED}#{perm.id}:#{inst.ref}")
+          grant.granted.method_for("#{GRANTED}#{perm.id}:#{inst.ref}", engine: self, obj: obj)
         end
       end
 
@@ -77,7 +84,8 @@ module Enjine
 
       # The alternative cost ability a method's ref names: the card's own, or one a permanent grants.
       def alt_cost_ability(obj, ref)
-        return chars(obj).ability(ref) unless ref.start_with?(GRANTED)
+        # a spell cast face down has its card's alternative cost (morph, disguise), not its face-down abilities (CR 708.4)
+        return (face_down_object?(obj) ? catalog.fetch(own_card(obj)) : chars(obj)).ability(ref) unless ref.start_with?(GRANTED)
 
         perm, inst = ref.delete_prefix(GRANTED).split(":", 2)
         state.objects[perm] && chars(perm).ability(inst)&.granted

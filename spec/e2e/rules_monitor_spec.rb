@@ -141,13 +141,17 @@ RSpec.describe Enjine::RulesMonitor do
       expect(checked_events(game, began).map(&:rule)).to include("514.2")
     end
 
-    it "leaves lethal damage on a creature whose creature types were replaced to the engine (CR 704.5g, 613.1d)" do
+    it "reads keywords from the layers for a creature whose creature types were replaced (CR 704.5g, 613.1d)" do
       wall = obj_id(game, "Wall of Ranks")
       game.state.object(wall).damage = 3
       game.state.effects << { "kind" => "assimilate", "timestamp" => 99, "controller" => 0, "affected" => [wall],
                               "duration" => "permanent" }
-      allow_any_instance_of(described_class).to receive(:keyword?).and_return(false) # rubocop:disable RSpec/AnyInstance
-      expect(checked(game).map(&:rule)).not_to include("704.5g")
+      engine = game.instance_variable_get(:@engine)
+      engine.touch!
+      expect(checked(game)).to eq([]) # still a creature you control: the Banner keeps it indestructible
+      allow(engine).to receive(:static_sources).and_return([])
+      engine.touch!
+      expect(checked(game).map(&:rule)).to include("704.5g")
     end
 
     it "reports a static pump the engine forgot" do

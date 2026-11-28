@@ -12,12 +12,12 @@ module Enjine
       # (`grants_beam_me_up` is the same idea for beam me up, whose cost is each card's own mana cost.)
       class CardsHave < Primitive
         ZONES = %w[graveyard hand exile].freeze
-        GRANTABLE = %i[flashback harmonize mayhem web_slinging sneak].freeze
+        GRANTABLE = %i[flashback harmonize mayhem web_slinging sneak miracle].freeze
 
         primitive :ability, :cards_have,
                   description: "While this permanent is on the battlefield, cards you own in `zone` (graveyard " \
                                "(default), hand or exile) matching `cards` have the keyword alternative cost `ability` " \
-                               "(flashback, harmonize, mayhem, web_slinging or sneak) and may be cast with it from " \
+                               "(flashback, harmonize, mayhem, web_slinging, sneak or miracle) and may be cast with it from " \
                                "that zone. Cast option `via: \"alt:cards_have:<permanent>:<ref>\"`.",
                   rules: %w[611.3a 604.1 118.9 601.2b 702.190a],
                   params: { "zone" => ZONES.join(" | "), "cards" => "card spec",
@@ -52,6 +52,8 @@ module Enjine
         def mana_ability? = false
         def allowed_types = nil
         def try_effects = []
+        # A granted keyword's own triggered ability (miracle's, Abilities::Miracle) belongs to this permanent's card.
+        def linked_abilities = granted.respond_to?(:linked_abilities) ? granted.linked_abilities : []
 
         # Whether the card `obj` (owned by `index`, who controls this permanent) may be cast with the granted ability now.
         def functions?(engine, obj, index)

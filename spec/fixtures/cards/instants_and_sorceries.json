@@ -5739,5 +5739,172 @@
       }
     ],
     "rules_text": "Return target creature to its owner's hand. If it was attacking, draw a card."
+  },
+  {
+    "name": "Fading Bargain",
+    "mana_cost": "{1}{U}",
+    "types": [
+      "sorcery"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "effects": [
+            "exile_this_spell",
+            {
+              "pay": {
+                "cost": [
+                  {
+                    "mana": "{1}"
+                  },
+                  {
+                    "discard": {}
+                  }
+                ],
+                "then": [
+                  {
+                    "draw": {
+                      "amount": 2
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "reflexive_trigger": {
+                "targets": [
+                  "land"
+                ],
+                "effects": [
+                  {
+                    "untap": {
+                      "to": {
+                        "target": 0
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Spec Purifying Draught",
+    "mana_cost": "{G}",
+    "types": [
+      "instant"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "effects": [
+            {
+              "remove_all_counters": {
+                "to": "you"
+              }
+            },
+            {
+              "gain_life": {
+                "amount": 2
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Spec Goblin Volley",
+    "mana_cost": "{1}{R}",
+    "types": [
+      "kindred",
+      "instant"
+    ],
+    "subtypes": [
+      "goblin"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "targets": [
+            "any_target"
+          ],
+          "effects": [
+            {
+              "deal_damage": {
+                "amount": 2,
+                "to": {
+                  "target": 0
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Spec Named Pursuit",
+    "mana_cost": "{1}{B}",
+    "types": [
+      "sorcery"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "effects": [
+            {
+              "choose_card_name": {}
+            },
+            {
+              "reveal_until": {
+                "for": {
+                  "name": "chosen"
+                },
+                "put": "hand",
+                "rest": "graveyard"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Spec Cruel Bargain",
+    "mana_cost": "{1}{U}",
+    "types": [
+      "sorcery"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "effects": [
+            {
+              "mill": {
+                "amount": 3
+              }
+            },
+            {
+              "choose_cards": {
+                "from": {
+                  "result": 0
+                },
+                "for": {
+                  "not_types": [
+                    "land"
+                  ]
+                },
+                "put": "hand",
+                "chooser": "each_opponent"
+              }
+            }
+          ]
+        }
+      }
+    ]
   }
 ]

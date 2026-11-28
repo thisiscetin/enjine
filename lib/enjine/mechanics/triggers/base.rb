@@ -11,15 +11,17 @@ module Enjine
       # What an event tells a triggered ability about itself (CR 603.2): the object and player it is
       # about and a number ("that many"). Effects name them with {"triggering": "object" | "player"}
       # and the amount {"triggering": "amount"}; "card" is the object's card, for conditions, and "types" the card
-      # types a permanent that left had as it last existed ("if it was a creature", CR 603.10a).
+      # types a permanent that left had as it last existed ("if it was a creature", CR 603.10a), and "lki" how it
+      # last existed (its counters, power, toughness, mana value and whether it was a token, CR 603.10a, 608.2h), so
+      # "the +1/+1 counters it had" reads them after it left ({"counters": {"of": {"triggering": "object"}}}).
       def self.event_facts(engine, event)
         facts = {}
         case event
         when Events::ZoneChanged
           facts.merge!("object" => event.new_id, "player" => engine.names.index(event.owner))
-          facts["types"] = engine.last_known(event.old_id)&.fetch("types")&.map(&:to_s) if event.from == "battlefield"
-        when Events::SpellCast, Events::DilemmaFaced, Events::Tapped, Events::AttackerDeclared, Events::BecameBlocked,
-             Events::BlockerDeclared
+          departed_facts(engine, event, facts) if event.from == "battlefield"
+        when Events::SpellCast, Events::DilemmaFaced, Events::Tapped, Events::Untapped, Events::AttackerDeclared,
+             Events::BecameBlocked, Events::BlockerDeclared, Events::CrimeCommitted
           facts["object"] = event.object
         when Events::AbilityActivated then facts.merge!("object" => event.source, "ability" => event.object)
         when Events::TriggerPutOnStack then facts["ability"] = event.object
@@ -33,6 +35,13 @@ module Enjine
         facts["player"] ||= engine.names.index(event.player) if event.respond_to?(:player)
         facts["card"] = event.respond_to?(:card) ? event.card : engine.state.objects[facts["object"]]&.card
         facts.compact
+      end
+
+      # A permanent that left the battlefield, as it last existed (CR 603.10a): plain data, kept by the trigger.
+      def self.departed_facts(engine, event, facts)
+        lki = engine.last_known(event.old_id) or return
+        facts["types"] = lki["types"].map(&:to_s)
+        facts["lki"] = engine.last_known_memory(lki).merge("token" => lki["token"] == true)
       end
 
       # CR 601.2h: the mana spent to cast "that spell" and the sources of what artifacts made, as it was cast;

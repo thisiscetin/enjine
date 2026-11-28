@@ -49,6 +49,7 @@ module Enjine
         state.result = { "winner" => winner, "reason" => reason }
         ask!(nil)
         state.frames.clear
+        reveal_face_down_at_end! # CR 708.9 (Engine::FaceDownPermanents)
         emit Events::GameEnded.new(winner: winner, reason: reason)
       end
 
@@ -64,17 +65,37 @@ module Enjine
         state.battlefield.each do |id|
           obj = object(id)
           defn = chars(obj)
-          reason = if defn.creature? then creature_sba(obj)
-                   elsif defn.planeswalker? && loyalty(obj) <= 0 then "sba_loyalty"
-                   end
+          reason = defn.creature? ? creature_sba(obj) : noncreature_sba(obj, defn)
           reason ||= "sba_aura" if illegal_aura?(obj) # CR 704.5m
           reason ||= "sacrifice" if saga_complete?(obj) # CR 704.5s: its controller sacrifices it
           (doomed ||= []) << [id, reason] if reason
         end
         return ceased unless doomed
 
-        simultaneously { doomed.each { |id, reason| move!(id, :graveyard, reason: reason) } } # CR 704.3, 603.10a
+        in_batch("sba:#{state.next_id}") do # CR 704.3, 603.2c, 603.10a: at once, one event batch
+          simultaneously { doomed.each { |id, reason| move!(id, :graveyard, reason: reason) } }
+        end
         true
+      end
+
+      # CR 704.5i: a planeswalker with 0 loyalty is put into its owner's graveyard; a battle, see #battle_sba.
+      def noncreature_sba(obj, current)
+        return "sba_loyalty" if current.planeswalker? && loyalty(obj) <= 0
+
+        battle_sba(obj) if current.type?(:battle)
+      end
+
+      # CR 704.5v, 310.7: a battle with defense 0 is put into its owner's graveyard, unless it's the source of a
+      # triggered ability that has triggered but not yet left the stack (a Siege's defeat trigger, CR 310.12).
+      # CR 704.5x: a Siege its protector controls gets a new protector from among its controller's opponents (no
+      # choice in a two-player game).
+      def battle_sba(obj)
+        obj.memory["protector"] = state.opponent(obj.controller) if protector(obj) == obj.controller && chars(obj).subtypes.include?(:siege)
+        return nil if obj.counters.fetch("defense", 0).positive?
+
+        waiting = state.pending_triggers.any? { it["source"] == obj.id } ||
+                  state.stack.any? { (ability = object(it)).ability? && ability.source == obj.id && ability.memory.key?("trigger_id") }
+        waiting ? nil : "sba_defense"
       end
 
       # CR 704.5q, 122.3: N +1/+1 and N -1/-1 counters are removed, N the smaller count.

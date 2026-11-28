@@ -15,7 +15,7 @@ module Enjine
         "tapped" => tapped, "controlled_since" => controlled_since, "kind" => kind, "counters" => counters.dup,
         "damage" => damage, "source" => source, "ability" => ability, "targets" => targets&.dup,
         "loyalty_turn" => loyalty_turn, "deathtouched" => deathtouched,
-        "modes" => modes&.dup, "memory" => Marshal.load(Marshal.dump(memory || {})), "x" => x,
+        "modes" => modes&.dup, "memory" => Snapshot.deep_copy(memory || {}), "x" => x,
         "mana_spent" => mana_spent&.dup, "attached_to" => attached_to, "paid" => paid&.map(&:dup),
         "phased_out" => phased_out&.dup }
     end
@@ -53,7 +53,7 @@ module Enjine
 
     private
 
-    def deep(value) = Marshal.load(Marshal.dump(value))
+    def deep(value) = Snapshot.deep_copy(value)
 
     # Fields left out while empty.
     def optional_h

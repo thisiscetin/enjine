@@ -135,7 +135,7 @@ module Enjine
           return false if @chosen_name && engine.chars(object).name != source.memory["chosen_name"]
 
           (filter.nil? || filter.match_for?(engine, object.id, source.controller, source.id)) &&
-            (spells.nil? || spells.match?(engine, object))
+            (spells.nil? || spells.match?(engine, object, EffectContext.new(source.controller, source.id, source.id, [], [])))
         end
 
         def to_s

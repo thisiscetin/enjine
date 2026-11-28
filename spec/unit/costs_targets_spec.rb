@@ -156,6 +156,11 @@ RSpec.describe "Costs, kicker, targets and payments: card data (unit)" do
     mana_costs = ["tap", "discard", { "pay_life" => "X" }, { "mana" => "{2/W}" }]
     expect(errors_for(creature([{ "mana" => { "cost" => mana_costs, "produce" => "{C}" } }])))
       .to eq((1..3).map { "abilities[0].mana.cost[#{it}]: a mana ability's cost can't need a choice, X or {2/B}" })
+    # CR 605.3a: a one_of in a mana ability's cost is refused as the card is loaded, not when it is played.
+    forage = ["tap", { "one_of" => [{ "pay_life" => 1 }, "sacrifice"] }]
+    expect(errors_for(creature([{ "mana" => { "cost" => forage, "produce" => "{G}" } }])))
+      .to eq(["abilities[0].mana.cost[1]: a mana ability's cost can't be a one_of (a choice between costs, CR 601.2b, " \
+              "isn't supported for mana abilities, which are paid for at once, CR 605.3a)"])
     expect(errors_for(creature([{ "mana" => { "cost" => ["tap"], "color" => "chosen", "colors" => %w[W U] } }])))
       .to eq(["abilities[0].mana.colors: must list two or more colors (W U B R G), with color"])
     costs = Enjine::CardDefinition.from_h(activated("cost" => [

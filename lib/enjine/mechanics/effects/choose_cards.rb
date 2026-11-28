@@ -16,43 +16,53 @@ module Enjine
         LISTS = %w[then otherwise].freeze
 
         primitive :effect, :choose_cards,
-                  description: "You choose `count` (default 1; \"any\": any number) cards matching `for` from `from`: a " \
+                  description: "You choose `count` (default 1; \"any\": any number; \"all\": every matching card, no " \
+                               "choice) cards matching `for` from `from`: a " \
                                "selector (e.g. {\"result\": 0}, the cards an earlier effect milled) or a player's zone, " \
                                "{\"hand\": selector} / {\"graveyard\": selector}. `optional`: you may choose fewer. Then " \
                                "they are put into `put` (`discard`: from a hand, its owner discards them; `tapped` onto the " \
                                "battlefield, under your control; exiled cards `link`ed to the source). `look`: you look at the " \
                                "whole zone first; `reveal`: \"chosen\" reveals what you chose, \"all\" the whole set. " \
                                "`then` runs if a card was chosen, `otherwise` if none was (\"if you can't\"). `random: true`: the " \
-                               "cards are picked at random (the game's random number generator) instead of chosen.",
-                  rules: %w[701.20a 701.20e 400.7j 608.2c 607.2a 118.12 701.9a 701.9b],
+                               "cards are picked at random (the game's random number generator) instead of chosen. " \
+                               "`chooser`: the player who chooses (a player selector, default \"you\"; e.g. " \
+                               "\"each_opponent\" or {\"target\": 0}: \"target opponent chooses a card from among " \
+                               "them\"); they look at the cards they choose from, and the cards still go where `put` " \
+                               "says under your control.",
+                  rules: %w[701.20a 701.20e 400.7j 608.2c 607.2a 118.12 701.9a 701.9b 608.2d],
                   params: { "from" => "selector or {\"hand\"|\"graveyard\": player selector}", "for" => "card spec",
-                            "count" => "integer or \"any\"", "optional" => "boolean", "put" => PUT.join(" | "),
+                            "count" => "integer, \"any\" or \"all\"", "optional" => "boolean", "put" => PUT.join(" | "),
                             "tapped" => "boolean", "link" => "boolean", "look" => "boolean", "random" => "boolean",
-                            "reveal" => REVEAL.join(" | "), "then" => "list of effects", "otherwise" => "list of effects" },
+                            "reveal" => REVEAL.join(" | "), "then" => "list of effects", "otherwise" => "list of effects",
+                            "chooser" => "player selector (default \"you\")" },
                   example: { "choose_cards" => { "from" => { "result" => 0 }, "for" => { "permanent" => true },
                                                  "optional" => true, "put" => "hand" } }
 
         attr_reader :spec, :count, :put
 
-        def self.keys = %w[from for count optional put tapped link look random reveal then otherwise if]
+        def self.keys = %w[from for count optional put tapped link look random reveal then otherwise chooser if]
         def self.default_to = "you"
 
         def setup(params, errors, path)
           @from_zone, @from = parse_from(Mechanics.fetch_param(params, :from), errors, path)
           @spec = CardSpec.build(Mechanics.fetch_param(params, :for), errors, "#{path}.for")
           @count = Mechanics.fetch_param(params, :count) || 1
-          unless @count == "any" || (@count.is_a?(Integer) && @count.positive?)
-            errors << "#{path}.count: must be a positive integer or \"any\""
+          unless %w[any all].include?(@count) || (@count.is_a?(Integer) && @count.positive?)
+            errors << "#{path}.count: must be a positive integer, \"any\" or \"all\""
           end
           @optional = Mechanics.flag_param(params, "optional", errors, path)
           @put = Mechanics.fetch_param(params, :put).to_s
           errors << "#{path}.put: must be one of #{PUT.join(", ")}" unless PUT.include?(@put)
           errors << "#{path}.put: discard takes cards from a hand" if @put == "discard" && @from_zone != "hand"
           @flags = %w[tapped link look random].to_h { [it, Mechanics.flag_param(params, it, errors, path)] }
-          errors << "#{path}.count: must be a number to pick at random" if @flags["random"] && @count == "any"
+          errors << "#{path}.count: must be a number to pick at random" if @flags["random"] && !@count.is_a?(Integer)
           @reveal = Mechanics.fetch_param(params, :reveal)
           errors << "#{path}.reveal: must be one of #{REVEAL.join(", ")}" unless @reveal.nil? || REVEAL.include?(@reveal)
           @lists = parse_lists(params, errors, path, LISTS)
+          raw = Mechanics.fetch_param(params, :chooser)
+          errors << "#{path}.chooser: random cards have no chooser" if raw && @flags["random"]
+          @chooser = raw && Selector.build(raw, errors, "#{path}.chooser", targets_count: @targets_count,
+                                                                           results_count: @results_count)
         end
 
         def parse_from(raw, errors, path)
@@ -67,13 +77,13 @@ module Enjine
         def nested_effects = @lists.values.flatten
 
         def to_s
-          many = count == "any" ? "any number of" : "#{"up to " if @optional}#{count}"
+          many = { "any" => "any number of", "all" => "all" }.fetch(count) { "#{"up to " if @optional}#{count}" }
           "choose #{many} #{spec}#{" at random" if @flags["random"]} from #{"the #{@from_zone} of " if @from_zone}#{@from} " \
-            "→ #{put.tr("_", " ")}"
+            "→ #{put.tr("_", " ")}#{" (#{@chooser} chooses)" if @chooser}"
         end
 
         # CR 118.3: as the optional part of a "may", the full number of cards must be available.
-        def possible?(engine, ctx) = pool(engine, ctx).size >= (count == "any" ? 1 : count)
+        def possible?(engine, ctx) = pool(engine, ctx).size >= (count.is_a?(Integer) ? count : 1)
 
         def run(engine, ctx, locals)
           return :done unless locals["asked"] || locals.key?("chose") || condition.nil? || condition.true?(engine, ctx)
@@ -81,8 +91,8 @@ module Enjine
           unless locals.key?("chose")
             show!(engine, ctx, locals)
             chosen = picked(engine, ctx, locals)
-            choices = @flags["random"] || stop?(locals, chosen) ? [] : choices(engine, ctx, chosen)
-            return ask(engine, locals, ctx.controller, "Choose #{spec}", choices) unless choices.empty?
+            choices = @flags["random"] || count == "all" || stop?(locals, chosen) ? [] : choices(engine, ctx, chosen)
+            return ask(engine, locals, chooser(engine, ctx, locals), "Choose #{spec}", choices) unless choices.empty?
 
             return :wait if put == "battlefield" && engine.ask_entering_choices!(locals, chosen.map { [it, ctx.controller] }) == :wait
 
@@ -94,8 +104,18 @@ module Enjine
 
         private
 
+        # Who chooses (CR 608.2d): `chooser`'s first player, resolved once; the controller without one (or when it
+        # names no player any more).
+        def chooser(engine, ctx, locals)
+          return ctx.controller unless @chooser
+
+          locals["chooser"] ||= @chooser.resolve(engine, ctx).filter_map { Filters.player_index(engine, it) }.first ||
+                                ctx.controller
+        end
+
         # The cards chosen so far, or picked at random once (as in CR 701.9b, through the game's RNG).
         def picked(engine, ctx, locals)
+          return locals["picked"] ||= pool(engine, ctx) if count == "all" # "all cards with that name": no choice
           return answers(locals).select { it["type"] == "choose" }.map { it["object"] } unless @flags["random"]
 
           locals["picked"] ||= engine.state.rng.shuffle!(pool(engine, ctx)).first(count)
@@ -125,6 +145,16 @@ module Enjine
           elsif @flags["look"]
             ids.group_by { engine.object(it).owner }.each { |owner, list| engine.look_at!(ctx.controller, owner, list) }
           end
+          look_for_chooser!(engine, ctx, locals)
+        end
+
+        # Another player choosing among cards they can't see (a hand, a library) looks at them first (CR 701.20e).
+        def look_for_chooser!(engine, ctx, locals)
+          index = chooser(engine, ctx, locals)
+          return if index == ctx.controller || @reveal == "all"
+
+          hidden = pool(engine, ctx).select { %i[hand library].include?(engine.object(it).zone) || engine.face_down?(engine.object(it)) }
+          hidden.group_by { engine.object(it).owner }.each { |owner, list| engine.look_at!(index, owner, list) unless owner == index }
         end
 
         def stop?(locals, chosen)

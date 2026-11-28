@@ -14,6 +14,8 @@ module Enjine
         obj = object(id)
         defn = definition(obj)
         return false unless defn.castable?
+        return false if defn.layout == "room" && defn.face_index.zero? # CR 709.3: a Room is cast as one of its doors
+        return false if mana_out_of_reach?(index, obj)
         return false unless defn.instant_speed? || sorcery_timing?(index) || flash_by_cost?(obj)
         return false if cast_forbidden?(index, obj) # CR 101.2 (Engine::Rules)
         return false unless additional_costs_payable?(obj) # CR 601.2f: e.g. "sacrifice a creature"
@@ -29,25 +31,6 @@ module Enjine
         kicked_castable?(index, obj) # CR 702.33g: only the kicked spell has legal targets
       end
 
-      # No effect gives a card off the battlefield an ability (CR 113.6b): each has only its own (and its copiable
-      # values'), so the quick nos below hold.
-      def own_abilities_only? = state.effects.none? { it["kind"] == "card_ability" }
-
-      # A card that isn't a copy, none of whose faces has an activated ability functioning from the zone it's in
-      # (CardDefinition#activation_zones, CR 113.6): nothing of it can be activated there.
-      def no_activations_here?(obj)
-        !obj.memory.key?("copy_except") && !obj.memory.key?("copy_effects") &&
-          !card_off_board(obj.card)[:activation_zones].include?(obj.zone)
-      end
-
-      # What a card's faces can do off the battlefield (CardDefinition#plays_itself?, #activation_zones), once per
-      # card: printed facts that never change.
-      def card_off_board(card)
-        (@card_off_board ||= {})[card] ||= catalog.fetch(card).faces.then do |faces|
-          { plays_itself: faces.any?(&:plays_itself?), activation_zones: faces.flat_map(&:activation_zones).uniq }
-        end
-      end
-
       def activatable?(index, id, ability_ref)
         obj = object(id)
         ability = chars(obj).ability(ability_ref)
@@ -55,6 +38,7 @@ module Enjine
         return false unless obj.zone == ability.zone # CR 113.6: e.g. cycling only from the hand (702.29a)
         return false if ability.sorcery_speed? && !sorcery_timing?(index)
         return false if activation_forbidden?(index, obj) # CR 602.5, 101.2 (Engine::Rules)
+        return false if Mechanics::Keywords::SplitSecond.active?(self) # CR 702.61b
         return false unless activation_allowed?(index, obj, ability_ref, ability) # CR 602.5b
 
         if (ability.kind == :loyalty) && (obj.loyalty_turn == state.turn || (loyalty(obj) + ability.loyalty_cost).negative?)
@@ -141,11 +125,11 @@ module Enjine
         origin["memory"] = card.memory.slice("face_down", "may_look") if face_down?(card) # turned face up (CR 406.3a)
         origin["memory"] = card.memory.slice("prepared_for") if card.memory["prepared_for"] # a prepare spell (CR 723.3c)
         flash_cost = !via && !face && flash_cost_needed?(index, card) # CR 601.3c: the optional cost must be paid
-        obj = move!(card_id, :stack, controller: index, reason: "cast")
+        obj = move!(card_id, :stack, controller: index, reason: "cast", face_down_as: method&.dig("alt", "face_down")) # CR 708.4
         turn_spell_face!(obj, face) # CR 712.8b, 716.3b, 721.3b
         extra = method ? { "method" => method } : {}
         extra["flash_by_cost"] = true if flash_cost
-        extra["no_priority"] = true if %w[free resolving].include?(via) # cast while resolving (CR 608.2g)
+        extra["no_priority"] = true if %w[free resolving].include?(via) || method&.[]("resolving") # cast while resolving (CR 608.2g)
         start_casting!(index, obj.id, "spell", origin: origin, extra: extra)
       end
 
@@ -233,11 +217,23 @@ module Enjine
         spec = casting_targets[target_slot(ctx)] # Engine::TargetCounts: a counted slot's list may be open
         taken = spec.respond_to?(:distinct_from) ? spec.distinct_from.flat_map { Array(ctx["targets"][it]) } : []
         taken += open_target_group(ctx)
-        candidates = spec.candidates_for(self, ctx["player"], ctx["source"]).reject do
+        candidates = spec.candidates_for(self, ctx["player"], ctx["source"], ctx: x_target_context(ctx)).reject do
           it == ctx["object"] || taken.include?(it) || !targetable?(it, ctx["player"], ctx["source"],
                                                                     targeter: ctx["source"] || ctx["object"])
         end
         sharing_type(candidates, spec, ctx)
+      end
+
+      # CR 601.2b-c: X is announced before targets are chosen, so "target ... with mana value X" reads the X of the
+      # spell or ability being cast (a triggered ability's: the cycling ability's X, CR 702.29c). Without an X the
+      # filter's own default context applies.
+      def x_target_context(ctx) = x_context(ctx["player"], ctx["source"], state.objects[ctx["object"]])
+
+      # The same as its targets are checked on resolution (CR 608.2b, Engine::Resolution#legal_targets).
+      def x_context(controller, source, obj)
+        return nil if obj&.x.nil?
+
+        Mechanics::EffectContext.new(controller, source, obj.id, [], [])
       end
 
       # "Target permanents that share a card type" (`shares_type_with`, CR 205.2a): only candidates sharing one

@@ -48,6 +48,9 @@ module Enjine
       def self.decisions = %w[effect_choice enter_choice damage_order]
 
       def self.validate(frame, data, errors)
+        # A spell that left the stack while resolving is kept by the frame (CR 608.2n, Engine::Resolution).
+        return if frame["left_stack"].is_a?(Hash) && frame["left_stack"]["id"] == frame["object"]
+
         errors << "frames: resolving object #{frame["object"]} is not on the stack" unless data["stack"].include?(frame["object"])
       end
     end

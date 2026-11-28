@@ -5,6 +5,14 @@ module Enjine
     # Layers 5 and 6 of the layer pass (Engine::Characteristics#apply_layers): colors, and abilities gained
     # and lost in timestamp order (CR 613.1e-f, 613.7).
     module AbilityLayers
+      # What a static ability matches a permanent on in the layer pass: characteristics, counters and token-ness,
+      # plus combat and tapped status (not characteristics, so reading them never depends on the pass, CR 506.4,
+      # 613.8).
+      def facts(obj, current)
+        status = { "attacking" => attackers.key?(obj.id), "blocking" => state.blockers.key?(obj.id), "tapped" => obj.tapped }
+        Mechanics::Filters::Facts.new(chars: current, counters: obj.counters, token: token?(obj), status: status)
+      end
+
       # Layer 5 (CR 613.1e): effects that set colors, in timestamp order. Layer 6 (CR 613.1f): keyword counters
       # (CR 122.1b), keywords and abilities from static abilities and resolved effects, and "loses all
       # abilities", applied in timestamp order (CR 613.7): a removal takes away what the object had then, and

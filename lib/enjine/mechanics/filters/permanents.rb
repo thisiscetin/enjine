@@ -18,6 +18,13 @@ module Enjine
         def self.card_types = [:planeswalker]
       end
 
+      # A battle on the battlefield (CR 310).
+      class Battle < Filter
+        primitive :filter, :battle, description: "A battle on the battlefield.", rules: %w[310.5], example: "battle"
+        def self.match_object?(engine, object, _controller) = type?(engine, object, :battle)
+        def self.card_types = [:battle]
+      end
+
       # A creature or planeswalker on the battlefield.
       class CreatureOrPlaneswalker < Filter
         primitive :filter, :creature_or_planeswalker, description: "A creature or planeswalker on the battlefield.",

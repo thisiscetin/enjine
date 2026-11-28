@@ -8,7 +8,10 @@ module Enjine
       class Reduction
         attr_reader :amount, :condition
 
-        def self.build(data, errors, path)
+        # `targets_count`: the targets of the ability it reduces, which the amount may name ({"target": 0}): "costs {1}
+        # less for each +1/+1 counter on the target creature" (the total cost is determined after targets are chosen,
+        # CR 601.2f).
+        def self.build(data, errors, path, targets_count: 0)
           unless data.is_a?(Hash)
             errors << "#{path}: must be {\"amount\": n, \"if\": condition}"
             return new(Amount::Fixed.new(0), nil)
@@ -16,22 +19,36 @@ module Enjine
           data = data.transform_keys(&:to_s)
           Mechanics.check_keys(data, %w[amount if], errors, path)
           amount = if data.key?("amount")
-                     Amount.build(data["amount"], errors, "#{path}.amount", targets_count: 0)
+                     Amount.build(data["amount"], errors, "#{path}.amount", targets_count: targets_count)
                    else
                      (errors << "#{path}.amount: required") && Amount::Fixed.new(0)
                    end
           condition = data["if"] && Condition.build(data["if"], errors, "#{path}.if")
-          new(amount, condition)
+          new(amount, condition, targeted: targets_count.positive? && names_targets?(data["amount"], path))
         end
 
-        def initialize(amount, condition)
+        # Whether the amount names a target: it is valid only with targets to name.
+        def self.names_targets?(raw, path)
+          probe = []
+          Amount.build(raw, probe, path, targets_count: 0)
+          !probe.empty?
+        end
+
+        def initialize(amount, condition, targeted: false)
           @amount = amount
           @condition = condition
+          @targeted = targeted
           freeze
         end
 
-        # The generic mana it takes off now (0 when the condition doesn't hold).
-        def reduction(engine, ctx) = condition.nil? || condition.true?(engine, ctx) ? amount.value(engine, ctx) : 0
+        # The generic mana it takes off now (0 when the condition doesn't hold). An amount naming a target, before the
+        # targets are chosen (ctx targets nil): any amount, so the total cost found is a lower bound (Engine::Costs).
+        def reduction(engine, ctx)
+          return 0 unless condition.nil? || condition.true?(engine, ctx)
+          return Float::INFINITY if @targeted && ctx.targets.nil?
+
+          amount.value(engine, ctx)
+        end
 
         def to_s = "costs {#{amount}} less#{" if #{condition}" if condition}"
       end
@@ -73,12 +90,14 @@ module Enjine
       class CostModifier < Primitive
         TYPES = %w[artifact creature enchantment land planeswalker instant sorcery].freeze
         CASTERS = %w[you opponent any].freeze
-        SPEC_KEYS = %w[subtypes colors].freeze
+        SPEC_KEYS = %w[subtypes colors name].freeze
 
         primitive :ability, :cost_modifier,
                   description: "While on the battlefield: spells cast by `caster` (you, opponent or any; default you) " \
                                "whose card types match `spells` ({\"any_of\": [types], \"not\": [types]}, default all " \
-                               "spells; `subtypes` and `colors` narrow it: \"Dragon spells\", \"red spells\") cost " \
+                               "spells; `subtypes`, `colors` and `name` narrow it: \"Dragon spells\", \"red spells\"; " \
+                               "`\"subtypes\": \"chosen\"`: of the type chosen for this permanent, `\"name\": \"chosen\"`: with the " \
+                               "name its source chose) cost " \
                                "`reduce` less or `increase` more generic mana. `from` / `not_from`: only " \
                                "spells cast from (not from) that zone (hand | graveyard | exile | library | outside).",
                   rules: %w[601.2f 118.7a 604.1 601.2a],
@@ -148,14 +167,17 @@ module Enjine
           chars = engine.chars(spell)
           types = chars.types
           return 0 if types.intersect?(not_types) || !(any_of.empty? || types.intersect?(any_of))
-          return 0 if @spec && !@spec.chars_match?(engine, chars)
+
+          ctx = EffectContext.new(permanent.controller, permanent.id, permanent.id, [])
+          return 0 if @spec && !@spec.chars_match?(engine, chars, ctx) # the source's choices: type, name (CR 201.4, 607.2d)
           return 0 unless @zones.match?(engine.cast_origin(spell))
 
-          sign * amount.value(engine, EffectContext.new(permanent.controller, permanent.id, permanent.id, []))
+          sign * amount.value(engine, ctx)
         end
 
         def to_s
           narrow = @spec ? [@spec.colors.map(&:to_s), @spec.subtypes.map { it.to_s.capitalize }] : []
+          narrow << "chosen-type" if @spec&.relations&.[]("chosen_subtype")
           kinds = [not_types.map { "non#{it}" }, narrow, any_of.join(" or ")].flatten.reject(&:empty?).join(" ")
           whose = { "you" => "you cast", "opponent" => "your opponents cast", "any" => "" }[caster]
           "#{[kinds, "spells", whose].reject(&:empty?).join(" ")}#{@zones} cost {#{amount}} " \

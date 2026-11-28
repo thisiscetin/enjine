@@ -36,12 +36,18 @@ module Enjine
     # Accepts an id ("lightning_bolt") or a display name ("Lightning Bolt"). Ids hit an exact
     # lookup; only names pay for slugging (Unicode normalization), so the engine's hot path stays cheap.
     def fetch(ref)
-      @definitions[ref] || @faces[ref] ||
+      @definitions[ref] || @faces[ref] || CardDefinition::FaceDownCards.fetch(ref) ||
         @definitions.fetch(CardDefinition.slug(ref)) { raise KeyError, "unknown card #{ref.inspect}" }
     end
 
-    def [](ref) = @definitions[ref] || @faces[ref] || @definitions[CardDefinition.slug(ref)]
-    def include?(ref) = @definitions.key?(ref) || @faces.key?(ref) || @definitions.key?(CardDefinition.slug(ref))
+    # Face-down characteristics (CardDefinition::FaceDownCards) are known to every catalog without being listed in it.
+    def [](ref) = @definitions[ref] || @faces[ref] || CardDefinition::FaceDownCards.fetch(ref) || @definitions[CardDefinition.slug(ref)]
+
+    def include?(ref)
+      @definitions.key?(ref) || @faces.key?(ref) || CardDefinition::FaceDownCards.id?(ref) ||
+        @definitions.key?(CardDefinition.slug(ref))
+    end
+
     def ids = @definitions.keys
     def size = @definitions.size
     def each(&) = @definitions.each_value(&)

@@ -151,6 +151,24 @@ Rules: CR 715.3a, CR 715.3c, CR 505.4, CR 715.4, CR 704.5s
 }
 ```
 
+## siege
+
+Battle type. As it enters, an opponent of its controller becomes its protector. When the last defense counter is removed from it, its controller exiles it, then may cast it transformed (its back face) without paying its mana cost.
+
+Rules: CR 310.12, CR 310.9, CR 712.10, CR 608.2g
+
+```json
+{
+  "types": [
+    "battle"
+  ],
+  "subtypes": [
+    "siege"
+  ],
+  "defense": 3
+}
+```
+
 ## swamp
 
 Basic land type. A land with this subtype has "{T}: Add {B}."

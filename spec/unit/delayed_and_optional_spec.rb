@@ -21,11 +21,13 @@ RSpec.describe "Delayed triggers, optional effects and results: card data valida
     expect(errors_for([{ "draw" => { "amount" => 1 } }, { "exile" => { "to" => { "result" => 0 } } }])).to eq([])
   end
 
-  it "checks may: needs effects; nested lists see the parent's earlier results (CR 118.12)" do
+  it "checks may: needs effects; nested lists see the parent's earlier results, then their own (CR 118.12, 608.2c)" do
     expect(errors_for([{ "may" => {} }])).to eq(["#{base}[0].may.effects: needs at least one effect"])
     expect(errors_for([{ "may" => { "effects" => [{ "draw" => { "amount" => 1 } }],
-                                    "then" => [{ "exile" => { "to" => { "result" => 0 } } }] } }]))
-      .to eq(["#{base}[0].may.then[0].exile.to.result: must refer to one of the 0 earlier effects"])
+                                    "then" => [{ "exile" => { "to" => { "result" => 0 } } }] } }])).to eq([])
+    expect(errors_for([{ "may" => { "effects" => [{ "draw" => { "amount" => 1 } }],
+                                    "then" => [{ "exile" => { "to" => { "result" => 1 } } }] } }]))
+      .to eq(["#{base}[0].may.then[0].exile.to.result: must refer to one of the 1 earlier effects"])
     expect(errors_for([{ "may" => { "effects" => [{ "draw" => { "amount" => 1 } }], "else" => [] } }]))
       .to eq(["#{base}[0].may: unknown parameter \"else\""])
   end

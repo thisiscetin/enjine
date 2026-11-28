@@ -24,7 +24,7 @@ module Enjine
     # CardDefinition with the id "<card id>/<index>"; a game object whose `card` names a face has that
     # face up (see Engine::Faces).
     module Faces
-      LAYOUTS = %w[transform modal adventure omen prepare meld].freeze
+      LAYOUTS = %w[transform modal adventure omen prepare meld room].freeze
       DOUBLE_FACED = %w[transform modal].freeze
       # Layouts whose faces[1] is a spell the card can be (CR 716.2, 721.2, 723.2).
       SPELL_FACE = { "adventure" => "adventure", "omen" => "omen", "prepare" => nil }.freeze
@@ -68,7 +68,7 @@ module Enjine
       def other_face = faces[1 - face_index]
 
       # "Alfa // Bravo" for a card with faces.
-      def full_name = faces.map(&:name).join(" // ")
+      def full_name = (layout == "room" ? faces[1..2] : faces).map(&:name).join(" // ")
 
       private
 
@@ -86,6 +86,8 @@ module Enjine
           list << {} while list.size < 2
         end
         front, back = list.map { it.transform_keys(&:to_s) }
+        return read_room(card, front, back, errors, token_id) if @layout == "room" # CardDefinition::Rooms
+
         read_card(front, prefixed(errors, "faces[0]"), token_id)
         @faces = [self, CardDefinition.new(back, prefixed(errors, "faces[1]"), face: [self, 1])].freeze
         validate_faces(card, errors)

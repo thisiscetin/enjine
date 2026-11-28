@@ -16,7 +16,9 @@ module Enjine
                   description: "An optional effect. The controller chooses yes or no as it resolves; yes is offered only " \
                                "if every effect in `effects` can be done fully. On yes, `effects` then `then` (\"if you " \
                                "do\") happen; on no, `otherwise` (\"if you don't\"). Nested effects may name the results " \
-                               "of earlier effects of the enclosing list.",
+                               "of earlier effects of the enclosing list ({\"result\": n} with n below this effect's " \
+                               "position) and their own, numbered on from there: `effects` then `then` in one " \
+                               "numbering, `otherwise` in its own (\"if you do, ... the creature sacrificed this way\").",
                   rules: %w[118.12 118.3 608.2d 608.2e],
                   params: { "effects" => "list of effects (the optional part)", "then" => "list of effects",
                             "otherwise" => "list of effects",
@@ -30,7 +32,7 @@ module Enjine
         def self.default_to = "you"
 
         def setup(params, errors, path)
-          @lists = parse_lists(params, errors, path, LISTS)
+          @lists = parse_lists(params, errors, path, LISTS, chain: %w[effects then])
           errors << "#{path}.effects: needs at least one effect" if @lists["effects"].empty?
           raw = Mechanics.fetch_param(params, :chooser)
           @chooser = if raw.nil? || raw == "active_player" then raw

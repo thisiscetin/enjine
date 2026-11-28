@@ -478,6 +478,20 @@ Rules: CR 702.192a, CR 707.12, CR 603.7, CR 608.2g
 }
 ```
 
+## persist
+
+When this permanent dies, if it had no -1/-1 counters on it, return it to the battlefield under its owner's control with a -1/-1 counter on it.
+
+Rules: CR 702.79a, CR 603.10a, CR 603.4
+
+```json
+{
+  "keywords": [
+    "persist"
+  ]
+}
+```
+
 ## phasing
 
 During each of its controller's untap steps, before they untap, it phases out if it's phased in (and phases in if it phased out under their control).
@@ -530,6 +544,20 @@ Rules: CR 702.136a, CR 702.136b, CR 614.12
 {
   "keywords": [
     "riot"
+  ]
+}
+```
+
+## split_second
+
+As long as this spell is on the stack, players can't cast spells or activate abilities that aren't mana abilities (mana abilities, special actions and triggered abilities still work).
+
+Rules: CR 702.61a, CR 702.61b, CR 702.61c
+
+```json
+{
+  "keywords": [
+    "split second"
   ]
 }
 ```
@@ -628,6 +656,20 @@ Rules: CR 702.19b, CR 702.19e
 {
   "keywords": [
     "trample"
+  ]
+}
+```
+
+## undying
+
+When this permanent dies, if it had no +1/+1 counters on it, return it to the battlefield under its owner's control with a +1/+1 counter on it.
+
+Rules: CR 702.93a, CR 603.10a, CR 603.4
+
+```json
+{
+  "keywords": [
+    "undying"
   ]
 }
 ```

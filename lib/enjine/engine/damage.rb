@@ -89,6 +89,7 @@ module Enjine
             obj.deathtouched = true if has[:deathtouch] # CR 702.2b
           end
           remove_counters!(obj, "loyalty", amount) if defn.planeswalker? # CR 120.3c
+          remove_counters!(obj, "defense", amount) if defn.type?(:battle) # CR 120.3h, 310.6
         end
         lifelink!(source, amount) if lifelink && has[:lifelink]
         amount
@@ -103,12 +104,14 @@ module Enjine
       end
 
       # CR 120.6, 120.4a: damage that would be lethal to the creature `id` from `source`, counting damage already
-      # marked on it (1 if the source has deathtouch, CR 702.2c); a planeswalker's is its loyalty (CR 120.10).
+      # marked on it (1 if the source has deathtouch, CR 702.2c); a planeswalker's is its loyalty, a battle's its defense
+      # (CR 120.10).
       # Nil for a player or an object that is neither.
       def lethal_damage(source, id)
         obj = state.objects[id]
         return nil unless obj && state.battlefield.include?(id)
         return loyalty(obj) if !chars(obj).creature? && chars(obj).planeswalker?
+        return obj.counters.fetch("defense", 0) if !chars(obj).creature? && chars(obj).type?(:battle) # CR 310.4c
         return nil unless chars(obj).creature?
 
         lethal = [toughness(obj) - obj.damage, 0].max
@@ -127,6 +130,16 @@ module Enjine
         yield
       ensure
         @damage_batch = nil
+      end
+
+      # The events of the block are one event batch for "one or more" triggers (CR 603.2c; Engine::Triggering#event_batch),
+      # unless an outer block already named one.
+      def in_batch(name)
+        outer = @event_batch
+        @event_batch ||= name
+        yield
+      ensure
+        @event_batch = outer
       end
 
       # Whether a damage source has `keyword` (deathtouch, lifelink, wither): a card (a permanent or a spell) as it
@@ -202,6 +215,28 @@ module Enjine
         before = player_counters(index).fetch(kind, 0)
         kind == "poison" ? pl.poison += amount : (pl.counters ||= {})[kind] = before + amount
         emit Events::PlayerCountersChanged.new(player: pl.name, counter: kind, from: before, to: before + amount)
+      end
+
+      # Removes up to `amount` counters of `kind` from a player (CR 122.1, 122.8). Returns how many came off.
+      def remove_player_counters!(index, kind, amount)
+        pl = player(index)
+        before = player_counters(index).fetch(kind, 0)
+        after = [before - amount, 0].max
+        return 0 if after == before
+
+        if kind == "poison" then pl.poison = after
+        elsif after.zero? then pl.counters.delete(kind)
+        else pl.counters[kind] = after
+        end
+        emit Events::PlayerCountersChanged.new(player: pl.name, counter: kind, from: before, to: after)
+        before - after
+      end
+
+      # CR 122.1: every counter of `kind` (of every kind, if nil) on a player.
+      def remove_all_player_counters!(index, kind = nil)
+        (kind ? [kind] : player_counters(index).keys.sort).each do
+          remove_player_counters!(index, it, player_counters(index).fetch(it, 0))
+        end
       end
 
       def remove_counters!(object, kind, amount)

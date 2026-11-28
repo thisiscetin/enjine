@@ -21,9 +21,11 @@ module Enjine
     #   {"layout": "adventure"}                         "a card that has an Adventure": the card's layout (CR 716,
     #                                                   CardDefinition::Faces)
     #   {"subtypes": "chosen"}                          of the creature type chosen for the source (CR 607.2d)
+    #   {"name": "chosen"}                              with the card name chosen for the source or the resolving
+    #                                                   spell (choose_card_name, CR 201.4, 607.2d)
     #   {"same_name_as": filter}                        the same name as a permanent the filter matches, e.g. "a
     #                                                   legendary permanent you control" (CR 201.2a)
-    # The last two read the context (an EffectContext): the source's choices and its controller.
+    # The chosen ones and same_name_as read the context (an EffectContext): the source's choices and its controller.
     class CardSpec
       KEYS = %w[types not_types subtypes supertypes name any_of permanent mana_value colors color_count keywords
                 not_subtypes power toughness layout same_name_as].freeze
@@ -43,8 +45,9 @@ module Enjine
         Mechanics.check_keys(data, KEYS, errors, path)
         errors << "#{path}: needs at least one of #{KEYS.join(", ")}" if data.empty?
         chosen = data["subtypes"] == "chosen"
+        named = data["name"] == "chosen"
         new(types: names(data, "types", :type, errors, path), supertypes: names(data, "supertypes", :supertype, errors, path),
-            subtypes: chosen ? [] : subtype_list(data, errors, path), name: name_param(data, errors, path),
+            subtypes: chosen ? [] : subtype_list(data, errors, path), name: named ? nil : name_param(data, errors, path),
             any_of: alternatives(data, errors, path), not_types: names(data, "not_types", :type, errors, path),
             permanent: permanent_param(data, errors, path), mana_value: bounds_param(data, "mana_value", errors, path),
             colors: colors_param(data, errors, path), color_count: bounds_param(data, "color_count", errors, path),
@@ -65,7 +68,8 @@ module Enjine
       def self.relations_param(data, chosen, errors, path)
         raw = data["same_name_as"]
         same = raw && Mechanics.build_entry(:filter, raw, errors, "#{path}.same_name_as")
-        { "chosen_subtype" => (true if chosen), "same_name_as" => same }.compact
+        { "chosen_subtype" => (true if chosen), "chosen_name" => (true if data["name"] == "chosen"),
+          "same_name_as" => same }.compact
       end
 
       def self.colors_param(data, errors, path)
@@ -202,6 +206,7 @@ module Enjine
 
         text = (type_words.map { it.to_s.tr("_", " ") } + ["card"]).join(" ") + quality_words
         text += " with the same name as a #{relations["same_name_as"]}" if relations["same_name_as"]
+        text += " with the chosen name" if relations["chosen_name"]
         bounds = { "mana value" => mana_value, "number of colors" => color_count, "power" => stats["power"] || {},
                    "toughness" => stats["toughness"] || {} }.reject { |_, b| b.empty? }
         return text if bounds.empty?
@@ -235,6 +240,10 @@ module Enjine
         if relations["chosen_subtype"]
           chosen = Filters.chosen_memory(engine, ctx.source, ctx)["chosen_type"]
           return false unless chosen && chars.subtypes.include?(chosen.to_sym)
+        end
+        if relations["chosen_name"] # "a card with the chosen name" (CR 201.4): nothing matches before a name is chosen
+          named = Filters.chosen_memory(engine, ctx.source, ctx)["chosen_name"]
+          return false unless named && chars.name == named
         end
         filter = relations["same_name_as"] or return true
         !chars.name.to_s.empty? && engine.state.battlefield.any? do

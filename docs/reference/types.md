@@ -18,6 +18,26 @@ Rules: CR 301.1
 }
 ```
 
+## battle
+
+A permanent with a printed `defense`: it enters with that many defense counters. Each battle has a protector (a Siege's is an opponent of its controller, chosen as it enters); the protector's opponents can attack it and the protector can block for it. Damage dealt to it removes defense counters; with none left it's put into its owner's graveyard (unless it's the source of a triggered ability still waiting or on the stack). Every battle needs a battle type: siege (CR 205.3q).
+
+Rules: CR 310.1, CR 310.4, CR 310.5, CR 310.6, CR 310.7, CR 310.9, CR 120.3h, CR 704.5v, CR 205.3q
+
+```json
+{
+  "name": "Example Invasion",
+  "mana_cost": "{2}{R}",
+  "types": [
+    "battle"
+  ],
+  "subtypes": [
+    "siege"
+  ],
+  "defense": 4
+}
+```
+
 ## creature
 
 A permanent with power and toughness that can attack and block. Cast at sorcery speed. It can't attack or use {T} abilities unless controlled continuously since its controller's most recent turn began (summoning sickness).

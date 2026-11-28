@@ -289,6 +289,22 @@ Rules: CR 603.2, CR 601.2i, CR 113.6, CR 202.3e, CR 201.4, CR 607.2, CR 115.1, C
 }
 ```
 
+## commits_crime
+
+A player commits a crime: they cast a spell, activate an ability or put a triggered ability on the stack that targets an opponent, a permanent, spell or ability an opponent controls, or a card in an opponent's graveyard (once per spell or ability). `controller`: you (default) | opponent | any. {"triggering": "object"} is that spell or ability. Amount `{"crimes_this_turn": player}` counts them.
+
+Rules: CR 700.13, CR 603.2
+
+| Parameter | Description |
+| --- | --- |
+| `controller` | you | opponent | any |
+
+```json
+{
+  "commits_crime": {}
+}
+```
+
 ## counters_placed
 
 One or more counters (only `counter`, if given) are put on the subject, including the counters it enters the battlefield with. Triggers once per event, however many counters. `nth` (needs `counter`): only when the Nth such counter is put on it (the event that takes it from fewer than N to N or more).
@@ -332,14 +348,15 @@ Rules: CR 702.122b, CR 603.2
 
 ## cycles
 
-A player (`controller`: you (default) | opponent | any) cycles a card (activates its cycling or typecycling ability; optional `card` filter).
+A player (`controller`: you (default) | opponent | any) cycles a card (activates its cycling or typecycling ability; optional `card` filter). `self: true`: "when you cycle this card", an ability of the card with `zone: "graveyard"` (where the cycled card is); its X is the cycling ability's X.
 
-Rules: CR 702.29a, CR 702.29e
+Rules: CR 702.29a, CR 702.29c, CR 702.29e, CR 113.6k
 
 | Parameter | Description |
 | --- | --- |
 | `controller` | you | opponent | any |
 | `card` | card filter |
+| `self` | true |
 
 ```json
 {
@@ -351,7 +368,7 @@ Rules: CR 702.29a, CR 702.29e
 
 ## deals_damage
 
-The subject deals damage. `combat: true` only counts combat damage, `noncombat: true` only noncombat damage; `to`: player | opponent (of the source's controller) | creature | any (default). Triggers once per damage event (each combat damage step is one, so double strike can trigger twice).
+The subject deals damage. `combat: true` only counts combat damage, `noncombat: true` only noncombat damage; `to`: player | opponent | you (players, relative to the source's controller) | creature | planeswalker | battle | permanent | any (default), or a list of them ("a player or planeswalker"). Triggers once per damage event (each combat damage step is one, so double strike can trigger twice). `batched: true`: "one or more ... deal damage", once per event batch (a combat damage step); then {"triggering": "objects"} are the sources that dealt it and {"triggering": "amount"} the number of damage events.
 
 Rules: CR 510.2, CR 603.2, CR 603.2c, CR 120.2a, CR 120.2b, CR 120.3
 
@@ -360,7 +377,8 @@ Rules: CR 510.2, CR 603.2, CR 603.2c, CR 120.2a, CR 120.2b, CR 120.3
 | `subject` | "self" (default) or {"each": filter, ...} |
 | `combat` | true | false |
 | `noncombat` | true | false |
-| `to` | player | opponent | creature | any |
+| `to` | player | opponent | you | creature | planeswalker | battle | permanent | any, or a list of them |
+| `batched` | true | false |
 
 ```json
 {
@@ -395,13 +413,14 @@ Rules: CR 120.3, CR 603.2, CR 603.2c, CR 120.2a, CR 120.2b
 
 ## dies
 
-The subject is put into a graveyard from the battlefield. Looks back in time (CR 603.10a).
+The subject is put into a graveyard from the battlefield. Looks back in time (CR 603.10a). `batched: true`: "whenever one or more ... die", once per event batch (creatures dying at the same time, e.g. to lethal combat damage); {"triggering": "objects"} are the cards put into graveyards and {"triggering": "amount"} how many.
 
-Rules: CR 603.6c, CR 603.10a, CR 700.4
+Rules: CR 603.6c, CR 603.10a, CR 700.4, CR 603.2c
 
 | Parameter | Description |
 | --- | --- |
 | `subject` | "self" (default) or {"each": filter, ...} |
+| `batched` | true | false |
 
 ```json
 {
@@ -468,15 +487,16 @@ Rules: CR 701.66b
 
 ## enters
 
-The subject enters the battlefield. `untapped: true`: only if it entered untapped. `from`: only if it entered from that zone ("enters from exile").
+The subject enters the battlefield. `untapped: true`: only if it entered untapped. `from`: only if it entered from that zone ("enters from exile"). `batched: true`: "whenever one or more ... enter", once per event batch; {"triggering": "objects"} are the permanents that entered and {"triggering": "amount"} how many.
 
-Rules: CR 603.6a, CR 603.2, CR 614.12
+Rules: CR 603.6a, CR 603.2, CR 603.2c, CR 614.12
 
 | Parameter | Description |
 | --- | --- |
 | `subject` | "self" (default) or {"each": filter, "controller": you|opponent|any, "other": true} |
 | `untapped` | true | false |
 | `from` | hand | graveyard | exile | library | stack | outside |
+| `batched` | true | false |
 
 ```json
 {
@@ -799,6 +819,47 @@ Rules: CR 701.27f, CR 603.2
 ```json
 {
   "transforms": {}
+}
+```
+
+## turned_face_up
+
+The subject (default this permanent) is turned face up. On a card with morph, disguise or that can be manifested, it's "when this creature is turned face up".
+
+Rules: CR 708.8, CR 702.37e, CR 702.168d, CR 603.2
+
+| Parameter | Description |
+| --- | --- |
+| `subject` | "self" (default) or {"each": filter, "controller": ...} |
+
+```json
+{
+  "turned_face_up": {}
+}
+```
+
+## unlocks_door
+
+A Room permanent (the subject, default this one) gets an unlocked designation. On a Room's door, `{}` means "when you unlock this door". `door`: left | right | any; `fully: true`: only when it now has both doors unlocked ("whenever you fully unlock a Room").
+
+Rules: CR 709.5h, CR 709.5i, CR 709.5j, CR 603.2
+
+| Parameter | Description |
+| --- | --- |
+| `door` | left | right | any (set on a door's own trigger) |
+| `fully` | true |
+| `subject` | "self" (default) or {"each": filter, "controller": ...} |
+
+```json
+{
+  "unlocks_door": {
+    "door": "any",
+    "fully": true,
+    "subject": {
+      "each": "permanent",
+      "controller": "you"
+    }
+  }
 }
 ```
 

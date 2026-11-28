@@ -28,7 +28,7 @@ require_relative "enjine/frames"
 require_relative "enjine/decisions"
 Dir[File.join(__dir__, "enjine/decisions/*.rb")].each { |f| require f }
 require_relative "enjine/actions"
-%w[pass play_land activate_mana_ability cast special_action].each { |f| require_relative "enjine/actions/#{f}" }
+%w[pass play_land activate_mana_ability cast special_action unlock turn_face_up].each { |f| require_relative "enjine/actions/#{f}" }
 require_relative "enjine/replacements"
 require_relative "enjine/engine"
 Dir[File.join(__dir__, "enjine/engine/**/*.rb")].each { |f| require f }

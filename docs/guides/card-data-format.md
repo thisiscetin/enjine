@@ -52,10 +52,11 @@ Tips:
 | `mana_cost` | castable cards | string | `"{2}{W}{W}"`. Symbols: `{N}` generic, `{W}{U}{B}{R}{G}`, `{C}`, `{X}` (announced while casting; use the amount `"x"` in effects, see 4.7). Lands must **not** have one. A card without one can't be cast. Two-color hybrid `{R/G}` is supported (paid with either color, CR 107.4e), and so is monocolored hybrid `{2/B}` (one black mana or two mana of any type; mana value 2, CR 202.3f); Phyrexian and `{S}` are not yet. |
 | `supertypes` | no | list | `basic` (exempt from the 4-copy rule). `legendary` and `snow`: not yet. |
 | `subtypes` | no | list | Lowercase, spaces become `_`: `["human", "wizard"]`. Free-form labels, except the basic land types `plains island swamp mountain forest`, which grant their mana ability automatically (CR 305.6) and are valid only on lands. |
-| `keywords` | no | list | Keyword abilities, lowercase: see `SUPPORTED.md` → *Keyword abilities*. |
+| `keywords` | no | list | Keyword abilities, lowercase: see `SUPPORTED.md` → *Keyword abilities*. A keyword listed twice is one instance (redundant, CR 702.2f), except where each instance triggers separately: `cascade`, `storm`, `extort` and `increment` get one ability per listing ("cascade, cascade" is `["cascade", "cascade"]`, CR 702.85c). |
 | `power`, `toughness` | creatures | integer or amount | Required for creatures; not allowed on other types. A `*` defined by the card ("power is equal to the number of …", CR 604.3) is an amount, see 4.10. |
 | `colors` | no | list | `W U B R G`. Only for a color indicator or a token's colors (CR 202.2e, 111.3); otherwise colors come from the mana cost. |
 | `loyalty` | planeswalkers | integer | Starting loyalty. |
+| `defense` | battles | integer | Printed defense: it enters with that many defense counters (CR 310.4). A battle needs the subtype `siege` (its protector is an opponent; defeated, it exiles itself and its controller may cast its back face free, CR 310.12), so write a Siege as a `transform` card with the battle on the front face. |
 | `abilities` | no | list | Section 4. |
 | `rules_text` | no | string | Informational only (shown in the CLI). Never interpreted. |
 | `deck_limit` | no | `"any"` or integer | CR 100.2a exception: "A deck can have any number of cards named ~" is `"deck_limit": "any"`; "up to seven cards named ~" is `7`. Without it a deck may hold four (basic lands: any number). |
@@ -275,7 +276,7 @@ whose qualities must all match:
 | `{ "target": 0 }` | "target …" (the 1st declared target; `1` is the 2nd, …) |
 | `"you"` | "you" ("you gain 3 life", "draw a card") |
 | `"each_opponent"` | "each opponent" |
-| `"self"` | "this creature" / the card's own name, on a permanent; "this card" for an ability that works from a graveyard, exile or a hand ("{4}{B}: Return this card from your graveyard to the battlefield tapped") |
+| `"self"` | "this creature" / the card's own name, on a permanent; "this card" for an ability that works from a graveyard, exile or a hand ("{4}{B}: Return this card from your graveyard to the battlefield tapped"); in its own leaves-the-battlefield trigger, the card in the public zone it went to while it's still there ("When this dies, exile it", CR 400.7e). Amounts (`{ "power": "self" }`, `{ "counters": { "of": "self" } }`) still read the permanent as it last existed |
 | `"attached"` | "equipped creature" / "enchanted creature", on an Equipment or Aura |
 | `{ "each": "creature", "controller": "you" }` | "creatures you control", "each creature you control" |
 | `{ "each": "creature", "controller": "opponent" }` | "creatures your opponents control" |
@@ -288,8 +289,14 @@ whose qualities must all match:
 Every effect records the objects it moved or created (the new object ids, CR 400.7).
 A later effect of the same effect list names them with `{ "result": n }`, where `n`
 is the earlier effect's index (inside a mode: the index within that mode's list).
-Lists nested in a `may` or a `delayed_trigger` see the results of their parent's
-earlier effects.
+Lists nested in an effect (`may`, `pay`, `choose_cards`, `reflexive_trigger`,
+`delayed_trigger`) see the results of their parent's earlier effects, and number their own
+after them: in a list nested in effect `i`, `{ "result": n }` (and `{ "this_way": n }`) with
+`n < i` is the parent's effect `n`, and `i + j` is the nested list's own effect `j`. A `may`'s
+`effects` and `then` share one numbering (`then` follows `effects`); `otherwise` starts again
+at `i`. ("You may sacrifice a creature. If you do, you gain life equal to its power", as effect 0:
+`{ "may": { "effects": [{ "sacrifice_choice": { "filter": "creature" } }], "then": [{ "gain_life":
+{ "amount": { "power": { "result": 0 } } } }] } }`.) Only `repeat` restarts at 0 for each pass.
 
 ```json
 [{ "exile": { "to": { "target": 0 } } },
@@ -325,7 +332,7 @@ is a flicker ("exile …, then return it to the battlefield under its owner's co
 | a nonland card name chosen as it enters / spells or sources with that name | ability `{ "choose_card_name": { "not": ["land"] } }` / `"name": "chosen"` on `cast` or `activates_ability` |
 | triggers at most once per turn | `"limit": "once_each_turn"` on the `triggered` ability |
 | a triggered ability that works from the graveyard ("return this card from your graveyard") | `"zone": "graveyard"` on the `triggered` ability (CR 113.6k) |
-| "that creature", "that player", "that many" | selectors `{ "triggering": "object" }`, `{ "triggering": "player" }`, amount `{ "triggering": "amount" }` |
+| "that creature", "that player", "that many" | selectors `{ "triggering": "object" }`, `{ "triggering": "player" }`, amount `{ "triggering": "amount" }`. A permanent that left the battlefield is read as it last existed by amounts: "the +1/+1 counters it had" is `{ "counters": { "of": { "triggering": "object" }, "kind": "+1/+1" } }`, and `power`, `toughness` and `mana_value` likewise (CR 603.10a) |
 | the triggering spell is a Saga | condition `{ "triggering": { "spell": { "subtypes": ["saga"] } } }` |
 | the targeted creature dying later this turn | `{ "delayed_trigger": { "when": { "dies": { "subject": "watched" } }, "watch": { "target": 0 }, "this_turn": true, "effects": [...] } }`; effects name the watched objects with the selector `"watched"` |
 | each of your creatures entering for the rest of the turn | `delayed_trigger` with `"this_turn": true` (it triggers each time until the turn ends) |
@@ -925,6 +932,27 @@ until the permanent stops being prepared; casting it unprepares the permanent.
 Not yet: casting another face from outside the hand, casting a card transformed, the mana
 value of a back face (CR 202.3b), day/night (CR 702.145), meld (CR 713), convert
 (CR 701.28) and an "as this enters" choice on a modal card's land face.
+
+### 4.17a Rooms, Cases, Infinity cards, face-down permanents, ninjutsu and crimes
+
+| Oracle words | Data |
+| --- | --- |
+| A Room (two doors, CR 709.5) | `"layout": "room"`, `"faces": [left door, right door]`; each door has its own `name`, `mana_cost` and `abilities` and the same `types`/`subtypes` (`["enchantment"]`, `["room"]`). Off the battlefield the card has both halves combined (mana value of both); it's cast as one door (`{type: "cast", object, face: 1 \| 2}`); the permanent has only its unlocked doors (both locked: no name, mana value 0). Unlocking is the special action `{type: "unlock", object, door: "left" \| "right"}` |
+| "When you unlock this door" | `{ "triggered": { "when": { "unlocks_door": {} }, … } }` on that door (it also triggers when that door is cast) |
+| "Whenever you fully unlock a Room" | `"when": { "unlocks_door": { "door": "any", "fully": true, "subject": { "each": "permanent", "controller": "you" } } }` |
+| "To solve — [condition]" (CR 720.3a) | `{ "to_solve": condition }`, e.g. `{ "to_solve": { "amount": { "life_gained_this_turn": "you" }, "at_least": 5 } }` |
+| "Solved — [ability]" (CR 702.169) | `{ "solved": { "activated" \| "triggered" \| "static": { … } } }`; condition `{ "solved": true }` |
+| "Harness [this]" / "∞ — [ability]" (CR 701.64, 702.186) | effect `{ "harness": {} }`; `{ "infinity": { "triggered" \| "activated" \| "static": { … } } }`; condition `{ "harnessed": true }` |
+| "Exile a creature you control" (a cost) | `{ "exile_permanent": { "filter": "creature" } }` (`other`, `count`) |
+| "Ninjutsu {1}{U}" (CR 702.49) | `{ "ninjutsu": { "cost": "{1}{U}" } }`: activated from the hand once blockers are declared; the card enters tapped and attacking (not cast) |
+| "Manifest the top card of your library" / "cloak" / "manifest dread" | effects `{ "manifest": {} }`, `{ "cloak": {} }` (`amount`, `to`: players), `{ "manifest_dread": {} }`; the new permanents are the effect's results (`{ "result": n }`) |
+| "Morph {cost}" / "Disguise {cost}" | `{ "morph": { "cost": "{1}{G}" } }` / `{ "disguise": { "cost": "{4}{G}" } }`: cast face down for {3} (`via: "alt:<ref>"`), turned face up for `cost` |
+| "When this creature is turned face up" | `"when": { "turned_face_up": {} }`; special action `{type: "turn_face_up", object, via: "mana_cost" \| "morph" \| "disguise"}` |
+| "if a permanent entered the battlefield face down under your control this turn" / "you turned a permanent face up this turn" | amounts `{ "entered_face_down_this_turn": "you" }`, `{ "turned_face_up_this_turn": "you" }` |
+| "Whenever you commit a crime" (CR 700.13) | `"when": { "commits_crime": {} }` (`controller`: you \| opponent \| any); amount `{ "crimes_this_turn": "you" }` |
+
+Not yet: effects that unlock or lock a door, an "as this is turned face up" replacement (CR 708.11), megamorph's
+counter, morph costs other than mana, and turning a face-down permanent face up with an effect.
 
 ### 4.18 Mana spent to cast a spell (converge)
 
@@ -1582,7 +1610,10 @@ It must be a legendary creature, Vehicle, or Spacecraft with power and toughness
 (CR 903.3). There is one copy of each card, except basic lands (CR 903.5b), and
 every card's **color identity** must be inside the commander's (CR 903.5c). A card's
 identity is the colors of every mana symbol in its data (mana cost, ability costs,
-produced mana, kicker, and so on), plus `colors`, the colors of its basic land types
+produced mana, kicker, and so on; a mana choice among some colors, `"color": "any_one",
+"colors": ["B", "G"]`, counts as "{B} or {G}", while mana of the chosen color counts nothing:
+`"color": "chosen"` and a fixed color gated by `"only_if": { "chosen": "<that color>" }`, as on a
+Thriving land), plus `colors`, the colors of its basic land types
 (CR 903.5d) and those of all its faces (CR 903.4d–e). `rules_text` is never read
 (reminder text doesn't count, CR 903.4c). For the odd card whose identity the data
 can't show, a card or face may state it with `"color_identity"`.

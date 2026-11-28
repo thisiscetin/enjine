@@ -186,13 +186,16 @@ module Enjine
           end.freeze
         end
 
-        # Effect i may name the results of effects 0...i ({"result": n}). A nested list (`results_count`
-        # given) sees only its parent's earlier results.
-        def self.parse_effects(params, errors, path, targets_count, key: :effects, results_count: nil)
+        # Effect i may name the results of effects 0...i ({"result": n}, {"this_way": n}). A nested list
+        # (`results_count` given: how many earlier effects of the enclosing list it may name) continues that
+        # numbering: n below `results_count` is the enclosing list's effect n, `results_count + offset + j` the
+        # nested list's own effect j (CR 608.2c). `offset`: effects of a list that runs just before this one in
+        # the same numbering (a "may"'s `then` follows its `effects`).
+        def self.parse_effects(params, errors, path, targets_count, key: :effects, results_count: nil, offset: 0)
           list = Mechanics.list_param(params, key, errors, path)
           list.each_with_index.filter_map do |entry, i|
-            Mechanics.build_entry(:effect, entry, errors, "#{path}.#{key}[#{i}]", targets_count: targets_count,
-                                                                                  results_count: results_count || i)
+            Mechanics.build_entry(:effect, entry, errors, "#{path}.#{key}[#{i}]",
+                                  targets_count: targets_count, results_count: results_count ? results_count + offset + i : i)
           end.freeze
         end
 
@@ -320,7 +323,7 @@ module Enjine
                             "zone" => "\"exile\" | \"graveyard\" | \"hand\" (CR 113.6b; default: the battlefield, or the " \
                                       "zone a cost moves the card from)",
                             "cost_reduction" => "{\"amount\": amount, \"if\": condition}: \"this ability costs {N} less " \
-                                                "to activate\" (CR 601.2f, 602.2b)" },
+                                                "to activate\" (CR 601.2f, 602.2b); the amount may name its targets ({\"target\": 0})" },
                   example: { "activated" => { "cost" => ["tap"], "targets" => ["any_target"],
                                               "effects" => [{ "deal_damage" => { "amount" => 1, "to" => { "target" => 0 } } }] } }
 
@@ -332,7 +335,9 @@ module Enjine
           costs = parse_costs(params, errors, path)
           errors << "#{path}.cost: must be a non-empty list" if costs.empty? && errors.none? { it.start_with?("#{path}.cost") }
           raw = Mechanics.fetch_param(params, :cost_reduction)
-          reduction = raw && Reduction.build(raw, errors, "#{path}.cost_reduction")
+          targets = Mechanics.fetch_param(params, :targets)
+          reduction = raw && Reduction.build(raw, errors, "#{path}.cost_reduction",
+                                             targets_count: targets.is_a?(Array) ? targets.size : 0) # CR 601.2f
           check_cost_zones(costs, errors, path)
           zone = parse_zone(params, costs, errors, path)
           body = parse_body(params, errors, path)

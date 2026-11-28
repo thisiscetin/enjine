@@ -287,6 +287,7 @@ module Enjine
         when "sba_lethal_damage" then "#{what} dies (lethal damage)"
         when "sba_toughness" then "#{what} dies (0 toughness)"
         when "sba_loyalty" then "#{what} is put into the graveyard (0 loyalty)"
+        when "sba_defense" then "#{what} is put into the graveyard (0 defense)"
         when "countered" then "#{what} is countered"
         when "commander" then "#{ev["owner"]} puts #{what} into the command zone"
         when "mulligan_bottom" then "#{ev["owner"]} puts #{what} on the bottom of their library (mulligan)"

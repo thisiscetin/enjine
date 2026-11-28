@@ -14,7 +14,11 @@ module Enjine
     #   {"target": 0}                               the first chosen target
     #   "self"                                      the source permanent, or the source card while it's still in
     #                                               the graveyard, hand or exile ("return this card from your
-    #                                               graveyard", CR 113.6m; it's a new object once it moves, CR 400.7)
+    #                                               graveyard", CR 113.6m; it's a new object once it moves, CR 400.7).
+    #                                               In a leaves-the-battlefield trigger of the source itself ("when
+    #                                               this dies, exile it"), the new object it became in the public zone
+    #                                               it went to, while it's still there (CR 400.7e, 603.10a). Amounts
+    #                                               read a source that has left as it last existed (Amount.refs).
     #   "you"                                       the controller
     #   "each_opponent"                             every opponent
     #   "attached"                                  what the source is attached to ("enchanted creature", CR 303.4m)
@@ -25,6 +29,8 @@ module Enjine
     #                                               one that has left the battlefield as it last existed (CR 608.2h)
     #   {"triggering": "object" | "player"}        what the trigger event was about ("that creature",
     #                                               "that player", CR 603.2); see Triggers.event_facts
+    #   {"triggering": "objects"}                   a `batched` trigger's objects, one per occurrence in the batch
+    #                                               ("those creatures", CR 603.2c)
     #   {"triggering": "targets"}                   the targets of the spell a cast trigger saw that matched its
     #                                               `targets` filter ("those creatures", CR 601.2c)
     #   {"triggering": "ability"}                   the activated or triggered ability on the stack the trigger
@@ -39,9 +45,11 @@ module Enjine
     #                                               on the battlefield; the source itself for an ability it has printed
     class Selector
       CONTROLLERS = %w[you opponent any].freeze
-      TRIGGERING = %w[object player targets ability].freeze
+      TRIGGERING = %w[object objects player targets ability].freeze
       # Where "self" finds its source (CR 113.6m); a source that changed zones is a new object (CR 400.7).
       SELF_ZONES = %i[battlefield graveyard exile hand].freeze
+      # Where a leaves-the-battlefield trigger can still find the object its source became (CR 400.7e).
+      PUBLIC_ZONES = %w[battlefield graveyard exile stack command].freeze
 
       attr_reader :kind, :value, :controller
 
@@ -134,12 +142,14 @@ module Enjine
         end
       end
 
-      # Resolves to a list of references (object ids / "player:<name>") at resolution time.
-      def resolve(engine, ctx)
+      # Resolves to a list of references (object ids / "player:<name>") at resolution time. `follow: false`: "self"
+      # never names the new object a source that left the battlefield became (an amount reads it as it last
+      # existed instead, CR 608.2h).
+      def resolve(engine, ctx, follow: true)
         case kind
         when :target then Array(ctx.targets[value]).compact # a counted target's slot holds a list (CR 601.2c)
         when :result then results(engine, ctx)
-        when :self then SELF_ZONES.include?(engine.state.objects[ctx.source]&.zone) ? [ctx.source] : []
+        when :self then own(engine, ctx, follow)
         when :attached then attached(engine, ctx)
         when :triggering then triggering(engine, ctx)
         when :watched, :gift_recipient then remembered(engine, ctx)
@@ -154,7 +164,7 @@ module Enjine
       end
 
       # What the resolving triggered ability remembers (the event facts, watched objects).
-      def self.memory(engine, ctx) = ctx.memory || engine.state.objects[ctx.object]&.memory || {}
+      def self.memory(engine, ctx) = ctx.memory || engine.find_object(ctx.object)&.memory || {}
 
       # What a delayed trigger watches; the opponent chosen for a gift, kept by the spell or the permanent it
       # became (CR 702.174b).
@@ -165,6 +175,17 @@ module Enjine
       end
 
       private
+
+      # CR 400.7e: an ability that triggered on its source leaving the battlefield can find the new object it became
+      # in the public zone it moved to ("source_moved_to", Engine::Triggering#queue_trigger), if it's still there.
+      def own(engine, ctx, follow)
+        return [ctx.source] if SELF_ZONES.include?(engine.state.objects[ctx.source]&.zone)
+        return [] unless follow
+
+        moved = Selector.memory(engine, ctx)["source_moved_to"]
+        obj = moved && engine.state.objects[moved]
+        obj && PUBLIC_ZONES.include?(obj.zone.to_s) && !obj.memory["face_down"] ? [moved] : []
+      end
 
       def results(engine, ctx)
         found = Array(ctx.results&.[](value))
@@ -183,21 +204,21 @@ module Enjine
       end
 
       def controllers(engine, ctx)
-        Array(value&.resolve(engine, ctx)).filter_map do |ref|
+        Array(value&.resolve(engine, ctx, follow: false)).filter_map do |ref|
           obj = engine.state.objects[ref]
           controller = if obj && %i[battlefield
                                     stack].include?(obj.zone)
                          obj.controller
                        else
                          engine.resolving_last_known(ref)&.fetch("controller") ||
-                           engine.state.objects[ctx.object]&.memory&.dig(Linked::LKI, ref) || obj&.controller
+                           engine.find_object(ctx.object)&.memory&.dig(Linked::LKI, ref) || obj&.controller
                        end
           controller && Filters.player_ref(engine, controller)
         end.uniq
       end
 
       def granter(engine, ctx)
-        id = engine.state.objects[ctx.object]&.memory&.[]("granter") || ctx.source
+        id = engine.find_object(ctx.object)&.memory&.[]("granter") || ctx.source
         engine.state.battlefield.include?(id) ? [id] : []
       end
 

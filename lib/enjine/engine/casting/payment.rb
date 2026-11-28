@@ -10,7 +10,8 @@ module Enjine
     # sources tapped for it ("tapped"), so an unfinished payment can be rewound (CR 734.1). Once a
     # mana ability with a cost other than {T} has been activated (a Treasure's sacrifice), the payment
     # is "irreversible": it can't be cancelled any more, and only choices that keep the rest payable
-    # are offered, so the player can't get stuck.
+    # are offered. Should it still have no choice left, it may be cancelled after all (#stuck?), keeping
+    # the mana abilities activated (#refund_payment!).
     module Payment
       # The payment in progress: the top frame (a cast or a pay frame while a casting decision is pending).
       def payment = state.frames.last
@@ -120,6 +121,7 @@ module Enjine
         frame["remaining"] = after_paying(frame["remaining"], slot)
         (frame["spent"] ||= []) << type # what was spent matters later (sunburst, CR 702.44a; 609.4b: its real type)
         (frame["spent_from"] ||= []) << entry["from"] if entry&.key?("from") # "if mana from a Treasure was spent"
+        (frame["refund"] ||= []) << { "mana" => type, (restricted ? "restricted" : "source") => entry }.compact # #refund_payment!
         emit Events::ManaPaid.new(player: name(frame["player"]), mana: "{#{type}}", object: frame["object"])
         ask!(nil)
       end
@@ -178,7 +180,9 @@ module Enjine
       end
 
       # A mana ability whose costs include more than {T} and mana (a sacrifice, life, a discard) can't be undone.
-      def irreversible_mana_ability?(id, ref) = chars(id).ability(ref).costs.any? { !it.is_a?(Mechanics::Costs::Tap) && !it.mana? }
+      def irreversible_mana_ability?(id, ref)
+        chars(id).ability(ref).costs.any? { !it.is_a?(Mechanics::Costs::Tap) && !it.is_a?(Mechanics::Costs::TapGranter) && !it.mana? }
+      end
 
       def reserved_for_cost?(frame, id, ref)
         return true if id == payment_excluded_source(frame)
@@ -208,16 +212,21 @@ module Enjine
         else
           produced.each { pool[it] += 1 }
         end
-        payable_with?(frame, remaining_cost(frame["remaining"]), pool, payment_reserved(frame) + [id], restricted: rest)
+        used = [id, tapped_granter(option[:ability], ability)].compact
+        payable_with?(frame, remaining_cost(frame["remaining"]), pool, payment_reserved(frame) + used, restricted: rest)
       end
 
       # CR 605.3: activating a mana ability while paying. One whose costs include more than {T} (a
-      # sacrifice, life, a discard) can't be undone, so the payment stops being cancellable.
+      # sacrifice, life, a discard) can't be undone, so the payment stops being cancellable. Tapping the
+      # permanent that granted it can (CR 734.1: it is untapped with the source).
       def tap_for_payment!(id, ability_ref, mana = nil)
         frame = payment
         frame["irreversible"] = true if irreversible_mana_ability?(id, ability_ref)
+        granter = tapped_granter(ability_ref, chars(id).ability(ability_ref))
         activate_mana_ability!(frame["player"], id, ability_ref, mana)
         frame["tapped"] << id
+        frame["tapped"] << granter if granter
+        (frame["mana_tapped"] ||= []).push(*[id, granter].compact) # kept tapped by #refund_payment!
         ask!(nil)
       end
 
@@ -245,15 +254,41 @@ module Enjine
       # Undoes the mana abilities activated for the payment (CR 734.1): untaps their sources and restores
       # the pool. Abilities that triggered meanwhile didn't trigger (CR 734.1).
       def rewind_payment!(frame)
-        frame["tapped"].select { state.objects.key?(it) }.each do |id|
-          object(id).tapped = false
-          emit Events::Untapped.new(object: id)
-        end
+        return refund_payment!(frame) if frame["irreversible"]
+
+        untap_for_rewind!(frame["tapped"])
         player(frame["player"]).mana_pool = Mana::TYPES.to_h { |t| [t, frame["pool"].fetch(t.to_s, 0)] }
         player(frame["player"]).restricted_mana = Snapshot.deep_copy(frame["restricted"]) if frame["restricted"]
         player(frame["player"]).pool_sources = Snapshot.deep_copy(frame["pool_sources"]) if frame.key?("pool_sources")
         state.pending_triggers.select! { frame["triggers_before"].include?(it["id"]) }
       end
+
+      def untap_for_rewind!(ids)
+        ids.select { state.objects.key?(it) }.each do |id|
+          object(id).tapped = false
+          emit Events::Untapped.new(object: id)
+        end
+      end
+
+      # Rewinding an irreversible payment (one that can't be finished, #stuck?). CR 734.1 lets the player reverse the
+      # mana abilities activated meanwhile, but one with a cost such as life or a sacrifice can't be undone here, so
+      # none is: their sources stay tapped and their mana stays in the pool, and the mana spent on this payment goes
+      # back to the pool. What else it tapped (convoke, waterbend, a cost's choices) is untapped.
+      def refund_payment!(frame)
+        untap_for_rewind!(frame["tapped"] - frame.fetch("mana_tapped", []))
+        pl = player(frame["player"])
+        frame.fetch("refund", []).each do |spent|
+          next pl.restricted_mana << Snapshot.deep_copy(spent["restricted"]) if spent["restricted"]
+
+          pl.mana_pool[spent["mana"].to_sym] += 1
+          (pl.pool_sources ||= []) << Snapshot.deep_copy(spent["source"]) if spent["source"]
+        end
+      end
+
+      # Whether the payment or cost choice in progress has no legal choice left: it was made irreversible (CR 605.3a)
+      # and can't be finished. It can then still be rewound (CR 734.1, #refund_payment!), so a decision always has
+      # an option.
+      def stuck?(options) = options.empty? && !payment.nil? && payment["kind"] != "trigger"
 
       # ---- countering (CR 701.6) ----------------------------------------------------------------
 
@@ -326,7 +361,10 @@ module Enjine
         special = frame["special"]
         if outcome == "paid" && state.objects.key?(special["object"])
           obj = object(special["object"])
-          chars(obj).ability(special["ability"]).special!(self, obj, index)
+          if special["unlock"] then unlock_door!(obj, special["unlock"], index) # CR 709.5e (Engine::Rooms)
+          elsif special["face_up"] then turn_face_up!(obj, index) # CR 116.2b (Engine::FaceDownPermanents)
+          else chars(obj).ability(special["ability"]).special!(self, obj, index)
+          end
         end
         action_taken!(index)
         :done

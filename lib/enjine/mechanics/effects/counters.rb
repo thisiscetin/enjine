@@ -36,9 +36,10 @@ module Enjine
       # "Remove two +1/+1 counters from target creature." (CR 122.8)
       class RemoveCounters < Effect
         primitive :effect, :remove_counters,
-                  description: "Remove up to `amount` counters named `counter` from each referenced permanent. How " \
-                               "many were removed is {\"this_way\": n} (\"remove a bait counter ... If you do, ...\").",
-                  rules: %w[122.8],
+                  description: "Remove up to `amount` counters named `counter` from each referenced permanent or " \
+                               "player (poison, experience, ...). How many were removed is {\"this_way\": n} " \
+                               "(\"remove a bait counter ... If you do, ...\").",
+                  rules: %w[122.8 122.1],
                   params: { "counter" => "counter name", "amount" => "amount", "to" => "selector" },
                   example: { "remove_counters" => { "counter" => "+1/+1", "amount" => 2, "to" => { "target" => 0 } } }
 
@@ -58,6 +59,7 @@ module Enjine
             engine.remove_counters!(perm, counter, n)
             engine.record_amount!(before - perm.counters.fetch(counter, 0)) # CR 608.2c: "if you do"
           end
+          players(engine, ctx).each { engine.record_amount!(engine.remove_player_counters!(it, counter, n)) } # CR 122.1
         end
 
         def to_s = "remove #{amount} #{counter} counter(s) → #{to}"
@@ -67,8 +69,8 @@ module Enjine
       class RemoveAllCounters < Effect
         primitive :effect, :remove_all_counters,
                   description: "Remove every counter named `counter` (every counter, if no `counter` is given) from " \
-                               "each referenced permanent.",
-                  rules: %w[122.8],
+                               "each referenced permanent or player (\"you lose all poison counters\").",
+                  rules: %w[122.8 122.1],
                   params: { "counter" => "optional counter name", "to" => "selector" },
                   example: { "remove_all_counters" => { "counter" => "+1/+1", "to" => { "target" => 0 } } }
 
@@ -81,7 +83,11 @@ module Enjine
           @counter = raw && Counters.parse(raw, errors, "#{path}.counter")
         end
 
-        def apply(engine, ctx) = objects(engine, ctx).each { engine.remove_all_counters!(engine.object(it), counter) }
+        def apply(engine, ctx)
+          objects(engine, ctx).each { engine.remove_all_counters!(engine.object(it), counter) }
+          players(engine, ctx).each { engine.remove_all_player_counters!(it, counter) } # CR 122.1: poison, experience, ...
+        end
+
         def to_s = "remove all #{counter || "counters"} → #{to}"
       end
 

@@ -24,6 +24,7 @@ module Enjine
       record_history!(event) # before triggers look at it (see Engine::TurnHistory)
       @emit.call(event)
       watch_triggers!(event)
+      check_crime!(event) # CR 700.13 (Engine::Crimes)
     end
 
     def name(index) = state.players[index].name
@@ -31,7 +32,10 @@ module Enjine
     def player(index) = state.players[index]
     def active_player = state.players[state.active]
     def definition(object) = catalog.fetch(object.card)
-    def object(id) = state.objects.fetch(id)
+    # A spell that left the stack while resolving stands in for itself until it has resolved (Engine::Resolution).
+    def object(id) = state.objects.fetch(id) { resolving_stand_in(id) || raise(KeyError, "key not found: #{id.inspect}") }
+    # The object, or that stand-in; nil for an object that no longer exists.
+    def find_object(id) = state.objects[id] || resolving_stand_in(id)
     def ask!(pending) = state.pending = pending
     def step = Steps.fetch(state.step)
     def attackers = state.attackers

@@ -23,8 +23,11 @@ module Enjine
                                "`affects` is " \
                                "{\"each\": filter, " \
                                "\"controller\": you|opponent|any, \"other\": true} (relative to the source's " \
-                               "controller), \"self\", or \"attached\" (\"equipped/enchanted creature\").",
-                  rules: %w[604.1 604.2 611.3a 612.8 613.1c 613.1d 613.1e 613.1f 613.4b 613.4c 613.7a 613.8a 205.1a 205.1b 301.5f
+                               "controller), \"self\", or \"attached\" (\"equipped/enchanted creature\"). The filter " \
+                               "and the `if` condition may read combat and tapped status (\"attacking creatures you " \
+                               "control have first strike\", {\"if\": {\"attacking\": \"attached\"}}), never power " \
+                               "or toughness.",
+                  rules: %w[604.1 604.2 611.3a 506.4 612.8 613.1c 613.1d 613.1e 613.1f 613.4b 613.4c 613.7a 613.8a 205.1a 205.1b 301.5f
                             303.4m],
                   params: { "affects" => "{\"each\": filter, \"controller\": ..., \"other\": bool}, \"self\" or \"attached\"",
                             "if" => "condition (\"as long as ...\", \"during your turn\")",
@@ -44,7 +47,9 @@ module Enjine
 
         GRANTABLE = %i[triggered mana activated loyalty hexproof_from protection_from tapping_power cant_be_blocked_by].freeze
         # Data that would make the layer pass depend on its own result (CR 613.8).
-        LIVE = %w[power toughness greatest_power attacking blocking tapped].freeze
+        # Combat and tapped status may be read (CR 506.4): they aren't characteristics, so they never depend on it.
+        LIVE = %w[power toughness greatest_power].freeze
+        STATUS = Filters::Restricted::STATUS
         KEYS = %w[affects if pump keywords creature_types abilities types subtypes loses_abilities colors
                   base_power_toughness set_types name].freeze
 
@@ -56,7 +61,7 @@ module Enjine
           affects = Mechanics.fetch_param(params, :affects)
           filter, controller, other = parse_affects(affects, errors, path)
           raw_if = Mechanics.fetch_param(params, :if)
-          errors << "#{path}.if: can't depend on power, toughness or combat status (CR 613.8)" if live?(raw_if)
+          errors << "#{path}.if: can't depend on power or toughness (CR 613.8)" if live?(raw_if)
           condition = raw_if && Condition.build(raw_if, errors, "#{path}.if")
           pump = parse_pump(params, errors, path)
           keywords = parse_keywords(params, errors, path)
@@ -111,7 +116,7 @@ module Enjine
           end
           Mechanics.check_keys(affects, %w[each controller other], errors, "#{path}.affects")
           filter = Mechanics.build_entry(:filter, affects["each"], errors, "#{path}.affects.each")
-          live = filter ? filter.live_keys : []
+          live = filter ? filter.live_keys - STATUS : []
           # CR 613.8: these would make the layer pass depend on its own result.
           errors << "#{path}.affects.each: #{live.join(", ")} can't be used in a static ability yet" unless live.empty?
           [filter, affects.fetch("controller", "any"), affects["other"] == true]
@@ -206,6 +211,14 @@ module Enjine
         # Whether it changes layer 6: abilities removed or added.
         def ability_changes? = @loses_abilities || !@keywords.empty? || !@granted.empty?
         def computed? = @pump.values.any? { !it.is_a?(Amount::Fixed) }
+
+        # Whether which permanents it affects depends on combat or tapped status ("attacking creatures you control
+        # have first strike", CR 506.4): the layer pass is then redone after every event.
+        def combat_status? = @filter.respond_to?(:live_keys) && @filter.live_keys.intersect?(STATUS)
+
+        # Whether any event may change what it does (a condition, a computed bonus, combat status): then the layer
+        # pass isn't cached between events (Engine::Characteristics#apply_layers).
+        def volatile? = !@condition.nil? || computed? || combat_status?
 
         # The fixed bonus, for display and for data readers (computed bonuses are Amounts).
         def power = fixed(@pump["power"])

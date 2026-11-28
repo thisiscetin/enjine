@@ -119,7 +119,12 @@ module Enjine
 
           raw.each_with_index.map do |c, i|
             cost = Mechanics.build_entry(:cost, c, errors, "#{path}.cost[#{i}]")
-            errors << "#{path}.cost[#{i}]: a mana ability's cost can't need a choice, X or {2/B}" if choosing_cost?(cost)
+            if cost.is_a?(Costs::OneOf)
+              errors << "#{path}.cost[#{i}]: a mana ability's cost can't be a one_of (a choice between costs, CR 601.2b, " \
+                        "isn't supported for mana abilities, which are paid for at once, CR 605.3a)"
+            elsif choosing_cost?(cost)
+              errors << "#{path}.cost[#{i}]: a mana ability's cost can't need a choice, X or {2/B}"
+            end
             cost
           end
         end
@@ -169,11 +174,12 @@ module Enjine
         def allowed_types = nil
 
         # A mana cost ("{1}, {T}: Add …") is paid from the mana already in the pool (CR 605.3a, 601.2g-h).
-        # "Activate only if ..." (CR 602.5b) is checked for its controller.
-        def activatable?(engine, object)
+        # "Activate only if ..." (CR 602.5b) is checked for its controller. `bound`: its costs as they apply to this
+        # instance (a granted ability's "tap the granter", Engine#mana_ability_costs).
+        def activatable?(engine, object, bound = costs)
           return false if @only_if && !@only_if.true?(engine, EffectContext.new(object.controller, object.id, nil, nil))
 
-          costs.all? { |c| c.payable?(engine, object) } && (mana_cost.nil? || engine.pool_covers?(object.controller, mana_cost))
+          bound.all? { |c| c.payable?(engine, object) } && (mana_cost.nil? || engine.pool_covers?(object.controller, mana_cost))
         end
 
         # How many times it may be activated each turn (nil: no limit, CR 602.5b); kept by Engine#record_activation!.

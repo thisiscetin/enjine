@@ -131,11 +131,11 @@ module Enjine
       end
     end
 
-    # Decks that together include every card in `cards`: grouped by the colors each needs (a land: the colors it
-    # makes), a few spells and lands per deck. Colorless groups get random colors.
+    # Decks that together include every card in `cards`: grouped by the colors each needs, a few spells and lands
+    # per deck. Colorless groups get random colors.
     def coverage_decks(cards)
       defns = cards.map(&:definition).reject { DeckBuilder.basic?(it) } # every deck has them
-      groups = defns.group_by { it.land? ? DeckBuilder.produced_colors(it) : DeckBuilder.required_colors(it) }
+      groups = defns.group_by { deck_colors(it) }
       groups.sort_by { |colors, _| colors.join }.flat_map do |colors, defns|
         lands, spells = defns.partition(&:land?)
         spell_chunks = spells.each_slice(SPELLS_PER_DECK).to_a
@@ -145,6 +145,13 @@ module Enjine
           coverage_deck(colors.empty? ? :any : colors, including.map(&:id))
         end
       end.compact
+    end
+
+    # The colors a deck needs to hold the card (DeckBuilder's fit check): a spell's colors and colored activation
+    # costs; a land's also the colors it makes ({C} lands with a colored ability or cycling cost need that color).
+    def deck_colors(defn)
+      needed = DeckBuilder.required_colors(defn)
+      defn.land? ? Mana::COLORS & (needed | DeckBuilder.produced_colors(defn)) : needed
     end
 
     def coverage_deck(colors, including)

@@ -1,0 +1,222 @@
+[
+  {
+    "name": "Lingering Mourner",
+    "mana_cost": "{1}{B}",
+    "types": ["creature"],
+    "subtypes": ["spirit"],
+    "power": 2,
+    "toughness": 1,
+    "keywords": ["persist"]
+  },
+  {
+    "name": "Stubborn Revenant",
+    "mana_cost": "{1}{G}",
+    "types": ["creature"],
+    "subtypes": ["zombie"],
+    "power": 2,
+    "toughness": 1,
+    "keywords": ["undying"]
+  },
+  {
+    "name": "Gravecaller Matron",
+    "mana_cost": "{3}{B}",
+    "types": ["creature"],
+    "subtypes": ["human", "cleric"],
+    "power": 3,
+    "toughness": 3,
+    "abilities": [
+      {
+        "static": {
+          "affects": { "each": { "creature": { "token": false } }, "other": true, "controller": "you" },
+          "keywords": ["persist"]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Sudden Jolt",
+    "mana_cost": "{1}{R}",
+    "types": ["instant"],
+    "keywords": ["split second"],
+    "abilities": [
+      {
+        "spell": {
+          "targets": ["any_target"],
+          "effects": [{ "deal_damage": { "amount": 2, "to": { "target": 0 } } }]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Hatchling Brood",
+    "mana_cost": "{1}{G}",
+    "types": ["creature"],
+    "subtypes": ["lizard"],
+    "power": 2,
+    "toughness": 2,
+    "abilities": [{ "offspring": { "cost": "{2}" } }]
+  },
+  {
+    "name": "Looming Overseer",
+    "mana_cost": "{3}{G}{G}",
+    "types": ["enchantment", "creature"],
+    "subtypes": ["avatar"],
+    "power": 5,
+    "toughness": 5,
+    "abilities": [
+      { "impending": { "amount": 2, "cost": "{1}{G}" } },
+      { "triggered": { "when": { "enters": {} }, "effects": [{ "draw": { "amount": 1 } }] } }
+    ]
+  },
+  {
+    "name": "Skyfall Verdict",
+    "mana_cost": "{4}{R}{R}",
+    "types": ["sorcery"],
+    "abilities": [
+      {
+        "spell": {
+          "targets": ["any_target"],
+          "effects": [{ "deal_damage": { "amount": 4, "to": { "target": 0 } } }]
+        }
+      },
+      { "miracle": { "cost": "{R}" } }
+    ]
+  },
+  {
+    "name": "Chronicle Keeper",
+    "mana_cost": "{2}{U}",
+    "types": ["creature"],
+    "subtypes": ["human", "wizard"],
+    "power": 2,
+    "toughness": 2,
+    "abilities": [
+      {
+        "cards_have": {
+          "zone": "hand",
+          "cards": { "types": ["instant"] },
+          "ability": { "miracle": { "cost": "{U}" } }
+        }
+      }
+    ]
+  },
+  {
+    "name": "Recall Spark",
+    "mana_cost": "{1}{R}",
+    "types": ["instant"],
+    "abilities": [
+      {
+        "spell": {
+          "targets": [{ "graveyard_card": { "controller": "you", "any_of": ["instant", "sorcery"] } }],
+          "effects": [
+            {
+              "grant_ability": {
+                "to": { "target": 0 },
+                "duration": "end_of_turn",
+                "ability": { "flashback": { "cost": "mana_cost" } }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Evidence Clerk Ruling",
+    "mana_cost": "{1}{B}",
+    "types": ["sorcery"],
+    "abilities": [
+      { "additional_cost": { "cost": [{ "collect_evidence": 4 }], "optional": true } },
+      {
+        "spell": {
+          "effects": [
+            { "lose_life": { "amount": 2, "to": "each_opponent" } },
+            { "draw": { "amount": 1, "if": { "cast_with": "additional_cost" } } }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Snarecycler Spider",
+    "mana_cost": "{G}{G}",
+    "types": ["creature"],
+    "subtypes": ["spider"],
+    "power": 3,
+    "toughness": 3,
+    "keywords": ["reach"],
+    "abilities": [
+      { "cycling": { "cost": "{X}{G}" } },
+      {
+        "triggered": {
+          "zone": "graveyard",
+          "when": { "cycles": { "self": true } },
+          "targets": [
+            {
+              "filter": { "permanent": { "any_of": ["artifact", "enchantment"], "mana_value": { "equal": "x" } } },
+              "optional": true
+            }
+          ],
+          "effects": [{ "destroy": { "to": { "target": 0 } } }]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Ashen Wraith",
+    "mana_cost": "{3}{B}",
+    "types": ["creature"],
+    "subtypes": ["wraith"],
+    "power": 3,
+    "toughness": 3,
+    "abilities": [{ "cycling": { "cost": [{ "pay_life": 2 }] } }]
+  },
+  {
+    "name": "Rift Culler",
+    "mana_cost": "{B}{B}",
+    "types": ["creature"],
+    "subtypes": ["warlock"],
+    "power": 2,
+    "toughness": 2,
+    "keywords": ["haste"],
+    "abilities": [{ "warp": { "cost": [{ "mana": "{B}" }, { "pay_life": 2 }], "from": ["hand", "graveyard"] } }]
+  },
+  {
+    "name": "Void Chanter",
+    "mana_cost": "{1}{B}",
+    "types": ["creature"],
+    "subtypes": ["human", "warlock"],
+    "power": 1,
+    "toughness": 2,
+    "abilities": [
+      {
+        "triggered": {
+          "when": { "step_begins": { "step": "end", "whose": "your" } },
+          "if": { "void": true },
+          "effects": [{ "lose_life": { "amount": 1, "to": "each_opponent" } }]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Tinker's Kit // Tinker's Engine",
+    "layout": "transform",
+    "faces": [
+      {
+        "name": "Tinker's Kit",
+        "mana_cost": "{1}{W}",
+        "types": ["artifact"],
+        "abilities": [
+          { "craft": { "cost": "{2}{W}", "materials": { "card": { "types": ["artifact"] } } } }
+        ]
+      },
+      {
+        "name": "Tinker's Engine",
+        "colors": ["W"],
+        "types": ["artifact", "creature"],
+        "subtypes": ["construct"],
+        "power": 3,
+        "toughness": 3
+      }
+    ]
+  }
+]

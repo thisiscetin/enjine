@@ -134,7 +134,9 @@ module Enjine
       self
     end
 
-    def view_for(viewer) = View.build(@engine, viewer_key(viewer))
+    # The pending decision's options come from #pending_decision (memoized until the next submission), not generated
+    # once more for the view.
+    def view_for(viewer) = View.build(@engine, viewer_key(viewer), options: method(:legal_options))
     def history_for(viewer) = @history.map { it.for_viewer(viewer_key(viewer)) }
 
     # Ids of every decision submitted so far: with the seed this replays the game.

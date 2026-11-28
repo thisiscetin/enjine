@@ -7,20 +7,25 @@ module Enjine
       # `untapped: true` is "when this land enters untapped": the status it entered with (CR 614.12).
       # `from`: only a permanent that entered from that zone ("enters from exile", CR 603.6a).
       class Enters < Trigger
+        include Batched
+
         FROM = %w[hand graveyard exile library stack outside].freeze
 
         primitive :trigger, :enters,
                   description: "The subject enters the battlefield. `untapped: true`: only if it entered untapped. " \
-                               "`from`: only if it entered from that zone (\"enters from exile\").",
-                  rules: %w[603.6a 603.2 614.12],
+                               "`from`: only if it entered from that zone (\"enters from exile\"). `batched: true`: " \
+                               "\"whenever one or more ... enter\", once per event batch; {\"triggering\": \"objects\"} " \
+                               "are the permanents that entered and {\"triggering\": \"amount\"} how many.",
+                  rules: %w[603.6a 603.2 603.2c 614.12],
                   params: { "subject" => "\"self\" (default) or {\"each\": filter, \"controller\": you|opponent|any, \"other\": true}",
-                            "untapped" => "true | false", "from" => FROM.join(" | ") },
+                            "untapped" => "true | false", "from" => FROM.join(" | "), "batched" => "true | false" },
                   example: { "enters" => { "subject" => { "each" => "land", "controller" => "you" } } }
 
-        def self.keys = %w[subject untapped from]
+        def self.keys = %w[subject untapped from batched]
         def event_class = Events::ZoneChanged
 
         def setup(params, errors, path)
+          setup_batched(params, errors, path)
           @untapped = params.fetch("untapped", false)
           errors << "#{path}.untapped: must be true or false" unless [true, false].include?(@untapped)
           @from = params["from"]
@@ -36,7 +41,10 @@ module Enjine
           @subject.match?(engine, event.new_id, obj.controller, event.card, source, types: engine.chars(obj).types)
         end
 
-        def to_s = "When #{@subject} enters#{" untapped" if @untapped}#{" from #{@from}" if @from}"
+        def to_s
+          "When#{" one or more of" if @batched} #{@subject} enter#{"s" unless @batched}#{" untapped" if @untapped}" \
+            "#{" from #{@from}" if @from}"
+        end
       end
 
       # "Whenever you play a land" (CR 305.1): a player plays a land, from their hand or, when an effect allows it,
@@ -71,14 +79,21 @@ module Enjine
 
       # "When ~ dies" / "Whenever another creature you control dies".
       class Dies < Trigger
+        include Batched
+
         primitive :trigger, :dies,
-                  description: "The subject is put into a graveyard from the battlefield. Looks back in time (CR 603.10a).",
-                  rules: %w[603.6c 603.10a 700.4],
-                  params: { "subject" => "\"self\" (default) or {\"each\": filter, ...}" },
+                  description: "The subject is put into a graveyard from the battlefield. Looks back in time (CR 603.10a). " \
+                               "`batched: true`: \"whenever one or more ... die\", once per event batch (creatures " \
+                               "dying at the same time, e.g. to lethal combat damage); {\"triggering\": \"objects\"} are " \
+                               "the cards put into graveyards and {\"triggering\": \"amount\"} how many.",
+                  rules: %w[603.6c 603.10a 700.4 603.2c],
+                  params: { "subject" => "\"self\" (default) or {\"each\": filter, ...}", "batched" => "true | false" },
                   example: { "dies" => { "subject" => "self" } }
 
+        def self.keys = %w[subject batched]
         def event_class = Events::ZoneChanged
         def leaves_battlefield? = true
+        def setup(params, errors, path) = setup_batched(params, errors, path)
 
         def match?(engine, event, source)
           return false unless event.from == "battlefield" && event.to == "graveyard"
@@ -87,7 +102,7 @@ module Enjine
           @subject.match?(engine, event.old_id, lki["controller"], event.card, source, types: lki["types"])
         end
 
-        def to_s = "When #{@subject} dies"
+        def to_s = @batched ? "Whenever one or more of #{@subject} die" : "When #{@subject} dies"
       end
 
       # "When ~ leaves the battlefield" / "Whenever another creature you control leaves the battlefield"

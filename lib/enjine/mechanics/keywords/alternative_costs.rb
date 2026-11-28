@@ -86,12 +86,16 @@ module Enjine
         def cost_text = costs.empty? ? "" : " #{costs.join(", ")}"
         def to_s = "#{keyword.split("_").map(&:capitalize).join("-")}#{cost_text}"
 
-        # The cast method (Engine::Permissions) this ability gives.
-        def method_for(ref)
+        # The mana cost string paid for the card `obj` (nil: it can't be cast this way, CR 118.6).
+        def alt_cost_for(_engine, _obj) = mana_cost.to_s
+
+        # The cast method (Engine::Permissions) this ability gives the card `obj`; nil when it has none.
+        def method_for(ref, engine: nil, obj: nil)
           method = { "via" => "alt:#{ref}", "play" => play, "keyword" => keyword }
           return method unless alternative?
 
-          alt = { "cost" => mana_cost.to_s, "ref" => ref }
+          cost = alt_cost_for(engine, obj) or return nil
+          alt = { "cost" => cost, "ref" => ref }
           alt["exile"] = true if exiles?
           alt["returns"] = returns if returns
           alt["harmonize"] = true if is_a?(Harmonize)
@@ -106,10 +110,39 @@ module Enjine
                   description: "Flashback: you may cast this instant or sorcery card from your graveyard by paying " \
                                "`cost` rather than its mana cost; then it's exiled whenever it would leave the stack. " \
                                "`cost` is a mana cost string or a list of costs (`[{\"mana\": \"{1}{U}\"}, " \
-                               "{\"tap_permanents\": {\"count\": 3}}]`). Cast option `via: \"alt:<ref>\"`.",
-                  rules: %w[702.34a 118.9 601.2b 601.2f 601.2h],
-                  params: { "cost" => "mana cost string, or a list of costs" },
+                               "{\"tap_permanents\": {\"count\": 3}}]`), or `\"mana_cost\"`: the card's own mana cost " \
+                               "(\"its flashback cost is equal to its mana cost\", e.g. granted with `grant_ability`). " \
+                               "Cast option `via: \"alt:<ref>\"`.",
+                  rules: %w[702.34a 118.9 118.6 601.2b 601.2f 601.2h],
+                  params: { "cost" => "mana cost string, a list of costs, or \"mana_cost\"" },
                   example: { "flashback" => { "cost" => "{2}{R}" } }
+
+        MANA_COST = "mana_cost"
+
+        # `{"cost": "mana_cost"}`: "its flashback cost is equal to its mana cost" (a granted flashback, CR 702.34a).
+        def self.build(params, errors, path, **)
+          return super unless Mechanics.fetch_param(params, :cost) == MANA_COST
+
+          Mechanics.check_keys(params, %w[cost], errors, path)
+          new([], path, errors, own_mana_cost: true)
+        end
+
+        def initialize(costs, path, errors, own_mana_cost: false)
+          @own_mana_cost = own_mana_cost
+          super(costs, path, errors)
+        end
+
+        def own_mana_cost? = @own_mana_cost
+        def alternative? = own_mana_cost? || super
+
+        # The card's own mana cost, X included (CR 107.3); a card with no mana cost can't be cast this way (CR 118.6).
+        def alt_cost_for(engine, obj)
+          return super unless own_mana_cost?
+
+          engine && obj && engine.chars(obj).mana_cost&.to_s
+        end
+
+        def cost_text = own_mana_cost? ? " (its mana cost)" : super
 
         def zone = :graveyard
         def exiles? = true
@@ -160,17 +193,37 @@ module Enjine
                                "cost. If you do, the permanent it becomes is exiled at the beginning of the next end " \
                                "step (a delayed triggered ability), and its owner may cast it from exile after this " \
                                "turn has ended for as long as it remains exiled (cast option `via: \"warped\"`). " \
-                               "Conditions `{\"cast_with\": \"warp\"}` and `{\"cast_with_this_turn\": \"warp\"}` read it.",
-                  rules: %w[702.185a 702.185b 702.185c 603.7 118.9 601.2b 601.2f 601.2h],
-                  params: { "cost" => "mana cost string, or a list of costs" },
+                               "Conditions `{\"cast_with\": \"warp\"}` and `{\"cast_with_this_turn\": \"warp\"}` read it. " \
+                               "`from: [\"hand\", \"graveyard\"]`: \"you may cast this card from your graveyard using " \
+                               "its warp ability\" (CR 601.3).",
+                  rules: %w[702.185a 702.185b 702.185c 603.7 118.9 601.2b 601.2f 601.2h 601.3],
+                  params: { "cost" => "mana cost string, or a list of costs",
+                            "from" => "zones it works from: \"hand\" (default), \"graveyard\", or a list of both" },
                   example: { "warp" => { "cost" => "{1}{R}" } }
 
-        attr_reader :delayed
+        ZONES = %w[hand graveyard].freeze
 
-        def initialize(costs, path, errors)
-          @delayed = Effects::WarpDelayed.build({}, errors, path)
-          super
+        attr_reader :delayed, :zones
+
+        def self.build(params, errors, path, **)
+          raw = Mechanics.fetch_param(params, :from) || "hand"
+          zones = Array(raw).map(&:to_s)
+          if zones.empty? || !(zones - ZONES).empty?
+            errors << "#{path}.from: must be hand, graveyard or a list of them"
+            zones = ["hand"]
+          end
+          Mechanics.check_keys(params, %w[cost from], errors, path)
+          new(read_costs(Mechanics.fetch_param(params, :cost), errors, path), path, errors,
+              zones: zones.uniq.map(&:to_sym).freeze)
         end
+
+        def initialize(costs, path, errors, zones: %i[hand].freeze)
+          @delayed = Effects::WarpDelayed.build({}, errors, path)
+          @zones = zones
+          super(costs, path, errors)
+        end
+
+        def functions?(engine, obj, index) = zones.include?(obj.zone) && usable?(engine, obj, index)
 
         def try_effects = [delayed]
       end
@@ -281,12 +334,12 @@ module Enjine
       # that permanent's triggered abilities), remembers it.
       class CastHow
         KEYS = %w[cast_with cast_from cast_with_this_turn].freeze
-        KEYWORDS = %w[flashback harmonize mayhem warp evoke web_slinging sneak foretell].freeze
+        KEYWORDS = %w[flashback harmonize mayhem warp evoke web_slinging sneak foretell impending miracle].freeze
         # Optional additional costs announced as the spell is cast (Engine::CastChoices#announce_kicker!):
         # "if this spell was cast using teamwork" (CR 702.194b), "if this spell's additional cost was paid" (CR 118.8b),
         # "if the gift was promised" (CR 702.174k).
         OPTIONAL_TEXT = { "teamwork" => "it was cast using teamwork", "additional_cost" => "its additional cost was paid",
-                          "gift" => "its gift was promised" }.freeze
+                          "gift" => "its gift was promised", "offspring" => "its offspring cost was paid" }.freeze
         OPTIONAL = OPTIONAL_TEXT.keys.freeze
         ZONES = %w[hand graveyard exile library outside].freeze
 
@@ -312,9 +365,10 @@ module Enjine
           return engine.cast_with_this_turn?(@value) if @key == "cast_with_this_turn"
 
           holder = engine.state.objects[ctx.object || ctx.source]
-          return holder&.memory&.[]("kicked_with") == @value if OPTIONAL.include?(@value)
+          memory = holder ? holder.memory : engine.departed_cast_memory(ctx.source) # a dies trigger checked (CR 603.4)
+          return memory&.[]("kicked_with") == @value if OPTIONAL.include?(@value)
 
-          holder&.memory&.[](@key) == @value
+          memory&.[](@key) == @value
         end
 
         def to_s

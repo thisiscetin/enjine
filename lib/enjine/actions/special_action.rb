@@ -16,8 +16,12 @@ module Enjine
       end
 
       def self.options(engine, index)
+        own = engine.own_abilities_only?
         engine.player(index).hand.flat_map do |id|
           obj = engine.object(id)
+          # no face with a special action: a quick no (Engine::Casting#printed_faces_only?)
+          next [] if engine.printed_faces_only?(obj, own) && !engine.card_off_board(obj.card)[:special_actions]
+
           engine.chars(obj).abilities.filter_map do |inst|
             ability = inst.ability
             next unless ability.respond_to?(:special!) && ability.special_allowed?(engine, obj, index)

@@ -155,10 +155,11 @@ module Enjine
           entries.map { it["object"] }.select { engine.state.objects[it]&.zone == self.class.zone }.each { pay_card!(engine, it) }
         end
 
-        # An exiled card is remembered by the spell or ability being cast ("copy those exiled cards").
+        # An exiled card is remembered by the spell or ability being cast, or resolving for a cost paid then (CR 118.12):
+        # "copy those exiled cards".
         def pay_card!(engine, id)
           fresh = engine.move!(id, :exile, reason: "cost") or return
-          holder = engine.casting && engine.state.objects[engine.casting["object"]]
+          holder = engine.cost_holder
           (holder.memory[EXILED] ||= []) << fresh.id if holder
         end
 

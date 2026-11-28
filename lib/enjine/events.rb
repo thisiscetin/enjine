@@ -136,6 +136,15 @@ module Enjine
     SpeedChanged = define(:speed_changed, :player, :from, :to)
     # A player got a designation for the rest of the game, e.g. an enduring story (CR 702.195b).
     DesignationGained = define(:designation_gained, :player, :designation)
+    # A permanent got a designation it keeps until it leaves the battlefield: "solved" (CR 720.3b), "harnessed"
+    # (CR 701.64b), see Engine::PermanentDesignations.
+    PermanentDesignated = define(:permanent_designated, :object, :designation)
+    # CR 709.5c, 709.5h-i: a Room permanent got a door's unlocked designation; `fully`: it now has both.
+    DoorUnlocked = define(:door_unlocked, :player, :object, :door, :fully)
+    # CR 709.5g: a Room permanent lost a door's unlocked designation.
+    DoorLocked = define(:door_locked, :object, :door)
+    # CR 708.8, 116.2b: a face-down permanent was turned face up; `card` is the card it is (Engine::FaceDownPermanents).
+    TurnedFaceUp = define(:turned_face_up, :player, :object, :card)
     # A permanent's class level became `level` (CR 717.2a).
     ClassLevelChanged = define(:class_level_changed, :object, :level)
     # CR 701.27a: a double-faced permanent turned over; `card` names the face now up (CR 712).

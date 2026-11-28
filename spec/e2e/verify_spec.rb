@@ -88,6 +88,54 @@ RSpec.describe Enjine::Verify do
     end
   end
 
+  describe "colorless lands with colored abilities or cycling costs" do
+    def colorless_land(name, ability)
+      { "name" => name, "types" => ["land"], "abilities" => [{ "mana" => { "cost" => ["tap"], "produce" => "{C}" } }, ability] }
+    end
+
+    let(:lands) do
+      [colorless_land("Spec Grove Ruins", { "activated" => { "cost" => [{ "mana" => "{G}" }, "tap"],
+                                                             "effects" => [{ "gain_life" => { "amount" => 1 } }] } }),
+       colorless_land("Spec Tri Vista", { "cycling" => { "cost" => "{G}{W}{U}" } }),
+       colorless_land("Spec Ember Gorge", { "cycling" => { "cost" => "{R}" } })]
+    end
+
+    # Every deck built for a coverage group: [colors, cards included].
+    def built_decks(dir)
+      built = []
+      allow(Enjine::Fuzz).to receive(:play).and_return(1)
+      allow(Enjine::DeckBuilder).to receive(:new).and_wrap_original do |make, *args|
+        make.call(*args).tap do |builder|
+          allow(builder).to receive(:build).and_wrap_original do |build, **opts|
+            build.call(**opts).tap { built << [opts[:colors], opts[:including]] if opts[:including] }
+          end
+        end
+      end
+      [described_class.new(dir, games: 1, seed: 2).run, built]
+    end
+
+    it "builds each into a deck whose colors cover its activation and cycling costs, even without spells of them" do
+      Dir.mktmpdir do |dir|
+        green_folder(dir)
+        lands.each_with_index { |land, i| write(dir, "land#{i}.json", JSON.generate(land)) }
+        report, built = built_decks(dir)
+        expect(report["errors"]).to eq([])
+        expect(built).to include([%i[G], array_including("spec_grove_ruins")], [%i[W U G], ["spec_tri_vista"]],
+                                 [%i[R], ["spec_ember_gorge"]])
+      end
+    end
+
+    it "plays one in a game" do
+      Dir.mktmpdir do |dir|
+        green_folder(dir)
+        write(dir, "ruins.json", JSON.generate(lands.first))
+        report = described_class.new(dir, games: 1, seed: 2).run
+        expect(report["errors"]).to eq([])
+        expect(report["unexercised"].map { it["name"] }).not_to include("Spec Grove Ruins")
+      end
+    end
+  end
+
   it "writes a readable report" do
     report = { "engine_version" => "1", "rules_version" => "r", "seed" => 2, "cards" => 1, "games" => 1, "decisions" => 9,
                "types" => { "land" => { "total" => 2, "valid" => 1, "exercised" => 1 } },

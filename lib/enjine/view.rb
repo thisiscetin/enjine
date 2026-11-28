@@ -8,7 +8,10 @@ module Enjine
   module View
     module_function
 
-    def build(engine, viewer)
+    # `options`: something callable returning the pending decision's legal options when the caller already has them
+    # (Game#view_for passes its memoized decision's), so a view doesn't generate them all again; computed here otherwise.
+    # Called only for a view that shows the options.
+    def build(engine, viewer, options: nil)
       state = engine.state
       observer = viewer == :observer
       {
@@ -19,12 +22,12 @@ module Enjine
         "phase" => state.step && Steps.fetch(state.step).phase.to_s,
         "priority" => state.priority && engine.name(state.priority),
         "players" => state.players.map { |pl| player_view(engine, pl, observer || pl.name == viewer, observer) },
-        "battlefield" => state.battlefield.map { object_view(engine, it) },
-        "stack" => state.stack.map { object_view(engine, it) },
+        "battlefield" => state.battlefield.map { board_view(engine, it, viewer) },
+        "stack" => state.stack.map { board_view(engine, it, viewer) },
         "exile" => state.exile.map { exiled_view(engine, it, viewer) },
-        "phased_out" => state.phased_out.map { object_view(engine, it) },
+        "phased_out" => state.phased_out.map { board_view(engine, it, viewer) },
         "command" => state.command.map { command_view(engine, it) },
-        "pending" => pending_view(engine, viewer),
+        "pending" => pending_view(engine, viewer, options),
         "result" => state.result&.dup,
         "effects" => state.effects.map { it.except("controller").merge("controller" => engine.name(it["controller"])) },
         "delayed_triggers" => state.delayed_triggers.map { delayed_view(engine, it) }
@@ -95,7 +98,7 @@ module Enjine
     def outside_view(engine, player)
       player.outside.map do |card|
         defn = engine.catalog.fetch(card)
-        { "card" => card, "name" => defn.name, "type_line" => defn.type_line, "mana_cost" => defn.mana_cost&.to_s }.compact
+        { "card" => card, "name" => defn.name, "type_line" => defn.type_line, "mana_cost" => defn.mana_cost_text }.compact
       end
     end
 
@@ -115,6 +118,21 @@ module Enjine
       looks ? object_view(engine, id).merge(hidden) : hidden
     end
 
+    # A spell or permanent. A face-down one (CR 708) shows its face-down characteristics to everyone; only its
+    # controller (CR 708.5) and an observer also see which card it is.
+    def board_view(engine, id, viewer)
+      view = object_view(engine, id)
+      obj = engine.object(id)
+      return view unless !obj.ability? && engine.face_down_object?(obj)
+
+      view["face_down"] = true
+      index = engine.names.index(viewer)
+      return view unless viewer == :observer || (index && engine.sees_face_down?(obj, index))
+
+      card = obj.memory["face_down_card"]
+      view.merge("face_down_card" => card, "face_down_name" => engine.catalog.fetch(card).name)
+    end
+
     def object_view(engine, id)
       obj = engine.object(id)
       defn = engine.definition(obj)
@@ -122,8 +140,8 @@ module Enjine
 
       view = { "id" => id, "card" => obj.card, "name" => defn.name, "type_line" => defn.type_line,
                "owner" => engine.name(obj.owner) }
-      view["mana_cost"] = defn.mana_cost.to_s if defn.mana_cost
-      view["keywords"] = defn.keywords.map(&:to_s) unless defn.keywords.empty?
+      view["mana_cost"] = defn.mana_cost_text if defn.mana_cost
+      view["keywords"] = defn.keywords.map(&:name) unless defn.keywords.empty?
       view["rules_text"] = defn.rules_text if defn.rules_text
       case obj.zone
       when :battlefield then permanent_view(engine, obj, defn, view)
@@ -133,6 +151,15 @@ module Enjine
         view["attached_to"] = obj.attached_to if obj.attached_to
       end
       view
+    end
+
+    # A planeswalker's loyalty; a battle's defense and protector (CR 306.5b, 310.4c, 310.9).
+    def loyalty_and_defense(engine, obj, defn, view)
+      view["loyalty"] = engine.loyalty(obj) if defn.planeswalker?
+      return unless defn.type?(:battle)
+
+      view["defense"] = obj.counters.fetch("defense", 0)
+      view["protector"] = engine.name(engine.protector(obj)) if engine.protector(obj)
     end
 
     def permanent_view(engine, obj, defn, view)
@@ -146,15 +173,24 @@ module Enjine
         view.merge!("power" => power, "toughness" => toughness, "damage" => obj.damage,
                     "summoning_sick" => engine.summoning_sick_for_tap?(obj))
       end
-      view["loyalty"] = engine.loyalty(obj) if defn.planeswalker?
+      loyalty_and_defense(engine, obj, defn, view)
       view["counters"] = obj.counters.reject { |_, n| n.zero? } unless obj.counters.values.all?(&:zero?)
       view["attached_to"] = obj.attached_to if obj.attached_to
-      view["transformed"] = true if engine.transformed?(obj) # CR 701.27h
-      view["prepared"] = true if engine.prepared?(obj) # CR 723.3a
+      designations_view(engine, obj, view)
       if (attack = engine.attackers[obj.id])
         view["attacking"] = attack["target"]
       end
       view["blocking"] = engine.state.blockers[obj.id] if engine.state.blockers.key?(obj.id)
+    end
+
+    # A permanent's status: transformed, prepared, its designations (solved, CR 720.3b; harnessed, CR 701.64b) and a
+    # Room's unlocked doors (CR 709.5c).
+    def designations_view(engine, obj, view)
+      view["transformed"] = true if engine.transformed?(obj) # CR 701.27h
+      view["prepared"] = true if engine.prepared?(obj) # CR 723.3a
+      marks = engine.permanent_designations(obj)
+      view["designations"] = marks unless marks.empty?
+      view["unlocked"] = engine.unlocked_doors(obj) if engine.room?(obj)
     end
 
     def ability_view(engine, obj, defn)
@@ -164,7 +200,7 @@ module Enjine
         "controller" => engine.name(obj.controller), "targets" => (obj.targets || []).flatten }.compact
     end
 
-    def pending_view(engine, viewer)
+    def pending_view(engine, viewer, options = nil)
       pending = engine.state.pending
       return nil unless pending
 
@@ -172,7 +208,7 @@ module Enjine
       view = pending.merge("player" => decider)
       return view.except("choices") unless viewer == :observer || viewer == decider # e.g. the cards a search sees
 
-      view["options"] = engine.options.map { it.transform_keys(&:to_s) }
+      view["options"] = (options ? options.call : engine.options).map { it.transform_keys(&:to_s) }
       view
     end
   end

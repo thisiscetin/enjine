@@ -22,7 +22,8 @@ module Enjine
     #   {"distinct_land_types": selector}             how many basic land types among them (domain, CR 305.6)
     #   {"distinct_planeswalker_types": selector}     how many planeswalker types among them (CR 205.3j)
     #   {"counters": {"of": selector, "kind": name}}  counters on them, objects or players (any kind without "kind", CR 122)
-    #   {"life_gained_this_turn" | "life_lost_this_turn" | "dilemmas_this_turn" | "returned_this_turn"
+    #   {"life_gained_this_turn" | "life_lost_this_turn" | "dilemmas_this_turn" | "returned_this_turn" | "crimes_this_turn"
+    #    | "entered_face_down_this_turn" | "turned_face_up_this_turn"
     #    | "cards_drawn_this_turn" | "cards_discarded_this_turn" | "noncombat_damage_this_turn"
     #    | "noncombat_damage_last_turn"
     #    | "spells_cast_this_game" | "turns_taken": player selector}  this turn's (or game's) history, see
@@ -37,11 +38,14 @@ module Enjine
     #                                                 (CR 107.1a). "-X" is {"times": ["x", -1]}.
     # A source that has left the battlefield is used as it last existed (CR 608.2h), and so is any object the
     # power, toughness or mana value of which is read after it left the battlefield during the resolving
-    # spell or ability (a destroyed target, or {"result": n} of a sacrifice).
+    # spell or ability (a destroyed target, or {"result": n} of a sacrifice), and the permanent a
+    # leaves-the-battlefield trigger is about ({"triggering": "object"}: its power, toughness, mana value and
+    # counters, CR 603.10a).
     class Amount
       SELECTOR_KINDS = %w[count power toughness greatest_power hand_size life graveyard_size distinct_names distinct_types
                           distinct_colors distinct_land_types distinct_planeswalker_types
-                          life_gained_this_turn life_lost_this_turn dilemmas_this_turn returned_this_turn
+                          life_gained_this_turn life_lost_this_turn dilemmas_this_turn returned_this_turn crimes_this_turn
+                          entered_face_down_this_turn turned_face_up_this_turn
                           cards_drawn_this_turn cards_discarded_this_turn spells_cast_this_game speed
                           noncombat_damage_this_turn noncombat_damage_last_turn turns_taken greatest_toughness
                           mana_value greatest_mana_value card_types library_size].freeze
@@ -55,7 +59,8 @@ module Enjine
                                                                 mana_spent sacrificed]).freeze
       # Player history counters: kind -> turn_log/game_log key.
       HISTORY = { "life_gained_this_turn" => "life_gained", "life_lost_this_turn" => "life_lost",
-                  "dilemmas_this_turn" => "dilemmas", "returned_this_turn" => "returned",
+                  "dilemmas_this_turn" => "dilemmas", "returned_this_turn" => "returned", "crimes_this_turn" => "crimes",
+                  "entered_face_down_this_turn" => "entered_face_down", "turned_face_up_this_turn" => "turned_face_up",
                   "cards_drawn_this_turn" => "drawn", "cards_discarded_this_turn" => "discarded",
                   "noncombat_damage_this_turn" => "noncombat_damage" }.freeze
       # The same, read from the previous turn's log ("was dealt noncombat damage last turn").
@@ -98,13 +103,14 @@ module Enjine
       def reads_power? = %w[power toughness greatest_power greatest_toughness].include?(@kind)
 
       def value(engine, ctx)
-        refs = @selector.resolve(engine, ctx) # built without errors: a selector
+        refs = Amount.refs(@selector, engine, ctx) # built without errors: a selector
         case @kind
         when "count" then refs.size
-        when "power", "toughness" then refs.empty? ? Amount.last_known(engine, ctx, @selector, @kind) : stats(engine, refs).sum
-        when "greatest_power", "greatest_toughness" then stats(engine, refs).max.to_i
-        when "mana_value" then mana_values(engine, refs).sum
-        when "greatest_mana_value" then mana_values(engine, refs).max.to_i
+        when "power", "toughness" then refs.empty? ? Amount.last_known(engine, ctx, @selector, @kind) : stats(engine, ctx, refs).sum
+        when "greatest_power", "greatest_toughness" then stats(engine, ctx, refs).max.to_i
+        when "mana_value"
+          refs.empty? ? Amount.last_known(engine, ctx, @selector, @kind) : mana_values(engine, ctx, refs).sum
+        when "greatest_mana_value" then mana_values(engine, ctx, refs).max.to_i
         when *DISTINCT then distinct(live(engine, refs).map { engine.chars(it) })
         else players(engine, refs).sum { player_value(engine, it) }
         end
@@ -129,6 +135,19 @@ module Enjine
         chars.creature? || chars.type?(:kindred) ? chars.subtypes - Engine::Characteristics::NON_CREATURE_SUBTYPES : []
       end
 
+      # The references an amount reads. "Self" of a source that has left the battlefield names nothing here (not the
+      # new object it became, Selector#resolve), so it's read as it last existed (CR 608.2h, #last_known).
+      def self.refs(selector, engine, ctx) = selector.resolve(engine, ctx, follow: false)
+
+      # CR 603.10a, 608.2h: how the permanent a leaves-the-battlefield trigger is about ({"triggering": "object"})
+      # last existed on the battlefield (Triggers.event_facts "lki"); nil for any other reference.
+      def self.triggering_lki(engine, ctx, selector, ref)
+        return nil unless selector.kind == :triggering && selector.value == "object"
+
+        facts = Selector.memory(engine, ctx)["triggering"]
+        facts["lki"] if facts.is_a?(Hash) && facts["object"] == ref
+      end
+
       # CR 608.2h: "its power" of a source that has left the battlefield is its last known value.
       def self.last_known(engine, ctx, selector, key)
         return 0 unless selector.kind == :self
@@ -151,7 +170,7 @@ module Enjine
       # How a source that has left the battlefield last existed: remembered by the resolving ability, or,
       # while its leaves-the-battlefield trigger is being checked (CR 603.4, 603.10a), the engine's.
       def self.source_lki(engine, ctx)
-        engine.state.objects[ctx.object]&.memory&.[]("source_lki") || engine.last_known(ctx.source)
+        engine.find_object(ctx.object)&.memory&.[]("source_lki") || engine.last_known(ctx.source)
       end
 
       private
@@ -176,19 +195,22 @@ module Enjine
       def live(engine, refs) = refs.select { engine.state.objects.key?(it) }
 
       # Each one's mana value; one that has left as it last existed (CR 608.2h).
-      def mana_values(engine, refs)
+      def mana_values(engine, ctx, refs)
         refs.map do |ref|
-          lki = Amount.left_battlefield(engine, ref, moved: @selector.kind == :result)
+          lki = Amount.triggering_lki(engine, ctx, @selector, ref) ||
+                Amount.left_battlefield(engine, ref, moved: @selector.kind == :result)
           lki ? lki["mana_value"].to_i : Amount.mana_value(engine, engine.state.objects[ref]) || 0
         end
       end
 
       # Each one's power or toughness; one that left the battlefield during the resolving spell or ability as it
       # last existed (CR 608.2h), one that's simply gone not at all.
-      def stats(engine, refs)
+      def stats(engine, ctx, refs)
         key = @kind.end_with?("toughness") ? "toughness" : "power"
         refs.filter_map do |ref|
-          if (lki = Amount.left_battlefield(engine, ref, moved: @selector.kind == :result)) then lki[key].to_i
+          lki = Amount.triggering_lki(engine, ctx, @selector, ref) ||
+                Amount.left_battlefield(engine, ref, moved: @selector.kind == :result)
+          if lki then lki[key].to_i
           elsif engine.state.objects.key?(ref) then engine.public_send(key, engine.object(ref))
           end
         end
@@ -215,7 +237,7 @@ module Enjine
       class X
         INSTANCE = new.freeze
 
-        def value(engine, ctx) = engine.state.objects[ctx.object]&.x.to_i
+        def value(engine, ctx) = engine.find_object(ctx.object)&.x.to_i
         def to_s = "X"
       end
 
@@ -247,7 +269,7 @@ module Enjine
         end
 
         def reads_power? = @key != "mana_value"
-        def value(engine, ctx) = (engine.state.objects[ctx.object]&.paid || []).sum { it[@key].to_i }
+        def value(engine, ctx) = (engine.find_object(ctx.object)&.paid || []).sum { it[@key].to_i }
         def to_s = "the sacrificed permanent's #{@key.tr("_", " ")}"
       end
 
@@ -318,7 +340,8 @@ module Enjine
       end
 
       # {"counters": {"of": selector, "kind": name}}: counters of one kind (or of every kind) on the
-      # objects or players (CR 122). A source that has left the battlefield counts as it last existed (CR 608.2h).
+      # objects or players (CR 122). A source that has left the battlefield counts as it last existed (CR 608.2h), and
+      # so does the permanent a leaves-the-battlefield trigger is about ({"triggering": "object"}, CR 603.10a).
       class Counters
         def self.build(data, errors, path, **context)
           data = data.is_a?(Hash) ? data.transform_keys(&:to_s) : {}
@@ -335,15 +358,23 @@ module Enjine
         end
 
         def value(engine, ctx)
-          all = @selector.resolve(engine, ctx)
-          refs = all.select { engine.state.objects.key?(it) }
-          counters = refs.map { engine.object(it).counters } +
+          all = Amount.refs(@selector, engine, ctx)
+          counters = all.filter_map { object_counters(engine, ctx, it) } +
                      all.filter_map { Filters.player_index(engine, it) }.map { engine.player_counters(it) } # CR 122.1
-          counters = [Amount.source_lki(engine, ctx)&.[]("counters") || {}] if refs.empty? && @selector.kind == :self
+          counters = [Amount.source_lki(engine, ctx)&.[]("counters") || {}] if all.empty? && @selector.kind == :self
           counters.sum { @kind ? it.fetch(@kind, 0) : it.values.sum }
         end
 
         def to_s = "the number of #{"#{@kind} " if @kind}counters on #{@selector}"
+
+        private
+
+        def object_counters(engine, ctx, ref)
+          lki = Amount.triggering_lki(engine, ctx, @selector, ref)
+          return lki["counters"] || {} if lki
+
+          engine.state.objects[ref]&.counters
+        end
       end
 
       # {"spells_cast_this_turn": {"by": "you", "matching": {"spell": {"not": ["creature"]}}}}: spells the
@@ -466,6 +497,7 @@ module Enjine
     #   {"share_card_type": selector | [selectors]}  the referenced objects share a card type ("exiled_with": linked cards)
     #   {"chosen": word}           that word was chosen for this object (choose_option, CR 607.2f)
     #   {"meld_with": name}        you both own and control the source and a creature named so (CR 713.1a)
+    #   {"void": true}             a nonland permanent left the battlefield or a spell was warped this turn (void)
     #   {"attacking": selector}    a referenced permanent is attacking, or was as it last existed ("if it was
     #                              attacking", CR 608.2h)
     #   {"not": condition}, {"all": [conditions]}, {"any": [conditions]}
@@ -476,7 +508,9 @@ module Enjine
       # keywords/storied.rb).
       KEYED = { "targets" => :Targets, "triggering" => :TriggeringIs, "source" => :Source,
                 "nth_resolution" => :NthResolution, "chosen" => :ChosenIs, "designation" => :Designation,
-                "first_combat_phase" => :FirstCombatPhase, "meld_with" => :MeldWith }.freeze # MeldWith: effects/meld.rb
+                "first_combat_phase" => :FirstCombatPhase, "meld_with" => :MeldWith, # MeldWith: effects/meld.rb
+                "void" => :Void, # Void: keywords/void.rb
+                "solved" => :PermanentDesignation, "harnessed" => :PermanentDesignation }.freeze # abilities/designated.rb
       # Kinds about the objects a selector names (both in linked.rb).
       SELECTED = { "share_card_type" => :ShareCardType, "attacking" => :Attacking }.freeze
 
@@ -518,7 +552,8 @@ module Enjine
           unless subject
             errors << "#{path}: unknown condition (use amount, controls, life, hand_size, your_turn, was_cast, targets, " \
                       "attacked, source, attacked_this_turn, you_attacked_this_turn, nth_resolution, kicked, " \
-                      "sacrificed, cast_with, cast_from, cast_with_this_turn, chosen, max_speed, designation, not, all, any)"
+                      "sacrificed, cast_with, cast_from, cast_with_this_turn, chosen, max_speed, designation, void, solved, harnessed, " \
+                      "not, all, any)"
             return nil
           end
           Mechanics.check_keys(data, [subject, "at_least", "at_most"], errors, path)
@@ -586,7 +621,10 @@ module Enjine
         # source has left, its triggered ability remembers it (last known information, CR 603.4 / 608.2h).
         def was_cast?(engine, ctx)
           source = engine.state.objects[ctx.source]
-          cast = source ? source.memory["cast"] : engine.state.objects[ctx.object]&.memory&.[]("source_cast")
+          cast = if source then source.memory["cast"]
+                 elsif (ability = engine.find_object(ctx.object)) then ability.memory["source_cast"]
+                 else engine.departed_cast_memory(ctx.source)&.[]("cast") # its dies trigger being checked (CR 603.4)
+                 end
           cast == true
         end
       end
@@ -648,7 +686,7 @@ module Enjine
         end
 
         def true?(engine, ctx)
-          obj = engine.state.objects[ctx.object]
+          obj = engine.find_object(ctx.object)
           !obj.nil? && obj.ability? && engine.times_resolved(obj.source, obj.ability) + 1 == @nth
         end
 
@@ -692,7 +730,7 @@ module Enjine
         end
 
         def true?(engine, ctx)
-          paid = engine.state.objects[ctx.object]&.paid || []
+          paid = engine.find_object(ctx.object)&.paid || []
           paid.any? { |entry| entry["subtypes"] && @spec.all? { |key, wanted| entry[key].intersect?(wanted) } }
         end
 
@@ -720,7 +758,16 @@ module Enjine
           defn = engine.catalog.fetch(facts["card"])
           chars = defn.printed_characteristics
           chars = chars.with(types: facts["types"].map(&:to_sym)) if facts["types"]
-          @filter.matches_facts?(Filters::Facts.new(chars: chars, counters: {}, token: defn.token?))
+          @filter.matches_facts?(Filters::Facts.new(chars: chars, counters: {}, token: token?(engine, facts, defn)))
+        end
+
+        # CR 111.1: a token copy of a card keeps the card's id, so whether it's a token is the object's (or, for one
+        # that left the battlefield, as it last existed: Triggers.event_facts "lki"), not the card's.
+        def token?(engine, facts, defn)
+          return facts["lki"]["token"] == true if facts["lki"].is_a?(Hash) && facts["lki"].key?("token")
+
+          obj = engine.state.objects[facts["object"]]
+          obj ? engine.token?(obj) : defn.token?
         end
 
         def to_s = "it's a #{@filter.respond_to?(:primitive_name) ? @filter.primitive_name.tr("_", " ") : @filter}"

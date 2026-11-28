@@ -117,6 +117,9 @@ module Enjine
 
     def check!(game, seed, count)
       errors = Snapshot.validate(game.state.to_h, game.catalog)
+      # A pending decision always has a legal answer (CR 734.1: a payment that can't be finished is rewound).
+      decision = game.over? ? nil : game.pending_decision
+      errors << "pending #{decision.kind} decision has no options" if decision && decision.options.empty?
       raise Failure.new("invariant broken: #{errors.join("; ")}", seed: seed, decisions: count) unless errors.empty?
     end
 

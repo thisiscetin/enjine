@@ -133,10 +133,19 @@ module Enjine
 
       # Runs a nested effect list one effect at a time (`may`, `pay`, `choose_cards`); a waiting effect keeps its locals
       # under "child", where Engine#effect_answer! delivers answers.
+      # The nested list numbers its results after the enclosing list's earlier effects (StackAbility.parse_effects):
+      # {"result": n} below this effect's `results_count` is one of those, above it one of the nested list's own
+      # (CR 608.2c: "if you do, ... the creature sacrificed this way"). What the nested effects move, create or change
+      # also counts for this effect in the enclosing list.
       module NestedList
         def run_list(engine, ctx, locals, list)
-          while locals["next"] < list.size
-            return :wait if list[locals["next"]].run(engine, ctx, locals["child"] ||= {}) == :wait
+          while (i = locals["next"]) < list.size
+            status, ids, amount = engine.recording_apart do
+              list[i].run(engine, nested_context(ctx, locals), locals["child"] ||= {})
+            end
+            (locals["own_results"] ||= [])[i] = Array(locals["own_results"][i]) + ids
+            (locals["own_amounts"] ||= [])[i] = locals["own_amounts"][i].to_i + amount
+            return :wait if status == :wait
 
             locals.delete("child")
             locals["next"] += 1
@@ -144,11 +153,23 @@ module Enjine
           :done
         end
 
-        def parse_lists(params, errors, path, keys)
+        # `chain`: lists that run one after the other in one numbering (a "may"'s `effects`, then its `then`).
+        def parse_lists(params, errors, path, keys, chain: [])
+          offset = 0
           keys.to_h do |key|
-            [key, Abilities::StackAbility.parse_effects(params, errors, path, @targets_count, key: key.to_sym,
-                                                                                              results_count: @results_count)]
+            list = Abilities::StackAbility.parse_effects(params, errors, path, @targets_count, key: key.to_sym,
+                                                                                               results_count: @results_count,
+                                                                                               offset: chain.include?(key) ? offset : 0)
+            offset += list.size if chain.include?(key)
+            [key, list]
           end.freeze
+        end
+
+        # The enclosing list's results before this effect, then the nested list's own so far.
+        def nested_context(ctx, locals)
+          results = Array.new(@results_count) { Array(ctx.results&.[](it)) } + Array(locals["own_results"]).map { Array(it) }
+          amounts = Array.new(@results_count) { ctx.amounts&.[](it).to_i } + Array(locals["own_amounts"]).map(&:to_i)
+          EffectContext.new(ctx.controller, ctx.source, ctx.object, ctx.targets, results, amounts, ctx.memory, ctx.result_cards)
         end
       end
     end

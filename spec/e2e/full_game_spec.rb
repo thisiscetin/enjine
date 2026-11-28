@@ -56,6 +56,11 @@ RSpec.describe "Full games from Setup" do
     expect { Enjine::Fuzz.run(basics_setup, games: 1, seed: 1) }.to raise_error(Enjine::Fuzz::Failure, /invariant broken/)
   end
 
+  it "flags a pending decision with no options (CR 734.1)" do
+    allow(Enjine::Decisions::Priority).to receive(:options).and_return([])
+    expect { Enjine::Fuzz.run(basics_setup, games: 1, seed: 1) }.to raise_error(Enjine::Fuzz::Failure, /has no options/)
+  end
+
   it "flags export/import mismatches" do
     allow(Enjine::Game).to receive(:import).and_wrap_original do |original, *args, **kw|
       original.call(*args, **kw).tap { it.state.players[0].life = 1 }

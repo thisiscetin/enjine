@@ -2,6 +2,7 @@
 
 require_relative "snapshot/turn_checks"
 require_relative "snapshot/player_checks"
+require_relative "snapshot/deep_copy"
 
 module Enjine
   # Converts State to and from plain data, with complete consistency validation.
@@ -85,7 +86,7 @@ module Enjine
                      phased_out: hash["phased_out"]&.dup)
     end
 
-    def deep_copy(value) = Marshal.load(Marshal.dump(value))
+    # deep_copy: see snapshot/deep_copy.rb
 
     def build_player(hash)
       PlayerState.new(**PLAYER_KEYS.to_h { |k| [k.to_sym, hash[k]] }).tap do |pl|

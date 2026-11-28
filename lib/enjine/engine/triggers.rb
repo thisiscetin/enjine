@@ -41,6 +41,7 @@ module Enjine
         watch_delayed!(event) unless state.delayed_triggers.empty?
         watch_speed!(event) # CR 702.179d (Engine::Speed)
         Mechanics::Keywords::Suspend.watch!(self, event) # CR 702.62a: suspended cards in exile
+        Mechanics::Abilities::Miracle.watch!(self, event) # CR 702.94a: the first card drawn this turn
       end
 
       # "For the first time each turn" (trigger counters_placed with first_time_this_turn): every placement of
@@ -206,18 +207,24 @@ module Enjine
         return if once_each_turn_used!(ability, inst.ref, source)
 
         memory = trigger_memory(source)
+        memory = memory.merge("source_moved_to" => event.new_id) if source_left?(trigger, event, source)
         batch = trigger.respond_to?(:batched?) && trigger.batched? ? event_batch : nil
         times = 1 + additional_triggers(event, source)
         card, ref, granter = AbilityLayers.granted_parts(inst.ref) # a granted ability lives in the granting card's data (CR 613.1f)
         queued = source.merge("ability" => ref || inst.ref, "card" => card || source["card"])
         memory = memory.merge("granter" => granter) if granter # CR 607.1a (Selector "granter")
         found.first(limited?(ability) ? 1 : found.size).each do |facts|
-          next if batch && batched_pending!(source, queued["ability"], batch)
+          next if batch && batched_pending!(source, queued["ability"], batch, facts)
 
-          facts = facts.merge("amount" => 1) if batch # "that many": the occurrences so far (batched_pending!)
-          times.times { queue_pending_trigger!(queued, event, memory.merge("triggering" => facts), batch: batch) }
+          # "that many" / "those": the occurrences and their objects so far (batched_pending!)
+          facts = facts.merge("amount" => 1, "objects" => [facts["object"]].compact) if batch
+          times.times { queue_pending_trigger!(queued, event, memory.merge("triggering" => Snapshot.deep_copy(facts)), batch: batch) }
         end
       end
+
+      # CR 400.7e, 603.10a: a leaves-the-battlefield ability of the permanent that left ("when this dies, return it to
+      # its owner's hand") can find the new object it became; Selector "self" looks for it.
+      def source_left?(trig, event, src) = trig.leaves_battlefield? && event.is_a?(Events::ZoneChanged) && event.old_id == src["id"]
 
       # A once-each-turn limit: remembered on the source object, so the same card
       # as a new object (CR 400.7) may trigger again.
@@ -256,18 +263,24 @@ module Enjine
       # The event batch an event belongs to, for "one or more" triggers (CR 603.2c): everything one effect
       # of a resolving spell or ability does, or one cast or activation (its costs). Outside those, each
       # event is its own batch.
+      # Events that happen at once outside those (state-based actions, CR 704.3) share the batch `in_batch` names.
       def event_batch
+        return @event_batch if @event_batch
+
         frame = state.frames.last or return "event:#{state.next_id}"
         "#{frame["type"]}:#{frame["object"]}:#{frame["pc"]}"
       end
 
       # Whether a "one or more" trigger already waits for this batch. If so, this occurrence joins it: its
-      # "that many" counts the occurrences in the batch (CR 603.2c).
-      def batched_pending!(source, ref, batch)
+      # "that many" counts the occurrences in the batch and its "those" ({"triggering": "objects"}) gains the
+      # occurrence's object (CR 603.2c).
+      def batched_pending!(source, ref, batch, found = {})
         waiting = state.pending_triggers.select { it["source"] == source["id"] && it["ability"] == ref && it["batch"] == batch }
         waiting.each do |trigger|
           facts = trigger["memory"]["triggering"]
           facts["amount"] = facts.fetch("amount", 1) + 1
+          objects = (facts["objects"] ||= [])
+          objects << found["object"] if found["object"] && !objects.include?(found["object"])
         end
         !waiting.empty?
       end
@@ -330,6 +343,8 @@ module Enjine
       # CR 107.3m: an enters-the-battlefield trigger uses the X its permanent was cast with.
       def entered_x(trigger)
         event = trigger["event"]
+        # "When you cycle this card, ... with mana value X": the X of the activated ability (CR 702.29c, 107.3).
+        return state.objects[event["object"]]&.x if event["type"] == "ability_activated"
         return nil unless event["type"] == "zone_changed" && event["to"] == "battlefield" &&
                           event["new_id"] == trigger["source"]
 

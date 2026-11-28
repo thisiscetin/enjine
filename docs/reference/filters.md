@@ -4,7 +4,7 @@
 
 ## any_target
 
-A creature, player or planeswalker (battles: later).
+A creature, player, planeswalker or battle.
 
 Rules: CR 115.4
 
@@ -20,6 +20,16 @@ Rules: CR 115.1
 
 ```json
 "artifact"
+```
+
+## battle
+
+A battle on the battlefield.
+
+Rules: CR 310.5
+
+```json
+"battle"
 ```
 
 ## creature

@@ -1,0 +1,182 @@
+[
+  {
+    "name": "Alley Outlaw",
+    "mana_cost": "{1}{R}",
+    "types": ["creature"],
+    "subtypes": ["human", "rogue"],
+    "power": 2,
+    "toughness": 1,
+    "abilities": [
+      {
+        "triggered": {
+          "when": { "commits_crime": {} },
+          "limit": "once_each_turn",
+          "effects": [{ "pump": { "power": 1, "toughness": 0, "to": "self" } }]
+        }
+      },
+      {
+        "activated": {
+          "cost": [{ "mana": "{1}" }, "tap"],
+          "targets": ["player"],
+          "effects": [{ "lose_life": { "amount": 1, "to": { "target": 0 } } }]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Case of the Empty Larder",
+    "mana_cost": "{1}{W}",
+    "types": ["enchantment"],
+    "subtypes": ["case"],
+    "abilities": [
+      {
+        "triggered": {
+          "when": { "enters": { "subject": { "each": "creature", "controller": "you" } } },
+          "effects": [{ "gain_life": { "amount": 1 } }]
+        }
+      },
+      { "to_solve": { "amount": { "life_gained_this_turn": "you" }, "at_least": 2 } },
+      {
+        "solved": {
+          "static": { "affects": { "each": "creature", "controller": "you" }, "pump": { "power": 1, "toughness": 0 } }
+        }
+      },
+      {
+        "solved": {
+          "activated": { "cost": [{ "mana": "{2}" }, "sacrifice"], "effects": [{ "draw": { "amount": 2 } }] }
+        }
+      }
+    ]
+  },
+  {
+    "name": "The Ember Gem",
+    "mana_cost": "{1}{R}",
+    "types": ["artifact"],
+    "supertypes": ["legendary"],
+    "subtypes": ["infinity", "stone"],
+    "keywords": ["indestructible"],
+    "abilities": [
+      { "mana": { "cost": ["tap"], "produce": "{R}" } },
+      {
+        "activated": {
+          "cost": [{ "mana": "{2}{R}" }, "tap", { "exile_permanent": { "filter": "creature" } }],
+          "effects": [{ "harness": {} }]
+        }
+      },
+      {
+        "infinity": {
+          "triggered": {
+            "when": { "step_begins": { "step": "upkeep", "whose": "your" } },
+            "effects": [{ "deal_damage": { "amount": 2, "to": "each_opponent" } }]
+          }
+        }
+      }
+    ]
+  },
+  {
+    "name": "Dusty Pantry // Haunted Cellar",
+    "layout": "room",
+    "faces": [
+      {
+        "name": "Dusty Pantry",
+        "mana_cost": "{1}{B}",
+        "types": ["enchantment"],
+        "subtypes": ["room"],
+        "abilities": [
+          {
+            "triggered": {
+              "when": { "step_begins": { "step": "end", "whose": "your" } },
+              "effects": [{ "draw": { "amount": 1 } }, { "lose_life": { "amount": 1, "to": "you" } }]
+            }
+          }
+        ]
+      },
+      {
+        "name": "Haunted Cellar",
+        "mana_cost": "{3}{B}",
+        "types": ["enchantment"],
+        "subtypes": ["room"],
+        "abilities": [
+          {
+            "triggered": {
+              "when": { "unlocks_door": {} },
+              "effects": [
+                {
+                  "create_token": {
+                    "token": { "name": "Spirit", "types": ["creature"], "subtypes": ["spirit"], "colors": ["B"], "power": 3, "toughness": 3 }
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Hallway Lurker",
+    "mana_cost": "{2}{B}",
+    "types": ["creature"],
+    "subtypes": ["spirit"],
+    "power": 2,
+    "toughness": 2,
+    "abilities": [
+      {
+        "triggered": {
+          "when": { "unlocks_door": { "door": "any", "fully": true, "subject": { "each": "permanent", "controller": "you" } } },
+          "effects": [{ "add_counters": { "counter": "+1/+1", "amount": 1, "to": "self" } }]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Veiled Informant",
+    "mana_cost": "{2}{G}",
+    "types": ["creature"],
+    "subtypes": ["elf", "detective"],
+    "power": 3,
+    "toughness": 3,
+    "abilities": [
+      { "disguise": { "cost": "{1}{G}" } },
+      { "triggered": { "when": { "turned_face_up" : {} }, "effects": [{ "draw": { "amount": 1 } }] } }
+    ]
+  },
+  {
+    "name": "Hooded Brute",
+    "mana_cost": "{4}{R}",
+    "types": ["creature"],
+    "subtypes": ["ogre"],
+    "power": 5,
+    "toughness": 4,
+    "abilities": [{ "morph": { "cost": "{2}{R}" } }]
+  },
+  {
+    "name": "Unseen Recruits",
+    "mana_cost": "{2}{G}",
+    "types": ["sorcery"],
+    "abilities": [{ "spell": { "effects": [{ "manifest": {} }, { "cloak": {} }] } }]
+  },
+  {
+    "name": "Dread Whispers",
+    "mana_cost": "{1}{B}",
+    "types": ["instant"],
+    "abilities": [{ "spell": { "effects": [{ "manifest_dread": {} }] } }]
+  },
+  {
+    "name": "Rooftop Shinobi",
+    "mana_cost": "{3}{U}",
+    "types": ["creature"],
+    "subtypes": ["human", "ninja"],
+    "power": 3,
+    "toughness": 2,
+    "abilities": [
+      { "ninjutsu": { "cost": "{U}" } },
+      {
+        "triggered": {
+          "when": { "deals_damage": { "combat": true, "to": "player" } },
+          "effects": [{ "draw": { "amount": 1 } }]
+        }
+      }
+    ]
+  }
+]

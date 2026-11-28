@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 require_relative "card_faces"
+require_relative "card_rooms"
+require_relative "card_face_down"
 
 module Enjine
   # Immutable, validated blueprint of a card, built from a data block.
@@ -11,7 +13,7 @@ module Enjine
   # Enjine.registry. Anything unknown is reported (with its path) in a single
   # InvalidCardDefinition error.
   class CardDefinition
-    KEYS = %w[name mana_cost colors types supertypes subtypes keywords power toughness loyalty abilities rules_text deck_limit
+    KEYS = %w[name mana_cost colors types supertypes subtypes keywords power toughness loyalty defense abilities rules_text deck_limit
               color_identity].freeze
     # Optional catalogue data beside the rules data, never read by the rules: rarity, and the set code and
     # collector number printed on the card ({"set" => "trk", "number" => "12"}).
@@ -19,7 +21,7 @@ module Enjine
     SUBTYPE_FORMAT = /\A[a-z][a-z0-9_]*\z/
     include Faces
 
-    attr_reader :id, :name, :mana_cost, :types, :supertypes, :subtypes, :keywords, :power, :toughness, :loyalty,
+    attr_reader :id, :name, :mana_cost, :types, :supertypes, :subtypes, :keywords, :power, :toughness, :loyalty, :defense,
                 :abilities, :rules_text, :type_modules, :source, :colors, :power_amount, :toughness_amount, :rarity, :printing
 
     # Canonical id derived from a card name: "Jace, the Mind Sculptor" -> "jace_the_mind_sculptor".
@@ -65,26 +67,30 @@ module Enjine
       @source = deep_freeze(@source.merge("rarity" => @rarity, "printing" => @printing).compact) if @rarity || @printing
       @printed_characteristics = Characteristics.printed(self) if errors.empty?
       @color_identity = ColorIdentity.of(self) if face.nil? && errors.empty? # a face has its card's (see #color_identity)
+      precompute_texts if errors.empty?
       freeze
     end
 
     def read_card(card, errors, token_id, face = nil)
       (card.keys - KEYS).each { |k| errors << "#{k}: unknown field (allowed: #{(KEYS + PRINT_KEYS).join(", ")})" }
-      @name = read_name(card, errors)
+      blank = (face && Rooms.locked_face?(face, card)) || FaceDownCards.id?(token_id) # no name (CR 709.5, 708.2)
+      @name = blank ? "" : read_name(card, errors)
       @id = face ? "#{face[0].id}#{FACE_SEPARATOR}#{face[1]}" : token_id || self.class.slug(@name)
       @front, @face_index = face
-      @token = !token_id.nil?
+      @token = !token_id.nil? && !FaceDownCards.id?(token_id)
       @types, @type_modules = read_names(card, "types", :type, errors, required: true)
       @supertypes, = read_names(card, "supertypes", :supertype, errors)
       @subtypes = read_subtypes(card, errors)
       @mana_cost = card.key?("mana_cost") ? Mana.parse_cost(card["mana_cost"], errors) : nil
       @keywords, keyword_modules = read_names(card, "keywords", :keyword, errors)
+      @keyword_instances = read_keyword_instances(card, keyword_modules)
       @colors = read_colors(card, errors)
       @deck_limit = read_deck_limit(card, errors)
       @declared_color_identity = read_color_identity(card, errors)
       @power, @power_amount = read_pt(card, "power", errors)
       @toughness, @toughness_amount = read_pt(card, "toughness", errors)
       @loyalty = read_stat(card, "loyalty", errors)
+      @defense = read_stat(card, "defense", errors) # CR 310.4
       @rules_text = card["rules_text"]
       errors << "rules_text: must be a string" unless @rules_text.nil? || @rules_text.is_a?(String)
       @abilities = read_abilities(card, errors)
@@ -168,6 +174,8 @@ module Enjine
     # This face has an ability of its own to be played from outside its owner's hand: "you may cast this card
     # from your graveyard" (CR 113.6e), beam me up (CR 702.196a) or an alternative cost (Engine::Permissions).
     def plays_itself? = @plays_itself
+    # This face has an ability that is a special action from the hand (foretell, suspend, plot: Actions::SpecialAction).
+    def special_actions? = @special_actions
     # The zones this face's activated abilities function from (CR 113.6): [:battlefield], or [:hand] for cycling.
     attr_reader :activation_zones
 
@@ -195,11 +203,11 @@ module Enjine
 
     def mana_abilities = @ability_instances.map(&:ability).select(&:mana_ability?)
 
-    def type_line
-      left = (@supertypes + @types).map { |t| t.to_s.capitalize }.join(" ")
-      right = @subtypes.map { |t| t.to_s.split("_").map(&:capitalize).join(" ") }.join(" ")
-      right.empty? ? left : "#{left} — #{right}"
-    end
+    # The type line, e.g. "Legendary Creature — Elf Druid" (frozen; views show it for every object).
+    def type_line = @type_line || build_type_line
+
+    # The mana cost as symbols ("{2}{G}"), or nil without one (frozen; views show it for every object).
+    def mana_cost_text = @mana_cost_text || @mana_cost&.to_s
 
     # Canonical data form; CardDefinition.from_h(defn.to_h) == defn.
     def to_h = @source
@@ -215,11 +223,24 @@ module Enjine
 
     private
 
+    def build_type_line
+      left = (@supertypes + @types).map { |t| t.to_s.capitalize }.join(" ")
+      right = @subtypes.map { |t| t.to_s.split("_").map(&:capitalize).join(" ") }.join(" ")
+      right.empty? ? left : "#{left} — #{right}"
+    end
+
+    # Texts a view asks of the definition each time it shows an object: built once, as the definition is immutable.
+    def precompute_texts
+      @type_line = build_type_line.freeze
+      @mana_cost_text = @mana_cost&.to_s&.freeze
+    end
+
     # What lets this face be used off the battlefield, from all its abilities (keyword abilities and nested ones too).
     def precompute_off_board
       own = @ability_instances.map(&:ability) + @nested_instances.map(&:ability)
       @plays_itself = own.any? { CardDefinition.self_play?(it) }
       @activation_zones = own.filter_map { it.zone if %i[activated loyalty].include?(it.kind) }.uniq.freeze
+      @special_actions = own.any? { it.respond_to?(:special!) }
     end
 
     def precompute_predicates
@@ -258,6 +279,7 @@ module Enjine
         errors << "power/toughness: only creatures and Vehicles have power and toughness"
       end
       errors << "loyalty: only planeswalkers have loyalty" if !planeswalker? && @loyalty
+      errors << "defense: only battles have defense" if !type?(:battle) && @defense # CR 310.4
       @abilities.each_with_index do |ability, i|
         allowed = ability.allowed_types
         next if allowed.nil? || allowed.any? { type?(it) }
@@ -425,8 +447,23 @@ module Enjine
       end
     end
 
-    # Keyword abilities that stand for an ability ("Station" is an activated ability, CR 702.184a).
-    def keyword_abilities = @keywords.flat_map { CardDefinition.keyword_instances(it) }
+    # Keyword abilities that stand for an ability ("Station" is an activated ability, CR 702.184a). A keyword whose
+    # instances each trigger separately (cascade, CR 702.85c) brings its abilities once per instance listed.
+    def keyword_abilities
+      @keywords.flat_map { |kw| CardDefinition.keyword_instances(kw) * @keyword_instances.fetch(kw, 1) }
+    end
+
+    # How many times each keyword is listed, for the keywords where several instances aren't redundant
+    # (`multiple_instances?`: "each instance triggers separately", CR 702.40b, 702.85c, 702.101b, 702.191b). Any
+    # other keyword listed twice is one instance (redundant, as in CR 702.2f).
+    def read_keyword_instances(card, modules)
+      list = card.fetch("keywords", [])
+      return {}.freeze unless list.is_a?(Array)
+
+      repeatable = modules.select { it.respond_to?(:multiple_instances?) && it.multiple_instances? }.map { it.primitive_name.to_sym }
+      counts = list.map { it.to_s.downcase.tr(" -", "__").to_sym }.tally
+      counts.select { |kw, n| n > 1 && repeatable.include?(kw) }.freeze
+    end
 
     # Abilities nested in another ability (a station symbol's, CR 722.2), referenced as
     # "<parent ref>:<j>". They're part of the object's characteristics only while the parent applies.
@@ -445,9 +482,10 @@ module Enjine
       out["types"] = @types.map(&:to_s)
       out["supertypes"] = @supertypes.map(&:to_s) unless @supertypes.empty?
       out["subtypes"] = @subtypes.map(&:to_s) unless @subtypes.empty?
-      out["keywords"] = @keywords.map(&:to_s) unless @keywords.empty?
+      out["keywords"] = @keywords.flat_map { [it.to_s] * @keyword_instances.fetch(it, 1) } unless @keywords.empty?
       %w[power toughness].each { |key| out[key] = normalized_stat(card, key) unless instance_variable_get("@#{key}").nil? }
       out["loyalty"] = @loyalty unless @loyalty.nil?
+      out["defense"] = @defense unless @defense.nil?
       out["abilities"] = Snapshot.deep_stringify(card["abilities"]) if card["abilities"].is_a?(Array) && !card["abilities"].empty?
       out["rules_text"] = @rules_text if @rules_text
       deep_freeze(out.merge!(deck_building_h))

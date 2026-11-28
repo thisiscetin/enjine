@@ -25,6 +25,8 @@ module Enjine
         } }.freeze
 
         def self.intrinsic_abilities = @intrinsic_abilities ||= [Keywords.ability_from_data(ABILITY, "increment")].freeze
+        # CR 702.191b: list it once per instance
+        def self.multiple_instances? = true
       end
     end
   end

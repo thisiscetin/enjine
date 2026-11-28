@@ -94,7 +94,7 @@ RSpec.describe "Library, hand and graveyard effects, edicts and linked exile: ca
     expect(errors_for([{ "choose_cards" => { "from" => { "hand" => { "target" => 0 } }, "count" => "few", "put" => "hand",
                                              "reveal" => "some", "otherwise" => [{ "exile" => { "to" => { "result" => 0 } } }] } }]))
       .to eq(["#{base}.choose_cards.from.hand.target: must refer to one of the 0 declared targets",
-              "#{base}.choose_cards.count: must be a positive integer or \"any\"",
+              "#{base}.choose_cards.count: must be a positive integer, \"any\" or \"all\"",
               "#{base}.choose_cards.reveal: must be one of chosen, all",
               "#{base}.choose_cards.otherwise[0].exile.to.result: must refer to one of the 0 earlier effects"])
     choose = effect({ "choose_cards" => { "from" => { "graveyard" => "you" }, "count" => "any", "put" => "library_bottom" } })

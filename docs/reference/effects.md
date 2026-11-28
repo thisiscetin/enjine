@@ -509,15 +509,15 @@ Rules: CR 205.2a, CR 607.2d, CR 608.2c
 
 ## choose_cards
 
-You choose `count` (default 1; "any": any number) cards matching `for` from `from`: a selector (e.g. {"result": 0}, the cards an earlier effect milled) or a player's zone, {"hand": selector} / {"graveyard": selector}. `optional`: you may choose fewer. Then they are put into `put` (`discard`: from a hand, its owner discards them; `tapped` onto the battlefield, under your control; exiled cards `link`ed to the source). `look`: you look at the whole zone first; `reveal`: "chosen" reveals what you chose, "all" the whole set. `then` runs if a card was chosen, `otherwise` if none was ("if you can't"). `random: true`: the cards are picked at random (the game's random number generator) instead of chosen.
+You choose `count` (default 1; "any": any number; "all": every matching card, no choice) cards matching `for` from `from`: a selector (e.g. {"result": 0}, the cards an earlier effect milled) or a player's zone, {"hand": selector} / {"graveyard": selector}. `optional`: you may choose fewer. Then they are put into `put` (`discard`: from a hand, its owner discards them; `tapped` onto the battlefield, under your control; exiled cards `link`ed to the source). `look`: you look at the whole zone first; `reveal`: "chosen" reveals what you chose, "all" the whole set. `then` runs if a card was chosen, `otherwise` if none was ("if you can't"). `random: true`: the cards are picked at random (the game's random number generator) instead of chosen. `chooser`: the player who chooses (a player selector, default "you"; e.g. "each_opponent" or {"target": 0}: "target opponent chooses a card from among them"); they look at the cards they choose from, and the cards still go where `put` says under your control.
 
-Rules: CR 701.20a, CR 701.20e, CR 400.7j, CR 608.2c, CR 607.2a, CR 118.12, CR 701.9a, CR 701.9b
+Rules: CR 701.20a, CR 701.20e, CR 400.7j, CR 608.2c, CR 607.2a, CR 118.12, CR 701.9a, CR 701.9b, CR 608.2d
 
 | Parameter | Description |
 | --- | --- |
 | `from` | selector or {"hand"|"graveyard": player selector} |
 | `for` | card spec |
-| `count` | integer or "any" |
+| `count` | integer, "any" or "all" |
 | `optional` | boolean |
 | `put` | hand | graveyard | exile | battlefield | library_top | library_bottom | discard |
 | `tapped` | boolean |
@@ -527,6 +527,7 @@ Rules: CR 701.20a, CR 701.20e, CR 400.7j, CR 608.2c, CR 607.2a, CR 118.12, CR 70
 | `reveal` | chosen | all |
 | `then` | list of effects |
 | `otherwise` | list of effects |
+| `chooser` | player selector (default "you") |
 
 ```json
 {
@@ -614,6 +615,23 @@ Rules: CR 607.2f, CR 608.2c
       "even"
     ]
   }
+}
+```
+
+## cloak
+
+Each referenced player (default you) cloaks the top card of their library `amount` times (default 1): it enters face down as a nameless colorless 2/2 creature with ward {2}. Its controller may turn it face up for its mana cost if it's a creature card.
+
+Rules: CR 701.58a, CR 701.58b, CR 701.58e, CR 701.58f, CR 701.58g, CR 708.2, CR 708.3
+
+| Parameter | Description |
+| --- | --- |
+| `amount` | amount (default 1) |
+| `to` | players (default you) |
+
+```json
+{
+  "cloak": {}
 }
 ```
 
@@ -900,7 +918,7 @@ Rules: CR 120.3a, CR 120.3c, CR 120.3e, CR 120.6, CR 120.4a, CR 120.10
 
 ## delayed_trigger
 
-Creates a delayed triggered ability with the controller and source of the resolving spell or ability. It triggers only once, the next time `when` happens (e.g. {"step_begins": {"step": "end", "whose": "each"}} for the next end step). Its `effects` may use {"result": n} for what earlier effects of the creating list moved or created; those objects are affected only if they are still where they were put.
+Creates a delayed triggered ability with the controller and source of the resolving spell or ability. It triggers only once, the next time `when` happens (e.g. {"step_begins": {"step": "end", "whose": "each"}} for the next end step). Its `effects` may use {"result": n} for what earlier effects of the creating list moved or created (n below its position); those objects are affected only if they are still where they were put. Its own effects are numbered on from there.
 
 Rules: CR 603.7a, CR 603.7b, CR 603.7c, CR 603.7d, CR 603.7e
 
@@ -1475,6 +1493,22 @@ Rules: CR 113.6b, CR 611.2a, CR 613.1f
 }
 ```
 
+## harness
+
+Each referenced permanent (default: this one) becomes harnessed if it isn't (a designation it keeps until it leaves the battlefield). Its `infinity` abilities work while it is.
+
+Rules: CR 701.64a, CR 701.64b
+
+| Parameter | Description |
+| --- | --- |
+| `to` | selector of permanents (default self) |
+
+```json
+{
+  "harness": {}
+}
+```
+
 ## look_at_hand
 
 You look at each referenced player's hand (other players don't see the cards).
@@ -1529,9 +1563,42 @@ Rules: CR 119.3
 }
 ```
 
+## manifest
+
+Each referenced player (default you) manifests the top card of their library `amount` times (default 1): it enters face down as a nameless colorless 2/2 creature with no abilities. Its controller may turn it face up for its mana cost if it's a creature card (special action `turn_face_up`). The new permanents are this effect's results.
+
+Rules: CR 701.40a, CR 701.40b, CR 701.40e, CR 701.40f, CR 701.40g, CR 708.2, CR 708.3
+
+| Parameter | Description |
+| --- | --- |
+| `amount` | amount (default 1) |
+| `to` | players (default you) |
+
+```json
+{
+  "manifest": {}
+}
+```
+
+## manifest_dread
+
+Each referenced player (default you) manifests dread: looks at the top two cards of their library, manifests one of them (decision `effect_choice`) and puts the other into their graveyard. Triggers on it (`keyword_action` "manifest_dread") see it after it's complete.
+
+Rules: CR 701.62a, CR 701.62b, CR 701.40a, CR 701.20e
+
+| Parameter | Description |
+| --- | --- |
+| `to` | players (default you) |
+
+```json
+{
+  "manifest_dread": {}
+}
+```
+
 ## may
 
-An optional effect. The controller chooses yes or no as it resolves; yes is offered only if every effect in `effects` can be done fully. On yes, `effects` then `then` ("if you do") happen; on no, `otherwise` ("if you don't"). Nested effects may name the results of earlier effects of the enclosing list.
+An optional effect. The controller chooses yes or no as it resolves; yes is offered only if every effect in `effects` can be done fully. On yes, `effects` then `then` ("if you do") happen; on no, `otherwise` ("if you don't"). Nested effects may name the results of earlier effects of the enclosing list ({"result": n} with n below this effect's position) and their own, numbered on from there: `effects` then `then` in one numbering, `otherwise` in its own ("if you do, ... the creature sacrificed this way").
 
 Rules: CR 118.12, CR 118.3, CR 608.2d, CR 608.2e
 
@@ -1858,7 +1925,7 @@ Rules: CR 701.70a
 
 ## reflexive_trigger
 
-Creates a reflexive triggered ability ("when you do, ...") that triggers immediately, with the controller and source of the resolving spell or ability. Its `targets` are chosen as it's put on the stack; its `effects` may name the results of earlier effects of the creating list. With `if`, it triggers only when the condition holds ("when excess damage is dealt this way").
+Creates a reflexive triggered ability ("when you do, ...") that triggers immediately, with the controller and source of the resolving spell or ability. Its `targets` are chosen as it's put on the stack; its `effects` may name the results of earlier effects of the creating list ({"result": n} / {"this_way": n} with n below its position) and their own, numbered on from there. With `if`, it triggers only when the condition holds ("when excess damage is dealt this way").
 
 Rules: CR 603.12, CR 603.12a, CR 603.7d, CR 603.7e, CR 603.3d
 
@@ -1891,9 +1958,9 @@ Rules: CR 603.12, CR 603.12a, CR 603.7d, CR 603.7e, CR 603.3d
 
 ## remove_all_counters
 
-Remove every counter named `counter` (every counter, if no `counter` is given) from each referenced permanent.
+Remove every counter named `counter` (every counter, if no `counter` is given) from each referenced permanent or player ("you lose all poison counters").
 
-Rules: CR 122.8
+Rules: CR 122.8, CR 122.1
 
 | Parameter | Description |
 | --- | --- |
@@ -1913,9 +1980,9 @@ Rules: CR 122.8
 
 ## remove_counters
 
-Remove up to `amount` counters named `counter` from each referenced permanent. How many were removed is {"this_way": n} ("remove a bait counter ... If you do, ...").
+Remove up to `amount` counters named `counter` from each referenced permanent or player (poison, experience, ...). How many were removed is {"this_way": n} ("remove a bait counter ... If you do, ...").
 
-Rules: CR 122.8
+Rules: CR 122.8, CR 122.1
 
 | Parameter | Description |
 | --- | --- |
@@ -2322,6 +2389,22 @@ Rules: CR 614.1b, CR 614.10, CR 614.10a
       "target": 0
     }
   }
+}
+```
+
+## solve
+
+Each referenced permanent (default: this one) becomes solved if it isn't (a designation it keeps until it leaves the battlefield). Usually written through `to_solve`.
+
+Rules: CR 720.3a, CR 720.3b
+
+| Parameter | Description |
+| --- | --- |
+| `to` | selector of permanents (default self) |
+
+```json
+{
+  "solve": {}
 }
 ```
 

@@ -29,15 +29,17 @@ module Enjine
         filter
       end
 
-      Facts = Data.define(:chars, :counters, :token, :chosen) do
-        def initialize(chars:, counters:, token:, chosen: nil) = super
+      # `status`: {"attacking" =>, "blocking" =>, "tapped" => bool} for a permanent on the battlefield, nil where unknown
+      # (then a filter's status keys aren't checked).
+      Facts = Data.define(:chars, :counters, :token, :chosen, :status) do
+        def initialize(chars:, counters:, token:, chosen: nil, status: nil) = super
       end
 
       # The choices "the chosen ..." can refer to (CR 607.2d): the resolving spell's or ability's own
       # (an effect's "choose a creature type"), else its source's (an "as this enters" choice, CR 614.12).
       def self.chosen_memory(engine, source, ctx)
         own = engine.state.objects[source]&.memory || {}
-        resolving = ctx && ctx.object != source ? engine.state.objects[ctx.object]&.memory : nil
+        resolving = ctx && ctx.object != source ? engine.find_object(ctx.object)&.memory : nil
         resolving ? own.merge(resolving.select { |k, _| k.start_with?("chosen_") }) : own
       end
 
@@ -106,7 +108,7 @@ module Enjine
       #   {"creature": {"entered_this_turn": true}}      entered the battlefield this turn
       #   {"spell": {"single_target": true}}             a spell with a single target (CR 115.7)
       class Restricted
-        TYPES = %w[artifact creature enchantment land planeswalker instant sorcery].freeze
+        TYPES = %w[artifact battle creature enchantment kindred land planeswalker instant sorcery].freeze
         BOOLEANS = %w[other attacking blocking tapped token modified transformed prepared saddled entered_this_turn
                       single_target].freeze
         RANGES = %w[power toughness mana_value].freeze
@@ -118,6 +120,8 @@ module Enjine
         # "chosen" ("with the chosen name", CR 201.4).
         CHOSEN = { "colors" => "chosen_color", "types" => "chosen_card_type", "not" => "chosen_card_type",
                    "subtypes" => "chosen_type", "not_subtypes" => "chosen_type", "name" => "chosen_name" }.freeze
+        # Status, not characteristics: a static ability may read them (they never depend on the layer pass, CR 613.8).
+        STATUS = %w[attacking blocking tapped].freeze
         # Keys that need current characteristics or combat/tapped status: not usable in the layer pass.
         LIVE = %w[power toughness attacking blocking tapped attached_subtypes transformed prepared saddled
                   entered_this_turn single_target].freeze
@@ -240,7 +244,12 @@ module Enjine
             (@lists["any_of"].empty? || types.intersect?(@lists["any_of"])) && (@lists["types"] - types).empty?
         end
 
-        def matches_facts?(facts) = base.matches_facts?(facts) && characteristics_ok?(facts)
+        def matches_facts?(facts) = base.matches_facts?(facts) && characteristics_ok?(facts) && status_facts_ok?(facts.status)
+
+        # Attacking, blocking and tapped status from Facts (CR 506.4), when known.
+        def status_facts_ok?(status)
+          status.nil? || STATUS.all? { @params[it].nil? || status[it] == @params[it] }
+        end
 
         def to_s
           words = []

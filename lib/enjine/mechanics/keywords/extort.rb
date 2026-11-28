@@ -20,6 +20,8 @@ module Enjine
         } }.freeze
 
         def self.intrinsic_abilities = @intrinsic_abilities ||= [Keywords.ability_from_data(ABILITY, "extort")].freeze
+        # CR 702.101b: list it once per instance
+        def self.multiple_instances? = true
       end
     end
   end

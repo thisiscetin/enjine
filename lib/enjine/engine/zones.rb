@@ -82,9 +82,11 @@ module Enjine
       def propose(kind, data, applied = []) = Replacements.apply(self, Proposal.new(kind, data, applied.dup))
 
       # `face_down`: exile it face down (CR 406.3); the list of player indices who may look at it.
-      def move!(id, to, reason:, position: :top, controller: nil, enters: nil, face_down: nil)
+      # `face_down_as`: it goes to the battlefield or the stack face down, as "manifest", "cloak", "morph" or
+      # "disguise" (Engine::FaceDownPermanents).
+      def move!(id, to, reason:, position: :top, controller: nil, enters: nil, face_down: nil, face_down_as: nil)
         data = plan_move(id, to, reason: reason, position: position, controller: controller, enters: enters,
-                                 face_down: face_down)
+                                 face_down: face_down, face_down_as: face_down_as)
         data && execute_zone_change!(data)
       end
 
@@ -94,9 +96,10 @@ module Enjine
 
       # The zone change `move!` would make, after replacement effects (CR 614), not yet executed; nil if a
       # replacement cancelled it. Planning several before executing any lets them happen at once (CR 614.12).
-      def plan_move(id, to, reason:, position: :top, controller: nil, enters: nil, face_down: nil)
+      def plan_move(id, to, reason:, position: :top, controller: nil, enters: nil, face_down: nil, face_down_as: nil)
         data = { "object" => id, "to" => to, "position" => position, "reason" => reason, "controller" => controller }
         data["face_down"] = face_down if face_down && to == :exile
+        data["face_down_as"] = face_down_as if face_down_as && %i[battlefield stack].include?(to)
         data["enters"] = { "tapped" => enters&.fetch("tapped", false) == true, "counters" => {} } if to == :battlefield
         data["enters"]["face"] = enters["face"] if data["enters"] && enters&.key?("face") # seen by its own replacements
         data = propose("zone_change", data).data
@@ -110,7 +113,10 @@ module Enjine
       def depart!(old)
         lki = old.zone == :battlefield ? last_known_info(old) : nil # before it leaves (CR 603.10a)
         remember_last_known!(old.id, lki) if lki # CR 608.2h (see Engine::TurnHistory)
-        remember_spell!(old) if old.zone == :stack && !old.ability? # a countered spell's mana spent (Engine::TurnHistory)
+        if old.zone == :stack && !old.ability?
+          remember_spell!(old) # a countered spell's mana spent (Engine::TurnHistory)
+          note_left_stack!(old) # while it resolves (Engine::Resolution)
+        end
         state.zone_list(old.zone, old.owner).delete(old.id)
         state.objects.delete(old.id)
         lki
@@ -122,23 +128,43 @@ module Enjine
         old = object(id)
         lki = depart!(old)
         face_down = to == :exile ? data["face_down"] : nil
-        fresh = create_object(card_after_move(old, to), old.owner, to, hidden: !face_down.nil?) # front face up (Engine::Faces)
+        as = face_down_as(old, to, data) # CR 708.3, 708.4 (Engine::FaceDownPermanents)
+        fresh = create_object(card_after_move(old, to), old.owner, to, hidden: !face_down.nil? || !as.nil?) # front face up (Engine::Faces)
         carry_copy_status!(fresh, old, to) # a token or copy stays one (Engine::Copies)
         left_battlefield!(fresh, old) if lki
         arrive!(fresh, old, data)
         fresh.memory.merge!("face_down" => true, "may_look" => face_down.uniq.sort) if face_down
+        turn_face_down!(fresh, as) if as
         place!(fresh, data)
         record_result!(fresh.id)
         note_commander_move!(fresh) # CR 903.9
         event = Events::ZoneChanged.new(card: old.card, old_id: id, new_id: fresh.id, owner: name(old.owner),
                                         from: old.zone.to_s, to: to.to_s, reason: data["reason"],
-                                        lookers: face_down&.map { name(it) })
+                                        lookers: zone_change_lookers(fresh, face_down, as))
         lki ? with_last_known(id, lki) { emit event } : emit(event)
+        reveal_face_down_left!(old, fresh) # CR 708.9
         return_exiled_until_leaves!(old) if lki # CR 610.3
         unmeld!(old, to, data) if old.memory["melded"] # CR 713.8 (Engine::Faces)
         prepare!(fresh) if to == :battlefield && data["enters"]["prepared"] # "enters prepared" (CR 723.3a)
+        room_entered!(fresh, old) if to == :battlefield # CR 709.5d, 709.5h (Engine::Rooms)
         run_follow_ups!(data, "object" => fresh.id) # "exile it instead. When you do, ..." (Engine::FollowUps)
         fresh
+      end
+
+      # What a moving object is face down as on arrival: as the move says, or as the face-down spell it was
+      # (CR 702.37c, 702.168b: the permanent has the spell's characteristics); nil when it's face up.
+      def face_down_as(old, to, data)
+        return data["face_down_as"] if data["face_down_as"]
+
+        old.memory["face_down_as"] if old.zone == :stack && to == :battlefield
+      end
+
+      # Who sees which card moved: the players who may look at a card exiled face down (CR 406.3), the controller of
+      # a face-down spell or permanent (CR 708.5); nil when everyone who sees the zones does.
+      def zone_change_lookers(fresh, face_down, kind)
+        return face_down.map { name(it) } if face_down
+
+        kind && [name(fresh.controller)]
       end
 
       # Puts the new object into its zone's list; on the battlefield, as what it enters as (#enter_as!).

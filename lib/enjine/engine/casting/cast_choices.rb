@@ -8,7 +8,7 @@ module Enjine
     module CastChoices
       # ---- additional costs of spells (CR 601.2b, 601.2f, 702.33) ----------------------------
 
-      def spell_cost_abilities(obj, kind) = chars(obj).abilities.map(&:ability).select { it.kind == kind }
+      def spell_cost_abilities(obj, kind) = abilities_of_kind(chars(obj), kind)
 
       # CR 601.2f / 118.3: the spell's mandatory non-mana additional costs can be paid.
       def additional_costs_payable?(obj) = spell_cost_abilities(obj, :additional_cost).all? { it.payable?(self, obj) }
@@ -220,6 +220,13 @@ module Enjine
 
       # The object a cost is paid for: the ability's source, or the spell itself.
       def cost_payer(ctx) = object(ctx["kind"] == "ability" ? ctx["source"] : ctx["object"])
+
+      # The spell or ability whose costs are being paid now: the one being cast or activated, else the one resolving
+      # (a cost paid while it resolves, CR 118.12). It remembers what its costs chose (a creature type, cards exiled).
+      def cost_holder
+        id = casting&.[]("object") || state.frames.rfind { it["type"] == "resolve" }&.[]("object")
+        id && state.objects[id]
+      end
 
       def cost_entries(ctx, index) = (ctx["paid"] || []).select { it["cost"] == index }
 

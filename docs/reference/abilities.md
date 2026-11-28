@@ -20,7 +20,7 @@ Rules: CR 602.1, CR 602.2, CR 602.5b, CR 602.5d, CR 702.177a, CR 702.193a, CR 70
 | `power_up` | true: "Power-up — [cost]: [effect]" (CR 702.193a) |
 | `boast` | true: "Boast — [cost]: [effect]" (CR 702.142a) |
 | `zone` | "exile" | "graveyard" | "hand" (CR 113.6b; default: the battlefield, or the zone a cost moves the card from) |
-| `cost_reduction` | {"amount": amount, "if": condition}: "this ability costs {N} less to activate" (CR 601.2f, 602.2b) |
+| `cost_reduction` | {"amount": amount, "if": condition}: "this ability costs {N} less to activate" (CR 601.2f, 602.2b); the amount may name its targets ({"target": 0}) |
 
 ```json
 {
@@ -206,7 +206,7 @@ Rules: CR 702.26a, CR 502.1, CR 604.1
 
 ## cards_have
 
-While this permanent is on the battlefield, cards you own in `zone` (graveyard (default), hand or exile) matching `cards` have the keyword alternative cost `ability` (flashback, harmonize, mayhem, web_slinging or sneak) and may be cast with it from that zone. Cast option `via: "alt:cards_have:<permanent>:<ref>"`.
+While this permanent is on the battlefield, cards you own in `zone` (graveyard (default), hand or exile) matching `cards` have the keyword alternative cost `ability` (flashback, harmonize, mayhem, web_slinging, sneak or miracle) and may be cast with it from that zone. Cast option `via: "alt:cards_have:<permanent>:<ref>"`.
 
 Rules: CR 611.3a, CR 604.1, CR 118.9, CR 601.2b, CR 702.190a
 
@@ -436,7 +436,7 @@ Rules: CR 717.2a, CR 717.2b, CR 717.2d, CR 717.3, CR 602.5d
 
 ## cost_modifier
 
-While on the battlefield: spells cast by `caster` (you, opponent or any; default you) whose card types match `spells` ({"any_of": [types], "not": [types]}, default all spells; `subtypes` and `colors` narrow it: "Dragon spells", "red spells") cost `reduce` less or `increase` more generic mana. `from` / `not_from`: only spells cast from (not from) that zone (hand | graveyard | exile | library | outside).
+While on the battlefield: spells cast by `caster` (you, opponent or any; default you) whose card types match `spells` ({"any_of": [types], "not": [types]}, default all spells; `subtypes`, `colors` and `name` narrow it: "Dragon spells", "red spells"; `"subtypes": "chosen"`: of the type chosen for this permanent, `"name": "chosen"`: with the name its source chose) cost `reduce` less or `increase` more generic mana. `from` / `not_from`: only spells cast from (not from) that zone (hand | graveyard | exile | library | outside).
 
 Rules: CR 601.2f, CR 118.7a, CR 604.1, CR 601.2a
 
@@ -484,6 +484,32 @@ Rules: CR 601.2f, CR 118.7a, CR 702.41a
 }
 ```
 
+## craft
+
+Craft with `materials` `cost`: pay `cost`, exile this permanent and exile the materials (`count` (default 1) permanents you control and/or cards in your graveyard matching the card spec `card`; `or_more: true`: that many or more), chosen with `choose_cost`: return this card to the battlefield transformed under its owner's control. Sorcery speed. The exiled materials are the selector "exiled_for_cost".
+
+Rules: CR 702.167a, CR 702.167b, CR 702.167c, CR 712.11a, CR 602.2b, CR 406.1
+
+| Parameter | Description |
+| --- | --- |
+| `cost` | mana cost string, or a list of costs |
+| `materials` | {"card": card spec, "count": n, "or_more": true} |
+
+```json
+{
+  "craft": {
+    "cost": "{3}{W}",
+    "materials": {
+      "card": {
+        "types": [
+          "artifact"
+        ]
+      }
+    }
+  }
+}
+```
+
 ## crew
 
 Crew N: tap any number of other untapped creatures you control with total power N or more (chosen one at a time; `done` once the total is enough): this permanent becomes an artifact creature until end of turn. A Vehicle has its printed power and toughness only while it's a creature.
@@ -504,13 +530,13 @@ Rules: CR 702.122a, CR 702.122b, CR 702.122e, CR 301.7, CR 301.7a, CR 301.7b, CR
 
 ## cycling
 
-Cycling: pay `cost` and discard this card from your hand to draw a card. With `for` it is typecycling: instead search your library for a card matching `for`, reveal it, put it into your hand, then shuffle.
+Cycling: pay `cost` and discard this card from your hand to draw a card. With `for` it is typecycling: instead search your library for a card matching `for`, reveal it, put it into your hand, then shuffle. `cost` is a mana cost string (it may hold {X}, announced as it's activated) or a list of costs (`[{"pay_life": 2}]`). "When you cycle this card" is a triggered ability with `zone: "graveyard"` and the trigger `{"cycles": {"self": true}}`; its X is the cycling ability's.
 
-Rules: CR 702.29a, CR 702.29b, CR 702.29e, CR 702.29f, CR 113.6m, CR 602.2a
+Rules: CR 702.29a, CR 702.29b, CR 702.29c, CR 702.29d, CR 702.29e, CR 702.29f, CR 113.6m, CR 602.2a, CR 107.3
 
 | Parameter | Description |
 | --- | --- |
-| `cost` | mana cost string, e.g. "{2}" |
+| `cost` | mana cost string, e.g. "{2}" or "{X}{G}{G}", or a list of costs |
 | `for` | optional card spec for typecycling (see search_library) |
 
 ```json
@@ -624,6 +650,24 @@ Rules: CR 702.82a, CR 702.82b, CR 702.82c, CR 614.12, CR 701.21a
   "devour": {
     "amount": 3,
     "each": "land"
+  }
+}
+```
+
+## disguise
+
+Disguise: you may cast this card face down as a nameless colorless 2/2 creature spell with ward {2} by paying {3} rather than its mana cost (cast option `via: "alt:<ref>"`). Any time you have priority you may turn the face-down permanent face up by paying `cost` (special action `{type: "turn_face_up", via: "disguise"}`).
+
+Rules: CR 702.168a, CR 702.168b, CR 702.168c, CR 702.168d, CR 708.2, CR 708.4, CR 708.8, CR 116.2b
+
+| Parameter | Description |
+| --- | --- |
+| `cost` | mana cost string: the cost to turn it face up |
+
+```json
+{
+  "disguise": {
+    "cost": "{4}{G}"
   }
 }
 ```
@@ -969,13 +1013,13 @@ Rules: CR 705.3, CR 604.1
 
 ## flashback
 
-Flashback: you may cast this instant or sorcery card from your graveyard by paying `cost` rather than its mana cost; then it's exiled whenever it would leave the stack. `cost` is a mana cost string or a list of costs (`[{"mana": "{1}{U}"}, {"tap_permanents": {"count": 3}}]`). Cast option `via: "alt:<ref>"`.
+Flashback: you may cast this instant or sorcery card from your graveyard by paying `cost` rather than its mana cost; then it's exiled whenever it would leave the stack. `cost` is a mana cost string or a list of costs (`[{"mana": "{1}{U}"}, {"tap_permanents": {"count": 3}}]`), or `"mana_cost"`: the card's own mana cost ("its flashback cost is equal to its mana cost", e.g. granted with `grant_ability`). Cast option `via: "alt:<ref>"`.
 
-Rules: CR 702.34a, CR 118.9, CR 601.2b, CR 601.2f, CR 601.2h
+Rules: CR 702.34a, CR 118.9, CR 118.6, CR 601.2b, CR 601.2f, CR 601.2h
 
 | Parameter | Description |
 | --- | --- |
-| `cost` | mana cost string, or a list of costs |
+| `cost` | mana cost string, a list of costs, or "mana_cost" |
 
 ```json
 {
@@ -1079,6 +1123,58 @@ Rules: CR 702.75a, CR 406.3, CR 607.2a
 }
 ```
 
+## impending
+
+Impending `amount`—`cost`: you may cast this card by paying `cost` rather than its mana cost. If you do, it enters with `amount` time counters, and while its impending cost was paid and it has a time counter on it, it isn't a creature. At the beginning of your end step, remove a time counter from it (a triggered ability that comes with the keyword). Cast option `via: "alt:<ref>"`; `{"cast_with": "impending"}` reads it.
+
+Rules: CR 702.176a, CR 118.9, CR 601.2b, CR 601.2f, CR 601.2h, CR 613.1d, CR 613.6, CR 122.6
+
+| Parameter | Description |
+| --- | --- |
+| `amount` | integer >= 1: the time counters |
+| `cost` | mana cost string, or a list of costs |
+
+```json
+{
+  "impending": {
+    "amount": 4,
+    "cost": "{1}{G}{G}"
+  }
+}
+```
+
+## infinity
+
+An Infinity card's "∞ — [ability]": one static, triggered or activated ability that works only while this permanent is harnessed. Condition `{"harnessed": true}` reads the designation.
+
+Rules: CR 702.186a, CR 702.186b, CR 701.64b
+
+| Parameter | Description |
+| --- | --- |
+| `(ability)` | {"static" | "triggered" | "activated": {...}} |
+
+```json
+{
+  "infinity": {
+    "triggered": {
+      "when": {
+        "step_begins": {
+          "step": "upkeep",
+          "whose": "your"
+        }
+      },
+      "effects": [
+        {
+          "draw": {
+            "amount": 1
+          }
+        }
+      ]
+    }
+  }
+}
+```
+
 ## kicker
 
 Kicker: as you cast this spell you may also pay `cost` (mana and/or chosen costs such as `sacrifice_permanent`). The spell is then kicked: `{"kicked": true}` conditions hold and its `kicked_targets` are used.
@@ -1097,6 +1193,28 @@ Rules: CR 702.33a, CR 702.33d, CR 702.33g, CR 601.2b, CR 601.2f, CR 601.2h
         "mana": "{1}{U}"
       }
     ]
+  }
+}
+```
+
+## life_gain_replacement
+
+While this permanent is on the battlefield, each time `player` (you (default) | opponent | any, relative to its controller) would gain life, instead: `multiply` (2 = "twice that much"), `plus` an amount ("that much life plus 1"), or `lose: true` ("that player loses that much life instead"). Each applies once to an event; the affected player's best order is used: losing instead first, then adding, then multiplying. Gaining 0 life is no event (nothing applies).
+
+Rules: CR 614.1a, CR 614.5, CR 616.1, CR 119.10
+
+| Parameter | Description |
+| --- | --- |
+| `player` | you | opponent | any |
+| `multiply` | integer >= 2 |
+| `plus` | amount |
+| `lose` | true |
+
+```json
+{
+  "life_gain_replacement": {
+    "player": "you",
+    "plus": 1
   }
 }
 ```
@@ -1234,6 +1352,24 @@ Rules: CR 702.187a, CR 702.187b, CR 702.187c, CR 118.9, CR 601.2b, CR 601.2f, CR
 }
 ```
 
+## miracle
+
+Miracle `cost`: when you draw this card as the first card you drew this turn, it's revealed and a triggered ability lets you cast it as that ability resolves by paying `cost` rather than its mana cost (an `effect_choice`: cast or done), if it's still in your hand. Never offered at priority. `cards_have` with `zone: "hand"` can give it to cards in your hand.
+
+Rules: CR 702.94a, CR 702.94b, CR 608.2g, CR 118.9, CR 601.2b, CR 601.2f, CR 601.2h, CR 121.2
+
+| Parameter | Description |
+| --- | --- |
+| `cost` | mana cost string, or a list of costs |
+
+```json
+{
+  "miracle": {
+    "cost": "{1}{R}"
+  }
+}
+```
+
 ## mobilize
 
 Mobilize `amount`: whenever this creature attacks, create that many 1/1 red Warrior creature tokens tapped and attacking; sacrifice them at the beginning of the next end step.
@@ -1248,6 +1384,60 @@ Rules: CR 702.181a, CR 508.4
 {
   "mobilize": {
     "amount": 2
+  }
+}
+```
+
+## morph
+
+Morph: you may cast this card face down as a nameless colorless 2/2 creature spell by paying {3} rather than its mana cost (cast option `via: "alt:<ref>"`). Any time you have priority you may turn the face-down permanent face up by paying `cost` (special action `{type: "turn_face_up", via: "morph"}`); abilities about entering don't trigger then.
+
+Rules: CR 702.37a, CR 702.37c, CR 702.37d, CR 702.37e, CR 708.2, CR 708.4, CR 708.8, CR 116.2b
+
+| Parameter | Description |
+| --- | --- |
+| `cost` | mana cost string: the cost to turn it face up |
+
+```json
+{
+  "morph": {
+    "cost": "{1}{G}"
+  }
+}
+```
+
+## ninjutsu
+
+Ninjutsu: an activated ability from your hand: pay `cost`, reveal this card and return an unblocked attacking creature you control to its owner's hand (a `choose_cost` decision) to put this card onto the battlefield tapped and attacking what that creature was attacking. It isn't cast. Usable while you have an unblocked attacker (after blockers are declared).
+
+Rules: CR 702.49a, CR 702.49b, CR 702.49c, CR 509.1h, CR 506.3a, CR 113.6m, CR 602.2a
+
+| Parameter | Description |
+| --- | --- |
+| `cost` | mana cost string, e.g. "{1}{U}{B}" |
+
+```json
+{
+  "ninjutsu": {
+    "cost": "{1}{U}"
+  }
+}
+```
+
+## offspring
+
+Offspring: as you cast this spell you may also pay `cost` (announced with the `choose_kicker` decision; the spell isn't kicked). When the permanent enters, if its offspring cost was paid, create a 1/1 token copy of it (a triggered ability that comes with the keyword). `{"cast_with": "offspring"}` holds if it was paid.
+
+Rules: CR 702.175a, CR 702.175b, CR 601.2b, CR 601.2f, CR 601.2h, CR 707.9b, CR 603.4
+
+| Parameter | Description |
+| --- | --- |
+| `cost` | mana cost string, or a list of costs |
+
+```json
+{
+  "offspring": {
+    "cost": "{2}"
   }
 }
 ```
@@ -1405,6 +1595,35 @@ Rules: CR 702.190a, CR 702.190b, CR 506.3a, CR 118.9, CR 601.2b, CR 601.2f, CR 6
 }
 ```
 
+## solved
+
+A Case's "Solved — [ability]": one static, triggered or activated ability that works only while this permanent is solved (a static applies as long as it's solved, a triggered ability triggers only if it's solved, an activated ability can be activated only if it's solved). Condition `{"solved": true}` reads the designation.
+
+Rules: CR 702.169a, CR 702.169b, CR 702.169c, CR 702.169d, CR 720.3b, CR 720.3c
+
+| Parameter | Description |
+| --- | --- |
+| `(ability)` | {"static" | "triggered" | "activated": {...}} |
+
+```json
+{
+  "solved": {
+    "activated": {
+      "cost": [
+        "sacrifice"
+      ],
+      "effects": [
+        {
+          "draw": {
+            "amount": 1
+          }
+        }
+      ]
+    }
+  }
+}
+```
+
 ## spell
 
 The spell ability of an instant or sorcery: its targets are chosen while casting and its effects happen in order when it resolves. If every target is illegal on resolution, it doesn't resolve. A mode of a modal spell may have a `cost`: a mana cost paid in addition when that mode is chosen (tiered: "Choose one additional cost").
@@ -1497,9 +1716,9 @@ Rules: CR 702.126a, CR 702.51a, CR 611.3a, CR 604.1
 
 ## static
 
-While its source is on the battlefield (and its `if` condition holds), every permanent it `affects` gets `pump` (fixed or computed amounts, layer 7c), the `keywords` and granted `abilities` (layer 6, triggered, activated or mana abilities), and with `creature_types` has exactly those creature types (layer 4); `loses_abilities: true` removes the abilities it had before (layer 6, in timestamp order: later grants and keyword counters stay, CR 613.7), `colors` sets its colors (layer 5) and `base_power_toughness` its base power and toughness (layer 7b); `types` are card types it has in addition to its other types ("this Vehicle is an artifact creature", layer 4) and `subtypes` subtypes it has in addition to its other types ("is a Wizard in addition to its other types", layer 4). `affects` is {"each": filter, "controller": you|opponent|any, "other": true} (relative to the source's controller), "self", or "attached" ("equipped/enchanted creature").
+While its source is on the battlefield (and its `if` condition holds), every permanent it `affects` gets `pump` (fixed or computed amounts, layer 7c), the `keywords` and granted `abilities` (layer 6, triggered, activated or mana abilities), and with `creature_types` has exactly those creature types (layer 4); `loses_abilities: true` removes the abilities it had before (layer 6, in timestamp order: later grants and keyword counters stay, CR 613.7), `colors` sets its colors (layer 5) and `base_power_toughness` its base power and toughness (layer 7b); `types` are card types it has in addition to its other types ("this Vehicle is an artifact creature", layer 4) and `subtypes` subtypes it has in addition to its other types ("is a Wizard in addition to its other types", layer 4). `affects` is {"each": filter, "controller": you|opponent|any, "other": true} (relative to the source's controller), "self", or "attached" ("equipped/enchanted creature"). The filter and the `if` condition may read combat and tapped status ("attacking creatures you control have first strike", {"if": {"attacking": "attached"}}), never power or toughness.
 
-Rules: CR 604.1, CR 604.2, CR 611.3a, CR 612.8, CR 613.1c, CR 613.1d, CR 613.1e, CR 613.1f, CR 613.4b, CR 613.4c, CR 613.7a, CR 613.8a, CR 205.1a, CR 205.1b, CR 301.5f, CR 303.4m
+Rules: CR 604.1, CR 604.2, CR 611.3a, CR 506.4, CR 612.8, CR 613.1c, CR 613.1d, CR 613.1e, CR 613.1f, CR 613.4b, CR 613.4c, CR 613.7a, CR 613.8a, CR 205.1a, CR 205.1b, CR 301.5f, CR 303.4m
 
 | Parameter | Description |
 | --- | --- |
@@ -1621,6 +1840,27 @@ Rules: CR 702.194a, CR 702.194b, CR 702.194c, CR 601.2b, CR 601.2f, CR 601.2h
 }
 ```
 
+## to_solve
+
+A Case's "To solve — [condition]": at the beginning of your end step, if the condition holds and this Case isn't solved, it becomes solved (an intervening-if triggered ability). The parameter is the condition itself.
+
+Rules: CR 720.3a, CR 720.3b, CR 603.4
+
+| Parameter | Description |
+| --- | --- |
+| `(condition)` | any condition, e.g. {"hand_size": "you", "at_most": 0} |
+
+```json
+{
+  "to_solve": {
+    "amount": {
+      "life_gained_this_turn": "you"
+    },
+    "at_least": 5
+  }
+}
+```
+
 ## token_replacement
 
 If tokens would be created under this permanent's controller's control, that many `token` tokens are created instead (tapped or attacking if the originals would be). `token` is a predefined token name or inline card data.
@@ -1704,13 +1944,14 @@ Rules: CR 702.21a, CR 601.2c, CR 603.2, CR 701.6a, CR 701.67a
 
 ## warp
 
-Warp: you may cast this card from your hand by paying `cost` rather than its mana cost. If you do, the permanent it becomes is exiled at the beginning of the next end step (a delayed triggered ability), and its owner may cast it from exile after this turn has ended for as long as it remains exiled (cast option `via: "warped"`). Conditions `{"cast_with": "warp"}` and `{"cast_with_this_turn": "warp"}` read it.
+Warp: you may cast this card from your hand by paying `cost` rather than its mana cost. If you do, the permanent it becomes is exiled at the beginning of the next end step (a delayed triggered ability), and its owner may cast it from exile after this turn has ended for as long as it remains exiled (cast option `via: "warped"`). Conditions `{"cast_with": "warp"}` and `{"cast_with_this_turn": "warp"}` read it. `from: ["hand", "graveyard"]`: "you may cast this card from your graveyard using its warp ability" (CR 601.3).
 
-Rules: CR 702.185a, CR 702.185b, CR 702.185c, CR 603.7, CR 118.9, CR 601.2b, CR 601.2f, CR 601.2h
+Rules: CR 702.185a, CR 702.185b, CR 702.185c, CR 603.7, CR 118.9, CR 601.2b, CR 601.2f, CR 601.2h, CR 601.3
 
 | Parameter | Description |
 | --- | --- |
 | `cost` | mana cost string, or a list of costs |
+| `from` | zones it works from: "hand" (default), "graveyard", or a list of both |
 
 ```json
 {

@@ -556,7 +556,7 @@ module Enjine
           details["to"] = nil if to.nil? # "to": nil means any recipient
           details["by"] = nil if by.nil?
           details["remaining"] = shield.value(engine, ctx) if shield
-          card = engine.state.objects[ctx.object]&.card
+          card = engine.find_object(ctx.object)&.card
           details["follow_up"] = follow_up.entry(card, ctx.controller, ctx.source, {}) if follow_up && card
           engine.add_continuous_effect!("prevent_damage", ctx, (to || []) + (by || []), details)
           :done

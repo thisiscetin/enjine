@@ -28,11 +28,11 @@ module Enjine
 
         def choice_options(_engine, _object, _chosen) = Chosen.values("creature_type", []).map { { creature_type: it } }
 
-        # The spell being cast remembers the type now, so a later cost of "that type" can be chosen (CR 601.2b).
+        # The spell or ability being cast (or resolving, for a cost paid then, CR 118.12) remembers the type now, so a
+        # later cost of "that type" can be chosen (CR 601.2b).
         def choose!(engine, option)
           type = option[:creature_type].to_s
-          spell = engine.casting && engine.state.objects[engine.casting["object"]]
-          spell&.memory&.store("chosen_type", type)
+          engine.cost_holder&.memory&.store("chosen_type", type)
           { "creature_type" => type }
         end
 

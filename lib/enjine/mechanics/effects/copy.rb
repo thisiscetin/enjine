@@ -400,8 +400,8 @@ module Enjine
         def to_s = "gains \"#{@granted_ability}\"#{" until end of turn" if @duration == "end_of_turn"} → #{to}"
 
         def apply(engine, ctx)
-          card = engine.state.objects[ctx.object]&.card or return
-          affected = refs(engine, ctx).select { (obj = engine.state.objects[it]) && @for.match?(engine, obj) }
+          card = engine.find_object(ctx.object)&.card or return
+          affected = refs(engine, ctx).select { (obj = engine.state.objects[it]) && @for.match?(engine, obj, ctx) }
           engine.grant_card_ability!(ctx, affected, card, @ref, @duration) unless affected.empty?
         end
       end

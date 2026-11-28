@@ -66,14 +66,16 @@ module Enjine
       # The options the block makes of each [candidate ref, object, play method]. While no permanent lets `index`
       # play cards from other zones and no card was granted an ability, a card in a graveyard or library can only
       # be played by an ability of its own (#unplayable_elsewhere?); nor while one gives cards an alternative cost.
+      # Nor an exiled card of another owner no permission effect names (Engine::OptionsMemo#unplayable_candidate?).
+      # The play methods are found once per decision: the cast and the land options both ask (Engine#options).
       def candidate_methods(index, land: false, &)
         sources = permission_sources(index)
         plain = sources.empty? && own_abilities_only? && granted_alt_zones(index).empty?
         permission_candidates(index, sources).flat_map do |ref|
           obj = candidate_object(index, ref)
-          next [] if (plain && unplayable_elsewhere?(obj)) || (land && !face_up(obj.id) { chars(obj).land? })
+          next [] if unplayable_candidate?(index, obj, plain, land)
 
-          play_methods(index, obj, sources).filter_map { yield ref, obj, it }
+          candidate_play_methods(index, ref, obj, sources).filter_map { yield ref, obj, it }
         end
       end
 
@@ -132,7 +134,8 @@ module Enjine
 
       # Permanents `index` controls whose static abilities let them play cards from other zones:
       # [[permanent, AbilityInstance], ...].
-      def permission_sources(index)
+      # Memoized per decision while legal options are computed (Engine::OptionsMemo#permission_sources).
+      def scan_permission_sources(index)
         state.battlefield.flat_map do |id|
           obj = object(id)
           next [] unless obj.controller == index

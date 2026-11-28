@@ -563,7 +563,8 @@ More in the [deck builder guide](deck-builder.md).
 `Enjine::RulesMonitor` is an independent rules checker: it re-derives from raw
 state and events what must be true after each decision (life totals, mana
 emptying, lethal damage, summoning sickness, land plays, P/T, ...), without using
-the engine's rules code.
+the engine's rules code. What each permanent is (types, keywords, abilities: layers
+1-6) it reads from the engine's layer pass; layer 7 power/toughness it recomputes.
 
 ```ruby
 monitor = Enjine::RulesMonitor.new(game)

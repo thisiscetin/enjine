@@ -11,7 +11,8 @@ module Enjine
                                "spell or ability. It triggers only once, the next time `when` happens (e.g. " \
                                "{\"step_begins\": {\"step\": \"end\", \"whose\": \"each\"}} for the next end step). Its " \
                                "`effects` may use {\"result\": n} for what earlier effects of the creating list moved or " \
-                               "created; those objects are affected only if they are still where they were put.",
+                               "created (n below its position); those objects are affected only if they are still " \
+                               "where they were put. Its own effects are numbered on from there.",
                   rules: %w[603.7a 603.7b 603.7c 603.7d 603.7e],
                   params: { "when" => "a trigger condition", "effects" => "list of effects",
                             "watch" => "selector resolved now (e.g. {\"target\": 0}): the objects its trigger subject " \
@@ -26,6 +27,10 @@ module Enjine
 
         def self.keys = %w[when effects watch this_turn]
         def self.default_to = "you"
+
+        # What the earlier effects of the creating list did (results or amounts), exactly `count` of them, so the
+        # created ability's own effects are numbered right after them (StackAbility.parse_effects).
+        def self.linked(values, count, blank) = Array.new(count) { values&.[](it) || blank }
 
         def setup(params, errors, path)
           @ref = "delayed:#{path}"
@@ -48,7 +53,7 @@ module Enjine
         # remembers the results it may name and the objects it watches (CR 603.7c).
         def apply(engine, ctx)
           entry = { "controller" => ctx.controller, "source" => ctx.source, "card" => engine.object(ctx.object).card,
-                    "ability" => ref, "results" => Snapshot.deep_copy(ctx.results || []) }
+                    "ability" => ref, "results" => Snapshot.deep_copy(DelayedTrigger.linked(ctx.results, @results_count, [])) }
           entry["watched"] = @watch.resolve(engine, ctx) if @watch
           entry["turn"] = engine.state.turn if @this_turn
           entry["once"] = true if @this_turn == "once" # CR 603.7b: the next time only, and only this turn
@@ -64,7 +69,8 @@ module Enjine
                   description: "Creates a reflexive triggered ability (\"when you do, ...\") that triggers immediately, " \
                                "with the controller and source of the resolving spell or ability. Its `targets` are " \
                                "chosen as it's put on the stack; its `effects` may name the results of earlier effects " \
-                               "of the creating list. With `if`, it triggers only when the condition holds " \
+                               "of the creating list ({\"result\": n} / {\"this_way\": n} with n below its position) and " \
+                               "their own, numbered on from there. With `if`, it triggers only when the condition holds " \
                                "(\"when excess damage is dealt this way\").",
                   rules: %w[603.12 603.12a 603.7d 603.7e 603.3d],
                   params: { "targets" => "list of target filters", "effects" => "list of effects", "if" => "condition",
@@ -100,10 +106,11 @@ module Enjine
         def apply(engine, ctx)
           # Created by a replacement's follow-up (Engine::FollowUps), its spell may be long gone: its card is remembered.
           memory = Selector.memory(engine, ctx)
-          card = engine.state.objects[ctx.object]&.card || memory["source_card"]
+          card = engine.find_object(ctx.object)&.card || memory["source_card"]
           source = { "id" => ctx.source, "card" => card, "controller" => ctx.controller, "ability" => ref }
-          engine.queue_pending_trigger!(source, nil, { "results" => Snapshot.deep_copy(ctx.results || []),
-                                                       "amounts" => (ctx.amounts || []).dup,
+          results = Snapshot.deep_copy(DelayedTrigger.linked(ctx.results, @results_count, []))
+          engine.queue_pending_trigger!(source, nil, { "results" => results,
+                                                       "amounts" => DelayedTrigger.linked(ctx.amounts, @results_count, 0),
                                                        "triggering" => memory["triggering"]&.dup,
                                                        "departed" => engine.departed_snapshot }.compact)
         end

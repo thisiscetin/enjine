@@ -6,6 +6,10 @@ module Enjine
   # decision, without calling the engine's own rules code. Any mismatch is a
   # finding: the engine did something the rules don't allow.
   #
+  # What a permanent is (its types, keywords and abilities: layers 1-6, CR 613.1a-f) is read from the engine's
+  # layer pass, so the checks agree with copy effects, type changes, keyword counters and timestamps. What follows
+  # from it is recomputed here: layer 7 power/toughness, land plays, hand size, loyalty costs, combat legality.
+  #
   #   monitor = RulesMonitor.new(game)
   #   game.submit(option); monitor.check!(entry)   # or use Fuzz.run(..., monitor: true)
   #   monitor.findings  # => [] when everything matched
@@ -24,6 +28,7 @@ module Enjine
       @loyalty_activations = Hash.new(0)
       @commander_casts = Hash.new(0)
       @cast_from_command = []
+      @x_announced = {}
     end
 
     def state = @game.state
@@ -44,6 +49,10 @@ module Enjine
     end
 
     def defn(card) = catalog.fetch(card)
+    def engine = @game.instance_variable_get(:@engine)
+
+    # Its characteristics after layers 1-6 (the engine's layer pass; power and toughness aren't read from it).
+    def current(obj) = engine.chars(obj)
 
     # A permanent's printed abilities, the abilities of its unlocked symbols in their place.
     def abilities_of(obj)
@@ -81,6 +90,7 @@ module Enjine
       when Events::AttackerDeclared then attacker_declared!(event)
       when Events::BlockerDeclared then blocker_declared!(event)
       when Events::CountersChanged then @stats["counters_#{event.counter}"] += event.to - event.from
+      when Events::XAnnounced then @x_announced[event.object] = event.value
       end
     end
 
@@ -128,18 +138,12 @@ module Enjine
       finding("305.1", "#{player} played a land on #{active}'s turn") if player != active
     end
 
-    # CR 305.2: "you may play an additional land" abilities of the player's permanents, from the raw card data
-    # and from resolved effects that granted them (Effects::Become).
+    # CR 305.2: "you may play an additional land" abilities of the player's permanents: printed, unlocked (a
+    # station symbol, a class level, CR 722.2a, 717.2a) or granted (Effects::Become), as the layers give them.
     def additional_land_plays(index)
       state.battlefield.sum do |id|
         obj = state.objects[id]
-        next 0 unless obj.controller == index
-
-        printed = defn(obj.card).abilities.count { it.kind == :additional_land_plays }
-        granted = state.effects.select { it["kind"] == "abilities" && it["affected"].include?(id) }.sum do |effect|
-          defn(effect["card"]).effect_granted(effect["ref"]).count { it.ability.kind == :additional_land_plays }
-        end
-        printed + granted
+        obj.controller == index ? current(obj).abilities.count { it.ability.kind == :additional_land_plays } : 0
       end
     end
 
@@ -173,20 +177,9 @@ module Enjine
         state.players[state.active].name == caster
     end
 
-    # Printed keywords plus those of unlocked symbols, keywords granted and those of statics. A permanent that
-    # loses all abilities (CR 613.1f) has only the keywords granted to it (timestamps are the engine's specs').
-    def keyword?(obj, keyword)
-      return granted_keywords(obj.id).include?(keyword.to_sym) if stripped?(obj)
-
-      defn(obj.card).keyword?(keyword) || unlocked(obj).any? { it.keywords.include?(keyword) } ||
-        granted_keywords(obj.id).include?(keyword.to_sym) || static_keyword?(obj, keyword) ||
-        (keyword.to_sym == :haste && gained_haste?(obj))
-    end
-
-    # Haste a permanent gained as it was cast with suspend (CR 702.62a) or chose with riot (CR 702.136a).
-    def gained_haste?(obj)
-      obj.memory["haste_while_controlled_by"] == obj.controller || obj.memory["riot_haste"] == true
-    end
+    # Its keywords after layer 6 (CR 613.1f): printed, a copy's exceptions (CR 707.9b), keyword counters
+    # (CR 122.1b), granted and lost in timestamp order (CR 613.7).
+    def keyword?(obj, keyword) = current(obj).keyword?(keyword.to_sym)
 
     # Whether an effect or an applying static ability makes it lose all abilities (CR 613.1f).
     def stripped?(obj)
@@ -198,22 +191,15 @@ module Enjine
     # Permanents and emblems, whose static abilities function in the command zone (CR 114.4).
     def static_holders = state.battlefield + state.emblem_ids
 
-    # The static abilities of permanents on the battlefield and emblems that apply to `obj` now, matched on printed types.
+    # The static abilities of permanents on the battlefield and emblems that apply to `obj` now.
     def applying_statics(obj)
-      engine = @game.instance_variable_get(:@engine)
-      facts = facts(obj, defn(obj.card))
+      facts = facts(obj)
       static_holders.flat_map do |id|
         source = state.objects[id]
         abilities_of(source).select do |ability|
           ability.kind == :static && ability.affects?(obj, source, facts) && ability.active?(engine, source)
         end
       end
-    end
-
-    # Keywords granted until end of turn or by an attached Aura or Equipment (CR 301.5f, 303.4m).
-    def granted_keywords(id)
-      until_eot = state.effects.select { it["kind"] == "grant" && it["affected"].include?(id) }.flat_map { it["keywords"] }
-      (until_eot + attached_grants(id).flat_map { it["keywords"] }).map(&:to_sym)
     end
 
     def ability_activated!(event)
@@ -228,10 +214,10 @@ module Enjine
       end
       changes = @entry.events.grep(Events::CountersChanged).select { it.object == event.source && it.counter == "loyalty" }
       paid = changes.sum { it.to - it.from }
-      return unless paid != ability.loyalty_cost && state.objects.key?(event.source) && changes.any?
+      cost = ability.x_loyalty? ? -@x_announced.fetch(event.object, 0) : ability.loyalty_cost # CR 107.3: "-X", X announced
+      return unless paid != cost && state.objects.key?(event.source) && changes.any?
 
-      finding("606.4",
-              "#{event.source} loyalty changed by #{paid}, cost was #{ability.loyalty_cost}")
+      finding("606.4", "#{event.source} loyalty changed by #{paid}, cost was #{cost}")
     end
 
     # CR 302.6 / 508.1a: attackers were untapped and not summoning sick (or have haste).
@@ -246,9 +232,6 @@ module Enjine
 
       finding("702.3b", "#{event.object} has defender but attacked")
     end
-
-    # A keyword from an applying static ability of a permanent (CR 604.2), matched on printed types.
-    def static_keyword?(obj, keyword) = applying_statics(obj).any? { it.keywords.include?(keyword) }
 
     # CR 702.9b: a creature with flying can be blocked only by creatures with flying or reach.
     def blocker_declared!(event)
@@ -289,8 +272,9 @@ module Enjine
       end
     end
 
-    # CR 613.4, recomputed independently: printed (or a 7b setting effect) + counters + active pump effects
-    # + static ability bonuses. Characteristic-defining power/toughness (7a) is left to the engine's specs.
+    # CR 613.4, recomputed independently: printed (or a 7b setting effect) + power/toughness counters (CR 122.1a)
+    # + active pump effects + static ability bonuses. Characteristic-defining power/toughness (7a) is left to the
+    # engine's specs.
     def check_power_toughness!
       return if state.battlefield.any? { stripped?(state.objects[it]) } # CR 613.1f, 613.8a: the engine's specs
 
@@ -301,28 +285,20 @@ module Enjine
         card = defn(obj.card)
         next unless recomputable?(obj, card)
 
-        net = obj.counters.fetch("+1/+1", 0) - obj.counters.fetch("-1/-1", 0)
+        net = Mechanics::Counters.power_toughness(obj.counters)
         pumps = state.effects.select { it["kind"] == "pump" && it["affected"].include?(id) } + attached_grants(id) +
-                static_bonuses(obj, card, statics)
+                static_bonuses(obj, statics)
         base = base_power_toughness(obj, card)
-        expected = [base[0] + net + pumps.sum { it["power"] }, base[1] + net + pumps.sum { it["toughness"] }]
+        expected = [base[0] + net[0] + pumps.sum { it["power"] }, base[1] + net[1] + pumps.sum { it["toughness"] }]
         actual = view.fetch(id).values_at("power", "toughness")
         finding("613.4c", "#{id} is #{actual.join("/")}, expected #{expected.join("/")}") if actual != expected
       end
     end
 
-    # A creature whose power/toughness isn't characteristic-defining (7a) or set by a static ability (7b).
-    # One whose creature types an effect replaced (assimilate, "becomes a Borg", layer 4) is left to the engine's
-    # specs: which statics apply to it depends on those types.
+    # A printed creature that is still a creature after layer 4 (one that isn't has no power or toughness,
+    # CR 208.3), whose power/toughness isn't characteristic-defining (7a) or set by a static ability (7b).
     def recomputable?(obj, card)
-      card.creature? && !card.defined_pt? && applying_statics(obj).none?(&:base_power_toughness) && !types_replaced?(obj)
-    end
-
-    # Creature types or card types an effect or static replaced (layer 4, CR 205.1a): the monitor matches statics
-    # against printed types, and a permanent that is no longer a creature has no power or toughness.
-    def types_replaced?(obj)
-      applying_statics(obj).any?(&:set_types) ||
-        state.effects.any? { %w[creature_types assimilate set_types].include?(it["kind"]) && Array(it["affected"]).include?(obj.id) }
+      card.creature? && current(obj).creature? && !card.defined_pt? && applying_statics(obj).none?(&:base_power_toughness)
     end
 
     # CR 613.4b: the latest setting effect, else as printed, or as a copy's exceptions or a token's creating
@@ -337,9 +313,8 @@ module Enjine
 
     # Static abilities printed on permanents that give a bonus to more than the attached permanent and
     # apply now: [[source object, ability, [power, toughness]], ...]. Conditions and amounts are the
-    # primitives' own; which creatures get the bonus is decided here from printed types and raw counters.
+    # primitives' own; which creatures get the bonus is decided here (#facts).
     def static_pumps
-      engine = @game.instance_variable_get(:@engine)
       static_holders.flat_map do |id|
         source = state.objects[id]
         abilities_of(source).filter_map do |ability|
@@ -350,34 +325,33 @@ module Enjine
       end
     end
 
-    def static_bonuses(obj, card, statics)
-      facts = facts(obj, card)
+    def static_bonuses(obj, statics)
+      facts = facts(obj)
       statics.filter_map do |source, ability, (power, toughness)|
         { "power" => power, "toughness" => toughness } if ability.affects?(obj, source, facts)
       end
     end
 
-    # What statics match a permanent on: its printed characteristics, every creature type for a changeling
-    # (CR 702.73a) and the keywords it was granted (a bonus to creatures "with flying", CR 702.1).
-    def facts(obj, card)
-      chars = Mechanics::Keywords::Changeling.apply(card.printed_characteristics)
-      chars = chars.with(keywords: chars.keywords | granted_keywords(obj.id))
-      # A crewed Vehicle is an artifact creature (CR 702.122b): the types an effect adds count.
-      added = state.effects.select { it["kind"] == "add_types" && it["affected"].include?(obj.id) }.flat_map { it["types"] }
-      chars = chars.with(types: chars.types | added.map(&:to_sym)) unless added.empty?
-      Mechanics::Filters::Facts.new(chars: chars, counters: obj.counters, token: card.token?)
+    # What statics match a permanent on: its types and keywords after layers 1-6 ("becomes a Bear in addition to
+    # its other types", CR 205.1b; a changeling's every creature type, CR 702.73a; a bonus to creatures "with
+    # flying", CR 702.1), its printed power and toughness (not the layer 7 result being checked), its counters and
+    # whether it's a token, and its combat and tapped status ("attacking creatures you control get +1/+0", CR 506.4).
+    def facts(obj)
+      card = defn(obj.card)
+      chars = current(obj).with(power: card.power, toughness: card.toughness)
+      status = { "attacking" => state.attackers.key?(obj.id), "blocking" => state.blockers.key?(obj.id), "tapped" => obj.tapped }
+      Mechanics::Filters::Facts.new(chars: chars, counters: obj.counters, token: engine.token?(obj), status: status)
     end
 
     # "Equipped/enchanted creature gets/has ..." of every permanent attached to `id` whose condition holds
-    # ("during your turn", CR 604.2): [{"power" => n, "toughness" => n, "keywords" => [...]}].
+    # ("during your turn", CR 604.2): [{"power" => n, "toughness" => n}].
     def attached_grants(id)
-      engine = @game.instance_variable_get(:@engine)
       state.battlefield.filter_map { state.objects[it] if state.objects[it].attached_to == id }.flat_map do |att|
         abilities_of(att).filter_map do |ability|
           next unless ability.kind == :static && ability.attached? && ability.active?(engine, att)
 
           power, toughness = ability.bonus(engine, att)
-          { "power" => power, "toughness" => toughness, "keywords" => ability.keywords }
+          { "power" => power, "toughness" => toughness }
         end
       end
     end
@@ -408,8 +382,7 @@ module Enjine
       end
     end
 
-    # With replaced creature types, a static keyed on them may grant it.
-    def indestructible?(obj) = keyword?(obj, :indestructible) || types_replaced?(obj)
+    def indestructible?(obj) = keyword?(obj, :indestructible)
 
     # CR 514.1: after cleanup the active player has at most seven cards (checked at the next turn's priority).
     # The player whose turn ended is the one active before (an extra turn may follow its own, CR 500.7).
@@ -424,15 +397,16 @@ module Enjine
       finding("514.1", "#{previous.name} ended their turn with #{previous.hand.size} cards") if previous.hand.size > 7
     end
 
-    # CR 402.2: an effect or a permanent's ability may give a player no maximum hand size.
+    # CR 402.2: an effect, a permanent's ability or an emblem's (CR 114.4) may give a player no maximum hand size.
     def no_max_hand_size?(name)
       ref = "player:#{name}"
       return true if state.effects.any? { it["rule"] == "no_max_hand_size" && it["affected"].include?(ref) }
 
       index = state.players.index { it.name == name }
-      state.battlefield.any? do |id|
+      static_holders.any? do |id|
         obj = state.objects[id]
-        defn(obj.card).abilities.any? do |ability|
+        current(obj).abilities.any? do |inst|
+          ability = inst.ability
           ability.kind == :player_rule && ability.rule == "no_max_hand_size" && ability.applies_to?(index, obj.controller)
         end
       end

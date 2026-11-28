@@ -25,6 +25,9 @@ module Enjine
     #   "returned" permanents returned to their hand from the battlefield
     #   "drawn" / "discarded"  how many cards they drew (CR 121.2) / discarded (CR 701.9a)
     #   "dilemmas" dilemmas they faced (CR 700.17)
+    #   "crimes"   crimes they committed (CR 700.13)
+    #   "entered_face_down" / "turned_face_up"  permanents that entered face down under their control / that they
+    #              turned face up (CR 708.3, 708.8)
     #   "noncombat_damage"  noncombat damage dealt to them (CR 120.2b)
     #   "coin_flips"  coins they flipped (CR 705)
     # The game log also counts the turns each player has begun ("turns").
@@ -41,6 +44,8 @@ module Enjine
           zone_change_recorded!(event)
           discard_recorded!(event) # mayhem (Engine::AltCasting)
         when Events::DilemmaFaced then bump!(log_of(event.player), "dilemmas", 1)
+        when Events::CrimeCommitted then bump!(log_of(event.player), "crimes", 1) # CR 700.13 (Engine::Crimes)
+        when Events::TurnedFaceUp then bump!(log_of(event.player), "turned_face_up", 1) # CR 708.8
         when Events::AttackerDeclared then attack_recorded!(event)
         when Events::AttacksDeclared # the attacking creatures' total power, per combat (Triggers::PlayerAttacks)
           (log_of(event.player)["attack_powers"] ||= []) << event.attackers.sum { power(object(it)) }
@@ -117,8 +122,19 @@ module Enjine
           "mana_value" => Mechanics::Amount.mana_value(self, obj), # CR 202.3
           "keywords" => current.keywords.map(&:to_s), # deathtouch, lifelink, wither (CR 702.2e, 702.15c, 702.80b)
           "token" => token?(obj), "except" => copy_exceptions(obj), "abilities" => current.abilities,
-          "attacking" => attackers.key?(obj.id) } # "if it was attacking" (CR 506.4, 608.2h)
+          "attacking" => attackers.key?(obj.id), # "if it was attacking" (CR 506.4, 608.2h)
+          "memory" => cast_memory(obj) } # how it was cast, for its leaves-the-battlefield triggers (CR 400.7d)
           .merge(obj.memory.slice(Mechanics::Linked::EXILED)) # the cards exiled with it (CR 607.2a)
+      end
+
+      # What a permanent remembers of the spell it was (CR 400.7d): whether it was cast, kicked, how and from where,
+      # and the mana spent on it (CR 601.2h). Plain data; empty for a permanent that wasn't cast.
+      CAST_MEMORY = %w[cast kicked cast_from cast_with kicked_with mana_from].freeze
+
+      def cast_memory(obj)
+        memory = Snapshot.deep_copy(obj.memory.slice(*CAST_MEMORY))
+        memory["mana_spent"] = obj.mana_spent.dup if obj.mana_spent
+        memory
       end
 
       # The part of last known information an ability keeps in its memory ("source_lki"): plain data.
@@ -129,6 +145,10 @@ module Enjine
         info["except"] = lki["except"] if lki["except"] # what a copy of it copies (CR 707.2, Engine::Copies)
         info.merge(lki.slice(Mechanics::Linked::EXILED).transform_values(&:dup)) # CR 607.2a (Linked.exiled_with)
       end
+
+      # What a source that is being looked at while its leaves-the-battlefield trigger is checked remembered of the
+      # spell it was (CR 400.7d, 603.4): the ability isn't on the stack yet, and the permanent is gone.
+      def departed_cast_memory(id) = last_known(id)&.[]("memory")
 
       # What the resolving spell or ability remembers about an object that left the battlefield during it.
       def resolving_last_known(id) = state.frames.rfind { it["type"] == "resolve" && it["ctx"] }&.dig("ctx", "lki", id)
@@ -205,6 +225,7 @@ module Enjine
       def entered_recorded!(event)
         obj = state.objects[event.new_id] or return
         (turn_log(obj.controller)["entered"] ||= []) << history_entry(event.card, chars(obj))
+        bump!(turn_log(obj.controller), "entered_face_down", 1) if face_down_object?(obj) # CR 708.3
       end
 
       # CR 305.1: the player who plays a land controls it as it enters.
@@ -260,16 +281,18 @@ module Enjine
 
       # What a triggered ability remembers of its source: whether it was cast (CR 400.7d) and kicked (CR 702.33d),
       # how it was cast, the mana spent to cast it (CR 601.2h) and, for a source that just left the battlefield
-      # ("when this leaves, put its counters on ..."), how it last existed (CR 603.10a, 608.2h).
+      # ("when this leaves, put its counters on ..."), how it last existed (CR 603.10a, 608.2h), the way it was cast
+      # included ("when this dies, if it was cast from your hand").
       def trigger_memory(source)
         obj = state.objects[source["id"]]
-        source_memory = obj&.memory || {}
+        lki = last_known(source["id"])
+        source_memory = obj&.memory || lki&.[]("memory") || {}
         memory = source_memory["cast"] ? { "source_cast" => true } : {}
         memory["kicked"] = true if source_memory["kicked"] # CR 702.33d: a kicked permanent's "if it was kicked"
         memory.merge!(source_memory.slice("cast_from", "cast_with", "kicked_with")) # "if its evoke cost was paid" (Engine::AltCasting)
-        memory["source_mana_spent"] = obj.mana_spent.dup if obj&.mana_spent
+        spent = obj ? obj.mana_spent : source_memory["mana_spent"]
+        memory["source_mana_spent"] = spent.dup if spent
         memory["source_mana_from"] = Snapshot.deep_copy(source_memory["mana_from"]) if source_memory["mana_from"]
-        lki = last_known(source["id"])
         memory["source_lki"] = last_known_memory(lki) if lki
         memory
       end

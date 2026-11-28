@@ -35,8 +35,15 @@ module Enjine
         end
       end
 
-      # [[permanent, CostModifier], ...] on the battlefield.
+      # [[permanent, CostModifier], ...] on the battlefield; once per decision while legal options are computed
+      # (Engine#options: the board holds still meanwhile).
       def cost_modifiers
+        return @options_memo[:cost_modifiers] ||= scan_cost_modifiers if @options_memo
+
+        scan_cost_modifiers
+      end
+
+      def scan_cost_modifiers
         state.battlefield.flat_map do |id|
           obj = object(id)
           chars(obj).abilities.filter_map { [obj, it.ability] if it.ability.kind == :cost_modifier }

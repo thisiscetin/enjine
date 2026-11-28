@@ -75,7 +75,9 @@ module Enjine
 
         def take_choice(engine, paying, variant, answer)
           i = paying.delete("cost")
-          (paying["entries"][i.to_s] ||= []) << variant[i].choose!(engine, { object: answer["object"] })
+          # Every key of the option (the counter's kind, the creature type), as when casting.
+          option = answer.except("type").transform_keys(&:to_sym)
+          (paying["entries"][i.to_s] ||= []) << variant[i].choose!(engine, option)
         end
 
         # Asks for the next choice a cost needs (CR 601.2h, as for casting); nil when none is left.
@@ -88,7 +90,8 @@ module Enjine
             next if chosen.size >= cost.choices_needed || options.empty?
 
             paying["cost"] = i
-            return ask(engine, locals, payer_obj.controller, cost.to_s, options.map { { "type" => "cost", "object" => it[:object] } })
+            return ask(engine, locals, payer_obj.controller, cost.to_s,
+                       options.map { { "type" => "cost" }.merge(it.transform_keys(&:to_s)) })
           end
           nil
         end
@@ -104,9 +107,8 @@ module Enjine
           variant.each_with_index do |cost, i|
             next if cost.mana?
 
-            if cost.respond_to?(:choices_needed)
-              cost.pay_chosen!(engine, payer_obj,
-                               paying["entries"].fetch(i.to_s, []))
+            if cost.respond_to?(:choices_needed) # a chosen creature type was "paid" as it was chosen
+              cost.pay_chosen!(engine, payer_obj, paying["entries"].fetch(i.to_s, [])) if cost.respond_to?(:pay_chosen!)
             else
               cost.pay!(engine, payer_obj)
             end
@@ -175,7 +177,7 @@ module Enjine
 
         # Asks pay or decline, then pays; returns :wait while a decision or the payment is pending.
         def decide(engine, ctx, locals)
-          payer = engine.object(ctx.object)
+          payer = payer_object(engine, ctx)
           unless locals["paying"] || answers(locals).first
             choices = pay_choices(engine, payer, costs_now(engine, ctx)) + [{ "type" => "decline" }]
             return ask(engine, locals, payer.controller, "Pay #{what}?", choices)
@@ -184,6 +186,18 @@ module Enjine
 
           result = pay_costs(engine, ctx, locals, payer, costs_now(engine, ctx))
           result == :wait ? :wait : (locals["outcome"] = result)
+        end
+
+        # The object the costs are paid for. A resolving ability's "this permanent" (remove counters from it,
+        # sacrifice it, "another") is its source (CR 113.7a), while that is still on the battlefield under the
+        # ability's controller; once it has left it is a new object (CR 400.7), and such a cost can't be paid
+        # (CR 118.3). Either way the ability's controller pays.
+        def payer_object(engine, ctx)
+          resolving = engine.object(ctx.object)
+          return resolving unless resolving.ability?
+
+          source = engine.state.objects[ctx.source]
+          source&.zone == :battlefield && source.controller == resolving.controller ? source : resolving
         end
       end
 

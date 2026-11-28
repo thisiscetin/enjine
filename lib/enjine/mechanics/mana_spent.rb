@@ -85,7 +85,7 @@ module Enjine
         # "This spell" while it resolves (or as it enters), else the source permanent, else what the resolving
         # triggered ability remembers of a source that has left (CR 603.4, 608.2h).
         def self.own(engine, ctx, key = "mana_spent")
-          holder = engine.state.objects[ctx.object]
+          holder = engine.find_object(ctx.object)
           return recorded(holder, key) if holder && !holder.ability?
 
           source = engine.state.objects[ctx.source]

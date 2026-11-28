@@ -5514,5 +5514,278 @@
         }
       }
     ]
+  },
+  {
+    "name": "Spec Mourning Herald",
+    "mana_cost": "{1}{B}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "human",
+      "cleric"
+    ],
+    "power": 1,
+    "toughness": 2,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "dies": {
+              "subject": {
+                "each": "creature",
+                "other": true
+              },
+              "batched": true
+            }
+          },
+          "effects": [
+            {
+              "gain_life": {
+                "amount": {
+                  "triggering": "amount"
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Spec Raid Marshal",
+    "mana_cost": "{2}{R}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "goblin",
+      "warrior"
+    ],
+    "power": 2,
+    "toughness": 2,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "deals_damage": {
+              "subject": {
+                "each": "creature",
+                "controller": "you"
+              },
+              "combat": true,
+              "to": [
+                "player",
+                "battle"
+              ],
+              "batched": true
+            }
+          },
+          "effects": [
+            {
+              "add_counters": {
+                "counter": "+1/+1",
+                "amount": 1,
+                "to": {
+                  "triggering": "objects"
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Spec Gate Greeter",
+    "mana_cost": "{1}{W}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "human"
+    ],
+    "power": 2,
+    "toughness": 1,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "enters": {
+              "subject": {
+                "each": "creature",
+                "controller": "you",
+                "other": true
+              },
+              "batched": true
+            }
+          },
+          "effects": [
+            {
+              "gain_life": {
+                "amount": {
+                  "triggering": "amount"
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Homing Wurm",
+    "mana_cost": "{3}{G}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "wurm"
+    ],
+    "power": 3,
+    "toughness": 3,
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "dies": {}
+          },
+          "effects": [
+            {
+              "return_to_hand": {
+                "to": "self"
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "When this creature dies, return it to its owner's hand."
+  },
+  {
+    "name": "Counter Keeper",
+    "mana_cost": "{1}{G}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "elf"
+    ],
+    "power": 1,
+    "toughness": 1,
+    "abilities": [
+      {
+        "enters_with_counters": {
+          "counters": {
+            "+1/+1": 1
+          }
+        }
+      },
+      {
+        "triggered": {
+          "when": {
+            "leaves_battlefield": {
+              "subject": {
+                "each": {
+                  "creature": {
+                    "counters": "+1/+1"
+                  }
+                },
+                "controller": "you"
+              }
+            }
+          },
+          "effects": [
+            {
+              "gain_life": {
+                "amount": {
+                  "counters": {
+                    "of": {
+                      "triggering": "object"
+                    },
+                    "kind": "+1/+1"
+                  }
+                }
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "This creature enters with a +1/+1 counter on it. Whenever a creature you control with a +1/+1 counter on it leaves the battlefield, you gain life equal to the number of +1/+1 counters on it."
+  },
+  {
+    "name": "Twin Cascader",
+    "mana_cost": "{4}{R}{G}",
+    "types": [
+      "creature"
+    ],
+    "subtypes": [
+      "hydra"
+    ],
+    "power": 4,
+    "toughness": 4,
+    "keywords": [
+      "cascade",
+      "cascade"
+    ],
+    "rules_text": "Cascade, cascade"
+  },
+  {
+    "name": "Bonded Offering",
+    "mana_cost": "{1}{B}",
+    "types": [
+      "sorcery"
+    ],
+    "abilities": [
+      {
+        "spell": {
+          "effects": [
+            {
+              "may": {
+                "effects": [
+                  {
+                    "sacrifice_choice": {
+                      "filter": "creature"
+                    }
+                  }
+                ],
+                "then": [
+                  {
+                    "reflexive_trigger": {
+                      "targets": [
+                        "creature"
+                      ],
+                      "effects": [
+                        {
+                          "deal_damage": {
+                            "amount": {
+                              "power": {
+                                "result": 0
+                              }
+                            },
+                            "to": {
+                              "target": 0
+                            }
+                          }
+                        },
+                        {
+                          "gain_life": {
+                            "amount": {
+                              "this_way": 1
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "rules_text": "You may sacrifice a creature. When you do, it deals damage equal to the sacrificed creature's power to target creature, and you gain life equal to the excess damage."
   }
 ]

@@ -26,7 +26,8 @@ module Enjine
     module Copies
       # ---- reading -------------------------------------------------------------------------------
 
-      def own_card(obj) = obj.memory["own_card"] || obj.card
+      # A face-down object is its hidden card (Engine::FaceDownPermanents).
+      def own_card(obj) = obj.memory["face_down_card"] || obj.memory["own_card"] || obj.card
 
       # A token (CR 111.1): created as one, or a copy of a permanent spell that resolved (CR 608.3f).
       def token?(obj) = obj.memory["token"] == true || catalog.fetch(own_card(obj)).token?

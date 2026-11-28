@@ -55,15 +55,22 @@ module Enjine
         end
 
         # Not the card being cast (it is on the stack once casting begins). "Of the chosen type" reads the type chosen
-        # for it (Costs::ChooseCreatureType).
+        # for the spell or ability being paid for (Costs::ChooseCreatureType, Engine#cost_holder).
         def candidates(engine, object)
-          ctx = EffectContext.new(object.controller, object.id, object.id, [])
+          ctx = EffectContext.new(object.controller, object.id, holder(engine, object).id, [])
           Beholding.candidates(engine, object.controller, filter, ctx) - [object.id]
+        end
+
+        # The spell or ability being paid for, when `object` is it or its source (an ability's costs are paid for its
+        # source); otherwise `object`.
+        def holder(engine, object)
+          held = engine.cost_holder
+          held && (held.id == object.id || held.source == object.id) ? held : object
         end
 
         # Before a type is chosen for "behold two creatures of that type", whether some type would do (CR 601.2b).
         def payable?(engine, object)
-          return super unless filter.relations["chosen_subtype"] && !object.memory["chosen_type"]
+          return super unless filter.relations["chosen_subtype"] && !holder(engine, object).memory["chosen_type"]
 
           others = Beholding.candidates(engine, object.controller, filter.unrelated) - [object.id]
           others.flat_map { engine.chars(it).subtypes.uniq }.tally.any? do |type, n|

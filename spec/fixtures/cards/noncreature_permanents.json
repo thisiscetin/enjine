@@ -2534,5 +2534,239 @@
       }
     ],
     "rules_text": "Whenever you cast a noncreature spell, put a plan counter on this enchantment. When the third plan counter is put on this enchantment, sacrifice it. When you do, it deals 4 damage to any target."
+  },
+  {
+    "name": "Charge Warden",
+    "mana_cost": "{W}",
+    "types": [
+      "enchantment"
+    ],
+    "abilities": [
+      {
+        "triggered": {
+          "when": {
+            "enters": {}
+          },
+          "effects": [
+            {
+              "add_counters": {
+                "counter": "charge",
+                "amount": 2,
+                "to": "self"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "triggered": {
+          "when": {
+            "step_begins": {
+              "step": "precombat_main",
+              "whose": "your"
+            }
+          },
+          "effects": [
+            {
+              "pay": {
+                "cost": [
+                  {
+                    "remove_counters": {
+                      "count": 1,
+                      "counter": "charge",
+                      "self": true
+                    }
+                  }
+                ],
+                "then": [
+                  {
+                    "gain_life": {
+                      "amount": 1
+                    }
+                  }
+                ],
+                "otherwise": [
+                  {
+                    "sacrifice": {
+                      "to": "self"
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Kindred Horn",
+    "mana_cost": "{3}",
+    "types": [
+      "artifact"
+    ],
+    "abilities": [
+      {
+        "choose_creature_type": {}
+      },
+      {
+        "cost_modifier": {
+          "spells": {
+            "any_of": [
+              "creature"
+            ],
+            "subtypes": "chosen"
+          },
+          "reduce": 1
+        }
+      }
+    ]
+  },
+  {
+    "name": "Grove Drum",
+    "mana_cost": "{1}",
+    "types": [
+      "artifact"
+    ],
+    "abilities": [
+      {
+        "static": {
+          "affects": {
+            "each": "creature",
+            "controller": "you"
+          },
+          "abilities": [
+            {
+              "mana": {
+                "cost": [
+                  "tap",
+                  {
+                    "tap": "granter"
+                  }
+                ],
+                "color": "any_one"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Tallying Blades",
+    "mana_cost": "{2}",
+    "types": [
+      "artifact"
+    ],
+    "abilities": [
+      {
+        "activated": {
+          "cost": [
+            {
+              "mana": "{3}"
+            }
+          ],
+          "timing": "sorcery",
+          "targets": [
+            {
+              "creature": {
+                "controller": "you"
+              }
+            }
+          ],
+          "cost_reduction": {
+            "amount": {
+              "counters": {
+                "of": {
+                  "target": 0
+                },
+                "kind": "+1/+1"
+              }
+            }
+          },
+          "effects": [
+            {
+              "add_counters": {
+                "counter": "+1/+1",
+                "amount": 1,
+                "to": {
+                  "target": 0
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Spec Mercy Shrine",
+    "mana_cost": "{1}{W}",
+    "types": [
+      "enchantment"
+    ],
+    "abilities": [
+      {
+        "life_gain_replacement": {
+          "plus": 1
+        }
+      },
+      {
+        "activated": {
+          "cost": [
+            "tap",
+            {
+              "mana": "{1}"
+            }
+          ],
+          "effects": [
+            {
+              "gain_life": {
+                "amount": 1
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Spec Blight Totem",
+    "mana_cost": "{2}{B}",
+    "types": [
+      "artifact"
+    ],
+    "abilities": [
+      {
+        "life_gain_replacement": {
+          "player": "opponent",
+          "lose": true
+        }
+      }
+    ]
+  },
+  {
+    "name": "Spec Charge Banner",
+    "mana_cost": "{2}",
+    "types": [
+      "artifact"
+    ],
+    "abilities": [
+      {
+        "static": {
+          "affects": {
+            "each": {
+              "creature": {
+                "attacking": true
+              }
+            },
+            "controller": "you"
+          },
+          "keywords": [
+            "first_strike"
+          ]
+        }
+      }
+    ]
   }
 ]

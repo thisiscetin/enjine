@@ -15,7 +15,7 @@ module Enjine
       # battlefield, its triggered ability remembers them ("when this leaves, return the exiled card").
       def self.exiled_with(engine, source, ctx = nil)
         obj = engine.state.objects[source]
-        ids = obj ? obj.memory[EXILED] : ctx && engine.state.objects[ctx.object]&.memory&.dig("source_lki", EXILED)
+        ids = obj ? obj.memory[EXILED] : ctx && engine.find_object(ctx.object)&.memory&.dig("source_lki", EXILED)
         Array(ids).select { engine.state.exile.include?(it) }
       end
 
@@ -24,7 +24,7 @@ module Enjine
       def self.exiled(engine, kind, ctx)
         return exiled_with(engine, ctx.source, ctx) if kind == :exiled_with
 
-        Array(engine.state.objects[ctx.object]&.memory&.[](Costs::CardsCost::EXILED)).select { engine.state.exile.include?(it) }
+        Array(engine.find_object(ctx.object)&.memory&.[](Costs::CardsCost::EXILED)).select { engine.state.exile.include?(it) }
       end
 
       # Called by a resolving effect before it moves an object: who controlled it (CR 608.2h), kept on the

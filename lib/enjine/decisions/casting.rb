@@ -5,8 +5,9 @@ module Enjine
     CANCEL = { type: "cancel" }.freeze
 
     # CR 734.1: a cast or activation can be rewound ("cancel") until something irreversible has been
-    # paid (Engine::Payment#cancellable?); a triggered ability being put on the stack never can.
-    def self.with_cancel(engine, options) = engine.cancellable? ? options + [CANCEL] : options
+    # paid (Engine::Payment#cancellable?), and also after that when no other choice is left (Engine::Payment#stuck?:
+    # a decision never has no option); a triggered ability being put on the stack never can.
+    def self.with_cancel(engine, options) = engine.cancellable? || engine.stuck?(options) ? options + [CANCEL] : options
 
     # CR 601.2b / 603.3c: choose a mode of a modal spell or ability, one per decision.
     class ChooseMode < Base
@@ -162,7 +163,9 @@ module Enjine
           'pool_sources[i] names), `{type: "activate_mana", object: id, ability: ref}` ' \
           '(plus `mana: "{G}{G}"` when the mana is chosen) taps a source, `{type: "cancel"}` ' \
           "rewinds (or declines a payment asked for while resolving). Cancel isn't offered once a mana ability " \
-          "with a cost other than {T} (a Treasure) has been activated. `{type: \"convoke\", object: id}` taps a " \
+          "with a cost other than {T} (a Treasure) has been activated, unless the cost can no longer be paid: then " \
+          "it is the only option, and rewinds keeping the mana abilities' mana in the pool (CR 734.1). " \
+          "`{type: \"convoke\", object: id}` taps a " \
           "creature to pay for {1} or one mana of its color (a spell with convoke); `{type: \"improvise\", object: id}` " \
           "taps an artifact to pay for {1} (a spell with improvise); `{type: \"waterbend\", object: id}` taps " \
           "an artifact or creature to pay {1} of a waterbend cost. `remaining` shows what is left to pay."

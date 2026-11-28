@@ -12,6 +12,7 @@ module Enjine
       # lets restricted mana count where it may be spent (CR 106.6).
       def affordable?(index, cost, excluded_source, purpose = nil)
         return true if cost.nil? || cost.mana_value.zero?
+        return false if @options_memo && cost.equivalents.all? { it.mana_value > mana_unit_bound(index) }
 
         covers?(cost, mana_units(index, excluded_source, purpose))
       end
@@ -54,8 +55,10 @@ module Enjine
 
           ability = chars(id).ability(ref)
           next if ability.mana_cost || (ability.spend_only && !ability.spend_only.allows?(self, purpose))
+          next if (granter = tapped_granter(ref, ability)) && excluded.include?(granter)
 
-          by_source[id].concat(ability.outcomes(self, object(id)))
+          # Abilities that tap the permanent granting them (CR 602.2b) make mana once among them all.
+          by_source[granter ? "granter:#{granter}" : id].concat(ability.outcomes(self, object(id)))
         end
         units = by_source.values.flat_map { |options| Array.new(options.map(&:size).max) { options.flatten.uniq } }
         as_any_type(units, purpose)
@@ -102,7 +105,19 @@ module Enjine
       # CR 602.5b: "Activate only once each turn" counts on the source, as for other activated abilities.
       def mana_ability_usable?(obj, inst)
         per_turn = inst.ability.per_turn
-        (per_turn.nil? || activations_this_turn(obj, inst.ref) < per_turn) && inst.ability.activatable?(self, obj)
+        (per_turn.nil? || activations_this_turn(obj, inst.ref) < per_turn) &&
+          inst.ability.activatable?(self, obj, mana_ability_costs(inst.ref, inst.ability))
+      end
+
+      # A mana ability's costs, those naming the permanent that granted it bound to it ("tap the granter", CR 602.2b,
+      # 607.1a; Engine::Casting#granter_costs).
+      def mana_ability_costs(ref, ability) = granter_costs(ability.costs, AbilityLayers.granted_parts(ref)&.last)
+
+      # The permanent a granted mana ability taps besides its source ({"tap": "granter"}), or nil.
+      def tapped_granter(ref, ability)
+        return nil unless ability.costs.any?(Mechanics::Costs::TapGranter)
+
+        mana_ability_costs(ref, ability).find { it.is_a?(Mechanics::Costs::TapGranter) }&.granter
       end
 
       # Activation options for mana abilities: one per source, or one per mana it could add when the
@@ -126,7 +141,7 @@ module Enjine
         from = mana_provenance(id) # before a cost sacrifices it (a Treasure)
         record_activation!("source" => id, "ability" => ability_ref) if ability.per_turn
         pay_from_pool!(index, ability.mana_cost, id) if ability.mana_cost
-        ability.costs.each { |cost| cost.pay!(self, obj) }
+        mana_ability_costs(ability_ref, ability).each { |cost| cost.pay!(self, obj) }
         produced = chosen || ability.outcomes(self, obj).first # CR 605.3b: a fixed amount is counted as it resolves
         add_mana!(index, produced, id, restriction: ability.spend_only&.data, from: from)
       end

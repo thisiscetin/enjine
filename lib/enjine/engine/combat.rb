@@ -35,12 +35,19 @@ module Enjine
       # declaration may end only once every such requirement is obeyed (no attack has a cost yet).
       def unmet_attack_requirements = attack_candidates.select { chars(it).keyword?(:attacks_each_combat) }
 
-      # CR 506.3, 508.1b: the defending player or a planeswalker they control.
+      # CR 506.3, 508.1b: the defending player, a planeswalker they control, or a battle they protect (CR 310.5,
+      # 310.9: its protector's opponents may attack it, whoever controls it).
       def attack_targets
         defender = defending_player
         [Mechanics::Filters.player_ref(self, defender)] +
-          state.battlefield.select { |id| object(id).controller == defender && chars(id).planeswalker? }
+          state.battlefield.select do |id|
+            current = chars(id)
+            current.type?(:battle) ? protector(object(id)) == defender : object(id).controller == defender && current.planeswalker?
+          end
       end
+
+      # CR 310.9: the player who protects a battle (nil for a permanent that isn't one or has none).
+      def protector(obj) = obj.memory["protector"]
 
       # What creature `id` may attack: not a player with "creatures with flying can't attack you" matching it
       # (CR 508.1c; their planeswalkers still can be attacked).
@@ -76,6 +83,7 @@ module Enjine
       def withdraw_attacker!(id)
         attackers.delete(id)
         state.attacks_declared -= 1
+        touch! # statics reading combat status (CR 506.4)
         attack_withdrawn!(id) # Engine::TurnHistory
         state.pending_triggers.reject! { it["event"]["type"] == "attacker_declared" && it["event"]["object"] == id }
       end
@@ -305,11 +313,14 @@ module Enjine
 
       # CR 510.2: all combat damage in a step is dealt simultaneously.
       def deal_combat_damage!(hits)
-        simultaneous_damage do # CR 510.2
-          dealt = Hash.new(0)
-          lifelinked = hits.map(&:first).uniq.select { damage_source_keyword?(it, :lifelink) }
-          hits.each { |source, target, amount| dealt[source] += deal_damage!(source, target, amount, combat: true, lifelink: false) }
-          lifelinked.each { lifelink!(it, dealt[it]) if dealt[it].positive? } # CR 120.3f, 119.9: one gain per source
+        # CR 510.2, 603.2c: one event batch for "one or more creatures deal combat damage" triggers
+        in_batch("combat_damage:#{state.next_id}") do
+          simultaneous_damage do
+            dealt = Hash.new(0)
+            lifelinked = hits.map(&:first).uniq.select { damage_source_keyword?(it, :lifelink) }
+            hits.each { |source, target, amount| dealt[source] += deal_damage!(source, target, amount, combat: true, lifelink: false) }
+            lifelinked.each { lifelink!(it, dealt[it]) if dealt[it].positive? } # CR 120.3f, 119.9: one gain per source
+          end
         end
         turn_based_actions_done!
       end
@@ -327,6 +338,7 @@ module Enjine
         state.combat_damage_pass = nil
         attackers.clear
         state.blockers.clear
+        touch! # statics reading combat status (CR 506.4)
       end
     end
     include Combat

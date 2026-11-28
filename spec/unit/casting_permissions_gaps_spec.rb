@@ -50,7 +50,7 @@ RSpec.describe "Casting and permission gaps: card data (unit)" do
               "abilities[0].spell.effects[0].play_permission.waterbend: must be \"mana_value\""])
     expect(errors_for(creature([{ "cards_have" => { "zone" => "library", "ability" => { "warp" => { "cost" => "{1}" } } } }])))
       .to eq(["abilities[0].cards_have.zone: must be one of graveyard, hand, exile",
-              "abilities[0].cards_have.ability: must be one of flashback, harmonize, mayhem, web_slinging, sneak"])
+              "abilities[0].cards_have.ability: must be one of flashback, harmonize, mayhem, web_slinging, sneak, miracle"])
     expect(texts(creature([{ "cards_have" => { "cards" => { "types" => ["creature"] },
                                                "ability" => { "sneak" => { "cost" => "{1}" } } } }])))
       .to eq(["Creature cards in your graveyard have Sneak {1}"])

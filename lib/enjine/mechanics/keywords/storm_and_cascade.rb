@@ -58,6 +58,8 @@ module Enjine
                                                                        "new_targets" => true } }] } }.freeze
 
         def self.intrinsic_abilities = @intrinsic_abilities ||= [Keywords.ability_from_data(ABILITY, "storm")].freeze
+        # CR 702.40b: list it once per instance
+        def self.multiple_instances? = true
       end
 
       # Cascade (CR 702.85a): "When you cast this spell, exile cards from the top of your library until you exile
@@ -71,6 +73,9 @@ module Enjine
                                "nonland card with lesser mana value. You may cast it without paying its mana cost. " \
                                "Then the exiled cards not cast go on the bottom of your library in a random order.",
                   rules: %w[702.85a 702.85c 608.2g], example: { "keywords" => ["cascade"] }
+
+        # CR 702.85c: "keywords": ["cascade", "cascade"] cascades twice
+        def self.multiple_instances? = true
 
         def self.intrinsic_abilities
           @intrinsic_abilities ||= begin

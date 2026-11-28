@@ -30,6 +30,20 @@ module Enjine
         obj.ability? ? stack_ability(obj) : definition(obj).spell_ability
       end
 
+      # CR 608.2n, 400.7: a spell that leaves the stack as part of its own resolution ("exile this spell") becomes a
+      # new object, but its resolution goes on: its resolve frame keeps the spell as it last existed on the stack
+      # ("left_stack"), which stands in for it (Engine#object) for the rest of its effects (a choice, a payment, a
+      # reflexive trigger) and as it finishes resolving.
+      def note_left_stack!(old)
+        frame = state.frames.rfind { it["type"] == "resolve" && it["object"] == old.id } or return
+        frame["left_stack"] = old.to_h
+      end
+
+      def resolving_stand_in(id)
+        frame = state.frames.rfind { it["type"] == "resolve" && it["object"] == id }
+        frame&.key?("left_stack") ? Snapshot.build_object(frame["left_stack"]) : nil
+      end
+
       def step_resolution!(frame)
         obj = object(frame["object"])
         ability = resolving_ability(obj)
@@ -129,12 +143,18 @@ module Enjine
       end
 
       # `base` is the plan position of the first effect of this effect's list: result n is at base + n.
-      # A delayed trigger's effects see the results of the list that created it instead.
+      # A delayed or reflexive trigger's effects see the results (and amounts) of the earlier effects of the list
+      # that created it first, then their own (StackAbility.parse_effects numbers them on, CR 603.7c, 603.12).
       def effect_context(data, offset = 0, count = nil, base = 0)
         targets = count ? data["targets"][offset, count] || [] : data["targets"]
         own = data["results"] || {}
-        results = data["linked"] || Array.new([own.size - base, 0].max) { own[(base + it).to_s] || [] }
-        amounts = data["linked_amounts"] || Array.new(results.size) { data.fetch("amounts", {})[(base + it).to_s] || 0 }
+        results = Array.new([own.size - base, 0].max) { own[(base + it).to_s] || [] }
+        amounts = Array.new(results.size) { data.fetch("amounts", {})[(base + it).to_s] || 0 }
+        if (linked = data["linked"])
+          linked_amounts = Array.new(linked.size) { data["linked_amounts"]&.[](it).to_i }
+          results = linked + results
+          amounts = linked_amounts + amounts
+        end
         Mechanics::EffectContext.new(data["controller"], data["source"], data["object"], targets, results, amounts)
       end
 
@@ -153,8 +173,8 @@ module Enjine
       # Targets that are still legal; illegal ones become nil and are ignored (CR 608.2b).
       def legal_targets(obj, specs)
         legal = lambda { |ref, spec|
-          spec&.match_for?(self, ref, obj.controller,
-                           obj.source) && targetable?(ref, obj.controller, obj.source, targeter: obj.source || obj.id)
+          spec&.match_for?(self, ref, obj.controller, obj.source, ctx: x_context(obj.controller, obj.source, obj)) &&
+            targetable?(ref, obj.controller, obj.source, targeter: obj.source || obj.id)
         }
         (obj.targets || []).each_with_index.map do |ref, i|
           ref.is_a?(Array) ? ref.select { legal.call(it, specs[i]) } : (ref if legal.call(ref, specs[i])) # a counted slot's list

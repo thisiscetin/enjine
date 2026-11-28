@@ -8,6 +8,147 @@ change the public API; the stable surface is described in
 
 ## [Unreleased]
 
+### Added
+- An activated ability's `cost_reduction` amount may name its targets (`{"counters": {"of": {"target": 0}, "kind":
+  "+1/+1"}}`: "costs {1} less for each +1/+1 counter on the target", CR 601.2f); before targets are chosen, it counts as
+  any amount for affordability.
+- Fuzz invariant: a pending decision always has at least one option.
+- Keywords `split_second` (no spells or non-mana activated abilities while it's on the stack, also while another
+  object resolves; `spell_keywords` can grant it, CR 702.61), `persist` and `undying` (their dies triggers come with
+  the keyword, so statics granting them work and filters see them, CR 702.79a, 702.93a).
+- Abilities `offspring` (optional additional cost plus a 1/1 token copy as it enters; `{"cast_with": "offspring"}`,
+  CR 702.175), `impending` (`amount`, `cost`: enters with time counters, not a creature while it has one, a counter
+  comes off at your end step; `{"cast_with": "impending"}`, CR 702.176a), `miracle` (the first card drawn this turn
+  triggers and may be cast for its miracle cost as the trigger resolves; `cards_have` with `zone: "hand"` grants it,
+  CR 702.94a) and `craft` (`cost`, `materials`: exile this and permanents you control and/or graveyard cards, return
+  it transformed; materials are `exiled_for_cost`, CR 702.167).
+- Cost `collect_evidence` (exile graveyard cards with total mana value N or more, CR 701.59); "if evidence was
+  collected" is an optional `additional_cost` read by `{"cast_with": "additional_cost"}`.
+- Condition `{"void": true}` (a nonland permanent left the battlefield or a spell was warped this turn).
+- `flashback` takes `cost: "mana_cost"` (its flashback cost equals its mana cost; e.g. granted by `grant_ability`,
+  CR 702.34a). `warp` takes `from: ["hand", "graveyard"]` (CR 601.3).
+- `cycling` takes a cost with {X} or a list of costs ("Cycling—Pay 2 life"); trigger `cycles` takes `self: true`
+  ("when you cycle this card", a `zone: "graveyard"` ability whose X is the cycling ability's, CR 702.29c).
+- Battles (CR 310): card type `battle` with a printed `defense` (it enters with defense counters, CR 310.4b) and the
+  battle type `siege`: an opponent becomes its protector as it enters (CR 310.12); the protector's opponents can
+  attack it and the protector blocks for it (CR 310.5, 310.9); damage removes defense counters (CR 120.3h); at 0
+  defense it's put into its owner's graveyard unless its triggered ability is still waiting (CR 704.5v); a Siege its
+  protector controls gets a new protector (CR 704.5x); defeated, a Siege exiles itself and its controller may cast its
+  back face without paying its mana cost (CR 310.12, 712.10). Filter `battle`; `any_target` now includes battles
+  (CR 115.4); views show `defense` and `protector`.
+- Ability `life_gain_replacement` (CR 614.1a, 616.1): "if you would gain life, you gain twice that much / that much
+  plus 1 instead" (`multiply` / `plus`) and "if an opponent would gain life, that player loses that much life
+  instead" (`player: "opponent"`, `lose: true`).
+- `choose_cards` takes `chooser` (a player selector: "target opponent chooses a card from among them", CR 608.2d; that
+  player looks at hidden cards first) and `count: "all"` (every matching card, no choice: "discards all cards with
+  that name").
+- Card specs take `"name": "chosen"` (the card name chosen for the source or the resolving spell, CR 201.4): in
+  the card specs of resolving effects (`reveal_until`, `exile_top` `until`, `choose_cards`, `search_library`, ...) and
+  in `cost_modifier` `spells` (which takes `name` now), `player_rule` `spells` ("spells with the chosen name can't be
+  cast") and `grant_ability` `for`. Like `"subtypes": "chosen"`, it matches nothing in specs read without a source
+  (`play_permission`, `cards_have`, `convoke`, mana-ability spends, `cant_be_targeted_by` `abilities_from`).
+- Triggers: `enters` and `dies` take `batched` ("whenever one or more ...", CR 603.2c); `deals_damage` takes `batched`
+  and `to` as `you`, `planeswalker`, `battle`, `permanent` or a list of them. A batched trigger's
+  `{"triggering": "objects"}` names the objects of every occurrence in its batch ("those creatures").
+- `remove_counters` and `remove_all_counters` reach players' counters (poison, energy, experience, CR 122.1).
+- Spell filters accept the card types `kindred` and `battle` (CR 308, 310).
+- Static abilities may read combat and tapped status: `affects` with `{"creature": {"attacking": true}}`, `blocking`,
+  `tapped`, and an `if` such as `{"attacking": "attached"}` ("as long as equipped creature is attacking", CR 506.4).
+- Committing a crime (CR 700.13): a spell cast, ability activated or triggered ability put on the stack that targets
+  an opponent, something an opponent controls or a card in an opponent's graveyard is one crime (activated and
+  triggered abilities count, not only spells). Trigger `commits_crime` (`controller`), amount `crimes_this_turn`,
+  event `crime_committed`.
+- Cases (CR 720.3, 702.169): ability `to_solve` (a condition; at the beginning of your end step the Case becomes
+  solved), ability `solved` wrapping one static, triggered or activated ability, effect `solve`, condition
+  `{"solved": true}`. Solved is a permanent designation shown in views (`designations`).
+- Harness and ∞ (CR 701.64, 702.186): effect `harness`, ability `infinity` wrapping one static, triggered or
+  activated ability, condition `{"harnessed": true}`; cost `exile_permanent` ("Exile a creature you control", not a
+  sacrifice; the cards are `exiled_for_cost`, their last known stats amount `sacrificed`).
+- Ninjutsu (CR 702.49): an activated ability from the hand (not a cast): pay, reveal the card, return an unblocked
+  attacker; the card enters tapped and attacking what that creature attacked. Usable from the declare blockers step
+  to the end of combat.
+- Rooms (CR 709.5, 116.2m): layout `room` (two doors sharing a type line). The card has both halves combined off the
+  battlefield, is cast as one door, and the permanent has only its unlocked doors' name, mana cost and abilities
+  (both locked: no name, mana value 0). Special action `{type: "unlock", object, door: "left" | "right"}`; trigger
+  `unlocks_door` (on a door: "when you unlock this door"; `door: "any"`, `fully: true`); views show `unlocked`.
+- Face-down spells and permanents (CR 708): effects `manifest`, `cloak` and `manifest_dread` (CR 701.40, 701.58,
+  701.62); keyword abilities `morph` and `disguise` (cast face down for {3}, CR 702.37, 702.168); special action
+  `{type: "turn_face_up", object, via: "mana_cost" | "morph" | "disguise"}` (CR 116.2b); trigger `turned_face_up`;
+  amounts `entered_face_down_this_turn` and `turned_face_up_this_turn`. A face-down object is a nameless 2/2 (ward {2}
+  for cloak and disguise) with an id that doesn't name it; only its controller sees the card in views and events,
+  and it is revealed when it leaves the battlefield or stack and at the end of the game (CR 708.5, 708.9).
+- Repeated keyword instances: `"keywords": ["cascade", "cascade"]` gives two cascade abilities that each trigger
+  (CR 702.85c); the same for `storm`, `extort` and `increment` (CR 702.40b, 702.101b, 702.191b). Other keywords
+  listed twice stay one instance (CR 702.2f).
+- Effect lists nested in `may`, `pay`, `choose_cards`, `reflexive_trigger` and `delayed_trigger` number their own
+  results after the enclosing list's earlier effects: in a list nested in effect `i`, `{"result": n}` and
+  `{"this_way": n}` with `n < i` name the parent's effects as before, `i + j` the nested list's own effect `j` (a
+  `may`'s `then` continues after its `effects`; CR 608.2c, 603.12).
+- `{"counters": {"of": {"triggering": "object"}}}`, and `power`, `toughness` and `mana_value` of `{"triggering":
+  "object"}`, read a permanent that left the battlefield as it last existed (CR 603.10a, 608.2h).
+
+### Changed
+- Faster legal options, with identical results (the same options in the same order, the same random numbers drawn):
+  while one decision's options are computed, a conservative mana pre-check rules out spells whose colored symbols the
+  player's mana can't reach (CR 601.2f-h) and costs above what the player could ever make; permission sources, play
+  methods, cost modifiers, battlefield characteristics and abilities by kind are found once per decision; exiled cards
+  of another owner no permission names are skipped (CR 108.3); cards with no face that has an alternative cost or a
+  special action skip the full look (`Engine::OptionsMemo`).
+- `Game#view_for` reuses the pending decision's memoized options instead of generating them again
+  (`View.build` takes `options:`); views reuse each card's type line, mana cost text and keyword names (now frozen
+  strings), and `Snapshot.deep_copy` / `State#to_h` copy plain data without a Marshal round trip.
+- `script/determinism_digest.rb`: plays seeded games (constructed example and random decks, the real cards, Duel
+  Commander) and prints a digest per game of every decision's options, views, export/import, rolled-back applies and
+  forks, to check that a performance change keeps games bit-identical.
+
+### Fixed
+- `pay` (and `counter_unless_pays` with `cost`): a cost's choices keep every key of the option, so `remove_counters`
+  removes the chosen counter kind (it removed nothing and still counted as paid), and `choose_creature_type` then
+  `behold` `"subtypes": "chosen"` work while resolving (the resolving spell or ability remembers the type, CR 118.12).
+- `pay` in a triggered or activated ability: "this permanent" costs (`remove_counters` `self: true`, `sacrifice`,
+  `other: true`) refer to the source permanent while it is still on the battlefield under the ability's controller,
+  not to the ability on the stack (CR 113.7a); once it has left, they can't be paid (CR 400.7).
+- `exile_this_spell` may come before effects that ask for a decision or pay, and before a `reflexive_trigger`: the
+  resolving frame keeps the spell as it last existed on the stack and it stands in for itself until it has resolved
+  (CR 608.2n; it raised `KeyError`). Snapshots and their validation keep it (`left_stack` in the resolve frame).
+- `cost_modifier` `spells: {"subtypes": "chosen"}` reduces the cost of spells of the type chosen for the permanent
+  (CR 607.2d; it never applied).
+- A granted mana ability's `{"tap": "granter"}` cost taps the granting permanent; affordability counts such abilities
+  as one source among all of them, and cancelling a payment untaps the granter (CR 602.2b, 607.1a, 734.1).
+- A payment made irreversible by a mana ability (paying life, sacrificing) that can no longer be finished offers
+  `cancel` instead of no option at all: the cast is rewound (or the resolving payment counts as unpaid), the mana
+  abilities aren't (their sources stay tapped, their mana stays in the pool) and the mana spent goes back to the pool
+  (CR 734.1).
+- A `one_of` in a mana ability's cost is refused when the card is loaded (it crashed when activated, CR 605.3a).
+- "Target ... with mana value X" reads the X of the spell or ability being cast (CR 601.2b-c, 608.2b), not its
+  source's.
+- Permanents put into graveyards by the same state-based-action check are one event batch for "one or more"
+  triggers (CR 603.2c, 704.3); before, each was its own batch. Combat damage of one step is named as one batch
+  explicitly (CR 510.2).
+- `cost_modifier` `spells` with `"subtypes": "chosen"` now reads the source's choice (it never matched before).
+- An additional trigger of a batched ability no longer shares its "that many" count with the original.
+- `"self"` in a permanent's own leaves-the-battlefield trigger finds the card in the public zone it went to while
+  it's still there, so "when this dies, exile it / return it" works (CR 400.7e); amounts of `"self"` still read it
+  as it last existed.
+- A token copy of a card counts as a token in `{"triggering": filter}` conditions (CR 111.1).
+- A dies trigger of a permanent that was cast remembers how (`was_cast`, `cast_from` / `cast_with`, kicker, the
+  mana spent); `was_cast` and `cast_from` / `cast_with` also work as its intervening "if" (CR 400.7d, 603.4).
+- `{"triggering": "object"}` names the permanent of a `becomes_untapped` trigger (CR 603.2).
+- A reflexive trigger's `{"this_way": n}` reads its own effects' amounts, not the creating list's.
+- Color identity counts the colors of a mana choice among some (`"color": "any_one", "colors": ["B", "G"]`), and
+  no longer counts mana of the chosen color (a fixed color gated by `"only_if": {"chosen": ...}`, CR 903.4).
+- `RulesMonitor` reads a permanent's types, keywords and abilities from the engine's layers 1-6 (CR 613.1a-f)
+  instead of re-deriving them from the printed card, and recomputes only layer 7 and the rules that follow. No more
+  false findings for: statics matching a creature that "becomes a Bear in addition to its other types" (CR 205.1b,
+  613.4c); a creature an effect made only a land (CR 208.3); keyword counters (an indestructible counter, CR 122.1b,
+  704.5g); a copy's `except` keywords (haste on a token copy, CR 707.9b, 302.6); keywords an Aura granted before a
+  "loses all abilities" effect (timestamps, CR 613.7, 702.9b); extra land plays from a class level or a station symbol
+  (CR 305.2, 717.2a, 722.2a); "no maximum hand size" from an emblem (CR 114.4, 514.1). It also counts every
+  power/toughness counter (`-0/-1`, `+1/+0`, ..., CR 122.1a) and checks a `"-X"` loyalty ability against the X
+  announced (CR 606.4, 107.3).
+- `Enjine::Verify` places a colorless land with a colored activated ability or cycling cost in a coverage deck whose
+  colors cover it, instead of failing to build one ("does not fit a … deck") and never exercising the land.
+
 ## [0.5.0] - 2026-11-24
 
 ### Added

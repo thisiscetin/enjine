@@ -28,7 +28,7 @@ RSpec.describe "Activated abilities (CR 602) and summoning sickness (CR 302.6)" 
                                       { type: "target", target: pyro }, { type: "target", target: goblin },
                                       { type: "cancel" }])
     entry = game.submit(type: "target", target: goblin)
-    expect(entry.events.map(&:type)).to eq(%w[target_chosen tapped ability_activated])
+    expect(entry.events.map(&:type)).to eq(%w[target_chosen tapped ability_activated crime_committed]) # CR 700.13: an opponent's creature
     expect(game.state.object(pyro).tapped).to be(true)
     expect(game.legal_options).to eq([{ type: "pass" }]) # tapped: can't activate again
     pass_both(game)
